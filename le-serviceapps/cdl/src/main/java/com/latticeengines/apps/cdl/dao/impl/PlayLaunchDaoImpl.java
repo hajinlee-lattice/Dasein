@@ -19,6 +19,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
@@ -172,15 +174,16 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
+    public List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
 
-        String queryStr = "";
+        String queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl, lid.externalSystemName)";
+
         Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending,
-                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType);
+                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType, true);
 
         return query.list();
     }
@@ -194,7 +197,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "SELECT count(*) ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, false, orgId, externalSysType);
+                session, entityClz, queryStr, false, orgId, externalSysType, false);
 
         return Long.parseLong(query.uniqueResult().toString());
     }
@@ -208,7 +211,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "FROM Play WHERE pid IN ( SELECT distinct play ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, ")", false, orgId, externalSysType);
+                session, entityClz, queryStr, ")", false, orgId, externalSysType, false);
         return query.list();
     }
 
@@ -221,7 +224,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "SELECT distinct " + DEST_ORG_ID + ", " + DEST_SYS_TYPE + " ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, null, false, orgId, externalSysType);
+                session, entityClz, queryStr, null, false, orgId, externalSysType, false);
         List<Object> queryResult = query.list();
 
         List<Pair<String, String>> result = new ArrayList<>();
@@ -261,7 +264,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, false, orgId, externalSysType);
+                session, entityClz, queryStr, false, orgId, externalSysType, false);
 
         List<Map<String, Object>> queryResult = query.list();
         Stats totalCounts = new Stats();
@@ -269,7 +272,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         totalCounts.setSelectedTargets(getVal(res, totalAccountsSelected));
         totalCounts.setRecommendationsLaunched(getVal(res, totalAccountsLaunched));
         totalCounts.setSuppressed(getVal(res, totalAccountsSuppressed));
-        totalCounts.setErrors(getVal(res, totalAccountsErrored));
+        totalCounts.setAccountErrors(getVal(res, totalAccountsErrored));
         totalCounts.setContactsWithinRecommendations(getVal(res, totalContactsLaunched));
 
         return totalCounts;
@@ -283,23 +286,32 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings({"rawtypes"})
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
-            Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType) {
+            Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType,
+            boolean includeLookupIdMap) {
         return createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending, endTimestamp,
-                session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType);
+                session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType, includeLookupIdMap);
     }
 
     @SuppressWarnings({"rawtypes"})
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,
-            String externalSysType) {
-        queryStr += String.format(
-                " FROM %s "//
-                        + " WHERE deleted = :deleted AND created >= :startTimestamp ", //
-                entityClz.getSimpleName());
+            String externalSysType, boolean includeLookupIdMap) {
+
+        if (includeLookupIdMap) {
+            String lookupIdMapClz = LookupIdMap.class.getSimpleName();
+            queryStr += String.format(" FROM %s pl LEFT JOIN %s lid"//
+                    + " ON pl.destinationOrgId = lid.orgId WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+                    entityClz.getSimpleName(), lookupIdMapClz);
+            queryStr += " AND pl.tenantId = lid.tenant.pid";
+        } else {
+            queryStr += String.format(" FROM %s pl"//
+                    + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+                    entityClz.getSimpleName());
+        }
 
         if (endTimestamp != null) {
-            queryStr += " AND created <= :endTimestamp  ";
+            queryStr += " AND pl.created <= :endTimestamp  ";
         }
 
         if (playId != null) {
@@ -313,17 +325,18 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         boolean orgIdFilterNeeded = false;
         if (StringUtils.isNotBlank(orgId) && StringUtils.isNotBlank(externalSysType)) {
             orgIdFilterNeeded = true;
-            queryStr += " AND " + DEST_ORG_ID + " = :" + DEST_ORG_ID + " ";
-            queryStr += " AND " + DEST_SYS_TYPE + " = :" + DEST_SYS_TYPE + " ";
+            queryStr += " AND pl." + DEST_ORG_ID + " = :" + DEST_ORG_ID + " ";
+            queryStr += " AND pl." + DEST_SYS_TYPE + " = :" + DEST_SYS_TYPE + " ";
         }
 
         if (sortNeeded) {
             String sortDirection = descending ? "DESC" : "ASC";
 
             if (StringUtils.isBlank(sortby) || sortby.trim().equalsIgnoreCase(CREATED_COL)) {
-                queryStr += String.format(" ORDER BY %s %s ", CREATED_COL, sortDirection);
+                queryStr += String.format(" ORDER BY pl.%s %s ", CREATED_COL, sortDirection);
             } else {
-                queryStr += String.format(" ORDER BY %s %s, %s %s ", sortby, sortDirection, CREATED_COL, sortDirection);
+                queryStr += String.format(" ORDER BY pl.%s %s, pl.%s %s ", sortby, sortDirection, CREATED_COL,
+                        sortDirection);
             }
         }
 

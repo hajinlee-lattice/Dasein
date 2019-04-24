@@ -512,7 +512,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                         PlayLaunch matchingPlayLaunch = playLaunchMap.get(entry.getLaunchId());
                         Assert.assertEquals(stats.getContactsWithinRecommendations(),
                                 matchingPlayLaunch.getContactsLaunched().longValue());
-                        Assert.assertEquals(stats.getErrors(), matchingPlayLaunch.getAccountsErrored().longValue());
+                        Assert.assertEquals(stats.getAccountErrors(),
+                                matchingPlayLaunch.getAccountsErrored().longValue());
                         Assert.assertEquals(stats.getRecommendationsLaunched(),
                                 matchingPlayLaunch.getAccountsLaunched().longValue());
                         Assert.assertEquals(stats.getSuppressed(),

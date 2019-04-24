@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -48,13 +46,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            if (playLaunch == null) {
-                if (MultiTenantContext.getTenant() != null) {
-                    log.info("MultiTenantContext tenant name: "
-                            + MultiTenantContext.getTenant().getName());
-                }
-                log.info("statusMonitor: " + JsonUtils.serialize(statusMonitor));
-            }
             Long recordsProcessed = eventDetail.getProcessed();
             Long recordsFailed = eventDetail.getFailed();
             Long totalRecords = eventDetail.getTotalRecordsSubmitted();
@@ -65,6 +56,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }
+            playLaunch.setContactsErrored(recordsFailed);
             playLaunchService.update(playLaunch);
         }
 
