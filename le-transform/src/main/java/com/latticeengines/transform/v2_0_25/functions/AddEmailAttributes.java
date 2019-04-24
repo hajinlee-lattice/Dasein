@@ -34,7 +34,7 @@ public class AddEmailAttributes implements RealTimeTransform {
 
         private int maxStringLen;
 
-        EmailIsInvalidFcn(Object imputation, int maxStringLen) {
+        public EmailIsInvalidFcn(Object imputation, int maxStringLen) {
             super(imputation);
             this.maxStringLen = maxStringLen;
         }

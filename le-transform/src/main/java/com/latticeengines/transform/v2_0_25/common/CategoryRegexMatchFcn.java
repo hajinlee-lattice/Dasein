@@ -12,7 +12,7 @@ public class CategoryRegexMatchFcn extends TransformWithImpAndVetoFunctionBase {
         public String name;
         public Pattern pattern;
 
-        Category(String name, Pattern pattern) {
+        public Category(String name, Pattern pattern) {
             this.name = name;
             this.pattern = pattern;
         }
