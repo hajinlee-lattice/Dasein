@@ -342,6 +342,7 @@ public enum LedpCode {
     LEDP_18215("System is under maintenance, cannot submit processAnalyze job."),
     LEDP_18216("Failed to create S3ImportSystem {0}"),
     LEDP_18217("Current CustomerSpace is NULL!"),
+    LEDP_18218("Failed to get template preview {0}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

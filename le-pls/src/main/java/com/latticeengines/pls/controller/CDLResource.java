@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.StatusDocument;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -30,13 +32,17 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SystemStatusService;
@@ -70,6 +76,9 @@ public class CDLResource {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
@@ -324,5 +333,32 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return ResponseDocument.successResponse(cdlService.getS3ImportSystem(customerSpace.toString(), systemName));
+    }
+
+    @PostMapping(value = "s3import/template/preview")
+    @ResponseBody
+    @ApiOperation("Get template preview")
+    public List<TemplateFieldPreview> getTemplatePreview(
+            @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+            @RequestBody S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
+                    templateDisplay.getFeedType());
+            if (dataFeedTask == null) {
+                throw new RuntimeException("Cannot find template for S3 import!");
+            }
+            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            Table standardTable = SchemaRepository.instance().getSchema(
+                    BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            return cdlService.getTemplatePreview(customerSpace.toString(),
+                    dataFeedTask.getImportTemplate(), standardTable);
+        } catch (RuntimeException e) {
+            log.error("Get template preview Failed: " + e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18218, new String[] { e.getMessage() });
+        }
     }
 }
