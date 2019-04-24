@@ -153,7 +153,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private static final String S3_AVRO_DIR = "le-serviceapps/cdl/end2end/avro";
     private static final String S3_AVRO_VERSION = "6";
-    static final String S3_AVRO_VERSION_ADVANCED_MATCH = "5";
+    static final String S3_AVRO_VERSION_ADVANCED_MATCH = "6";
+    static final String ADVANCED_MATCH_SUFFIX = "EntityMatch";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
@@ -408,18 +409,31 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
 
-    protected Pair<String, InputStream> getTestAvroFile(BusinessEntity entity, int fileIdx) {
-        String fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
+    Pair<String, InputStream> getTestAvroFile(BusinessEntity entity, int fileIdx) {
+        return getTestAvroFile(entity, null, fileIdx);
+    }
+
+    Pair<String, InputStream> getTestAvroFile(BusinessEntity entity, String suffix, int fileIdx) {
+        String fileName;
+        if (StringUtils.isNotBlank(suffix)) {
+            fileName = String.format("%s_%s-%d.avro", entity.name(), suffix, fileIdx);
+        } else {
+            fileName = String.format("%s-%d.avro", entity.name(), fileIdx);
+        }
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), fileName);
         return Pair.of(fileName, is);
     }
 
     void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
-        List<String> strings = registerMockDataFeedTask(entity, feedType);
+        mockCSVImport(entity, null, fileIdx, feedType);
+    }
+
+    void mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
+        List<String> strings = registerMockDataFeedTask(entity, suffix, feedType);
         String feedTaskId = strings.get(0);
         String templateName = strings.get(1);
         Date now = new Date();
-        Pair<String, InputStream> testAvroArtifact = getTestAvroFile(entity, fileIdx);
+        Pair<String, InputStream> testAvroArtifact = getTestAvroFile(entity, suffix, fileIdx);
         String fileName = testAvroArtifact.getLeft();
         InputStream is = testAvroArtifact.getRight();
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
@@ -444,8 +458,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         registerImportAction(feedTaskId, numRecords, tableNames);
     }
 
-    private Table getMockTemplate(BusinessEntity entity, String feedType) {
-        String templateFileName = String.format("%s_%s.json", entity.name(), feedType);
+    private Table getMockTemplate(BusinessEntity entity, String suffix, String feedType) {
+        String templateFileName;
+        if (StringUtils.isNotBlank(suffix)) {
+            templateFileName = String.format("%s_%s_%s.json", entity.name(), suffix, feedType);
+        } else {
+            templateFileName = String.format("%s_%s.json", entity.name(), feedType);
+        }
         InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(),
                 templateFileName);
         ObjectMapper om = new ObjectMapper();
@@ -456,7 +475,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private List<String> registerMockDataFeedTask(BusinessEntity entity, String feedType) {
+    private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String feedTaskId;
         String templateName = NamingUtils.timestamp(entity.name());
@@ -464,7 +483,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 feedType, entity.name());
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
-            Table importTemplate = getMockTemplate(entity, feedType);
+            Table importTemplate = getMockTemplate(entity, suffix, feedType);
             importTemplate.setTableType(TableType.IMPORTTABLE);
             importTemplate.setName(templateName);
             dataFeedTask.setImportTemplate(importTemplate);
@@ -841,7 +860,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             for (BusinessEntity entity : BusinessEntity.values()) {
                 if (!allowed.contains(entity)) {
                     Assert.assertFalse(cubeMap.containsKey(entity.name()),
-                            "Stats not should contain a cube for " + entity);
+                            "Stats should not contain a cube for " + entity);
                 }
             }
         }

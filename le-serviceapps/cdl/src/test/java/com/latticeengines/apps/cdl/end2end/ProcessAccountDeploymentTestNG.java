@@ -45,7 +45,8 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         importData();
 
         if (isLocalEnvironment()) {
-            processAnalyzeSkipPublishToS3();
+//            processAnalyzeSkipPublishToS3();
+            runTestWithRetry();
         } else {
             runTestWithRetry();
         }
@@ -61,13 +62,16 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
     private void runTestWithRetry() {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setSkipPublishToS3(isLocalEnvironment());
         FailingStep failingStep = new FailingStep();
         failingStep.setName("mergeContact");
         request.setFailingStep(failingStep);
         long start = System.currentTimeMillis();
         processAnalyze(request, JobStatus.FAILED);
         long duration1 = System.currentTimeMillis() - start;
-        wipeOutContractDirInHdfs();
+        if (!isLocalEnvironment()) {
+            wipeOutContractDirInHdfs();
+        }
         start = System.currentTimeMillis();
         retryProcessAnalyze();
         long duration2 = System.currentTimeMillis() - start;
@@ -119,22 +123,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     protected void verifyProcess() {
-        clearCache();
-        verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(DataCollection.Version.Green);
-
-        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
-        verifyDataCollectionStatus(DataCollection.Version.Green);
-        verifyNumAttrsInAccount();
-        verifyAccountFeatures();
-        verifyAccountProfile();
-        verifyDateAttrs();
-
-        // Check that stats cubes only exist for the entities specified below.
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount);
-        verifyBatchStore(getExpectedBatchStoreCounts());
-        verifyServingStore(getExpectedServingStoreCounts());
-        verifyRedshift(getExpectedRedshiftCounts());
+        verifyProcessAccount();
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
@@ -146,7 +135,25 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         // Create a test segment to verify proper behavior of the Curated Attributes step and resulting table.
         createTestSegmentCuratedAttr();
         verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_1));
+    }
+
+    void verifyProcessAccount() {
+        verifyDataFeedStatus(DataFeed.Status.Active);
+        verifyActiveVersion(DataCollection.Version.Green);
         verifyUpdateActions();
+
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+        verifyDataCollectionStatus(DataCollection.Version.Green);
+        verifyNumAttrsInAccount();
+        verifyAccountFeatures();
+        verifyAccountProfile();
+        verifyDateAttrs();
+
+        // Check that stats cubes only exist for the entities specified below.
+        verifyStats(getEntitiesInStats());
+        verifyBatchStore(getExpectedBatchStoreCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
     }
 
     private void verifyAccountProfile() {
@@ -166,6 +173,10 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, BusinessEntity.Account.getServingStore());
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
         Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
+    }
+
+    protected BusinessEntity[] getEntitiesInStats() {
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount };
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
@@ -219,7 +230,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_1, //
                 BusinessEntity.Contact, CONTACT_1);

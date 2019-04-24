@@ -22,8 +22,13 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       val lhsDf = l._1
       val rhsDf = r._1
       val rhsIdx = r._2
-      val joinKeysForThisJoin = Seq(joinKey)
-      val merge2 = MergeUtils.merge2(lhsDf, rhsDf, joinKeysForThisJoin, Set(), overwriteByNull = false)
+      val merge2 =
+        if (joinKey != null && lhsDf.columns.contains(joinKey) && rhsDf.columns.contains(joinKey)) {
+          val joinKeysForThisJoin = Seq(joinKey)
+          MergeUtils.merge2(lhsDf, rhsDf, joinKeysForThisJoin, Set(), overwriteByNull = false)
+        } else {
+          MergeUtils.concat2(lhsDf, rhsDf)
+        }
       (merge2, rhsIdx)
     })._1
 
@@ -42,8 +47,12 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
   }
 
   private def processSrc(src: DataFrame, srcId: String, joinKey: String, deduplicate: Boolean): DataFrame = {
+    if (joinKey == null) {
+      return src
+    }
+
     val renamed =
-      if (!srcId.equals(joinKey) && src.columns.contains(srcId)) {
+      if (srcId != null && !srcId.equals(joinKey) && src.columns.contains(srcId)) {
         src.withColumnRenamed(srcId, joinKey)
       } else {
         src

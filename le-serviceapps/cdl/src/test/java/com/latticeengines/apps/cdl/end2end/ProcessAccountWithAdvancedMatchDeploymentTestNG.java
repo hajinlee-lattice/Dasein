@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -31,7 +30,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -57,7 +55,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Inject
     private MatchProxy matchProxy;
 
-    @BeforeClass(groups = { "end2end" }, enabled = false)
+    @BeforeClass(groups = "end2end" )
     @Override
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
@@ -67,23 +65,12 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         log.info("Setup Complete!");
     }
 
-    // Disable the test until we work on PA integration of M28
-    @Test(groups = "end2end", enabled = false)
-    @Override
-    public void runTest() throws Exception {
-        super.runTest();
-    }
-
     @Override
     protected void importData() throws InterruptedException {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockCSVImport(BusinessEntity.Account, 1, "Account");
+        mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_AccountData");
         Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, 4, "Contact_EntityMatch");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Account, 2, "Account");
-        Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, 5, "Contact_EntityMatch");
+        mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_ContactData");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
@@ -96,23 +83,23 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     @Override
     protected void verifyProcess() {
-        super.verifyProcess();
+        super.verifyProcessAccount();
 
-        // verify decorated meatadata
-        Set<String> attributes = servingStoreProxy.getDecoratedMetadata(mainCustomerSpace, BusinessEntity.Contact, null)
-                .map(ColumnMetadata::getAttrName).filter(Objects::nonNull).collect(Collectors.toSet()).block();
-        verifyContactAttributes(attributes);
+//        // verify decorated meatadata
+//        Set<String> attributes = servingStoreProxy.getDecoratedMetadata(mainCustomerSpace, BusinessEntity.Contact, null)
+//                .map(ColumnMetadata::getAttrName).filter(Objects::nonNull).collect(Collectors.toSet()).block();
+//        verifyContactAttributes(attributes);
+//
+//        // verify contact batch/serving table
+//        Table contactBatchStoreTable = dataCollectionProxy.getTable(mainCustomerSpace,
+//                BusinessEntity.Contact.getBatchStore());
+//        Table contactServingStoreTable = dataCollectionProxy.getTable(mainCustomerSpace,
+//                BusinessEntity.Contact.getBatchStore());
+//        verifyContactTable(contactBatchStoreTable);
+//        verifyContactTable(contactServingStoreTable);
 
-        // verify contact batch/serving table
-        Table contactBatchStoreTable = dataCollectionProxy.getTable(mainCustomerSpace,
-                BusinessEntity.Contact.getBatchStore());
-        Table contactServingStoreTable = dataCollectionProxy.getTable(mainCustomerSpace,
-                BusinessEntity.Contact.getBatchStore());
-        verifyContactTable(contactBatchStoreTable);
-        verifyContactTable(contactServingStoreTable);
-
-        // make sure account seed/lookup data is published to serving dynamo table
-        verifyAccountSeedLookupData();
+//        // make sure account seed/lookup data is published to serving dynamo table
+//        verifyAccountSeedLookupData();
     }
 
     private void verifyAccountSeedLookupData() {
@@ -168,7 +155,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     }
 
     private List<String> getAccountIds(int fileIdx, int recordLimit) throws Exception {
-        Pair<String, InputStream> testArtifact = getTestAvroFile(BusinessEntity.Account, fileIdx);
+        Pair<String, InputStream> testArtifact = getTestAvroFile(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, fileIdx);
         List<GenericRecord> records = AvroUtils.readFromInputStream(testArtifact.getRight(), 0, recordLimit);
         return records.stream().map(record -> record.get(InterfaceName.AccountId.name()).toString())
                 .collect(Collectors.toList());
@@ -198,6 +185,11 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     }
 
     @Override
+    protected BusinessEntity[] getEntitiesInStats() {
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount };
+    }
+
+    @Override
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
@@ -222,14 +214,26 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
-        return ImmutableMap.of(//
+        return ImmutableMap.of( //
                 BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1);
+                BusinessEntity.Contact, CONTACT_1 //
+        );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
-        return null;
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_1);
+        map.put(BusinessEntity.Contact, CONTACT_1);
+        return map;
+    }
+
+    @Override
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+        return ImmutableMap.of( //
+                BusinessEntity.Account, ACCOUNT_1, //
+                BusinessEntity.Contact, CONTACT_1 //
+        );
     }
 
     @Override

@@ -14,6 +14,9 @@ public class UpsertConfig extends SparkJobConfig {
     private String joinKey; // default join key for both sides
 
     // optional parameters
+    @JsonProperty("SwitchSides")
+    private Boolean switchSides; // when true, the second input is lhs
+
     @JsonProperty("ColsFromLhs")
     private List<String> colsFromLhs; // some special cols that needs to keep the value from lhs
 
@@ -30,6 +33,14 @@ public class UpsertConfig extends SparkJobConfig {
         UpsertConfig config =  new UpsertConfig();
         config.setJoinKey(joinKey);
         return config;
+    }
+
+    public Boolean getSwitchSides() {
+        return switchSides;
+    }
+
+    public void setSwitchSides(Boolean switchSides) {
+        this.switchSides = switchSides;
     }
 
     public String getJoinKey() {

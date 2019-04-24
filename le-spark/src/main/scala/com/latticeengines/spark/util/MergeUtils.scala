@@ -51,6 +51,17 @@ private[spark] object MergeUtils {
     })(RowEncoder(outputSchema))
   }
 
+  def concat2(lhs: DataFrame, rhs: DataFrame): DataFrame = {
+    if (lhs.columns.diff(rhs.columns).length > 0 || rhs.columns.diff(lhs.columns).length > 0) {
+      val outputSchema = getOutputSchema(lhs, rhs, Seq())
+      val expandedLhs = expand(lhs, outputSchema)
+      val expandedRhs = expand(rhs, outputSchema)
+      expandedLhs.union(expandedRhs)
+    } else {
+      lhs.union(rhs)
+    }
+  }
+
   private def getOutputSchema(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): StructType = {
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
     val uniqueColsFromRhs = rhs.columns.diff(joinKeys.union(intersectCols))
@@ -74,6 +85,20 @@ private[spark] object MergeUtils {
     val lhsColPos = lhsCols.view.zipWithIndex.toMap
     val rhsColPos = rhsCols.view.zipWithIndex.toMap.mapValues(_ + lhsMarkerPos + 1).map(identity)
     (lhsColPos, rhsColPos)
+  }
+
+  private def expand(df: DataFrame, expandedSchema: StructType): DataFrame = {
+    val colPos = df.columns.view.zipWithIndex.toMap
+    df.map(row => {
+      val vals: Seq[Any] = expandedSchema.fieldNames map (attr => {
+        if (colPos.contains(attr)) {
+          row.get(colPos(attr))
+        } else {
+          null
+        }
+      })
+      Row.fromSeq(vals)
+    })(RowEncoder(expandedSchema))
   }
 
 }
