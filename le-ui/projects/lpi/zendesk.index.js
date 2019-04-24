@@ -13,6 +13,7 @@ if (!disable_zendesk) {
     let loginDocument = $.jStorage.get('GriotLoginDocument');
     let userName = loginDocument.FirstName + ' ' + loginDocument.LastName;
     let userEmail = loginDocument.UserName;
+    let tokenDocument = $.jStorage.get('GriotTokenDocument');
 
     let observer = new Observer(response => {
 
@@ -25,5 +26,5 @@ if (!disable_zendesk) {
         });
     });
 
-    httpService.get(`/zdsk?name=${userName}&email=${userEmail}`, observer);
+    httpService.get(`/zdsk/token?name=${userName}&email=${userEmail}`, observer, {Authorization: tokenDocument});
 }
