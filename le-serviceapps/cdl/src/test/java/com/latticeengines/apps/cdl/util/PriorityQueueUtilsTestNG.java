@@ -45,12 +45,12 @@ public class PriorityQueueUtilsTestNG {
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromHighPriority(), "testTenant2");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromHighPriority(), "testTenant11");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromHighPriority(), "testTenant3");
-        Assert.assertEquals(PriorityQueueUtils.getAllFromHighPriority().size(), 3);
+        Assert.assertEquals(PriorityQueueUtils.getHighPriorityQueueSize(), 3);
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant33");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant44");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant3");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant4");
-        Assert.assertEquals(PriorityQueueUtils.getAllFromLowPriority().size(), 4);
+        Assert.assertEquals(PriorityQueueUtils.getLowPriorityQueueSize(), 4);
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant6");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant66");
     }

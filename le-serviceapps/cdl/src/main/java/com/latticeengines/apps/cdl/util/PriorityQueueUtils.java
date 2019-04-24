@@ -113,14 +113,6 @@ public class PriorityQueueUtils {
         }
     }
 
-    public static List<String> getAllFromHighPriority() {
-        if (highPriorityQueue.size() < 1) {
-            return null;
-        } else {
-            return new ArrayList<>(highPriorityMap.keySet());
-        }
-    }
-
     public static int getHighPriorityQueueSize() {
         return highPriorityQueue.size();
     }
@@ -171,14 +163,6 @@ public class PriorityQueueUtils {
             PriorityObject firstObject = lowPriorityQueue.poll();
             lowPriorityMap.remove(firstObject.getTenantName(), firstObject);
             return firstObject.getTenantName();
-        }
-    }
-
-    public static List<String> getAllFromLowPriority() {
-        if (lowPriorityQueue.size() < 1) {
-            return null;
-        } else {
-            return new ArrayList<>(lowPriorityMap.keySet());
         }
     }
 
