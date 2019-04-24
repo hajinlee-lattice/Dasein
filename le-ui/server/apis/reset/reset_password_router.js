@@ -46,11 +46,11 @@ class ResetPasswordRouter {
 
                 let body = {
                     Username: payload.username,
-                    HostPort: this.getPlsHost(),
+                    HostPort: payload.hostport,
                     Product: 'Lead Prioritization'
                 };
                 let options = {
-                    url: this.getPlsHost() + '/pls/forgotpassword',
+                    url: payload.hostport + '/pls/forgotpassword',
                     method: 'PUT',
                     timeout: 3000,
                     headers: {
@@ -91,15 +91,15 @@ class ResetPasswordRouter {
 
             var payload = {
                 username: req.query.userName,
-                jti: uuid.v4()
+                hostport: req.query.hostPort,
+                jti: uuid.v4() //should be stored and used to prevent replay attacks
             };
-            var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
 
-            let ref = url.parse(req.headers.referer);
+            var token = jwt.sign(payload, 'e6b6376591584a6990e3a56306247cc2', { expiresIn: '1d' });
 
             let body = {
                 userEmail: payload.username,
-                hostPort: ref.protocol + '//' + ref.hostname + (ref.port ? (':' + ref.port) : '') + '/reset/publish?jwt=' + token
+                hostPort: payload.hostport + '/reset/publish?jwt=' + token
             };
             let options = {
                 url: this.getPlsHost() + '/pls/forgotpasswordconfirmation',
