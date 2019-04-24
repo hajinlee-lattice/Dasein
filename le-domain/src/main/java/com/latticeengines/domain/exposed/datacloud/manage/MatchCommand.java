@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
@@ -42,50 +43,70 @@ public class MatchCommand implements HasPid {
 
     @Column(name = "Customer", length = 200)
     protected String customer;
+
     @Column(name = "ColumnSelection", length = 50)
     protected String columnSelection;
+
     @Column(name = "CreateTime")
     protected Date createTime = new Date();
+
     @Column(name = "LatestStatusUpdate")
-    protected Date latestStatusUpdate;
+    private Date latestStatusUpdate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "StatusBeforeFailed", length = 20)
-    protected MatchStatus statusBeforeFailed;
+    private MatchStatus statusBeforeFailed;
+
     @Column(name = "ErrorMessage", length = 1000)
     protected String errorMessage;
+
     @Column(name = "NumRetries")
     protected int numRetries;
+
     @Column(name = "ApplicationId", length = 50)
     protected String applicationId;
+
     @Column(name = "Progress")
     protected Float progress;
+
     @Column(name = "ResultLocation", length = 400)
-    protected String resultLocation;
+    private String resultLocation;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = false)
     private Long pid;
+
     @Column(name = "RootOperationUID", unique = true, nullable = false, length = 100)
     private String rootOperationUid;
+
     @Column(name = "RowsRequested", nullable = false)
     private Integer rowsRequested;
+
     @Column(name = "RowsMatched")
     private Integer rowsMatched;
+
     @Column(name = "MatchResults", columnDefinition = "'JSON'")
     @org.hibernate.annotations.Type(type = "json")
     private Map<EntityMatchResult, Long> matchResults;
+
     @Column(name = "RowsToDnB")
     private Integer rowsToDnb = 0;
+
     @Column(name = "RowsMatchedByDnB")
     private Integer rowsMatchedByDnb = 0;
+
     @Column(name = "DnBDurationAvg")
     private Integer dnbDurationAvg = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "MatchStatus", nullable = false, length = 20)
     private MatchStatus matchStatus;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "JobType", nullable = false, length = 20)
     private MatchRequestSource jobType;
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "matchCommand")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SUBSELECT)
@@ -299,6 +320,16 @@ public class MatchCommand implements HasPid {
     @JsonProperty("ResultLocation")
     public String getResultLocation() {
         return resultLocation;
+    }
+
+    @JsonIgnore
+    public String getNewEntitiesLocation() {
+        String outputPath = getResultLocation();
+        if (StringUtils.isNotBlank(outputPath)) {
+            return outputPath.replace("Output", "NewEntities");
+        } else {
+            return null;
+        }
     }
 
     @JsonProperty("ResultLocation")

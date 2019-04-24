@@ -207,15 +207,15 @@ public class MatchInput implements Fact, Dimension {
     // what the ultimate match goal is.
     // TargetEntity = LatticeAccount means it's LDC match (default)
     @JsonProperty("TargetEntity")
-    String targetEntity = BusinessEntity.LatticeAccount.name();
+    private String targetEntity = BusinessEntity.LatticeAccount.name();
 
     // A map from Business Entity (as a String) to EntityKeyMap.
     @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
 
     // Temporary flag to output all newly allocated entities to avro files. Only
-    // applies to bulk match with allocateId
-    // mode. TODO change this after solution is finalized
+    // applies to bulk match with allocateId mode.
+    // TODO: change this after solution is finalized
     @JsonProperty("OutputNewEntities")
     private boolean outputNewEntities;
 

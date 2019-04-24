@@ -215,15 +215,14 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     count += block.getMatchedRows() != null ? block.getMatchedRows() : 0L;
                     if (MapUtils.isNotEmpty(block.getMatchResults())) {
                         Map<EntityMatchResult, Long> map = block.getMatchResults();
-                        orphanedNoMatchCount += map.containsKey(EntityMatchResult.ORPHANED_NO_MATCH) ?
-                                map.get(EntityMatchResult.ORPHANED_NO_MATCH) : 0L;
-                        orphanedUnmatchedAccountIdCount +=
-                                map.containsKey(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID) ?
-                                        map.get(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID) : 0L;
-                        matchedByMatchKeyCount += map.containsKey(EntityMatchResult.MATCHED_BY_MATCHKEY) ?
-                                map.get(EntityMatchResult.MATCHED_BY_MATCHKEY) : 0L;
-                        matchedByAccountIdCount += map.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID) ?
-                                map.get(EntityMatchResult.MATCHED_BY_ACCOUNTID) : 0L;
+                        orphanedNoMatchCount += //
+                                map.getOrDefault(EntityMatchResult.ORPHANED_NO_MATCH, 0L);
+                        orphanedUnmatchedAccountIdCount += //
+                                map.getOrDefault(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID, 0L);
+                        matchedByMatchKeyCount += //
+                                map.getOrDefault(EntityMatchResult.MATCHED_BY_MATCHKEY, 0L);
+                        matchedByAccountIdCount += //
+                                map.getOrDefault(EntityMatchResult.MATCHED_BY_ACCOUNTID, 0L);
                     }
                 }
             }
@@ -256,8 +255,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //
                     .commit();
-
-            createNewEntityTable();
             setupErrorExport();
         } catch (Exception e) {
             String errorMessage = "Failed to finalize the match: " + e.getMessage();
@@ -290,26 +287,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_ERROR_EXPORT_PATH,
                 matchErrorDir + "CSV/matcherror.csv");
 
-    }
-
-    /*
-     * Create table for newly allocated entities
-     */
-    private void createNewEntityTable() {
-        MatchInput input = jobConfigurations.get(0).getMatchInput();
-        if (!EntityMatchUtils.shouldOutputNewEntities(input)) {
-            log.info(
-                    "Should not ouput new entities. Skip creating table for new entity result. "
-                            + "MatchInput(OperationalMode={},isAllocateId={},outputNewEntities={})",
-                    input.getOperationalMode(), input.isAllocateId(), input.isOutputNewEntities());
-            return;
-        }
-
-        String tableName = String.format("MatchNewEntity%s", rootOperationUid);
-        log.info("Creating Table for newly allocated entities. TableName={}", tableName);
-        Table newEntityTable = MetaDataTableUtils.createTable(yarnConfiguration, tableName, matchNewEntityDir);
-        newEntityTable.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), tableName, newEntityTable);
     }
 
     private List<ApplicationReport> gatherApplicationReports() {
