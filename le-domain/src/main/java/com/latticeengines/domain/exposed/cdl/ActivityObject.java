@@ -4,19 +4,20 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class ActivityObject {
 
-    private String tenantName;
+    private Tenant tenant;
     private Boolean scheduleNow;
     private Date scheduleTime;
     private List<Action> actions;
     private Boolean dataCloudRefresh;
     private Date invokeTime;
 
-    public String getTenantName() { return tenantName; }
+    public Tenant getTenant() { return tenant; }
 
-    public void setTenantName(String tenantName) { this.tenantName = tenantName; }
+    public void setTenant(Tenant tenant) { this.tenant = tenant; }
 
     public Boolean getScheduleNow() { return scheduleNow; }
 
