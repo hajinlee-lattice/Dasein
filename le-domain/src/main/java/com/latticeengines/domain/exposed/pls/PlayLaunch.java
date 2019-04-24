@@ -142,6 +142,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "ACCOUNTS_ERRORED")
     private Long accountsErrored;
 
+    @JsonProperty("contactsErrored")
+    @Column(name = "CONTACTS_ERRORED")
+    private Long contactsErrored;
+
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
@@ -358,6 +362,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAccountsErrored(Long accountsErrored) {
         this.accountsErrored = accountsErrored;
+    }
+
+    public Long getContactsErrored() {
+        return contactsErrored;
+    }
+
+    public void setContactsErrored(Long contactsErrored) {
+        this.contactsErrored = contactsErrored;
     }
 
     public String getTableName() {

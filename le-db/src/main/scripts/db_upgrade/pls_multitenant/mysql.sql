@@ -70,6 +70,8 @@ CREATE PROCEDURE `UpdatePLSTables`()
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add column `FK_TENANT_ID` bigint(20) not null 
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add constraint `FK_METADATADATACOLLECTIONSTATUSHISTORY_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade; 
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop column `TENANT_NAME` 
+
+alter table `PLS_MultiTenant`.`PLAY_LAUNCH` add column `CONTACTS_ERRORED` BIGINT;
   END;
 //
 DELIMITER;
