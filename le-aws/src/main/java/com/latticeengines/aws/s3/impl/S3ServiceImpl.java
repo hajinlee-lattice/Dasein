@@ -2,7 +2,6 @@ package com.latticeengines.aws.s3.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,11 +45,11 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.s3.S3Service;
@@ -320,17 +319,21 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception {
-        byte[] buf = new byte[16384];
-        try (S3ObjectInputStream stream = s3Client.getObject(itemDesc.getBucketName(), itemDesc.getKey())
-                .getObjectContent()) {
-            try (FileOutputStream writer = new FileOutputStream(file)) {
-                while (stream.available() > 0) {
-                    int bytes = stream.read(buf);
-                    if (bytes <= 0)
-                        break;
-                    writer.write(buf, 0, bytes);
-                }
-            }
+
+        try {
+
+            TransferManagerBuilder
+                    .standard()
+                    .withS3Client(s3Client)
+                    .build()
+                    .download(itemDesc.getBucketName(), itemDesc.getKey(), file)
+                    .waitForCompletion();
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+            throw e;
+
         }
     }
 
