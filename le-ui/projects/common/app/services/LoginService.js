@@ -181,7 +181,7 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'GET',
             url: '/reset/confirm',
-            params: {userName: username},
+            params: {userName: username, hostPort: this.getHostPort()},
             headers: {'Content-Type': 'application/json'}
         }).then(
             function onSuccess(data, status, _headers, _config){
