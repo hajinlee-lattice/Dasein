@@ -24,7 +24,7 @@ angular
             },
             templateUrl: 'app/create/fileuploader/FileUploaderTemplate.html',
             controllerAs: 'vm_uploader_container',
-            controller: function ($scope) {
+            controller: function ($scope, $state) {
                 angular.extend(this, $scope);
 
                 this.getTooltipConfig = function (key) {
@@ -32,7 +32,7 @@ angular
                 }
 
                 this.getS3Files = function () {
-                    console.log("get S3, yo");
+                    $state.go('home.import.entry.s3files', {}, { reload: true } );
                 }
 
             }
@@ -380,10 +380,6 @@ angular
                     }, 1);
 
                     return deferred.promise;
-                }
-
-                vm.changeFile = function(){
-                    console.log("yo");
                 }
 
                 vm.uploadFile = function (file) {

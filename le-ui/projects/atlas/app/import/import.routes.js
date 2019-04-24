@@ -1,5 +1,9 @@
 import './import.utils';
 import { actions, reducer } from './import.redux';
+import { s3actions , s3reducer } from './s3Files/s3Files.redux';
+
+import '../react/react-angular-main.component';
+
 angular
 .module('lp.import', [
     'common.wizard',
@@ -107,6 +111,32 @@ angular
                 }
             },
             redirectTo: 'home.import.entry.accounts'
+        })
+        .state('home.import.entry.s3files', {
+            url:'/s3files',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
+            resolve: {
+                path: () => {
+                    return 's3fileslist';
+                },
+                ngservices: (ImportWizardStore) => {
+
+                    console.log("here");
+
+                    let obj = {
+                        ImportWizardStore: ImportWizardStore
+                    }
+                    return obj;
+                }
+            },
+            views: {
+                'main@': {
+                    component: 'reactAngularMainComponent'
+                }
+            }
         })
         .state('home.import.entry.accounts', {
             url: '/accounts',

@@ -1,35 +1,29 @@
 import S3FileList from 'atlas/import/s3files/s3files.component';
 
 
-const templatesListState = {
-  parent: 'home',
-  name: "templateslist",
-  url: "/templateslist",
+const s3FileListState = {
+  parent: 'home.import.entry',
+  name: "s3fileslist",
+  url: "/s3files",
   onEnter: ($transition$, $state$) => {
     console.log('ENTEReD', $transition$, $state$);
   },
   resolve: [
     {
-      token: 'templateslist',
+      token: 's3fileslist',
       resolveFn: () => {
-        console.log('FN');
+        console.log('here 2');
         return [];
       }
     }
   ],
   views: {
-    'summary@': SummaryContainer,
-    'main@': MultipleTemplatesList
+    'summary@': {
+    	templateUrl: 'app/navigation/summary/BlankLine.html'
+    },
+    'main@': S3FileList
   }
 };
 
-const creationSystemState = {
-  parent: 'home',
-  name: 'sistemcreation',
-  url: '/system',
-  views: {
-    "main@^.^": SystemCreationComponent
-  }
-};
-const states = [creationSystemState, templatesListState];
-export default states;
+const s3filestates = [s3FileListState];
+export default s3filestates;

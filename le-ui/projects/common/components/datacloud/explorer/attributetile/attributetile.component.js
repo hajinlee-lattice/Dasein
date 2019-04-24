@@ -35,6 +35,10 @@ export default function () {
                 return booleans;
             }
 
+            vm.getStatSort = function () {
+                return vm.section == 're.model_iteration' ? '-Lift' : '-Cnt';
+            }
+
             vm.goToEnumPicker = function (bucket, enrichment) {
                 QueryTreeService.setPickerObject({
                     item: enrichment

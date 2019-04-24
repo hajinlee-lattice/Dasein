@@ -1,5 +1,5 @@
 import states from 'atlas/import/templates/multiple/states';
-import states from 'atlas/import/s3files/s3files.states';
+import s3filestates from 'atlas/import/s3files/s3files.states';
 import connectrosstates from 'atlas/connectors/connectors.states';
 
 const modulesStates = [];
