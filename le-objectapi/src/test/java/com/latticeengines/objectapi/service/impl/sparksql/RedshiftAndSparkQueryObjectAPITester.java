@@ -10,7 +10,7 @@ import com.latticeengines.query.evaluator.sparksql.RedshiftAndSparkQueryTester;
 
 public interface RedshiftAndSparkQueryObjectAPITester extends RedshiftAndSparkQueryTester {
 
-    public default long testAndAssertCountFromTester(String sqlUser, long resultCount, long expectedCount) {
+    default long testAndAssertCountFromTester(String sqlUser, long resultCount, long expectedCount) {
         switch (sqlUser) {
         case USER_SEGMENT:
             getLogger().info("Redshift Query Count: {}", resultCount);
@@ -24,7 +24,7 @@ public interface RedshiftAndSparkQueryObjectAPITester extends RedshiftAndSparkQu
         throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 
-    public default List<Map<String, Object>> testAndAssertDataFromTester(String sqlUser, List<Map<String, Object>> results,
+    default List<Map<String, Object>> testAndAssertDataFromTester(String sqlUser, List<Map<String, Object>> results,
             List<Map<String, Object>> expectedResults) {
         switch (sqlUser) {
         case USER_SEGMENT:
