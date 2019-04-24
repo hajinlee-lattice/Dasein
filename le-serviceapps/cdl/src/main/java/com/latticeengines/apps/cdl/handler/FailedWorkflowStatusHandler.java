@@ -44,10 +44,11 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         String messageType = status.getMessageType();
 
-        if (eventDetail != null) {
+        if (MessageType.Information.equals(MessageType.valueOf(messageType)) && eventDetail != null) {
             Map<String, String> errorFileMap = eventDetail.getErrorFile();
 
-            if (errorFileMap != null && errorFileMap.containsKey(URL)) {
+            if (errorFileMap != null && errorFileMap.containsKey(URL)
+                    && errorFileMap.get(URL).indexOf("dropfolder") >= 0) {
                 String errorFile = errorFileMap.get(URL);
                 statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
             }

@@ -1,11 +1,8 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,14 +11,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
+import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 @Component("playLaunchEntityMgr")
@@ -32,6 +30,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override
     public BaseDao<PlayLaunch> getDao() {
@@ -107,9 +108,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
-        List<PlayLaunch> playLaunches = playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp,
-                offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
-        return convertToSummaries(playLaunches);
+        return playLaunchDao.findByPlayStatesAndPagination(playId, states,
+                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
     }
 
     @Override
@@ -144,43 +144,4 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
                 orgId, externalSysType);
     }
 
-    private List<LaunchSummary> convertToSummaries(List<PlayLaunch> playLaunches) {
-        if (CollectionUtils.isEmpty(playLaunches)) {
-            return new ArrayList<>();
-        } else {
-            return playLaunches.stream() //
-                    .map(this::convertToSummary) //
-                    .collect(Collectors.toList());
-        }
-    }
-
-    private LaunchSummary convertToSummary(PlayLaunch launch) {
-        LaunchSummary summary = new LaunchSummary();
-
-        Stats stats = new Stats();
-        stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
-        stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
-        stats.setErrors(getCount(launch.getAccountsErrored()));
-        stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
-        stats.setSuppressed(getCount(launch.getAccountsSuppressed()));
-
-        summary.setStats(stats);
-        summary.setLaunchId(launch.getLaunchId());
-        summary.setLaunchState(launch.getLaunchState());
-        summary.setLaunchTime(launch.getCreated());
-        summary.setSelectedBuckets(launch.getBucketsToLaunch());
-        summary.setDestinationOrgId(launch.getDestinationOrgId());
-        summary.setDestinationSysType(launch.getDestinationSysType());
-        summary.setDestinationAccountId(launch.getDestinationAccountId());
-        if (launch.getPlay() != null) {
-            summary.setPlayName(launch.getPlay().getName());
-            summary.setPlayDisplayName(launch.getPlay().getDisplayName());
-        }
-
-        return summary;
-    }
-
-    private long getCount(Long count) {
-        return count == null ? 0L : count;
-    }
 }
