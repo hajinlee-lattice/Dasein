@@ -30,11 +30,11 @@ public class AddEmailAttributes implements RealTimeTransform {
 
     private Map<String, Object> imputationMap = new HashMap<>();
 
-    private class EmailIsInvalidFcn extends TransformWithImputationFunctionBase {
+    public class EmailIsInvalidFcn extends TransformWithImputationFunctionBase {
 
         private int maxStringLen;
 
-        EmailIsInvalidFcn(Object imputation, int maxStringLen) {
+        public EmailIsInvalidFcn(Object imputation, int maxStringLen) {
             super(imputation);
             this.maxStringLen = maxStringLen;
         }

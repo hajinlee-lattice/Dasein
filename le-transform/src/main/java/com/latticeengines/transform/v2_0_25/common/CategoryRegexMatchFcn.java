@@ -8,11 +8,11 @@ import java.util.regex.Pattern;
 
 public class CategoryRegexMatchFcn extends TransformWithImpAndVetoFunctionBase {
 
-    class Category {
+    public class Category {
         public String name;
         public Pattern pattern;
 
-        Category(String name, Pattern pattern) {
+        public Category(String name, Pattern pattern) {
             this.name = name;
             this.pattern = pattern;
         }

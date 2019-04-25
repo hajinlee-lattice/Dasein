@@ -26,9 +26,9 @@ public class AddPhoneAttributes implements RealTimeTransform {
 
     private Map<String, Object> imputationMap = new HashMap<>();
 
-    private class PhoneEntropyFcn extends TransformWithImputationFunctionBase {
+    public class PhoneEntropyFcn extends TransformWithImputationFunctionBase {
 
-        PhoneEntropyFcn(Object imputation) {
+        public PhoneEntropyFcn(Object imputation) {
             super(imputation);
         }
 
