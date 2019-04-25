@@ -28,7 +28,7 @@ public class AddPhoneAttributes implements RealTimeTransform {
 
     private class PhoneEntropyFcn extends TransformWithImputationFunctionBase {
 
-        PhoneEntropyFcn(Object imputation) {
+        public PhoneEntropyFcn(Object imputation) {
             super(imputation);
         }
 
