@@ -47,6 +47,12 @@ $font-size: 12px;
             color: $gun-metal;
             pointer-events: none;
         }
+        &.selected{
+            background-color: $saphire-two;
+        }
+        &.selected:hover{
+            background-color: $saphire-two;
+        }
     }
     .le-table-body {
         background: none;
