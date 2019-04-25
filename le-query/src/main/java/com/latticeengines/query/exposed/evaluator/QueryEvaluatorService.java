@@ -7,14 +7,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -112,15 +109,6 @@ public class QueryEvaluatorService {
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
         return String.format("%s tenantId=%s SQLQuery=%s", method, attrRepo.getCustomerSpace().getTenantId(),
                 sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "));
-    }
-
-    public String getAndValidateServingStoreTableName(BusinessEntity businessEntity, AttributeRepository attrRepo) {
-        String toReturn = attrRepo.getTableName(businessEntity.getServingStore());;
-        if (StringUtils.isEmpty(toReturn)) {
-            throw new LedpException(LedpCode.LEDP_37017,
-                    new String[] { "ServingStore " + businessEntity.name(), attrRepo.getCustomerSpace().getTenantId() });
-        }
-        return toReturn;
     }
 
 }
