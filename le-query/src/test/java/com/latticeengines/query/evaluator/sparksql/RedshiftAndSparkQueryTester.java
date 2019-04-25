@@ -23,6 +23,18 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 
+/**
+ * @author jadusumalli
+ * 
+ * Created this test interface to check the results between Redshift and Spark.
+ * Goal of this interface is to use existing testcases as is, without modifying the expected outputs.
+ * Because existing testcases are using version 1 of data set in Redshift.
+ * This interface allows us to test with any dataset, as we donot assert for any specific number. 
+ *  Instead it just stored the results from Redshift testcase and compares with Spark testcase results.
+ *  
+ * This allows us test new usecases with different data sets versions. without hard coding expected outputs.
+ * 
+ */
 public interface RedshiftAndSparkQueryTester {
 
     Logger getLogger();

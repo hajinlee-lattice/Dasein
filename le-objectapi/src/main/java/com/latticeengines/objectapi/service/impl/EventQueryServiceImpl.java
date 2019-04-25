@@ -5,6 +5,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -31,9 +34,25 @@ import com.latticeengines.query.factory.RedshiftQueryProvider;
 @Service("eventQueryService")
 public class EventQueryServiceImpl extends BaseQueryServiceImpl implements EventQueryService {
 
+    private static Logger log = LoggerFactory.getLogger(EventQueryServiceImpl.class);
+
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
 
     private final TransactionService transactionService;
+
+    private String batchUserName;
+
+    protected void setBatchUser(String batchUserName) {
+        this.batchUserName = batchUserName;
+        log.info("Set BatchUserName to {}", batchUserName);
+    }
+
+    protected String getBatchUser() {
+        if (StringUtils.isNotBlank(batchUserName)) {
+            return batchUserName;
+        }
+        return BATCH_USER;
+    }
 
     @Inject
     public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
@@ -83,7 +102,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                 queryEvaluatorService);
         try {
             Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
-            return queryEvaluatorService.getCount(attrRepo, query, BATCH_USER);
+            return queryEvaluatorService.getCount(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
@@ -95,7 +114,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                 queryEvaluatorService);
         try {
             Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
-            return queryEvaluatorService.getData(attrRepo, query, BATCH_USER);
+            return queryEvaluatorService.getData(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
@@ -117,7 +136,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             map.putAll(segmentMap);
         }
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, BATCH_USER);
+        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, getBatchUser());
         return query;
     }
 
@@ -128,7 +147,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                 queryEvaluatorService);
         Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
         try {
-            return queryEvaluatorService.getQueryStr(attrRepo, query, BATCH_USER);
+            return queryEvaluatorService.getQueryStr(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             String msg = "Failed to construct query string " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();

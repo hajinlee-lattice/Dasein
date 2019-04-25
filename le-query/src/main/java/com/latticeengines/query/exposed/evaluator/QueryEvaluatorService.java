@@ -50,6 +50,7 @@ public class QueryEvaluatorService {
 
     public long getCount(AttributeRepository attrRepo, Query query, String sqlUser) {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        sqlQuery.setUseLiterals(true);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
             timer.setThreshold(0L);
             return sqlQuery.fetchCount();

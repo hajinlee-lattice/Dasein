@@ -74,19 +74,6 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return entityQueryService;
     }
 
-    protected long testAndAssertCount(String sqlUser, long resultCount, long expectedCount) {
-        Assert.assertEquals(resultCount, expectedCount, "Counts Doesn't match");
-        return resultCount;
-    }
-
-    protected List<Map<String, Object>> testAndAssertData(String sqlUser, List<Map<String, Object>> results,
-            List<Map<String, Object>> expectedResults) {
-        if (expectedResults != null) {
-            Assert.assertEquals(results, expectedResults, "Data Doesn't match");
-        }
-        return results;
-    }
-
     protected Object[][] getTimeFilterDataProvider() {
         TimeFilter currentMonth = new TimeFilter( //
                 ComparisonType.IN_CURRENT_PERIOD, //
