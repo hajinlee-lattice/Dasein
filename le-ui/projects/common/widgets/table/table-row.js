@@ -7,6 +7,7 @@ export default class LeTableRow extends Component {
     constructor(props) {
         super(props);
     }
+
     getCells() {
         if (this.props.columnsMapping) {
             let cellsUI = Object.keys(this.props.columnsMapping).map(
@@ -21,6 +22,7 @@ export default class LeTableRow extends Component {
                             colIndex={index}
                             colName={column.name}
                             rowData={this.props.rowData}
+                            onClick={this.props.onClick}
                         />
                     );
                 }
@@ -39,10 +41,9 @@ export default class LeTableRow extends Component {
         if (this.props.formatter) {
             externalFormatting = this.props.formatter(this.props.rowData);
         }
-        let format = `${rowClass} ${
-            externalFormatting ? externalFormatting : ""
-        }`;
-        return <div className={format}>{this.getCells()}</div>;
+        let selectedFormat = `${externalFormatting} ${this.props.selected ? 'selected' :''}`
+        let format = `${rowClass} ${selectedFormat}`;
+        return (<div className={format}>{this.getCells()}</div>);
     }
 }
 
