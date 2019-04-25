@@ -776,6 +776,10 @@ angular
         })
         .state('home.import.data.productbundles.ids', {
             url: '/transactionids',
+            onEnter: function($state, ImportWizardStore, FieldDocument){
+                ImportWizardStore.setSavedDocumentInState('home.import.data.productbundles', FieldDocument.fieldMappings);
+                ImportWizardStore.setSavedDocumentInState('home.import.data.productbundles.ids', FieldDocument.fieldMappings);
+            },
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
