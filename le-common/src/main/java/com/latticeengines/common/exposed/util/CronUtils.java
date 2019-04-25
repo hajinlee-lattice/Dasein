@@ -47,4 +47,8 @@ public final class CronUtils {
         return executionTime.nextExecution(now);
     }
 
+    public static boolean isValidExpression(String expression) {
+        return CronExpression.isValidExpression(expression);
+    }
+
 }

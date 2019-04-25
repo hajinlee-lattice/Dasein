@@ -23,6 +23,7 @@
               "v1", "v2"
             ]
         }
-    }
+    },
+    { "Node": "ExportCronExpression", "Data": {"Type": "string", "Required": false}}
   ]
 }
