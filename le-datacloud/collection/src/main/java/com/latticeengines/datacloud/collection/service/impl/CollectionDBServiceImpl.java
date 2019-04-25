@@ -726,6 +726,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
     }
 
+    /*
     private List<File> createBucketFiles(long minTs, int periodInMS, int bucketCount) throws Exception {
 
         List<File> bucketFiles = new ArrayList<>();
@@ -908,6 +909,111 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         return bucketFiles;
 
     }
+
+    private void ingestConsumedWorker(CollectionWorker worker) throws Exception {
+
+        try {
+
+            String vendor = worker.getVendor();
+            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
+
+            List<File> tmpFiles = downloadWorkerOutput(worker);
+            if (CollectionUtils.isEmpty(tmpFiles)) {
+
+                log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
+                        + "\'s output dir on s3 does not contain any files");
+                return;
+
+            }
+
+            //bucketing
+            List<File> bucketFiles = doBucketing(tmpFiles, vendor);
+            List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
+            if (CollectionUtils.isNotEmpty(bucketFiles)) {
+
+                Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
+                String ingestDir = ingestLocation.toString();
+
+                for (File bucketFile : bucketFiles) {
+
+                    if (!bucketFile.exists()) {
+
+                        log.warn("no data gathered for bucket file: " + bucketFile.getPath());
+                        continue;
+
+                    }
+
+                    String remoteFilePath = ingestLocation.append(bucketFile.getName()).toString();
+
+                    if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
+
+                        File tmpFile = File.createTempFile("temp", ".avro");
+                        tmpFile.deleteOnExit();
+                        tmpBucketFiles.add(tmpFile);
+
+                        s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
+
+                        if (bucketFile.length() >= tmpFile.length()) {
+
+                            log.info("appending to local file: " + bucketFile);
+                            AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
+
+                            log.info("uploading local file: " + bucketFile);
+                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                        } else {
+
+                            log.info("appending to local file: " + tmpFile);
+                            AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
+
+                            log.info("uploading local file: " + tmpFile);
+                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
+                        }
+
+                    } else {
+
+                        log.info("uploading local file: " + bucketFile);
+                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                    }
+
+                    log.info("uploaded s3 file in bucket " + s3Bucket + ": " + remoteFilePath);
+
+                }
+
+            }
+
+            //clean local file
+            for (File tmpFile : tmpFiles) {
+
+                FileUtils.deleteQuietly(tmpFile);
+
+            }
+
+            if (CollectionUtils.isNotEmpty(bucketFiles)) {
+
+                for (File bucketFile : bucketFiles) {
+
+                    FileUtils.deleteQuietly(bucketFile);
+
+                }
+
+                for (File tmpBucketFile: tmpBucketFiles) {
+
+                    FileUtils.deleteQuietly(tmpBucketFile);
+
+                }
+            }
+
+            //update worker status
+            worker.setStatus(CollectionWorker.STATUS_INGESTED);
+            collectionWorkerService.getEntityMgr().update(worker);
+
+        }
+        catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }*/
 
     private void createBucketFiles(long minTs, int periodInMS, int bucketCount, Map<Long, File> buckets) throws Exception {
 
@@ -1095,111 +1201,6 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private void ingestConsumedWorker(CollectionWorker worker) throws Exception {
-
-        try {
-
-            String vendor = worker.getVendor();
-            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
-
-            List<File> tmpFiles = downloadWorkerOutput(worker);
-            if (CollectionUtils.isEmpty(tmpFiles)) {
-
-                log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
-                        + "\'s output dir on s3 does not contain any files");
-                return;
-
-            }
-
-            //bucketing
-            List<File> bucketFiles = doBucketing(tmpFiles, vendor);
-            List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
-            if (CollectionUtils.isNotEmpty(bucketFiles)) {
-
-                Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
-                String ingestDir = ingestLocation.toString();
-
-                for (File bucketFile : bucketFiles) {
-
-                    if (!bucketFile.exists()) {
-
-                        log.warn("no data gathered for bucket file: " + bucketFile.getPath());
-                        continue;
-
-                    }
-
-                    String remoteFilePath = ingestLocation.append(bucketFile.getName()).toString();
-
-                    if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
-
-                        File tmpFile = File.createTempFile("temp", ".avro");
-                        tmpFile.deleteOnExit();
-                        tmpBucketFiles.add(tmpFile);
-
-                        s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
-
-                        if (bucketFile.length() >= tmpFile.length()) {
-
-                            log.info("appending to local file: " + bucketFile);
-                            AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
-
-                            log.info("uploading local file: " + bucketFile);
-                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
-
-                        } else {
-
-                            log.info("appending to local file: " + tmpFile);
-                            AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
-
-                            log.info("uploading local file: " + tmpFile);
-                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
-                        }
-
-                    } else {
-
-                        log.info("uploading local file: " + bucketFile);
-                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
-
-                    }
-
-                    log.info("uploaded s3 file in bucket " + s3Bucket + ": " + remoteFilePath);
-
-                }
-
-            }
-
-            //clean local file
-            for (File tmpFile : tmpFiles) {
-
-                FileUtils.deleteQuietly(tmpFile);
-
-            }
-
-            if (CollectionUtils.isNotEmpty(bucketFiles)) {
-
-                for (File bucketFile : bucketFiles) {
-
-                    FileUtils.deleteQuietly(bucketFile);
-
-                }
-
-                for (File tmpBucketFile: tmpBucketFiles) {
-
-                    FileUtils.deleteQuietly(tmpBucketFile);
-
-                }
-            }
-
-            //update worker status
-            worker.setStatus(CollectionWorker.STATUS_INGESTED);
-            collectionWorkerService.getEntityMgr().update(worker);
-
-        }
-        catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
     private boolean ingestConsumedWorker(CollectionWorker worker, Map<String, Map<Long, File>> bucketGroups) {
 
         boolean ret = false;
@@ -1264,7 +1265,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             if (bucketFiles.isEmpty()) {
 
-                log.info(vendor + "does not have ingested files to upload");
+                log.info("0 ingested files to upload for " + vendor);
                 continue;
 
             }
@@ -1279,7 +1280,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                 if (!bucketFile.exists()) {
 
-                    log.warn("no data gathered for bucket file: " + bucketFile.getPath());
+                    log.warn("no data gathered for bucket file: " + bucketFile.getName());
                     continue;
 
                 }
@@ -1299,24 +1300,24 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
                     if (bucketFile.length() >= tmpFile.length()) {
 
-                        log.info("\tappending to local file: " + bucketFile);
+                        log.info("\tappending to local file: " + bucketFile.getName());
                         AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
 
-                        log.info("\tuploading local file: " + bucketFile);
+                        log.info("\tuploading local file: " + bucketFile.getName());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                     } else {
 
-                        log.info("\tappending to local file: " + tmpFile);
+                        log.info("\tappending to local file: " + tmpFile.getName());
                         AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
 
-                        log.info("\tuploading local file: " + tmpFile);
+                        log.info("\tuploading local file: " + tmpFile.getName());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
                     }
 
                 } else {
 
-                    log.info("\tuploading local file: " + bucketFile);
+                    log.info("\tuploading local file: " + bucketFile.getName());
                     s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                 }
@@ -1325,7 +1326,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 s3Service.uploadLocalFile(s3Bucket, dirLocation.append("_SUCCESS").toString(), tagFile, true);
 
             }
-            log.info("uploading for " + vendor + " done");
+            log.info("ingested files for " + vendor + " uploaded");
 
             for (File bucketFile : bucketFiles.values()) {
 
