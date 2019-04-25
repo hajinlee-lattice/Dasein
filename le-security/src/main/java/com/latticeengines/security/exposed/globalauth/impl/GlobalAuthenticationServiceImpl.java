@@ -133,6 +133,12 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
             Map<String, GlobalAuthTenant> distinctTenants = new HashMap<String, GlobalAuthTenant>();
             for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
+                if (rightData.getExpirationDate() != null) {
+                    long expirationDate = rightData.getExpirationDate();
+                    if (expirationDate < System.currentTimeMillis()) {
+                        continue;
+                    }
+                }
                 if (rightData.getGlobalAuthTenant() != null) {
                     if (!distinctTenants.containsKey(rightData.getGlobalAuthTenant().getId())) {
                         distinctTenants.put(rightData.getGlobalAuthTenant().getId(), rightData.getGlobalAuthTenant());
