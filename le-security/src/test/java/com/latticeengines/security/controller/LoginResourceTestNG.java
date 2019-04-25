@@ -5,16 +5,23 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.List;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -162,5 +169,43 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
         HttpEntity<SimpleBooleanResponse> responseEntity = restTemplate.exchange(
                 getRestAPIHostPort() + "/logout", HttpMethod.GET, headerEntity, SimpleBooleanResponse.class);
         assertTrue(responseEntity.getBody().isSuccess());
+    }
+
+    @Test(groups = { "functional", "deployment" })
+    public void loginWithExpiredTenant() {
+
+        UserDocument document = loginAndAttach(adminUsername, adminPassword, getAdminTenant());
+        // set expiration date for admin user on tenant
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(AccessLevel.SUPER_ADMIN.toString());
+        data.setExpirationDate(System.currentTimeMillis());
+        HttpHeaders headers = new HttpHeaders();
+        String token = document.getTicket().getUniqueness() + "." + document.getTicket().getRandomness();
+        headers.set(Constants.AUTHORIZATION, token);
+        HttpEntity<UserUpdateData> entity = new HttpEntity<>(data, headers);
+
+        // update expiration date to current time
+        HttpEntity<SimpleBooleanResponse> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + String.format("/users/%s", JsonUtils.serialize(adminUsername)), HttpMethod.PUT,
+                entity,
+                SimpleBooleanResponse.class);
+        assertTrue(responseEntity.getBody().isSuccess());
+
+        HttpEntity<HttpHeaders> headerEntity = new HttpEntity<>(headers);
+        HttpEntity<SimpleBooleanResponse> responseEntity1 = restTemplate.exchange(getRestAPIHostPort() + "/logout",
+                HttpMethod.GET, headerEntity,
+                SimpleBooleanResponse.class);
+        assertTrue(responseEntity1.getBody().isSuccess());
+
+        // login again, verify that the tenant can't visit
+        Credentials creds = new Credentials();
+        creds.setUsername(adminUsername);
+        creds.setPassword(DigestUtils.sha256Hex(adminPassword));
+        LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
+                LoginDocument.class);
+        assertNotNull(loginDoc.getResult());
+        List<Tenant> validatedTenants = loginDoc.getResult().getTenants();
+        System.out.println("test " + JsonUtils.serialize(validatedTenants));
+        Assert.assertTrue(CollectionUtils.isEmpty(validatedTenants));
     }
 }
