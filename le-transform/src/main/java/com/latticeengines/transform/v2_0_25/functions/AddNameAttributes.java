@@ -30,7 +30,7 @@ public class AddNameAttributes implements RealTimeTransform {
 
     private Map<String, Object> imputationMap = new HashMap<>();
 
-    private abstract class TransformWithTwoArgsFunctionBase extends TransformWithImputationFunctionBase {
+    public abstract class TransformWithTwoArgsFunctionBase extends TransformWithImputationFunctionBase {
         public TransformWithTwoArgsFunctionBase(Object imputation) {
             super(imputation);
         }
@@ -43,7 +43,7 @@ public class AddNameAttributes implements RealTimeTransform {
         public abstract double execute(String s1, String s2);
     }
 
-    private class FirstNameLastNameLengthFcn extends TransformWithTwoArgsFunctionBase {
+    public class FirstNameLastNameLengthFcn extends TransformWithTwoArgsFunctionBase {
 
         private StringLengthFcn stringLengthFcn;
 
@@ -61,7 +61,7 @@ public class AddNameAttributes implements RealTimeTransform {
         }
     }
 
-    private class FirstNameLastNameSameFcn extends TransformWithTwoArgsFunctionBase {
+    public class FirstNameLastNameSameFcn extends TransformWithTwoArgsFunctionBase {
 
         public FirstNameLastNameSameFcn(Object imputation) {
             super(imputation);
