@@ -6,15 +6,15 @@ class CopyComponent extends Component {
     this.clickHandler = this.clickHandler.bind(this);
   }
 
-  clickHandler(){
+  clickHandler(event){
     // copyPath(text) {
         let text = this.props.data;
         window.navigator.clipboard.writeText(text).then(
           () => {
               if(this.props.callback){
-                  this.props.callback();
+                  this.props.callback(event);
               }
-            console.log("Async: Copying to clipboard was successful!");
+            // console.log("Async: Copying to clipboard was successful!");
           },
           err => {
             console.error("Async: Could not copy text: ", err);
