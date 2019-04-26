@@ -55,8 +55,6 @@ import reactor.core.publisher.Flux;
 @Service("ratingQueryService")
 public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements RatingQueryService {
 
-    private final QueryEvaluatorService queryEvaluatorService;
-
     private final TransactionService transactionService;
 
     private final SparkSQLService sparkSQLService;
@@ -64,7 +62,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
     @Inject
     public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService, //
                                   SparkSQLService sparkSQLService) {
-        this.queryEvaluatorService = queryEvaluatorService;
+        super(queryEvaluatorService);
         this.transactionService = transactionService;
         this.sparkSQLService = sparkSQLService;
     }

@@ -61,6 +61,10 @@ public class SparkSQLQueryTester {
         return customerSpace;
     }
 
+    public LivySession getLivySession() {
+        return session;
+    }
+
     public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
         this.customerSpace = customerSpace;
         this.attrRepo = attrRepo;
