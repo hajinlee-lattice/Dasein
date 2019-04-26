@@ -16,7 +16,6 @@ import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
 public abstract class BaseConvertToCSV<S extends BaseStepConfiguration>
         extends RunSparkJob<S, ConvertToCSVConfig, ConvertToCSVJob> {
 
-
     protected abstract HdfsDataUnit getInputData();
     protected abstract Map<String, String> getDisplayNameMap();
     protected abstract Map<String, String> getDateAttrFmtMap();

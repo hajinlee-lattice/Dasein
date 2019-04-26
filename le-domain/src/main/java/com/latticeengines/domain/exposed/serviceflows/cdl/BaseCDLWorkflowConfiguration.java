@@ -57,10 +57,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = RebuildTransactionWorkflowConfiguration.class, name = "RebuildTransactionWorkflowConfiguration"),
 
         @Type(value = CuratedAttributesWorkflowConfiguration.class, name = "CuratedAttributesWorkflowConfiguration"),
-
         @Type(value = ProcessRatingWorkflowConfiguration.class, name = "ProcessRatingWorkflowConfiguration"),
-
         @Type(value = CrossSellImportMatchAndModelWorkflowConfiguration.class, name = "CrossSellImportMatchAndModelWorkflowConfiguration"),
+
+        @Type(value = EntityExportWorkflowConfiguration.class, name = "EntityExportWorkflowConfiguration"),
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
         @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration") })

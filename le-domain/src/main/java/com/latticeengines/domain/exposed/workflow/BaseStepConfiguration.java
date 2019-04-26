@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
@@ -21,21 +22,22 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.P
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({
-        @Type(value = BaseWrapperStepConfiguration.class, name = "BaseWrapperStepConfiguration"),
-        @Type(value = CombineStatisticsConfiguration.class, name = "CombineStatisticsConfiguration"),
-        @Type(value = ImportVdbTableStepConfiguration.class, name = "ImportVdbTableStepConfiguration"),
-        @Type(value = IngestionStepConfiguration.class, name = "IngestionStepConfiguration"),
-        @Type(value = MicroserviceStepConfiguration.class, name = "MicroserviceStepConfiguration"),
-        @Type(value = PrepareTransformationStepInputConfiguration.class, name = "PrepareTransformationStepInputConfiguration"),
-        @Type(value = PlayLaunchInitStepConfiguration.class, name = "PlayLaunchInitStepConfiguration"),
-        @Type(value = PrepareBulkMatchInputConfiguration.class, name = "PrepareBulkMatchInputConfiguration"),
-        @Type(value = PublishConfiguration.class, name = "PublishConfiguration"),
-        @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"),
-        @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"),
-        @Type(value = CommitEntityMatchConfiguration.class, name = "CommitEntityMatchConfiguration"),
-        @Type(value = SparkJobStepConfiguration.class, name = "SparkJobStepConfiguration"),
-        @Type(value = SparkScriptStepConfiguration.class, name = "SparkScriptStepConfiguration"),
+@JsonSubTypes({ //
+        @Type(value = BaseWrapperStepConfiguration.class, name = "BaseWrapperStepConfiguration"), //
+        @Type(value = CombineStatisticsConfiguration.class, name = "CombineStatisticsConfiguration"), //
+        @Type(value = ImportVdbTableStepConfiguration.class, name = "ImportVdbTableStepConfiguration"), //
+        @Type(value = IngestionStepConfiguration.class, name = "IngestionStepConfiguration"), //
+        @Type(value = MicroserviceStepConfiguration.class, name = "MicroserviceStepConfiguration"), //
+        @Type(value = PrepareTransformationStepInputConfiguration.class, name = "PrepareTransformationStepInputConfiguration"), //
+        @Type(value = PlayLaunchInitStepConfiguration.class, name = "PlayLaunchInitStepConfiguration"), //
+        @Type(value = PrepareBulkMatchInputConfiguration.class, name = "PrepareBulkMatchInputConfiguration"), //
+        @Type(value = PublishConfiguration.class, name = "PublishConfiguration"), //
+        @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"), //
+        @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"), //
+        @Type(value = CommitEntityMatchConfiguration.class, name = "CommitEntityMatchConfiguration"), //
+        @Type(value = SparkJobStepConfiguration.class, name = "SparkJobStepConfiguration"), //
+        @Type(value = SparkScriptStepConfiguration.class, name = "SparkScriptStepConfiguration"), //
+        @Type(value = EntityExportStepConfiguration.class, name = "EntityExportStepConfiguration"), //
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {

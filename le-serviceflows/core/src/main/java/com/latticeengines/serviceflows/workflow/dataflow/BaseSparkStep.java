@@ -40,6 +40,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     @Resource(name = "distCpConfiguration")
     protected Configuration distCpConfiguration;
 
+    @Resource(name = "yarnConfiguration")
+    protected Configuration yarnConfiguration;
+
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
