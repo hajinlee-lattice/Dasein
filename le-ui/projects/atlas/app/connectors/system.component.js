@@ -178,7 +178,7 @@ export default class SystemComponent extends Component {
                                 disabled={this.state.saving || !this.state.system.isRegistered}
                                 config={{
                                     label: "Edit Mappings",
-                                    classNames: "blue-button connections-edit-mappings"
+                                    classNames: "blue-button aptrinsic-connections-edit-mappings"
                                 }}
                                 callback={this.editMappingClickHandler}
                             /></LeHPanel>
