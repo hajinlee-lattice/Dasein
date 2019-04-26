@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.merge.EntityMatchCheckpoint;
 import com.latticeengines.cdl.workflow.steps.merge.MatchAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MatchContactWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
@@ -25,11 +26,15 @@ public class MatchEntityWorkflow extends AbstractWorkflow<MatchEntityWorkflowCon
     @Inject
     private MatchContactWrapper matchContactWrapper;
 
+    @Inject
+    private EntityMatchCheckpoint entityMatchCheckpoint;
+
     @Override
     public Workflow defineWorkflow(MatchEntityWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchAccountWrapper) //
                 .next(matchContactWrapper) //
+                .next(entityMatchCheckpoint) //
                 .build();
     }
 }

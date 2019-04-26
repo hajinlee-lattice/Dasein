@@ -1062,7 +1062,8 @@ public class AvroUtils {
     }
 
     public static boolean hasRecords(Configuration configuration, String path) {
-        try (AvroFilesIterator iterator = avroFileIterator(configuration, path)) {
+        String glob = PathUtils.toAvroGlob(path);
+        try (AvroFilesIterator iterator = avroFileIterator(configuration, glob)) {
             return iterator.hasNext();
         }
     }
@@ -1101,11 +1102,12 @@ public class AvroUtils {
 
         AvroFilesIterator(Configuration configuration, String path) throws IOException {
             matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
-            if (matchedFiles == null || matchedFiles.isEmpty()) {
-                throw new IOException("Could not find any avro file that matches the path pattern [" + path + "]");
+            if (CollectionUtils.isEmpty(matchedFiles)) {
+                log.warn("Could not find any avro file that matches the path pattern [" + path + "]");
+            } else {
+                this.configuration = configuration;
+                reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
             }
-            this.configuration = configuration;
-            reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
         }
 
         AvroFilesIterator(Configuration configuration, Collection<String> paths) throws IOException {
@@ -1113,31 +1115,40 @@ public class AvroUtils {
             for (String path : paths) {
                 matchedFiles.addAll(HdfsUtils.getFilesByGlob(configuration, path));
             }
-            if (matchedFiles.isEmpty()) {
-                throw new IOException("Could not find any avro file that matches one of the path patterns [ "
+            if (CollectionUtils.isEmpty(matchedFiles)) {
+                log.warn("Could not find any avro file that matches one of the path patterns [ "
                         + StringUtils.join(paths, ", ") + " ]");
+            } else {
+                this.configuration = configuration;
+                reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
             }
-            this.configuration = configuration;
-            reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
         }
 
         @Override
         public boolean hasNext() {
-            while (!reader.hasNext() && fileIdx < matchedFiles.size() - 1) {
-                fileIdx++;
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.error("Failed to close avro file reader.");
+            if (reader != null) {
+                while (!reader.hasNext() && fileIdx < matchedFiles.size() - 1) {
+                    fileIdx++;
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        log.error("Failed to close avro file reader.");
+                    }
+                    reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
                 }
-                reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
+                return reader.hasNext();
+            } else {
+                return false;
             }
-            return reader.hasNext();
         }
 
         @Override
         public GenericRecord next() {
-            return reader.next();
+            if (reader != null) {
+                return reader.next();
+            } else {
+                throw new NoSuchElementException();
+            }
         }
 
         @Override

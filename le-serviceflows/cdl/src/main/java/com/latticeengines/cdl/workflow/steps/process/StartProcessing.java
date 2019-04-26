@@ -122,7 +122,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Override
     public void execute() {
         Set<String> renewableKeys = Sets.newHashSet( //
-                NEW_ENTITY_MATCH_VERSION, //
+                ENTITY_MATCH_COMPLETED, //
+                NEW_ENTITY_MATCH_ENVS, //
+                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
                 ACCOUNT_DIFF_TABLE_NAME, //
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //
@@ -157,8 +161,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         createReportJson();
         setupInactiveVersion();
         setGrapherContext();
-        bumpEntityMatchVersion();
-        // clearPhaseForRetry();
+        resetEntityMatchFlagsForRetry();
+//        bumpEntityMatchVersion();
     }
 
     private void updateDataFeed() {
@@ -483,6 +487,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setupInactiveVersion() {
         Set<String> tableKeysForRetry = Sets.newHashSet( //
+                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
                 ACCOUNT_DIFF_TABLE_NAME, //
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //
@@ -522,11 +529,20 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
     }
 
+    private void resetEntityMatchFlagsForRetry() {
+        boolean completed = Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
+        if (!completed) {
+            // need to rerun entity match steps
+            removeObjectFromContext(NEW_ENTITY_MATCH_ENVS);
+        }
+    }
+
     /*
      * bump up entity match version
      */
+    // TODO: to be removed
     private void bumpEntityMatchVersion() {
-        Boolean alreadyBumpedUp = getObjectFromContext(NEW_ENTITY_MATCH_VERSION, Boolean.class);
+        Boolean alreadyBumpedUp = getObjectFromContext(NEW_ENTITY_MATCH_ENVS, Boolean.class);
         if (Boolean.TRUE.equals(alreadyBumpedUp)) {
             log.info("Already handled entity match version bumping up in previous PA.");
             return;
@@ -547,7 +563,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         } else {
             log.debug("No entity match environment requires bump up version");
         }
-        putObjectInContext(NEW_ENTITY_MATCH_VERSION, Boolean.TRUE);
+        putObjectInContext(NEW_ENTITY_MATCH_ENVS, Boolean.TRUE);
     }
 
     /*

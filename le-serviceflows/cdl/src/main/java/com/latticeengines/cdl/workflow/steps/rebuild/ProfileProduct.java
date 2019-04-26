@@ -55,7 +55,7 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
     protected PipelineTransformationRequest getTransformRequest() {
         masterTableName = masterTable.getName();
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ConsolidateProductStep");
+        request.setName("ProfileProduct");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);

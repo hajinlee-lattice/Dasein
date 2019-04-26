@@ -59,7 +59,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         String masterTableName = masterTable.getName();
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ProfileContactStep");
+        request.setName("ProfileContact");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);

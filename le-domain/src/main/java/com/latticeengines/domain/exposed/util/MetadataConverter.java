@@ -53,8 +53,7 @@ public class MetadataConverter {
         try {
             List<Extract> extracts = convertToExtracts(configuration, path, skipCount);
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, extracts.get(0).getPath());
-            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
-            return table;
+            return getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
         } catch (Exception e) {
             throw new RuntimeException(
                     String.format("Failed to parse metadata for avro file located at %s", path), e);

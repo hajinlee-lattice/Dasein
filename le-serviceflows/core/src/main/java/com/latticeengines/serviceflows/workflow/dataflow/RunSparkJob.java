@@ -55,7 +55,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
                         log.warn("Previous failure: " + context.getLastThrowable());
                         killLivySession();
                     }
-                    String jobName = tenantId + "~" + getClass().getSimpleName() + "~" + getJobClz().getSimpleName();
+                    String jobName = tenantId + "~" + getJobClz().getSimpleName() + "~" + getClass().getSimpleName();
                     LivySession session = createLivySession(jobName);
                     return sparkJobService.runJob(session, getJobClz(), jobConfig);
                 });

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 
@@ -657,17 +658,21 @@ public class MatchInput implements Fact, Dimension {
             return keyMap;
         }
 
+        public static EntityKeyMap fromKeyMap(Map<MatchKey, List<String>> keyMap) {
+            EntityKeyMap entityKeyMap = new EntityKeyMap();
+            entityKeyMap.setKeyMap(keyMap);
+            return entityKeyMap;
+        }
+
         public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
             this.keyMap = keyMap;
         }
 
         public void addMatchKey(MatchKey key, String attr) {
-            if (keyMap == null) {
+            if (MapUtils.isEmpty(keyMap)) {
                 keyMap = new HashMap<>();
             }
-            if (keyMap.get(key) == null) {
-                keyMap.put(key, new ArrayList<>());
-            }
+            keyMap.computeIfAbsent(key, k -> new ArrayList<>());
             keyMap.get(key).add(attr);
         }
 

@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,17 +57,8 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
         request.setName("RematchAccount");
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-
-        if (configuration.isEntityMatchEnabled()) {
-            TransformationStepConfig match = match(false);
-            TransformationStepConfig assignId = fetchOnlyMatch();
-            steps.add(match);
-            steps.add(assignId);
-        } else {
-            TransformationStepConfig match = match(true);
-            steps.add(match);
-        }
-
+        TransformationStepConfig match = match(true);
+        steps.add(match);
         request.setSteps(steps);
         return request;
     }
@@ -91,27 +81,14 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
         return step;
     }
 
-    private TransformationStepConfig fetchOnlyMatch() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(0));
-        step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getFetchOnlyMatchConfig());
-        setTargetTable(step, batchStoreTablePrefix);
-        return step;
-    }
-
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
         Set<String> columnNames = getMasterTableColumnNames();
         if (configuration.isEntityMatchEnabled()) {
-            return MatchUtils.getAllocateIdMatchConfigForAccount(matchInput, columnNames);
+            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
         } else {
-            return MatchUtils.getLegacyMatchConfigForAccount(matchInput, columnNames);
+            return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
         }
-    }
-
-    private String getFetchOnlyMatchConfig() {
-        return MatchUtils.getFetchOnlyMatchConfigForAccount(getBaseMatchInput());
     }
 
     private void setMasterTableName() {
