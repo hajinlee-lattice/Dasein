@@ -88,10 +88,12 @@ public class PlayResource {
             @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
             @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
             @ApiParam(value = "End date in Unix timestamp", required = false) //
-            @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
+            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp, //
+            @ApiParam(value = "Include LookupIdMap in launch summary", required = false) //
+            @RequestParam(value = "include-lookup-id-map", required = false, defaultValue = "true") boolean includeLookupIdMap) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunchDashboard(tenant.getId(), playName, launchStates, startTimestamp, offset, max,
-                sortby, descending, endTimestamp, orgId, externalSysType);
+                sortby, descending, endTimestamp, orgId, externalSysType, includeLookupIdMap);
     }
 
     @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET,

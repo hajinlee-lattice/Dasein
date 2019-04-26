@@ -81,12 +81,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+                    launchstates, start, 0L, 1000L, null, null, null, null, null, false);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
-                    effectiveOrgInfo.getRight());
+                    effectiveOrgInfo.getRight(), false);
         }
         plays = dashboard.getUniquePlaysWithLaunches();
         return plays;
@@ -104,12 +104,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         }
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+                    launchstates, start, 0L, 1000L, null, null, null, null, null, false);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
-                    effectiveOrgInfo.getRight());
+                    effectiveOrgInfo.getRight(), false);
         }
         if (dashboard == null) {
             return null;
