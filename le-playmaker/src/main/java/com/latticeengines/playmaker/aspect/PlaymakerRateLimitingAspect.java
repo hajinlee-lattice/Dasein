@@ -26,6 +26,7 @@ public class PlaymakerRateLimitingAspect {
 
     @Before("execution(* com.latticeengines.playmaker.controller.RecommendationResource.*(..)) ")
     public void rateLimitPlaymakerRequest(JoinPoint joinPoint){
+        /*
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof HttpServletRequest) {
             HttpServletRequest request = (HttpServletRequest)joinPoint.getArgs()[0];
             String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
@@ -40,5 +41,6 @@ public class PlaymakerRateLimitingAspect {
                 throw new RateLimitException(LedpCode.LEDP_00005, new String[]{errorMessage}, null);
             }
         }
+        */
     }
 }
