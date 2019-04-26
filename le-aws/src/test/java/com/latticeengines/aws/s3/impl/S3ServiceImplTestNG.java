@@ -31,6 +31,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.util.Md5Utils;
 import com.latticeengines.aws.s3.S3Service;
 
@@ -88,7 +89,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional")
-    public void testCopyLargeObject() throws IOException {
+    public void testCopyLargeObjectAndTag() throws IOException {
         String sourceKey = "le-serviceapps/cdl/end2end/large_csv/1/Accounts.csv";
         String destKey = "copyLargeObjectTest/Accounts.csv";
         if (!s3Service.objectExist(SOURCE_S3_BUCKET, sourceKey)) {
@@ -101,6 +102,22 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         }
         s3Service.copyLargeObjects(SOURCE_S3_BUCKET, sourceKey, testBucket, destKey);
         Assert.assertTrue(s3Service.objectExist(testBucket, destKey));
+        //Add Tag
+        s3Service.addTagToObject(testBucket, destKey, "TestTag1", "This is tag 1");
+        List<Tag> tagList = s3Service.getObjectTags(testBucket, destKey);
+        Assert.assertNotNull(tagList);
+        Assert.assertEquals(tagList.size(), 1);
+        Assert.assertEquals(tagList.get(0).getKey(), "TestTag1");
+        Assert.assertEquals(tagList.get(0).getValue(), "This is tag 1");
+        s3Service.addTagToObject(testBucket, destKey, "TestTag1", "This is tag 2");
+        tagList = s3Service.getObjectTags(testBucket, destKey);
+        Assert.assertEquals(tagList.size(), 1);
+        Assert.assertEquals(tagList.get(0).getKey(), "TestTag1");
+        Assert.assertEquals(tagList.get(0).getValue(), "This is tag 2");
+        s3Service.addTagToObject(testBucket, destKey, "TestTag2", "This is tag 2");
+        tagList = s3Service.getObjectTags(testBucket, destKey);
+        Assert.assertEquals(tagList.size(), 2);
+
         ObjectMetadata sourceMeta = s3Client.getObjectMetadata(SOURCE_S3_BUCKET, sourceKey);
         ObjectMetadata destMeta = s3Client.getObjectMetadata(testBucket, destKey);
         Assert.assertEquals(sourceMeta.getContentLength(), destMeta.getContentLength());

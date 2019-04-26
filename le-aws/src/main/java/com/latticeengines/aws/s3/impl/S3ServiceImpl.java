@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +37,8 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.CopyPartResult;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
@@ -42,11 +46,14 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
+import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -381,6 +388,33 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public void deleteBucketPolicy(String bucket) {
         s3Client().deleteBucketPolicy(bucket);
+    }
+
+    @Override
+    public void addTagToObject(String bucket, String key, String tagKey, String tagValue) {
+        if (!objectExist(bucket, key)) {
+            return;
+        }
+        key = sanitizePathToKey(key);
+        GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucket, key);
+        GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
+
+        Map<String, Tag> tagMap= getTagsResult.getTagSet().stream().collect(Collectors.toMap(Tag::getKey, tag -> tag));
+        tagMap.put(tagKey, new Tag(tagKey, tagValue));
+        SetObjectTaggingRequest setTaggingRequest = new SetObjectTaggingRequest(bucket, key,
+                new ObjectTagging(new ArrayList<>(tagMap.values())));
+        s3Client.setObjectTagging(setTaggingRequest);
+    }
+
+    @Override
+    public List<Tag> getObjectTags(String bucket, String key) {
+        if (!objectExist(bucket, key)) {
+            return Collections.emptyList();
+        }
+        key = sanitizePathToKey(key);
+        GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucket, key);
+        GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
+        return getTagsResult.getTagSet();
     }
 
     private AmazonS3 s3Client() {

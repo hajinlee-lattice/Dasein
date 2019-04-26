@@ -36,6 +36,10 @@
     { 
       "Node": "ModelingProfilingVersion",
       "Data": "v2"
+    },
+    {
+      "Node": "ExportCronExpression",
+      "Data": "0 0 22 ? * SUN *"
     }
   ]
 }
