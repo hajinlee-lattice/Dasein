@@ -104,6 +104,29 @@ CREATE PROCEDURE `CreateS3ImportMessageTable`()
 //
 DELIMITER;
 
+CREATE PROCEDURE `CreateAtlasSchedulingTable`()
+  BEGIN
+    CREATE TABLE `ATLAS_SCHEDULING`
+      (
+         `PID`             BIGINT NOT NULL auto_increment,
+         `CRON_EXPRESSION` VARCHAR(255),
+         `TENANT_ID`       BIGINT NOT NULL,
+         `TYPE`            VARCHAR(255) NOT NULL,
+         `FK_TENANT_ID`    BIGINT NOT NULL,
+         PRIMARY KEY (`PID`)
+      )
+    engine=InnoDB;
+
+    ALTER TABLE `ATLAS_SCHEDULING`
+      ADD CONSTRAINT UX_SCHEDULETYPE UNIQUE (`TENANT_ID`, `TYPE`);
+
+    ALTER TABLE `ATLAS_SCHEDULING`
+      ADD CONSTRAINT `FK_ATLASSCHEDULING_FKTENANTID_TENANT` FOREIGN KEY (
+      `FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+  END;
+//
+DELIMITER;
+
 CREATE PROCEDURE `CreateS3ImportSystemTable`()
   BEGIN
     CREATE TABLE `ATLAS_S3_IMPORT_SYSTEM`
@@ -167,3 +190,4 @@ CALL `Update_CDL_BUSINESS_CALENDAR`();
 CALL `CreateDataIntegrationMonitoringTable`();
 CALL `CreateDataIntegrationMessageTable`();
 CALL `CreateS3ImportSystemTable`();
+CALL `CreateAtlasSchedulingTable`();
