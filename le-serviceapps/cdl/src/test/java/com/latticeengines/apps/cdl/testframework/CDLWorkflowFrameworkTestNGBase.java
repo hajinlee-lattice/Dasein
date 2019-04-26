@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
@@ -23,10 +22,12 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePostprocessingStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestBasePreprocessingStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePostprocessingStepConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePreprocessingStepConfiguration;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-workflow-context.xml" })
-public abstract class CDLWorkflowFrameworkTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CDLWorkflowFrameworkTestNGBase.class);
 
@@ -49,13 +50,9 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends AbstractTestNGSprin
     @Autowired
     protected WorkflowService workflowService;
 
-    public abstract void setup() throws Exception;
-
     public abstract void testWorkflow() throws Exception;
 
     protected abstract void verifyTest();
-
-    public abstract void tearDown() throws Exception;
 
     // This version of generateConfiguration is used for setting up a test for a single Workflow Step rather than a
     // full Workflow.
@@ -84,6 +81,14 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends AbstractTestNGSprin
             TestBasePostprocessingStepConfiguration postprocessStepConfiguration) {
         TestFrameworkWrapperWorkflowConfiguration.Builder frameworkWorkflowBuilder =
                 new TestFrameworkWrapperWorkflowConfiguration.Builder(false);
+        if (preprocessStepConfiguration == null) {
+            preprocessStepConfiguration = //
+                    new SamplePreprocessingStepConfiguration("samplePreprocessingStep");
+        }
+        if (postprocessStepConfiguration == null) {
+            postprocessStepConfiguration = //
+                    new SamplePostprocessingStepConfiguration("samplePostprocessingStep");
+        }
         return frameworkWorkflowBuilder //
                 .setTestPreprocessStepConfiguration(preprocessStepConfiguration) //
                 .setTestWorkflowName(workflowUnderTestName) //

@@ -110,7 +110,7 @@ public class AtlasScheduling implements HasPid, HasTenant, HasTenantId {
 
     public enum ScheduleType {
         Export,
-        PA,        // future integration.
+        PA,         // future integration.
         Campaign    // future integration.
     }
 }

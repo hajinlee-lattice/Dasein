@@ -15,11 +15,9 @@
 
     <import resource="classpath:common-testclient-env-context.xml"/>
     <import resource="classpath:serviceapps-cdl-context.xml"/>
+    <import resource="classpath:serviceflows-cdl-workflow-context.xml" />
     <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:workflowapi-context.xml"/>
     <import resource="classpath:yarn-context.xml"/>
 
-
 </beans>
-
-

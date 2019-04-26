@@ -4,9 +4,6 @@ import static org.testng.Assert.assertNotNull;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,12 +12,10 @@ import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkflowFrameworkTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(CDLWorkflowFrameworkDeploymentTestNGBase.class);
-
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
 
-    public void setup() throws Exception {
+    protected void setupTestEnvironment() {
         setupTestEnvironment(LatticeProduct.CG);
     }
 

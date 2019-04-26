@@ -26,7 +26,9 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
         C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
 
     @Inject
-    private SparkJobService sparkJobService;
+    protected SparkJobService sparkJobService;
+
+    protected C jobConfig;
 
     protected abstract Class<J> getJobClz();
     /**
@@ -39,11 +41,10 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
     public void execute() {
         log.info("Executing spark job " + getJobClz().getSimpleName());
         customerSpace = parseCustomerSpace(configuration);
-        C jobConfig = configureJob(configuration);
+        jobConfig = configureJob(configuration);
         if (jobConfig != null) {
             String tenantId = customerSpace.getTenantId();
-            String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
-            jobConfig.setWorkspace(workspace);
+            jobConfig.setWorkspace(getRandomWorkspace());
             log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
             computeScalingMultiplier(jobConfig.getInput());
             try {
@@ -57,7 +58,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
                     }
                     String jobName = tenantId + "~" + getJobClz().getSimpleName() + "~" + getClass().getSimpleName();
                     LivySession session = createLivySession(jobName);
-                    return sparkJobService.runJob(session, getJobClz(), jobConfig);
+                    return runSparkJob(session);
                 });
                 postJobExecution(result);
             } finally {
@@ -66,6 +67,14 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
         } else {
             log.info("Spark job config is null, skip submitting spark job.");
         }
+    }
+
+    protected SparkJobResult runSparkJob(LivySession session) {
+        return sparkJobService.runJob(session, getJobClz(), jobConfig);
+    }
+
+    protected String getRandomWorkspace() {
+        return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
     }
 
     protected CustomerSpace parseCustomerSpace(S stepConfiguration) {
