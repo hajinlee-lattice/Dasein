@@ -45,8 +45,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         importData();
 
         if (isLocalEnvironment()) {
-//            processAnalyzeSkipPublishToS3();
-            runTestWithRetry();
+            processAnalyzeSkipPublishToS3();
         } else {
             runTestWithRetry();
         }
