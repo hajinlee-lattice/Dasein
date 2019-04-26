@@ -1,12 +1,12 @@
 package com.latticeengines.cdl.workflow.listeners;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class SegmentExportListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportListener.class);
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Value("${yarn.pls.url}")

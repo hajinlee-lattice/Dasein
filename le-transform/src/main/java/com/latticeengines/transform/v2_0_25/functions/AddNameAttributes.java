@@ -30,8 +30,8 @@ public class AddNameAttributes implements RealTimeTransform {
 
     private Map<String, Object> imputationMap = new HashMap<>();
 
-    private abstract class TransformWithTwoArgsFunctionBase extends TransformWithImputationFunctionBase {
-        TransformWithTwoArgsFunctionBase(Object imputation) {
+    public abstract class TransformWithTwoArgsFunctionBase extends TransformWithImputationFunctionBase {
+        public TransformWithTwoArgsFunctionBase(Object imputation) {
             super(imputation);
         }
 
@@ -43,11 +43,11 @@ public class AddNameAttributes implements RealTimeTransform {
         public abstract double execute(String s1, String s2);
     }
 
-    private class FirstNameLastNameLengthFcn extends TransformWithTwoArgsFunctionBase {
+    public class FirstNameLastNameLengthFcn extends TransformWithTwoArgsFunctionBase {
 
         private StringLengthFcn stringLengthFcn;
 
-        FirstNameLastNameLengthFcn(Object imputation, int maxStringLen) {
+        public FirstNameLastNameLengthFcn(Object imputation, int maxStringLen) {
             super(imputation);
             stringLengthFcn = new StringLengthFcn(imputation, maxStringLen);
         }
@@ -61,9 +61,9 @@ public class AddNameAttributes implements RealTimeTransform {
         }
     }
 
-    private class FirstNameLastNameSameFcn extends TransformWithTwoArgsFunctionBase {
+    public class FirstNameLastNameSameFcn extends TransformWithTwoArgsFunctionBase {
 
-        FirstNameLastNameSameFcn(Object imputation) {
+        public FirstNameLastNameSameFcn(Object imputation) {
             super(imputation);
         }
 
@@ -105,7 +105,7 @@ public class AddNameAttributes implements RealTimeTransform {
         }
     }
 
-    AddNameAttributes(String modelPath) {
+    public AddNameAttributes(String modelPath) {
         importLoookupMapFromJson(modelPath + "/dsnameimputations.json");
         initializeAttributeFunctions();
     }

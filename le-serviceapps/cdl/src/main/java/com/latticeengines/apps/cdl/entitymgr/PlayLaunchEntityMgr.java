@@ -7,13 +7,14 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
+    @Override
     void create(PlayLaunch entity);
 
     PlayLaunch findByLaunchId(String launchId);
@@ -31,7 +32,8 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     List<PlayLaunch> findByState(LaunchState state);
 
     List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
-            Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType);
+            Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType,
+            boolean includeLookupIdMap);
 
     Long findDashboardEntriesCount(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
             String orgId, String externalSysType);

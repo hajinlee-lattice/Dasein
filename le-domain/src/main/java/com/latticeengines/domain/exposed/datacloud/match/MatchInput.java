@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 
@@ -207,15 +208,15 @@ public class MatchInput implements Fact, Dimension {
     // what the ultimate match goal is.
     // TargetEntity = LatticeAccount means it's LDC match (default)
     @JsonProperty("TargetEntity")
-    String targetEntity = BusinessEntity.LatticeAccount.name();
+    private String targetEntity = BusinessEntity.LatticeAccount.name();
 
     // A map from Business Entity (as a String) to EntityKeyMap.
     @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
 
     // Temporary flag to output all newly allocated entities to avro files. Only
-    // applies to bulk match with allocateId
-    // mode. TODO change this after solution is finalized
+    // applies to bulk match with allocateId mode.
+    // TODO: change this after solution is finalized
     @JsonProperty("OutputNewEntities")
     private boolean outputNewEntities;
 
@@ -657,17 +658,21 @@ public class MatchInput implements Fact, Dimension {
             return keyMap;
         }
 
+        public static EntityKeyMap fromKeyMap(Map<MatchKey, List<String>> keyMap) {
+            EntityKeyMap entityKeyMap = new EntityKeyMap();
+            entityKeyMap.setKeyMap(keyMap);
+            return entityKeyMap;
+        }
+
         public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
             this.keyMap = keyMap;
         }
 
         public void addMatchKey(MatchKey key, String attr) {
-            if (keyMap == null) {
+            if (MapUtils.isEmpty(keyMap)) {
                 keyMap = new HashMap<>();
             }
-            if (keyMap.get(key) == null) {
-                keyMap.put(key, new ArrayList<>());
-            }
+            keyMap.computeIfAbsent(key, k -> new ArrayList<>());
             keyMap.get(key).add(attr);
         }
 

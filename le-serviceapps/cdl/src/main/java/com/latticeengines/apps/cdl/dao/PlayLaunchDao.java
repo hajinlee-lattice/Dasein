@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
@@ -24,9 +25,9 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     List<PlayLaunch> findByState(LaunchState state);
 
-    List<PlayLaunch> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
+    List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType);
+            String externalSysType, boolean includeLookupIdMap);
 
     Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType);

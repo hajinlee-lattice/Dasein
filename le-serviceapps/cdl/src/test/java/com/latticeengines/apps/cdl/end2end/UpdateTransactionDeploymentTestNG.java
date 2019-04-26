@@ -24,7 +24,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "update3";
+    public static final String CHECK_POINT = "update3";
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;

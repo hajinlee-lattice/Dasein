@@ -89,7 +89,7 @@ export default class LeTableCell extends Component {
         }
         let format = `${span} ${externalFormatting}`;
         return (
-            <ul className={format}>
+            <ul className={format} onClick={() => {this.props.onClick ? this.props.onClick(this.props.rowIndex, this.props.rowData): null}}>
                 {this.getCellContent()}
                 {this.getTemplate()}
                 {this.getSaving()}

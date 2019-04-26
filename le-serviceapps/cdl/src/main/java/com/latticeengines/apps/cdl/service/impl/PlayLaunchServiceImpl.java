@@ -32,12 +32,12 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -115,7 +115,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType, boolean skipLoadingAllLookupIdMapping) {
+            String externalSysType, boolean skipLoadingAllLookupIdMapping, boolean includeLookupIdMap) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp, orgId, externalSysType);
@@ -124,7 +124,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 startTimestamp, endTimestamp, orgId, externalSysType);
 
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
-                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
+                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType,
+                includeLookupIdMap);
 
         addDataIntegrationStatusFor(launchSummaries);
         dashboard.setLaunchSummaries(launchSummaries);

@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -67,7 +66,7 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlModelWorkflowConfigura
     @Inject
     private InvokeDataScienceAnalysis invokeDataScienceAnalysis;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
     @Override

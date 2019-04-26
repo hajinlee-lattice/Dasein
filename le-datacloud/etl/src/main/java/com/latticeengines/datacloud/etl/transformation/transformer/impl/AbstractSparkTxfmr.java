@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters.ENGINE_CONFIG;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +34,6 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
@@ -46,6 +44,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -110,7 +109,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     @Value("${dataflowapi.spark.min.executors}")
     private String minExecutors;
 
-    private S sparkJobConfig;
+    protected S sparkJobConfig;
 
     public abstract String getName();
 
@@ -149,7 +148,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
             step.setCount(output.getCount());
 
-            List<Schema> baseSchemas = getBaseSourceSchemas(step, configuration.isShouldInheritSchemaProp());
+            List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(output, sparkJobConfig, configuration, baseSchemas));
 
         } catch (Exception e) {
@@ -227,67 +226,34 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         return sourceTable.toHdfsDataUnit(sourceName);
     }
 
-    private List<Schema> getBaseSourceSchemas(TransformStep step, boolean shouldInheritSchemaProp) {
-        Transformer transformer = step.getTransformer();
-        if (!(transformer instanceof AbstractDataflowTransformer)) {
-            return null;
-        }
-        boolean needAvsc = ((AbstractDataflowTransformer) transformer).needBaseAvsc();
-        // NOTE if we want to inherit schema properties, we must have base source schemas.
-        if (needAvsc || shouldInheritSchemaProp) {
-            Source[] baseSources = step.getBaseSources();
-            List<String> baseSourceVersions = step.getBaseVersions();
-            List<Schema> schemas = new ArrayList<>();
-            for (int i = 0; i < baseSources.length; i++) {
-                Source source = baseSources[i];
-                String version = baseSourceVersions.get(i);
+    private List<Schema> getBaseSourceSchemas(TransformStep step) {
+        Source[] baseSources = step.getBaseSources();
+        List<String> baseSourceVersions = step.getBaseVersions();
+        List<Schema> schemas = new ArrayList<>();
+        for (int i = 0; i < baseSources.length; i++) {
+            Source source = baseSources[i];
+            String version = baseSourceVersions.get(i);
+            if (source instanceof TableSource) {
+                Table table = hdfsSourceEntityMgr.getTableAtVersion(source, version);
+                Schema schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
+                schemas.add(schema);
+            } else {
                 Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
                 schemas.add(schema);
             }
-            return schemas;
-        } else {
-            return null;
         }
+        return schemas;
     }
 
     protected Schema getTargetSchema(HdfsDataUnit result, S sparkJobConfig, T configuration, List<Schema> baseSchemas) {
-        if (configuration.isShouldInheritSchemaProp() && CollectionUtils.isNotEmpty(baseSchemas)
-                && baseSchemas.get(0) != null) {
-            return inheritSchemaPropFromBaseSchema(result, baseSchemas);
-        } else {
-            return null;
-        }
-    }
-
-    /*
-     * Retain all schema properties from the first base schema. Input list of base schema must have at least one item
-     * and the first one must be non-null
-     */
-    private Schema inheritSchemaPropFromBaseSchema(HdfsDataUnit result, List<Schema> baseSchemas) {
-        String extractPath = result.getPath();
-        String glob;
-        if (extractPath.endsWith(".avro")) {
-            glob = extractPath;
-        } else if (extractPath.endsWith(File.pathSeparator)) {
-            glob = extractPath + "*.avro";
-        } else {
-            glob = extractPath + File.separator + "*.avro";
-        }
-        Schema parsed = AvroUtils.getSchemaFromGlob(yarnConfiguration, glob);
-        Schema base = baseSchemas.get(0);
-        for (Map.Entry<String, org.codehaus.jackson.JsonNode> entry : base.getJsonProps().entrySet()) {
-            if (parsed.getProp(entry.getKey()) == null) {
-                parsed.addProp(entry.getKey(), entry.getValue());
-            }
-        }
-        return parsed;
+        return null;
     }
 
     private LivySession createLivySession(TransformStep step, TransformationProgress progress, //
                                           Map<String, String> sparkProps) {
         String creator = progress.getCreatedBy();
         String primaryJobName = creator + "~" + getName();
-        String secondaryJobName = getSecondaryJobName(step);
+        String secondaryJobName = getSecondaryJobName(progress, step);
         String jobName = StringUtils.isNotBlank(secondaryJobName) //
                 ? primaryJobName + "~" + secondaryJobName : primaryJobName;
         String livyHost;
@@ -354,8 +320,13 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         return conf;
     }
 
-    protected String getSecondaryJobName(TransformStep step) {
-        return "";
+    private String getSecondaryJobName(TransformationProgress progress, TransformStep step) {
+        String pipelineName = progress.getPipelineName();
+        if (StringUtils.isBlank(pipelineName)) {
+            return progress.getSourceName();
+        } else {
+            return pipelineName + "~" + step.getName();
+        }
     }
 
 }

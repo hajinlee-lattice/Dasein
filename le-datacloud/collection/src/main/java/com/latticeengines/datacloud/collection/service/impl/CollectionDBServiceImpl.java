@@ -726,6 +726,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
     }
 
+    /*
     private List<File> createBucketFiles(long minTs, int periodInMS, int bucketCount) throws Exception {
 
         List<File> bucketFiles = new ArrayList<>();
@@ -914,6 +915,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         try {
 
             String vendor = worker.getVendor();
+            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
 
             List<File> tmpFiles = downloadWorkerOutput(worker);
             if (CollectionUtils.isEmpty(tmpFiles)) {
@@ -1011,6 +1013,336 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }*/
+
+    private void createBucketFiles(long minTs, int periodInMS, int bucketCount, Map<Long, File> buckets) throws Exception {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String path = Files.createTempDirectory("bucket").toString();
+        Date date = new Date();
+
+        long ts = minTs;
+        for (int i = 0; i < bucketCount; ++i, ts += periodInMS) {
+
+            if (buckets.containsKey(ts)) {
+
+                continue;
+
+            }
+
+            date.setTime(ts);
+
+            File of = new File(path, dateFormat.format(date) + "_UTC.avro");
+            of.deleteOnExit();
+
+            buckets.put(ts, of);
+
+        }
+
+    }
+
+    private void doBucketing(List<File> inputFiles, String vendor, Map<Long, File> bucketFiles) throws Exception {
+
+        //get timestamp, adjust min to whole period
+        Pair<Long, Long> tsPair = getTimestampRange(inputFiles, vendor);
+        long minTs = tsPair.getKey();
+        long maxTs = tsPair.getValue();
+
+        int periodInMS = ingestionPartionPeriod * 1000;
+        int dayInMS = 86400 * 1000;
+        int weekInMS = dayInMS * 7;
+        if (periodInMS == weekInMS) {
+
+            minTs -= minTs % dayInMS;//adjust to day boundary
+            long weekDay = (minTs % weekInMS / dayInMS + 4) % 7;//week day
+            minTs -= weekDay * dayInMS;
+
+        } else {
+
+            minTs -= minTs % periodInMS;
+
+        }
+
+        //create bucket file/buffers
+        int bucketCount = 1 + (int) ((maxTs - minTs) / periodInMS);
+
+        createBucketFiles(minTs, periodInMS, bucketCount, bucketFiles);
+
+        boolean[] bucketCreated = new boolean[bucketCount];
+
+        List<List<GenericRecord>> bucketBuffers = new ArrayList<>();
+        for (int i = 0; i < bucketCount; ++i) {
+
+            bucketBuffers.add(new ArrayList<>());
+
+        }
+
+        //processing files
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
+                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        Schema schema = getSchema(vendor);
+        List<Schema.Field> fields = schema.getFields();
+        String tsColName = getTimestampColumn(vendor);
+        String domainCheckField = vendorConfigService.getDomainCheckField(vendor);
+
+        for (File file : inputFiles) {
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+                try (CSVParser parser = new CSVParser(reader, format)) {
+
+                    Map<String, Integer> csvColName2Idx = parser.getHeaderMap();
+                    int domainChkCsvCol = csvColName2Idx.getOrDefault(domainCheckField, -1);
+                    int columnCount = csvColName2Idx.size();
+
+                    //calculate col mapping
+                    int[] csvIdx2Avro = new int[columnCount];
+                    Schema.Field[] avroIdx2Fields = new Schema.Field[columnCount];
+                    if (fields.size() != columnCount + 2) {//avro has two extra id column
+
+                        throw new Exception("avro column count != csv column count");
+
+                    }
+
+                    for (Schema.Field field: fields) {
+
+                        int csvIdx = csvColName2Idx.getOrDefault(field.name(), -1);
+                        if (csvIdx == -1) {
+
+                            continue;
+
+                        }
+
+                        csvIdx2Avro[csvIdx] = field.pos();
+                        avroIdx2Fields[csvIdx] = field;
+
+                    }
+                    int tsAvroCol = csvIdx2Avro[csvColName2Idx.get(tsColName)];
+                    Schema.Field avroIdField = schema.getField(ingestionIdCol);
+                    Schema.Field avroPidField = schema.getField(ingestionPidCol);
+
+                    //iterate csv, generate avro
+                    for (CSVRecord csvRec : parser) {
+
+                        if (domainChkCsvCol != -1 && csvRec.get(domainChkCsvCol).equals("")) {
+
+                            //bypass dummy line
+                            continue;
+
+                        }
+
+                        //create avro record, add it to buffer
+                        GenericRecord rec = new GenericData.Record(schema);
+                        for (int i = 0; i < columnCount; ++i) {
+
+                            rec.put(csvIdx2Avro[i], AvroUtils.checkTypeAndConvertEx(avroIdx2Fields[i].name(), //
+                                    csvRec.get(i), avroIdx2Fields[i]));
+
+                        }
+                        rec.put(avroIdField.pos(), UUID.randomUUID().toString());
+                        rec.put(avroPidField.pos(), null);
+
+                        int bucketIdx = (int) (((Long) rec.get(tsAvroCol) - minTs) / periodInMS);
+                        List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
+                        buf.add(rec);
+
+                        //flush bucket buffer when it's full
+                        if (buf.size() == BUCKET_CACHE_LIMIT) {
+
+                            long bucketTs = minTs + periodInMS * bucketIdx;
+                            if (!bucketCreated[bucketIdx]) {
+
+                                AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketTs).getPath(), true);
+                                bucketCreated[bucketIdx] = true;
+
+                            } else {
+
+                                AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketTs).getPath(), true);
+
+                            }
+
+                            buf.clear();
+
+                        }
+
+                    }
+
+                    //flush non-empty buffers
+                    for (int bucketIdx = 0; bucketIdx < bucketCount; ++bucketIdx) {
+
+                        List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
+                        if (buf.size() == 0) {
+
+                            continue;
+
+                        }
+
+                        long bucketTs = minTs + periodInMS * bucketIdx;
+                        if (!bucketCreated[bucketIdx]) {
+
+                            AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketTs).getPath(), true);
+                            bucketCreated[bucketIdx] = true;
+
+                        } else {
+
+                            AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketTs).getPath(), true);
+
+                        }
+
+                        buf.clear();
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    private boolean ingestConsumedWorker(CollectionWorker worker, Map<String, Map<Long, File>> bucketGroups) {
+
+        boolean ret = false;
+        try {
+
+            String vendor = worker.getVendor();
+            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
+
+            if (!bucketGroups.containsKey(vendor)) {
+
+                bucketGroups.put(vendor, new HashMap<>());
+
+            }
+            Map<Long, File> bucketFiles = bucketGroups.get(vendor);
+
+            List<File> tmpFiles = downloadWorkerOutput(worker);
+            if (CollectionUtils.isEmpty(tmpFiles)) {
+
+                log.warn(worker.getVendor() + " worker " + worker.getWorkerId() //
+                        + "\'s output dir on s3 does not contain any files");
+                return true;
+
+            }
+
+            //bucketing
+            doBucketing(tmpFiles, vendor, bucketFiles);
+
+            //clean local file
+            for (File tmpFile : tmpFiles) {
+
+                FileUtils.deleteQuietly(tmpFile);
+
+            }
+
+            ret = true;
+        }
+        catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return ret;
+    }
+
+    private void uploadIngestedBucket(Map<String, Map<Long, File>> bucketGroups) throws Exception {
+
+        if (bucketGroups.isEmpty()) {
+
+            return;
+
+        }
+
+        //success file
+        File tagFile = File.createTempFile("temp", "tag");
+        tagFile.createNewFile();
+        tagFile.deleteOnExit();
+
+        //loop all vendor
+        for (Map.Entry<String, Map<Long, File>> entry : bucketGroups.entrySet()) {
+
+            String vendor = entry.getKey();
+            Map<Long, File> bucketFiles = entry.getValue();
+
+            if (bucketFiles.isEmpty()) {
+
+                log.info("0 ingested files to upload for " + vendor);
+                continue;
+
+            }
+
+            log.info("uploading ingested file for " + vendor);
+
+            List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
+            Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
+
+            //loop all bucket files
+            for (File bucketFile : bucketFiles.values()) {
+
+                if (!bucketFile.exists()) {
+
+                    log.warn("no data gathered for bucket file: " + bucketFile.getName());
+                    continue;
+
+                }
+
+                String fileName = bucketFile.getName();
+                String fileTs = fileName.substring(0, fileName.length() - ".avro".length());
+                Path dirLocation = ingestLocation.append(fileTs);
+                String remoteFilePath = dirLocation.append(bucketFile.getName()).toString();
+
+                if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
+
+                    File tmpFile = File.createTempFile("temp", ".avro");
+                    tmpFile.deleteOnExit();
+                    tmpBucketFiles.add(tmpFile);
+
+                    s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
+
+                    if (bucketFile.length() >= tmpFile.length()) {
+
+                        log.info("\tappending to local file: " + bucketFile.getName());
+                        AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
+
+                        log.info("\tuploading local file: " + bucketFile.getName());
+                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                    } else {
+
+                        log.info("\tappending to local file: " + tmpFile.getName());
+                        AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
+
+                        log.info("\tuploading local file: " + tmpFile.getName());
+                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
+                    }
+
+                } else {
+
+                    log.info("\tuploading local file: " + bucketFile.getName());
+                    s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
+
+                }
+
+                log.info("\tuploading success tag file");
+                s3Service.uploadLocalFile(s3Bucket, dirLocation.append("_SUCCESS").toString(), tagFile, true);
+
+            }
+            log.info("ingested files for " + vendor + " uploaded");
+
+            for (File bucketFile : bucketFiles.values()) {
+
+                FileUtils.deleteQuietly(bucketFile);
+
+            }
+
+            for (File tmpBucketFile: tmpBucketFiles) {
+
+                FileUtils.deleteQuietly(tmpBucketFile);
+
+            }
+        }
+
+        FileUtils.deleteQuietly(tagFile);
+
     }
 
     public void ingest() {
@@ -1043,13 +1375,30 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             //process consumed workers
             int workerCount = consumedWorkers.size();
             log.info("there're " + workerCount + " consumed worker to ingest:");
+            List<Boolean> retList = new ArrayList<>(workerCount);
+            Map<String, Map<Long, File>> bucketGroups = new HashMap<>();
             for (int i = 0; i < workerCount; ++i) {
 
                 CollectionWorker worker = consumedWorkers.get(i);
 
-                ingestConsumedWorker(worker);
+                boolean ret = ingestConsumedWorker(worker, bucketGroups);
                 log.info("\t" + (i + 1) + "/" + workerCount + " done");
 
+                retList.add(ret);
+            }
+
+            //upload bucket files
+            uploadIngestedBucket(bucketGroups);
+
+            //update status
+            for (int i = 0; i < workerCount; ++i) {
+
+                CollectionWorker worker = consumedWorkers.get(i);
+
+                if (retList.get(i)) {
+                    worker.setStatus(CollectionWorker.STATUS_INGESTED);
+                    collectionWorkerService.getEntityMgr().update(worker);
+                }
             }
 
         } catch (Exception e) {

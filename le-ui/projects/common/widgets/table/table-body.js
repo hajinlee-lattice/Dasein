@@ -8,6 +8,15 @@ export default class LeTableBody extends Component {
         super(props);
     }
 
+    isRowSelected(index){
+        let selected = this.props.rowsSelected[index];
+        if(selected){
+            return true;
+        }else{
+            false;
+        }
+    }
+
     getRows() {
         if (this.props.data && this.props.data.length > 0) {
             let rowsUI = this.props.data.map((row, index) => {
@@ -17,6 +26,8 @@ export default class LeTableBody extends Component {
                         columnsMapping={this.props.columnsMapping}
                         rowIndex={index}
                         rowData={row}
+                        onClick={this.props.onClick}
+                        selected={this.isRowSelected(index)}
                     >
                         {this.props.children}
                     </LeTableRow>

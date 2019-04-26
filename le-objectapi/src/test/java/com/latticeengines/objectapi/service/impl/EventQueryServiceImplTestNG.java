@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -43,6 +44,21 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         super.setupTestData(1);
     }
 
+    @DataProvider(name = "userContexts", parallel = false)
+    private Object[][] provideSqlUserContexts() {
+        return new Object[][] {
+                { SEGMENT_USER, "Redshift" }
+        };
+    }
+
+    protected EventQueryService getEventQueryService(String sqlUser) {
+        return eventQueryService;
+    }
+
+    protected String getProductId() {
+        return PRODUCT_ID;
+    }
+
     @Test(groups = "functional", enabled = false)
     public void testEventQuery() throws IOException {
         String str = FileUtils.readFileToString(new File("/Users/ygao/Downloads/test_query_1_accountQ_in_seg.json"),
@@ -50,16 +66,16 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         EventFrontEndQuery eventQuery = JsonUtils.deserialize(str, EventFrontEndQuery.class);
         System.out.println("mainEntity for eQuery: " + eventQuery.getSegmentQuery().getMainEntity());
 
-        long count = eventQueryService.getScoringCount(eventQuery, DataCollection.Version.Blue);
+        long count = getEventQueryService(null).getScoringCount(eventQuery, DataCollection.Version.Blue);
         System.out.println("count: " + count);
     }
 
-    @Test(groups = "functional")
-    public void testScoringCount() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testScoringCount(String sqlUser, String queryContext) {
         // Ever, Amount > 0 and Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN,
                 Collections.singletonList(0));
-        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), greaterThan0, greaterThan0,
+        Bucket.Transaction txn = new Bucket.Transaction(getProductId(), TimeFilter.ever(), greaterThan0, greaterThan0,
                 false);
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Restriction txnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
@@ -73,52 +89,52 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 .build();
         Restriction accRestriction = Restriction.builder().or(accRestriction1, accRestriction2).build();
         Restriction cntRestriction1 = Restriction.builder() //
-                .let(BusinessEntity.Contact, InterfaceName.Title.name()) //
-                .contains("Vice") //
+                .let(BusinessEntity.Contact, InterfaceName.Email.name()) //
+                .contains("gmail") //
                 .build();
         Restriction cntRestriction2 = Restriction.builder() //
-                .let(BusinessEntity.Contact, InterfaceName.Title.name()) //
-                .contains("Professor") //
+                .let(BusinessEntity.Contact, InterfaceName.Email.name()) //
+                .contains("hotmail") //
                 .build();
         Restriction cntRestriction = Restriction.builder().or(cntRestriction1, cntRestriction2).build();
 
         // only transaction restriction
-        verifyScoringQuery(txnRestriction, 832L);
+        verifyScoringQuery(sqlUser, txnRestriction, 832L);
 
         // only account restriction
-        verifyScoringQuery(accRestriction1, 9L);
-        verifyScoringQuery(accRestriction, 17L);
+        verifyScoringQuery(sqlUser, accRestriction1, 9L);
+        verifyScoringQuery(sqlUser, accRestriction, 17L);
 
         // only contact restriction
-        verifyScoringQuery(cntRestriction1, 23L);
-        verifyScoringQuery(cntRestriction, 73L);
+        verifyScoringQuery(sqlUser, cntRestriction1, 18L);
+        verifyScoringQuery(sqlUser, cntRestriction, 23L);
 
         // account + transaction
         Restriction restriction = Restriction.builder().and(accRestriction, txnRestriction).build();
-        verifyScoringQuery(restriction, 11L);
+        verifyScoringQuery(sqlUser, restriction, 11L);
 
         // account + contact + transaction
         restriction = Restriction.builder().and(accRestriction, cntRestriction, txnRestriction).build();
-        verifyScoringQuery(restriction, 1L);
+        verifyScoringQuery(sqlUser, restriction, 1L);
     }
 
-    private void verifyScoringQuery(Restriction restriction, long expectedCount) {
-        long count = countRestrictionForScoring(restriction);
-        Assert.assertEquals(count, expectedCount);
-        int numTuples = (int) Math.min(5L, expectedCount);
+    private void verifyScoringQuery(String sqlUser, Restriction restriction, long expectedCount) {
+        long count = countRestrictionForScoring(sqlUser, restriction);
+        testAndAssertCount(sqlUser, count, expectedCount);
+        int numTuples = (int) Math.min(5L, count);
         if (numTuples > 0) {
-            DataPage dataPage = retrieveScoringDataByRestriction(restriction, numTuples);
+            DataPage dataPage = retrieveScoringDataByRestriction(sqlUser, restriction, numTuples);
             Assert.assertTrue(CollectionUtils.isNotEmpty(dataPage.getData()));
-            Assert.assertEquals(dataPage.getData().size(), numTuples);
+            testAndAssertCount(sqlUser, dataPage.getData().size(), numTuples);
         }
     }
 
-    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
-    public void testCrossPeriodQuery() {
-        Bucket.Transaction txn1 = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
+    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class, dataProvider = "userContexts")
+    public void testCrossPeriodQuery(String sqlUser, String queryContext) {
+        Bucket.Transaction txn1 = new Bucket.Transaction(getProductId(), TimeFilter.ever(), null, null, false);
         TimeFilter timeFilter = TimeFilter.ever();
         timeFilter.setPeriod(PeriodStrategy.Template.Quarter.name());
-        Bucket.Transaction txn2 = new Bucket.Transaction(PRODUCT_ID, timeFilter, null, null, false);
+        Bucket.Transaction txn2 = new Bucket.Transaction(getProductId(), timeFilter, null, null, false);
 
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
@@ -129,31 +145,31 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
+        getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    @Test(groups = "functional")
-    public void testHasEngaged() {
-        Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
-        long scoringCount = countTxnBktForScoring(txn);
-        Assert.assertEquals(scoringCount, 832);
-        scoringCount = countTxnBktForScoringUsingSegmentQuery(txn);
-        Assert.assertEquals(scoringCount, 832);
-        long trainingCount = countTxnBktForTraining(txn);
-        Assert.assertEquals(trainingCount, 16378);
-        long eventCount = countTxnBktForEvent(txn);
-        Assert.assertEquals(eventCount, 5374);
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testHasEngaged(String sqlUser, String queryContext) {
+        Bucket.Transaction txn = new Bucket.Transaction(getProductId(), TimeFilter.ever(), null, null, false);
+        long scoringCount = countTxnBktForScoring(sqlUser, txn);
+        testAndAssertCount(sqlUser, scoringCount, 832);
+        scoringCount = countTxnBktForScoringUsingSegmentQuery(sqlUser, txn);
+        testAndAssertCount(sqlUser, scoringCount, 832);
+        long trainingCount = countTxnBktForTraining(sqlUser, txn);
+        testAndAssertCount(sqlUser, trainingCount, 16378);
+        long eventCount = countTxnBktForEvent(sqlUser, txn);
+        testAndAssertCount(sqlUser, eventCount, 5374);
     }
 
-    @Test(groups = "functional")
-    public void testDP6881() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testDP6881(String sqlUser, String queryContext) {
         EventFrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("dp6881.json");
-        long count = eventQueryService.getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
-        Assert.assertEquals(count, 8501);
+        long count = getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
+        testAndAssertCount(sqlUser, count, 8501);
     }
 
     @SuppressWarnings("unused")
-    private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
+    private long countTxnBktForScoringFromDataPage(String sqlUser, Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -163,38 +179,38 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
+        DataPage dataPage = getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(dataPage.getData());
         return dataPage.getData().size();
     }
 
-    private long countTxnBktForScoring(Bucket.Transaction txn) {
+    private long countTxnBktForScoring(String sqlUser, Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
-        return countRestrictionForScoring(restriction);
+        return countRestrictionForScoring(sqlUser, restriction);
     }
 
-    private long countTxnBktForScoringUsingSegmentQuery(Bucket.Transaction txn) {
+    private long countTxnBktForScoringUsingSegmentQuery(String sqlUser, Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
-        return countRestrictionForScoringUsingSegmentQuery(restriction);
+        return countRestrictionForScoringUsingSegmentQuery(sqlUser, restriction);
     }
 
-    private long countRestrictionForScoring(Restriction restriction) {
+    private long countRestrictionForScoring(String sqlUser, Restriction restriction) {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        frontEndQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         frontEndQuery.setPeriodName("Month");
-        return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getScoringCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    private long countRestrictionForScoringUsingSegmentQuery(Restriction restriction) {
+    private long countRestrictionForScoringUsingSegmentQuery(String sqlUser, Restriction restriction) {
         EventFrontEndQuery eventQuery = new EventFrontEndQuery();
         FrontEndQuery segmentQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -204,24 +220,24 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         segmentQuery.setEvaluationDateStr(maxTransactionDate);
         eventQuery.setSegmentQuery(segmentQuery);
         eventQuery.setPageFilter(new PageFilter(0, 0));
-        eventQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        eventQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         eventQuery.setPeriodName("Month");
-        return eventQueryService.getScoringCount(eventQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getScoringCount(eventQuery, DataCollection.Version.Blue);
     }
 
-    private DataPage retrieveScoringDataByRestriction(Restriction restriction, int numTuples) {
+    private DataPage retrieveScoringDataByRestriction(String sqlUser, Restriction restriction, int numTuples) {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, numTuples));
-        frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        frontEndQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         frontEndQuery.setPeriodName("Month");
-        return eventQueryService.getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    private long countTxnBktForTraining(Bucket.Transaction txn) {
+    private long countTxnBktForTraining(String sqlUser, Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         frontEndQuery.setPeriodName("Month");
@@ -232,10 +248,10 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        return eventQueryService.getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    private long countTxnBktForEvent(Bucket.Transaction txn) {
+    private long countTxnBktForEvent(String sqlUser, Bucket.Transaction txn) {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
 
@@ -253,7 +269,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
         frontEndQuery.setPeriodName("Month");
-        return eventQueryService.getEventCount(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getEventCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
 }

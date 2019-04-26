@@ -107,7 +107,7 @@ public class SparkJobServiceImpl implements SparkJobService {
                 ScalaJobHandle<String> handle = client.submit(job);
                 return Await.result(handle, Duration.create(1, TimeUnit.DAYS));
             } catch (Exception e) {
-                if (e.getMessage().contains("Unable to find class: com.latticeengines.")) {
+                if (e.getMessage().contains("Unable to find class")) {
                     log.warn("Retry on error:\n" + e.getMessage());
                 } else {
                     context.setExhaustedOnly();

@@ -6,6 +6,8 @@ import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
+import GridLayout from 'common/widgets/container/grid-layout.component';
+import ReactMainContainer from "atlas/react/react-main-container";
 import MainComponent from "./main.component";
 import RatingsComponent from "./ratings.component";
 import SystemsComponent from "./systems.component";
@@ -20,24 +22,25 @@ import {
     SPACEEVEN
 } from "common/widgets/container/le-alignments";
 
-export class OverviewComponent extends Component {
+export default class OverviewComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             play: props.play,
-            connections: props.connections
+            connections: [] //props.connections
         };
     }
 
     componentDidMount() {
+        injectAsyncReducer(store, 'playbook', reducer);
+        // let playstore = store.getState()['playbook'];
+        // actions.fetchPlay(this.props.playname);
+        // actions.fetchConnections(this.props.playname);
+        
         this.unsubscribe = store.subscribe(this.handleChange);
 
-        //injectAsyncReducer(store, 'playbook', reducer);
-        //let playstore = store.getState()['playbook'];
-        //actions.fetchPlay(this.props.playname);
-        //actions.fetchConnections(this.props.playname);
-
         console.log('props', this.props);
+        // actions.fetchConnections(this.state.play.playname);
     }
 
     componentWillUnmount() {
@@ -51,40 +54,40 @@ export class OverviewComponent extends Component {
     }
 
     render() {
+        return (
+            <ReactMainContainer>
+                <p>hello</p>
+            </ReactMainContainer>
+        );
         if (this.state.play) {
+                //<div className="playbook-overview">
             return (
-                <div className="playbook-overview">
-                    <LeHPanel halignment={SPACEAROUND}>
-                        <ul>
-                            <li>
-                                {this.state.play.displayName}
-                            </li>
-                            <li>
+                <section id="main-content" class="container playbook-overview">
+                    <div class="overview-grid-container">
+                        {this.state.play.displayName}
+                        <GridLayout classNames="overview-grid extend">
+                            <span>
                                 Segment: {this.state.play.targetSegment.display_name}
-                            </li>
-                            <li>
-                                Model: {this.state.play.ratingEngine.displayName}
-                            </li>
-                            <li>
-                                Available Targets: {this.state.play.targetSegment.accounts} Accounts | {this.state.play.targetSegment.contacts} Contacts
-                            </li>
-                        </ul>
-                        <ul>
-                            <li>
+                            </span>
+                            <span>
                                 Campaign Type: {this.state.play.playType.displayName}
-                            </li>
-                            <li>
+                            </span>
+                            <span>
+                                Model: {this.state.play.ratingEngine.displayName}
+                            </span>
+                            <span>
                                 Talking Point: {this.state.play.talkingPoints.length} talking points
-                            </li>
-                            <li>
+                            </span>
+                            <span>
+                                Available Targets: {this.state.play.targetSegment.accounts} Accounts | {this.state.play.targetSegment.contacts} Contacts
+                            </span>
+                            <span>
                                 Description: {this.state.play.description}
-                            </li>
-                        </ul>
-                    </LeHPanel>
-                    <LeVPanel hstretch={"true"}>
-                        <SystemsComponent play={this.state.play} />
-                    </LeVPanel>
-                </div>
+                            </span>
+                        </GridLayout>
+                    </div>
+                    <SystemsComponent play={this.state.play} connections={this.state.connections} />
+                </section>
             );
         } else {
             return (
@@ -96,9 +99,9 @@ export class OverviewComponent extends Component {
     }
 }
 
-angular
-    .module("lp.playbook.overview", [])
-    .component(
-        "playbookOverview",
-        react2angular(OverviewComponent, ['play', 'connections'], ['$state', '$stateParams'])
-    );
+// angular
+//     .module("lp.playbook.overview", [])
+//     .component(
+//         "playbookOverview",
+//         react2angular(OverviewComponent, ['play', 'connections'], ['$state', '$stateParams'])
+//     );

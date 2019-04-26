@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -98,8 +98,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.transaction.dataquota.limit}")
     private Long defaultTransactionQuotaLimit;
 
-    @Inject
-    @Named("jdbcTemplate")
+    @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     private final DataCollectionProxy dataCollectionProxy;
@@ -483,7 +482,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
                 .setFullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
-                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)//put dataQuotaLimit into
+                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)// put dataQuotaLimit into
                 // stepConfiguration
                 .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
                 .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)

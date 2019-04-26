@@ -31,17 +31,23 @@ import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
+import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -377,6 +383,34 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
         return cdlProxy.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @Override
+    public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable) {
+        List<TemplateFieldPreview> templatePreview =
+                templateTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
+        Set<String> standardAttrNames = standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+        for (TemplateFieldPreview fieldPreview : templatePreview) {
+            if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
+                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+            } else {
+                fieldPreview.setFieldCategory(FieldCategory.CustomField);
+            }
+        }
+        return templatePreview;
+    }
+
+    private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {
+        TemplateFieldPreview fieldPreview = new TemplateFieldPreview();
+        fieldPreview.setNameInTemplate(attribute.getName());
+        fieldPreview.setNameFromFile(attribute.getDisplayName());
+        fieldPreview.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+        if (UserDefinedType.DATE.equals(fieldPreview.getFieldType())) {
+            fieldPreview.setDateFormatString(attribute.getDateFormatString());
+            fieldPreview.setTimeFormatString(attribute.getTimeFormatString());
+            fieldPreview.setTimezone(attribute.getTimezone());
+        }
+        return fieldPreview;
     }
 
     private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {

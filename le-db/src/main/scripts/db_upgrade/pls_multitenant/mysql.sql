@@ -70,6 +70,8 @@ CREATE PROCEDURE `UpdatePLSTables`()
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add column `FK_TENANT_ID` bigint(20) not null 
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add constraint `FK_METADATADATACOLLECTIONSTATUSHISTORY_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade; 
 alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop column `TENANT_NAME` 
+
+alter table `PLS_MultiTenant`.`PLAY_LAUNCH` add column `CONTACTS_ERRORED` BIGINT;
   END;
 //
 DELIMITER;
@@ -98,6 +100,29 @@ CREATE PROCEDURE `CreateS3ImportMessageTable`()
       `FK_DROP_BOX`) REFERENCES `ATLAS_DROPBOX` (`PID`) ON DELETE CASCADE;
 
 
+  END;
+//
+DELIMITER;
+
+CREATE PROCEDURE `CreateAtlasSchedulingTable`()
+  BEGIN
+    CREATE TABLE `ATLAS_SCHEDULING`
+      (
+         `PID`             BIGINT NOT NULL auto_increment,
+         `CRON_EXPRESSION` VARCHAR(255),
+         `TENANT_ID`       BIGINT NOT NULL,
+         `TYPE`            VARCHAR(255) NOT NULL,
+         `FK_TENANT_ID`    BIGINT NOT NULL,
+         PRIMARY KEY (`PID`)
+      )
+    engine=InnoDB;
+
+    ALTER TABLE `ATLAS_SCHEDULING`
+      ADD CONSTRAINT UX_SCHEDULETYPE UNIQUE (`TENANT_ID`, `TYPE`);
+
+    ALTER TABLE `ATLAS_SCHEDULING`
+      ADD CONSTRAINT `FK_ATLASSCHEDULING_FKTENANTID_TENANT` FOREIGN KEY (
+      `FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
   END;
 //
 DELIMITER;
@@ -165,3 +190,4 @@ CALL `Update_CDL_BUSINESS_CALENDAR`();
 CALL `CreateDataIntegrationMonitoringTable`();
 CALL `CreateDataIntegrationMessageTable`();
 CALL `CreateS3ImportSystemTable`();
+CALL `CreateAtlasSchedulingTable`();

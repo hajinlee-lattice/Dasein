@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
+import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -55,6 +56,8 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private S3Service s3Service;
 
+    @Inject
+    private AtlasSchedulingService atlasSchedulingService;
 
     @Override
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
@@ -71,6 +74,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
         dropBoxService.createTenantDefaultFolder(space.toString());
+        String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
+        log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
+        atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
     }
 
     @Override

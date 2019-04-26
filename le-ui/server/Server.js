@@ -23,10 +23,9 @@ const wsproxy = require("http-proxy-middleware");
 const DateUtil = require("./utilities/DateUtil");
 // const session = require("express-session");
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-const uuid = require('uuid/v4');
-var TrayRouter = require('./apis/tray_routes');
+var TrayRouter = require('./apis/tray/tray_routes');
 var ResetPasswordRouter = require('./apis/reset/reset_password_router');
+var ZendeskRouter = require('./apis/zendesk/zendesk_routes');
 class Server {
     constructor(express, app, options) {
         console.log(
@@ -450,30 +449,9 @@ class Server {
 
     createZendeskProxy(API_URL, API_PATH, PATH) {
         if (API_URL) {
-            (API_PATH = API_PATH || "/zdsk");
-            console.log(
-                chalk.white(">") + " ZENDESK PROXY",
-                API_PATH,
-                "\n\t" + API_URL + PATH
-            );
-            this.app.use(API_PATH, (req, res) => {
-                try {
-                    var payload = {
-                        name: req.query.name,
-                        email: req.query.email,
-                        iat: (new Date().getTime() / 1000),
-                        external_id: req.query.email,
-                        exp: (new Date().getTime() / 1000) + 420,
-                        jti: uuid.v4()
-                    };
-                    var token = jwt.sign(payload, '52fb614cdedb5d2b1820db7bc01e9c64');
-                    res.send(token);
-                } catch (err) {
-                    console.log(
-                        chalk.red(DateUtil.getTimeStamp() + ":ZENDESK PROXY ") + err
-                    );
-                }
-            });
+            console.log('Zendesk Password PROXY <======================');
+            var router = new ZendeskRouter(this.express, this.app, bodyParser, chalk,  API_URL, PATH, request, this.options.config.proxies).createRoutes();
+            this.app.use('/zdsk', router);
         }
     }
 

@@ -56,13 +56,11 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
     private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImpl.class);
 
-    private final QueryEvaluatorService queryEvaluatorService;
-
     private final TransactionService transactionService;
 
     @Inject
     public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
-        this.queryEvaluatorService = queryEvaluatorService;
+        super(queryEvaluatorService);
         this.transactionService = transactionService;
     }
 
@@ -199,6 +197,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                         if (!counts.containsKey(ratingField)) {
                             counts.put(rating, 0L);
                         }
+                        System.out.println(String.format("DEBUG: SQL User: %s, Rating: %s, Value: %s", sqlUser, rating,  map.get("count")));
                         counts.put(rating, counts.get(rating) + (Long) map.get("count"));
                     }
                 });
@@ -238,7 +237,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         query.setPageFilter(null);
         query.setSort(null);
         AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);
-        AggregateLookup countLookup = AggregateLookup.count().as("Count");
+        AggregateLookup countLookup = AggregateLookup.count().as("count");
         query.setLookups(Arrays.asList(ratingLookup, countLookup));
         GroupBy groupBy = new GroupBy();
         groupBy.setLookups(Collections.singletonList(ratingLookup));

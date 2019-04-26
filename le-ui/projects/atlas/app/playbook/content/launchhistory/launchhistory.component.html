@@ -114,7 +114,7 @@
                                 'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
     				<th>
-                        Launched
+                        Accounts
                    </th>
     				<th>
                         Contacts
@@ -135,7 +135,7 @@
                     <td class="text-ellipsis" title="{{vm.systemNameMap[launch.destinationOrgId]}}">{{vm.systemNameMap[launch.destinationOrgId]}}</td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
-    				<td class="red-text">{{launch.stats.errors | number}}</td>
+    				<td class="red-text">{{vm.getErrors(launch) | number}}</td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
     				<td class="green-text">{{launch.stats.contactsWithinRecommendations | number}}</td>
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">

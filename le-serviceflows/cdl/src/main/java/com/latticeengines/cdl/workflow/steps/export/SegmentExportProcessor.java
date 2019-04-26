@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -130,7 +131,7 @@ public abstract class SegmentExportProcessor {
 
         MetadataSegmentExportType exportType = metadataSegmentExport.getType();
 
-        Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap = new HashMap<>();
+        Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap = new TreeMap<>();
         BusinessEntity.SEGMENT_ENTITIES.forEach(i -> configuredBusEntityAttrMap.put(i, new ArrayList<Attribute>()));
 
         List<Attribute> configuredAccountAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Account);

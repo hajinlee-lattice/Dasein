@@ -1,4 +1,4 @@
-name: spark
+name: leds
 channels:
   - conda-forge
 dependencies:

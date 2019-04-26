@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -433,7 +434,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private void runAndVerify(MatchInput input, String scenario) {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
-        validateNoNewAccountFile(finalStatus.getResultLocation());
+        validateNoNewAccountFile(finalStatus.getNewEntitiesLocation());
 
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
@@ -607,9 +608,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // for account match, we should not generate any new entities file
     private void validateNoNewAccountFile(String outputPath) {
-        // TODO maybe find a better way to get the path to new entity dir
-        outputPath = outputPath.replace("Output", "NewEntities");
-        String avroGlob = outputPath + "/*.avro";
+        String avroGlob = PathUtils.toAvroGlob(outputPath);
         Long fileCount = fileCount(avroGlob);
         // should have no file if there are no new accounts
         Assert.assertEquals(fileCount.longValue(), 0L);
@@ -645,14 +644,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     }
 
     private void validateLeadToAcctResult(MatchCommand finalStatus, String scenario) {
-        Set<String> casesMatchedAID = null;
-        Set<String> casesAnonymousAID = null;
+        Set<String> casesMatchedAID;
+        Set<String> casesAnonymousAID;
         if (CASE_LEAD_TO_ACCT.equals(scenario)) {
             casesMatchedAID = new HashSet<>(Arrays.asList("6", "7", "10"));
             casesAnonymousAID = new HashSet<>(Arrays.asList("8", "9", "11"));
         } else if (CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
-            casesMatchedAID = new HashSet<>(Arrays.asList("12"));
-            casesAnonymousAID = new HashSet<>(Arrays.asList("13"));
+            casesMatchedAID = new HashSet<>(Collections.singletonList("12"));
+            casesAnonymousAID = new HashSet<>(Collections.singletonList("13"));
         } else {
             throw new IllegalArgumentException("Unrecognized test scenario: " + scenario);
         }

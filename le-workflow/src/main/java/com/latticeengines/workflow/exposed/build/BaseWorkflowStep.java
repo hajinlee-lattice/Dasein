@@ -141,13 +141,15 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
-    protected static final String ENTITY_MATCH_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_ACCOUNT_TARGETTABLE";
-    protected static final String ENTITY_MATCH_CONTACT_TARGETTABLE = "ENTITY_MATCH_CONTACT_TARGETTABLE";
     protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
-    public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
+    protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
 
     // intermediate results for skippable steps
-    protected static final String NEW_ENTITY_MATCH_VERSION = "NEW_ENTITY_MATCH_VERSION";
+    protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
+    protected static final String ENTITY_MATCH_COMPLETED = "ENTITY_MATCH_COMPLETED";
+    protected static final String ENTITY_MATCH_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_ACCOUNT_TARGETTABLE";
+    protected static final String ENTITY_MATCH_CONTACT_TARGETTABLE = "ENTITY_MATCH_CONTACT_TARGETTABLE";
+    public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";

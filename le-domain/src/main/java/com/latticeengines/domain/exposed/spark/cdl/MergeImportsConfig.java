@@ -7,11 +7,12 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     public static final String NAME = "mergeImports";
 
-    // required parameters
+    // default join key for all rhs
+    // if not specified, or not exists on both sides
+    // concatenate instead of join
     @JsonProperty("JoinKey")
-    private String joinKey; // default join key for all rhs
+    private String joinKey;
 
-    // optional
     @JsonProperty("SrcId")
     private String srcId; // dedupe by srcId, then rename to join key
 

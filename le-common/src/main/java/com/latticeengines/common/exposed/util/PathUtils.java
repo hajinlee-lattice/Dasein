@@ -30,6 +30,14 @@ public class PathUtils {
         }
     }
 
+    public static String toAvroDir(String path) {
+        if (path.endsWith(".avro") || path.endsWith("/")) {
+            return path.substring(0, path.lastIndexOf("/"));
+        } else {
+            return path;
+        }
+    }
+
     public static String formatPath(String path) {
         if (StringUtils.isNotEmpty(path)) {
             while (path.startsWith("/")) {

@@ -1,3 +1,5 @@
+import { MARKETO, SALESFORCE, ELOQUA } from 'atlas/connectors/connectors.service';
+
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
     $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  BrowserStorageUtility,
@@ -221,6 +223,18 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var filePath = integrationStatusMonitor.errorFile ? integrationStatusMonitor.errorFile : '';
         if (filePath) {
             return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
+        }
+    }
+
+    vm.getErrors = function(launchSummary) {
+        var destinationSysName = launchSummary.destinationSysName || "";
+        switch (destinationSysName) {
+            case MARKETO:
+                return launchSummary.stats.contactErrors;
+            case SALESFORCE:
+            case ELOQUA:
+            default: 
+                return launchSummary.stats.accountErrors;
         }
     }
 

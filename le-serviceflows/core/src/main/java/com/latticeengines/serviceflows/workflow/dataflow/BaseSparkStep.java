@@ -40,6 +40,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     @Resource(name = "distCpConfiguration")
     protected Configuration distCpConfiguration;
 
+    @Resource(name = "yarnConfiguration")
+    protected Configuration yarnConfiguration;
+
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
@@ -110,6 +113,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     private Map<String, String> getSparkConf() {
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingMultiplier;
+        if (scalingMultiplier > 1) {
+            // when scaling factor > 1, we eagerly want more executors
+            minExe *= 2;
+        }
         int maxExe = maxExecutors * scalingMultiplier;
         conf.put("spark.executor.instances", String.valueOf(Math.max(minExe, 1)));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));

@@ -23,11 +23,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -81,12 +81,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+                    launchstates, start, 0L, 1000L, null, null, null, null, null, false);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
-                    effectiveOrgInfo.getRight());
+                    effectiveOrgInfo.getRight(), false);
         }
         plays = dashboard.getUniquePlaysWithLaunches();
         return plays;
@@ -104,12 +104,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         }
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+                    launchstates, start, 0L, 1000L, null, null, null, null, null, false);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
                     launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
-                    effectiveOrgInfo.getRight());
+                    effectiveOrgInfo.getRight(), false);
         }
         if (dashboard == null) {
             return null;

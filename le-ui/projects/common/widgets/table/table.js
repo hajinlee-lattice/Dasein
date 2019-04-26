@@ -18,7 +18,9 @@ export default class LeTable extends Component {
                 : 10,
             startPage: this.props.config.pagination
                 ? this.props.config.pagination.startPage
-                : 1
+                : 1,
+            rowsSelected: {},
+            selectable: this.props.config.selectable ? this.props.config.selectable : null
         };
         if (props.config.sorting) {
             this.state.sortingName = this.props.config.sorting
@@ -32,6 +34,7 @@ export default class LeTable extends Component {
         this.sortHandler = this.sortHandler.bind(this);
         this.setColumnSorting = this.setColumnSorting.bind(this);
         this.loadPage = this.loadPage.bind(this);
+        this.clickRowHandler = this.clickRowHandler.bind(this);
         this.columnsMapping = {};
         this.headerMapping = {};
         this.props.config.header.forEach((header, index) => {
@@ -80,11 +83,25 @@ export default class LeTable extends Component {
             this.setColumnSorting(header);
         });
     }
+
+    clickRowHandler(rowIndex, data) {
+        
+        this.setState({ rowsSelected: { [rowIndex]: data } },
+            () => {
+                if (this.props.onClick) {
+                    // this.setState({ rowsSelected: { [rowIndex]: data } });
+                    this.props.onClick(this.state.rowsSelected, rowIndex);
+                }
+            });
+
+
+
+    }
+
     setColumnSorting(header) {
-        // console.log('HEADER ', header);
         if (this.props.config.sorting && header && header.sortable) {
-            this.headerMapping[header.name].template = (function(s, h, cb) {
-                return function() {
+            this.headerMapping[header.name].template = (function (s, h, cb) {
+                return function () {
                     let direction = DIRECTION_NONE;
                     if (header.name == s.sortingName) {
                         direction = s.sortingDirection;
@@ -143,6 +160,8 @@ export default class LeTable extends Component {
                 <LeTableBody
                     columnsMapping={this.columnsMapping}
                     data={this.state.data}
+                    rowsSelected={this.state.rowsSelected}
+                    onClick={this.state.selectable ? this.clickRowHandler : null}
                 />
             );
         } else {
@@ -151,7 +170,6 @@ export default class LeTable extends Component {
     }
 
     getFooter() {
-        // if (this.props.config.pagination) {
         return (
             <LeTableFooter
                 total={this.props.data.length}
@@ -160,9 +178,6 @@ export default class LeTable extends Component {
                 start={this.state.startPage}
             />
         );
-        // } else {
-        // return null;
-        // }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {

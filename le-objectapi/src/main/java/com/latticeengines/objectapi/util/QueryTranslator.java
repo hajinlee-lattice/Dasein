@@ -400,7 +400,7 @@ abstract class QueryTranslator {
 
     void configurePagination(FrontEndQuery frontEndQuery) {
         if (frontEndQuery.getPageFilter() == null) {
-            frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
+            //frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
         } else {
             int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size()
                     : 1;

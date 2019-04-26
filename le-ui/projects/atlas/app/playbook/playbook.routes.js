@@ -1,5 +1,6 @@
 import { actions, reducer } from './playbook.redux';
 import { store, injectAsyncReducer } from 'store';
+import 'atlas/react/react-angular-main.component';
 
 angular
     .module('lp.playbook', [
@@ -7,7 +8,7 @@ angular
         'lp.cg.talkingpoint',
         'lp.playbook.playlisttabs',
         'lp.playbook.plays',
-        'lp.playbook.overview',
+        //'lp.playbook.overview',
         'lp.playbook.dashboard',
         'lp.playbook.dashboard.launchhistory',
         'lp.playbook.dashboard.sidebar',
@@ -223,21 +224,24 @@ angular
 
                         return deferred.promise;
                     },
-                    connections: ($q, $stateParams, playstore) => {
-                        var deferred = $q.defer();
+                    // connections: ($q, $stateParams, playstore) => {
+                    //     var deferred = $q.defer();
 
-                        actions.fetchConnections($stateParams.play_name, deferred);
+                    //     actions.fetchConnections($stateParams.play_name, deferred);
 
-                        return deferred.promise;
+                    //     return deferred.promise;
+                    // },
+                    // playname: ($stateParams) => {
+                    //     return $stateParams.play_name;
+                    // },
+                    Play: (play) => { 
+                        return play; 
                     },
-                    playname: ($stateParams) => {
-                        return $stateParams.play_name;
-                    },
-                    Play: () => { return {} },
-                    CampaignTypes: () => {
-                        return false;
+                    path: () => {
+                        return 'playbookOverview';
                     }
                 },
+
                 views: {
                     "navigation@home": {
                         controller: 'SidebarPlaybookController',
@@ -245,7 +249,8 @@ angular
                         templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                     },
                     'main@': {
-                        component: 'playbookOverview'
+                        //component: 'playbookOverview'
+                        component: 'reactAngularMainComponent'
                     },
                     'header.back@': 'backNav'
                 }

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -10,28 +11,38 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchEntityMgrImplTestNG.class);
+
+    @Autowired
+    private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Autowired
     private PlayEntityMgr playEntityMgr;
@@ -92,8 +103,11 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
-        playLaunch1 = createPlayLaunch(null, null, null);
-        playLaunch2 = createPlayLaunch(null, null, null);
+        registerLookupIdMap(org1, externalSystemType, destinationAccountIdColumn_1);
+        registerLookupIdMap(org2, externalSystemType, destinationAccountIdColumn_2);
+
+        playLaunch1 = createPlayLaunch(org1, null, null);
+        playLaunch2 = createPlayLaunch(org1, null, null);
 
         playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
         playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
@@ -494,6 +508,19 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         return launch;
     }
 
+    private void registerLookupIdMap(String org, CDLExternalSystemType externalSystemType,
+            String destinationAccountIdColumn) {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setTenant(mainTestTenant);
+        lookupIdMap.setOrgId(org);
+        lookupIdMap.setOrgName(org);
+        lookupIdMap.setExternalSystemType(externalSystemType);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        lookupIdMap.setAccountId(destinationAccountIdColumn);
+        lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
+
+    }
+
     private void cleanupPlayLunches() {
         for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.UnLaunched)) {
             playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId(), false);
@@ -560,7 +587,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 endTimestamp, orgId, destinationSystemType);
         Assert.assertNotNull(cumulativeStats);
         Assert.assertEquals(cumulativeStats.getSuppressed(), suppressed.longValue());
-        Assert.assertEquals(cumulativeStats.getErrors(), errors.longValue());
+        Assert.assertEquals(cumulativeStats.getAccountErrors(), errors.longValue());
         Assert.assertEquals(cumulativeStats.getRecommendationsLaunched(), recommendationsLaunched.longValue());
         Assert.assertEquals(cumulativeStats.getContactsWithinRecommendations(),
                 contactsWithinRecommendations.longValue());
@@ -633,7 +660,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount,
             String orgId, String destinationSystemType) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType);
+                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType, true);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 

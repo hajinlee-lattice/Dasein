@@ -14,10 +14,9 @@ public class CDLWorkflowFrameworkFunctionalTestNG extends CDLWorkflowFrameworkFu
 
     private static final Logger log = LoggerFactory.getLogger(CDLWorkflowFrameworkFunctionalTestNG.class);
 
-    @Override
     @BeforeClass(groups = "functional" )
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment();
         log.info("In CDLWorkflowFrameworkFunctionalTestNG.setup");
     }
 
@@ -48,7 +47,6 @@ public class CDLWorkflowFrameworkFunctionalTestNG extends CDLWorkflowFrameworkFu
         log.info("In CDLWorkflowFrameworkFunctionalTestNG.verifyTest");
     }
 
-    @Override
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         log.info("In CDLWorkflowFrameworkFunctionalTestNG.tearDown");
