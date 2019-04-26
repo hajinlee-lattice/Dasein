@@ -176,14 +176,19 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType) {
+            String externalSysType, boolean includeLookupIdMap) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
 
-        String queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl, lid.externalSystemName)";
+        String queryStr = "";
+        if (includeLookupIdMap) {
+            queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl, lid.externalSystemName)";
+        } else {
+            queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl)";
+        }
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending,
-                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType, true);
+                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType, includeLookupIdMap);
 
         return query.list();
     }

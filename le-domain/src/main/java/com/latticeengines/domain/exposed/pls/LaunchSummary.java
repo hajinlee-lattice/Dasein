@@ -38,6 +38,10 @@ public class LaunchSummary {
 
     }
 
+    public LaunchSummary(PlayLaunch launch) {
+        this(launch, null);
+    }
+
     public LaunchSummary(PlayLaunch launch, CDLExternalSystemName externalSystemName) {
         Stats stats = new Stats();
         stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
