@@ -12,5 +12,6 @@ function mergeStates(imported) {
 
 mergeStates(states);
 mergeStates(connectrosstates);
+mergeStates(s3filestates);
 
 export default modulesStates;

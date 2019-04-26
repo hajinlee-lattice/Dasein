@@ -2,8 +2,12 @@ import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
 import { s3actions, s3reducer } from './s3files.redux';
 import ReactRouter from '../../react/router';
-import './s3files.component.scss';
+import NgState from "atlas/ng-state";
+
+import LeTable from "common/widgets/table/table";
+import LeButton from "common/widgets/buttons/le-button";
 import ReactMainContainer from "atlas/react/react-main-container";
+import './s3files.component.scss';
 
 export default class S3FileList extends Component {
 
@@ -18,7 +22,6 @@ export default class S3FileList extends Component {
             data: []
         };
     }
-
 
     // actionCallbackHandler(response) {
     //     switch (response.action) {
@@ -36,7 +39,7 @@ export default class S3FileList extends Component {
 
     handleChange = () => {
 
-        const data = store.getState()['s3fileslist'];
+        const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
         this.setState({
             forceReload: true,
@@ -52,10 +55,10 @@ export default class S3FileList extends Component {
     }
 
     componentDidMount() {
-        injectAsyncReducer(store, 's3fileslist', s3reducer);
+        injectAsyncReducer(store, 's3files', s3reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
+        
         s3actions.fetchS3Files();
-
         console.log(s3actions.fetchS3Files());
 
         this.setState({
@@ -74,216 +77,103 @@ export default class S3FileList extends Component {
     // }
     
 
-    // getConfig() {
-    //     let config = {
-    //         name: "import-templates",
-    //         header: [
-    //             {
-    //                 name: "Actions",
-    //                 displayName: "Actions",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "SystemName",
-    //                 displayName: "System Name",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "System",
-    //                 displayName: "System",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "Object",
-    //                 displayName: "Object",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "Path",
-    //                 displayName: "Automated Import Location",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "LastEditedDate",
-    //                 displayName: "Last Modified",
-    //                 sortable: false
-    //             },
-    //             {
-    //                 name: "actions",
-    //                 sortable: false
-    //             }
-    //         ],
-    //         columns: [
-    //             {
-    //                 colSpan: 1
-    //             },
-    //             {
-    //                 colSpan: 2,
-    //                 template: cell => {
-    //                     if (!cell.state.saving && !cell.state.editing) {
-    //                         if (cell.props.rowData.Exist) {
-    //                             return (
-    //                                 <EditControl
-    //                                     icon="fa fa-pencil-square-o"
-    //                                     title="Edit Name"
-    //                                     toogleEdit={cell.toogleEdit}
-    //                                     classes="initially-hidden"
-    //                                 />
-    //                             );
-    //                         } else {
-    //                             return null;
-    //                         }
-    //                     }
-    //                     if (cell.state.editing && !cell.state.saving) {
-    //                         if (cell.props.rowData.Exist) {
-    //                             return (
-    //                                 <EditorText
-    //                                     initialValue={
-    //                                         cell.props.rowData.TemplateName
-    //                                     }
-    //                                     cell={cell}
-    //                                     applyChanges={
-    //                                         this.saveTemplateNameHandler
-    //                                     }
-    //                                     cancel={cell.cancelHandler}
-    //                                 />
-    //                             );
-    //                         } else {
-    //                             return null;
-    //                         }
-    //                     }
-    //                 }
-    //             },
-    //             {
-    //                 colSpan: 1
-    //             },
-    //             {
-    //                 colSpan: 2
-    //             },
-    //             {
-    //                 colSpan: 3,
-    //                 template: cell => {
-    //                     if (cell.props.rowData.Exist) {
-    //                         return (
-    //                             <CopyComponent
-    //                                 title="Copy Link"
-    //                                 data={
-    //                                     cell.props.rowData[cell.props.colName]
-    //                                 }
-    //                                 callback={() => {
-    //                                     messageService.sendMessage(
-    //                                         new Message(
-    //                                             null,
-    //                                             NOTIFICATION,
-    //                                             "success",
-    //                                             "",
-    //                                             "Copied to Clipboard"
-    //                                         )
-    //                                     );
-    //                                 }}
-    //                             />
-    //                         );
-    //                     } else {
-    //                         return null;
-    //                     }
-    //                 }
-    //             },
-    //             {
-    //                 colSpan: 2,
-    //                 mask: value => {
-    //                     var options = {
-    //                         year: "numeric",
-    //                         month: "2-digit",
-    //                         day: "2-digit",
-    //                         hour: "2-digit",
-    //                         minute: "2-digit"
-    //                     };
-    //                     var formatted = new Date(value);
-    //                     var buh = "err";
-    //                     try {
-    //                         buh = formatted.toLocaleDateString(
-    //                             "en-US",
-    //                             options
-    //                         );
-    //                     } catch (e) {
-    //                         // console.log(e);
-    //                     }
+    getConfig() {
+        let config = {
+            name: "file-list",
+            header: [
+                {
+                    name: "file_name",
+                    displayName: "File",
+                    sortable: false
+                },
+                {
+                    name: "file_type",
+                    displayName: "File Type",
+                    sortable: false
+                },
+                {
+                    name: "file_size",
+                    displayName: "File Size",
+                    sortable: false
+                },
+                {
+                    name: "last_modified",
+                    displayName: "Time",
+                    sortable: true
+                }
+            ],
+            columns: [
+                {
+                    colSpan: 6
+                },
+                {
+                    colSpan: 2
+                },
+                {
+                    colSpan: 2
+                },
+                {
+                    colSpan: 2
+                }
+            ]
+        };
 
-    //                     return buh;
-    //                 }
-    //             },
-    //             {
-    //                 colSpan: 1,
-    //                 template: cell => {
-    //                     return (
-    //                         <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-    //                             <i class="fa fa-upload" aria-hidden="true" onClick={() => {
-    //                                 bannerActions.info(store, {title: 'Test Banner', message: 'Here the message'});
-    //                             }}></i>
-    //                             <i class="fa fa-plus" aria-hidden="true" onClick={() => {
-    //                                 bannerActions.error(store, {title: 'Test Banner 2', message: 'Here the message 1'});
-    //                             }}></i>
-    //                             <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
-    //                                 bannerActions.success(store, {title: 'Test Banner 3', message: 'Here the message 2'});
-    //                             }}></i>
+        return config;
+    }
 
-    //                         </LeHPanel>
-    //                         // <TemplatesRowActions
-    //                         //     rowData={cell.props.rowData}
-    //                         //     callback={this.actionCallbackHandler}
-    //                         // />
-    //                         // rowData={cell.props.rowData}
-    //                         // callback={this.actionCallbackHandler}
-    //                         // />
-    //                     );
-    //                 }
-    //             }
-    //         ]
-    //     };
-
-    //     return config;
-    // }
-
-
-    // render() {
-    //     return (
-    //         <ReactMainContainer>
-    //             <LeToolBar justifycontent={SPACE_BETWEEN}>
-    //                 <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-    //                 <LeButton
-    //                     name="add"
-    //                     config={{
-    //                         label: "Add System",
-    //                         classNames: "blue-button",
-    //                         iconside: RIGHT,
-    //                         icon: 'fa fa-plus-circle'
-    //                     }}
-    //                     callback={() => {
-    //                         ReactRouter.getStateService().go('sistemcreation');
-    //                     }}
-    //                 />
-    //             </LeToolBar>
-    //             <LeTable
-    //                 name="multiple-templates"
-    //                 config={this.getConfig()}
-    //                 forceReload={this.state.forceReload}
-    //                 showLoading={this.state.showLoading}
-    //                 showEmpty={this.state.showEmpty}
-    //                 data={this.state.data}
-    //             />
-    //             <p>
-    //                 *Atlas currently only supports one template for each object.{" "}
-    //             </p>
-    //         </ReactMainContainer>
-    //     );
-    // }
     render() {
         return (
             <ReactMainContainer>
-                <h1>Hello World</h1>
-                <div>
-                    { this.state.data }
-                </div>
+                <section className="container setup-import data-import">
+                    <div className="row">
+                        <div className="columns eight offset-two box-outline">
+                            <div className="section-header"><h4>Browse S3</h4></div>
+                            <hr />
+                            <div className="section-body with-padding">
+                                <h5>Account Data</h5>
+                                <LeTable
+                                    name="s3files"
+                                    config={this.getConfig()}
+                                    forceReload={this.state.forceReload}
+                                    showLoading={this.state.showLoading}
+                                    showEmpty={this.state.showEmpty}
+                                    data={this.state.data}
+                                    rowClick={(rowsSelected, rowIndex) => {
+                                        console.log('ROW')
+                                        console.log(rowsSelected, rowIndex);
+                                    }}
+                                />
+                            </div>
+                            <hr />
+                            <div className="container section-actions row form-actions">
+                                <div className="pull-left">
+                                    <LeButton
+                                        name="add"
+                                        config={{
+                                            label: "Cancel",
+                                            classNames: "white-button"
+                                        }}
+                                        callback={() => {
+                                            ReactRouter.getStateService().go('templateslist');
+                                        }}
+                                    />
+                                </div>
+                                <div className="pull-right">
+                                    <LeButton
+                                        name="add"
+                                        config={{
+                                            label: "Select",
+                                            classNames: "blue-button"
+                                        }}
+                                        callback={() => {
+                                            NgState.getAngularState().go('home.import.entry', response);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </ReactMainContainer>
         );
     }

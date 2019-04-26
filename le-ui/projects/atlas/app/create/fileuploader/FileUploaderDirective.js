@@ -32,7 +32,7 @@ angular
                 }
 
                 this.getS3Files = function () {
-                    $state.go('home.import.entry.s3files', {}, { reload: true } );
+                    $state.go('home.import.s3', {}, { reload: true } );
                 }
 
             }

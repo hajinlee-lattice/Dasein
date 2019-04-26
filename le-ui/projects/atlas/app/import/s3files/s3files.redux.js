@@ -20,8 +20,9 @@ export const s3actions = {
                 });
             }
         );
-        httpService.get('/pls/cdl/s3import/fileList', observer, {});
+        httpService.get('/pls/cdl/s3import/fileList?s3Path=latticeengines-qa-customers/dropfolder/k9adsbgl/Templates/HierarchySchema/', observer, {});
     }
+
 };
 
 export const s3reducer = (state = initialState, action) => {
