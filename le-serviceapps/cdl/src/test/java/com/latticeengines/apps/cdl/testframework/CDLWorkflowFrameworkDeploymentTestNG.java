@@ -14,10 +14,9 @@ public class CDLWorkflowFrameworkDeploymentTestNG extends CDLWorkflowFrameworkDe
 
     private static final Logger log = LoggerFactory.getLogger(CDLWorkflowFrameworkDeploymentTestNG.class);
 
-    @Override
     @BeforeClass(groups = "deployment" )
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironment();
         log.info("In CDLWorkflowFrameworkDeploymentTestNG.setup");
     }
 
@@ -48,7 +47,6 @@ public class CDLWorkflowFrameworkDeploymentTestNG extends CDLWorkflowFrameworkDe
         log.info("In CDLWorkflowFrameworkDeploymentTestNG.verifyTest");
     }
 
-    @Override
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         log.info("In CDLWorkflowFrameworkDeploymentTestNG.tearDown");

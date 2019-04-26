@@ -22,7 +22,7 @@ public abstract class CDLWorkflowFrameworkFunctionalTestNGBase extends CDLWorkfl
 
     protected DataCollection dataCollection;
 
-    public void setup() throws Exception {
+    protected void setupTestEnvironment() {
         setupTestEnvironmentWithDataCollection();
     }
 

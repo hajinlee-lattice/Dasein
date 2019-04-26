@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorit
 import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
@@ -105,6 +106,9 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Inject
     private VersionManager versionManager;
+
+    @Inject
+    private ManifestService manifestService;
 
     @Inject
     private SqoopProxy sqoopProxy;
@@ -537,7 +541,8 @@ public class ModelingServiceImpl implements ModelingService {
             return script;
         }
 
-        return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
+//        return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
+        return manifestService.getLedsPath() + afterPart;
     }
 
     private String getDataProfileAvroPathInHdfs(String path) {
