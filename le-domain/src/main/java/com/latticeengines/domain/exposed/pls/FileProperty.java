@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FileProperty {
@@ -68,6 +69,7 @@ public class FileProperty {
         return isDirectory;
     }
 
+    @JsonIgnore
     public void setDirectory(boolean directory) {
         isDirectory = directory;
     }
