@@ -9,12 +9,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.yarn.configuration.ConfigurationUtils;
 
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
@@ -68,7 +70,7 @@ public class HdfsS3ImporterExporter implements Runnable {
                 if (isSync) {
                     globalSyncCopy(hadoopConfiguration);
                 } else {
-                    HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, yarnQueue);
+                    distCpWithRetry(hadoopConfiguration);
                 }
                 if (hasDataUnit && StringUtils.isNotBlank(tableName)) {
                     registerDataUnit();
@@ -99,11 +101,22 @@ public class HdfsS3ImporterExporter implements Runnable {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 360, TimeUnit.MINUTES);
             if (!HdfsUtils.fileExists(distCpConfiguration, tgtPath)) {
-                HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, yarnQueue);
+                distCpWithRetry(hadoopConfiguration);
             }
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
+    }
+
+    private void distCpWithRetry(Configuration hadoopConfiguration) throws Exception {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Retry=" + ctx.getRetryCount() + ") distcp from " + srcPath + " to " + tgtPath);
+            }
+            HdfsUtils.distcp(hadoopConfiguration, srcPath, tgtPath, yarnQueue);
+            return true;
+        });
     }
 
     private Configuration createConfiguration() {

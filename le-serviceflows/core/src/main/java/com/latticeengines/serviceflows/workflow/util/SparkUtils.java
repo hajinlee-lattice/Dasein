@@ -1,16 +1,13 @@
 package com.latticeengines.serviceflows.workflow.util;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -23,9 +20,19 @@ public final class SparkUtils {
                                         Configuration yarnConfiguration, //
                                         String podId, CustomerSpace customerSpace) {
         String srcPath = hdfsDataUnit.getPath();
-        Table table = MetadataConverter.getTable(yarnConfiguration, srcPath, //
+        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
+        try {
+            HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);
+        }
+
+        Table table = MetadataConverter.getTable(yarnConfiguration, tgtPath, //
                 null, null, true);
         table.setName(tableName);
+        if (hdfsDataUnit.getCount() != null) {
+            table.getExtracts().get(0).setProcessedRecords(hdfsDataUnit.getCount());
+        }
 
         if (StringUtils.isNotBlank(primaryKey) && table.getAttribute(primaryKey) != null) {
             PrimaryKey pk = new PrimaryKey();
@@ -34,22 +41,6 @@ public final class SparkUtils {
             pk.addAttribute(primaryKey);
             table.setPrimaryKey(pk);
         }
-
-        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
-        try {
-            HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);
-        }
-
-        Extract extract = new Extract();
-        extract.setPath(tgtPath);
-        if (hdfsDataUnit.getCount() != null) {
-            extract.setProcessedRecords(hdfsDataUnit.getCount());
-        }
-        extract.setName(NamingUtils.timestamp("Extract"));
-        extract.setExtractionTimestamp(System.currentTimeMillis());
-        table.setExtracts(Collections.singletonList(extract));
 
         return table;
     }

@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ContactNameConcatenateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -24,46 +24,54 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchContact.class);
-
     static final String BEAN_NAME = "matchContact";
 
     private String matchTargetTablePrefix = null;
+    private String newAccountTableName = NamingUtils.timestamp("NewAccounts");
 
-    private int mergeStep;
-    private int concatenateStep;
-    private int matchStep;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("MatchContact");
-        matchTargetTablePrefix = entity.name() + "_Matched";
-
-        boolean entityMatchEnabled = configuration.isEntityMatchEnabled();
-        if (entityMatchEnabled) {
-            request.setSteps(entityMatchSteps());
+        if (isShortCutMode()) {
+            return null;
         } else {
-            request.setSteps(legacyMatchSteps());
+            PipelineTransformationRequest request = new PipelineTransformationRequest();
+            request.setName("MatchContact");
+            matchTargetTablePrefix = entity.name() + "_Matched";
+            if (configuration.isEntityMatchEnabled()) {
+                bumpEntityMatchStagingVersion();
+                request.setSteps(entityMatchSteps());
+            } else {
+                request.setSteps(legacyMatchSteps());
+            }
+            return request;
         }
-        return request;
     }
 
     @Override
     protected void onPostTransformationCompleted() {
         String targetTableName = getEntityMatchTargetTableName();
+        mergeInputSchema(targetTableName);
         putStringValueInContext(ENTITY_MATCH_CONTACT_TARGETTABLE, targetTableName);
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
+        Table newAccountTable = metadataProxy.getTable(customerSpace.toString(), newAccountTableName);
+        if (newAccountTable != null) {
+            putStringValueInContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, newAccountTableName);
+            addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
+        }
+    }
+
+    private boolean isShortCutMode() {
+        return Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
     }
 
     private List<TransformationStepConfig> entityMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        mergeStep = 0;
-        concatenateStep = 1;
-        matchStep = 2;
-        TransformationStepConfig merge = mergeInputs(false, false, true);
+        int mergeStep = 0;
+        int concatenateStep = 1;
+        TransformationStepConfig merge = concatImports(null);
         TransformationStepConfig concatenate = concatenateContactName(mergeStep, null);
-        TransformationStepConfig entityMatch = leadToAccountMatch(concatenateStep, matchTargetTablePrefix);
+        TransformationStepConfig entityMatch = match(concatenateStep, matchTargetTablePrefix);
         steps.add(merge);
         steps.add(concatenate);
         steps.add(entityMatch);
@@ -72,8 +80,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     private List<TransformationStepConfig> legacyMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        mergeStep = 0;
-        TransformationStepConfig merge = mergeInputs(false, true, false);
+        int mergeStep = 0;
+        TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.ContactId.name());
         TransformationStepConfig concatenate = concatenateContactName(mergeStep, matchTargetTablePrefix);
         steps.add(merge);
         steps.add(concatenate);
@@ -95,13 +103,13 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         return step;
     }
 
-    private TransformationStepConfig leadToAccountMatch(int inputStep, String targetTableName) {
+    private TransformationStepConfig match(int inputStep, String targetTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
-        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(getBaseMatchInput(),
-                getInputTableColumnNames(0));
+        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+                getInputTableColumnNames(0), newAccountTableName);
         step.setConfiguration(configStr);
         return step;
     }

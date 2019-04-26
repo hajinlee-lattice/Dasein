@@ -118,7 +118,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("CalculatePurchaseHistory");
+        request.setName("ProfilePurchaseHistory");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);

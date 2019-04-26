@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 
@@ -49,7 +50,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component(ExtractEmbeddedEntityTable.DATAFLOW_BEAN_NAME)
 public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbeddedEntityTableConfig> {
     public static final String DATAFLOW_BEAN_NAME = "ExtractEmbeddedEntityTableFlow";
-    public static final String TRANSFORMER_NAME = "ExtractEmbeddedEntityTable";
+    public static final String TRANSFORMER_NAME = TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 
     private ExtractEmbeddedEntityTableConfig config;
 

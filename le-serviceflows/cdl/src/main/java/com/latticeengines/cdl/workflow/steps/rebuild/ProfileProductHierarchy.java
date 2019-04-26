@@ -62,7 +62,7 @@ public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<Process
     protected PipelineTransformationRequest getTransformRequest() {
         masterTableName = masterTable.getName();
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ProfileProductHierarchyStep");
+        request.setName("ProfileProductHierarchy");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);

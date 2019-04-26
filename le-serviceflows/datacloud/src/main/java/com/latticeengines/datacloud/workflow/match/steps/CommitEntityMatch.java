@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
@@ -35,6 +36,10 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
+/**
+ * This step only runs once before switch stack.
+ * It attempts to commit all supported entities, if STAGING version is bumped up.
+ */
 @Component("commitEntityMatch")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfiguration> {
@@ -43,6 +48,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     private static final EntityMatchEnvironment SOURCE_ENV = EntityMatchEnvironment.STAGING;
     private static final EntityMatchEnvironment DEST_ENV = EntityMatchEnvironment.SERVING;
+
+    // only commit Account & Contact for now
+    private static final Set<String> ENTITIES_TO_COMMIT = Sets.newHashSet( //
+            BusinessEntity.Account.name(), BusinessEntity.Contact.name());
 
     @Inject
     private EntityRawSeedService entityRawSeedService;
@@ -55,17 +64,17 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     @Override
     public void execute() {
-        log.info("In CommitEntityMatch.");
-        Tenant tenant = tenantEntityMgr.findByTenantId(configuration.getCustomerSpace().toString());
-        if (tenant == null) {
-            throw new RuntimeException(
-                    "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
+        List<EntityMatchEnvironment> updatedEnvs = //
+                getListObjectFromContext(NEW_ENTITY_MATCH_ENVS, EntityMatchEnvironment.class);
+        if (CollectionUtils.isNotEmpty(updatedEnvs) && updatedEnvs.contains(EntityMatchEnvironment.STAGING)) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(configuration.getCustomerSpace().toString());
+            if (tenant == null) {
+                throw new RuntimeException(
+                        "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
+            }
+            Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
+            ENTITIES_TO_COMMIT.forEach(entity -> commitEntity(standardizedTenant, entity));
         }
-        Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
-        Set<String> publishedEntities = getPublishedEntities();
-        Set<String> commitEntities = getEntitySet(publishedEntities);
-        commitEntities.forEach(entity -> publishEntity(standardizedTenant, entity));
-        setPublishedEntities(commitEntities, publishedEntities);
     }
 
     @VisibleForTesting
@@ -132,7 +141,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         }
     }
 
-    private void publishEntity(Tenant tenant, String entity) {
+    private void commitEntity(Tenant tenant, String entity) {
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         int nSeeds = 0, nLookups = 0;

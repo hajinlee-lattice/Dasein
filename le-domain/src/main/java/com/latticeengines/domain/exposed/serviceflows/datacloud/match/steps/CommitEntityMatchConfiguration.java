@@ -16,12 +16,14 @@ public class CommitEntityMatchConfiguration extends BaseStepConfiguration {
      * Set of entities that will be published. skipPublishedEntities flag will still
      * be honored.
      */
+    @Deprecated // always check all relevant entities
     @JsonProperty("entity_list")
     private Set<String> entitySet;
 
     /*
      * flag to publish any entity that has imports
      */
+    @Deprecated // always check all relevant entities
     @JsonProperty("check_all_entity_import")
     private boolean checkAllEntityImport = true;
 
@@ -30,12 +32,14 @@ public class CommitEntityMatchConfiguration extends BaseStepConfiguration {
      * checkAllEntityImport is set to true, this set will be ignored.
      * skipPublishedEntities flag will still be honored.
      */
+    @Deprecated // always check all relevant entities
     @JsonProperty("entity_import_to_check")
     private Set<String> entityImportSetToCheck;
 
     /*
      * flag to skip all entities that are already published
      */
+    @Deprecated // the step only runs once
     @JsonProperty("skip_published_entities")
     private boolean skipPublishedEntities = true;
 

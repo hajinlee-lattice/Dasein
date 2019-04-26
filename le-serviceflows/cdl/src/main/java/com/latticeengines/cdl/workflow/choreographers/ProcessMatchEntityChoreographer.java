@@ -32,25 +32,22 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        if (step.name().endsWith(matchAccount.name()) && hasImports(step, BusinessEntity.Account)) {
-            return false;
-        } else if (step.name().endsWith(matchContact.name()) && hasImports(step, BusinessEntity.Contact)) {
+        if (step.name().endsWith(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account)) {
+            log.info("Skip matchAccount, because no imports for Account");
+            return true;
+        } else if (step.name().endsWith(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact)) {
+            log.info("Skip matchContact, because no imports for Contact");
+            return true;
+        } else {
             return false;
         }
-        return true;
     }
 
-    private boolean hasImports(AbstractStep<? extends BaseStepConfiguration> step, BusinessEntity entity) {
+    private boolean hasNoImports(AbstractStep<? extends BaseStepConfiguration> step, BusinessEntity entity) {
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = step.getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
-        boolean hasImports = MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(entity);
-        if (hasImports) {
-            log.info("Found imports for " + entity.name());
-        } else {
-            log.info("Found no imports for " + entity.name());
-        }
-        return hasImports;
+        return MapUtils.isEmpty(entityImportsMap) || !entityImportsMap.containsKey(entity);
     }
 
 }

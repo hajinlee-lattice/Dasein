@@ -18,6 +18,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
@@ -60,12 +61,13 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
         Source[] baseSources = step.getBaseSources();
         List<String> baseSourceVersions = step.getBaseVersions();
         String confStr = step.getConfig();
-        String sourceDirInHdfs = null;
-        Integer matched;
+        String sourceDirInHdfs;
+        MatchCommand matchCommand;
+        MatchTransformerConfig transformerConfig = getConfiguration(confStr);
         if (!(baseSources[0] instanceof TableSource)) {
-            sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0],
-                    baseSourceVersions.get(0)).toString();
-            matched = match(sourceDirInHdfs, workflowDir, getConfiguration(confStr));
+            sourceDirInHdfs = hdfsPathBuilder
+                    .constructTransformationSourceDir(baseSources[0], baseSourceVersions.get(0)).toString();
+            matchCommand = match(sourceDirInHdfs, workflowDir, transformerConfig);
         } else {
             TableSource tableSource = (TableSource) baseSources[0];
             Table table = (tableSource).getTable();
@@ -93,17 +95,18 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
                 schema = TableUtils.createSchema("input", table);
             }
 
-            matched = match(avroDir, schema, workflowDir, getConfiguration(confStr));
+            matchCommand = match(avroDir, schema, workflowDir, transformerConfig);
         }
-        if (matched == null) {
+        if (matchCommand == null) {
             return false;
         } else {
-            step.setCount(matched.longValue());
+            step.setCount(matchCommand.getRowsRequested().longValue());
             return true;
         }
     }
 
-    abstract Integer match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
+    abstract MatchCommand match(String inputAvroPath, String outputAvroPath, MatchTransformerConfig config);
 
-    abstract Integer match(String inputAvroPath, Schema schema, String outputAvroPath, MatchTransformerConfig config);
+    abstract MatchCommand match(String inputAvroPath, Schema schema, String outputAvroPath,
+            MatchTransformerConfig config);
 }

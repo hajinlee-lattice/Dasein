@@ -151,7 +151,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         step.setTransformer(TRANSFORMER_COPY_TXMFR);
         CopyConfig conf = new CopyConfig();
         conf.setSelectAttrs(getRetrainAttrNames());
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -206,7 +206,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
                 dataCloudVersion);
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
-        amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
+        amCols.forEach(cm -> amColMap.put(cm.getAttrName(), cm));
         ColumnMetadata latticeIdCm = columnMetadataProxy
                 .columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
         Map<String, Attribute> masterAttrs = new HashMap<>();

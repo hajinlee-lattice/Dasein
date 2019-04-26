@@ -220,7 +220,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         initializeConfiguration();
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("CalculatePurchaseHistory");
+        request.setName("ProfileTransaction");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
