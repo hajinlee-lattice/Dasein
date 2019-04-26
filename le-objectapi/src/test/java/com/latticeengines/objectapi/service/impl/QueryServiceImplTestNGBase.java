@@ -2,12 +2,16 @@ package com.latticeengines.objectapi.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -45,7 +49,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
 
     private void setupTestData(int dataVersion, boolean setupSpark) {
         initializeAttributeRepo(dataVersion, setupSpark);
-        mockDataCollectionProxy();
+        mockDataCollectionProxy(queryEvaluatorService);
         mockPeriodProxy();
         tenant = new Tenant();
         tenant.setId(attrRepo.getCustomerSpace().toString());
@@ -56,7 +60,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         log.info("Max txn date is " + maxTransactionDate);
     }
 
-    private void mockDataCollectionProxy() {
+    protected void mockDataCollectionProxy(QueryEvaluatorService queryEvaluatorService) {
         DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
         Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
         ReflectionTestUtils.setField(queryEvaluatorService, "dataCollectionProxy", proxy);
@@ -68,4 +72,16 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         ((TransactionServiceImpl) transactionService).setPeriodProxy(periodProxy);
     }
 
+    protected long testAndAssertCount(String sqlUser, long resultCount, long expectedCount) {
+        Assert.assertEquals(resultCount, expectedCount, "Counts Doesn't match");
+        return resultCount;
+    }
+
+    protected List<Map<String, Object>> testAndAssertData(String sqlUser, List<Map<String, Object>> results,
+            List<Map<String, Object>> expectedResults) {
+        if (expectedResults != null) {
+            Assert.assertEquals(results, expectedResults, "Data Doesn't match");
+        }
+        return results;
+    }
 }
