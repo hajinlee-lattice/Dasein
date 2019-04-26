@@ -1,18 +1,12 @@
 package com.latticeengines.playmaker.aspect;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
-import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.monitor.exposed.ratelimit.RateLimitException;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.service.PlaymakerRateLimitingService;
 
 @Aspect
