@@ -660,7 +660,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount,
             String orgId, String destinationSystemType) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType);
+                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType, true);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 

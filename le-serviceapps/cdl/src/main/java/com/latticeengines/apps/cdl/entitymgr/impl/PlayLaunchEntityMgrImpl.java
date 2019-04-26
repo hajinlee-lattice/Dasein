@@ -107,9 +107,10 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType) {
+            String externalSysType, boolean includeLookupIdMap) {
         return playLaunchDao.findByPlayStatesAndPagination(playId, states,
-                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
+                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType,
+                includeLookupIdMap);
     }
 
     @Override
