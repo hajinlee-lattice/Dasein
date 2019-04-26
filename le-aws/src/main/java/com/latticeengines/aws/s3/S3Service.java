@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
@@ -51,6 +52,10 @@ public interface S3Service {
     void setBucketPolicy(String bucket, String policyDoc);
 
     void deleteBucketPolicy(String bucket);
+
+    void addTagToObject(String bucket, String key, String tagKey, String tagValue);
+
+    List<Tag> getObjectTags(String bucket, String key);
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
 
