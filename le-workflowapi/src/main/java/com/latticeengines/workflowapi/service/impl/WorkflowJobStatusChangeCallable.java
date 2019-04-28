@@ -31,14 +31,11 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobStatusChangeCallable.class);
 
     private static final long period = TimeUnit.HOURS.toMillis(72);
-    @SuppressWarnings("unused")
-    private String jobArguments;
     private WorkflowJobEntityMgr workflowJobEntityMgr;
     private EMREnvService emrEnvService;
     private JobCacheService jobCacheService;
 
     public WorkflowJobStatusChangeCallable(Builder builder) {
-        this.jobArguments = builder.jobArguments;
         this.workflowJobEntityMgr = builder.workflowJobEntityMgr;
         this.emrEnvService = builder.emrEnvService;
         this.jobCacheService = builder.jobCacheService;
@@ -82,7 +79,8 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
                             YarnApplicationState state = appReport.getYarnApplicationState();
                             log.info(String.format("begin to deal with workflow %s, %s, %s.", job.getPid(), clusterId,
                                     state.name()));
-                            if (YarnApplicationState.FAILED.equals(state)) {
+                            if (YarnApplicationState.FAILED.equals(state)
+                                    || YarnApplicationState.KILLED.equals(state)) {
                                 log.info(String.format("update status to failed for workflow job.", job.getPid()));
                                 job.setStatus(JobStatus.FAILED.name());
                                 workflowJobEntityMgr.update(job);
@@ -105,15 +103,9 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
     }
 
     public static class Builder {
-        private String jobArguments;
         private WorkflowJobEntityMgr workflowJobEntityMgr;
         private EMREnvService emrEnvService;
         private JobCacheService jobCacheService;
-
-        public Builder jobArguments(String jobArgument) {
-            this.jobArguments = jobArgument;
-            return this;
-        }
 
         public Builder workflowJobEntityMgr(WorkflowJobEntityMgr workflowJobEntityMgr) {
             this.workflowJobEntityMgr = workflowJobEntityMgr;

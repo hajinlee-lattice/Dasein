@@ -32,7 +32,7 @@ public class WorkflowJobStatusChangeBean implements QuartzJobBean {
         log.info(String.format("Got callback with job arguments = %s", jobArguments));
 
         WorkflowJobStatusChangeCallable.Builder builder = new WorkflowJobStatusChangeCallable.Builder();
-        builder.jobArguments(jobArguments).workflowJobEntityMgr(workflowJobEntityMgr).emrEnvService(emrEnvService)
+        builder.workflowJobEntityMgr(workflowJobEntityMgr).emrEnvService(emrEnvService)
                 .jobCacheService(jobCacheService);
         return new WorkflowJobStatusChangeCallable(builder);
     }
