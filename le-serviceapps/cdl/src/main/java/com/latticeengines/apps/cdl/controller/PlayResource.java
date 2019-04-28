@@ -353,11 +353,9 @@ public class PlayResource {
             @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
             @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending, //
             @ApiParam(value = "End date in Unix timestamp", required = false) //
-            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp,
-            @ApiParam(value = "Include LookupIdMap in launch summary", required = false) //
-            @RequestParam(value = "include-lookup-id-map", required = false, defaultValue = "true") boolean includeLookupIdMap) {
+            @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
         return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
-                descending, endTimestamp, orgId, externalSysType, false, includeLookupIdMap);
+                descending, endTimestamp, orgId, externalSysType, false);
     }
 
     @GetMapping(value = "/launches/dashboard/count", headers = "Accept=application/json")

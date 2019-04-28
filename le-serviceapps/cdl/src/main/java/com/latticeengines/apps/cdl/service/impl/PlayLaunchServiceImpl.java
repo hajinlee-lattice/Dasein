@@ -115,7 +115,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType, boolean skipLoadingAllLookupIdMapping, boolean includeLookupIdMap) {
+            String externalSysType, boolean skipLoadingAllLookupIdMapping) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp, orgId, externalSysType);
@@ -124,8 +124,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 startTimestamp, endTimestamp, orgId, externalSysType);
 
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
-                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType,
-                includeLookupIdMap);
+                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
 
         addDataIntegrationStatusFor(launchSummaries);
         dashboard.setLaunchSummaries(launchSummaries);
