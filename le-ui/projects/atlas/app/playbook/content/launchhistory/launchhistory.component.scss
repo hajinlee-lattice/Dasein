@@ -93,6 +93,11 @@
 			}
 		}
 	}
+	a {
+		&.file-download {
+			text-decoration: underline;
+		}
+	}
 }
 
 .history-metadata {

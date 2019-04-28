@@ -133,7 +133,9 @@
                                     class="launch-success pull-right"
                                     ng-if="vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) >= 0">
                                     <i class="fa fa-check" aria-hidden="true"></i>
-                                    Launched {{play.launchHistory.lastCompletedLaunch.updated | date}}
+                                    {{play.launchHistory.lastCompletedLaunch.launchState == 'Launched' ? 'Launched' : 'Synced'}} 
+
+                                    {{play.launchHistory.lastCompletedLaunch.updated | date}}
                                 </span>
                         </span>
 

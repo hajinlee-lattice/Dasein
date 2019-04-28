@@ -20,7 +20,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
-import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
@@ -176,19 +175,14 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType, boolean includeLookupIdMap) {
+            String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
 
-        String queryStr = "";
-        if (includeLookupIdMap) {
-            queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl, lid.externalSystemName)";
-        } else {
-            queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl)";
-        }
+        String queryStr = "SELECT new com.latticeengines.domain.exposed.pls.LaunchSummary (pl)";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending,
-                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType, includeLookupIdMap);
+                endTimestamp, session, entityClz, queryStr, true, orgId, externalSysType);
 
         return query.list();
     }
@@ -202,7 +196,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "SELECT count(*) ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, false, orgId, externalSysType, false);
+                session, entityClz, queryStr, false, orgId, externalSysType);
 
         return Long.parseLong(query.uniqueResult().toString());
     }
@@ -216,7 +210,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "FROM Play WHERE pid IN ( SELECT distinct play ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, ")", false, orgId, externalSysType, false);
+                session, entityClz, queryStr, ")", false, orgId, externalSysType);
         return query.list();
     }
 
@@ -229,7 +223,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         String queryStr = "SELECT distinct " + DEST_ORG_ID + ", " + DEST_SYS_TYPE + " ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, null, false, orgId, externalSysType, false);
+                session, entityClz, queryStr, null, false, orgId, externalSysType);
         List<Object> queryResult = query.list();
 
         List<Pair<String, String>> result = new ArrayList<>();
@@ -269,7 +263,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
-                session, entityClz, queryStr, false, orgId, externalSysType, false);
+                session, entityClz, queryStr, false, orgId, externalSysType);
 
         List<Map<String, Object>> queryResult = query.list();
         Stats totalCounts = new Stats();
@@ -291,29 +285,21 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     @SuppressWarnings({"rawtypes"})
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
-            Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType,
-            boolean includeLookupIdMap) {
+            Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType) {
         return createQueryForDashboard(playId, states, startTimestamp, offset, max, sortby, descending, endTimestamp,
-                session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType, includeLookupIdMap);
+                session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType);
     }
 
     @SuppressWarnings({"rawtypes"})
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,
-            String externalSysType, boolean includeLookupIdMap) {
+            String externalSysType) {
 
-        if (includeLookupIdMap) {
-            String lookupIdMapClz = LookupIdMap.class.getSimpleName();
-            queryStr += String.format(" FROM %s pl LEFT JOIN %s lid"//
-                    + " ON pl.destinationOrgId = lid.orgId WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
-                    entityClz.getSimpleName(), lookupIdMapClz);
-            queryStr += " AND pl.tenantId = lid.tenant.pid";
-        } else {
-            queryStr += String.format(" FROM %s pl"//
-                    + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
-                    entityClz.getSimpleName());
-        }
+
+        queryStr += String.format(" FROM %s pl"//
+                + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+                entityClz.getSimpleName());
 
         if (endTimestamp != null) {
             queryStr += " AND pl.created <= :endTimestamp  ";
