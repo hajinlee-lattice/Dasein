@@ -226,6 +226,17 @@
         <property name="jobTimeout" value="${quartz.admin.cleanuptenant.job.timeout:3000}" />
     </bean>
 
+    <bean name="workflowJobStatusChangeJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="workflowJobStatusChangeJob" />
+        <property name="cronTrigger" value="${quartz.workflowapi.statuschange.job.cron:0 0 0/1 * * ?}" />
+        <property name="destUrl" value="${quartz.workflowapi.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.workflowapi.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.workflowapi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.workflowapi.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;workflowJobStatusChangeJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.workflowapi.statuschange.job.timeout:3000}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -247,6 +258,7 @@
         <ref bean="cdlRedShiftCleanupJob"/>
         <ref bean="adminRecycleTenantJob"/>
         <ref bean="adminCleanupErrorTenantJob"/>
+        <ref bean="workflowJobStatusChangeJob"/>
     </util:list>
 
 </beans>
