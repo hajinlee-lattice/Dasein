@@ -32,6 +32,8 @@ public class LaunchSummary {
 
     private CDLExternalSystemName destinationSysName;
 
+    private String audienceName;
+
     private DataIntegrationStatusMonitor integrationStatusMonitor;
 
     public LaunchSummary() {
@@ -39,10 +41,6 @@ public class LaunchSummary {
     }
 
     public LaunchSummary(PlayLaunch launch) {
-        this(launch, null);
-    }
-
-    public LaunchSummary(PlayLaunch launch, CDLExternalSystemName externalSystemName) {
         Stats stats = new Stats();
         stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
         stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
@@ -59,11 +57,11 @@ public class LaunchSummary {
         this.setDestinationOrgId(launch.getDestinationOrgId());
         this.setDestinationSysType(launch.getDestinationSysType());
         this.setDestinationAccountId(launch.getDestinationAccountId());
+        this.setAudienceName(launch.getAudienceName());
         if (launch.getPlay() != null) {
             this.setPlayName(launch.getPlay().getName());
             this.setPlayDisplayName(launch.getPlay().getDisplayName());
         }
-        this.setDestinationSysName(externalSystemName);
     }
 
     private long getCount(Long count) {
@@ -156,6 +154,14 @@ public class LaunchSummary {
 
     public void setDestinationSysName(CDLExternalSystemName destinationSysName) {
         this.destinationSysName = destinationSysName;
+    }
+
+    public String getAudienceName() {
+        return audienceName;
+    }
+
+    public void setAudienceName(String audienceName) {
+        this.audienceName = audienceName;
     }
 
     public DataIntegrationStatusMonitor getIntegrationStatusMonitor() {

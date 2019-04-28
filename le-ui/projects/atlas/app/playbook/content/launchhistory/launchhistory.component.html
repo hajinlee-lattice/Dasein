@@ -89,6 +89,9 @@
                     <th>
                         System Name
                     </th>
+                    <th ng-if="!vm.allPlaysHistory">
+                        Audience Name
+                    </th>
     				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
                         Selected
                         <i  aria-hidden="true" 
@@ -132,12 +135,25 @@
     			<tr ng-repeat="launch in vm.launches.launchSummaries">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory" class="text-ellipsis" title="{{launch.playDisplayName}}">{{launch.playDisplayName}}</td>
-                    <td class="text-ellipsis" title="{{vm.systemNameMap[launch.destinationOrgId]}}">{{vm.systemNameMap[launch.destinationOrgId]}}</td>
+                    <td class="text-ellipsis" title="{{vm.systemMap[launch.destinationOrgId].orgName}}">{{vm.systemMap[launch.destinationOrgId].orgName}}</td>
+                    <td ng-if="!vm.allPlaysHistory">
+                        <span ng-if="launch.audienceName" class="text-ellipsis" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
+                        <span ng-if="!launch.audienceName" class="text-ellipsis"> -- </span>
+                    </td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
-    				<td class="red-text">{{vm.getErrors(launch) | number}}</td>
+                    <td class="red-text">
+                        <span ng-if="!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.errorFile"> {{vm.getErrors(launch) | number}} </span>
+                        
+                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'PartialSync' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile" style="color: #D0242F">{{vm.getErrors(launch) | number}}</a>
+                    </td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
-    				<td class="green-text">{{launch.stats.contactsWithinRecommendations | number}}</td>
+                    <td class="green-text">
+                        <span ng-if="!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.sourceFile"> {{launch.stats.contactsWithinRecommendations | number}} </span>
+
+                        <a href="/files/datafiles/sourcefile?fileName={{vm.getSourceFileName(launch)}}&filePath={{vm.getSourceFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.sourceFile" class="file-download">{{launch.stats.contactsWithinRecommendations | number}}</a>
+                    </td>
+
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">
                         <span class="fa fa-check" ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'"></span>
                         <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'"></span>
@@ -146,10 +162,12 @@
                     </td>
                     <td ng-if="launch.launchState === 'PartialSync' || launch.launchState === 'SyncFailed'">
                         <span class="fa fa-exclamation-triangle orange-text" ng-if="launch.launchState === 'PartialSync'"></span>
+                        <!-- <span ng-if="launch.launchState === 'PartialSync'">Partially Synced</span> -->
                         <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'PartialSync' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">Partially Synced</a>
                         <span ng-if="launch.launchState === 'PartialSync' && (!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.errorFile || !launch.integrationStatusMonitor.s3Bucket)">Partially Synced</span>
                         
                         <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
+                        <!-- <span ng-if="launch.launchState === 'SyncFailed'">Sync Failed</span> -->
                         <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'SyncFailed' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">Sync Failed</a>
                         <span ng-if="launch.launchState === 'SyncFailed' && (!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.errorFile || !launch.integrationStatusMonitor.s3Bucket)">Sync Failed</span>
                     </td>
