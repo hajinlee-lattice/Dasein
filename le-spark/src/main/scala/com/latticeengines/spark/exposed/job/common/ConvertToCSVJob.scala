@@ -64,15 +64,20 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     }
   }
 
-  private def saveToCsv(df: DataFrame, path: String): Unit = {
-    df.coalesce(1).write
+  private def saveToCsv(df: DataFrame, path: String, compress: Boolean): Unit = {
+    var writer = df.coalesce(1).write
       .format("csv")
       .option("header", value = true)
-      .option("compression", "gzip")
-      .save(path)
+    if (compress) {
+      writer = writer.option("compression", "gzip")
+    }
+    writer.save(path)
   }
 
   override def finalizeJob(latticeCtx: LatticeContext[ConvertToCSVConfig]): List[HdfsDataUnit] = {
+    val config: ConvertToCSVConfig = latticeCtx.config
+    val compress: Boolean = if (config.getCompress == null) false else config.getCompress
+
     val targets: List[HdfsDataUnit] = latticeCtx.targets
     val output: List[DataFrame] = latticeCtx.output
     if (targets.length != output.length) {
@@ -82,7 +87,7 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     targets.zip(output).map { t =>
       val tgt = t._1
       val df = t._2.persist(StorageLevel.DISK_ONLY_2).toDF()
-      saveToCsv(df, tgt.getPath)
+      saveToCsv(df, tgt.getPath, compress=compress)
       tgt.setCount(df.count())
       df.unpersist()
       tgt
