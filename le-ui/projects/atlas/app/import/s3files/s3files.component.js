@@ -80,6 +80,7 @@ export default class S3FileList extends Component {
     getConfig() {
         let config = {
             name: "file-list",
+            selectable: true,
             header: [
                 {
                     name: "file_name",
