@@ -29,7 +29,7 @@ import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("importProcessAnalyzeFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class    ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
+public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportProcessAnalyzeFromS3.class);
 

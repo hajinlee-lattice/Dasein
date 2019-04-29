@@ -71,7 +71,7 @@ public class QueryEvaluatorService {
         return new DataPage(results);
     }
 
-    public SQLQuery<?> constructSqlQuery(AttributeRepository attrRepo, Query query, String sqlUser) {
+    private SQLQuery<?> constructSqlQuery(AttributeRepository attrRepo, Query query, String sqlUser) {
         List<Lookup> filteredLookups = new ArrayList<>();
         for (Lookup lookup : query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
