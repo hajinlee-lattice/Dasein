@@ -8,21 +8,25 @@ import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
 
         EntityExportWorkflowConfiguration configuration = new EntityExportWorkflowConfiguration();
+        ImportExportS3StepConfiguration importS3 = new ImportExportS3StepConfiguration();
         EntityExportStepConfiguration step = new EntityExportStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            importS3.setCustomerSpace(customerSpace);
             step.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
+            importS3.setVersion(version);
             step.setDataCollectionVersion(version);
             return this;
         }
@@ -50,6 +54,7 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         public EntityExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("entityExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            configuration.add(importS3);
             configuration.add(step);
             return configuration;
         }

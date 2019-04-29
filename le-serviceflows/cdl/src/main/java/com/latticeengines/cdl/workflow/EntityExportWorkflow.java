@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.EntityExportWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.export.ExtractAtlasEntity;
+import com.latticeengines.cdl.workflow.steps.export.ImportExtractEntityFromS3;
 import com.latticeengines.cdl.workflow.steps.export.SaveAtlasExportCSV;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -22,6 +23,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class EntityExportWorkflow extends AbstractWorkflow<EntityExportWorkflowConfiguration> {
 
     @Inject
+    private ImportExtractEntityFromS3 importFromS3;
+
+    @Inject
     private ExtractAtlasEntity extractAtlasEntity;
 
     @Inject
@@ -33,6 +37,7 @@ public class EntityExportWorkflow extends AbstractWorkflow<EntityExportWorkflowC
     @Override
     public Workflow defineWorkflow(EntityExportWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(importFromS3) //
                 .next(extractAtlasEntity) //
                 .next(saveAtlasExportCSV) //
                 .listener(listener) //

@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -137,6 +139,14 @@ public class AttributeRepository {
 
     public String getTableName(TableRoleInCollection tableRole) {
         return tableNameMap.get(tableRole);
+    }
+
+    public Map<TableRoleInCollection, String> getTableNameMap() {
+        return tableNameMap;
+    }
+
+    public Set<String> getTableNames() {
+        return new HashSet<>(tableNameMap.values());
     }
 
     public CustomerSpace getCustomerSpace() {

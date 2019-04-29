@@ -30,6 +30,10 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("compress_result")
     private boolean compressResult;
 
+    // for local testing purpose only
+    @JsonProperty("save_to_local")
+    private boolean saveToLocal;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -76,5 +80,13 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setCompressResult(boolean compressResult) {
         this.compressResult = compressResult;
+    }
+
+    public boolean isSaveToLocal() {
+        return saveToLocal;
+    }
+
+    public void setSaveToLocal(boolean saveToLocal) {
+        this.saveToLocal = saveToLocal;
     }
 }

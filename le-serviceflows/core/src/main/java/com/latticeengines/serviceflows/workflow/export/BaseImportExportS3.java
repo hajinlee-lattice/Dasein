@@ -102,8 +102,8 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         }
         log.info("Starting to export from hdfs to s3 or vice versa. size=" + requests.size());
         List<HdfsS3ImporterExporter> exporters = new ArrayList<>();
-        for (int i = 0; i < requests.size(); i++) {
-            exporters.add(buildImporterExporter(requests.get(i)));
+        for (ImportExportRequest request : requests) {
+            exporters.add(buildImporterExporter(request));
         }
         int threadPoolSize = Math.min(5, requests.size());
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-import-export", threadPoolSize);
