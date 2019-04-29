@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,6 +18,8 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchKeyTuple implements Fact {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchKeyTuple.class);
 
     @JsonProperty("Domain")
     private String domain;
@@ -233,6 +237,10 @@ public class MatchKeyTuple implements Fact {
 
     @Override
     public String toString() {
+        if (serializedFormat == null) {
+            log.error("$JAW$ serializedFormat was null!  Refreshing cached strings");
+            refreshCachedStrings();
+        }
         return serializedFormat;
     }
 

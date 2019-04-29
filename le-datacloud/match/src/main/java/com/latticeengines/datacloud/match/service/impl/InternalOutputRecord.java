@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -59,6 +60,9 @@ public class InternalOutputRecord extends OutputRecord {
 
     // Match result: entity -> entityId
     private Map<String, String> entityIds;
+
+    // $JAW$ Potentially temporary location.
+    private EntityMatchHistory entityMatchHistory;
 
     public String getParsedDomain() {
         return parsedDomain;
@@ -316,5 +320,13 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setEntityIds(Map<String, String> entityIds) {
         this.entityIds = entityIds;
+    }
+
+    public EntityMatchHistory getEntityMatchHistory() {
+        return entityMatchHistory;
+    }
+
+    public void setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
+        this.entityMatchHistory = entityMatchHistory;
     }
 }

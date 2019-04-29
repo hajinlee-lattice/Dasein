@@ -105,13 +105,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     private void processMatchHistory(MatchContext matchContext) {
+        isMatchHistoryEnabled = true;
         if (!isMatchHistoryEnabled) {
+            log.error("$JAW$ MatchHistory was not enabled! 1 :((((");
             return;
         }
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         if (CollectionUtils.isEmpty(records)) {
             return;
         }
+        log.error("$JAW$ MatchHistory will be published! 1");
         List<MatchHistory> matchHistories = new ArrayList<>();
         for (InternalOutputRecord record : records) {
             MatchHistory matchHistory = record.getFabricMatchHistory();
@@ -134,6 +137,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setDomainSource(record.getDomainSource())
                     .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
 
+            // $JAW$ Add EntityMatchHistory to MatchHistory.
+            matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
+
+
+                    //JsonUtils.serialize(record.getEntityMatchHistory(), EntityMatchHistory.class));
+
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
@@ -152,11 +161,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
+            log.error("$JAW$ MatchHistory was not enabled! 2 :((((");
             return;
         }
         if (CollectionUtils.isEmpty(matchHistories)) {
             return;
         }
+        log.error("$JAW$ MatchHistory will be published! 2");
         for (MatchHistory matchHistory : matchHistories) {
             GenericRecordRequest recordRequest = new GenericRecordRequest();
             recordRequest.setId(UUID.randomUUID().toString());
@@ -166,7 +177,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        firehoseService.sendBatch(deliveryStreamName, histories);
+        log.error("$JAW$ deliveryStreamName is: " + deliveryStreamName);
+        //firehoseService.sendBatch(deliveryStreamName, histories);
+
+        firehoseService.sendBatch("latticeengines-etl-match-history-dev", histories);
     }
 
     @VisibleForTesting

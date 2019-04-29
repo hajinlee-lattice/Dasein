@@ -4,6 +4,7 @@ import org.apache.avro.reflect.AvroName;
 import org.apache.avro.reflect.Nullable;
 import org.apache.avro.reflect.Union;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -236,6 +237,13 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("MatchMode")
     private String matchMode; // Batch or Realtime
+
+    // Temporary: Entity Match Result
+
+    @JsonProperty("EntityMatchHistory")
+    @Nullable
+    @AvroName("EntityMatchHistory")
+    private EntityMatchHistory entityMatchHistory;
 
     @Override
     @Union({})
@@ -1060,6 +1068,16 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public MatchHistory setStandardisedCountryCode(String standardisedCountryCode) {
         this.standardisedCountryCode = standardisedCountryCode;
+        return this;
+    }
+    @Union({})
+    public EntityMatchHistory getEntityMatchHistory() {
+        return entityMatchHistory;
+    }
+
+    @Union({})
+    public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
+        this.entityMatchHistory = entityMatchHistory;
         return this;
     }
 

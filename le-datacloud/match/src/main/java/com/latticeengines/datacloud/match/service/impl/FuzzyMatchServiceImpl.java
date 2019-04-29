@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -11,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -105,12 +108,18 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     matchRecord.setEntityId(result);
                     if (MapUtils.isNotEmpty(traveler.getNewEntityIds())) {
                         // copy new entity IDs map
+                        // $JAW$ Why might there be more than one new Entity ID?
                         matchRecord.setNewEntityIds(traveler.getNewEntityIds());
                     }
                     matchRecord.setEntityIds(traveler.getEntityIds());
                     // Copy data from EntityMatchKeyRecord in MatchTraveler that was set by MatchPlannerMicroEngineActor
                     // into the InternalOutputRecord.
                     copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
+
+                    // $JAW$ Need copy information from MatchTraveler to a place where we can add it to
+                    // EntityMatchHistory.
+                    matchRecord.setEntityMatchHistory(generateEntityMatchHistory(traveler));
+
                 } else {
                     matchRecord.setLatticeAccountId(result);
                 }
@@ -381,5 +390,105 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
         matchKeyTuple.setDuns(matchRecord.getParsedDuns());
         return matchKeyTuple;
+    }
+
+    EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
+        EntityMatchHistory history = new EntityMatchHistory();
+
+        history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
+        //history.setEntityId((String) traveler.getResult());
+        if (StringUtils.isBlank(history.getBusinessEntity())) {
+            log.error("$JAW$ Found null or blank BusinessEntity for MatchTraveler");
+            return null;
+        } else if (MapUtils.isEmpty(traveler.getEntityIds())) {
+            log.error("$JAW$ Found null or empty Entity Match Result Map for MatchTraveler");
+            return null;
+        }
+        history.setEntityId(traveler.getEntityIds().get(history.getBusinessEntity()));
+        if (MapUtils.isEmpty(traveler.getEntityMatchKeyTuples())) {
+            log.error("$JAW$ Found null or empty Entity MatchKeyTuples Map in MatchTraveler");
+            return null;
+        } else {
+            log.error("$JAW$ EntityMatchKeyTuples is: ");
+            for (Map.Entry<String, MatchKeyTuple> entry : traveler.getEntityMatchKeyTuples().entrySet())  {
+                log.error("$JAW$    Entity: " + entry.getKey());
+                log.error("$JAW$    MatchKeyTuple: " + entry.getValue().toString());
+            }
+            MatchKeyTuple matchKeyTuple = traveler.getEntityMatchKeyTuple(history.getBusinessEntity());
+            if (CollectionUtils.isNotEmpty(matchKeyTuple.getSystemIds())) {
+                history.setUserId(matchKeyTuple.getSystemIds().get(0).getValue());
+            }
+        }
+
+        if (MapUtils.isEmpty(traveler.getEntityIds())) {
+            log.error("$JAW$ Found null or empty EntityIds Map in MatchTraveler");
+        } else {
+            log.error("$JAW$ EntityIds is: ");
+            for (Map.Entry<String, String> entry : traveler.getEntityIds().entrySet())  {
+                log.error("$JAW$    Entity: " + entry.getKey());
+                log.error("$JAW$    EntityId: " + entry.getValue());
+            }
+        }
+
+        if (MapUtils.isEmpty(traveler.getNewEntityIds())) {
+            log.error("$JAW$ Found null or empty NewEntityIds Map in MatchTraveler");
+        } else {
+            log.error("$JAW$ NewEntityIds is: ");
+            for (Map.Entry<String, String> entry : traveler.getNewEntityIds().entrySet())  {
+                log.error("$JAW$    Entity: " + entry.getKey());
+                log.error("$JAW$    NewEntityId: " + entry.getValue());
+            }
+        }
+
+        if (CollectionUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
+            log.error("$JAW$ Found null or empty EntityMatchLookupResults List in MatchTraveler");
+            return null;
+        }
+        boolean foundResult = false;
+        log.error("$JAW$ Iterate through Match Results:");
+        for (Pair<MatchKeyTuple, List<String>> pair : traveler.getEntityMatchLookupResults()) {
+            if (pair.getKey() == null) {
+                log.error("$JAW$   MatchKeyTuple: null");
+            } else {
+                log.error("$JAW$   MatchKeyTuple: " + pair.getKey().toString());
+            }
+
+            String resultList = "";
+            for (String result : pair.getValue()) {
+                if (result != null) {
+                    if (!foundResult) {
+                        history.setMatchKeyTuple(pair.getKey());
+                        foundResult = true;
+                        resultList += ">>> " + result + " <<< ";
+                    } else {
+                        resultList += result + " ";
+                    }
+                } else {
+                    resultList += "null ";
+                }
+            }
+
+            log.error(":$JAW$   Results: " + resultList);
+
+            // Check if there is a non-null result for this MatchKeyTuple.
+            /*
+            for (String result : pair.getValue()) {
+                if (result != null) {
+                    history.setMatchKeyTuple(pair.getKey());
+                    break;
+                }
+            }
+            */
+        }
+
+        log.error("$JAW$ EntityMatchHistory:\n" + "   Entity: " + history.getBusinessEntity() + "\n   Entity ID: "
+                + history.getEntityId() + "\n   User Provided ID: " + history.getUserId());
+        if (history.getMatchKeyTuple() == null) {
+            log.error("$JAW$ MatchKeyTuple: null");
+        } else {
+            log.error("$JAW$ MatchKeyTuple: " + history.getMatchKeyTuple().toString());
+        }
+
+        return history;
     }
 }
