@@ -42,6 +42,11 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
+        public Builder compressResult(boolean compress) {
+            step.setCompressResult(compress);
+            return this;
+        }
+
         public EntityExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("entityExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

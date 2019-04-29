@@ -100,9 +100,11 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     }
 
     private void processResultCSV(ExportEntity exportEntity, String csvGzFilePath) {
-        saveToDataFiles(exportEntity, csvGzFilePath);
         if (configuration.isSaveToDropfolder()) {
             saveToDropfolder(exportEntity, csvGzFilePath);
+        } else {
+            saveToDataFiles(exportEntity, csvGzFilePath);
+
         }
     }
 
