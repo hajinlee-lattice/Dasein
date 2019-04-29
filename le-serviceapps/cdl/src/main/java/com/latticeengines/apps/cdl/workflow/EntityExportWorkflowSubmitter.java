@@ -32,6 +32,7 @@ public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
                 .exportEntities(Arrays.asList(ExportEntity.Account, ExportEntity.Contact)) //
                 .dataCollectionVersion(request.getDataCollectionVersion()) //
                 .frontEndQuery(null) //
+                .compressResult(true) //
                 .saveToDropfolder(true) //
                 .build();
     }

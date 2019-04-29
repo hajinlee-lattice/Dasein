@@ -27,6 +27,9 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("export_entities")
     private List<ExportEntity> exportEntities;
 
+    @JsonProperty("compress_result")
+    private boolean compressResult;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -65,5 +68,13 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setExportEntities(List<ExportEntity> exportEntities) {
         this.exportEntities = exportEntities;
+    }
+
+    public boolean isCompressResult() {
+        return compressResult;
+    }
+
+    public void setCompressResult(boolean compressResult) {
+        this.compressResult = compressResult;
     }
 }
