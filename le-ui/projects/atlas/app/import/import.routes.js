@@ -116,10 +116,15 @@ angular
             params: {
                 action: null,
                 type: null,
-                data: null
+                data: null,
+                file_name: null,
+                file_path: null
             },
             resolve:{
-                DateSupport : function($state){
+                DateSupport : function($state, $stateParams){
+
+                    console.log($stateParams);
+
                     let redux = $state.get('home.import').data.redux;
                     // console.log('redux', redux);
                     redux.fetchDateSupport();

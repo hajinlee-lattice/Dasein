@@ -5,13 +5,19 @@ const s3FileListState = {
   name: "files",
   url: "/files",
   onEnter: ($transition$, $state$) => {
-    console.log('ENTEReD', $transition$, $state$);
+    // console.log('ENTEReD', $transition$, $state$);
   },
   resolve: [
     {
       token: 'files',
       resolveFn: () => {
         return [];
+      },
+      ngservices: (ImportWizardStore) => {
+        let obj = {
+            ImportWizardStore: ImportWizardStore
+        }
+        return obj;
       }
     }
   ],

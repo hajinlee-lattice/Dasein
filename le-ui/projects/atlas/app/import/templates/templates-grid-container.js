@@ -4,6 +4,9 @@ import NgState from "../../ng-state";
 import httpService from "../../../../common/app/http/http-service";
 import { SUCCESS } from "../../../../common/app/http/response";
 
+import { store, injectAsyncReducer } from 'store';
+import { s3actions, s3reducer } from 'atlas/import/s3files/s3files.redux';
+
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
     EDIT_TEMPLATE,
@@ -32,6 +35,7 @@ export default class GridContainer extends Component {
             showLoading: false,
             data: []
         };
+
     }
 
     createTemplate(response) {
@@ -60,6 +64,9 @@ export default class GridContainer extends Component {
         }
         let goTo = `home.import.entry.${entity}`;
 
+        console.log(response.data.Path);
+        s3actions.setPath(response.data.Path);
+
         NgState.getAngularState().go(goTo, response);
     }
 
@@ -79,9 +86,12 @@ export default class GridContainer extends Component {
 
     componentWillUnmount() {
         httpService.unsubscribeObservable(this.observer);
+
     }
 
     componentDidMount() {
+        injectAsyncReducer(store, 's3files', s3reducer);
+
         this.setState({
             forceReload: true,
             showEmpty: false,

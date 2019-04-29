@@ -13,32 +13,21 @@ export default class S3FileList extends Component {
 
     constructor(props) {
         super(props);
-        // this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
-        // this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
+
+        console.log(props);
         this.state = {
             forceReload: false,
             showEmpty: false,
             showLoading: false,
+            enableButton: false,
+            selectedItem: null,
             data: []
         };
     }
 
-    // actionCallbackHandler(response) {
-    //     switch (response.action) {
-    //         case CREATE_TEMPLATE:
-    //             this.createTemplate(response);
-    //             break;
-    //         case EDIT_TEMPLATE:
-    //             this.createTemplate(response);
-    //             break;
-    //         case IMPORT_DATA:
-    //             this.createTemplate(response);
-    //             break;
-    //     }
-    // }
-
     handleChange = () => {
 
+        console.log(store.getState()['s3files']);
         const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
         this.setState({
@@ -55,11 +44,12 @@ export default class S3FileList extends Component {
     }
 
     componentDidMount() {
-        injectAsyncReducer(store, 's3files', s3reducer);
+
+        // injectAsyncReducer(store, 's3files', s3reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
         
+        console.log(store.getState()['s3files']);
         s3actions.fetchS3Files();
-        console.log(s3actions.fetchS3Files());
 
         this.setState({
             forceReload: false,
@@ -67,15 +57,6 @@ export default class S3FileList extends Component {
             showLoading: true
         });
     }
-
-    // saveTemplateNameHandler(cell, value) {
-    //     if (value && value != "") {
-    //         cell.setSavingState();
-    //         let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
-    //         copy[cell.props.colName] = value;
-    //     }
-    // }
-    
 
     getConfig() {
         let config = {
@@ -139,9 +120,13 @@ export default class S3FileList extends Component {
                                     showLoading={this.state.showLoading}
                                     showEmpty={this.state.showEmpty}
                                     data={this.state.data}
-                                    rowClick={(rowsSelected, rowIndex) => {
-                                        console.log('ROW')
-                                        console.log(rowsSelected, rowIndex);
+                                    onClick={(rowsSelected) => {
+                                        console.log(rowsSelected[0]);
+
+                                        this.setState({ 
+                                            enableButton: true,
+                                            selectedItem: rowsSelected[0]
+                                        });
                                     }}
                                 />
                             </div>
@@ -155,19 +140,20 @@ export default class S3FileList extends Component {
                                             classNames: "white-button"
                                         }}
                                         callback={() => {
-                                            ReactRouter.getStateService().go('templateslist');
+                                            NgState.getAngularState().go('home.importtemplates', {});
                                         }}
                                     />
                                 </div>
                                 <div className="pull-right">
                                     <LeButton
                                         name="add"
+                                        disabled={!this.state.enableButton}
                                         config={{
                                             label: "Select",
                                             classNames: "blue-button"
                                         }}
                                         callback={() => {
-                                            NgState.getAngularState().go('home.import.entry', response);
+                                            NgState.getAngularState().go('home.import.entry', this.state.selectedItem);
                                         }}
                                     />
                                 </div>

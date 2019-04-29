@@ -3,14 +3,16 @@ import Observer from "common/app/http/observer";
 import {store} from 'store';
 
 var CONST = {
-    FETCH_S3_FILES: 'FETCH_S3_FILES'
+    FETCH_S3_FILES: 'FETCH_S3_FILES',
+    SET_PATH: 'SET_PATH'
 };
 const initialState = {
-    s3Files: []
+    s3Files: [],
+    path: ''
 };
 
 export const s3actions = {
-    fetchS3Files: () => {
+    fetchS3Files: (path) => {
         let observer = new Observer(
             response => {
                 httpService.unsubscribeObservable(observer);
@@ -20,7 +22,13 @@ export const s3actions = {
                 });
             }
         );
-        httpService.get('/pls/cdl/s3import/fileList?s3Path=latticeengines-qa-customers/dropfolder/k9adsbgl/Templates/HierarchySchema/', observer, {});
+        httpService.get(`/pls/cdl/s3import/fileList?s3Path=${path}`, observer, {});
+    },
+    setPath: (path) => {
+        return store.dispatch({
+            type: CONST.SET_PATH,
+            payload: path
+        });
     }
 
 };
@@ -31,6 +39,11 @@ export const s3reducer = (state = initialState, action) => {
             return {
                 ...state,
                 s3Files: action.payload
+            };
+        case CONST.SET_PATH:
+            return {
+                ...state,
+                path: action.payload
             };
         default:
             return state;

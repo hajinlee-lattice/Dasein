@@ -190,7 +190,7 @@ export default class LeTable extends Component {
 
     render() {
         return (
-            <div className={`le-table ${this.props.name}`}>
+            <div className={`le-table ${this.props.name} ${this.state.selectable ? 'selectable' : ''}`}>
                 <LeTableHeader headerMapping={this.headerMapping} />
                 {this.getBody()}
                 {this.getEmptyMsg()}

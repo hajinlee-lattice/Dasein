@@ -98,7 +98,6 @@ export default class MultipleTemplatesList extends Component {
     getConfig() {
         let config = {
             name: "import-templates",
-            selectable: true,
             header: [
                 {
                     name: "Actions",
@@ -192,8 +191,7 @@ export default class MultipleTemplatesList extends Component {
                                     data={
                                         cell.props.rowData[cell.props.colName]
                                     }
-                                    callback={(event) => {
-                                        event.stopPropagation();
+                                    callback={() => {
                                         messageService.sendMessage(
                                             new Message(
                                                 null,
@@ -240,17 +238,12 @@ export default class MultipleTemplatesList extends Component {
                     template: cell => {
                         return (
                             <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-                                <i class="fa fa-upload" aria-hidden="true" onClick={(event) => {
-                                    event.stopPropagation();
+                                <i class="fa fa-upload" aria-hidden="true" onClick={() => {
                                     bannerActions.info(store, {title: 'Test Banner', message: 'Here the message'});
                                 }}></i>
                                 <i class="fa fa-plus" aria-hidden="true" onClick={() => {
                                     NgState.getAngularState().go('home.import.entry', response);                                    
                                     // bannerActions.error(store, {title: 'Test Banner 2', message: 'Here the message 1'});
-                                }}></i>
-                                <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
-                                    NgState.getAngularState().go('home.import.entry', response);
-                                    // bannerActions.success(store, {title: 'Test Banner 3', message: 'Here the message 2'});
                                 }}></i>
                                 <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
                                     NgState.getAngularState().go('home.import.entry', response);
@@ -298,10 +291,6 @@ export default class MultipleTemplatesList extends Component {
                     showLoading={this.state.showLoading}
                     showEmpty={this.state.showEmpty}
                     data={this.state.data}
-                    rowClick={(rowsSelected, rowIndex) => {
-                        console.log('ROW')
-                        // console.log(rowsSelected, rowIndex);
-                    }}
                 />
                 <p>
                     *Atlas currently only supports one template for each object.{" "}
