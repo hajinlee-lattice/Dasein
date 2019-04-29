@@ -12,15 +12,25 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public class QueryServiceUtils {
 
+    private static boolean localAttrRepoMode = false;
+    private static AttributeRepository attrRepo;
+
     public static AttributeRepository checkAndGetAttrRepo(CustomerSpace customerSpace,
                                                           DataCollection.Version version,
                                                           QueryEvaluatorService queryEvaluatorService) {
-        String tenant = customerSpace.toString();
-        AttributeRepository attrRepo = queryEvaluatorService.getAttributeRepository(tenant, version);
-        if (attrRepo == null) {
-            throw new LedpException(LedpCode.LEDP_37015, new Object[]{ tenant, version });
+        if (localAttrRepoMode) {
+            if (attrRepo == null) {
+                throw new IllegalStateException("Local attr repo has not been set.");
+            }
+            return attrRepo;
+        } else {
+            String tenant = customerSpace.toString();
+            AttributeRepository attrRepo = queryEvaluatorService.getAttributeRepository(tenant, version);
+            if (attrRepo == null) {
+                throw new LedpException(LedpCode.LEDP_37015, new Object[]{tenant, version});
+            }
+            return attrRepo;
         }
-        return attrRepo;
     }
 
     public static TimeFilterTranslator getTimeFilterTranslator(TransactionService transactionService,
@@ -31,4 +41,17 @@ public class QueryServiceUtils {
             return null;
         }
     }
+
+    public static void toLocalAttrRepoMode() {
+        localAttrRepoMode = true;
+    }
+
+    public static void setAttrRepo(AttributeRepository attrRepo) {
+        QueryServiceUtils.attrRepo = attrRepo;
+    }
+
+    public static AttributeRepository getAttrRepo() {
+        return attrRepo;
+    }
+
 }

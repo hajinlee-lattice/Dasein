@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -82,7 +83,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void add(BaseStepConfiguration configuration) {
         log.info("Added " + configuration.getClass().getSimpleName() + " to " + getClass().getSimpleName());
-        stepConfigRegistry.put(configuration.getClass().getSimpleName(), configuration.toString());
+        stepConfigRegistry.put(configuration.getClass().getSimpleName(), JsonUtils.serialize(configuration));
     }
 
     protected void add(WorkflowConfiguration configuration) {

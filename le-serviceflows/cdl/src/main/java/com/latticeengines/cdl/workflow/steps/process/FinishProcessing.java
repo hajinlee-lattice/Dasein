@@ -8,6 +8,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,6 +37,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("finishProcessing")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(FinishProcessing.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;

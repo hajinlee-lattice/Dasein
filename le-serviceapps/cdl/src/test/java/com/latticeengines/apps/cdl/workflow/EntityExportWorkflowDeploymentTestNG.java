@@ -15,10 +15,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.end2end.UpdateTransactionDeploymentTestNG;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 /**
@@ -36,9 +38,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
 
     @BeforeClass(groups = "manual" )
     public void setup() throws Exception {
-        boolean useExistingTenant = false;
+        boolean useExistingTenant = true;
         if (useExistingTenant) {
-            testBed.useExistingTenantAsMain("LETest1556291091418");
+            testBed.useExistingTenantAsMain("LETest1556551255251");
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
             mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
@@ -63,6 +65,13 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         EntityExportWorkflowConfiguration configuration = (EntityExportWorkflowConfiguration) //
                 ReflectionUtils.invokeMethod(method, entityExportWorkflowSubmitter, //
                         mainTestCustomerSpace.toString(), request);
+        Assert.assertNotNull(configuration);
+
+        EntityExportStepConfiguration stepConfiguration = JsonUtils.deserialize( //
+                configuration.getStepConfigRegistry().get(EntityExportStepConfiguration.class.getSimpleName()), //
+                EntityExportStepConfiguration.class);
+        stepConfiguration.setSaveToLocal(true);
+        configuration.add(stepConfiguration);
 
         runWorkflow(generateWorkflowTestConfiguration(null, //
                 "entityExportWorkflow", configuration, null));
