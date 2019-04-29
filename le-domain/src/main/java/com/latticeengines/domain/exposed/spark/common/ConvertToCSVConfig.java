@@ -21,6 +21,9 @@ public class ConvertToCSVConfig extends SparkJobConfig {
     @JsonProperty("TimeZone")
     private String timeZone;
 
+    @JsonProperty("Compress")
+    private Boolean compress;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -49,5 +52,13 @@ public class ConvertToCSVConfig extends SparkJobConfig {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public Boolean getCompress() {
+        return compress;
+    }
+
+    public void setCompress(Boolean compress) {
+        this.compress = compress;
     }
 }

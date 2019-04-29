@@ -27,7 +27,7 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType, boolean includeLookupIdMap);
+            String externalSysType);
 
     Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType);

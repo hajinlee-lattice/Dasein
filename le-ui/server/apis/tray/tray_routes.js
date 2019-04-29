@@ -165,8 +165,8 @@ class TrayRouter {
                     res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
                     return;
                 }
-                let solutionInfo = GraphQLParser.getAuthorizationCodeInfo(body.data);
-                res.send(solutionInfo);
+                let authorizationCode = GraphQLParser.getAuthorizationCodeInfo(body.data);
+                res.send(authorizationCode);
             });
         }.bind(this));
 

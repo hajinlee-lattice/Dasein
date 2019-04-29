@@ -482,7 +482,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, Long expectedCount) {
         PlayLaunchDashboard dashboardEntries = playLaunchService.getDashboard(playId, states, startTimestamp, offset,
-                max, null, true, endTimestamp, null, null, true, true);
+                max, null, true, endTimestamp, null, null, true);
 
         Set<String> orgSet = new HashSet<>(Arrays.asList(org1, org2));
 

@@ -109,7 +109,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: '',
-                                launchStates: 'Launching,Launched,Failed',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
                                 sortby: 'created',
                                 descending: true,
                                 offset: 0,
@@ -125,7 +125,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: '',
-                                launchStates: 'Launching,Launched,Failed',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
                                 startTimestamp: 0
                             };
 
@@ -141,7 +141,7 @@ angular
                             launches = LaunchHistoryData,
                             uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
                             allCountQuery = {
-                                launchStates: 'Launching,Launched,Failed',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
                                 offset: 0,
                                 startTimestamp: 0,
                                 orgId: '',
@@ -160,29 +160,30 @@ angular
 
                             angular.forEach(uniqueLookupIdMapping, function (value, key) {
                                 angular.forEach(value, function (val, index) {
-
-                                    var countParams = {
-                                        playName: $stateParams.play_name,
-                                        launchStates: 'Launching,Launched,Failed',
-                                        offset: 0,
-                                        startTimestamp: 0,
-                                        orgId: val.orgId,
-                                        externalSysType: val.externalSystemType
-                                    }
-                                    PlaybookWizardStore.getPlayLaunchCount(countParams).then(function (result) {
-                                        filterItems.push({
-                                            label: val.orgName,
-                                            data: {
-                                                orgName: val.orgName,
-                                                externalSystemType: val.externalSystemType,
-                                                destinationOrgId: val.orgId
-                                            },
-                                            action: {
-                                                destinationOrgId: val.orgId
-                                            },
-                                            total: result.toString()
+                                    if (val.orgName) {
+                                        var countParams = {
+                                            playName: $stateParams.play_name,
+                                            launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                            offset: 0,
+                                            startTimestamp: 0,
+                                            orgId: val.orgId,
+                                            externalSysType: val.externalSystemType
+                                        }
+                                        PlaybookWizardStore.getPlayLaunchCount(countParams).then(function (result) {
+                                            filterItems.push({
+                                                label: val.orgName,
+                                                data: {
+                                                    orgName: val.orgName,
+                                                    externalSystemType: val.externalSystemType,
+                                                    destinationOrgId: val.orgId
+                                                },
+                                                action: {
+                                                    destinationOrgId: val.orgId
+                                                },
+                                                total: result.toString()
+                                            });
                                         });
-                                    });
+                                    }
                                 });
                             });
                         }, 250);
@@ -581,7 +582,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: $stateParams.play_name,
-                                launchStates: 'Launching,Launched,Failed',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
                                 sortBy: 'created',
                                 descending: true,
                                 offset: 0,
@@ -596,7 +597,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: $stateParams.play_name,
-                                launchStates: 'Launching,Launched,Failed',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
                                 startTimestamp: 0
                             };
 
@@ -696,7 +697,7 @@ angular
                                 state: 'segment.rating.name',
                                 secondaryLinkValidation: true,
                                 secondaryLinkLabel: 'Save & Create Insights',
-                                secondaryClass: 'campaign-wizard-save-and-add-insights',
+                                secondaryClass: 'aptrinsic-campaign-wizard-save-and-add-insights',
                                 secondaryFn: function () {
                                     PlaybookWizardStore.nextSaveAndGoto('home.playbook.dashboard.insights', {
                                         include_play_name: true
@@ -707,7 +708,7 @@ angular
                                     PlaybookWizardStore.nextSaveAndGoto('home.playbook');
                                 },
                                 nextLabel: 'Save & Go to Campaign List',
-                                nextClass: 'campaign-wizard-save-and-campaign-list',
+                                nextClass: 'aptrinsic-campaign-wizard-save-and-campaign-list',
                                 progressDisabled: true
                             }
                         ];

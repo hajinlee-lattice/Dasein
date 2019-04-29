@@ -85,6 +85,9 @@ public class    ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExpo
 
     private void buildTablesForRetryRequests(List<ImportExportRequest> requests) {
         Set<String> tableKeysForRetry = Sets.newHashSet( //
+                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_TARGETTABLE, //
+                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
                 ACCOUNT_DIFF_TABLE_NAME, //
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //

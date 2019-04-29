@@ -82,7 +82,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
 
     public PlayLaunchDashboard getPlayLaunchDashboard(String customerSpace, String playName,
             List<LaunchState> launchStates, Long startTimestamp, Long offset, Long max, String sortby,
-            Boolean descending, Long endTimestamp, String orgId, String externalSysType, boolean includeLookupIdMap) {
+            Boolean descending, Long endTimestamp, String orgId, String externalSysType) {
 
         String url = constructUrl(DASHBOARD_URL, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
@@ -117,7 +117,6 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             params.add("org-id=" + orgId.trim());
             params.add("external-sys-type=" + externalSysType.trim());
         }
-        params.add("include-lookup-id-map=" + includeLookupIdMap);
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }

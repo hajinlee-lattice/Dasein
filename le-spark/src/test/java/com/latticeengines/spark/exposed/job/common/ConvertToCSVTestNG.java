@@ -42,6 +42,7 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
     public void test() {
         uploadData();
         ConvertToCSVConfig config = new ConvertToCSVConfig();
+        config.setCompress(true);
         config.setDisplayNames(ImmutableMap.of( //
                 "Attr1", "My Attr 1", //
                 "Attr3", "My Attr 3" //

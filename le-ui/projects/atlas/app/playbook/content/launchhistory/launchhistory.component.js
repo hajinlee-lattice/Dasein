@@ -32,7 +32,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 items: FilterData
             }
         },
-        systemNameMap: {}
+        systemMap: {}
     });
 
     vm.init = function() {
@@ -49,15 +49,15 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
         vm.updateLaunchData();
 
-        makeSystemNameMap(LaunchHistoryData.uniqueLookupIdMapping);
+        makeSystemMap(LaunchHistoryData.uniqueLookupIdMapping);
     };
 
-    var makeSystemNameMap = function(uniqueLookupIdMapping) {
+    var makeSystemMap = function(uniqueLookupIdMapping) {
         var uniqueLookupIdMapping = uniqueLookupIdMapping || {};
 
         for(var i in uniqueLookupIdMapping) {
             for(var j in uniqueLookupIdMapping[i]) {
-                vm.systemNameMap[uniqueLookupIdMapping[i][j].orgId] = uniqueLookupIdMapping[i][j].orgName;
+                vm.systemMap[uniqueLookupIdMapping[i][j].orgId] = uniqueLookupIdMapping[i][j];
             }
         }
     }
@@ -145,7 +145,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.summaryData = {
             selectedTargets: stats.selectedTargets,
             suppressed: stats.suppressed,
-            errors: stats.errors,
+            errors: stats.accountErrors,
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
@@ -226,8 +226,25 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         }
     }
 
+
+    vm.getSourceFileName = function(launchSummary) {
+        var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
+        var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
+        if (filePath) {
+            return filePath.split('\\').pop().split('/').pop();
+        } 
+    }
+
+    vm.getSourceFilePath = function(launchSummary) {
+        var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
+        var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
+        if (filePath) {
+            return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
+        }
+    }
+
     vm.getErrors = function(launchSummary) {
-        var destinationSysName = launchSummary.destinationSysName || "";
+        var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
         switch (destinationSysName) {
             case MARKETO:
                 return launchSummary.stats.contactErrors;

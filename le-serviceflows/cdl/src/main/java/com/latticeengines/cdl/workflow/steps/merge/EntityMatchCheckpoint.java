@@ -57,6 +57,7 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
 
     @Override
     public void execute() {
+        customerSpace = configuration.getCustomerSpace();
         boolean isCompleted = Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
         if (!isCompleted) {
             for (String contextKey: Arrays.asList( //

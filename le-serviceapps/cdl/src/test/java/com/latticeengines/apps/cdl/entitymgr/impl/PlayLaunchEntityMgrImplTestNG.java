@@ -103,11 +103,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
-        registerLookupIdMap(org1, externalSystemType, destinationAccountIdColumn_1);
-        registerLookupIdMap(org2, externalSystemType, destinationAccountIdColumn_2);
-
-        playLaunch1 = createPlayLaunch(org1, null, null);
-        playLaunch2 = createPlayLaunch(org1, null, null);
+        playLaunch1 = createPlayLaunch(null, null, null);
+        playLaunch2 = createPlayLaunch(null, null, null);
 
         playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
         playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
@@ -660,7 +657,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount,
             String orgId, String destinationSystemType) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType, true);
+                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 

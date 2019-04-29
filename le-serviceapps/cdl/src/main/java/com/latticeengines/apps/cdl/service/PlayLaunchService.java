@@ -30,7 +30,7 @@ public interface PlayLaunchService {
 
     PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType,
-            boolean skipLoadingAllLookupIdMapping, boolean includeLookupIdMap);
+            boolean skipLoadingAllLookupIdMapping);
 
     Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp,
             String orgId, String externalSysType);
