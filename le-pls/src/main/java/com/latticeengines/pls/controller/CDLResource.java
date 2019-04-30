@@ -326,7 +326,7 @@ public class CDLResource {
 
     @GetMapping(value = "/s3import/system")
     @ResponseBody
-    @ApiOperation("create new S3 Import system")
+    @ApiOperation("Get S3 Import system")
     public ResponseDocument<S3ImportSystem> getS3ImportSystem(@RequestParam String systemName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {

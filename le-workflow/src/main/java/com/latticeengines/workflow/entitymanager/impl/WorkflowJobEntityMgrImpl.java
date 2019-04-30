@@ -252,4 +252,13 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     public void updateInput(WorkflowJob workflowJob) {
         workflowJobDao.updateInput(workflowJob);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByStatuses(List<String> statuses) {
+        if (CollectionUtils.isEmpty(statuses)) {
+            return workflowJobDao.findAll();
+        }
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(null, null, statuses);
+    }
 }

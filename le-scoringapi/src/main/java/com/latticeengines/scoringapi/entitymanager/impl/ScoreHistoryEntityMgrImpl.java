@@ -8,6 +8,11 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +41,8 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
     @Inject
     private FirehoseService firehoseService;
 
+    protected DateTimeFormatter timestampFormatter = ISODateTimeFormat.dateTime();
+
     @PostConstruct
     public void init() {
     }
@@ -57,7 +64,6 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
         }
         firehoseService.sendBatch(deliveryStreamName, histories);
     }
-
 
     private void publishScoreHistory(ScoreRecordHistory scoreHistory) {
         firehoseService.send(deliveryStreamName, JsonUtils.serialize(scoreHistory));
@@ -121,6 +127,9 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
         history.setId(id);
         history.setRequestTimestamp(request.getRequestTimestamp());
+        if (StringUtils.isBlank(history.getRequestTimestamp())) {
+            history.setRequestTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+        }
         history.setLatticeId(response.getLatticeId());
         history.setIdType(request.getIdType());
         history.setRecordId(response.getId());

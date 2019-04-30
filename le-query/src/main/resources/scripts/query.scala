@@ -12,7 +12,7 @@ val sql = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.g
   Charset.forName("UTF-8"))
 
 println("----- BEGIN SCRIPT OUTPUT -----")
-println(s"SQL Statement:")
+println("SQL Statement:")
 println(sql)
 println("----- END SCRIPT OUTPUT -----")
 

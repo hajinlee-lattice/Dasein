@@ -71,4 +71,6 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
      */
     List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId, List<String> workflowTypes,
             List<String> statuses);
+
+    List<WorkflowJob> findByStatuses(List<String> statuses);
 }
