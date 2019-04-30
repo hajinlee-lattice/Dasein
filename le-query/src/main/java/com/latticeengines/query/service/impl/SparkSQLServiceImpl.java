@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,15 +68,21 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     private String executorMem;
 
     @Value("${dataflowapi.spark.max.executors}")
-    private String maxExecutors;
+    private int maxExecutors;
 
     @Value("${dataflowapi.spark.min.executors}")
-    private String minExecutors;
+    private int minExecutors;
 
     @Override
-    public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap) {
+    public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
+                                             int scalingFactor, String secondaryJobName) {
         String tenantId = attrRepo.getCustomerSpace().getTenantId();
-        String jobName = tenantId + "~SparkSQL";
+        String jobName;
+        if (StringUtils.isNotBlank(secondaryJobName)) {
+            jobName = tenantId + "~SparkSQL~" + secondaryJobName;
+        } else {
+            jobName = tenantId + "~SparkSQL";
+        }
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
             livyHost = emrCacheService.getLivyUrl();
@@ -85,7 +92,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
             LivySession session = livySessionService.startSession(livyHost, jobName, //
-                    getLivyConf(), getSparkConf());
+                    getLivyConf(), getSparkConf(scalingFactor));
             bootstrapAttrRepo(session, hdfsPathMap);
             return session;
         });
@@ -157,11 +164,18 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return conf;
     }
 
-    private Map<String, String> getSparkConf() {
+    private Map<String, String> getSparkConf(int scalingFactor) {
+        scalingFactor = Math.max(scalingFactor, 1);
         Map<String, String> conf = new HashMap<>();
-        conf.put("spark.executor.instances", String.valueOf(Math.max(Integer.valueOf(minExecutors), 1)));
-        conf.put("spark.dynamicAllocation.minExecutors", minExecutors);
-        conf.put("spark.dynamicAllocation.maxExecutors", maxExecutors);
+        int minExe = minExecutors * scalingFactor;
+        if (scalingFactor > 1) {
+            // when scaling factor > 1, we eagerly want more executors
+            minExe *= 2;
+        }
+        int maxExe = maxExecutors * scalingFactor;
+        conf.put("spark.executor.instances", String.valueOf(Math.max(minExe, 1)));
+        conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
+        conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;
     }

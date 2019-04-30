@@ -78,7 +78,7 @@ public class SparkSQLQueryTester {
     }
 
     private void setupLivyEnvironment() {
-        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap);
+        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, null);
     }
 
     private void reuseLivyEnvironment(int sessionId) {

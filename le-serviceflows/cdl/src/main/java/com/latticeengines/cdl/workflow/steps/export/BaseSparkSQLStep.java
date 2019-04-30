@@ -75,7 +75,8 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         QueryServiceUtils.setAttrRepo(attrRepo);
         QueryServiceUtils.toLocalAttrRepoMode();
-        livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap);
+        livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
+                1, getClass().getSimpleName());
     }
 
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
