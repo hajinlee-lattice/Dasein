@@ -139,7 +139,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
-        log.info(String.format("The extract path is: %s", path));
+        log.info(String.format("The extract path before process is: %s", path));
+        path = processExtractPath(path);
+        log.info(String.format("The extract path after process is: %s", path));
 
         Map<String, String> fieldNameMapping = getFieldNameMapping(rtsBulkScoringConfig);
 
@@ -655,6 +657,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
             return 0;
         }
+    }
+
+    private String processExtractPath(String path) {
+        if (path.endsWith(".avro")) {
+            int index = path.lastIndexOf("/");
+            return path.substring(0, index);
+        }
+        return path;
     }
 
 }
