@@ -478,7 +478,6 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public boolean checkSourceExist(Source source) {
-        boolean sourceExists = false;
         String sourceDir = null;
         if (source instanceof IngestionSource) {
             sourceDir = hdfsPathBuilder
@@ -489,12 +488,12 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         try {
             if (HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
-                sourceExists = true;
+                return true;
             }
         } catch (Exception e) {
             log.warn("Failed to check " + source + " at " + sourceDir, e);
         }
-        return sourceExists;
+        return false;
     }
 
     @Override
