@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableList;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -40,8 +39,6 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
     static final String BEAN_NAME = "profileContact";
 
     private static final Logger log = LoggerFactory.getLogger(ProfileContact.class);
-
-    private List<String> dedupFields = ImmutableList.of(InterfaceName.AccountId.name());
 
     @Override
     protected void initializeConfiguration() {
@@ -71,7 +68,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         TransformationStepConfig profile = profile(masterTableName);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix);
         TransformationStepConfig removeOrphan = removeOrphan(bucketStep);
-        TransformationStepConfig calc = calcStats(profileStep, removeOrphanStep, statsTablePrefix, dedupFields);
+        TransformationStepConfig calc = calcStats(profileStep, removeOrphanStep, statsTablePrefix, null);
         TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
                 DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------
