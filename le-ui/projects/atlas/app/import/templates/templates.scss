@@ -1,10 +1,8 @@
 @import "../../../../common/widgets/layout/layout.scss";
 @import "../../../../common/widgets/colors.scss";
-  .templates-main-container {
-    max-width: 1200px;
 
     .import-templates {
-      margin-top: 1.5em;
+      // margin-top: 1.5em;
       .cell-error {
         background-color: $ruby;
       }
@@ -43,10 +41,7 @@
         & > .le-table-cell > * {
           color: $pearl-white;
         }
-        & > .le-table-cell {        
-          .fa.pause-play {
-            border-color: rgba(255,255,255,0.5);
-          }
+        & > .le-table-cell {
           .le-blu-link {
             color: $pearl-white;
 
@@ -68,22 +63,3 @@
       }
 
     }
-  }
-
-.fa.pause-play {
-  font-size: 10px;
-  border-width: 1px;
-  border-radius: 50%;
-  border-style: solid;
-  padding: 8px 8px 6px 8px;
-  display: inline-block;
-  &.fa-pause {
-    border-color: green;
-  }
-  &.fa-play {
-    border-color: gray;
-  }
-  &:hover {
-    cursor: pointer;
-  }
-}
