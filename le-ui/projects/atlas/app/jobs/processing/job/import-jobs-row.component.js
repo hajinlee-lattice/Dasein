@@ -1,8 +1,8 @@
 angular.module('lp.jobs.import.row', [
-    'common.modal'
+    'common.modal', 'mainApp.appCommon.services.HealthService'
 ])
 .directive('importJobRow', [function () {
-    var controller = ['$scope', '$q', '$filter', 'JobsStore', 'Modal', 'AuthorizationUtility', 'Banner', function ($scope, $q, $filter, JobsStore, Modal, AuthorizationUtility, Banner) {
+    var controller = ['$scope', '$q', '$filter', 'JobsStore', 'Modal', 'AuthorizationUtility', 'HealthService', function ($scope, $q, $filter, JobsStore, Modal, AuthorizationUtility, HealthService) {
         $scope.thejob = $scope.job;
         $scope.disableButton = false;
         $scope.maxRowsTooltip = 3;
@@ -41,12 +41,6 @@ angular.module('lp.jobs.import.row', [
                     if(result.Success === true) {
                         $scope.job.jobStatus = 'Pending';
                     } 
-                    // else {
-                    //     var errorMsg = result.errorMsg;
-
-                    //     Banner.error({ message: errorMsg });
-                    // }
-                    
                 });
             }else if("closedForced" == action.action){
                 $scope.disableButton = false;
@@ -196,8 +190,12 @@ angular.module('lp.jobs.import.row', [
         };
         
         $scope.mouseDownRun  = function(job){
-            $scope.disableButton = true;
-            $scope.run(job);
+            HealthService.checkSystemStatus().then(function() {
+                $scope.disableButton = true;
+                $scope.run(job);
+            });
+
+           
         };
 
         $scope.getJobStatus = function(job){
