@@ -71,10 +71,11 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
                     continue;
                 }
 
+                log.info("begin checking cluster state.");
                 if (!emrService.isActive(clusterId)) {
                     log.info(String.format("Emr cluster has been shut down for job %s with cluster id %s.",
                             job.getPid(), clusterId));
-                    updateStatus(job);
+                    updateStatusToFailed(job);
                     continue;
                 }
                 log.info(String.format("trying to getting client by cluster %s", clusterId));
@@ -90,11 +91,12 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
                                     state.name()));
                             if (YarnApplicationState.FAILED.equals(state)
                                     || YarnApplicationState.KILLED.equals(state)) {
-                                updateStatus(job);
+                                updateStatusToFailed(job);
                             }
                             return true;
                         }
                     } catch (IOException | YarnException e) {
+                        log.info("internal error" + e.getMessage());
                         throw new RuntimeException(e);
                     }
                 });
@@ -105,7 +107,7 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
         return true;
     }
 
-    private void updateStatus(WorkflowJob job) {
+    private void updateStatusToFailed(WorkflowJob job) {
         log.info(String.format("update status to failed for workflow job.", job.getPid()));
         job.setStatus(JobStatus.FAILED.name());
         workflowJobEntityMgr.update(job);
