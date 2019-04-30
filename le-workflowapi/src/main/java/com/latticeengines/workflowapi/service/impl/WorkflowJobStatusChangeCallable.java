@@ -14,12 +14,12 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.amazonaws.services.batch.model.JobStatus;
+import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -33,11 +33,13 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
     private static final long period = TimeUnit.HOURS.toMillis(72);
     private WorkflowJobEntityMgr workflowJobEntityMgr;
     private EMREnvService emrEnvService;
+    private EMRService emrService;
     private JobCacheService jobCacheService;
 
     public WorkflowJobStatusChangeCallable(Builder builder) {
         this.workflowJobEntityMgr = builder.workflowJobEntityMgr;
         this.emrEnvService = builder.emrEnvService;
+        this.emrService = builder.emrService;
         this.jobCacheService = builder.jobCacheService;
     }
 
@@ -69,25 +71,26 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
                     continue;
                 }
 
+                if (!emrService.isActive(clusterId)) {
+                    log.info(String.format("Emr cluster has been shut down for job %s with cluster id %s.",
+                            job.getPid(), clusterId));
+                    updateStatus(job);
+                    continue;
+                }
+                log.info(String.format("trying to getting client by cluster %s", clusterId));
                 RetryTemplate template = RetryUtils.getRetryTemplate(3);
                 template.execute(context -> {
                     try {
                         try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
                             yarnClient.start();
-                            ApplicationId applicationId = ConverterUtils.toApplicationId(appId);
+                            ApplicationId applicationId = ApplicationId.fromString(appId);
                             ApplicationReport appReport = yarnClient.getApplicationReport(applicationId);
                             YarnApplicationState state = appReport.getYarnApplicationState();
                             log.info(String.format("begin to deal with workflow %s, %s, %s.", job.getPid(), clusterId,
                                     state.name()));
                             if (YarnApplicationState.FAILED.equals(state)
                                     || YarnApplicationState.KILLED.equals(state)) {
-                                log.info(String.format("update status to failed for workflow job.", job.getPid()));
-                                job.setStatus(JobStatus.FAILED.name());
-                                workflowJobEntityMgr.update(job);
-                                if (job.getWorkflowId() != null) {
-                                    log.info(String.format("evict cache for workflow job %s.", job.getPid()));
-                                    jobCacheService.evictByWorkflowIds(Collections.singletonList(job.getWorkflowId()));
-                                }
+                                updateStatus(job);
                             }
                             return true;
                         }
@@ -102,9 +105,20 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
         return true;
     }
 
+    private void updateStatus(WorkflowJob job) {
+        log.info(String.format("update status to failed for workflow job.", job.getPid()));
+        job.setStatus(JobStatus.FAILED.name());
+        workflowJobEntityMgr.update(job);
+        if (job.getWorkflowId() != null) {
+            log.info(String.format("evict cache for workflow job %s.", job.getPid()));
+            jobCacheService.evictByWorkflowIds(Collections.singletonList(job.getWorkflowId()));
+        }
+    }
+
     public static class Builder {
         private WorkflowJobEntityMgr workflowJobEntityMgr;
         private EMREnvService emrEnvService;
+        private EMRService emrService;
         private JobCacheService jobCacheService;
 
         public Builder workflowJobEntityMgr(WorkflowJobEntityMgr workflowJobEntityMgr) {
@@ -119,6 +133,11 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
 
         public Builder jobCacheService(JobCacheService jobCacheService) {
             this.jobCacheService = jobCacheService;
+            return this;
+        }
+
+        public Builder emrService(EMRService emrService) {
+            this.emrService = emrService;
             return this;
         }
 
