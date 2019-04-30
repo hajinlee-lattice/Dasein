@@ -419,9 +419,6 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void validatePurgeSources(List<PurgeSource> toPurge, Map<String, PurgeSource> validationMap) {
-        for (PurgeSource sourceToPurge : toPurge) {
-            System.out.println("####purge Sources: " + sourceToPurge.getSourceName());
-        }
         Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
         Set<String> actualKeys = new HashSet<>();
         toPurge.forEach(purgeSource -> {
