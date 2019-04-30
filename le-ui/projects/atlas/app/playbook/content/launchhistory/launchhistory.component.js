@@ -145,7 +145,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         vm.summaryData = {
             selectedTargets: stats.selectedTargets,
             suppressed: stats.suppressed,
-            errors: stats.accountErrors,
+            accountErrors: stats.accountErrors,
+            contactErrors: stats.contactErrors,
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
