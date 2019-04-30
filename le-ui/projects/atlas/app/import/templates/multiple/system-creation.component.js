@@ -65,7 +65,7 @@ export default class SystemCreationComponent extends Component {
     render() {
         return (
             <ReactMainContainer>
-                <LeVPanel vstretch={"true"} hstretch={"true"}>
+                <LeVPanel vstretch={"true"} hstretch={"true"} className={"system-creation"}>
                     <p className="le-header">Import Data: Add System</p>
                     <p className="le-sub-header">Select System</p>
                     <GridLayout gap={MIN_GAP}>
