@@ -47,6 +47,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 public class MetadataResolver {
     private static Logger log = LoggerFactory.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false");
+    private static final String USER_PREFIX = "user_";
 
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
@@ -440,8 +441,12 @@ public class MetadataResolver {
             fieldType = fieldMapping.getFieldType().getAvroType().toString().toLowerCase();
         }
         if (cdlResolve) {
-            attribute.setName(
-                    ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
+            String attrName =
+                    ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField());
+            if (!fieldMapping.isMappedToLatticeField() && !attrName.startsWith(USER_PREFIX)) {
+                attrName = USER_PREFIX + attrName;
+            }
+            attribute.setName(attrName);
         } else {
             attribute
                     .setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getUserField()));
