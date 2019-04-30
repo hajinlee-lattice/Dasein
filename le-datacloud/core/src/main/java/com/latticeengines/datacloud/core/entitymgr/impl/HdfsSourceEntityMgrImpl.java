@@ -24,6 +24,7 @@ import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -483,7 +484,13 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Override
     public boolean checkSourceExist(String source) {
         boolean sourceExists = false;
-        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        Source chkSource = new GeneralSource(source);
+        String sourceDir;
+        if (chkSource instanceof IngestionSource) {
+            sourceDir = hdfsPathBuilder.constructIngestionDir(source).toString();
+        } else {
+            sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        }
         try {
             if (HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
                 sourceExists = true;
