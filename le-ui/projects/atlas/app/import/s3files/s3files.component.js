@@ -47,9 +47,9 @@ export default class S3FileList extends Component {
 
         // injectAsyncReducer(store, 's3files', s3reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
-        
-        console.log(store.getState()['s3files']);
-        s3actions.fetchS3Files();
+        let path = store.getState()['s3files'].path;
+        console.log(path);
+        s3actions.fetchS3Files(path);
 
         this.setState({
             forceReload: false,

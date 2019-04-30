@@ -1,7 +1,8 @@
 import states from 'atlas/import/templates/multiple/states';
 import s3filestates from 'atlas/import/s3files/s3files.states';
 import connectrosstates from 'atlas/connectors/connectors.states';
-
+import statessingle from 'atlas/import/templates/states';
+// projects/atlas/app/import/templates/states.js
 const modulesStates = [];
 
 function mergeStates(imported) {
@@ -13,5 +14,6 @@ function mergeStates(imported) {
 mergeStates(states);
 mergeStates(connectrosstates);
 mergeStates(s3filestates);
+mergeStates(statessingle);
 
 export default modulesStates;
