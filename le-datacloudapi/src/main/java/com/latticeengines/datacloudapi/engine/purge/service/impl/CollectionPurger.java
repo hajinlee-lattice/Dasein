@@ -9,6 +9,9 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.service.HiveTableService;
@@ -51,8 +54,21 @@ public abstract class CollectionPurger implements SourcePurger {
         List<PurgeStrategy> strategies = purgeStrategyEntityMgr.findStrategiesByType(getSourceType());
         List<PurgeSource> list = new ArrayList<>();
         for (PurgeStrategy strategy : strategies) {
-            Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
-            list.addAll(constructPurgeSources(strategy, sourcePaths));
+            // check whether source exists or no : if not existing continue to
+            // next loop iteration and skip constructPurgeSources
+            String sourceName = strategy.getSource();
+            String sourceType = strategy.getSourceType().name();
+            if (hdfsSourceEntityMgr.checkSourceExist(sourceName)) {
+                Source source;
+                if (sourceType.equals(SourceType.INGESTION_SOURCE)) {
+                    source = new IngestionSource();
+                    ((IngestionSource) source).setIngestionName(sourceName);
+                } else {
+                    source = new GeneralSource(strategy.getSource());
+                }
+                Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
+                list.addAll(constructPurgeSources(strategy, sourcePaths));
+            }
         }
         return list;
     }
