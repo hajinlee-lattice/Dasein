@@ -1,5 +1,6 @@
 import './import.utils';
 import { actions, reducer } from './import.redux';
+
 angular
 .module('lp.import', [
     'common.wizard',
@@ -87,15 +88,42 @@ angular
                 }
             }
         })
+        .state('home.import.s3', {
+            url:'/s3',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
+            resolve: {
+                path: () => {
+                    return 'files';
+                },
+                ngservices: (ImportWizardStore) => {
+                    let obj = {
+                        ImportWizardStore: ImportWizardStore
+                    }
+                    return obj;
+                }
+            },
+            views: {
+                'main@': {
+                    component: 'reactAngularMainComponent'
+                }
+            }
+        })
         .state('home.import.entry', {
             url: '/entry',
             params: {
                 action: null,
                 type: null,
-                data: null
+                data: null,
+                selectedItem: null
             },
             resolve:{
-                DateSupport : function($state){
+                DateSupport : function($state, $stateParams){
+
+                    console.log($stateParams);
+
                     let redux = $state.get('home.import').data.redux;
                     // console.log('redux', redux);
                     redux.fetchDateSupport();

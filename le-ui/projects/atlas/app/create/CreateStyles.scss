@@ -56,6 +56,34 @@ section.container.setup-import {
     textarea {
         overflow: hidden;
     }
+    .uploadContainer {
+        &.hasS3 {
+            margin-top: 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            .button {
+                text-align: left;
+            }
+            & > div {
+                margin-top: 0;
+                &:last-of-type {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: flex-end;
+                    .button {
+                        font-size: 10px;
+                        margin-left: 4px;
+                    }
+                }
+            }
+        }
+    }
+    .s3help {
+        text-align: right;
+        font-size: 11px;
+        color: #26639b;
+    }
     div.file-upload {
         &.disabled,
         &.disabled * {

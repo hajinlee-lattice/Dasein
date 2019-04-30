@@ -1,5 +1,6 @@
 import React, { Component, react2angular, UIRouter, UIView } from "common/react-vendor";
 import ReactRouter from './router';
+import NgState from "atlas/ng-state";
 import './react-main.component.scss';
 import LeModal from 'common/widgets/modal/le-modal';
 import { store, injectAsyncReducer } from 'store';
@@ -11,6 +12,7 @@ import ReactMessagingService from '../../../common/components/exceptions/react.m
 export default class ReactAngularMainComponent extends Component {
     constructor(props) {
         super(props);
+        NgState.setAngularState(this.props.$state);
     }
 
 
@@ -53,4 +55,4 @@ angular
     .module("le.react.maincomponent", ['common.exceptions'])
     .component(
         "reactAngularMainComponent",
-        react2angular(ReactAngularMainComponent, ['path', 'ngservices'], ['ServiceErrorUtility']));
+        react2angular(ReactAngularMainComponent, ['path', 'ngservices'], ["$state", 'ServiceErrorUtility']));

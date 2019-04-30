@@ -34,7 +34,6 @@ angular.module('lp.import.entry', [
     });
 
     vm.init = function() {
-
         const templateAction = $stateParams.action ? $stateParams.action : ImportWizardStore.getTemplateAction();
 
         ImportWizardStore.setTemplateAction(templateAction);
@@ -88,6 +87,14 @@ angular.module('lp.import.entry', [
                 vm.changeEntityType('Product', 'producthierarchy', 'HierarchySchema'); 
                 break;
         }
+        vm.next = false;
+
+        if ($stateParams.selectedItem) {
+            console.log($stateParams.selectedItem);
+            // vm.fileName = $stateParams.selectedItem.file_name;
+            // vm.fileDone($stateParams.selectedItem);
+            // vm.next = true;
+        }
     }
 
     vm.getDefaultMessage = function()  {
@@ -100,7 +107,6 @@ angular.module('lp.import.entry', [
         if(vm.params.scope){
             vm.params.scope.cancel();
         }
-        vm.next = false;
     }
 
     function getInvalidColumns(columns){
