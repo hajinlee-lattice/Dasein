@@ -11,6 +11,7 @@ angular
                 infoTemplate: '=',
                 defaultMessage: '=',
                 defaultMessageFn: '&',
+                hasSthreeFiles: '@',
                 fileRequired: '@',
                 fileAccept: '@',
                 fileSelect: '&',
@@ -23,12 +24,17 @@ angular
             },
             templateUrl: 'app/create/fileuploader/FileUploaderTemplate.html',
             controllerAs: 'vm_uploader_container',
-            controller: function ($scope) {
+            controller: function ($scope, $state) {
                 angular.extend(this, $scope);
 
                 this.getTooltipConfig = function (key) {
                     return this.tooltipConfig != undefined ? JSON.parse(this.tooltipConfig)[key] : '';
                 }
+
+                this.getS3Files = function () {
+                    $state.go('home.import.s3', {}, { reload: true } );
+                }
+
             }
         };
     })

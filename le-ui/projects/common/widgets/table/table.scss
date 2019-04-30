@@ -54,6 +54,13 @@ $font-size: 12px;
             background-color: $saphire-two;
         }
     }
+    &.selectable {
+        .le-table-row {
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
     .le-table-body {
         background: none;
         min-height: 0px;

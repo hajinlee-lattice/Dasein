@@ -1,22 +1,29 @@
-import React, { Component } from "common/react-vendor";
+import React, { Component } from "../../../../common/react-vendor";
+import NgState from "../../ng-state";
+
+import ReactMainContainer from "atlas/react/react-main-container";
+import httpService from "../../../../common/app/http/http-service";
+import { SUCCESS } from "../../../../common/app/http/response";
+
 import { store, injectAsyncReducer } from 'store';
-import { actions, reducer } from './multipletemplates.redux';
-import LeHPanel from 'common/widgets/container/le-h-panel';
-import ReactRouter from '../../../react/router';
-import NgState from "atlas/ng-state";
-import {
-    SPACEBETWEEN,
-    SPACEEVEN,
-    CENTER
-} from "common/widgets/container/le-alignments";
+import { s3actions, s3reducer } from 'atlas/import/s3files/s3files.redux';
+
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
     EDIT_TEMPLATE,
     IMPORT_DATA
-} from "../templates-row-actions";
-import EditControl from "common/widgets/table/controlls/edit-controls";
-import CopyComponent from "common/widgets/table/controlls/copy-controll";
-import EditorText from "common/widgets/table/editors/editor-text";
+} from "./templates-row-actions";
+import "./templates.scss";
+import Observer from "../../../../common/app/http/observer";
+import EditControl from "../../../../common/widgets/table/controlls/edit-controls";
+import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
+import EditorText from "../../../../common/widgets/table/editors/editor-text";
+
+import LeButton from "common/widgets/buttons/le-button";
+import {
+    LeToolBar
+} from "common/widgets/toolbar/le-toolbar";
+import "./templates.scss";
 
 import messageService from "common/app/utilities/messaging-service";
 import Message, {
@@ -24,27 +31,56 @@ import Message, {
 } from "common/app/utilities/message";
 
 import LeTable from "common/widgets/table/table";
-import './multiple-templates.list.scss';
-import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
-import ReactMainContainer from "atlas/react/react-main-container";
-import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
 
-import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
-import { TYPE_SUCCESS } from "../../../../../common/widgets/banner/le-banner.utils";
-export default class MultipleTemplatesList extends Component {
-
+export default class TemplatesComponent extends Component {
     constructor(props) {
         super(props);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
+        this.emailCredentialConfig = {
+            label: "Setup Automation",
+            classNames: "gray-button"
+        };
         this.state = {
             forceReload: false,
             showEmpty: false,
             showLoading: false,
             data: []
         };
+
     }
 
+    createTemplate(response) {
+        let entity = "";
+        switch (response.type) {
+            case "Accounts": {
+                entity = "accounts";
+                break;
+            }
+            case "Contacts": {
+                entity = "contacts";
+                break;
+            }
+            case "Product Purchases": {
+                entity = "productpurchases";
+                break;
+            }
+            case "Product Bundles": {
+                entity = "productbundles";
+                break;
+            }
+            case "Product Hierarchy": {
+                entity = "producthierarchy";
+                break;
+            }
+        }
+        let goTo = `home.import.entry.${entity}`;
+
+        console.log(response.data.Path);
+        s3actions.setPath(response.data.Path);
+
+        NgState.getAngularState().go(goTo, response);
+    }
 
     actionCallbackHandler(response) {
         switch (response.action) {
@@ -60,32 +96,48 @@ export default class MultipleTemplatesList extends Component {
         }
     }
 
-    handleChange = () => {
-
-        const data = store.getState()['multitemplates'];
-        let templates = data.templates;
-        this.setState({
-            forceReload: true,
-            showEmpty: templates && templates.length == 0,
-            showLoading: false,
-            data: templates
-        });
-        this.setState({ forceReload: false });
-    }
-
     componentWillUnmount() {
-        this.unsubscribe();
+        httpService.unsubscribeObservable(this.observer);
+
     }
 
     componentDidMount() {
-        injectAsyncReducer(store, 'multitemplates', reducer);
-        this.unsubscribe = store.subscribe(this.handleChange);
-        actions.fetchTemplates();
+        injectAsyncReducer(store, 's3files', s3reducer);
+
         this.setState({
-            forceReload: false,
+            forceReload: true,
             showEmpty: false,
             showLoading: true
         });
+        this.observer = new Observer(
+            response => {
+                if (response.status == SUCCESS) {
+                    this.setState({
+                        forceReload: true,
+                        showEmpty: response.data && response.data.length == 0,
+                        showLoading: false,
+                        data: response.data
+                    });
+                    this.setState({ forceReload: false });
+                } else {
+                    this.setState({
+                        forceReload: false,
+                        showEmpty: true,
+                        showLoading: false,
+                        data: []
+                    });
+                }
+            },
+            error => {
+                this.setState({
+                    forceReload: false,
+                    showEmpty: true,
+                    showLoading: false,
+                    data: []
+                });
+            }
+        );
+        httpService.get("/pls/cdl/s3import/template", this.observer);
     }
 
     saveTemplateNameHandler(cell, value) {
@@ -93,6 +145,25 @@ export default class MultipleTemplatesList extends Component {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
             copy[cell.props.colName] = value;
+            httpService.put(
+                "/pls/cdl/s3/template/displayname",
+                copy,
+                new Observer(
+                    response => {
+                        cell.toogleEdit();
+                        if (response.getStatus() === SUCCESS) {
+                            let newState = [...this.state.data];
+                            newState[cell.props.rowIndex][
+                                cell.props.colName
+                            ] = value;
+                            this.setState({ data: newState });
+                        }
+                    },
+                    error => {
+                        cell.toogleEdit();
+                    }
+                )
+            );
         }
     }
     getConfig() {
@@ -100,18 +171,8 @@ export default class MultipleTemplatesList extends Component {
             name: "import-templates",
             header: [
                 {
-                    name: "Actions",
-                    displayName: "Active",
-                    sortable: false
-                },
-                {
-                    name: "SystemName",
-                    displayName: "System Name",
-                    sortable: false
-                },
-                {
-                    name: "System",
-                    displayName: "System",
+                    name: "TemplateName",
+                    displayName: "Name",
                     sortable: false
                 },
                 {
@@ -135,9 +196,6 @@ export default class MultipleTemplatesList extends Component {
                 }
             ],
             columns: [
-                {
-                    colSpan: 1
-                },
                 {
                     colSpan: 2,
                     template: cell => {
@@ -174,9 +232,6 @@ export default class MultipleTemplatesList extends Component {
                             }
                         }
                     }
-                },
-                {
-                    colSpan: 1
                 },
                 {
                     colSpan: 2
@@ -220,6 +275,9 @@ export default class MultipleTemplatesList extends Component {
                             minute: "2-digit"
                         };
                         var formatted = new Date(value);
+                        // console.log(
+                        //     `grid formatted: ${formatted} value: ${value} options: ${options}`
+                        // );
                         var buh = "err";
                         try {
                             buh = formatted.toLocaleDateString(
@@ -227,37 +285,20 @@ export default class MultipleTemplatesList extends Component {
                                 options
                             );
                         } catch (e) {
-                            // console.log(e);
+                            console.log(e);
                         }
 
                         return buh;
                     }
                 },
                 {
-                    colSpan: 1,
+                    colSpan: 3,
                     template: cell => {
                         return (
-                            <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-                                <i class="fa fa-upload" aria-hidden="true" onClick={() => {
-                                    bannerActions.info(store, {title: 'Test Banner', message: 'Here the message'});
-                                }}></i>
-                                <i class="fa fa-plus" aria-hidden="true" onClick={() => {
-                                    NgState.getAngularState().go('home.import.entry', response);                                    
-                                    // bannerActions.error(store, {title: 'Test Banner 2', message: 'Here the message 1'});
-                                }}></i>
-                                <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
-                                    NgState.getAngularState().go('home.import.entry', response);
-                                    // bannerActions.success(store, {title: 'Test Banner 3', message: 'Here the message 2'});
-                                }}></i>
-
-                            </LeHPanel>
-                            // <TemplatesRowActions
-                            //     rowData={cell.props.rowData}
-                            //     callback={this.actionCallbackHandler}
-                            // />
-                            // rowData={cell.props.rowData}
-                            // callback={this.actionCallbackHandler}
-                            // />
+                            <TemplatesRowActions
+                                rowData={cell.props.rowData}
+                                callback={this.actionCallbackHandler}
+                            />
                         );
                     }
                 }
@@ -266,26 +307,33 @@ export default class MultipleTemplatesList extends Component {
 
         return config;
     }
+
     render() {
         return (
             <ReactMainContainer>
-                <LeToolBar justifycontent={SPACE_BETWEEN}>
-                    <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-                    <LeButton
-                        name="add"
-                        config={{
-                            label: "Add System",
-                            classNames: "blue-button",
-                            iconside: RIGHT,
-                            icon: 'fa fa-plus-circle'
-                        }}
-                        callback={() => {
-                            ReactRouter.getStateService().go('sistemcreation');
-                        }}
-                    />
+                <LeToolBar>
+                    <div className="right">
+                        <LeButton
+                            name="credentials"
+                            config={this.emailCredentialConfig}
+                            callback={() => {
+                                httpService.get(
+                                    "/pls/dropbox",
+                                    new Observer(response => {
+                                        // console.log("BACK HERE ", response);
+                                    }),
+                                    {
+                                        ErrorDisplayMethod: "Banner",
+                                        ErrorDisplayOptions: '{"title": "Warning"}',
+                                        ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+                                    }
+                                );
+                            }}
+                        />
+                    </div>
                 </LeToolBar>
                 <LeTable
-                    name="multiple-templates"
+                    name="import-templates"
                     config={this.getConfig()}
                     forceReload={this.state.forceReload}
                     showLoading={this.state.showLoading}

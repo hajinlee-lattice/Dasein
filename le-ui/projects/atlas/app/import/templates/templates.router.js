@@ -24,12 +24,20 @@ angular
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Data Processing & Analysis'
             },
-            views: {
-                'summary@': {
-                    component: 'leSummaryComponent'
+            resolve: {
+                path: () => {
+                    return 'templatelist';
                 },
+                ngservices: (TemplatesStore) => {
+                    let obj = {
+                        TemplatesStore : TemplatesStore
+                    }
+                    return obj;
+                }
+            },
+            views: {
                 'main@': {
-                    component: 'templatesComponent'
+                    component: 'reactAngularMainComponent'
                 }
             },
         })
