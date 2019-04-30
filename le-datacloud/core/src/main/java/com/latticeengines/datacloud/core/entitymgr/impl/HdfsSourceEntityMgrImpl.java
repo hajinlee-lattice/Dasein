@@ -460,7 +460,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngestionName(), version)
                     .toString();
         } else {
-            versionDir = hdfsPathBuilder.constructSourceDir(source).toString();
+            versionDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version)
+                    .toString();
         }
         try {
             String success = versionDir + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;

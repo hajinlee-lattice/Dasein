@@ -57,9 +57,8 @@ public abstract class CollectionPurger implements SourcePurger {
             // check whether source exists or no : if not existing continue to
             // next loop iteration and skip constructPurgeSources
             String sourceName = strategy.getSource();
-            String sourceType = strategy.getSourceType().name();
             Source source = null;
-            if (sourceType.equals(SourceType.INGESTION_SOURCE)) {
+            if (strategy.getSourceType().equals(SourceType.INGESTION_SOURCE)) {
                 source = new IngestionSource();
                 ((IngestionSource) source).setIngestionName(sourceName);
             } else {
