@@ -46,9 +46,15 @@
             <li>
                 <dl>
                     <dt>Errors</dt>
-                    <dd class="red-text">{{vm.summaryData.errors | number}}</dd>
+                    <dd class="red-text">{{vm.summaryData.accountErrors | number}}</dd>
                 </dl>
             </li>
+<!--             <li>
+                <dl>
+                    <dt>Contact Errors</dt>
+                    <dd class="red-text">{{vm.summaryData.contactErrors | number}}</dd>
+                </dl>
+            </li> -->
         	<li>
         		<dl>
         			<dt>Launched Recommendations</dt>
@@ -90,7 +96,7 @@
                         System Name
                     </th>
                     <th ng-if="!vm.allPlaysHistory">
-                        Audience Name
+                        Destination
                     </th>
     				<th class="sortable" ng-click="vm.sort('accountsSelected'); vm.sortDesc = !vm.sortDesc">
                         Selected
@@ -136,9 +142,8 @@
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
                     <td ng-if="vm.allPlaysHistory" class="text-ellipsis" title="{{launch.playDisplayName}}">{{launch.playDisplayName}}</td>
                     <td class="text-ellipsis" title="{{vm.systemMap[launch.destinationOrgId].orgName}}">{{vm.systemMap[launch.destinationOrgId].orgName}}</td>
-                    <td ng-if="!vm.allPlaysHistory">
-                        <span ng-if="launch.audienceName" class="text-ellipsis" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
-                        <span ng-if="!launch.audienceName" class="text-ellipsis"> -- </span>
+                    <td ng-if="!vm.allPlaysHistory" class="text-ellipsis" >
+                        <span ng-if="launch.audienceName" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
                     </td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>
