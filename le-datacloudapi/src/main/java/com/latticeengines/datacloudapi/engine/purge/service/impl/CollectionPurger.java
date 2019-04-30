@@ -58,14 +58,14 @@ public abstract class CollectionPurger implements SourcePurger {
             // next loop iteration and skip constructPurgeSources
             String sourceName = strategy.getSource();
             String sourceType = strategy.getSourceType().name();
-            if (hdfsSourceEntityMgr.checkSourceExist(sourceName)) {
-                Source source;
-                if (sourceType.equals(SourceType.INGESTION_SOURCE)) {
-                    source = new IngestionSource();
-                    ((IngestionSource) source).setIngestionName(sourceName);
-                } else {
-                    source = new GeneralSource(strategy.getSource());
-                }
+            Source source = null;
+            if (sourceType.equals(SourceType.INGESTION_SOURCE)) {
+                source = new IngestionSource();
+                ((IngestionSource) source).setIngestionName(sourceName);
+            } else {
+                source = new GeneralSource(strategy.getSource());
+            }
+            if (hdfsSourceEntityMgr.checkSourceExist(source)) {
                 Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
                 list.addAll(constructPurgeSources(strategy, sourcePaths));
             }
