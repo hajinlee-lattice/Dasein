@@ -45,7 +45,7 @@ export default class S3FileList extends Component {
 
     componentDidMount() {
 
-        // injectAsyncReducer(store, 's3files', s3reducer);
+        injectAsyncReducer(store, 's3files', s3reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
         let path = store.getState()['s3files'].path;
         console.log(path);
@@ -121,8 +121,6 @@ export default class S3FileList extends Component {
                                     showEmpty={this.state.showEmpty}
                                     data={this.state.data}
                                     onClick={(rowsSelected) => {
-                                        console.log(rowsSelected[0]);
-
                                         this.setState({ 
                                             enableButton: true,
                                             selectedItem: rowsSelected[0]
@@ -153,7 +151,9 @@ export default class S3FileList extends Component {
                                             classNames: "blue-button"
                                         }}
                                         callback={() => {
-                                            NgState.getAngularState().go('home.import.entry', this.state.selectedItem);
+                                            
+                                            // Same functionality as Next, Field mappings 
+                                            NgState.getAngularState().go('home.import.entry.producthierarchy', {selectedItem: this.state.selectedItem});
                                         }}
                                     />
                                 </div>

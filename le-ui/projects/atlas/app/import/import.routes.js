@@ -117,8 +117,7 @@ angular
                 action: null,
                 type: null,
                 data: null,
-                file_name: null,
-                file_path: null
+                selectedItem: null
             },
             resolve:{
                 DateSupport : function($state, $stateParams){
