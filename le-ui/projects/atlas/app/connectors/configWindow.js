@@ -60,6 +60,7 @@ export const openConfigWindow = () => {
 
             setTimeout(() => {
                     // Add errors to all inputs
+                    console.log(e.data.data);
                     const errors = e.data.data.visibleValues.reduce(
                         (errors, externalId) => {
                             console.log(`Visible ${externalId} value:`, e.data.data.configValues[externalId]);
@@ -175,10 +176,11 @@ export const openConfigWindow = () => {
 
     function verifyFieldMapping(fieldMappingValues, errors, externalId) {
         console.log(solutionInstanceConfig.orgType);
+        console.log(fieldMappingValues);
         switch(solutionInstanceConfig.orgType) {
           case MARKETO:
             var marketoFields = new Set();
-            if (fieldMappingValues.length == 0) {
+            if (!fieldMappingValues || fieldMappingValues.length == 0) {
                 errors[externalId] = `No fields have been mapped.`;
                 break;
             }
