@@ -77,7 +77,8 @@ public class QueryEvaluatorService {
         for (Lookup lookup : query.getLookups()) {
             if (lookup instanceof AttributeLookup) {
                 AttributeLookup attrLookup = (AttributeLookup) lookup;
-                if (BusinessEntity.Rating.equals(attrLookup.getEntity()) || attrRepo.hasAttribute(attrLookup)) {
+                if (BusinessEntity.Rating.equals(attrLookup.getEntity()) //
+                        || attrRepo.hasAttribute(attrLookup)) {
                     filteredLookups.add(lookup);
                 } else {
                     log.warn("Cannot find metadata for attribute lookup " + lookup.toString() + ", skip it.");
