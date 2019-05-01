@@ -89,8 +89,10 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void destroy() {
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("Pipeline_"));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("LDCDEV_"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(
+                "Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1"));
+        purgeStrategyEntityMgr
+                .delete(purgeStrategyEntityMgr.findStrategiesBySource("LDCDEV_SuspectRecords"));
         purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(ingestionToPurge.getSourceName()));
         purgeStrategyEntityMgr
                 .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToBak.getSourceName()));
@@ -134,7 +136,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
         pipelineTempSourceToPurge = new PurgeSource(srcName, hdfsPaths, null, false);
         PurgeStrategy strategy = new PurgeStrategy();
-        strategy.setSource("Pipeline_");
+        strategy.setSource(srcName);
         strategy.setSourceType(SourceType.TEMP_SOURCE);
         strategy.setHdfsDays(3);
         strategy.setNoBak(true);
@@ -151,7 +153,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         List<String> hiveTables = Collections.singletonList(hiveTable);
         operationalSourceToPurge = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
         PurgeStrategy strategy = new PurgeStrategy();
-        strategy.setSource("LDCDEV_");
+        strategy.setSource(srcName);
         strategy.setSourceType(SourceType.TEMP_SOURCE);
         strategy.setHdfsDays(14);
         strategy.setNoBak(true);
@@ -432,7 +434,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
                 validateMLSource(purgeSource);
             } else {
                 Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-                Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
+                Assert.assertTrue(
+                        isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             }
             if (validationMap.containsKey(key)) {
                 actualKeys.add(key);
