@@ -247,7 +247,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(count1 + count2 + count3, count);
     }
 
-    @DataProvider(name = "timefilterProvider", parallel = false)
+    @DataProvider(name = "timefilterProvider")
     private Object[][] timefilterProvider() {
         return getTimeFilterDataProvider();
     }
@@ -333,7 +333,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testAccountDataWithTranslation(String sqlUser, String queryContext) {
         testAccountDataWithTranslation(true, sqlUser);
-        testAccountDataWithTranslation(false, sqlUser);
+//        testAccountDataWithTranslation(false, sqlUser);
     }
 
     private void testAccountDataWithTranslation(boolean enforceTranslation, String sqlUser) {

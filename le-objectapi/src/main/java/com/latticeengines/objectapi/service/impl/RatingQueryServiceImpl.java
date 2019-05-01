@@ -190,7 +190,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             String queryStr = getQueryStr(frontEndQuery, version, "spark");
             System.out.println(queryStr);
-            return sparkSQLService.getData(customerSpace, livySession, queryStr);
+            return sparkSQLService.getData(customerSpace, livySession, queryStr, null);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -90,10 +91,15 @@ public class QueryEvaluatorService {
     }
 
     public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
+        return getDataFlux(attrRepo, query, sqlUser, null);
+    }
+
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser, //
+                                                 Map<String, Map<Long, String>> decodeMapping) {
         SQLQuery<?> sqlQuery = constructSqlQuery(attrRepo, query, sqlUser);
         AtomicLong startTime = new AtomicLong();
         AtomicLong counter = new AtomicLong(0);
-        return queryEvaluator.pipe(sqlQuery, query) //
+        Flux<Map<String, Object>> flux = queryEvaluator.pipe(sqlQuery, query) //
                 .doOnSubscribe(s -> startTime.set(System.currentTimeMillis())) //
                 .doOnNext(m -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
@@ -104,6 +110,33 @@ public class QueryEvaluatorService {
                             System.currentTimeMillis() - startTime.get());
                     log.info(msg);
                 });
+        if (MapUtils.isNotEmpty(decodeMapping)) {
+            flux = flux.map(result -> postProcess(result, decodeMapping));
+        }
+        return flux;
+    }
+
+    private Map<String, Object> postProcess(Map<String, Object> result, Map<String, Map<Long, String>> decodeMapping) {
+        if (MapUtils.isNotEmpty(result)) {
+            final Map<String, Object> modifier = result;
+            result.keySet() //
+                    .stream() //
+                    .filter(decodeMapping::containsKey) //
+                    .forEach(key -> { //
+                        Object val = modifier.get(key);
+                        if (val instanceof Long) {
+                            Long enumNumeric = (Long) val;
+                            if (enumNumeric == 0L) { // 0 is null
+                                modifier.put(key, null);
+                            } else if (decodeMapping.get(key).containsKey(enumNumeric)) {
+                                modifier.put(key, decodeMapping.get(key).get(enumNumeric));
+                            } else {
+                                modifier.put(key, enumNumeric);
+                            }
+                        }
+                    });
+        }
+        return result;
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
