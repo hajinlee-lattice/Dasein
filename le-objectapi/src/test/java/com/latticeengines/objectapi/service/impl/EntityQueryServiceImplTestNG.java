@@ -139,8 +139,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Product);
 
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 10);
 
         DataPage dataPage = getEntityQueryService(sqlUser).getData(frontEndQuery, DataCollection.Version.Blue, sqlUser, false);
@@ -160,8 +159,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 32802);
     }
 
@@ -176,7 +174,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         testAndAssertCount(sqlUser, count, 132658);
     }
 
-    @Test(groups = "functional", dataProvider = "userContexts", enabled = false)
+    @Test(groups = "functional", dataProvider = "userContexts")
     public void testMetricRestriction(String sqlUser, String queryContext) {
         final String phAttr = "AM_uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8__M_1_6__AS";
         FrontEndQuery frontEndQuery = new FrontEndQuery();
@@ -192,7 +190,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         Assert.assertEquals(count, 33248);
         testAndAssertCount(sqlUser, count, 33248);
-        testGetDataForMetricRestriction(sqlUser, phAttr, frontEndQuery);
+//        testGetDataForMetricRestriction(sqlUser, phAttr, frontEndQuery);
     }
 
     private void testGetDataForMetricRestriction(String sqlUser, final String phAttr, FrontEndQuery frontEndQuery) {
@@ -473,13 +471,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(frontEndRestriction2);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 203);
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
         testAndAssertCount(sqlUser, count, 217);
     }
 

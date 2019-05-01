@@ -41,7 +41,7 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
     @DataProvider(name = "userContexts", parallel = false)
     private Object[][] provideSqlUserContexts() {
         return new Object[][] {
-//                { SEGMENT_USER, "Redshift" },
+                { SEGMENT_USER, "Redshift" },
                 { SPARK_BATCH_USER, "Spark" }
         };
     }

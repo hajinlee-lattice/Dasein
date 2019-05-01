@@ -120,7 +120,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         preprocess(map, attrRepo, timeTranslator);
 
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
-        if (isCountQuery) {
+        if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         } else {
             if (CollectionUtils.isEmpty(query.getLookups())) {
