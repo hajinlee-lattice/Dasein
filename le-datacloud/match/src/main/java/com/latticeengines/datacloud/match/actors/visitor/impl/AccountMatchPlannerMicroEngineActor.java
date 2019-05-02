@@ -144,6 +144,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
             domainCollectService.enqueue(domain);
         }
 
+        matchKeyTuple
+                .setDomainFromMultiCandidates(matchStandardizationService.hasMultiDomain(inputRecord, keyPositionMap));
         matchTraveler.setMatchKeyTuple(matchKeyTuple);
         matchTraveler.addEntityMatchKeyTuple(BusinessEntity.Account.name(), matchKeyTuple);
         matchTraveler.addEntityMatchKeyTuple(BusinessEntity.LatticeAccount.name(), matchKeyTuple);

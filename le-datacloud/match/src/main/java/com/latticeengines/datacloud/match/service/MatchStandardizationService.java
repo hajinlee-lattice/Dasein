@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public interface MatchStandardizationService {
 
+    boolean hasMultiDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap);
+
     void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
             boolean treatPublicDomainAsNormal, EntityMatchKeyRecord record);
 
