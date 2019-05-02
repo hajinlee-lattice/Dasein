@@ -42,6 +42,9 @@
           color: $pearl-white;
         }
         & > .le-table-cell {
+          .fa.play-pause {
+            border-color: rgba(255,255,255,0.5);
+          }
           .le-blu-link {
             color: $pearl-white;
 
@@ -62,4 +65,18 @@
         }
       }
 
+    }
+
+    .fa.play-pause {
+      border-style: solid;
+      border-width: 1px;
+      border-radius: 50%;
+      &.fa-play {
+        border-color: gray;
+        padding: 8px 8px 6px 10px
+      }
+      &.fa-pause {
+        border-color: green;
+        padding: 8px 8px 6px 8px;
+      }
     }

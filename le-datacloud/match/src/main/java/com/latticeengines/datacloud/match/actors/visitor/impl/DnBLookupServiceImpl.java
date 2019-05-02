@@ -323,8 +323,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
         try {
             context = dnbFuture.get(dnbApiCallMaxWait, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            log.error("Calling/Waiting to call DnB realtime API got timeout after 90s");
             throw new RuntimeException(e);
         }
 

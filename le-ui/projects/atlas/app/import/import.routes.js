@@ -121,11 +121,7 @@ angular
             },
             resolve:{
                 DateSupport : function($state, $stateParams){
-
-                    console.log($stateParams);
-
                     let redux = $state.get('home.import').data.redux;
-                    // console.log('redux', redux);
                     redux.fetchDateSupport();
                 }
             },
