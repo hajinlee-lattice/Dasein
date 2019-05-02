@@ -38,6 +38,15 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
     @Inject
     private NameLocationService nameLocationService;
 
+    @Override
+    public boolean hasMultiDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap) {
+        if (!keyPositionMap.containsKey(MatchKey.Domain)) {
+            return false;
+        }
+        List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
+        return domainPosList.stream().filter(pos -> StringUtils.isNotBlank((String) inputRecord.get(pos))).count() > 1;
+    }
+
 
     // parseRecordForDomain() depends on having parsed Name/Location and DUNS and thus must run after
     // parseRecordForNameLocation() and parseRecordForDuns().
