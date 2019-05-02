@@ -220,7 +220,7 @@ export default class ConnectionsComponent extends Component {
                             disabled={!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo))}
                             config={{
                                 label: "Create",
-                                classNames: "gray-button"
+                                classNames: "gray-button aptrinsic-connections-create-system"
                             }}
                             callback={this.generateAuthTokenClickHandler}
                         />
