@@ -133,7 +133,16 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             extraAttributes = Collections.singletonMap(
                     DataCloudConstants.LATTICE_ACCOUNT_ID, traveler.getLatticeAccountId());
         }
-        return new EntityAssociationRequest(standardizedTenant, entity, lookupResults, extraAttributes);
+        return new EntityAssociationRequest(standardizedTenant, entity,
+                postProcessLookupResults(traveler, lookupResults), extraAttributes);
+    }
+
+    /*
+     * Return post-processed lookup result
+     */
+    protected List<Pair<MatchKeyTuple, String>> postProcessLookupResults(@NotNull MatchTraveler traveler,
+            @NotNull List<Pair<MatchKeyTuple, String>> results) {
+        return results;
     }
 
     /**
