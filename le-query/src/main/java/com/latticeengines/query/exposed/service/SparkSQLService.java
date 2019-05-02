@@ -14,6 +14,7 @@ public interface SparkSQLService {
 
     long getCount(CustomerSpace customerSpace, LivySession livySession, String sql);
 
-    HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql);
+    HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql, //
+                         Map<String, Map<Long, String>> decodeMapping);
 
 }

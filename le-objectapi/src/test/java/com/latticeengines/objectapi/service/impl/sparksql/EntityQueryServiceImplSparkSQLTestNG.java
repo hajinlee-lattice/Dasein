@@ -3,11 +3,9 @@ package com.latticeengines.objectapi.service.impl.sparksql;
 import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +13,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.impl.EntityQueryServiceImplTestNG;
 import com.latticeengines.objectapi.service.sparksql.impl.EntityQueryServiceSparkSQLImpl;
@@ -28,7 +25,7 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
     @Inject
     private SparkSQLQueryTester sparkSQLQueryTester;
 
-    @Inject @Named("entityQueryServiceSparkSQL")
+    @Resource(name = "entityQueryServiceSparkSQL")
     private EntityQueryServiceSparkSQLImpl entityQueryServiceSparkSql;
 
     @Override
@@ -95,16 +92,10 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
         return testAndAssertCountFromTester(sqlUser, resultCount, expectedCount);
     }
 
-    @Override
-    protected List<Map<String, Object>> testAndAssertData(String sqlUser, List<Map<String, Object>> results,
-            List<Map<String, Object>> expectedResults) {
-        return testAndAssertDataFromTester(sqlUser, results, expectedResults);
-    }
-
-    @Override
-    protected void testGetDataForMetricRestriction(String sqlUser, String phAttr, FrontEndQuery frontEndQuery) {
-        // TODO Need to fix the issue for SparkSQL. Tracked at: DP-9950
-        // Ignore it, till then.
-    }
+//    @Override
+//    protected List<Map<String, Object>> testAndAssertData(String sqlUser, List<Map<String, Object>> results,
+//            List<Map<String, Object>> expectedResults) {
+//        return testAndAssertDataFromTester(sqlUser, results, expectedResults);
+//    }
 
 }

@@ -112,12 +112,14 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     @Override
-    public HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql) {
+    public HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql, //
+                                Map<String, Map<Long, String>> decodeMapping) {
         InputStreamSparkScript sparkScript = getQueryScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(1);
         Map<String, Object> params = new HashMap<>();
         params.put("SQL", compressSql(sql));
+        params.put("DECODE_MAPPING", decodeMapping);
         params.put("SAVE", true);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();

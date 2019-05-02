@@ -20,7 +20,7 @@ public class EntityResolver extends BaseLookupResolver<EntityLookup> implements 
     }
 
     public Expression<?> resolveForSelect(EntityLookup lookup, boolean asAlias) {
-        return Expressions.constant(1);
+        return Expressions.as(Expressions.constant(1), lookup.getEntity().name());
     }
 
 }

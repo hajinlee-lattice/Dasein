@@ -69,14 +69,16 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
     }
 
     @Override
-    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser, //
+                                                 Map<String, Map<Long, String>> decodeMapping) {
         String sql = super.getQueryStr(attrRepo, query, sqlUser);
-        HdfsDataUnit hdfsDataUnit = sparkSQLService.getData(attrRepo.getCustomerSpace(), livySession, sql);
+        HdfsDataUnit hdfsDataUnit = //
+                sparkSQLService.getData(attrRepo.getCustomerSpace(), livySession, sql, decodeMapping);
         List<Map<String, Object>> resultData = convertHdfsDataUnitToList(hdfsDataUnit);
         return Flux.fromIterable(resultData);
     }
 
-    public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
+    private List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
         List<Map<String, Object>> resultData = new ArrayList<>();
         String avroPath = sparkResult.getPath();
         AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
@@ -84,7 +86,7 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
             Map<String, Object> row = new HashMap<>();
             for (Field field: record.getSchema().getFields()) {
                 Object value = record.get(field.name());
-                if (value != null && value instanceof Utf8) {
+                if (value instanceof Utf8) {
                     value = ((Utf8)value).toString();
                 }
                 row.put(field.name(), value);
