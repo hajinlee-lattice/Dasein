@@ -134,13 +134,13 @@ public abstract class VersionedPurger implements SourcePurger {
             } else {
                 source = new GeneralSource(strategy.getSource());
             }
-            SourceType arrOfSources[] = new SourceType[] { SourceType.HDFS_DIR,
+            SourceType arrOfSrcTypes[] = new SourceType[] { SourceType.HDFS_DIR,
                     SourceType.TEMP_SOURCE, SourceType.TIMESERIES_SOURCE };
-            List<SourceType> listOfSources = Arrays.asList(arrOfSources);
+            List<SourceType> listOfSrcTypes = Arrays.asList(arrOfSrcTypes);
 
-            if ((!listOfSources.contains(strategy.getSourceType())
+            if ((!listOfSrcTypes.contains(strategy.getSourceType())
                     && hdfsSourceEntityMgr.checkSourceExist(source))
-                    || (listOfSources.contains(strategy.getSourceType())
+                    || (listOfSrcTypes.contains(strategy.getSourceType())
                             && isSourceExisted(strategy))) {
                 List<PurgeSource> list = constructPurgeSource(strategy, debug);
                 if (CollectionUtils.isNotEmpty(list)) {
