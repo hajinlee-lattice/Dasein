@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.common.RepartitionConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 
 import reactor.core.publisher.Flux;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeImportsConfig.class, name = MergeImportsConfig.NAME), //
         @JsonSubTypes.Type(value = UpsertConfig.class, name = UpsertConfig.NAME), //
         @JsonSubTypes.Type(value = CopyConfig.class, name = CopyConfig.NAME), //
+        @JsonSubTypes.Type(value = RepartitionConfig.class, name = RepartitionConfig.NAME), //
         @JsonSubTypes.Type(value = ConvertToCSVConfig.class, name = ConvertToCSVConfig.NAME), //
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
         @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //

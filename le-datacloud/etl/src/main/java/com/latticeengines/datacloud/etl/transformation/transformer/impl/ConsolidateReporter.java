@@ -44,6 +44,7 @@ public class ConsolidateReporter
     protected void updateParameters(ConsolidateReportParameters parameters, Source[] baseTemplates,
             Source targetTemplate, ConsolidateReportConfig config, List<String> baseVersions) {
         parameters.setEntity(config.getEntity());
+        parameters.setThresholdTime(config.getThresholdTime());
     }
 
     @Override

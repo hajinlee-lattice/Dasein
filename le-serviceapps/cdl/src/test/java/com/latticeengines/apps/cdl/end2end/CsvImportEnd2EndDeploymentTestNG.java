@@ -5,9 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -30,14 +32,22 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 
     private static final Logger log = LoggerFactory.getLogger(CsvImportEnd2EndDeploymentTestNG.class);
 
+    private static final boolean isEntityMatchMode = true;
+
     private String localDir = "datafeed";
     private String downloadDir = localDir + "/download";
     private String uploadDir = localDir + "/upload";
 
     @BeforeClass(groups = { "manual" })
     public void setup() throws Exception {
-        setupEnd2EndTestEnvironment();
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        if (isEntityMatchMode) {
+            Map<String, Boolean> featureFlagMap = new HashMap<>();
+            featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+            setupEnd2EndTestEnvironment(featureFlagMap);
+        } else {
+            setupEnd2EndTestEnvironment();
+        }
+//        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "manual")
@@ -46,23 +56,27 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         FileUtils.forceMkdirParent(new File(downloadDir));
         FileUtils.deleteQuietly(new File(uploadDir));
         FileUtils.forceMkdirParent(new File(uploadDir));
-        importAndDownload(BusinessEntity.Account);
-        clearHdfs();
+//        importAndDownload(BusinessEntity.Account);
+//        clearHdfs();
         importAndDownload(BusinessEntity.Contact);
-        clearHdfs();
-        importAndDownload(BusinessEntity.Product);
-        clearHdfs();
-        importAndDownload(BusinessEntity.Transaction);
+//        clearHdfs();
+//        importAndDownload(BusinessEntity.Product);
+//        clearHdfs();
+//        importAndDownload(BusinessEntity.Transaction);
     }
 
     private void importAndDownload(BusinessEntity importingEntity) throws IOException {
-        importData(importingEntity);
+        if (isEntityMatchMode) {
+            importEntityMatchData(importingEntity);
+        } else {
+            importLegacyData(importingEntity);
+        }
         downloadData();
         collectAvroFilesForEntity(importingEntity);
         saveImportTemplate(importingEntity);
     }
 
-    private void importData(BusinessEntity importingEntity) {
+    private void importLegacyData(BusinessEntity importingEntity) {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         if (importingEntity.equals(BusinessEntity.Account)) {
@@ -75,6 +89,38 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
             importData(BusinessEntity.Contact, "Contact_1_900.csv", "DefaultSystem_ContactData");
             importData(BusinessEntity.Contact, "Contact_401_500.csv", "DefaultSystem_ContactData");
             importData(BusinessEntity.Contact, "Contact_901_1000.csv", "DefaultSystem_ContactData");
+        }
+
+        if (importingEntity.equals(BusinessEntity.Product)) {
+            importData(BusinessEntity.Product, "ProductBundles.csv", "DefaultSystem_ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies.csv", "DefaultSystem_ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductBundle_MissingProductBundle.csv", "DefaultSystem_ProductBundle");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingCategory.csv", "DefaultSystem_ProductHierarchy");
+            importData(BusinessEntity.Product, "ProductHierarchies_MissingFamily.csv", "DefaultSystem_ProductHierarchy");
+            // may need to update feed type for VDB import.
+            importData(BusinessEntity.Product, "ProductVDB.csv", "ProductVDB");
+        }
+
+        if (importingEntity.equals(BusinessEntity.Transaction)) {
+            importData(BusinessEntity.Transaction, "Transaction_1_25K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_25K_50K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "Transaction_46K_60K.csv", "DefaultSystem_TransactionData");
+        }
+    }
+
+    private void importEntityMatchData(BusinessEntity importingEntity) {
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+
+        if (importingEntity.equals(BusinessEntity.Account)) {
+            importData(BusinessEntity.Account, "EntityMatch_Account_1_900.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "EntityMatch_Account_401_500.csv", "DefaultSystem_AccountData");
+            importData(BusinessEntity.Account, "EntityMatch_Account_901_1000.csv", "DefaultSystem_AccountData");
+        }
+
+        if (importingEntity.equals(BusinessEntity.Contact)) {
+            importData(BusinessEntity.Contact, "EntityMatch_Contact_1_900.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "EntityMatch_Contact_401_500.csv", "DefaultSystem_ContactData");
+            importData(BusinessEntity.Contact, "EntityMatch_Contact_901_1000.csv", "DefaultSystem_ContactData");
         }
 
         if (importingEntity.equals(BusinessEntity.Product)) {
@@ -145,7 +191,13 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
                 feedType, entity.name());
         if (dataFeedTask != null) {
             Table importTemplate = dataFeedTask.getImportTemplate();
-            File jsonFile = new File(uploadDir + "/" + entity + "_" + feedType + ".json");
+            String fileName;
+            if (isEntityMatchMode) {
+                fileName = entity + "_" + ADVANCED_MATCH_SUFFIX + "_" + feedType + ".json";
+            } else {
+                fileName = entity + "_" + feedType + ".json";
+            }
+            File jsonFile = new File(uploadDir + "/" + fileName);
             FileUtils.touch(jsonFile);
             JsonUtils.serialize(importTemplate, new FileOutputStream(jsonFile));
             log.info("Saved " + entity + " template to upload folder");

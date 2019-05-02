@@ -151,6 +151,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     private void configReportDiffStep(TransformationStepConfig step) {
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
+        config.setThresholdTime(getLongValueFromContext(NEW_RECORD_CUT_OFF_TIME));
         String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
         setTargetTable(step, diffReportTablePrefix);

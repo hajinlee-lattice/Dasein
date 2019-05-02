@@ -8,6 +8,11 @@ public class ConsolidateReportParameters extends TransformationFlowParameters {
     @JsonProperty("BusinessEntity")
     private BusinessEntity entity;
 
+    // threshold timestamp for determine new records
+    // if not specified use timestamp from base class
+    @JsonProperty("ThresholdTime")
+    private Long thresholdTime;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -16,4 +21,11 @@ public class ConsolidateReportParameters extends TransformationFlowParameters {
         this.entity = entity;
     }
 
+    public Long getThresholdTime() {
+        return thresholdTime;
+    }
+
+    public void setThresholdTime(Long thresholdTime) {
+        this.thresholdTime = thresholdTime;
+    }
 }
