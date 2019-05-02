@@ -7,8 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -80,7 +78,7 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
         return Flux.fromIterable(resultData);
     }
 
-    public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
+    private List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
         List<Map<String, Object>> resultData = new ArrayList<>();
         String avroPath = sparkResult.getPath();
         AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
