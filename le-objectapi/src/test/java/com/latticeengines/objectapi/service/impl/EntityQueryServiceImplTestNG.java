@@ -114,7 +114,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
-    public void testDistinctCount(String sqlUser, String queryContext) {
+    public void testDistinct(String sqlUser, String queryContext) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -123,9 +123,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Product);
         frontEndQuery.setDistinct(true);
 
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
-        testAndAssertCount(sqlUser, count, Long.valueOf(1));
+        DataPage dataPage =  getEntityQueryService(sqlUser).getData(frontEndQuery, DataCollection.Version.Blue, //
+                sqlUser, true);
+        Assert.assertNotNull(dataPage);
+        Assert.assertNotNull(dataPage.getData());
+        testAndAssertCount(sqlUser, dataPage.getData().size(), 1L);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
