@@ -27,30 +27,15 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     public static Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
-        if (isHasNotPurchased(txnRestriction)) {
-            SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository,
-                    sqlUser);
-            return Restriction.builder() //
-                    .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                    .notInSubquery(notPurchasedSubQuery) //
-                    .build();
+        SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser);
+        RestrictionBuilder builder = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.AccountId.name());
+        if (Boolean.TRUE.equals(txnRestriction.isNegate())) {
+            builder = builder.notInSubquery(subQuery);
         } else {
-            SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser);
-            RestrictionBuilder builder = Restriction.builder() //
-                    .let(BusinessEntity.Account, InterfaceName.AccountId.name());
-            if (Boolean.TRUE.equals(txnRestriction.isNegate())) {
-                builder = builder.notInSubquery(subQuery);
-            } else {
-                builder = builder.inSubquery(subQuery);
-            }
-            return builder.build();
+            builder = builder.inSubquery(subQuery);
         }
-    }
-
-    private static boolean isHasNotPurchased(TransactionRestriction txnRestriction) {
-        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
-        AggregationFilter spendFilter = txnRestriction.getSpentFilter();
-        return unitFilter == null && spendFilter == null && Boolean.TRUE.equals(txnRestriction.isNegate());
+        return builder.build();
     }
 
     private static SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
@@ -58,9 +43,13 @@ public class DateRangeTranslator extends TranslatorCommon {
         StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
         BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
         BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
+        BooleanExpression validPurchasePredicate = makeValidPurchase(txnRestriction);
         BooleanExpression predicate = productPredicate;
         if (datePredicate != null) {
             predicate = productPredicate.and(datePredicate);
+        }
+        if (validPurchasePredicate != null) {
+            predicate = predicate.and(validPurchasePredicate);
         }
         SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
                 .select(accountId) //
@@ -76,22 +65,16 @@ public class DateRangeTranslator extends TranslatorCommon {
         return subQuery;
     }
 
-    private static SubQuery constructHasPurchasedSubQuery(TransactionRestriction txnRestriction,
-            QueryFactory queryFactory, AttributeRepository repository, String sqlUser) {
-        StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
-        BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
-        BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
-        BooleanExpression predicate = productPredicate;
-        if (datePredicate != null) {
-            predicate = productPredicate.and(datePredicate);
+    static BooleanExpression makeValidPurchase(TransactionRestriction txnRestriction) {
+        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
+        AggregationFilter spendFilter = txnRestriction.getSpentFilter();
+        if (unitFilter == null && spendFilter == null) {
+            StringPath amtAgg = Expressions.stringPath(InterfaceName.TotalAmount.name());
+            StringPath qtyAgg = Expressions.stringPath(InterfaceName.TotalQuantity.name());
+            BooleanExpression validPurchasePredicate = amtAgg.gt("0").or(qtyAgg.gt("0"));
+            return validPurchasePredicate;
         }
-        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
-                .select(accountId) //
-                .from(table) //
-                .where(predicate);
-        SubQuery subQuery = new SubQuery();
-        subQuery.setSubQueryExpression(query);
-        return subQuery;
+        return null;
     }
 
     private static BooleanExpression getProductPredicate(String productId) {
