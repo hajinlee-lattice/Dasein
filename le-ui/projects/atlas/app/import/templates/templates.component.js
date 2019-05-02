@@ -37,6 +37,7 @@ export default class TemplatesComponent extends Component {
         super(props);
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
+
         this.emailCredentialConfig = {
             label: "Setup Automation",
             classNames: "gray-button"
@@ -75,10 +76,7 @@ export default class TemplatesComponent extends Component {
             }
         }
         let goTo = `home.import.entry.${entity}`;
-
-        console.log(response.data.Path);
         s3actions.setPath(response.data.Path);
-
         NgState.getAngularState().go(goTo, response);
     }
 
@@ -94,6 +92,10 @@ export default class TemplatesComponent extends Component {
                 this.createTemplate(response);
                 break;
         }
+    }
+
+    playPauseCallbackHandler() {
+        console.log("yo");
     }
 
     componentWillUnmount() {
@@ -166,10 +168,58 @@ export default class TemplatesComponent extends Component {
             );
         }
     }
+
+    updateStatus(rowData) {
+
+        let templates = this.state.data;
+        let dataItem = templates.find( template => template.FeedType == rowData.FeedType);
+        let newStatus = dataItem.ImportStatus == "Active" ? "Pause" : "Active";
+        let postBody = {
+            ImportStatus: newStatus,
+            FeedType: dataItem.FeedType            
+        }
+
+        console.log(postBody);
+
+        httpService.put(
+            "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
+            postBody,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                    
+                        let newTemplatesState = [...templates];
+                        let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
+                        updatedDataItem.ImportStatus = newStatus;
+                        this.setState({ data: newTemplatesState });
+
+                        messageService.sendMessage(
+                            new Message(
+                                null,
+                                NOTIFICATION,
+                                "success",
+                                "",
+                                "Status updated"
+                            )
+                        );
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
+    }
+
     getConfig() {
         let config = {
             name: "import-templates",
             header: [
+                {
+                    name: "Active",
+                    displayName: "Active",
+                    sortable: false
+                },
                 {
                     name: "TemplateName",
                     displayName: "Name",
@@ -196,6 +246,22 @@ export default class TemplatesComponent extends Component {
                 }
             ],
             columns: [
+                {
+                    colspan: 1,
+                    template: cell => {
+
+                        let rowData = cell.props.rowData;
+                        return (
+                            <i 
+                                className={"play-pause fa " + (rowData.ImportStatus == "Active" ? 'fa-pause' : 'fa-play')} 
+                                aria-hidden="true" 
+                                onClick={() => {
+                                    this.updateStatus(rowData)
+                                }}>
+                            </i>
+                        );
+                    }
+                },
                 {
                     colSpan: 2,
                     template: cell => {
@@ -237,7 +303,7 @@ export default class TemplatesComponent extends Component {
                     colSpan: 2
                 },
                 {
-                    colSpan: 3,
+                    colSpan: 2,
                     template: cell => {
                         if (cell.props.rowData.Exist) {
                             return (

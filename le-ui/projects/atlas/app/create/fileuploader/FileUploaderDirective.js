@@ -348,6 +348,9 @@ angular
                 }
 
                 vm.compressFile = function (file) {
+
+                    console.log(fileType);
+
                     vm.compressing = true;
                     vm.message = 'Compressing the file.  This might take awhile...';
 
@@ -427,6 +430,9 @@ angular
                         }
                         vm.cancelDeferred = cancelDeferred = $q.defer();
 
+                        console.log(options);
+
+
                         ImportService.Upload(options).then(vm.uploadResponse);
                     } else {
                         vm.readFileAsText(file).then(vm.uploadResponse);
@@ -448,6 +454,9 @@ angular
                 }
 
                 vm.uploadResponse = function (result) {
+
+                    console.log(result);
+
                     if (typeof vm.fileDone == 'function') {
                         vm.fileDone({ result: result });
                     }

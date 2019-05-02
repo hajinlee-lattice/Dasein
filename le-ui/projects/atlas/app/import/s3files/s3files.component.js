@@ -21,40 +21,38 @@ export default class S3FileList extends Component {
             showLoading: false,
             enableButton: false,
             selectedItem: null,
-            data: []
+            data: [],
+            path: ''
         };
     }
 
     handleChange = () => {
-
-        console.log(store.getState()['s3files']);
         const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
-        this.setState({
-            forceReload: true,
-            showEmpty: s3Files && s3Files.length == 0,
-            showLoading: false,
-            data: s3Files
-        });
-        this.setState({ forceReload: false });
-    }
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
-
-    componentDidMount() {
-
-        injectAsyncReducer(store, 's3files', s3reducer);
-        this.unsubscribe = store.subscribe(this.handleChange);
-        let path = store.getState()['s3files'].path;
-        console.log(path);
-        s3actions.fetchS3Files(path);
-
+sf  
         this.setState({
             forceReload: false,
             showEmpty: false,
-            showLoading: true
+            showLoading: true,
+            path: path
+        });
+    }
+
+    getFilesFromFolder(folder) {
+        let newPath = this.state.path + folder;
+        let folderData = s3actions.fetchS3Files(newPath);
+
+        this.setState({
+            data: folderData
+        });
+    }
+
+    backToParentFolder() {
+        let parentFolderData = s3actions.fetchS3Files(this.state.path);
+
+        this.setState({
+            data: parentFolderData
         });
     }
 
@@ -64,7 +62,7 @@ export default class S3FileList extends Component {
             selectable: true,
             header: [
                 {
-                    name: "file_name",
+                    name: "fileName",
                     displayName: "File",
                     sortable: false
                 },
@@ -86,7 +84,22 @@ export default class S3FileList extends Component {
             ],
             columns: [
                 {
-                    colSpan: 6
+                    colSpan: 6,
+                    template: cell => {
+                        if (cell.props.rowData.file_type != null) {
+                            return (
+                                <span>{cell.props.rowData.file_name}</span>
+                            );
+                        } else {
+                            return (
+                                <span onClick={() => {
+                                    this.getFilesFromFolder(cell.props.rowData.file_name)
+                                }}>
+                                    <i className="fa fa-folder"></i> {cell.props.rowData.file_name}
+                                </span>
+                            );
+                        }
+                    }
                 },
                 {
                     colSpan: 2
@@ -95,7 +108,12 @@ export default class S3FileList extends Component {
                     colSpan: 2
                 },
                 {
-                    colSpan: 2
+                    colSpan: 2,
+                    template: cell => {
+                        return (
+                            cell.props.rowData.last_modified
+                        );
+                    }
                 }
             ]
         };
@@ -111,10 +129,14 @@ export default class S3FileList extends Component {
                         <div className="columns eight offset-two box-outline">
                             <div className="section-header"><h4>Browse S3</h4></div>
                             <hr />
-                            <div className="section-body with-padding">
+                            <div className="section-body s3files with-padding">
+                                
                                 <h5>Account Data</h5>
+
+                                
+                                
                                 <LeTable
-                                    name="s3files"
+                                    name="s3files-table"
                                     config={this.getConfig()}
                                     forceReload={this.state.forceReload}
                                     showLoading={this.state.showLoading}
