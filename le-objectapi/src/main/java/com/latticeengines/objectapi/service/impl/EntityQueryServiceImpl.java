@@ -1,6 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +120,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         preprocess(map, attrRepo, timeTranslator);
 
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
-        if (isCountQuery) {
+        if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         } else {
             if (CollectionUtils.isEmpty(query.getLookups())) {
@@ -138,37 +138,12 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 queryEvaluatorService);
         Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, false);
         try {
-            Map<String, Map<Long, String>> translationMapping = new HashMap<>();
             if (enforceTranslation) {
-                query.getLookups() //
-                        .stream() //
-                        .filter(lookup -> lookup instanceof AttributeLookup) //
-                        .map(lookup -> {
-                            AttributeLookup attributeLookup = (AttributeLookup) lookup;
-                            ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
-                            if (cm != null && cm.getBitOffset() != null) {
-                                // avoid in-place mutation of cached objects
-                                ColumnMetadata cm2 = cm.clone();
-                                cm2.setAttrName(attributeLookup.getAttribute());
-                                return cm2;
-                            } else {
-                                return new ColumnMetadata();
-                            }
-                        }) //
-                        .filter(cm -> StringUtils.isNotBlank(cm.getAttrName()) //
-                                && cm.getStats() != null //
-                                && cm.getStats().getBuckets() != null //
-                                && CollectionUtils.isNotEmpty(cm.getStats().getBuckets().getBucketList()))
-                        .forEach(cm -> {
-                            Map<Long, String> enumMap = new HashMap<>();
-                            List<Bucket> bucketList = cm.getStats().getBuckets().getBucketList();
-                            bucketList.forEach(bucket -> enumMap.put(bucket.getId(), bucket.getLabel()));
-                            translationMapping.put(cm.getAttrName(), enumMap);
-                        });
+                Map<String, Map<Long, String>> translationMapping = getDecodeMapping(attrRepo, query.getLookups());
+                return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser, translationMapping);
+            } else {
+                return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser);
             }
-
-            return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
-                    .map(row -> postProcess(row, enforceTranslation, translationMapping));
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();
@@ -213,6 +188,35 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         } else {
             throw new IllegalArgumentException("RatingEngineID cannot be empty for rating count query.");
         }
+    }
+
+    @Override
+    public Map<String, Map<Long, String>> getDecodeMapping(AttributeRepository attrRepo, Collection<Lookup> lookups) {
+        Map<String, Map<Long, String>> translationMapping = new HashMap<>();
+        lookups.stream().filter(lookup -> lookup instanceof AttributeLookup) //
+                .map(lookup -> {
+                    AttributeLookup attributeLookup = (AttributeLookup) lookup;
+                    ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
+                    if (cm != null && cm.getBitOffset() != null) {
+                        // avoid in-place mutation of cached objects
+                        ColumnMetadata cm2 = cm.clone();
+                        cm2.setAttrName(attributeLookup.getAttribute());
+                        return cm2;
+                    } else {
+                        return new ColumnMetadata();
+                    }
+                }) //
+                .filter(cm -> StringUtils.isNotBlank(cm.getAttrName()) //
+                        && cm.getStats() != null //
+                        && cm.getStats().getBuckets() != null //
+                        && CollectionUtils.isNotEmpty(cm.getStats().getBuckets().getBucketList()))
+                .forEach(cm -> {
+                    Map<Long, String> enumMap = new HashMap<>();
+                    List<Bucket> bucketList = cm.getStats().getBuckets().getBucketList();
+                    bucketList.forEach(bucket -> enumMap.put(bucket.getId(), bucket.getLabel()));
+                    translationMapping.put(cm.getAttrName(), enumMap);
+                });
+        return translationMapping;
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, String ratingField,
@@ -270,32 +274,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                     && BusinessEntity.Contact == attrLookup.getEntity();
         }
         return false;
-    }
-
-    private Map<String, Object> postProcess(Map<String, Object> result, boolean enforceTranslation,
-            Map<String, Map<Long, String>> translationMapping) {
-        if (enforceTranslation //
-                && MapUtils.isNotEmpty(translationMapping) //
-                && MapUtils.isNotEmpty(result)) {
-            final Map<String, Object> tempProcessed = result;
-            result.keySet() //
-                    .stream() //
-                    .filter(translationMapping::containsKey) //
-                    .forEach(key -> { //
-                        Object val = tempProcessed.get(key);
-                        if (val instanceof Long) {
-                            Long enumNumeric = (Long) val;
-                            if (enumNumeric == 0L) { // 0 is null
-                                tempProcessed.put(key, null);
-                            } else if (translationMapping.get(key).containsKey(enumNumeric)) {
-                                tempProcessed.put(key, translationMapping.get(key).get(enumNumeric));
-                            } else {
-                                tempProcessed.put(key, enumNumeric);
-                            }
-                        }
-                    });
-        }
-        return result;
     }
 
 }

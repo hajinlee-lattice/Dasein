@@ -85,6 +85,10 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
         frontEndQuery.setPageFilter(null);
 
+        AttributeRepository attrRepo = parseAttrRepo(configuration);
+        Map<String, Map<Long, String>> decodeMapping = entityQueryService.getDecodeMapping(attrRepo,
+                frontEndQuery.getLookups());
+
         DataCollection.Version version = parseDataCollectionVersion(configuration);
         String sql = entityQueryService.getQueryStr(frontEndQuery, version, SQL_USER, false);
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
@@ -92,7 +96,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + ctx.getRetryCount() + ") get SparkSQL data.");
             }
-            return sparkSQLService.getData(customerSpace, livySession, sql);
+            return sparkSQLService.getData(customerSpace, livySession, sql, decodeMapping);
         });
     }
 

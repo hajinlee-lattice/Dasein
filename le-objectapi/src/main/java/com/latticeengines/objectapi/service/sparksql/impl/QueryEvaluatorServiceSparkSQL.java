@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -69,9 +71,11 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
     }
 
     @Override
-    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser) {
+    public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser, //
+                                                 Map<String, Map<Long, String>> decodeMapping) {
         String sql = super.getQueryStr(attrRepo, query, sqlUser);
-        HdfsDataUnit hdfsDataUnit = sparkSQLService.getData(attrRepo.getCustomerSpace(), livySession, sql);
+        HdfsDataUnit hdfsDataUnit = //
+                sparkSQLService.getData(attrRepo.getCustomerSpace(), livySession, sql, decodeMapping);
         List<Map<String, Object>> resultData = convertHdfsDataUnitToList(hdfsDataUnit);
         return Flux.fromIterable(resultData);
     }
@@ -84,7 +88,7 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
             Map<String, Object> row = new HashMap<>();
             for (Field field: record.getSchema().getFields()) {
                 Object value = record.get(field.name());
-                if (value != null && value instanceof Utf8) {
+                if (value instanceof Utf8) {
                     value = ((Utf8)value).toString();
                 }
                 row.put(field.name(), value);

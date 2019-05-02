@@ -239,7 +239,7 @@ public class QueryProcessor {
         if (expressions.size() == 0) {
             return Expressions.constant(1);
         }
-        return Expressions.list(expressions.toArray(new Expression<?>[expressions.size()]));
+        return Expressions.list(expressions.toArray(new Expression<?>[0]));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
