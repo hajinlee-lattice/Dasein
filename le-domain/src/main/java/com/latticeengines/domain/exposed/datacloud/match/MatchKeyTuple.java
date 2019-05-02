@@ -60,6 +60,8 @@ public class MatchKeyTuple implements Fact {
     @JsonIgnore
     private String uniqueIdForValue;
 
+    private boolean domainFromMultiCandidates;
+
     @MetricField(name = MatchConstants.DOMAIN_FIELD)
     public String getDomain() {
         return domain;
@@ -171,6 +173,14 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
+    public boolean isDomainFromMultiCandidates() {
+        return domainFromMultiCandidates;
+    }
+
+    public void setDomainFromMultiCandidates(boolean domainFromMultiCandidates) {
+        this.domainFromMultiCandidates = domainFromMultiCandidates;
+    }
+
     public boolean hasDomain() {
         return StringUtils.isNotEmpty(domain);
     }
@@ -193,6 +203,28 @@ public class MatchKeyTuple implements Fact {
 
     public boolean hasZipCode() {
         return StringUtils.isNotEmpty(zipcode);
+    }
+
+    public boolean hasPhoneNumber() {
+        return StringUtils.isNotEmpty(phoneNumber);
+    }
+
+    public boolean hasDuns() {
+        return StringUtils.isNotEmpty(duns);
+    }
+
+    public boolean hasEmail() {
+        return StringUtils.isNotEmpty(email);
+    }
+
+    public boolean hasSystemIds() {
+        return CollectionUtils.isNotEmpty(systemIds)
+                && systemIds.stream().anyMatch(pair -> StringUtils.isNotEmpty(pair.getRight()));
+    }
+
+    public boolean hasDomainOnly() {
+        return hasDomain()
+                && !(hasName() || hasLocation() || hasPhoneNumber() || hasDuns() || hasEmail() || hasSystemIds());
     }
 
     public boolean hasLocation() {
