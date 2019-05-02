@@ -105,7 +105,7 @@ public class SparkSQLQueryTester {
 
     public HdfsDataUnit getDataFromSpark(Query query) {
         String sql = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
-        return sparkSQLService.getData(customerSpace, session, sql);
+        return sparkSQLService.getData(customerSpace, session, sql, null);
     }
 
     public long getCountFromSpark(String queryString) {
@@ -113,7 +113,7 @@ public class SparkSQLQueryTester {
     }
 
     public HdfsDataUnit getDataFromSpark(String queryString) {
-        return sparkSQLService.getData(customerSpace, session, queryString);
+        return sparkSQLService.getData(customerSpace, session, queryString, null);
     }
 
     public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {

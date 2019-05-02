@@ -5,9 +5,9 @@ import './react-main.component.scss';
 const ReactMainContainer = (props) => {
     
     return(
-        <section className={`${'main-content'} ${props.className}`}>
+        <div className={`${'main-content'} ${props.className}`}>
             {props.children}
-        </section>
+        </div>
     );
 }
 

@@ -172,7 +172,7 @@ export default class SystemComponent extends Component {
                         </GridLayout>
                     </LeTileBody>
                     <LeTileFooter>
-                        <LeHPanel hstretch={true} halignment={RIGHT} classesName="s-controls">
+                        <LeHPanel hstretch={true} halignment={RIGHT} className="s-controls">
                             <LeButton
                                 name={`${"edit-mappings-"}${this.state.system.orgName}`}
                                 disabled={this.state.saving || !this.state.system.isRegistered}

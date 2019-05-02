@@ -35,7 +35,8 @@ public enum LatticeFeatureFlag {
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
     PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
     ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
-    BETA_FEATURE("BetaFeature", "Allows beta features"),
+    BETA_FEATURE("BetaFeature", "Allows beta features"), //
+    ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

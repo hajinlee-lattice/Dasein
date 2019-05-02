@@ -149,7 +149,7 @@ angular
 
                     if (!reset) {
                         var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.position, 'Time');
-                        vm.periodNumericalConf.from.value = fromPeriod != 0 ? Number(fromPeriod) : undefined;
+                        vm.periodNumericalConf.from.value = Number(fromPeriod);
 
                         var toPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.position, 'Time');
                         vm.periodNumericalConf.to.value = toPeriod != 0 ? Number(toPeriod) : undefined;

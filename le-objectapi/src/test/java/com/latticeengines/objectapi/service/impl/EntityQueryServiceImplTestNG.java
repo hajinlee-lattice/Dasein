@@ -114,7 +114,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
-    public void testDistinctCount(String sqlUser, String queryContext) {
+    public void testDistinct(String sqlUser, String queryContext) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -123,9 +123,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Product);
         frontEndQuery.setDistinct(true);
 
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
-        testAndAssertCount(sqlUser, count, Long.valueOf(1));
+        DataPage dataPage =  getEntityQueryService(sqlUser).getData(frontEndQuery, DataCollection.Version.Blue, //
+                sqlUser, true);
+        Assert.assertNotNull(dataPage);
+        Assert.assertNotNull(dataPage.getData());
+        testAndAssertCount(sqlUser, dataPage.getData().size(), 1L);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -139,8 +141,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Product);
 
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 10);
 
         DataPage dataPage = getEntityQueryService(sqlUser).getData(frontEndQuery, DataCollection.Version.Blue, sqlUser, false);
@@ -160,8 +161,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 32802);
     }
 
@@ -188,15 +188,14 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.addLookups(BusinessEntity.ProductHierarchy, phAttr);
+        frontEndQuery.addLookups(BusinessEntity.PurchaseHistory, phAttr);
         long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         Assert.assertEquals(count, 33248);
         testAndAssertCount(sqlUser, count, 33248);
-
-        testGetDataForMetricRestriction(sqlUser, phAttr, frontEndQuery);
+//        testGetDataForMetricRestriction(sqlUser, phAttr, frontEndQuery);
     }
 
-    protected void testGetDataForMetricRestriction(String sqlUser, final String phAttr, FrontEndQuery frontEndQuery) {
+    private void testGetDataForMetricRestriction(String sqlUser, final String phAttr, FrontEndQuery frontEndQuery) {
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         DataPage dataPage = getEntityQueryService(sqlUser).getData(frontEndQuery, DataCollection.Version.Blue, sqlUser, false);
         Assert.assertNotNull(dataPage);
@@ -247,7 +246,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(count1 + count2 + count3, count);
     }
 
-    @DataProvider(name = "timefilterProvider", parallel = false)
+    @DataProvider(name = "timefilterProvider")
     private Object[][] timefilterProvider() {
         return getTimeFilterDataProvider();
     }
@@ -333,7 +332,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testAccountDataWithTranslation(String sqlUser, String queryContext) {
         testAccountDataWithTranslation(true, sqlUser);
-        testAccountDataWithTranslation(false, sqlUser);
+//        testAccountDataWithTranslation(false, sqlUser);
     }
 
     private void testAccountDataWithTranslation(boolean enforceTranslation, String sqlUser) {
@@ -474,13 +473,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setContactRestriction(frontEndRestriction2);
 
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        Long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
+        long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         testAndAssertCount(sqlUser, count, 203);
 
         frontEndQuery.setMainEntity(BusinessEntity.Contact);
         count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
-        Assert.assertNotNull(count);
         testAndAssertCount(sqlUser, count, 217);
     }
 

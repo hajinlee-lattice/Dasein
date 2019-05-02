@@ -361,6 +361,22 @@ public class EntityLookupEntry {
         }
 
         /**
+         * Get the lookup entry type from target tuple
+         *
+         * @param tuple
+         *            target tuple
+         * @return corresponding type, {@literal null} if no matching type
+         */
+        public static Type identifyType(MatchKeyTuple tuple) {
+            for (Type type : values()) {
+                if (type.canTransformToEntries(tuple)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        /**
          * Check whether the input {@link MatchKeyTuple} can be transformed to lookup
          * entry of this specific type.
          *

@@ -195,7 +195,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
                     if(vm.isEmpty(result.errorMap)){
                         var coverageCounts = result.ratingModelsCoverageMap ? result.ratingModelsCoverageMap[engineId] : {};
                         vm.totalCount = vm.play.targetSegment && vm.play.targetSegment.contacts ? vm.play.targetSegment.contacts : 0;
-                        vm.nullCount = Math.max(vm.totalCount - coverageCounts.contactCount, 0);
+                        vm.nullCount = Math.max(vm.totalCount - (coverageCounts.contactCount + coverageCounts.unscoredContactCount), 0);
                     }else{
                         vm.showErrorApi = true;
                     }

@@ -109,10 +109,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     @Override
     protected void onPostTransformationCompleted() {
-        enrichMasterTableSchema(masterTableName);
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-        exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
         finishing();
+        exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -218,6 +217,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private void finishing() {
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        enrichMasterTableSchema(masterTableName);
         exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
     }
 
