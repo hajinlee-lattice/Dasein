@@ -309,6 +309,32 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         };
     };
 
+    @Test(groups = "functional", dataProvider = "newAccountExistedContact", retryAnalyzer = SimpleRetryListener.class)
+    private void testMatchNewAccountExistedContact(ContactMatchTestCase testCase) {
+        testCase.setAccountStatus(EntityMatchStatus.ALLOCATE_NEW);
+        testCase.setContactStatus(EntityMatchStatus.MERGE_EXISTING);
+        matchAndVerify(testCase);
+    }
+
+    // Not cover any case related to anonymous, public domain & multi-domain
+    // Schema: CustomerContactId, Email, ContactName, PhoneNumber,
+    // CustomerAccountId, CompanyName, Country, State
+    @DataProvider(name = "newAccountExistedContact", parallel = true)
+    private Object[][] newAccountExistedContactTestData() {
+        return new Object[][] { //
+                // Contact: CCID; Account: CAID (Won't cover all Account match
+                // key cases as matched AccountId doesn't take effect in Contact
+                // match if CustomerContactId is provided)
+                { new ContactMatchTestCase( //
+                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
+                        new String[] { "C_CID_1", null, null, null, "C_AID_2", null, null, null }) }, //
+                { new ContactMatchTestCase( //
+                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
+                        new String[] { "C_CID_1", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_2",
+                                "Google", "USA", "CA" }) }, //
+        };
+    }
+
     @Test(groups = "functional", dataProvider = "newAccountContact", retryAnalyzer = SimpleRetryListener.class)
     private void testMatchNewAccountContact(ContactMatchTestCase testCase) {
         testCase.setAccountStatus(EntityMatchStatus.ALLOCATE_NEW);
