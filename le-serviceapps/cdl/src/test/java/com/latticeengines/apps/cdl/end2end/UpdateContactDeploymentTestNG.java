@@ -44,6 +44,8 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     private void importData() throws Exception {
+        mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, 3, "DefaultSystem_ContactData");
         Thread.sleep(2000);
     }
@@ -106,8 +108,8 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, 0L);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, CONTACT_2);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_2);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, UPDATED_CONTACT);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_3);
 

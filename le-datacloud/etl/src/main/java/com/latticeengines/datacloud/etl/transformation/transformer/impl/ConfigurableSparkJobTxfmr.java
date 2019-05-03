@@ -8,7 +8,8 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
  * Collapse transformer config in to spark job config
  * @param <S>
  */
-public abstract class ConfigurableSparkJobTxfmr<S extends SparkJobConfig> extends AbstractSparkTxfmr<S, TransformerConfig> {
+public abstract class ConfigurableSparkJobTxfmr<S extends SparkJobConfig> //
+        extends AbstractSparkTxfmr<S, TransformerConfig> {
 
     @Override
     protected Class<? extends TransformerConfig> getConfigurationClass() {
