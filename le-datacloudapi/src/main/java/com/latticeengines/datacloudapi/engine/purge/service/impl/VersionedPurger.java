@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
@@ -122,9 +123,13 @@ public abstract class VersionedPurger implements SourcePurger {
         }
         List<PurgeSource> toPurge = new ArrayList<>();
         strategies.forEach(strategy -> {
-            List<PurgeSource> list = constructPurgeSource(strategy, debug);
-            if (CollectionUtils.isNotEmpty(list)) {
-                toPurge.addAll(list);
+            // check whether source exists or no : if not existing continue to
+            // next loop iteration and skip constructPurgeSources
+            if (isSourceExisted(strategy)) {
+                List<PurgeSource> list = constructPurgeSource(strategy, debug);
+                if (CollectionUtils.isNotEmpty(list)) {
+                    toPurge.addAll(list);
+                }
             }
         });
         return toPurge;
@@ -218,5 +223,11 @@ public abstract class VersionedPurger implements SourcePurger {
         }
 
         return allVersions;
+    }
+
+    @Override
+    public boolean isSourceExisted(PurgeStrategy strategy) {
+        Source source = new GeneralSource(strategy.getSource());
+        return hdfsSourceEntityMgr.checkSourceExist(source);
     }
 }

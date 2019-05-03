@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
@@ -45,6 +46,13 @@ public class IngestionPurger extends VersionedPurger{
         });
 
         return Pair.of(hdfsPaths, hiveTables);
+    }
+
+    @Override
+    public boolean isSourceExisted(PurgeStrategy strategy) {
+        Source source = new IngestionSource();
+        ((IngestionSource) source).setIngestionName(strategy.getSource());
+        return hdfsSourceEntityMgr.checkSourceExist(source);
     }
 
 }
