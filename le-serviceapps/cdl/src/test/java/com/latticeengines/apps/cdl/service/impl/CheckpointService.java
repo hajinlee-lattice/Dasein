@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -238,7 +239,7 @@ public class CheckpointService {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
         resumeDbState();
 
-        copyEntitySeedTable(checkpoint, checkpointVersion);
+        copyEntitySeedTables(checkpoint, checkpointVersion);
 
         dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
         log.info("Switch active version to " + activeVersion);
@@ -729,55 +730,74 @@ public class CheckpointService {
         }
     }
 
-    public void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+    private void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
         if (!isEntityMatchEnabled()) {
             return;
         }
         try {
-            StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
-                    + " you must run the following HTTP Requests:\n");
-            msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
-            EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
-            entityPublishRequest.setEntity(BusinessEntity.Account.toString());
-            entityPublishRequest.setSrcTenant(mainTestTenant);
-            String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion);
-            Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
-            entityPublishRequest.setDestTenant(destTenant);
-            entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
-            entityPublishRequest.setDestTTLEnabled(false);
-            msg.append("Body:\n");
-            ObjectMapper mapper = new ObjectMapper();
-            msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
-            msg.append("\nPOST " + matchapiHostPort + "/match/matches/entity/publish\n");
-            entityPublishRequest.setDestEnv(EntityMatchEnvironment.SERVING);
-            msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
-            log.info(msg.toString());
+            for (BusinessEntity businessEntity: Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+                StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
+                        + " you must run the following HTTP Requests:\n");
+                msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
+                EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
+                entityPublishRequest.setEntity(businessEntity.name());
+                entityPublishRequest.setSrcTenant(mainTestTenant);
+                String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion, businessEntity.name());
+                Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+                entityPublishRequest.setDestTenant(destTenant);
+                entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
+                entityPublishRequest.setDestTTLEnabled(false);
+                msg.append("Body:\n");
+                ObjectMapper mapper = new ObjectMapper();
+                msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
+                msg.append("\nPOST " + matchapiHostPort + "/match/matches/entity/publish\n");
+                entityPublishRequest.setDestEnv(EntityMatchEnvironment.SERVING);
+                msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
+                log.info(msg.toString());
+            }
         } catch (JsonProcessingException e) {
             log.error("Failed to print EntityPublishRequest:\n" + e.getMessage(), e);
         }
     }
 
-    private void copyEntitySeedTable(String checkpoint, String checkpointVersion) {
+    private void copyEntitySeedTables(String checkpoint, String checkpointVersion) {
         if (!isEntityMatchEnabled()) {
             return;
         }
+
+        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("entity-match-copy", 2);
+        ThreadPoolUtils.runRunnablesInParallel(tp, Arrays.asList( //
+                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Account.name()),
+                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Contact.name())
+        ), 10, 1);
+        tp.shutdown();
+    }
+
+    private Runnable copyEntitySeedTable(String checkpoint, String checkpointVersion, String entity) {
         EntityPublishRequest request = new EntityPublishRequest();
-        request.setEntity(BusinessEntity.Account.toString());
-        String srcTenantId = getCheckPointTenantId(checkpoint, checkpointVersion);
+        request.setEntity(entity);
+        String srcTenantId = getCheckPointTenantId(checkpoint, checkpointVersion, entity);
         Tenant srcTenant = new Tenant(CustomerSpace.parse(srcTenantId).toString());
         request.setSrcTenant(srcTenant);
         request.setDestTenant(mainTestTenant);
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
-        EntityPublishStatistics stats = matchProxy.publishEntity(request);
-        log.info("Copied {} Account seeds and {} Account lookup entries from tenant {} to tenant {}",
-                stats.getSeedCount(), stats.getLookupCount(), srcTenant.getId(), mainTestTenant.getId());
-        Assert.assertTrue(stats.getSeedCount() > 0);
-        Assert.assertTrue(stats.getLookupCount() > 0);
+        request.setBumpupVersion(false);
+        return () -> {
+            log.info("Start copying entity match table for " + entity);
+            EntityPublishStatistics stats = matchProxy.publishEntity(request);
+            log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}",
+                    stats.getSeedCount(), entity, //
+                    stats.getLookupCount(), entity, //
+                    CustomerSpace.shortenCustomerSpace(srcTenant.getId()), //
+                    CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+            Assert.assertTrue(stats.getSeedCount() > 0);
+            Assert.assertTrue(stats.getLookupCount() > 0);
+        };
     }
 
-    public static String getCheckPointTenantId(String checkpoint, String checkpointVersion) {
-        return "cdlend2end_" + checkpoint + "_" + checkpointVersion;
+    public static String getCheckPointTenantId(String checkpoint, String checkpointVersion, String entity) {
+        return "cdlend2end_" + checkpoint + "_" + entity.toLowerCase() + "_" + checkpointVersion;
     }
 
     private boolean isEntityMatchEnabled() {
