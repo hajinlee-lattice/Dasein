@@ -68,7 +68,7 @@
     </GlobalNamingResources>
 
     <Service name="MatchAPI">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9076" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -91,7 +91,7 @@
     </Service>
 
     <Service name="Admin">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9085" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -114,7 +114,7 @@
     </Service>
 
     <Service name="PlayMaker">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9071" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -137,7 +137,7 @@
     </Service>
 
     <Service name="OAuth">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9072" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -160,7 +160,7 @@
     </Service>
 
     <Service name="ScoringAPI">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9073" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -183,7 +183,7 @@
     </Service>
 
     <Service name="SAML">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9087" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -206,7 +206,7 @@
     </Service>
 
     <Service name="API">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9074" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -229,7 +229,7 @@
     </Service>
 
     <Service name="Ulysses">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9075" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -252,7 +252,7 @@
     </Service>
 
     <Service name="MS">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="16" maxThreads="256"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="16" maxThreads="256"/>
         <Connector port="9080" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -275,7 +275,7 @@
     </Service>
 
     <Service name="PLS">
-        <Executor name="tomcat" namePrefix="catalina-nio2-" minSpareThreads="4" maxThreads="64"/>
+        <Executor name="tomcat" namePrefix="catalina-exec-" minSpareThreads="4" maxThreads="64"/>
         <Connector port="9081" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcat"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"

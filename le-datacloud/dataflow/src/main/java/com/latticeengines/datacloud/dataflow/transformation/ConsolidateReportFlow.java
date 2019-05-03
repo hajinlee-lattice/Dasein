@@ -97,11 +97,13 @@ public class ConsolidateReportFlow
     }
 
     private Node reportNew(Node node, ConsolidateReportParameters parameters) {
+        long thresholdTime = parameters.getThresholdTime() == null ? //
+                parameters.getTimestamp().getTime() : parameters.getThresholdTime();
         log.info(String.format("Entity with %s >= %d is treated as new entity", InterfaceName.CDLCreatedTime.name(),
-                parameters.getTimestamp().getTime()));
+                thresholdTime));
         node = node.filter(
                 String.format("%s != null && %s >= %dL", InterfaceName.CDLCreatedTime.name(),
-                        InterfaceName.CDLCreatedTime.name(), parameters.getTimestamp().getTime()),
+                        InterfaceName.CDLCreatedTime.name(), thresholdTime),
                 new FieldList(InterfaceName.CDLCreatedTime.name()));
         node = node.count("__NEW_COUNT__").rename(new FieldList("__NEW_COUNT__"), new FieldList(REPORT_CONTENT))
                 .addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_NEW, String.class).renamePipe("NewReport");

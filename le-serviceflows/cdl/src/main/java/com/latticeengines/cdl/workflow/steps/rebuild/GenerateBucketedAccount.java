@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -45,6 +44,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(GenerateBucketedAccount.BEAN_NAME)
 @Lazy
@@ -57,7 +57,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
     private int filterStep;
     private int profileStep;
-    private int encodeStep;
 
     private boolean shortCutMode;
 
@@ -119,12 +118,14 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         int step = 0;
         filterStep = step++;
         profileStep = step++;
-        encodeStep = step;
+        int encodeStep = step;
 
         // -----------
         TransformationStepConfig filter = filter();
         TransformationStepConfig profile = profile();
         TransformationStepConfig encode = bucketEncode();
+        TransformationStepConfig repartition = repartition(encodeStep, servingStoreTablePrefix,
+                InterfaceName.AccountId.name(), getServingStorePartitions());
         TransformationStepConfig sortProfile = sortProfile(profileTablePrefix);
 
         // -----------
@@ -132,6 +133,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         steps.add(filter);
         steps.add(profile);
         steps.add(encode);
+        steps.add(repartition);
         steps.add(sortProfile);
 
         request.setSteps(steps);
@@ -171,13 +173,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
-
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }
@@ -198,6 +193,13 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         setTargetTable(step, profileTablePrefix);
 
         return step;
+    }
+
+    private int getServingStorePartitions() {
+        long count = ScalingUtils.getTableCount(masterTable);
+        int redshiftPartitions = (int) Math.max(count / 5000, 50);
+        log.info("Set redshift partitions to " + redshiftPartitions + " based on master table count " + count);
+        return redshiftPartitions;
     }
 
     @Override

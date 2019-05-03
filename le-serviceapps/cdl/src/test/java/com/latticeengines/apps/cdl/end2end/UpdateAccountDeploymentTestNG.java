@@ -41,6 +41,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     protected void importData() throws Exception {
+        mockCSVImport(BusinessEntity.Account, 2, "DefaultSystem_AccountData");
+        Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Account, 3, "DefaultSystem_AccountData");
         Thread.sleep(2000);
     }
@@ -71,9 +73,9 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, ACCOUNT_2);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, ACCOUNT_2);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, UPDATED_ACCOUNT);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_3);
 
@@ -110,7 +112,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return expectedReport;
     }
 
-    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_3);
         map.put(BusinessEntity.Contact, CONTACT_1);
@@ -120,7 +122,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_3);
         map.put(BusinessEntity.Contact, CONTACT_1);
@@ -131,7 +133,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_3);
         map.put(BusinessEntity.Contact, CONTACT_1);

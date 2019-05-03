@@ -8,6 +8,11 @@ public class ConsolidateReportConfig extends TransformerConfig {
     @JsonProperty("BusinessEntity")
     private BusinessEntity entity;
 
+    // threshold timestamp for determine new records
+    // if not specified use pipeline timestamp
+    @JsonProperty("ThresholdTime")
+    private Long thresholdTime;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -16,4 +21,11 @@ public class ConsolidateReportConfig extends TransformerConfig {
         this.entity = entity;
     }
 
+    public Long getThresholdTime() {
+        return thresholdTime;
+    }
+
+    public void setThresholdTime(Long thresholdTime) {
+        this.thresholdTime = thresholdTime;
+    }
 }

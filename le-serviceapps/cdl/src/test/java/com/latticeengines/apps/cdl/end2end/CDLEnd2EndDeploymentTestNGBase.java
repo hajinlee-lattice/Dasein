@@ -160,7 +160,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String LARGE_CSV_VERSION = "1";
 
     static final Long ACCOUNT_1 = 900L;
+    static final Long ENTITY_MATCH_ACCOUNT_1 = 946L;
     static final Long CONTACT_1 = 900L;
+    static final Long ENTITY_MATCH_CONTACT_1 = 900L;
     static final Long TRANSACTION_1 = 41156L;
     static final Long TRANSACTION_IN_REPORT_1 = 48760L;
     static final Long PERIOD_TRANSACTION_1 = 62550L;
@@ -168,8 +170,16 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
+    static final Long UPDATED_ACCOUNT = 100L;
+    static final Long ENTITY_MATCH_ACCOUNT_2 = 100L;
+    static final Long ENTITY_MATCH_ACCOUNT_3 = 1000L;
+    static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
     static final Long CONTACT_2 = 100L;
     static final Long CONTACT_3 = 1000L;
+    static final Long UPDATED_CONTACT = 100L;
+    static final Long ENTITY_MATCH_CONTACT_2 = 100L;
+    static final Long ENTITY_MATCH_CONTACT_3 = 1000L;
+    static final Long ENTITY_MATCH_UPDATED_CONTACT = 100L;
     static final Long TRANSACTION_2 = 39004L;
     static final Long TRANSACTION_3 = 50238L;
     static final Long TRANSACTION_IN_REPORT_2 = 13633L;
@@ -906,7 +916,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
         log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
-
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());

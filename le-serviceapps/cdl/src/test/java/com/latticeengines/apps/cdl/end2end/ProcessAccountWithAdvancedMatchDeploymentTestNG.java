@@ -195,15 +195,15 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
                 ACCOUNT_1);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 1L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 9L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ENTITY_MATCH_ACCOUNT_1);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, ENTITY_MATCH_CONTACT_1);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ENTITY_MATCH_CONTACT_1);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -215,24 +215,24 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1 //
+                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1, //
+                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1 //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1);
+        map.put(BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1);
         return map;
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1 //
+                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1, //
+                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1 //
         );
     }
 
