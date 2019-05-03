@@ -217,7 +217,8 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
             Triple<List<String>, List<String>, List<String>> aidLists = getAccountIds(REAL_TIME_MATCH_RECORD_LIMIT);
             String checkpointTenantId = CheckpointService.getCheckPointTenantId(
                     ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT,
-                    String.valueOf(CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION));
+                    String.valueOf(CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION),
+                    BusinessEntity.Account.name());
             verifyMatchToSameEntityId(mainTestTenant.getId(), checkpointTenantId, aidLists.getLeft());
             verifyMatchToSameEntityId(mainTestTenant.getId(), checkpointTenantId, aidLists.getRight());
             verifyMatchToEntityId(mainTestTenant.getId(), aidLists.getMiddle());
