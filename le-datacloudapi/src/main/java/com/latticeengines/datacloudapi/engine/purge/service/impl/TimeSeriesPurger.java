@@ -113,4 +113,14 @@ public class TimeSeriesPurger extends VersionedPurger {
         return true;
     }
 
+    @Override
+    public boolean isSourceExisted(PurgeStrategy strategy) {
+        try {
+            return HdfsUtils.isDirectory(yarnConfiguration, strategy.getHdfsBasePath());
+        } catch (IOException e) {
+            log.info("Exception in checking source directory path : " + strategy.getHdfsBasePath());
+        }
+        return false;
+    }
+
 }

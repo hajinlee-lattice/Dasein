@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 public class HdfsDirPurger extends CollectionPurger {
 
     public static final String HIVE = "Hive";
+    private static final Logger log = LoggerFactory.getLogger(HdfsDirPurger.class);
 
     @Override
     protected SourceType getSourceType() {
@@ -89,6 +92,16 @@ public class HdfsDirPurger extends CollectionPurger {
             toPurge.add(purgeSource);
         }
         return toPurge;
+    }
+
+    @Override
+    public boolean isSourceExisted(PurgeStrategy strategy) {
+        try {
+            return HdfsUtils.isDirectory(yarnConfiguration, strategy.getHdfsBasePath());
+        } catch (IOException e) {
+            log.info("Exception in checking source path : " + e);
+        }
+        return false;
     }
 
 }

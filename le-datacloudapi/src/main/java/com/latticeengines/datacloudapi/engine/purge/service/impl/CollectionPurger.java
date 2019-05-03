@@ -51,11 +51,15 @@ public abstract class CollectionPurger implements SourcePurger {
         List<PurgeStrategy> strategies = purgeStrategyEntityMgr.findStrategiesByType(getSourceType());
         List<PurgeSource> list = new ArrayList<>();
         for (PurgeStrategy strategy : strategies) {
-            Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
-            list.addAll(constructPurgeSources(strategy, sourcePaths));
+
+            // check whether source exists or no : if not existing continue to
+            // next loop iteration and skip constructPurgeSources
+            if (isSourceExisted(strategy)) {
+                Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
+                list.addAll(constructPurgeSources(strategy, sourcePaths));
+            }
         }
         return list;
     }
-
 
 }
