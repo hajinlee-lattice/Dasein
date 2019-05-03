@@ -73,6 +73,11 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     }
 
     @Override
+    protected Long getPrePAAccountCount() {
+        return ENTITY_MATCH_ACCOUNT_1;
+    }
+
+    @Override
     protected void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 2, "DefaultSystem_AccountData");
@@ -133,6 +138,11 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         expectedReport.put(BusinessEntity.Contact, contactReport);
 
         return expectedReport;
+    }
+
+    @Override
+    protected BusinessEntity[] getEntitiesInStats() {
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount };
     }
 
     @Override

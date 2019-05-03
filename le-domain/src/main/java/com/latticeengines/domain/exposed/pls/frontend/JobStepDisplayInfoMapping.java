@@ -439,8 +439,8 @@ public final class JobStepDisplayInfoMapping {
         String[] steps = new String[totalSteps];
         int step = 0;
 
-        // Merge Phase: everything before [14] cloneAccount
-        while (step < 14) {
+        // Merge Phase: everything before [15] cloneAccount
+        while (step < 15) {
             steps[step++] = merge;
         }
 
