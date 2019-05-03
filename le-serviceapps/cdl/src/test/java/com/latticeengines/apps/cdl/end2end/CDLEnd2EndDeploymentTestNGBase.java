@@ -916,9 +916,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
         log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
-        if (true) { // FIXME: do not check in
-            return;
-        }
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
