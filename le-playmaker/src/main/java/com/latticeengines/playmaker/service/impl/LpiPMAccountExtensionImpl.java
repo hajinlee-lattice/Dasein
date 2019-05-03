@@ -107,8 +107,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             attributes.add(lookupIdColumn);
         }
 
-        List<String> internalAccountIds = null;
-        DataPage dataPage;
+        List<String> internalAccountIds = new ArrayList<>();
+        DataPage dataPage = new DataPage();
 
         if (recStart == null) {
             recStart = 0L;
@@ -121,12 +121,26 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             return getAccountExtensionsByLaunch(recStart, offset, maximum, orgInfo, customerSpace, attributes,
                     lookupIdColumn);
         } else {
-            internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn, start,
-                    offset, maximum);
+            int pagesRequired = (int) Math.ceil((double) maximum / MAX_ROWS);
+            for (int page = 0; page < pagesRequired; page++) {
+                internalAccountIds.addAll(getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn,
+                        start, offset + (page * MAX_ROWS), maximum));
+            }
         }
 
         if (CollectionUtils.isNotEmpty(internalAccountIds)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountIds, attributes);
+            int pagesRequired = (int) Math.ceil((double) internalAccountIds.size() / MAX_ROWS);
+            for (int page = 0; page < pagesRequired; page++) {
+                int pageOffset = page * MAX_ROWS;
+                List<String> internalAccountsIdsSublist = internalAccountIds.subList(pageOffset,
+                        Math.min(pageOffset + MAX_ROWS, internalAccountIds.size()));
+                DataPage currentDataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountsIdsSublist,
+                        attributes);
+                if (currentDataPage != null) {
+                    dataPage.getData()
+                            .addAll(currentDataPage.getData());
+                }
+            }
             log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
         } else {
             dataPage = AccountExtensionUtil.createEmptyDataPage();
@@ -146,11 +160,21 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             accountIds.add(accountName);
         });
 
-        DataPage dataPage;
+        DataPage dataPage = new DataPage();
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, accountIds, attributes);
-            log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
+            int pagesRequired = (int) Math.ceil((double) accountIds.size() / MAX_ROWS);
+            for (int page = 0; page < pagesRequired; page++) {
+                int pageOffset = page * MAX_ROWS;
+                List<String> accountIdsSublist = accountIds.subList(pageOffset,
+                        Math.min(pageOffset + MAX_ROWS, accountIds.size()));
+                DataPage currentDataPage = getAccountByIdViaMatchApi(customerSpace, accountIdsSublist,
+                        attributes);
+                if (currentDataPage != null) {
+                    dataPage.getData().addAll(currentDataPage.getData());
+                }
+                log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
+            }
         } else {
             dataPage = AccountExtensionUtil.createEmptyDataPage();
         }
