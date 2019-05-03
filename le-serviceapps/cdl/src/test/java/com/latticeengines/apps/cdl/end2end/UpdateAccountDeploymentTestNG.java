@@ -19,7 +19,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(resumeFromCheckPoint());
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_1);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), getPrePAAccountCount());
 
         new Thread(this::createTestSegment3).start();
 
@@ -40,6 +40,10 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     }
 
+    protected Long getPrePAAccountCount() {
+        return ACCOUNT_1;
+    }
+
     protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Account, 2, "DefaultSystem_AccountData");
         Thread.sleep(2000);
@@ -51,8 +55,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         clearCache();
         runCommonPAVerifications();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
-                BusinessEntity.CuratedAccount);
+        verifyStats(getEntitiesInStats());
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
         verifyServingStore(getExpectedServingStoreCounts());
@@ -69,6 +72,11 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                     BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
         }
         throw new IllegalArgumentException(String.format("Segment %s is not supported", segmentName));
+    }
+
+    protected BusinessEntity[] getEntitiesInStats() {
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, //
+                BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount };
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {

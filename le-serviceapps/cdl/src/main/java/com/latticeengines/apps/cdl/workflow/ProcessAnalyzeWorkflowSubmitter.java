@@ -447,6 +447,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
         log.info("Entity Match Enabled=" + entityMatchEnabled);
+        if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
+            throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
+        }
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 

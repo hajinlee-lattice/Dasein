@@ -171,15 +171,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
     static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1000L;
+    static final Long ENTITY_MATCH_ACCOUNT_2 = 104L;
+    static final Long ENTITY_MATCH_ACCOUNT_3 = 1050L;
     static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
     static final Long CONTACT_2 = 100L;
     static final Long CONTACT_3 = 1000L;
     static final Long UPDATED_CONTACT = 100L;
-    static final Long ENTITY_MATCH_CONTACT_2 = 100L;
-    static final Long ENTITY_MATCH_CONTACT_3 = 1000L;
-    static final Long ENTITY_MATCH_UPDATED_CONTACT = 100L;
+    static final Long ENTITY_MATCH_CONTACT_2 = 200L;
+    static final Long ENTITY_MATCH_CONTACT_3 = 1100L;
+    static final Long ENTITY_MATCH_UPDATED_CONTACT = 0L;
     static final Long TRANSACTION_2 = 39004L;
     static final Long TRANSACTION_3 = 50238L;
     static final Long TRANSACTION_IN_REPORT_2 = 13633L;
@@ -916,6 +916,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(summaryReport.getJson());
         Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
         log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
+
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
             ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
