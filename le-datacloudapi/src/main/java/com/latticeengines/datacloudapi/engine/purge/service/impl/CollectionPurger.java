@@ -1,7 +1,6 @@
 package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -10,9 +9,6 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.service.HiveTableService;
@@ -55,23 +51,10 @@ public abstract class CollectionPurger implements SourcePurger {
         List<PurgeStrategy> strategies = purgeStrategyEntityMgr.findStrategiesByType(getSourceType());
         List<PurgeSource> list = new ArrayList<>();
         for (PurgeStrategy strategy : strategies) {
+
             // check whether source exists or no : if not existing continue to
             // next loop iteration and skip constructPurgeSources
-            Source source = null;
-            if (strategy.getSourceType().equals(SourceType.INGESTION_SOURCE)) {
-                source = new IngestionSource();
-                ((IngestionSource) source).setIngestionName(strategy.getSource());
-            } else {
-                source = new GeneralSource(strategy.getSource());
-            }
-            SourceType arrOfSrcTypes[] = new SourceType[] { SourceType.HDFS_DIR,
-                    SourceType.TEMP_SOURCE, SourceType.TIMESERIES_SOURCE };
-            List<SourceType> listOfSrcTypes = Arrays.asList(arrOfSrcTypes);
-
-            if ((!listOfSrcTypes.contains(strategy.getSourceType())
-                    && hdfsSourceEntityMgr.checkSourceExist(source))
-                    || (listOfSrcTypes.contains(strategy.getSourceType())
-                            && isSourceExisted(strategy))) {
+            if (isSourceExisted(strategy)) {
                 Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
                 list.addAll(constructPurgeSources(strategy, sourcePaths));
             }
