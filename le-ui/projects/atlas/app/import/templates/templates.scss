@@ -71,6 +71,9 @@
       border-style: solid;
       border-width: 1px;
       border-radius: 50%;
+      &:hover {
+        cursor: pointer;
+      }
       &.fa-play {
         border-color: gray;
         padding: 8px 8px 6px 10px

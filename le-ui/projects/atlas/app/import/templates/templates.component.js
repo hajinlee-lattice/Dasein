@@ -35,8 +35,6 @@ import LeTable from "common/widgets/table/table";
 export default class TemplatesComponent extends Component {
     constructor(props) {
         super(props);
-        this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
-        this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
 
         this.emailCredentialConfig = {
             label: "Setup Automation",
@@ -80,7 +78,7 @@ export default class TemplatesComponent extends Component {
         NgState.getAngularState().go(goTo, response);
     }
 
-    actionCallbackHandler(response) {
+    actionCallbackHandler = (response) => {
         switch (response.action) {
             case CREATE_TEMPLATE:
                 this.createTemplate(response);
@@ -92,10 +90,6 @@ export default class TemplatesComponent extends Component {
                 this.createTemplate(response);
                 break;
         }
-    }
-
-    playPauseCallbackHandler() {
-        console.log("yo");
     }
 
     componentWillUnmount() {
@@ -142,7 +136,7 @@ export default class TemplatesComponent extends Component {
         httpService.get("/pls/cdl/s3import/template", this.observer);
     }
 
-    saveTemplateNameHandler(cell, value) {
+    saveTemplateNameHandler = (cell, value) => {
         if (value && value != "") {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
@@ -169,7 +163,7 @@ export default class TemplatesComponent extends Component {
         }
     }
 
-    updateStatus(rowData) {
+    updateStatus = (rowData) => {
 
         let templates = this.state.data;
         let dataItem = templates.find( template => template.FeedType == rowData.FeedType);
@@ -178,8 +172,6 @@ export default class TemplatesComponent extends Component {
             ImportStatus: newStatus,
             FeedType: dataItem.FeedType            
         }
-
-        console.log(postBody);
 
         httpService.put(
             "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
