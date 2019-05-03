@@ -105,7 +105,11 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     protected EntityAssociationRequest prepareAssociationRequest(@NotNull MatchTraveler traveler) {
         Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
-        List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getEntityMatchLookupResults()
+
+        // TODO(slin):  Is this the right place to grab the completed Match Lookup Results.
+        traveler.addEntityMatchLookupResults(entity, traveler.getMatchLookupResults());
+
+        List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getMatchLookupResults()
                 .stream()
                 .flatMap(pair -> {
                     MatchKeyTuple tuple = pair.getKey();

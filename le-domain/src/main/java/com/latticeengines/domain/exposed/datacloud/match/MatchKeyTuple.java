@@ -235,6 +235,18 @@ public class MatchKeyTuple implements Fact {
         return hasCity() || hasState() || hasCountry() || hasZipCode();
     }
 
+    public boolean hasPhoneNumber() {
+        return StringUtils.isNotEmpty(phoneNumber);
+    }
+
+    public boolean hasDuns() {
+        return StringUtils.isNotEmpty(duns);
+    }
+
+    public boolean hasEmail() {
+        return StringUtils.isNotEmpty(email);
+    }
+
     @Override
     public String toString() {
         if (serializedFormat == null) {

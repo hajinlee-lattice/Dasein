@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,19 +36,22 @@ import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-
 
 
 @Component
@@ -156,8 +161,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
                     entityMatchMetricService.recordMatchHistory(history);
                 }
-                if (isMatchHistoryEnabled)
+                if (isMatchHistoryEnabled) {
+                    log.error("$JAW$ Running getDnbMatchHistory()");
                     matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler));
+                }
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
                 dumpEntityMatchErrors(matchRecord, traveler);
@@ -395,40 +402,479 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
 
-        history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
-        //history.setEntityId((String) traveler.getResult());
-        if (StringUtils.isBlank(history.getBusinessEntity())) {
-            log.error("$JAW$ Found null or blank BusinessEntity for MatchTraveler");
+        log.error("$JAW$ -----------------------------------------------------------------");
+
+        //
+        // Extract Business Entity
+        //
+        if (StringUtils.isBlank(traveler.getMatchInput().getTargetEntity())) {
+            log.error("$JAW$ Found null or blank BusinessEntity in MatchTraveler");
             return null;
-        } else if (MapUtils.isEmpty(traveler.getEntityIds())) {
-            log.error("$JAW$ Found null or empty Entity Match Result Map for MatchTraveler");
+        }
+        history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
+        log.error("Business Entity: " + history.getBusinessEntity());
+
+        //
+        // Extract Input MatchKeys
+        //
+        if (MapUtils.isEmpty(traveler.getEntityKeyPositionMaps())) {
+            log.error("$JAW$ Found null or empty EntityKeyPositionMaps in MatchTraveler");
+            return null;
+        }
+        if (!traveler.getEntityKeyPositionMaps().containsKey(history.getBusinessEntity())) {
+            log.error("$JAW$ EntityKeyPositionMaps missing entry for Business Entity: " + history.getBusinessEntity());
+            return null;
+        }
+        if (CollectionUtils.isEmpty(traveler.getInputDataRecord())) {
+            log.error("$JAW$ InputDataRecord list null or empty in MatchTraveler");
+            return null;
+        }
+        boolean inputHasDuns = false;
+        Map<MatchKey, List<Integer>> matchKeyPosMap = traveler.getEntityKeyPositionMaps().get(history
+                .getBusinessEntity());
+        StringBuilder columnKeys = new StringBuilder();
+        StringBuilder columnValues = new StringBuilder();
+        for (Map.Entry<MatchKey, List<Integer>> entry : matchKeyPosMap.entrySet()) {
+            if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                for (Integer pos : entry.getValue()) {
+                    columnKeys.append(String.format("%20s", entry.getKey().name()));
+                    columnValues.append(String.format("%20s", traveler.getInputDataRecord().get(pos)));
+
+                    if (MatchKey.DUNS.equals(entry.getKey())
+                            && StringUtils.isNotBlank((String) traveler.getInputDataRecord().get(pos))) {
+                        inputHasDuns = true;
+                    }
+                }
+            }
+        }
+        log.error("Input MatchKeys:\n" + columnKeys + "\n" + columnValues);
+
+
+        /*
+        boolean inputHasDuns = false;
+        for (Map.Entry<String, Map<MatchKey, List<Integer>>> entry : traveler.getEntityKeyPositionMaps().entrySet()) {
+            StringBuilder columnKeys = new StringBuilder();
+            StringBuilder columnValues = new StringBuilder();
+            for (Map.Entry<MatchKey, List<Integer>> matchKeyEntry : entry.getValue().entrySet()) {
+                if (CollectionUtils.isNotEmpty(matchKeyEntry.getValue())) {
+                    for (Integer pos : matchKeyEntry.getValue()) {
+                        columnKeys.append(String.format("%20s", matchKeyEntry.getKey().name()));
+                        columnValues.append(String.format("%20s", traveler.getInputDataRecord().get(pos)));
+
+                        if (BusinessEntity.Account.name().equals(entry.getKey())
+                                && MatchKey.DUNS.equals(matchKeyEntry.getKey())
+                                && StringUtils.isNotBlank((String) traveler.getInputDataRecord().get(pos))) {
+                            inputHasDuns = true;
+                        }
+                    }
+                }
+            }
+            log.error("Input MatchKeys for: " + entry.getKey() + "\n" + columnKeys + "\n" + columnValues);
+        }
+        */
+
+        //
+        // Extract whether there was a match and the matched Entity ID.
+        //
+        if (MapUtils.isEmpty(traveler.getEntityIds())) {
+            log.error("$JAW$ Found null or empty EntityIds Map in MatchTraveler");
+            return null;
+        }
+        if (!traveler.getEntityIds().containsKey(history.getBusinessEntity())) {
+            log.error("$JAW$ EntityIds missing entry for Business Entity: " + history.getBusinessEntity());
             return null;
         }
         history.setEntityId(traveler.getEntityIds().get(history.getBusinessEntity()));
-        if (MapUtils.isEmpty(traveler.getEntityMatchKeyTuples())) {
-            log.error("$JAW$ Found null or empty Entity MatchKeyTuples Map in MatchTraveler");
-            return null;
+        if (history.getEntityId().equals(ENTITY_ANONYMOUS_ID)) {
+            history.setMatched("ANONYMOUS");
+        } else if (MapUtils.isNotEmpty(traveler.getNewEntityIds()) &&
+                traveler.getNewEntityIds().containsKey(history.getBusinessEntity())) {
+            // TODO(slin): Is this the correct way to determine no match?
+            history.setMatched("NO MATCH");
         } else {
-            log.error("$JAW$ EntityMatchKeyTuples is: ");
-            for (Map.Entry<String, MatchKeyTuple> entry : traveler.getEntityMatchKeyTuples().entrySet())  {
-                log.error("$JAW$    Entity: " + entry.getKey());
-                log.error("$JAW$    MatchKeyTuple: " + entry.getValue().toString());
+            history.setMatched("MATCHED");
+        }
+        log.error("Matched: " + history.getMatched());
+        log.error("Entity Id: " + history.getEntityId());
+
+        //
+        // Get Full MatchKeyTuple for Business Entity.
+        //
+        if (MapUtils.isEmpty(traveler.getEntityMatchKeyTuples())) {
+            log.error("$JAW$ Found null or empty EntityMatchKeyTuples Map in MatchTraveler");
+            return null;
+        }
+        if (!traveler.getEntityMatchKeyTuples().containsKey(history.getBusinessEntity())) {
+            log.error("$JAW$ EntityMatchKeyTuples missing entry for Business Entity: " + history.getBusinessEntity());
+            return null;
+        }
+        if (traveler.getEntityMatchKeyTuples().get(history.getBusinessEntity()) == null) {
+            log.error("$JAW$ EntityMatchKeyTuples has null entry for Business Entity: " + history.getBusinessEntity());
+            return null;
+        }
+        history.setFullMatchKeyTuple(traveler.getEntityMatchKeyTuple(history.getBusinessEntity()));
+        log.error("Full MatchKeyTuple: " + history.getFullMatchKeyTuple().toString());
+
+
+        //
+        // Get MatchKeyTuple that found Entity ID.
+        //
+        //if (CollectionUtils.isEmpty(traveler.getMatchLookupResults())) {
+        //    log.error("$JAW$ Found null or empty EntityMatchLookupResults List in MatchTraveler");
+        //    return null;
+        //}
+        if (MapUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
+            log.error("$JAW$ Found null or empty EntityMatchLookupResults Map in MatchTraveler");
+            return null;
+        }
+        if (!traveler.getEntityMatchLookupResults().containsKey(history.getBusinessEntity())) {
+            log.error("$JAW$ EntityMatchLookupResults missing entry for Business Entity: "
+                    + history.getBusinessEntity());
+            return null;
+        }
+        if (traveler.getEntityMatchLookupResults().get(history.getBusinessEntity()) == null) {
+            log.error("$JAW$ EntityMatchLookupResults has null entry for Business Entity: "
+                    + history.getBusinessEntity());
+            return null;
+        }
+        List<String> lookupResultList = new ArrayList<>();
+        for (Pair<MatchKeyTuple, List<String>> pair :
+                traveler.getEntityMatchLookupResult(history.getBusinessEntity())) {
+        //for (Pair<MatchKeyTuple, List<String>> pair : traveler.getMatchLookupResults()) {
+            boolean foundResult = false;
+            for (String result : pair.getValue()) {
+                if (result != null) {
+                    history.setMatchedMatchKeyTuple(pair.getKey());
+                    lookupResultList = pair.getValue();
+                    foundResult = true;
+                    break;
+                }
             }
-            MatchKeyTuple matchKeyTuple = traveler.getEntityMatchKeyTuple(history.getBusinessEntity());
-            if (CollectionUtils.isNotEmpty(matchKeyTuple.getSystemIds())) {
-                history.setUserId(matchKeyTuple.getSystemIds().get(0).getValue());
+            if (foundResult) {
+                break;
             }
         }
 
-        if (MapUtils.isEmpty(traveler.getEntityIds())) {
-            log.error("$JAW$ Found null or empty EntityIds Map in MatchTraveler");
+        //
+        // Generate Match Type Enum describing match.
+        //
+        if (history.getMatchedMatchKeyTuple() == null) {
+            log.error("MatchedMatchKeyTuple: null");
+            history.setMatchType(EntityMatchType.NO_MATCH);
         } else {
-            log.error("$JAW$ EntityIds is: ");
-            for (Map.Entry<String, String> entry : traveler.getEntityIds().entrySet())  {
-                log.error("$JAW$    Entity: " + entry.getKey());
-                log.error("$JAW$    EntityId: " + entry.getValue());
+            log.error("MatchedMatchKeyTuple: " + history.getMatchedMatchKeyTuple().toString());
+
+            MatchKeyTuple tuple = history.getMatchedMatchKeyTuple();
+            boolean hasAccountId = false;
+            history.setMatchType(EntityMatchType.UNKNOWN);
+            history.setUserId("null");
+            if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+                int i = 0;
+                if (lookupResultList.size() != tuple.getSystemIds().size()) {
+                    log.error("$JAW$ EntityMatchLookupResults results and MatchKeyTuple SystemIds sizes don't match");
+                    log.error("$JAW$ EntityMatchLookupResults: " + lookupResultList.toString());
+                    log.error("$JAW$ MatchKeyTuple SystemIds: " + tuple.getSystemIds().toString());
+                    return null;
+                }
+                for (Pair<String, String> systemId : tuple.getSystemIds()) {
+                    if (systemId.getKey().equals(InterfaceName.CustomerAccountId.name())
+                            && StringUtils.isNotBlank(systemId.getValue())
+                            && StringUtils.isNotBlank(lookupResultList.get(i))
+                            && BusinessEntity.Account.name().equals(history.getBusinessEntity())) {
+                        history.setMatchType(EntityMatchType.ACCOUNTID);
+                        log.error("$JAW$ MatchKeyTuple contains CustomerAccountId: " + systemId.getValue());
+
+                        // Consider setting this a different way.
+                        history.setUserId(systemId.getValue());
+                        break;
+                    } else if (systemId.getKey().equals(InterfaceName.CustomerContactId.name())
+                            && StringUtils.isNotBlank(systemId.getValue())
+                            && StringUtils.isNotBlank(lookupResultList.get(i))
+                            && BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
+                        history.setMatchType(EntityMatchType.CONTACTID);
+                        log.error("$JAW$ MatchKeyTuple contains CustomerContactId: " + systemId.getValue());
+
+                        // Consider setting this a different way.
+                        history.setUserId(systemId.getValue());
+                        break;
+                    } else if (systemId.getKey().equals(InterfaceName.AccountId.name())
+                            && StringUtils.isNotBlank(systemId.getValue())
+                            && BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
+                        log.error("$JAW$ MatchKeyTuple contains AccountId: " + systemId.getValue());
+                        hasAccountId = true;
+                    } else if (StringUtils.isNotBlank(systemId.getKey())
+                            && StringUtils.isNotBlank(systemId.getValue())
+                            && StringUtils.isNotBlank(lookupResultList.get(i))) {
+                        history.setMatchType(EntityMatchType.SYSTEMID);
+                        log.error("$JAW$ MatchKeyTuple contains SystemId: " + systemId.getKey() + " with value: "
+                                + systemId.getValue());
+                        break;
+                    }
+                    i++;
+                }
+            }
+
+            if (EntityMatchType.UNKNOWN.name().equals(history.getMatchType())) {
+                if (tuple.hasDomain()) {
+                    history.setMatchType(EntityMatchType.DOMAIN_COUNTRY);
+                } else if (tuple.hasDuns()) {
+                    // Need to figure out LDC Case
+                    if (inputHasDuns) {
+                        history.setMatchType(EntityMatchType.DUNS);
+                    } else {
+                        history.setMatchType(EntityMatchType.LDC_MATCH);
+                    }
+                } else if (tuple.hasEmail()) {
+                    if (hasAccountId) {
+                        history.setMatchType(EntityMatchType.EMAIL_ACCOUNTID);
+                    } else {
+                        history.setMatchType(EntityMatchType.EMAIL);
+                    }
+                } else if (tuple.hasName()) {
+                    if (BusinessEntity.Account.name().equals(history.getBusinessEntity())) {
+                        history.setMatchType(EntityMatchType.NAME_COUNTRY);
+                    } else if (tuple.hasPhoneNumber()) {
+                        if (hasAccountId) {
+                            history.setMatchType(EntityMatchType.NAME_PHONE_ACCOUNTID);
+                        } else {
+                            history.setMatchType(EntityMatchType.NAME_PHONE);
+                        }
+                    }
+                }
             }
         }
+        log.error("MatchType is: " + history.getMatchType());
+        log.error("User Provided Entity ID: " + history.getUserId());
+
+        //
+        // Add LeadToAccount Matching Results for Contacts.
+        //
+        if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
+            String accountEntity = BusinessEntity.Account.name();
+            log.error("+++ LeadToAccount Account Match Data +++");
+
+            //
+            // Extract Input MatchKeys
+            //
+            //if (MapUtils.isEmpty(traveler.getEntityKeyPositionMaps())) {
+            //    log.error("$JAW$ Found null or empty EntityKeyPositionMaps in MatchTraveler");
+            //    return null;
+            //}
+            if (!traveler.getEntityKeyPositionMaps().containsKey(accountEntity)) {
+                log.error("$JAW$ EntityKeyPositionMaps missing entry for Business Entity: " + accountEntity);
+                return null;
+            }
+            //if (CollectionUtils.isEmpty(traveler.getInputDataRecord())) {
+            //    log.error("$JAW$ InputDataRecord list null or empty in MatchTraveler");
+            //    return null;
+            //}
+
+            inputHasDuns = false;
+            //Map<MatchKey, List<Integer>> matchKeyPosMap = traveler.getEntityKeyPositionMaps().get(accountEntity);
+            matchKeyPosMap = traveler.getEntityKeyPositionMaps().get(accountEntity);
+            columnKeys = new StringBuilder();
+            columnValues = new StringBuilder();
+            for (Map.Entry<MatchKey, List<Integer>> entry : matchKeyPosMap.entrySet()) {
+                if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                    for (Integer pos : entry.getValue()) {
+                        columnKeys.append(String.format("%20s", entry.getKey().name()));
+                        columnValues.append(String.format("%20s", traveler.getInputDataRecord().get(pos)));
+
+                        if (MatchKey.DUNS.equals(entry.getKey())
+                                && StringUtils.isNotBlank((String) traveler.getInputDataRecord().get(pos))) {
+                            inputHasDuns = true;
+                        }
+                    }
+                }
+            }
+            log.error("  Input MatchKeys:\n" + columnKeys + "\n" + columnValues);
+
+            //
+            // Extract whether there was a match and the matched Entity ID.
+            //
+            //if (MapUtils.isEmpty(traveler.getEntityIds())) {
+            //    log.error("$JAW$ Found null or empty EntityIds Map in MatchTraveler");
+            //    return null;
+            //}
+            if (!traveler.getEntityIds().containsKey(accountEntity)) {
+                log.error("$JAW$ EntityIds missing entry for Business Entity: " + accountEntity);
+                return null;
+            }
+            history.setL2aEntityId(traveler.getEntityIds().get(accountEntity));
+            if (history.getL2aEntityId().equals(ENTITY_ANONYMOUS_ID)) {
+                history.setL2aMatched("ANONYMOUS");
+            } else if (MapUtils.isNotEmpty(traveler.getNewEntityIds()) &&
+                    traveler.getNewEntityIds().containsKey(accountEntity)) {
+                // TODO(slin): Is this the correct way to determine no match?
+                history.setL2aMatched("NO MATCH");
+            } else {
+                history.setL2aMatched("MATCHED");
+            }
+            log.error("  Matched: " + history.getL2aMatched());
+            log.error("  Entity Id: " + history.getL2aEntityId());
+
+            //
+            // Get Full MatchKeyTuple for Business Entity.
+            //
+            //if (MapUtils.isEmpty(traveler.getEntityMatchKeyTuples())) {
+            //    log.error("$JAW$ Found null or empty EntityMatchKeyTuples Map in MatchTraveler");
+            //    return null;
+            //}
+            if (!traveler.getEntityMatchKeyTuples().containsKey(accountEntity)) {
+                log.error("$JAW$ EntityMatchKeyTuples missing entry for Business Entity: " + accountEntity);
+                return null;
+            }
+            if (traveler.getEntityMatchKeyTuples().get(accountEntity) == null) {
+                log.error("$JAW$ EntityMatchKeyTuples has null entry for Business Entity: " + accountEntity);
+                return null;
+            }
+            history.setL2aFullMatchKeyTuple(traveler.getEntityMatchKeyTuple(accountEntity));
+            log.error("Full MatchKeyTuple: " + history.getL2aFullMatchKeyTuple().toString());
+
+
+            //
+            // Get MatchKeyTuple that found Entity ID.
+            //
+            //if (CollectionUtils.isEmpty(traveler.getMatchLookupResults())) {
+            //    log.error("$JAW$ Found null or empty EntityMatchLookupResults List in MatchTraveler");
+            //    return null;
+            //}
+            //if (MapUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
+            //    log.error("$JAW$ Found null or empty EntityMatchLookupResults Map in MatchTraveler");
+            //    return null;
+            //}
+            if (!traveler.getEntityMatchLookupResults().containsKey(accountEntity)) {
+                log.error("$JAW$ EntityMatchLookupResults missing entry for Business Entity: "
+                        + accountEntity);
+                return null;
+            }
+            if (traveler.getEntityMatchLookupResults().get(accountEntity) == null) {
+                log.error("$JAW$ EntityMatchLookupResults has null entry for Business Entity: "
+                        + accountEntity);
+                return null;
+            }
+
+            lookupResultList = new ArrayList<>();
+            for (Pair<MatchKeyTuple, List<String>> pair :
+                    traveler.getEntityMatchLookupResult(accountEntity)) {
+                //for (Pair<MatchKeyTuple, List<String>> pair : traveler.getMatchLookupResults()) {
+                boolean foundResult = false;
+                for (String result : pair.getValue()) {
+                    if (result != null) {
+                        history.setL2aMatchedMatchKeyTuple(pair.getKey());
+                        lookupResultList = pair.getValue();
+                        foundResult = true;
+                        break;
+                    }
+                }
+                if (foundResult) {
+                    break;
+                }
+            }
+
+            //
+            // Generate Match Type Enum describing match.
+            //
+            if (history.getL2aMatchedMatchKeyTuple() == null) {
+                log.error("  MatchedMatchKeyTuple: null");
+                history.setL2aMatchType(EntityMatchType.NO_MATCH);
+            } else {
+                log.error("  MatchedMatchKeyTuple: " + history.getL2aMatchedMatchKeyTuple().toString());
+
+                MatchKeyTuple tuple = history.getL2aMatchedMatchKeyTuple();
+                boolean hasAccountId = false;
+                history.setL2aMatchType(EntityMatchType.UNKNOWN);
+                history.setL2aUserId("null");
+                if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+                    int i = 0;
+                    if (lookupResultList.size() != tuple.getSystemIds().size()) {
+                        log.error("$JAW$ EntityMatchLookupResults results and MatchKeyTuple SystemIds sizes don't " +
+                                "match");
+                        log.error("$JAW$ EntityMatchLookupResults: " + lookupResultList.toString());
+                        log.error("$JAW$ MatchKeyTuple SystemIds: " + tuple.getSystemIds().toString());
+                        return null;
+                    }
+                    for (Pair<String, String> systemId : tuple.getSystemIds()) {
+                        if (systemId.getKey().equals(InterfaceName.CustomerAccountId.name())
+                                && StringUtils.isNotBlank(systemId.getValue())
+                                && StringUtils.isNotBlank(lookupResultList.get(i))
+                                && BusinessEntity.Account.name().equals(accountEntity)) {
+                            history.setL2aMatchType(EntityMatchType.ACCOUNTID);
+                            log.error("$JAW$ MatchKeyTuple contains CustomerAccountId: " + systemId.getValue());
+
+                            // Consider setting this a different way.
+                            history.setL2aUserId(systemId.getValue());
+                            break;
+                        } else if (systemId.getKey().equals(InterfaceName.CustomerContactId.name())
+                                && StringUtils.isNotBlank(systemId.getValue())
+                                && StringUtils.isNotBlank(lookupResultList.get(i))
+                                && BusinessEntity.Contact.name().equals(accountEntity)) {
+                            history.setL2aMatchType(EntityMatchType.CONTACTID);
+                            log.error("$JAW$ MatchKeyTuple contains CustomerContactId: " + systemId.getValue());
+
+                            // Consider setting this a different way.
+                            history.setL2aUserId(systemId.getValue());
+                            break;
+                        } else if (StringUtils.isNotBlank(systemId.getKey())
+                                && StringUtils.isNotBlank(systemId.getValue())
+                                && StringUtils.isNotBlank(lookupResultList.get(i))) {
+                            history.setL2aMatchType(EntityMatchType.SYSTEMID);
+                            log.error("$JAW$ MatchKeyTuple contains SystemId: " + systemId.getKey() + " with value: "
+                                    + systemId.getValue());
+                            break;
+                        } else if (systemId.getKey().equals(InterfaceName.AccountId.name())
+                                && StringUtils.isNotBlank(systemId.getValue())
+                                && BusinessEntity.Contact.name().equals(accountEntity)) {
+                            log.error("$JAW$ MatchKeyTuple contains AccountId: " + systemId.getValue());
+                            hasAccountId = true;
+                        }
+                        i++;
+                    }
+                }
+
+                if (EntityMatchType.UNKNOWN.name().equals(history.getL2aMatchType())) {
+                    if (tuple.hasDomain()) {
+                        history.setL2aMatchType(EntityMatchType.DOMAIN_COUNTRY);
+                    } else if (tuple.hasDuns()) {
+                        // Need to figure out LDC Case
+                        if (inputHasDuns) {
+                            history.setL2aMatchType(EntityMatchType.DUNS);
+                        } else {
+                            history.setL2aMatchType(EntityMatchType.LDC_MATCH);
+                        }
+                    } else if (tuple.hasEmail()) {
+                        if (hasAccountId) {
+                            history.setL2aMatchType(EntityMatchType.EMAIL_ACCOUNTID);
+                        } else {
+                            history.setL2aMatchType(EntityMatchType.EMAIL);
+                        }
+                    } else if (tuple.hasName()) {
+                        if (BusinessEntity.Account.name().equals(accountEntity)) {
+                            history.setL2aMatchType(EntityMatchType.NAME_COUNTRY);
+                        } else if (tuple.hasPhoneNumber()) {
+                            if (hasAccountId) {
+                                history.setL2aMatchType(EntityMatchType.NAME_PHONE_ACCOUNTID);
+                            } else {
+                                history.setL2aMatchType(EntityMatchType.NAME_PHONE);
+                            }
+                        }
+                    }
+                }
+            }
+            log.error("  MatchType is: " + history.getL2aMatchType());
+            log.error("  User Provided Entity ID: " + history.getL2aUserId());
+        }
+
+        log.error("DEBUG -----------------------------------------------------------------");
+        //if (MapUtils.isEmpty(traveler.getEntityIds())) {
+        //    log.error("$JAW$ Found null or empty EntityIds Map in MatchTraveler");
+        //} else {
+        log.error("$JAW$ EntityIds are: ");
+        for (Map.Entry<String, String> entry : traveler.getEntityIds().entrySet())  {
+            log.error("$JAW$    Entity: " + entry.getKey());
+            log.error("$JAW$    EntityId: " + entry.getValue());
+        }
+        //}
 
         if (MapUtils.isEmpty(traveler.getNewEntityIds())) {
             log.error("$JAW$ Found null or empty NewEntityIds Map in MatchTraveler");
@@ -440,55 +886,54 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             }
         }
 
-        if (CollectionUtils.isEmpty(traveler.getEntityMatchLookupResults())) {
-            log.error("$JAW$ Found null or empty EntityMatchLookupResults List in MatchTraveler");
-            return null;
+        log.error("$JAW$ EntityMatchKeyTuples is: ");
+        for (Map.Entry<String, MatchKeyTuple> entry : traveler.getEntityMatchKeyTuples().entrySet())  {
+            log.error("$JAW$    Entity: " + entry.getKey());
+            log.error("$JAW$    MatchKeyTuple: " + entry.getValue().toString());
         }
+        MatchKeyTuple matchKeyTuple = traveler.getEntityMatchKeyTuple(history.getBusinessEntity());
+        if (CollectionUtils.isNotEmpty(matchKeyTuple.getSystemIds())) {
+            log.error("$JAW$    User Entity ID: " + matchKeyTuple.getSystemIds().get(0).getValue());
+        }
+
+        //if (CollectionUtils.isEmpty(traveler.getMatchLookupResults())) {
+        //    log.error("$JAW$ Found null or empty EntityMatchLookupResults List in MatchTraveler");
+        //} else {
+
         boolean foundResult = false;
-        log.error("$JAW$ Iterate through Match Results:");
-        for (Pair<MatchKeyTuple, List<String>> pair : traveler.getEntityMatchLookupResults()) {
-            if (pair.getKey() == null) {
-                log.error("$JAW$   MatchKeyTuple: null");
-            } else {
-                log.error("$JAW$   MatchKeyTuple: " + pair.getKey().toString());
-            }
+        log.error("$JAW$ Iterate through EntityMatchLookupResults:");
+        //for (Pair<MatchKeyTuple, List<String>> pair : traveler.getMatchLookupResults()) {
+        for (Map.Entry<String, List<Pair<MatchKeyTuple, List<String>>>> entry :
+            traveler.getEntityMatchLookupResults().entrySet()) {
+            //for (Pair<MatchKeyTuple, List<String>> pair :
+            //        traveler.getEntityMatchLookupResult(history.getBusinessEntity())) {
+            for (Pair<MatchKeyTuple, List<String>> pair : entry.getValue()) {
+                log.error("$JAW$    MatchKeyTuple Lookup Results for " + entry.getKey());
 
-            String resultList = "";
-            for (String result : pair.getValue()) {
-                if (result != null) {
-                    if (!foundResult) {
-                        history.setMatchKeyTuple(pair.getKey());
-                        foundResult = true;
-                        resultList += ">>> " + result + " <<< ";
-                    } else {
-                        resultList += result + " ";
-                    }
+                if (pair.getKey() == null) {
+                    log.error("$JAW$     MatchKeyTuple: null");
                 } else {
-                    resultList += "null ";
+                    log.error("$JAW$     MatchKeyTuple: " + pair.getKey().toString());
                 }
-            }
 
-            log.error(":$JAW$   Results: " + resultList);
-
-            // Check if there is a non-null result for this MatchKeyTuple.
-            /*
-            for (String result : pair.getValue()) {
-                if (result != null) {
-                    history.setMatchKeyTuple(pair.getKey());
-                    break;
+                String resultList = "";
+                for (String result : pair.getValue()) {
+                    if (result != null) {
+                        if (!foundResult) {
+                            foundResult = true;
+                            resultList += ">>> " + result + " <<< ";
+                        } else {
+                            resultList += result + " ";
+                        }
+                    } else {
+                        resultList += "null ";
+                    }
                 }
+
+                log.error("$JAW$     Results: " + resultList);
             }
-            */
+            //}
         }
-
-        log.error("$JAW$ EntityMatchHistory:\n" + "   Entity: " + history.getBusinessEntity() + "\n   Entity ID: "
-                + history.getEntityId() + "\n   User Provided ID: " + history.getUserId());
-        if (history.getMatchKeyTuple() == null) {
-            log.error("$JAW$ MatchKeyTuple: null");
-        } else {
-            log.error("$JAW$ MatchKeyTuple: " + history.getMatchKeyTuple().toString());
-        }
-
         return history;
     }
 }

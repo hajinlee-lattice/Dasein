@@ -57,8 +57,11 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
     protected void execute(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
 
+        // TODO(slin):  Is this the right place to grab the completed Match Lookup Results.
+        matchTraveler.addEntityMatchLookupResults(matchTraveler.getEntity(), matchTraveler.getMatchLookupResults());
+
         // select the entityId found by the highest priority key
-        String entityId = matchTraveler.getEntityMatchLookupResults()
+        String entityId = matchTraveler.getMatchLookupResults()
                 .stream()
                 .map(Pair::getValue)
                 .filter(CollectionUtils::isNotEmpty)
@@ -75,7 +78,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
             if (entityId != null) {
                 // should never happen, lookup actor should return either null or non-blank entity ID
                 log.warn("Blank entity ID found in entity lookup results = {}",
-                        matchTraveler.getEntityMatchLookupResults());
+                        matchTraveler.getMatchLookupResults());
             }
             traveler.debug(String.format(
                     "No entity found in lookup results for Entity=%s", matchTraveler.getEntity()));
@@ -97,7 +100,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         // in lookup mode and have lookup result
         return !entityMatchConfigurationService.isAllocateMode()
-                && CollectionUtils.isNotEmpty(matchTraveler.getEntityMatchLookupResults());
+                && CollectionUtils.isNotEmpty(matchTraveler.getMatchLookupResults());
     }
 
     // Actually no retry for lookup mode. MatchAnchorActor decides it. Just
