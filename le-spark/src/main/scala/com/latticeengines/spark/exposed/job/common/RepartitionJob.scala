@@ -18,15 +18,11 @@ class RepartitionJob extends AbstractSparkJob[RepartitionConfig] {
     val partitions = config.getPartitions
 
     val partitioned =
-      if (partitions < 200) {
-        input
+      if (CollectionUtils.isNotEmpty(config.getPartitionKeys)) {
+        val pKeys = config.getPartitionKeys.asScala.toList.map(col)
+        input.repartition(partitions, pKeys: _*)
       } else {
-        if (CollectionUtils.isNotEmpty(config.getPartitionKeys)) {
-          val pKeys = config.getPartitionKeys.asScala.toList.map(col)
-            input.repartition(partitions, pKeys: _*)
-        } else {
-          input.repartition(partitions)
-        }
+        input.repartition(partitions)
       }
 
     lattice.output = partitioned :: Nil
