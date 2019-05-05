@@ -34,6 +34,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected static final String ENTITY_ACCOUNT = "Account";
     protected static final String ENTITY_CONTACT = "Contact";
     protected static final String ENTITY_TRANSACTION = "Transaction";
+    protected static final String ENTITY_PRODUCT = "Product";
 
     protected static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
     protected static final String CONTACT_SOURCE_FILE = "Contact_base.csv";

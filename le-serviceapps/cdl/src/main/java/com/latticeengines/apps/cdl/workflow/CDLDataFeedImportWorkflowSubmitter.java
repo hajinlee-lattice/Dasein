@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -139,12 +140,13 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         if (s3ImportEmail && emailInfo != null) {
             emailInfoStr = JsonUtils.serialize(emailInfo);
         }
+        BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
-                .fileValidation(dataFeedTask.getTemplateDisplayName()) //
+                .fileValidation(entity) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
                 .inputProperties(ImmutableMap.<String, String>builder()

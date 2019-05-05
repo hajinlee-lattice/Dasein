@@ -1,8 +1,9 @@
-package com.latticeengines.cdl.workflow.steps.importdata;
+package com.latticeengines.cdl.workflow.steps.validations;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,18 +11,17 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -31,28 +31,33 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.InputFileValidatorConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.BaseInputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("inputFileValidator")
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
+public abstract class BaseInputFileValidator<T extends BaseInputFileValidatorConfiguration>
+        extends BaseWorkflowStep<T> {
+    private static final Logger log = LoggerFactory.getLogger(BaseInputFileValidator.class);
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
+
+    private static final List<Character> invalidChars = Arrays.asList('/', '&');
+
+    protected abstract BusinessEntity getEntity();
 
     @Override
     public void execute() {
@@ -78,9 +83,86 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         }).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(pathList)) {
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
+            return;
         }
-        List<Product> inputProducts = new ArrayList<>();
 
+        BusinessEntity entity = getEntity();
+        log.info(String.format("Begin to validate data with entity %s.", entity.name()));
+        if (BusinessEntity.Account == entity) {
+            validateAccount(pathList);
+        } else if (BusinessEntity.Contact == entity) {
+            validateContact(pathList);
+        } else if (BusinessEntity.Product == entity) {
+            validateProduct(pathList);
+        }
+    }
+
+    private void validateAccount(List<String> pathList) {
+        List<String> errorMessages = new ArrayList<>();
+        try (AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, pathList)) {
+            while (iterator.hasNext()) {
+                GenericRecord record = iterator.next();
+                String id = getString(record, InterfaceName.Id.name());
+                if (id == null) {
+                    id = getString(record, InterfaceName.AccountId.name());
+                }
+                if (StringUtils.isEmpty(id)) {
+                    log.info("Empty id is found from avro file");
+                    continue;
+                }
+                for (Character c : invalidChars) {
+                    if (id.indexOf(c) != -1) {
+                        errorMessages
+                                .add(String.format("Invalid account id is found due to %s in %s.", c.toString(), id));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(errorMessages)) {
+            String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
+            writeErrorFile(filePath, errorMessages);
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+        }
+    }
+
+    private void validateContact(List<String> pathList) {
+        List<String> errorMessages = new ArrayList<>();
+        try (AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, pathList)) {
+            while (iterator.hasNext()) {
+                GenericRecord record = iterator.next();
+                String id = getString(record, InterfaceName.Id.name());
+                if (StringUtils.isBlank(id)) {
+                    id = getString(record, InterfaceName.ContactId.name());
+                }
+                if (StringUtils.isNotBlank(id)) {
+                    continue;
+                }
+                String email = getString(record, InterfaceName.Email.name());
+                if (StringUtils.isNotBlank(email)) {
+                    continue;
+                }
+                String firstName = getString(record, InterfaceName.FirstName.name());
+                String lastName = getString(record, InterfaceName.LastName.name());
+                String phone = getString(record, InterfaceName.PhoneNumber.name());
+                if (StringUtils.isNotBlank(firstName) && StringUtils.isNotBlank(lastName)
+                        && StringUtils.isNotBlank(phone)) {
+                    continue;
+                }
+                errorMessages.add(
+                        "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone");
+            }
+        }
+        if (CollectionUtils.isNotEmpty(errorMessages)) {
+            String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
+            writeErrorFile(filePath, errorMessages);
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+        }
+    }
+
+    private void validateProduct(List<String> pathList) {
+        List<Product> inputProducts = new ArrayList<>();
         pathList.forEach(path -> inputProducts.addAll(ProductUtils.loadProducts(yarnConfiguration, path, null, null)));
         Table currentTable = getCurrentConsolidateProductTable(configuration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
@@ -123,8 +205,7 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         }
     }
 
-    @VisibleForTesting
-    List<Product> mergeProducts(List<Product> inputProducts, List<Product> currentProducts,
+    private List<Product> mergeProducts(List<Product> inputProducts, List<Product> currentProducts,
             List<String> errorMessages) {
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
@@ -349,5 +430,15 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         }
         log.info("Get avro path output " + avroDir);
         return avroDir;
+    }
+
+    private static String getString(GenericRecord record, String field) {
+        String value;
+        try {
+            value = record.get(field).toString();
+        } catch (Exception e) {
+            value = null;
+        }
+        return value;
     }
 }
