@@ -18,9 +18,11 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
@@ -60,7 +62,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
             switch (entityType.getEntity().name()) {
                 case ENTITY_ACCOUNT:
                     Assert.assertEquals(fileLists.size(), 4);
-                    testConfigTemplate(fileLists.get(0), entityType.getEntity().name());
+                    testConfigTemplate(fileLists.get(0), entityType.getEntity().name(), display.getFeedType());
                     break;
                 case ENTITY_CONTACT: Assert.assertEquals(fileLists.size(), 1);break;
                 case ENTITY_TRANSACTION: Assert.assertEquals(fileLists.size(), 1);
@@ -101,7 +103,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         }
     }
 
-    private void testConfigTemplate(FileProperty csvFile, String entity) {
+    private void testConfigTemplate(FileProperty csvFile, String entity, String feedType) {
         String uri = "/pls/models/uploadfile/importFile?entity=%s";
         uri = String.format(uri, entity);
         ResponseDocument responseDocument = restTemplate.postForObject(getRestAPIHostPort() + uri,
@@ -110,5 +112,25 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         Assert.assertTrue(responseDocument.isSuccess());
         SourceFile sourceFile = JsonUtils.convertValue(responseDocument.getResult(), SourceFile.class);
         Assert.assertEquals(sourceFile.getDisplayName(), csvFile.getFileName());
+        uri = "/pls/models/uploadfile/%s/fieldmappings?entity=%s&source=%s&feedType=%s";
+        uri = String.format(uri, sourceFile.getName(), entity, SourceType.FILE.getName(), feedType);
+        responseDocument = restTemplate.postForObject(getRestAPIHostPort() + uri, null,
+                ResponseDocument.class);
+        Assert.assertNotNull(responseDocument);
+        Assert.assertTrue(responseDocument.isSuccess());
+        FieldMappingDocument fieldMappingDocument = JsonUtils.convertValue(responseDocument.getResult(),
+                FieldMappingDocument.class);
+        uri = "/pls/models/uploadfile/fieldmappings?displayName=%s&entity=%s&source=%s&feedType=%s";
+        uri = String.format(uri, sourceFile.getName(), entity, SourceType.FILE.getName(), feedType);
+        restTemplate.postForObject(getRestAPIHostPort() + uri, fieldMappingDocument,
+                Void.class);
+        uri = "/pls/cdl/import/csv?templateFileName=%s&dataFileName=%s&entity=%s&source=%s&feedType=%s";
+        uri = String.format(uri, sourceFile.getName(), sourceFile.getName(), entity, SourceType.FILE.getName(),
+                feedType);
+        try {
+            restTemplate.postForObject(getRestAPIHostPort() + uri, null, ResponseDocument.class);
+        } catch (RuntimeException e) {
+            Assert.assertTrue(e.getMessage().contains("can not auto import"));
+        }
     }
 }
