@@ -119,8 +119,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
     }
 
     @Test(groups = "deployment")
@@ -316,8 +316,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_CONTACT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {
