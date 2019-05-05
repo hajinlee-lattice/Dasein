@@ -175,9 +175,10 @@ public class SourceFileServiceImpl implements SourceFileService {
             file.setBusinessEntity(BusinessEntity.getByName(entity));
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(fileProperty.getFileName());
+            file.setAutoImport(false);
 
             long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
-                    outputPath + "/" + outputFileName);
+                    outputPath + "/" + outputFileName, 100);
             log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
             file.setFileRows(fileRows);
             sourceFileEntityMgr.create(file);

@@ -263,6 +263,10 @@ public class CDLServiceImpl implements CDLService {
             throw new RuntimeException(
                     String.format("Source file %s doesn't have a table template!", templateFileName));
         }
+        if (!dataSourceFile.isAutoImport()) {
+            throw new RuntimeException(
+                    String.format("Source file %s can not auto import!", templateFileName));
+        }
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         importConfig.setTemplateName(templateSourceFile.getTableName());
         importConfig.setFilePath(dataSourceFile.getPath());
@@ -398,6 +402,15 @@ public class CDLServiceImpl implements CDLService {
             }
         }
         return templatePreview;
+    }
+
+    @Override
+    public boolean autoImport(String templateFileName) {
+        SourceFile sourceFile = getSourceFile(templateFileName);
+        if (sourceFile != null && sourceFile.isAutoImport()) {
+            return true;
+        }
+        return false;
     }
 
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {

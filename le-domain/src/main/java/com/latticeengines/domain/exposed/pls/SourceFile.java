@@ -112,6 +112,10 @@ public class SourceFile
     @Enumerated(EnumType.STRING)
     private BusinessEntity businessEntity;
 
+    @JsonProperty("auto_import")
+    @Column(name = "AUTO_IMPORT")
+    private boolean autoImport;
+
     @Override
     public String getName() {
         return name;
@@ -247,5 +251,13 @@ public class SourceFile
 
     public void setBusinessEntity(BusinessEntity businessEntity) {
         this.businessEntity = businessEntity;
+    }
+
+    public boolean isAutoImport() {
+        return autoImport;
+    }
+
+    public void setAutoImport(boolean autoImport) {
+        this.autoImport = autoImport;
     }
 }

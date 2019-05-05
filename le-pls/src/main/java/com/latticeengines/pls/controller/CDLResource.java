@@ -67,6 +67,8 @@ public class CDLResource {
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
+    private static final String importFromS3FileMsg = "<p> The s3 file can not auto import file after create/edit " +
+            " %s template.</p>";
 
     @Inject
     private CDLJobProxy cdlJobProxy;
@@ -155,7 +157,8 @@ public class CDLResource {
                     feedType, subType, templateDisplay.getTemplateName());
 
             UIAction uiAction = null;
-            if (importData) {
+            boolean autoImportFlag = cdlService.autoImport(templateFileName);
+            if (importData && autoImportFlag) {
                 cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, templateFileName);
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
                     uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
@@ -167,11 +170,21 @@ public class CDLResource {
                 return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             } else {
                 if (Boolean.TRUE.equals(templateDisplay.getExist())) {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
-                            String.format(editS3TemplateMsg, entity));
+                    if (autoImportFlag) {
+                        uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                                String.format(editS3TemplateMsg, entity));
+                    } else {
+                        uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error,
+                                String.format(importFromS3FileMsg, entity));
+                    }
                 } else {
-                    uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
-                            String.format(createS3TemplateMsg, entity));
+                    if (autoImportFlag) {
+                        uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                                String.format(createS3TemplateMsg, entity));
+                    } else {
+                        uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error,
+                                String.format(importFromS3FileMsg, entity));
+                    }
                 }
                 return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
             }
