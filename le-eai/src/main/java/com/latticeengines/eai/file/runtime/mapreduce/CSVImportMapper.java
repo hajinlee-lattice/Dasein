@@ -33,6 +33,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -182,9 +184,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
             CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
-            try (CSVParser parser = new CSVParser(
-                    new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName), StandardCharsets.UTF_8)),
-                    format)) {
+            try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
+                            new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
+                                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                                    ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
                 headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
                 Iterator<CSVRecord> iter = parser.iterator();
                 while (true) {
