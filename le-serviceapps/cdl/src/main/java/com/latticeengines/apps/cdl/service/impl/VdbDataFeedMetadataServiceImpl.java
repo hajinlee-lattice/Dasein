@@ -311,31 +311,32 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         String typeStrLowerCase = attribute.getPhysicalDataType().toLowerCase();
         switch (typeStrLowerCase) {
-        case "bit":
-            type = Type.BOOLEAN;
-            break;
-        case "byte":
-        case "short":
-        case "int":
-            type = Type.INT;
-            break;
-        case "long":
-        case "date":
-        case "datetime":
-        case "datetimeoffset":
-            type = Type.LONG;
-            break;
-        case "float":
-            type = Type.FLOAT;
-            break;
-        case "double":
-            type = Type.DOUBLE;
-            break;
-        case "string":
-            type = Type.STRING;
-            break;
-        default:
-            break;
+            case "bit":
+            case "boolean":
+                type = Type.BOOLEAN;
+                break;
+            case "byte":
+            case "short":
+            case "int":
+                type = Type.INT;
+                break;
+            case "long":
+            case "date":
+            case "datetime":
+            case "datetimeoffset":
+                type = Type.LONG;
+                break;
+            case "float":
+                type = Type.FLOAT;
+                break;
+            case "double":
+                type = Type.DOUBLE;
+                break;
+            case "string":
+                type = Type.STRING;
+                break;
+            default:
+                break;
         }
         if (type == null) {
             if (typeStrLowerCase.startsWith("nvarchar") || typeStrLowerCase.startsWith("varchar")) {
