@@ -1,11 +1,16 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +41,21 @@ public class VdbMetadataUtils {
     static final Set<String> unparsableFundamentalTypes = new HashSet<>(Arrays.asList( //
             "alert", "segment", "unknown"));
 
+    private static final Map<String, Schema.Type> typeConverter =Stream.of(
+                    new AbstractMap.SimpleEntry<>("bit", Schema.Type.BOOLEAN),
+                    new AbstractMap.SimpleEntry<>("boolean", Schema.Type.BOOLEAN),
+                    new AbstractMap.SimpleEntry<>("byte", Schema.Type.INT),
+                    new AbstractMap.SimpleEntry<>("short", Schema.Type.INT),
+                    new AbstractMap.SimpleEntry<>("int", Schema.Type.INT),
+                    new AbstractMap.SimpleEntry<>("long", Schema.Type.LONG),
+                    new AbstractMap.SimpleEntry<>("float", Schema.Type.FLOAT),
+                    new AbstractMap.SimpleEntry<>("double", Schema.Type.DOUBLE),
+                    new AbstractMap.SimpleEntry<>("date", Schema.Type.LONG),
+                    new AbstractMap.SimpleEntry<>("datetime", Schema.Type.LONG),
+                    new AbstractMap.SimpleEntry<>("datetimeoffset", Schema.Type.LONG),
+                    new AbstractMap.SimpleEntry<>("string", Schema.Type.STRING))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     public static Attribute convertToAttribute(VdbSpecMetadata metadata, String entity) {
         try {
             Attribute attr = new Attribute();
@@ -44,7 +64,7 @@ public class VdbMetadataUtils {
             attr.setSourceAttrName(metadata.getColumnName());
             attr.setDisplayName(metadata.getDisplayName());
             attr.setSourceLogicalDataType(metadata.getDataType());
-            attr.setPhysicalDataType(metadata.getDataType());
+            attr.setPhysicalDataType(getAvroTypeFromDataType(metadata.getDataType()));
             attr.setDescription(metadata.getDescription());
             attr.setDataSource(metadata.getDataSource());
             attr.setFundamentalType(resolveFundamentalType(metadata));
@@ -70,6 +90,19 @@ public class VdbMetadataUtils {
             // see the log to add unit test
             throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)),
                     e);
+        }
+    }
+
+    public static String getAvroTypeFromDataType(String dataType) {
+        String type = dataType.toLowerCase();
+        if (type.startsWith("varchar") || type.startsWith("nvarchar")) {
+            return Schema.Type.STRING.name();
+        }
+        Schema.Type avroType = typeConverter.get(type);
+        if (avroType != null) {
+            return avroType.name();
+        } else {
+            throw new IllegalArgumentException("Unsupported vdb type detected: " + dataType);
         }
     }
 

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.util;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -154,6 +155,36 @@ public class VdbMetadataUtilsUnitTestNG {
         };
     }
 
+    @Test(groups = "unit", dataProvider = "typeConvertData")
+    public void testTypeConvert(String vdbType, String avroType) {
+        String convertType = VdbMetadataUtils.getAvroTypeFromDataType(vdbType);
+        Assert.assertEquals(convertType, avroType);
+    }
+
+    @DataProvider(name = "typeConvertData")
+    public Object[][] typeConvertDataProvider() {
+        return new Object[][]{
+                {"int", Schema.Type.INT.name()},
+                {"long", Schema.Type.LONG.name()},
+                {"Float", Schema.Type.FLOAT.name()},
+                {"Double", Schema.Type.DOUBLE.name()},
+                {"string", Schema.Type.STRING.name()},
+                {"nvarchar(max)", Schema.Type.STRING.name()},
+                {"varchar(10)", Schema.Type.STRING.name()},
+                {"Nvarchar(max)", Schema.Type.STRING.name()},
+                {"NVarChar(256)", Schema.Type.STRING.name()},
+                {"NVarChar(1900)", Schema.Type.STRING.name()},
+                {"float", Schema.Type.FLOAT.name()},
+                {"bit", Schema.Type.BOOLEAN.name()},
+                {"short", Schema.Type.INT.name()},
+                {"Date", Schema.Type.LONG.name()},
+                {"DateTimeOffset",  Schema.Type.LONG.name()},
+                {"DateTime",  Schema.Type.LONG.name()},
+                {"datetime",  Schema.Type.LONG.name()},
+        };
+    }
+
+
     @Test(groups = "unit")
     public void testMetadataExtension() {
         VdbSpecMetadata metadata = createVdbMetadata();
@@ -173,6 +204,7 @@ public class VdbMetadataUtilsUnitTestNG {
         metadata.setMostRecentUpdateDate("3/24/2017 1:36:00 AM +00:00");
         metadata.setLastTimeSourceUpdated(Collections.singletonList("3/24/2017 1:36:00 AM +00:00"));
         metadata.setTags(Arrays.asList("External", "ExcludeFromAll"));
+        metadata.setDataType("Nvarchar(100)");
         VdbMetadataExtension vdbMetadataExtension = new VdbMetadataExtension();
         vdbMetadataExtension.setKey("ExcludeFromAll");
         vdbMetadataExtension.setValue("true");
@@ -185,6 +217,7 @@ public class VdbMetadataUtilsUnitTestNG {
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getName()));
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getDisplayName()));
         Assert.assertTrue(CollectionUtils.isNotEmpty(attribute.getTags()));
-        Assert.assertTrue(attribute.getTags().get(0).equals(Tag.INTERNAL.getName()));
+        Assert.assertEquals(Tag.INTERNAL.getName(), attribute.getTags().get(0));
+        Assert.assertEquals(attribute.getPhysicalDataType(), Schema.Type.STRING.name());
     }
 }

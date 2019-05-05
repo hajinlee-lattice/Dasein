@@ -14,6 +14,7 @@ public class VdbTableToAvroTypeConverter extends AvroTypeConverter {
 
     public VdbTableToAvroTypeConverter() {
         typeMap.put("bit", Type.BOOLEAN);
+        typeMap.put("boolean", Type.BOOLEAN);
         typeMap.put("byte", Type.INT);
         typeMap.put("short", Type.INT);
         typeMap.put("int", Type.INT);
