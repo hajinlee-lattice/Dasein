@@ -73,7 +73,8 @@ alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop col
 
 alter table `PLS_MultiTenant`.`PLAY_LAUNCH` add column `CONTACTS_ERRORED` BIGINT;
 ALTER TABLE `PLS_MultiTenant`.`SOURCE_FILE`
-ADD COLUMN `AUTO_IMPORT` BIT(1) NULL DEFAULT 1 COMMENT 'The flag shows if we can auto import file after create template. Default : 1 Using s3 to create template : 0' AFTER `FK_TENANT_ID`;
+ADD COLUMN `PARTIAL_FILE` BIT(1) NULL DEFAULT 0 COMMENT 'The flag shows if we can auto import file after create template
+. Default : 0 Using s3 to create template : 1' AFTER `FK_TENANT_ID`;
 
   END;
 //

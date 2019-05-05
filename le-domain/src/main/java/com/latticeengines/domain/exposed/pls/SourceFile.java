@@ -112,9 +112,9 @@ public class SourceFile
     @Enumerated(EnumType.STRING)
     private BusinessEntity businessEntity;
 
-    @JsonProperty("auto_import")
-    @Column(name = "AUTO_IMPORT")
-    private boolean autoImport;
+    @JsonProperty("partial_file")
+    @Column(name = "PARTIAL_FILE")
+    private boolean partialFile;
 
     @Override
     public String getName() {
@@ -253,11 +253,11 @@ public class SourceFile
         this.businessEntity = businessEntity;
     }
 
-    public boolean isAutoImport() {
-        return autoImport;
+    public boolean isPartialFile() {
+        return partialFile;
     }
 
-    public void setAutoImport(boolean autoImport) {
-        this.autoImport = autoImport;
+    public void setPartialFile(boolean partialFile) {
+        this.partialFile = partialFile;
     }
 }

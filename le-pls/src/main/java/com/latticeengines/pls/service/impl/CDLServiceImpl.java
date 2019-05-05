@@ -263,7 +263,7 @@ public class CDLServiceImpl implements CDLService {
             throw new RuntimeException(
                     String.format("Source file %s doesn't have a table template!", templateFileName));
         }
-        if (!dataSourceFile.isAutoImport()) {
+        if (dataSourceFile.isPartialFile()) {
             throw new RuntimeException(
                     String.format("Source file %s can not auto import!", templateFileName));
         }
@@ -407,7 +407,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public boolean autoImport(String templateFileName) {
         SourceFile sourceFile = getSourceFile(templateFileName);
-        if (sourceFile != null && sourceFile.isAutoImport()) {
+        if (sourceFile != null && !sourceFile.isPartialFile()) {
             return true;
         }
         return false;
