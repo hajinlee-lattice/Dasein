@@ -1,4 +1,4 @@
-import underscore from 'common/vendor.index';
+import  { underscore } from 'common/vendor.index';
 
 angular.module('lp.import')
 .service('ImportWizardStore', function($q, $state, ImportWizardService, ImportUtils, StringUtility, FeatureFlagService){
