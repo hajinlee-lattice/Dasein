@@ -8,13 +8,20 @@ export default class LeBarchart extends Component {
     super(props);
     this.defaultColors = ['#70BF4A','#33BDB7','#65B7E6','#457EBA','#CD80BC','#8E71B2'];
 
+    var _labels = [];
+
     this.state = {
       orientation: this.props.orientation || 'horizontal',
+      type: this.props.type || 'simple',
+      showValues: this.props.showValues || true,
+      showAdditionalInfo: this.props.showAdditionalInfo || true,
       children: this.props.children || null,
       childrenPlacement: this.props.childrenPlacement || 'bottom',
       colors: this.props.colors || [],
+      labels: this.props.labels || [],
       data: this.props.data || [],
       limit: this.props.limit || 0,
+      liftsPostfix: this.props.liftsPostfix || 'x',
       callback: this.props.callback || null
     };
 
@@ -34,28 +41,51 @@ export default class LeBarchart extends Component {
     }
   }
 
+  getLabel(labels, index) {
+    var _labels = [];
+    labels.forEach(function(label) {
+      if(label === 'null') {
+        label = null;
+      }
+      _labels.push(label);
+    });
+    return _labels[index];
+  }
+
   getData(data) {
     var chart = {
       total: 0,
       items: []
     },
     clickHandler = this.clickHandler,
+    type = this.props.type,
+    showValues = this.props.showValues,
+    showAdditionalInfo = this.props.showAdditionalInfo, 
     limit = this.props.limit,
+    liftsPostfix = this.props.liftsPostfix,
     colors = this.props.colors,
+    labels = this.props.labels,
+    getLabel = this.getLabel,
     defaultColors = this.defaultColors;
 
     for(var i in data) {
       var value = data[i],
           orientation = this.props.orientation || 'horizontal';
       chart.items.push(value);
-      chart.total = chart.total + value.value;
+      if(type === 'lift') {
+        chart.total = (value.value > chart.total ? value.value : chart.total);
+      } else {
+        chart.total = chart.total + value.value;
+      }
     }
 
     var chartHorizontalTemplate = [],
         chartVerticalTemplate = {
           labels: [],
           bars: [],
-          values: []
+          values: [],
+          additionalInfo: [],
+          lifts: []
         };
 
     chart.items.forEach(function(item, index) {
@@ -63,19 +93,45 @@ export default class LeBarchart extends Component {
 
       chart.items[index].percent = percent
 
-      var style = {};
+      var style = {},
+          valueEl = [];
       
-      if(colors && colors[index] && colors[index] !== 'null') {
-        style.backgroundColor = colors[index];
-      } else if(defaultColors && defaultColors[index]) {
-        style.backgroundColor = defaultColors[index];
-      } else {
-        style.backgroundColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+      if(type !== 'plain' && type !== 'lift') {
+        if (colors && colors.length && colors[index] && colors[index] !== 'null') {
+          style.backgroundColor = colors[index];
+        } else if (defaultColors && defaultColors.length && defaultColors[index]) {
+          style.backgroundColor = defaultColors[index];
+        } else {
+          style.backgroundColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+        }
+      }
+      if(type === 'lift') {
+        if (colors && colors.length && colors[index] && colors[index] !== 'null') {
+          style.backgroundColor = colors[index];
+        }
       }
 
       if(limit && index >= limit) {
         return false;
       }
+
+      if(showValues) {
+        valueEl.push(<em>{item.value.toLocaleString()}</em>);
+      }
+
+      if(showAdditionalInfo && item.additionalInfo) {
+        var additionalInfos = [];
+
+        item.additionalInfo.forEach(function(info, index) {
+          var labelClass = getLabel(labels, index + 2);
+          if(labelClass) {
+            labelClass = labelClass.replace(/\s/g,'-');
+          }
+          additionalInfos.push(<span className={`label-${labelClass}`} data-label={getLabel(labels, index + 2)}>{info.toLocaleString()}</span>);
+        });
+        chartVerticalTemplate.additionalInfo.push(<div className="additional-info">{additionalInfos}</div>);
+      }
+
       if(orientation === 'vertical') {
         style.maxWidth = percent + '%';
         chartVerticalTemplate.labels.push(
@@ -84,35 +140,80 @@ export default class LeBarchart extends Component {
         chartVerticalTemplate.bars.push(
           <div>
             <div className="bar" style={style} data-label={item.label} data-value={item.value}></div>
-            <em>{item.value.toLocaleString()}</em>
+            {valueEl}
           </div>
         );
       } else {style.maxHeight = percent + '%';
         chartHorizontalTemplate.push(
           <li key={index} onClick={(event) => {return clickHandler(event, item) }}>
-            <em>{item.value.toLocaleString()}</em>
-            <div style={style} data-label={item.label} data-value={item.value}></div>
+            <div className="additionalInfo">
+              {additionalInfos}
+            </div>
+            {valueEl}
+            <div className="bar" style={style} data-label={item.label} data-value={item.value}></div>
             <strong>{item.label}</strong>
           </li>
         );
       }
     });
 
+    var additionalInfoEl = [];
+    if(chartVerticalTemplate.additionalInfo && chartVerticalTemplate.additionalInfo.length) {
+      additionalInfoEl.push(
+        <div>{chartVerticalTemplate.additionalInfo}</div>
+      );
+    }
+
+    if(type === 'lift') {
+      let lifts = Math.floor(chart.total);
+      var i;
+      for (i = 0; i < lifts + 1; i++) {
+        var lift = Math.floor(i),
+            percent = Math.floor((i / chart.total) * 100);
+
+        lift = lift + (lift && liftsPostfix ? liftsPostfix : '');
+
+        let liftStyle = {
+          left: percent + '%',
+        };
+
+        if(i === 0) {
+          lift = 0;
+        }
+        
+        chartVerticalTemplate.lifts.push(<li className="lift" style={liftStyle}><span>{lift}</span></li>);
+      }
+    }
+
     if(orientation === 'vertical') {
+      var labelClassLabels = getLabel(labels, 0);
+      if(labelClassLabels) {
+        labelClassLabels = labelClassLabels.replace(/\s/g,'-');
+      }
+      var labelClassBar = getLabel(labels, 0);
+      if(labelClassBar) {
+        labelClassBar = labelClassBar.replace(/\s/g,'-');
+      }
       return (
         <ul>
-          <li>
+          <li className={`bar-labels label-${labelClassLabels}`} data-label={this.getLabel(this.props.labels, 0)}>
             {chartVerticalTemplate.labels}
           </li>
-          <li className="bar-container">
+          <li className={`bar-container label-${labelClassBar}`} data-label={this.getLabel(this.props.labels, 1)}>
             {chartVerticalTemplate.bars}
+            <ul className="bar-lifts">
+              {chartVerticalTemplate.lifts}
+            </ul>
+          </li>
+          <li className="info-container">
+            {chartVerticalTemplate.additionalInfo}
           </li>
         </ul>
       );
     } else {
       return (
         <ul>
-        {chartHorizontalTemplate}
+          {chartHorizontalTemplate}
         </ul>
       );
     }
@@ -120,7 +221,7 @@ export default class LeBarchart extends Component {
 
   render() {
     return (
-      <div className={`le-chart-barchart orientation-${this.props.orientation || 'horizontal'}`}>
+      <div className={`le-chart-barchart orientation-${this.props.orientation || 'horizontal'} type-${this.props.type || 'simple'} ${(this.props.labels && this.props.labels.length ? 'has-labels' : '')}`}>
         {this.props.childrenPlacement === 'top' ? this.props.children : null}
         {this.getData(this.props.data)}
         {this.props.childrenPlacement === 'bottom' ? this.props.children : null}
@@ -131,9 +232,14 @@ export default class LeBarchart extends Component {
 
   LeBarchart.propTypes = {
     orientation: propTypes.string,
+    type: propTypes.string,
+    showValues: propTypes.boolean,
+    showAdditionalInfo: propTypes.boolean,
     colors: propTypes.array,
     childrenPlacement: propTypes.string,
     limit: propTypes.number,
+    liftsPostfix: propTypes.text,
+    labels: propTypes.array,
     data: propTypes.object.isRequired,
     callback: propTypes.func
   };

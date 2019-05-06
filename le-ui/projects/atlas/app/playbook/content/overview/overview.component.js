@@ -24,76 +24,75 @@ import {
 
 export default class OverviewComponent extends Component {
     constructor(props) {
+console.log('constructor');
         super(props);
         this.state = {
             play: props.play,
-            connections: [] //props.connections
+            connections: null
         };
     }
 
     componentDidMount() {
-        injectAsyncReducer(store, 'playbook', reducer);
-        // let playstore = store.getState()['playbook'];
-        // actions.fetchPlay(this.props.playname);
-        // actions.fetchConnections(this.props.playname);
-        
-        this.unsubscribe = store.subscribe(this.handleChange);
+        // injectAsyncReducer(store, 'playbook', reducer);
+        let playstore = store.getState()['playbook'];
 
-        console.log('props', this.props);
-        // actions.fetchConnections(this.state.play.playname);
+        //actions.fetchPlay(playstore.play.name);
+        actions.fetchConnections(playstore.play.name);
+
+        this.unsubscribe = store.subscribe(this.handleChange);
     }
 
     componentWillUnmount() {
-        this.unsubscribe();
+      this.unsubscribe();
     }
 
     handleChange = () => {
         const state = store.getState()['playbook'];
         this.setState(state);
-        console.log('handleChange', state);
+        //console.log('handleChange', state);
     }
 
     render() {
-        return (
-            <ReactMainContainer>
-                <p>hello</p>
-            </ReactMainContainer>
-        );
+console.log('OverviewComponent');
         if (this.state.play) {
-                //<div className="playbook-overview">
+console.log('this.state.play');
             return (
-                <section id="main-content" class="container playbook-overview">
-                    <div class="overview-grid-container">
-                        {this.state.play.displayName}
-                        <GridLayout classNames="overview-grid extend">
-                            <span>
-                                Segment: {this.state.play.targetSegment.display_name}
-                            </span>
-                            <span>
-                                Campaign Type: {this.state.play.playType.displayName}
-                            </span>
-                            <span>
-                                Model: {this.state.play.ratingEngine.displayName}
-                            </span>
-                            <span>
-                                Talking Point: {this.state.play.talkingPoints.length} talking points
-                            </span>
-                            <span>
-                                Available Targets: {this.state.play.targetSegment.accounts} Accounts | {this.state.play.targetSegment.contacts} Contacts
-                            </span>
-                            <span>
-                                Description: {this.state.play.description}
-                            </span>
-                        </GridLayout>
-                    </div>
-                    <SystemsComponent play={this.state.play} connections={this.state.connections} />
-                </section>
+                <ReactMainContainer className={'container playbook-overview'}>
+                    <LeHPanel hstretch={"true"} vstretch={"true"}>
+                        <div class="systems-component">
+                            <SystemsComponent play={this.state.play} connections={this.state.connections} />
+                        </div>
+                        <div class="main-component">
+                            <RatingsComponent play={this.state.play} />
+                            <GridLayout classNames="overview-grid extend">
+                                <span>
+                                    Segment: {this.state.play.targetSegment.display_name}
+                                </span>
+                                <span>
+                                    Campaign Type: {this.state.play.playType.displayName}
+                                </span>
+                                <span>
+                                    Model: {this.state.play.ratingEngine.displayName}
+                                </span>
+                                <span>
+                                    Talking Point: {this.state.play.talkingPoints.length} talking points
+                                </span>
+                                <span>
+                                    Available Targets: {this.state.play.targetSegment.accounts} Accounts | {this.state.play.targetSegment.contacts} Contacts
+                                </span>
+                                <span>
+                                    Description: {this.state.play.description}
+                                </span>
+                            </GridLayout>
+                        </div>
+                    </LeHPanel>
+                </ReactMainContainer>
             );
         } else {
             return (
-                <div className="playbook-overview">
+                <ReactMainContainer className={'container playbook-overview'}>
                     loading...
-                </div>
+                </ReactMainContainer>
             );
         }
     }
