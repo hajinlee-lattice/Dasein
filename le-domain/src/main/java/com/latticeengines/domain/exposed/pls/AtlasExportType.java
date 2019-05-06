@@ -17,31 +17,41 @@ import org.apache.commons.lang3.tuple.Triple;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public enum MetadataSegmentExportType {
+public enum AtlasExportType {
 
-    ACCOUNT("Enriched Accounts", BusinessEntity.Account), //
-    CONTACT("Enriched Contacts (No Account Attributes)", BusinessEntity.Contact), //
-    ACCOUNT_AND_CONTACT("Enriched Contacts with Account Attributes", BusinessEntity.Contact, BusinessEntity.Account), //
-    ACCOUNT_ID("Account_ID", InterfaceName.AccountId, "Account Id"), //
-    ORPHAN_CONTACT("Orphan Contacts", BusinessEntity.Contact, BusinessEntity.Account), //
-    ORPHAN_TXN("Orphan Transaction");
+    ACCOUNT("Enriched Accounts", "Account", BusinessEntity.Account), //
+    CONTACT("Enriched Contacts (No Account Attributes)", "Contact", BusinessEntity.Contact), //
+    ACCOUNT_AND_CONTACT("Enriched Contacts with Account Attributes", "AccountAndContact",
+            BusinessEntity.Contact, BusinessEntity.Account), //
+    ACCOUNT_ID("Account_ID", "AccountId", InterfaceName.AccountId, "Account Id"), //
+    ALL_ACCOUNTS("All Accounts", "AllAccounts"),
+    ALL_CONTACTS("All Contacts", "AllContacts"),
+    SEGMENT_ACCOUNTS("Segment Accounts", "SegmentAccounts"),
+    SEGMENT_ACCOUNTS_CONTACTS("Segment Accounts Contacts", "SegmentAccountsContacts"),
+    ORPHAN_CONTACT("Orphan Contacts", "OrphanContacts", BusinessEntity.Contact, BusinessEntity.Account), //
+    ORPHAN_TXN("Orphan Transaction", "OrphanTransaction");
 
     String displayName;
 
+    String pathFriendlyName;
+
     List<Triple<BusinessEntity, String, String>> defaultAttributeTuples;
 
-    MetadataSegmentExportType(String displayName) {
+    AtlasExportType(String displayName, String pathFriendlyName) {
         this.displayName = displayName;
+        this.pathFriendlyName = pathFriendlyName;
     }
 
-    MetadataSegmentExportType(String displayName, InterfaceName field, String fieldDisplayName) {
+    AtlasExportType(String displayName, String pathFriendlyName, InterfaceName field, String fieldDisplayName) {
         this.displayName = displayName;
+        this.pathFriendlyName = pathFriendlyName;
         this.defaultAttributeTuples = Collections.singletonList(
                 new ImmutableTriple<>(BusinessEntity.Account, field.name(), fieldDisplayName));
     }
 
-    MetadataSegmentExportType(String displayName, BusinessEntity... entities) {
+    AtlasExportType(String displayName, String pathFriendlyName, BusinessEntity... entities) {
         this.displayName = displayName;
+        this.pathFriendlyName = pathFriendlyName;
         Set<InterfaceName> attrName = new HashSet<>();
         this.defaultAttributeTuples = Arrays.stream(entities)//
                 .map(e -> getDefaultExportAttributesPair(e).stream() //
@@ -96,8 +106,21 @@ public enum MetadataSegmentExportType {
         return attrs;
     }
 
+    public static AtlasExportType getByPathName(String pathName) {
+        for (AtlasExportType exportType : values()) {
+            if (exportType.getPathFriendlyName().equalsIgnoreCase(pathName)) {
+                return exportType;
+            }
+        }
+        throw new IllegalArgumentException("Cannot find Atlas Export Type with name: " + pathName);
+    }
+
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getPathFriendlyName() {
+        return pathFriendlyName;
     }
 
     public List<Triple<BusinessEntity, String, String>> getDefaultAttributeTuples() {

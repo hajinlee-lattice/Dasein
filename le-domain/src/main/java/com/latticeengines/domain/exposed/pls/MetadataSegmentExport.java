@@ -101,7 +101,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @JsonProperty("type")
     @Column(name = "TYPE", nullable = false)
     @Enumerated(EnumType.STRING)
-    private MetadataSegmentExportType type;
+    private AtlasExportType type;
 
     @JsonProperty("status")
     @Column(name = "STATUS", nullable = false)
@@ -258,11 +258,11 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
         this.tenantId = tenantId;
     }
 
-    public MetadataSegmentExportType getType() {
+    public AtlasExportType getType() {
         return type;
     }
 
-    public void setType(MetadataSegmentExportType type) {
+    public void setType(AtlasExportType type) {
         this.type = type;
     }
 

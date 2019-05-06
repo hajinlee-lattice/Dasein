@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -66,6 +67,11 @@ public class DropBoxServiceImpl implements DropBoxService {
     // Template prefix
     private static final String DEFAULTSYSTEM = "DefaultSystem";
     private static final String TEMPLATES = "Templates";
+    // Export folder:
+    private static final String EXPORT = "Export";
+
+//    private static final SimpleDateFormat exportDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+
 
     @Inject
     private DropBoxEntityMgr entityMgr;
@@ -384,6 +390,32 @@ public class DropBoxServiceImpl implements DropBoxService {
             fileList.add(fileProperty);
         }
         return fileList;
+    }
+
+    @Override
+    public String getExportPath(String customerSpace, AtlasExportType exportType, String datePrefix,
+                                String optionalId) {
+        String bucket = getDropBoxBucket();
+        String prefix = getDropBoxPrefix();
+        String exportPath = prefix + '/' + EXPORT + '/';
+        if (!s3Service.objectExist(bucket, exportPath)) {
+            s3Service.createFolder(bucket, exportPath);
+        }
+        exportPath += exportType.getPathFriendlyName() + '/';
+        if (!s3Service.objectExist(bucket, exportPath)) {
+            s3Service.createFolder(bucket, exportPath);
+        }
+        if (StringUtils.isNotEmpty(optionalId)) {
+            exportPath += optionalId + '/';
+            if (!s3Service.objectExist(bucket, exportPath)) {
+                s3Service.createFolder(bucket, exportPath);
+            }
+        }
+        exportPath += datePrefix + '/';
+        if (!s3Service.objectExist(bucket, exportPath)) {
+            s3Service.createFolder(bucket, exportPath);
+        }
+        return exportPath;
     }
 
     private String getDropBoxId() {

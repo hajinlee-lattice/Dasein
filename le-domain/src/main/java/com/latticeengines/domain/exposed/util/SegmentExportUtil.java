@@ -16,8 +16,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -72,7 +72,7 @@ public class SegmentExportUtil {
     }
 
     public static String constructFileName(String exportPrefix, String segmentDisplayName,
-            MetadataSegmentExportType type) {
+            AtlasExportType type) {
 
         String exportedFileName = null;
         if (StringUtils.isNotBlank(exportPrefix)) {

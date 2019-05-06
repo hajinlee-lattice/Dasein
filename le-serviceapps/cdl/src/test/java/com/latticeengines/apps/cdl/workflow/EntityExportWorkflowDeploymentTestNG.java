@@ -14,11 +14,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.end2end.UpdateTransactionDeploymentTestNG;
+import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -36,11 +39,14 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
+    @Inject
+    private AtlasExportService atlasExportService;
+
     @BeforeClass(groups = "manual" )
     public void setup() throws Exception {
         boolean useExistingTenant = true;
         if (useExistingTenant) {
-            testBed.useExistingTenantAsMain("LETest1556551255251");
+            testBed.useExistingTenantAsMain("LETest1557130991019");
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
             mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
@@ -58,13 +64,15 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         EntityExportRequest request = new EntityExportRequest();
         request.setDataCollectionVersion(version);
+        AtlasExport atlasExport = atlasExportService.createAtlasExport(mainTestCustomerSpace.toString(),
+                AtlasExportType.ACCOUNT_AND_CONTACT);
         Method method = ReflectionUtils.findMethod(EntityExportWorkflowSubmitter.class,
-                "configure", String.class, EntityExportRequest.class);
+                "configure", String.class, EntityExportRequest.class, AtlasExport.class);
         Assert.assertNotNull(method);
         ReflectionUtils.makeAccessible(method);
         EntityExportWorkflowConfiguration configuration = (EntityExportWorkflowConfiguration) //
                 ReflectionUtils.invokeMethod(method, entityExportWorkflowSubmitter, //
-                        mainTestCustomerSpace.toString(), request);
+                        mainTestCustomerSpace.toString(), request, atlasExport);
         Assert.assertNotNull(configuration);
 
         EntityExportStepConfiguration stepConfiguration = JsonUtils.deserialize( //
