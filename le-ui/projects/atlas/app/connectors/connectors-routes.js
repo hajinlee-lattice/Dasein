@@ -1,4 +1,5 @@
 import 'atlas/react/react-angular-main.component';
+import { actions, reducer } from './connections.redux';
 angular
 .module('le.connectors', ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
 .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
@@ -34,6 +35,7 @@ angular
         }
         this.isMarketoEnabled = function () {
             let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
+            actions.setMarketoEnabled(connectorsEnabled);
             return connectorsEnabled;
         }
     })
