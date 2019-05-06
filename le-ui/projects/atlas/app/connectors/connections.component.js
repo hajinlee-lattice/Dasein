@@ -1,4 +1,5 @@
 import React, { Component } from "common/react-vendor";
+import { store, injectAsyncReducer } from 'store';
 
 import { CENTER, LEFT } from 'common/widgets/container/le-alignments';
 import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
@@ -12,10 +13,12 @@ import LeVPanel from 'common/widgets/container/le-v-panel';
 import LeHPanel from 'common/widgets/container/le-h-panel';
 import { LeToolBar, HORIZONTAL } from 'common/widgets/toolbar/le-toolbar';
 import Connector from './connector.component';
+import { actions, reducer } from './connections.redux';
+
 
 import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
-import SystemsListComponent from './systesms-list.component';
+import SystemsListComponent from './systems-list.component';
 import ReactMainContainer from "../react/react-main-container";
 
 export default class ConnectionsComponent extends Component {
@@ -38,10 +41,34 @@ export default class ConnectionsComponent extends Component {
         // console.log('UUUUUUU ',ReactRouter.getRouter().ngservices.ConnectorsService.isMarketoEnabled());
     }
 
-    componentDidMount() {
-        this.getTrayUserName(response => {
-            console.log("getTrayUserName");
+    handleChange = () => {
+        const data = store.getState()['connections'];
+        console.log(data);
+        let userName = data.userName;
+        let userId = data.userId;
+        let accessToken = data.accessToken;
+        this.setState({
+            userName: userName,
+            accessToken: accessToken,
+            userValidated: userName != null && userName != undefined
         });
+        if (userName && userId && accessToken) {
+            this.setState({
+                userValidated: true,
+                userInfo: {
+                    userName: userName,
+                    id: userId,
+                    accessToken: accessToken
+                }
+            });
+        }
+    }
+
+    componentDidMount() {
+        injectAsyncReducer(store, 'connections', reducer);
+        this.unsubscribe = store.subscribe(this.handleChange);
+
+        // this.getTrayUserName();
         this.router = ReactRouter.getRouter();
         if (name != MARKETO) {
             ConnectorService.setUserValidated(true);
@@ -51,15 +78,14 @@ export default class ConnectionsComponent extends Component {
     }
 
     clickHandler(name) {
+        console.log(name);
         this.setState({ connectorSelected: name });
         ConnectorService.setConnectorName(name);
         if (name != MARKETO) {
             ConnectorService.setUserValidated(true);
         } else if (name == MARKETO && this.state.userInfo == null) {
             ConnectorService.setUserValidated(true);
-            this.validateUser(this.state.userName)
         }
-        // this.router.stateService.go('profilesconnector', { nameConnector: name });
 
     }
     generateAuthTokenClickHandler() {
@@ -74,12 +100,14 @@ export default class ConnectionsComponent extends Component {
     }
 
     validateUser(userName) {
+        console.log(userName);
         let observer = new Observer(
             response => {
                 // httpService.printObservables();
                 if (response.data && response.data.name) {
-                    this.setState({ userValidated: true, userInfo: response.data });
-                    this.getUserAccessToken(response.data.id);
+                    this.setState({ userValidated: true, userInfo: response.data, accessToken: response.data.accessToken });
+                    solutionInstanceConfig.accessToken = this.state.accessToken;
+                    console.log(!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo)));
                     httpService.unsubscribeObservable(observer);
                 } else {
                     this.setState({ userValidated: false, userInfo: {} });
@@ -94,26 +122,26 @@ export default class ConnectionsComponent extends Component {
         httpService.get(('/tray/user?userName=' + userName), observer);
     }
 
-    getTrayUserName() {
-        let observer = new Observer(
-            response => {
-                // httpService.printObservables();
-                if (response.data && response.data.DropBox) {
-                    let userName = response.data.DropBox;
-                    this.setState({ userName: userName });
-                    httpService.unsubscribeObservable(observer);
-                } else {
-                    this.setState({ userName: null });
-                }
-            },
-            error => {
-                console.error('ERROR ', error);
-                this.setState({ userName: null });
-            }
-        );
+    // getTrayUserName() {
+    //     let observer = new Observer(
+    //         response => {
+    //             // httpService.printObservables();
+    //             if (response.data && response.data.DropBox) {
+    //                 let userName = response.data.DropBox;
+    //                 this.setState({ userName: userName });
+    //                 httpService.unsubscribeObservable(observer);
+    //             } else {
+    //                 this.setState({ userName: null });
+    //             }
+    //         },
+    //         error => {
+    //             console.error('ERROR ', error);
+    //             this.setState({ userName: null });
+    //         }
+    //     );
 
-        httpService.get('/pls/dropbox/summary', observer);
-    }
+    //     httpService.get('/pls/dropbox/summary', observer);
+    // }
 
     getSolutionConfiguration(userId, tag, instanceName) {
         const configWindow = openConfigWindow();
@@ -124,6 +152,8 @@ export default class ConnectionsComponent extends Component {
                     var data = response.data;
                     this.setState({authorizationCode: data.authorizationCode, solutionInstanceId: data.solutionInstanceId});
                     solutionInstanceConfig.id = data.solutionInstanceId;
+                    solutionInstanceConfig.registerLookupIdMap = true;
+                    solutionInstanceConfig.accessToken = this.state.accessToken;
                     configWindow.location = this.getPopupUrl(data.solutionInstanceId, data.authorizationCode);
                     // this.setState({openModal: true});
                     httpService.unsubscribeObservable(observer);
@@ -139,24 +169,25 @@ export default class ConnectionsComponent extends Component {
         httpService.get('/tray/solutionconfiguration?tag=' + tag + '&userId=' + userId + '&instanceName=' + instanceName, observer, {UserAccessToken: userAccessToken});
     }
 
-    getUserAccessToken(userId) {
-        let observer = new Observer(
-            response => {
-                if (response.data) {
-                    this.setState({accessToken: response.data.token});
-                    solutionInstanceConfig.accessToken = this.state.accessToken;
-                    httpService.unsubscribeObservable(observer);
-                } else {
-                    this.setState({accessToken: null});
-                }
-            },
-            error => {
-                this.setState({accessToken: null});
-            }
-        );
+    // getUserAccessToken(userId) {
+    //     let observer = new Observer(
+    //         response => {
+    //             if (response.data) {
+    //                 this.setState({accessToken: response.data.token});
+    //                 solutionInstanceConfig.accessToken = this.state.accessToken;
+    //                 console.log(!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo)));
+    //                 httpService.unsubscribeObservable(observer);
+    //             } else {
+    //                 this.setState({accessToken: null});
+    //             }
+    //         },
+    //         error => {
+    //             this.setState({accessToken: null});
+    //         }
+    //     );
 
-        httpService.post('/tray/authorize?userId=' + userId, {}, observer);
-    }
+    //     httpService.post('/tray/authorize?userId=' + userId, {}, observer);
+    // }
 
     getIFrame() {
         let partnerId = 'LatticeEngines';

@@ -76,7 +76,9 @@ const GraphQLParser = {
             });
             return awsAuthentications[0].node.id;
         }
-    },getUserDocument(user, accessToken) {
+    },
+    getUserDocument(user, accessToken) {
+
         return new UserDocument(user, accessToken);
     }
 };
@@ -108,8 +110,10 @@ class AccessToken {
 
 class UserDocument {
     constructor(user="", accessToken=""){
-        this.user = user;
-        this.accessToken = accessToken;
+        this.id = user.id;
+        this.name = user.name;
+        this.externalId = user.externalId;
+        this.accessToken = accessToken.token;
     }
 }
 

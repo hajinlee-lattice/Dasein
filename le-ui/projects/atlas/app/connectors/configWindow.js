@@ -5,7 +5,8 @@ import { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 export const solutionInstanceConfig = {
     orgType: null,
     id: null,
-    accessToken: null
+    accessToken: null,
+    registerLookupIdMap: null
 };
 
 const FIELD_MAPPING = 'external_field_mapping';
@@ -36,15 +37,17 @@ export const openConfigWindow = () => {
             configWindow.close();
         }
         if (e.data.type === 'tray.configPopup.finish') {
-            console.log("configFinished: " + configFinished);
+            console.log("Register new LookupIdMap: " + solutionInstanceConfig.registerLookupIdMap);
             // Handle popup finish message
-            if (solutionInstanceConfig.id) {
-                // get Tray auth values
-                // create lookup id map
-                // enable solution instance
-                getTrayAuthValues(solutionInstanceConfig.id);
-            } else {
-                alert('Error: Solution instance id is not defined');
+            if (solutionInstanceConfig.registerLookupIdMap == true) {
+                if (solutionInstanceConfig.id) {
+                    // get Tray auth values
+                    // create lookup id map
+                    // enable solution instance
+                    getTrayAuthValues(solutionInstanceConfig.id);
+                } else {
+                    alert('Error: Solution instance id is not defined');
+                }
             }
             configFinished = true;
             configWindow.close();

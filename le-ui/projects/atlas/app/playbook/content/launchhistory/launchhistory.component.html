@@ -154,9 +154,11 @@
                     </td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
                     <td class="green-text">
-                        <span ng-if="!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.sourceFile"> {{launch.stats.contactsWithinRecommendations | number}} </span>
+                        <a href="/files/datafiles/sourcefile?fileName={{vm.getSourceFileName(launch)}}&filePath={{vm.getSourceFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.sourceFile">
+                            <i class="fa fa-download" aria-hidden="true"></i>
+                        </a>
 
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getSourceFileName(launch)}}&filePath={{vm.getSourceFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.sourceFile" class="file-download">{{launch.stats.contactsWithinRecommendations | number}}</a>
+                        <span ng-class="{'indent-count': !launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.sourceFile}"> {{launch.stats.contactsWithinRecommendations | number}} </span>
                     </td>
 
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">

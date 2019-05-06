@@ -93,9 +93,13 @@
 			}
 		}
 	}
-	a {
-		&.file-download {
-			text-decoration: underline;
+	i.fa.fa-download {
+		font-size: 10px;
+		color: black;
+	}
+	span {
+		&.indent-count {
+			margin-left: 18px;
 		}
 	}
 }
