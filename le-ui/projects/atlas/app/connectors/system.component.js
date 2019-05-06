@@ -7,42 +7,108 @@ import LeTileBody from 'common/widgets/container/tile/le-tile-body';
 import LeTileFooter from 'common/widgets/container/tile/le-tile-footer';
 import LeButton from "common/widgets/buttons/le-button";
 import SystemMappingComponent from './system-mapping.component';
+import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
+import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
-import './systesms-list.component.scss';
+import './systems-list.component.scss';
 import LeHPanel from "common/widgets/container/le-h-panel";
 import GridLayout from 'common/widgets/container/grid-layout.component';
 import { RIGHT, CENTER } from "common/widgets/container/le-alignments";
+import { actions, reducer } from './connections.redux';
 
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { store } from 'store';
+import { store, injectAsyncReducer } from 'store';
 
 export default class SystemComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = { system: props.system, openModal: false, saving: false };
+        this.state = { system: props.system, openModal: false, saving: false, userId: null , userAccessToken: null};
         this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
         this.modalCallback = this.modalCallback.bind(this);
         this.getEditTemplate = this.getEditTemplate.bind(this);
         this.editMapping = Object.assign({}, props.system);
         this.mappingClosed = this.mappingClosed.bind(this);
-
     }
+
+    handleChange = () => {
+        const data = store.getState()['connections'];
+        let userId = data.userId;
+        let accessToken = data.accessToken;
+        this.setState({
+            userId: userId,
+            userAccessToken: accessToken
+        });
+    }
+
+    componentDidMount() {
+        injectAsyncReducer(store, 'connections', reducer);
+        this.unsubscribe = store.subscribe(this.handleChange);
+    }
+
+
     editMappingClickHandler() {
-        let config = {
-            callback : this.modalCallback,
-            template: () => {
-                this.editMapping = Object.assign({}, this.state.system);
-                return (
-                    <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
-                );
+        if (!this.isExternallyAuthenticatedSystem()) {
+            let config = {
+                callback : this.modalCallback,
+                template: () => {
+                    this.editMapping = Object.assign({}, this.state.system);
+                    return (
+                        <SystemMappingComponent system={this.editMapping} closed={this.mappingClosed} />
+                    );
+                },
+                title: () => {
+                    return <p>Org ID to Account ID Mapping</p>
+                }
+            };
+            modalActions.openModal(store, config);
+        } else if (this.state.userId && this.state.userAccessToken) {
+            const configWindow = openConfigWindow();
+            var solutionInstanceId = this.state.system.externalAuthentication.solutionInstanceId;
+
+            let observer = new Observer(
+                response => {
+                    if (response.data) {
+                        var authorizationCode = response.data.code;
+                        solutionInstanceConfig.id = solutionInstanceId;
+                        solutionInstanceConfig.orgType = this.state.system.externalSystemName;
+                        solutionInstanceConfig.accessToken = this.state.accessToken;
+                        solutionInstanceConfig.registerLookupIdMap = false;
+                        configWindow.location = this.getPopupUrl(solutionInstanceId, authorizationCode);
+                        httpService.unsubscribeObservable(observer);
+                    }
+                },
+                error => {
+                    console.error("No authorization code generated")
+                }
+            );
+
+            httpService.get('/tray/authorizationcode?userId=' + this.state.userId, observer);
+        }
+    }
+
+    getPopupAuthorizationCode(solutionInstanceId) {
+        console.log(ConnectorService.getTrayUserName());
+        let observer = new Observer(
+            response => {
+                if (response.data) {
+                    this.setState({accessToken: response.data.token});
+        
+                    httpService.unsubscribeObservable(observer);
+                }
             },
-            title: () => {
-                return <p>Org ID to Account ID Mapping</p>
+            error => {
+                console.error("No authorization code generated")
             }
-        };
-        modalActions.openModal(store, config);
+        );
+
+        httpService.get('/tray/authorizationcode?userId=' + userId, observer);
+    }
+
+    getPopupUrl(solutionInstanceId, authorizationCode) {
+        let partnerId = 'LatticeEngines';
+        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2`;
     }
 
     mappingClosed(system) {
@@ -97,6 +163,10 @@ export default class SystemComponent extends Component {
         }
         return color;
 
+    }
+
+    isExternallyAuthenticatedSystem() {
+        return this.state.system.externalAuthentication != null;
     }
 
     getEditTemplate() {
