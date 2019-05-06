@@ -13,9 +13,8 @@
     }
     .connected-systems {
         margin: 20px;
-        .systems-grid.extend {
-            .le-card {
-                max-width: none;
+        .systems-grid {
+            .connection-card {
                 padding: 10px;
                 margin: 2px;
                 h2, h3 {
@@ -31,19 +30,48 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
-                button {
-                    margin-bottom: 5px;
-                }
-                .launch-text {
-                    height: 120px;
-                    &.launched {
-                        text-align: left;
-                    }
-                }
-                .card-image-container {
-                    height: 55px;
+                .connection-logo {
+                    width: 100px;
                 }
             }
+        }
+    }
+    .main-component {
+        .lift-chart {
+            font-size: 10px;
+            width: 390px;
+            .bar-labels {
+                & > strong {
+                    position: relative;
+                    top: -5px;
+                    &:before {
+                        //top: -18px !important;
+                    }
+                }
+            }
+            .additional-info {
+                & > span {
+                    position: relative;
+                    top: -5px;
+                    &:before {
+                        top: -18px !important;
+                    }
+                    &.label-Accounts {
+                        min-width: 46px;
+                    }
+                }
+            }
+        }
+    }
+}
+.rating-modal {
+    .le-title-container {
+        & > img {
+            height: 37px;
+        }
+        & > p {
+            border-left: 1px solid #aaa;
+            padding-left: 10px;
         }
     }
 }
