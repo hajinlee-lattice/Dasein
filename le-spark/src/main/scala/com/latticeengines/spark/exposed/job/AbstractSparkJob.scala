@@ -27,7 +27,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   override def apply(ctx: ScalaJobContext): String = {
     val (spark, latticeCtx) = initializeJob()
     runJob(spark, latticeCtx)
-    val finalTargets = finalizeJob(latticeCtx).asJava
+    val finalTargets = finalizeJob(spark, latticeCtx).asJava
     val result = new SparkJobResult()
     result.setTargets(finalTargets)
     result.setOutput(latticeCtx.outputStr)
@@ -75,7 +75,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     spark.read.format("avro").load("hdfs://" + path)
   }
 
-  def finalizeJob(latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
+  def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
     val targets: List[HdfsDataUnit] = latticeCtx.targets
     val output: List[DataFrame] = latticeCtx.output
     if (targets.length != output.length) {
@@ -87,7 +87,8 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val df = t._2.persist(StorageLevel.MEMORY_AND_DISK_SER)
       val path = tgt.getPath
       df.write.format("avro").save(path)
-      tgt.setCount(df.count())
+      val df2 = spark.read.format("avro").load(path)
+      tgt.setCount(df2.count())
       df.unpersist()
       tgt
     }

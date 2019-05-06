@@ -74,7 +74,7 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     writer.save(path)
   }
 
-  override def finalizeJob(latticeCtx: LatticeContext[ConvertToCSVConfig]): List[HdfsDataUnit] = {
+  override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[ConvertToCSVConfig]): List[HdfsDataUnit] = {
     val config: ConvertToCSVConfig = latticeCtx.config
     val compress: Boolean = if (config.getCompress == null) false else config.getCompress
 
