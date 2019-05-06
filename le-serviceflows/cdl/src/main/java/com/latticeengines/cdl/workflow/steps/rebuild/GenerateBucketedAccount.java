@@ -44,7 +44,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(GenerateBucketedAccount.BEAN_NAME)
 @Lazy
@@ -117,15 +116,12 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
         int step = 0;
         filterStep = step++;
-        profileStep = step++;
-        int encodeStep = step;
+        profileStep = step;
 
         // -----------
         TransformationStepConfig filter = filter();
         TransformationStepConfig profile = profile();
         TransformationStepConfig encode = bucketEncode();
-        TransformationStepConfig repartition = repartition(encodeStep, servingStoreTablePrefix,
-                InterfaceName.AccountId.name(), getServingStorePartitions());
         TransformationStepConfig sortProfile = sortProfile(profileTablePrefix);
 
         // -----------
@@ -133,7 +129,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         steps.add(filter);
         steps.add(profile);
         steps.add(encode);
-        steps.add(repartition);
         steps.add(sortProfile);
 
         request.setSteps(steps);
@@ -173,6 +168,10 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
+
+        setTargetTable(step, servingStoreTablePrefix);
+        step.getTargetTable().setExpandBucketedAttrs(true);
+
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }
@@ -193,13 +192,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         setTargetTable(step, profileTablePrefix);
 
         return step;
-    }
-
-    private int getServingStorePartitions() {
-        long count = ScalingUtils.getTableCount(masterTable);
-        int redshiftPartitions = (int) Math.max(count / 5000, 50);
-        log.info("Set redshift partitions to " + redshiftPartitions + " based on master table count " + count);
-        return redshiftPartitions;
     }
 
     @Override
