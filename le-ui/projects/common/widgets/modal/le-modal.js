@@ -21,7 +21,9 @@ export default class LeModal extends Component {
                 open: data.open,
                 callbackFn: data.config.callback,
                 templateFn: data.config.template,
+                className: data.config.className,
                 title: data.config.title,
+                titleIcon: data.config.titleIcon,
                 hideFooter: data.config.hideFooter ? data.config.hideFooter : false,
                 type: data.config.type ? data.config.type : '',
                 oneButton: data.config.oneButton ? data.config.oneButton : false,
@@ -56,6 +58,17 @@ export default class LeModal extends Component {
         } else {
             return '';
         }
+    }
+
+    getTitleIcon() {
+        if (typeof this.state.title === 'function') {
+            return this.state.titleIcon();
+        }
+        return (
+            <span className="ico-container">
+                <i className="title-icon"></i>
+            </span>
+        )
     }
 
     hideFooter() {
@@ -95,6 +108,7 @@ export default class LeModal extends Component {
             return null;
         }
     }
+
     getFooter() {
         if (this.state.hideFooter) {
             return null;
@@ -126,15 +140,13 @@ export default class LeModal extends Component {
     getModalUI() {
         return (
             <div className="le_modal opened">
-                <div className={`${"le-modal-content"} ${this.state.size}`}>
+                <div className={`${"le-modal-content"} ${this.state.size} ${this.state.className}`}>
                     <div className={`${"le-modal-header"} ${this.state.type ? this.state.type : ''}`}>
                         <span className="close" onClick={() => {
                             this.clickHandler('close');
                         }}>&times;</span>
                         <div className="le-title-container">
-                            <span className="ico-container">
-                                <i className="title-icon"></i>
-                            </span>
+                            {this.getTitleIcon()}
                             <p className="le-title" title={this.getTitle()}>
                                 {this.getTitle()}
                             </p>
@@ -160,8 +172,6 @@ export default class LeModal extends Component {
         }
     }
 }
-
-
 
 LeModal.propTypes = {
     config: propTypes.objectOf(propTypes.shape({

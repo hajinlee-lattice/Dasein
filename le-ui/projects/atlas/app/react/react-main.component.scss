@@ -1,19 +1,21 @@
 @import "widgets/colors.scss";
-
-.main-panel{
+.open-nav #react-main-body section.main-content {
+    padding-left: 0;
+}
+.main-panel {
     // border: 1px solid red;
     margin-top: -2px;
     justify-content: center;
     width: 100%;
     background-color: $pearl-white;
     height: 100%;
-    .main-body{
+    .main-body {
         display: flex;
         justify-content: center;
         height: 100%;
         width: 100%;
     }
-    .main-content{
+    .main-content {
         // border: 2px solid blue;
         padding: 0 1em;
         width: 100%;
