@@ -45,7 +45,7 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "UUID", unique = true, nullable = false)
+    @Column(name = "UUID", nullable = false)
     @JsonProperty("uuid")
     private String uuid;
 
