@@ -505,7 +505,6 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void exportScheduleJob() {
-        log.info("111");
         List<AtlasScheduling> atlasSchedulingList =
                 atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
         log.info(JsonUtils.serialize(atlasSchedulingList));
