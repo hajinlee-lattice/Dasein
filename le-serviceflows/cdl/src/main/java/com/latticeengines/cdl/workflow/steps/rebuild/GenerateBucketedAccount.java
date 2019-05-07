@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -57,7 +56,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
     private int filterStep;
     private int profileStep;
-    private int encodeStep;
 
     private boolean shortCutMode;
 
@@ -118,8 +116,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
         int step = 0;
         filterStep = step++;
-        profileStep = step++;
-        encodeStep = step;
+        profileStep = step;
 
         // -----------
         TransformationStepConfig filter = filter();
@@ -172,11 +169,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
 
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
+        setTargetTable(step, servingStoreTablePrefix);
+        step.getTargetTable().setExpandBucketedAttrs(true);
 
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;

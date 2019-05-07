@@ -85,7 +85,7 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     val retainAttrs = joinKey::matchResult.columns.diff(sourceTable.columns).toList
     val dropAttrs = matchResult.columns.diff(retainAttrs)
     val reducedResult = matchResult.drop(dropAttrs:_*)
-    sourceTable.join(reducedResult, Seq(joinKey), "inner")
+    sourceTable.join(reducedResult, Seq(joinKey))
   }
 
 }

@@ -143,7 +143,7 @@ VALUES
   ('IceCreamSandwich', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsValidate,LocationToDuns,DunsValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, no DUNS redirect', NULL, 'LatticeAccount', NULL),
   ('JellyBean', 'DunsDomainBased,DunsBased,DomainCountryZipCodeBased,DomainCountryStateBased,DomainCountryBased,DomainBased,LocationToCachedDuns,CachedDunsGuideValidate,LocationToDuns,DunsGuideValidate', '0', '0:1,2,3,4,5,6,7,8,9|9:0,1', 'Prioritize [DUNS] lookup over [Domain + Location] and [Domain] lookup, have DUNS redirect', NULL, 'LatticeAccount', NULL),
   ('PetitFour', 'MatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Will retire after M28', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
-  ('Cupcake', 'AccountMatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDunsBased,EntityDomainCountryBased,EntityNameCountryBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
+  ('Cupcake', 'AccountMatchPlanner,EntitySystemIdBased,FuzzyMatch,EntityDomainCountryBased,EntityNameCountryBased,EntityDunsBased,EntityIdAssociate,EntityIdResolve', '0', '0:1,2,3,4,5,6,7', 'Default for Account entity', 'FuzzyMatch:IceCreamSandwich', 'Account', 3),
   ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate', '0', '0:1,2,3,4,5,6,7', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3);
 
 
@@ -199,7 +199,8 @@ VALUES
   ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.15', '2018-10-27', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.18', '2019-05-03', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -239,5 +240,12 @@ SET
   `EnrichmentStatsVersion`   = '2018-12-06_00-00-00_UTC',
   `DynamoTableSignature_Lookup` = '20190310'
 WHERE `Version` = '2.0.17';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2019-04-05_00-00-00_UTC',
+  `AccountLookupHdfsVersion` = '2019-04-04_00-00-00_UTC',
+  `EnrichmentStatsVersion`   = '2019-04-05_00-00-00_UTC'
+WHERE `Version` = '2.0.18';
 
 SET SQL_SAFE_UPDATES = 1;

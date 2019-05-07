@@ -10,4 +10,6 @@ public class CDLConstants {
     public static final String ORG_NAME = "orgName";
     public static final String EXTERNAL_SYSTEM_TYPE = "externalSystemType";
     public static final String EXTERNAL_SYSTEM_NAME = "externalSystemName";
+    public static final String LATTICE_S3_ORG_ID = "Lattice_S3";
+    public static final String LATTICE_S3_ORG_NAME = "Lattice S3";
 }

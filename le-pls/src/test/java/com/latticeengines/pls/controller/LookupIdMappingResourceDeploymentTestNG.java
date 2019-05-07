@@ -40,14 +40,13 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     @Test(groups = "deployment")
     public void getLookupIdsMapping() {
         @SuppressWarnings({ "rawtypes" })
-        Map lookupIdConfigsRaw = (Map) restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping",
-                Map.class);
+        Map lookupIdConfigsRaw = restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping", Map.class);
         Assert.assertNotNull(lookupIdConfigsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<LookupIdMap>> lookupIdConfigs = JsonUtils.convertMapWithListValue(lookupIdConfigsRaw,
                 String.class, LookupIdMap.class);
         Assert.assertNotNull(lookupIdConfigs);
-        Assert.assertTrue(lookupIdConfigs.keySet().size() == 0);
+        Assert.assertEquals(lookupIdConfigs.keySet().size(), 1);
     }
 
     @Test(groups = "deployment")
@@ -75,8 +74,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     @Test(groups = "deployment")
     public void updateLookupIdMap() {
         @SuppressWarnings({ "rawtypes" })
-        Map lookupIdConfigsRaw = (Map) restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping",
-                Map.class);
+        Map lookupIdConfigsRaw = restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping", Map.class);
         Assert.assertNotNull(lookupIdConfigsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<LookupIdMap>> lookupIdConfigs = JsonUtils.convertMapWithListValue(lookupIdConfigsRaw,
@@ -84,9 +82,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(lookupIdConfigs);
         Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
 
-        lookupIdConfigs.keySet().stream().forEach(k -> {
+        lookupIdConfigs.keySet().forEach(k -> {
             Assert.assertTrue(lookupIdConfigs.get(k).size() > 0);
-            lookupIdConfigs.get(k).stream().forEach(c -> {
+            lookupIdConfigs.get(k).forEach(c -> {
                 Assert.assertNotNull(c);
                 Assert.assertNotNull(c.getId());
                 Assert.assertNotNull(c.getOrgId());
@@ -155,7 +153,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     public void getAllLookupIds() {
 
         @SuppressWarnings({ "rawtypes" })
-        Map allLookupIdsRaw = (Map) restTemplate
+        Map allLookupIdsRaw = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping/available-lookup-ids", Map.class);
         Assert.assertNotNull(allLookupIdsRaw);
         @SuppressWarnings({ "unchecked" })
@@ -164,11 +162,11 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(allLookupIds);
         Assert.assertTrue(allLookupIds.keySet().size() > 0);
 
-        allLookupIds.keySet().stream().forEach(k -> {
+        allLookupIds.keySet().forEach(k -> {
             CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
             Assert.assertNotNull(externalSystemType);
             Assert.assertTrue(allLookupIds.get(k).size() > 0);
-            allLookupIds.get(k).stream().forEach(c -> {
+            allLookupIds.get(k).forEach(c -> {
                 Assert.assertNotNull(c);
                 Assert.assertNotNull(c.getDisplayName());
                 Assert.assertNotNull(c.getFieldName());
@@ -201,31 +199,32 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(lookupIdConfigs);
         Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
 
-        lookupIdConfigs.keySet().stream().forEach(k -> {
-            CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
-            Assert.assertTrue(lookupIdConfigs.get(k).size() > 0);
-            lookupIdConfigs.get(k).stream().forEach(c -> {
-                Assert.assertNotNull(c);
-                Assert.assertEquals(c.getExternalSystemType(), externalSystemType);
-                Assert.assertNotNull(c.getId());
-                Assert.assertNotNull(c.getOrgId());
-                Assert.assertNotNull(c.getOrgName());
+        lookupIdConfigs.keySet().stream().filter(k -> !k.equals(CDLExternalSystemType.FILE_SYSTEM.name()))
+                .forEach(k -> {
+                    CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
+                    Assert.assertTrue(lookupIdConfigs.get(k).size() > 0);
+                    lookupIdConfigs.get(k).forEach(c -> {
+                        Assert.assertNotNull(c);
+                        Assert.assertEquals(c.getExternalSystemType(), externalSystemType);
+                        Assert.assertNotNull(c.getId());
+                        Assert.assertNotNull(c.getOrgId());
+                        Assert.assertNotNull(c.getOrgName());
 
-                LookupIdMap lookupIdMap = restTemplate.getForObject(
-                        getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + c.getId(), LookupIdMap.class);
-                Assert.assertNotNull(lookupIdMap);
-                Assert.assertEquals(lookupIdMap.getExternalSystemType(), externalSystemType);
-                Assert.assertNotNull(lookupIdMap.getId());
-                Assert.assertNotNull(lookupIdMap.getOrgId());
-                Assert.assertNotNull(lookupIdMap.getOrgName());
-                Assert.assertEquals(lookupIdMap.getId(), c.getId());
-                Assert.assertNotNull(lookupIdMap.getIsRegistered());
-                Assert.assertEquals(lookupIdMap.getIsRegistered(), isMarkedRegistered);
-            });
-        });
+                        LookupIdMap lookupIdMap = restTemplate.getForObject(
+                                getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + c.getId(), LookupIdMap.class);
+                        Assert.assertNotNull(lookupIdMap);
+                        Assert.assertEquals(lookupIdMap.getExternalSystemType(), externalSystemType);
+                        Assert.assertNotNull(lookupIdMap.getId());
+                        Assert.assertNotNull(lookupIdMap.getOrgId());
+                        Assert.assertNotNull(lookupIdMap.getOrgName());
+                        Assert.assertEquals(lookupIdMap.getId(), c.getId());
+                        Assert.assertNotNull(lookupIdMap.getIsRegistered());
+                        Assert.assertEquals(lookupIdMap.getIsRegistered(), isMarkedRegistered);
+                    });
+                });
     }
 
-    @Test(groups = "deployment", dependsOnMethods="testDeregisterExternalSystem")
+    @Test(groups = "deployment", dependsOnMethods = "testDeregisterExternalSystem")
     public void testCreateWithAuthentication() {
         LookupIdMap lookupIdMapWithAuth = new LookupIdMap();
         lookupIdMapWithAuth.setExternalSystemType(CDLExternalSystemType.MAP);
@@ -245,7 +244,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         configIdWithAuth = resultLookupIdMap.getId();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {"testCreateWithAuthentication"})
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateWithAuthentication" })
     public void testFindWithAuthentication() {
         LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
@@ -258,7 +257,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {"testCreateWithAuthentication"})
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateWithAuthentication" })
     public void testUpdateWithAuthentication() {
         LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);
@@ -288,7 +287,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {"testUpdateWithAuthentication"})
+    @Test(groups = "deployment", dependsOnMethods = { "testUpdateWithAuthentication" })
     public void testUpdateWithNull() {
         LookupIdMap lookupIdWithAuth = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + configIdWithAuth, LookupIdMap.class);

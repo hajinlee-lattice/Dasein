@@ -76,6 +76,37 @@ class TrayRouter {
         }.bind(this));
 
         // define the route to verify if the user exists otherwise it is going to be created
+        this.router.get('/userdocument', function (req, res) {
+            var plsUrl = this.proxies['/pls']['remote_host'];
+            var url = '/pls/dropbox/summary';
+            const options = {
+                url: plsUrl + url,
+                method: 'GET',
+                headers: {
+                    'Authorization': req.headers.authorization ? req.headers.authorization : ''
+                }
+            };
+
+            try {
+                this.request(options, function (error, response, body) {
+                    var jsonBody = JSON.parse(body);
+                    if (error || !jsonBody || !jsonBody.DropBox) {
+                        res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                        return;
+                    }
+                    req.url = "/user";
+                    req.method = 'GET'
+                    req.query.userName = jsonBody.DropBox;
+                    this.router.handle(req, res);
+                }.bind(this));
+            } catch (err) {
+                console.log(
+                    this.chalk.red(DateUtil.getTimeStamp() + ":TRAY PROXY ") + err
+                );
+            }
+        }.bind(this));
+
+        // define the route to verify if the user exists otherwise it is going to be created
         this.router.get('/user', function (req, res) {
             console.log('USERNAME ', req.query.userName);
 
@@ -94,12 +125,11 @@ class TrayRouter {
                         req.body = { userName: req.query.userName, validated: true };
                         this.router.handle(req, res);
                     } else {
-                        // req.userInfo = userInfo;
-                        // req.url = "/authorize";
-                        // req.method = 'POST'
-                        // req.userInfo = userInfo;
-                        // this.router.handle(req, res);
-                        res.send(userInfo);
+                        req.userInfo = userInfo;
+                        req.url = "/authorize?userId=" + userInfo.id;
+                        req.method = 'POST';
+                        req.query.userId = userInfo.id;
+                        this.router.handle(req, res);
                     }
                 }.bind(this));
             } catch (err) {
@@ -122,12 +152,11 @@ class TrayRouter {
                         return;
                     }
                     let userInfo = GraphQLParser.getUserInfo(body.data);
-                    // req.userInfo = userInfo;
-                    // req.url = "/authorize";
-                    // req.method = 'POST'
-                    // req.userInfo = userInfo;
-                    // this.router.handle(req, res);
-                    res.send(userInfo);
+                    req.userInfo = userInfo;
+                    req.url = "/authorize?userId=" + userInfo.id;
+                    req.method = 'POST';
+                    req.query.userId = userInfo.id;
+                    this.router.handle(req, res);
                 }.bind(this));
             } else {
                 res.send(UIActionsFactory.getUIActionsObject('Not validated', 'Notice', 'Error'));
@@ -167,6 +196,20 @@ class TrayRouter {
                 }
                 let authorizationCode = GraphQLParser.getAuthorizationCodeInfo(body.data);
                 res.send(authorizationCode);
+            });
+        }.bind(this));
+
+        this.router.get('/solutionInstances/:id', function(req, res){
+            var solutionInstanceId = req.params.id;
+            let options = this.getApiOptions(req, true);
+            options.json = Queries.getSolutionInstanceByIdQuery(solutionInstanceId);
+            this.request(options, function(error, response, body){
+                if (error || !body.data) {
+                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                    return;
+                }
+                res.send(GraphQLParser.getSolutionInstance(body.data));
+                
             });
         }.bind(this));
 
@@ -263,6 +306,7 @@ class TrayRouter {
                     return;
                 }
                 let authorizationCode = GraphQLParser.getAuthorizationCodeInfo(body.data);
+                console.log(authorizationCode);
                 let solutionConfiguration = GraphQLParser.getSolutionConfigurationInfo(solutionInstanceId, authorizationCode);
                 res.send(solutionConfiguration);
             });

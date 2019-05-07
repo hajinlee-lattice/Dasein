@@ -127,7 +127,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 sqlUser, true);
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
-        testAndAssertCount(sqlUser, dataPage.getData().size(), 1L);
+        testAndAssertCount(sqlUser, dataPage.getData().size(), 10L);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

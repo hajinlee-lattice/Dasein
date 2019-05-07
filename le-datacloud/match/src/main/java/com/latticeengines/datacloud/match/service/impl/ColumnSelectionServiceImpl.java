@@ -100,6 +100,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
                     return cs;
                 }) //
                 .initKeys(Predefined.supportedSelections.toArray(new Predefined[Predefined.supportedSelections.size()])) //
+                .waitBeforeRefreshInSec((int) (Math.random() * 30))
                 .build();
     }
 

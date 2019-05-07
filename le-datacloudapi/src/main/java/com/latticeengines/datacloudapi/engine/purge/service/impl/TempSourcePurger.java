@@ -99,4 +99,9 @@ public class TempSourcePurger extends CollectionPurger {
         return toPurge;
     }
 
+    @Override
+    public boolean isSourceExisted(PurgeStrategy strategy) {
+        return true; // for temp source no need to check path for finding sourceToPurge
+    }
+
 }

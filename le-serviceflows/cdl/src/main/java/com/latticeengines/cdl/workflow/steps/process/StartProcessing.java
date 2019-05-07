@@ -135,7 +135,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 ACCOUNT_SERVING_TABLE_NAME, //
                 ACCOUNT_STATS_TABLE_NAME, //
                 FULL_REMATCH_PA, //
-                ENRICHED_ACCOUNT_DIFF_TABLE_NAME //
+                ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
+                NEW_RECORD_CUT_OFF_TIME
         );
         clearExecutionContext(renewableKeys);
         customerSpace = configuration.getCustomerSpace();
@@ -145,6 +146,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (!hasKeyInContext(FULL_REMATCH_PA)) {
             boolean fullRematch = Boolean.TRUE.equals(configuration.isFullRematch());
             putObjectInContext(FULL_REMATCH_PA, fullRematch);
+        }
+
+        if (!hasKeyInContext(NEW_RECORD_CUT_OFF_TIME)) {
+            putLongValueInContext(NEW_RECORD_CUT_OFF_TIME, System.currentTimeMillis());
         }
 
         putObjectInContext(SKIP_PUBLISH_PA_TO_S3, configuration.isSkipPublishToS3());

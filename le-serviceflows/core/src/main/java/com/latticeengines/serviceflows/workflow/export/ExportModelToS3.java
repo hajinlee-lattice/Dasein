@@ -33,6 +33,14 @@ public class ExportModelToS3 extends BaseImportExportS3<ImportExportS3StepConfig
         ModelSummary modelSummary = getModelSummary();
         addModelingArtifactsDirs(requests, modelSummary);
         addModelingSourceDirs(requests, modelSummary);
+        addScoringTrainingFile(requests);
+    }
+
+    private void addScoringTrainingFile(List<ImportExportRequest> requests) {
+        String tableName = getStringValueFromContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME);
+        if (StringUtils.isNotBlank(tableName)) {
+            addTableDirs(tableName, requests);
+        }
     }
 
     private void addModelingSourceDirs(List<ImportExportRequest> requests, ModelSummary modelSummary) {
@@ -98,8 +106,8 @@ public class ExportModelToS3 extends BaseImportExportS3<ImportExportS3StepConfig
     protected void addAtlasFile(List<ImportExportRequest> requests, String filePath) {
         try {
             if (StringUtils.isNotBlank(filePath) && HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                requests.add(
-                        new ImportExportRequest(filePath, pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket)));
+                requests.add(new ImportExportRequest(filePath,
+                        pathBuilder.convertAtlasFile(filePath, podId, tenantId, s3Bucket)));
             }
         } catch (Exception ex) {
             log.warn("Failed to copy file=" + filePath + " for tenantId=" + tenantId, " cause=" + ex.getMessage());

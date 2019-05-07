@@ -112,6 +112,10 @@ public class SourceFile
     @Enumerated(EnumType.STRING)
     private BusinessEntity businessEntity;
 
+    @JsonProperty("partial_file")
+    @Column(name = "PARTIAL_FILE")
+    private boolean partialFile;
+
     @Override
     public String getName() {
         return name;
@@ -247,5 +251,13 @@ public class SourceFile
 
     public void setBusinessEntity(BusinessEntity businessEntity) {
         this.businessEntity = businessEntity;
+    }
+
+    public boolean isPartialFile() {
+        return partialFile;
+    }
+
+    public void setPartialFile(boolean partialFile) {
+        this.partialFile = partialFile;
     }
 }

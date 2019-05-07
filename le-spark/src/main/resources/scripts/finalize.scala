@@ -9,7 +9,6 @@
 //}
 //val lattice: LatticeContext = new LatticeContext(Nil, null, List[JsonNode]())
 
-
 val targets = lattice.targets
 val output = lattice.output
 

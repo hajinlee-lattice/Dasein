@@ -114,13 +114,13 @@ a.button,
         }
     }
     &.orange-button {
-        background-color: $amber-two;
+        background-color: $amber;
         &:hover {
-            background-color: $amber-three;
+            background-color: $amber-two;
             color: $pearl-white;
         }
         &:active {
-            background-color: $amber-four;
+            background-color: $amber-three;
         }
         &:focus {
             color: $pearl-white;

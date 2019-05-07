@@ -215,7 +215,7 @@ angular
                     BackStore.setHidden(false);
                 },
                 onExit: function ($state) {
-                    $state.get('home.playbook.overview').data.redux.unsubscribe();
+                    //$state.get('home.playbook.overview').data.redux.unsubscribe();
                 },
                 resolve: {
                     play: ($q, $stateParams, playstore) => {
@@ -250,7 +250,7 @@ angular
                         templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                     },
                     'main@': {
-                        //component: 'playbookOverview'
+                        // component: 'playbookOverview'
                         component: 'reactAngularMainComponent'
                     },
                     'header.back@': 'backNav'

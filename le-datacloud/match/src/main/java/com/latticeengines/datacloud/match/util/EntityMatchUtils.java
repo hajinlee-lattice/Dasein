@@ -13,12 +13,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -26,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -186,6 +190,31 @@ public class EntityMatchUtils {
     }
 
     /**
+     * Determine whether email field is mapped in current match and is the only
+     * field used as domain in account match.
+     *
+     * @param traveler
+     *            current traveler object
+     * @return true if no other account info than Email
+     */
+    public static boolean hasEmailAccountInfoOnly(@NotNull MatchTraveler traveler) {
+        MatchKeyTuple tuple = traveler.getMatchKeyTuple();
+        MatchKeyTuple accountTuple = traveler.getEntityMatchKeyTuple(BusinessEntity.Account.name());
+        if (tuple == null) {
+            // be definsive for now, these two should not be null, maybe fail later
+            return false;
+        }
+
+        // Assumption is: If Contact has Email, it must be mapped in
+        // Account Domain match key because in Account match, there is
+        // no concept of "Email", thus we can only detect how many
+        // domain fields are mapped
+        return tuple.getEmail() != null
+                && (getValidEntityId(BusinessEntity.Account.name(), traveler) == null || (accountTuple != null
+                        && accountTuple.hasDomainOnly() && !accountTuple.isDomainFromMultiCandidates()));
+    }
+
+    /**
      * Determine whether we should override target attribute value or only set if
      * the attribute does not exist
      *
@@ -207,5 +236,29 @@ public class EntityMatchUtils {
 
         // attrs not in firstWinMap are considered last win (override with new value)
         return !FIRST_WIN_ATTRIBUTES.getOrDefault(entity, Collections.emptySet()).contains(attrName);
+    }
+
+    /**
+     * Return valid matched entity ID (ID of a non-anonymous entity) of specified
+     * entity
+     *
+     * @param entity
+     *            target entity
+     * @param traveler
+     *            traveler instance
+     * @return valid entity ID, {@literal null} if no valid ID found
+     */
+    public static String getValidEntityId(@NotNull String entity, MatchTraveler traveler) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(entity),
+                String.format("Target entity=%s should not be blank", entity));
+        if (traveler == null || MapUtils.isEmpty(traveler.getEntityIds())) {
+            return null;
+        }
+
+        String entityId = traveler.getEntityIds().get(entity);
+        if (StringUtils.isBlank(entityId) || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
+            return null;
+        }
+        return entityId;
     }
 }

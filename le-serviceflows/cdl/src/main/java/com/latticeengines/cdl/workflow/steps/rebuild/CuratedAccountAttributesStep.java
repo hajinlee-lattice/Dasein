@@ -116,7 +116,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
             log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
             skipTransformation = true;
         } else if (shouldResetCuratedAttributesContext()) {
-            log.warn("Should reset.  Skipping CuratedAccountAttributes Step.");
+            log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
             skipTransformation = true;
         }
 

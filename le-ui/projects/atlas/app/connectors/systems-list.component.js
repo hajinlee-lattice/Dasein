@@ -2,6 +2,7 @@ import React, { Component } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
+
 import GridLayout from 'common/widgets/container/grid-layout.component';
 
 import SystemComponent from './system.component';
@@ -9,15 +10,20 @@ import SystemComponent from './system.component';
 import SystemsService from './systems.service';
 import ConnectorService from './connectors.service';
 import LeVPanel from 'common/widgets/container/le-v-panel';
-import './systesms-list.component.scss';
+import './systems-list.component.scss';
 import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
+import { actions, reducer } from './connections.redux';
+import { store, injectAsyncReducer } from 'store';
+
 export default class SystemsListComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = { connectors: [], loading: true };
+        this.state = { connectors: [], loading: true, generatedAuthCode: false };
+
     }
 
     componentDidMount() {
+
         this.setState({loading: true});
         httpService.get(
             "/pls/lookup-id-mapping",
@@ -26,8 +32,7 @@ export default class SystemsListComponent extends Component {
                 let MAPs = response.data.MAP || [];
                 let connectors = CRMs.concat(MAPs);
                 SystemsService.cleanupLookupId(connectors);
-                    this.setState({ loading: false, connectors: connectors, count: connectors.length });
-                
+                this.setState({ loading: false, connectors: connectors, count: connectors.length });
             })
         );
     }
