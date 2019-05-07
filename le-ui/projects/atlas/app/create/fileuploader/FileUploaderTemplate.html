@@ -13,7 +13,6 @@
 
 </label>
 
-
 <div class="uploadContainer hasS3" ng-class="{ hasS3: vm_uploader.hasSthreeFiles == 'true' }">
     <div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
         <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
@@ -32,7 +31,6 @@
             ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}">
           <span><span></span></span>
         </div>
-        
         <span ng-show="vm_uploader.showFileDisplayName()">
           {{vm_uploader.selectedFileDisplayName}}
         </span>
