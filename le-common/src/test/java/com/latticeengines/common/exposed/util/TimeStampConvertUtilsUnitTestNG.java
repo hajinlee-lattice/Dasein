@@ -99,6 +99,7 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "YYYY/MMM/DD", "", "");
         Assert.assertEquals(actualTime, 1517443200000L);
 
+        // Test Case 6: Date/time with format MMM-DD-YYYY 00-00-00 12H in timezone Europe/London.
         actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018 01-23-45 Pm",
                 "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
@@ -174,7 +175,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test Case 8: Date/time with format DD/MM/YYYY 00 00 00 24H, in timezone America/New_York.
         actualTime = TimeStampConvertUtils.convertToLong("08/09/2018 07 07 07",
                 "DD/MM/YYYY", "00 00 00 24H", "America/New_York");
-                Assert.assertEquals(actualTime, 1536404827000L);
+        Assert.assertEquals(actualTime, 1536404827000L);
 
         // Test Case 9: Date/time with single digit month and day, in format MM-DD-YYYY 00-00-00 12H, in default
         // timezone (UTC).
@@ -190,24 +191,24 @@ public class TimeStampConvertUtilsUnitTestNG {
 
         // Test Case 11: Date/time with single digit hour, in format YYYY/MM/DD 00 00 00, in timezone America/Sao_Paulo.
         actualTime = TimeStampConvertUtils.convertToLong("2018/12/11 4 56 12",
-                "YYYY/MM/DD",  "00 00 00 24H", "America/Sao_Paulo");
+                "YYYY/MM/DD", "00 00 00 24H", "America/Sao_Paulo");
         Assert.assertEquals(actualTime, 1544511372000L);
 
         // Test Case 12: Date/time with single digit month, day, hour, minute, and second, in format
         // DD/MM/YY 00-00-00 24H, in timezone America/Los_Angeles.
         actualTime = TimeStampConvertUtils.convertToLong("2/2/22 2-2-2",
-                "DD/MM/YY",  "00-00-00 24H", "America/Los_Angeles");
+                "DD/MM/YY", "00-00-00 24H", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1643796122000L);
 
         // Test Case 13: Date/time with single digit month and day, in format MM-DD-YYYY 00:00:00 12H, with lowercase
         // AM, with UTC timezone provided.
         actualTime = TimeStampConvertUtils.convertToLong("4-3-2018 01:23:45 am",
-                "MM-DD-YYYY",  "00:00:00 12H", "UTC");
+                "MM-DD-YYYY", "00:00:00 12H", "UTC");
         Assert.assertEquals(actualTime, 1522718625000L);
 
         // Test Case 14: Test case 13 again with leading and trailing whitespace in the formats strings.
         actualTime = TimeStampConvertUtils.convertToLong("4-3-2018 01:23:45 am",
-                " \t \tMM-DD-YYYY    ", 	"			00:00:00 12H  ", "\t			UTC");
+                " \t \tMM-DD-YYYY	    ", "			00:00:00 12H  ", "\t			UTC ");
         Assert.assertEquals(actualTime, 1522718625000L);
 
         // Test Case 15: Test case 13 again with arbitrary whitespace before and between date and time in value.
@@ -251,7 +252,124 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = TimeStampConvertUtils.convertToLong("31.01.70 00 00",
                 "DD.MM.YY", "00 00 24H", "Pacific/Honolulu");
         Assert.assertEquals(actualTime, 3158388000000L);
-        }
+
+        // Test Case 22: Test case where time is in ISO 8601 format but no date/time format is given.  Conversion code
+        // reverts to legacy code which runs Natty Parser to successfully parse date.
+        // From https://solutions.lattice-engines.com/browse/DP-10017
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z", "", "", "");
+        Assert.assertEquals(actualTime, 1554679864000L);
+    }
+
+    // Test stripping out T and Z from dates in ISO 8601 format.
+    // From https://solutions.lattice-engines.com/browse/DP-10028.
+    @Test(groups = { "unit", "functional" })
+    public void testConvertToLongWithISO8601() {
+
+        // Test Case 1: Date/time with format MM.DD.YY 00:00:00 12H, in timezone America/Los_Angeles.
+        long actualTime = TimeStampConvertUtils.convertToLong("11.02.18T11:11:11 AMZ",
+                "MM.DD.YY", "00:00:00 12H", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1541182271000L);
+
+        // Test Case 2: Date/time with format DD/MM/YYYY 00 00 00 24H, in timezone America/New_York.
+        actualTime = TimeStampConvertUtils.convertToLong("08/09/2018t07 07 07z",
+                "DD/MM/YYYY", "00 00 00 24H", "America/New_York");
+        Assert.assertEquals(actualTime, 1536404827000L);
+
+        // Test Case 3: Date/time with single digit month and day, in format MM-DD-YYYY 00-00-00 12H, in default
+        // timezone (UTC).
+        actualTime = TimeStampConvertUtils.convertToLong("4-3-2018T01-23-45 PMz",
+                "MM-DD-YYYY", "00-00-00 12H", "");
+        Assert.assertEquals(actualTime, 1522761825000L);
+
+        // Test Case 4: Date/time with single digit month and day, in format MM-DD-YYYY 00:00:00 12H, in default
+        // timezone (UTC), testing lower case PM.
+        actualTime = TimeStampConvertUtils.convertToLong("4-3-2018t01:23:45 pmZ",
+                "MM-DD-YYYY", "00:00:00 12H", "");
+        Assert.assertEquals(actualTime, 1522761825000L);
+
+        // Test Case 5: Date/time with single digit hour, in format YYYY/MM/DD 00 00 00, in timezone America/Sao_Paulo.
+        actualTime = TimeStampConvertUtils.convertToLong("2018/12/11T4 56 12",
+                "YYYY/MM/DD", "00 00 00 24H", "America/Sao_Paulo");
+        Assert.assertEquals(actualTime, 1544511372000L);
+
+        // Test Case 6: Date/time with single digit month, day, hour, minute, and second, in format
+        // DD/MM/YY 00-00-00 24H, in timezone America/Los_Angeles.
+        actualTime = TimeStampConvertUtils.convertToLong("2/2/22T2-2-2Z",
+                "DD/MM/YY", "00-00-00 24H", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1643796122000L);
+
+        // Test Case 7: Date/time with single digit month and day, in format MM-DD-YYYY 00:00:00 12H, with lowercase
+        // AM, with UTC timezone provided.
+        actualTime = TimeStampConvertUtils.convertToLong("4-3-2018T01:23:45 amZ",
+                "MM-DD-YYYY", "00:00:00 12H", "UTC");
+        Assert.assertEquals(actualTime, 1522718625000L);
+
+        // Test Case 8: Test case 7 again with leading and trailing whitespace in the formats strings.
+        actualTime = TimeStampConvertUtils.convertToLong("4-3-2018t01:23:45 amz",
+                " \t \tMM-DD-YYYY    ", "			00:00:00 12H  ", "\t			UTC");
+        Assert.assertEquals(actualTime, 1522718625000L);
+
+        // Test Case 9: Date/time with format MM.DD.YYYY 00:00 12H, in timezone America/Los_Angeles.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("11.02.2018T11:11 AM",
+                "MM.DD.YYYY", "00:00 12H", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1541182260000L);
+
+        // Test Case 10: Date/time with format YYYY-MM-DD 00:00 24H, in timezone America/New_York.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10z",
+                "YYYY-MM-DD", "00:00 24H", "America/New_York");
+        Assert.assertEquals(actualTime, 1554419400000L);
+
+        // Test Case 11: Date/time with format DD.MM.YY 00 00 24H, in timezone Pacific/Honolulu.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("31.01.70t00 00",
+                "DD.MM.YY", "00 00 24H", "Pacific/Honolulu");
+        Assert.assertEquals(actualTime, 3158388000000L);
+
+        // Test Case 12: Test case with standard IS0 8601 format for date and time.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z",
+                "YYYY-MM-DD", "00:00:00 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 13: Test that any random characters after the date/time format will be ignored.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Zabcdefghijklmnopqrstuvwzyz123",
+                "YYYY-MM-DD", "00:00:00 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 14: Test that any random characters even in case without a trailing "Z" will be ignored.  In
+        // this case date/time has trailing timezone with only hours listed (-01)
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10-01",
+                "YYYY-MM-DD", "00:00 24H", "America/New_York");
+        Assert.assertEquals(actualTime, 1554419400000L);
+
+        // Test Case 15: Date/time with format MMM-DD-YYYY 00-00-00 12H in timezone Europe/London.
+        actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018T01-23-45 PmZ",
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
+        Assert.assertEquals(actualTime, 1522758225000L);
+
+        // Test Case 16: Date/time with format YYYY-MMM-DD 00-00 12H, in timezone America/Chicago.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-Dec-31t6-10 PMzZzZzZz",
+                "YYYY-MMM-DD", "00-00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 17: Date/time with format YYYY-MMM-DD 00-00 12H, in timezone America/Chicago, and month with
+        // improper casing.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-dEC-31T6-10 PM",
+                "YYYY-MMM-DD", "00-00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 18: Same as 6th case above, but with April in all capitals, eg. APR.  Date/time has trailing
+        // timezone with hours and minutes (+10:00).
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("APR-3-2018t01-23-45 Pm+10:00",
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
+        Assert.assertEquals(actualTime, 1522758225000L);
+
+    }
 
     // Test error cases for date to timestamp conversion with date/time formats.
     @Test(groups = { "unit", "functional" })
@@ -441,6 +559,20 @@ public class TimeStampConvertUtilsUnitTestNG {
                     "Wrong error message: " + e.getMessage());
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of unsupported time zone.");
+
+        // Test Case 12: Test September as alphabetical short form with four letters.
+        exceptionFound = false;
+        try {
+            TimeStampConvertUtils.convertToLong("2018/sept/01", "YYYY/MMM/DD", "", "");
+        } catch (Exception e) {
+            exceptionFound = true;
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+            Assert.assertTrue(
+                    e.getMessage().contains(
+                            "Date value (2018/Sept/01) could not be parsed by format string: YYYY/MMM/DD"),
+                    "Wrong error message: " + e.getMessage());
+        }
+        Assert.assertTrue(exceptionFound, "Did not fail on case of four character month.");
     }
 
     @Test(groups = { "unit", "functional" })
@@ -449,7 +581,6 @@ public class TimeStampConvertUtilsUnitTestNG {
         long value = TimeStampConvertUtils.convertToLong(str);
         Assert.assertEquals(TimeStampConvertUtils.convertToDate(value), "2016-04-13");
     }
-
 
     @Test(groups = "manual")
     public void testDisplayTimeZonesAndZoneIds() {
@@ -501,16 +632,6 @@ public class TimeStampConvertUtilsUnitTestNG {
             log.info("   ZoneId: " + zoneIdStr + "  ZoneOffset: " + zoneOffset.toString());
 
         }
-
-        // Trying to understand what DATE_TIME_FORMATTER is for.
-        //long test1 = TimeStampConvertUtils.DATE_TIME_FORMATTER.parseMillis("11.21.11 11:11:11 AM");
-        //log.info("Parsed 11/21/11 11:11:11 AM into " + test1);
-
-        //long test2 = TimeStampConvertUtils.DATE_TIME_FORMATTER.parseMillis("11.21.11");
-        //log.info("Parsed 11/21/11 into " + test2);
-
-
-
     }
 
 }
