@@ -38,12 +38,12 @@ public class TimeStampConvertUtils {
     // and optional "Z" at the end.
     private static final Pattern TZ_DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
-                    + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)[Zz]?");
+                    + "(\\d{1,2}((:\\d{1,2}){1,2}|(-\\d{1,2}){1,2}|( \\d{1,2}){1,2})(\\s+[aApP][mM])?)[Zz]?");
 
     // Regular expression pattern to match all current date/time formats.
     private static final Pattern DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})\\s+"
-                    + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)");
+                    + "(\\d{1,2}((:\\d{1,2}){1,2}|(-\\d{1,2}){1,2}|( \\d{1,2}){1,2})(\\s+[aApP][mM])?)");
 
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.

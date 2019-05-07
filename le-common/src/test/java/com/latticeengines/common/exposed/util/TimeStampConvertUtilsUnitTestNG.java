@@ -337,9 +337,10 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "YYYY-MM-DD", "00:00:00 24H", "UTC");
         Assert.assertEquals(actualTime, 1554679864000L);
 
-        // Test Case 14: Test that any random characters even in case without a trailing "Z" will be ignored.
+        // Test Case 14: Test that any random characters even in case without a trailing "Z" will be ignored.  In
+        // this case date/time has trailing timezone with only hours listed (-01)
         // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
-        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10998877665544332211",
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10-01",
                 "YYYY-MM-DD", "00:00 24H", "America/New_York");
         Assert.assertEquals(actualTime, 1554419400000L);
 
@@ -348,22 +349,23 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
 
-        // Test Case 16: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago.
+        // Test Case 16: Date/time with format YYYY-MMM-DD 00-00 12H, in timezone America/Chicago.
         // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
-        actualTime = TimeStampConvertUtils.convertToLong("1969-Dec-31t6:10 PMzZzZzZz",
-                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        actualTime = TimeStampConvertUtils.convertToLong("1969-Dec-31t6-10 PMzZzZzZz",
+                "YYYY-MMM-DD", "00-00 12H", "America/Chicago");
         Assert.assertEquals(actualTime, 600000L);
 
-        // Test Case 17: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago, and month with
+        // Test Case 17: Date/time with format YYYY-MMM-DD 00-00 12H, in timezone America/Chicago, and month with
         // improper casing.
         // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
-        actualTime = TimeStampConvertUtils.convertToLong("1969-dEC-31T6:10 PM",
-                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        actualTime = TimeStampConvertUtils.convertToLong("1969-dEC-31T6-10 PM",
+                "YYYY-MMM-DD", "00-00 12H", "America/Chicago");
         Assert.assertEquals(actualTime, 600000L);
 
-        // Test Case 18: Same as 6th case above, but with April in all capitals, eg. APR.
+        // Test Case 18: Same as 6th case above, but with April in all capitals, eg. APR.  Date/time has trailing
+        // timezone with hours and minutes (+10:00).
         // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
-        actualTime = TimeStampConvertUtils.convertToLong("APR-3-2018t01-23-45 PmABCDEFG123456",
+        actualTime = TimeStampConvertUtils.convertToLong("APR-3-2018t01-23-45 Pm+10:00",
                 "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
 
