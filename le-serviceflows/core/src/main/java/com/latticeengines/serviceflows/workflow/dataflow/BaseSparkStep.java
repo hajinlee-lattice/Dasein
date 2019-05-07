@@ -118,7 +118,8 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             minExe *= 2;
         }
         int maxExe = maxExecutors * scalingMultiplier;
-        conf.put("spark.executor.instances", String.valueOf(Math.max(minExe, 1)));
+        conf.put("spark.executor.instances", "1");
+        conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
         return conf;
