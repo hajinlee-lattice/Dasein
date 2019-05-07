@@ -56,6 +56,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setName("matchResult");
         dataUnit.setPath(inputDir);
+        dataUnit.setCount(matchCommand.getRowsRequested().longValue());
         List<DataUnit> inputUnits = new ArrayList<>();
         inputUnits.add(dataUnit);
 
@@ -63,6 +64,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         if (preMatchTable != null) {
             log.info("PreMatchTable=" + JsonUtils.serialize(preMatchTable));
             HdfsDataUnit eventTable = preMatchTable.toHdfsDataUnit("eventTable");
+            eventTable.setCount(matchCommand.getRowsRequested().longValue());
             inputUnits.add(eventTable);
         }
         log.info("InputUnits=" + JsonUtils.serialize(inputUnits));
