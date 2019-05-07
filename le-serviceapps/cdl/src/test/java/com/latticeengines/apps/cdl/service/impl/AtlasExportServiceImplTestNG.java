@@ -35,12 +35,15 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(exportRecord.getDatePrefix());
         String dropfolderExportPath = s3ExportFolderService.getDropFolderExportPath(mainCustomerSpace,
                 AtlasExportType.ALL_ACCOUNTS, exportRecord.getDatePrefix(), "");
-//        atlasExportService.updateAtlasExportDropfolderpath(mainCustomerSpace, exportUuid, dropfolderExportPath);
+        Assert.assertNotNull(dropfolderExportPath);
+        atlasExportService.addFileToDropFolder(mainCustomerSpace, exportUuid, "TestFile.csv.gz");
         String systemExportPath = s3ExportFolderService.getSystemExportPath(mainCustomerSpace);
-//        atlasExportService.updateAtlasExportSystemPath(mainCustomerSpace, exportUuid, systemExportPath);
+        Assert.assertNotNull(systemExportPath);
+        atlasExportService.addFileToSystemPath(mainCustomerSpace, exportUuid, "Account_" + exportUuid + ".csv.gz");
         exportRecord = atlasExportService.getAtlasExport(mainCustomerSpace, exportUuid);
-//        Assert.assertEquals(exportRecord.getDropfolderPath(), dropfolderExportPath);
-//        Assert.assertEquals(exportRecord.getSystemPath(), systemExportPath);
+        Assert.assertEquals(exportRecord.getFilesUnderDropFolder().size(), 1);
+        Assert.assertEquals(exportRecord.getFilesUnderSystemPath().size(), 1);
+        Assert.assertEquals(exportRecord.getFilesUnderDropFolder().get(0), "TestFile.csv.gz");
+        Assert.assertEquals(exportRecord.getFilesUnderSystemPath().get(0), "Account_" + exportUuid + ".csv.gz");
     }
-
 }

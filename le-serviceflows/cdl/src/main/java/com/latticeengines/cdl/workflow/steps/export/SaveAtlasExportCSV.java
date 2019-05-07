@@ -55,15 +55,24 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     private Map<ExportEntity, HdfsDataUnit> inputUnits;
     private Map<ExportEntity, HdfsDataUnit> outputUnits = new HashMap<>();
-//
-//    @Inject
-//    private EMREnvService emrEnvService;
 
     @Inject
     private S3Service s3Service;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
+
+    @Value("${cdl.atlas.export.dropfolder.tag}")
+    private String dropFolderTag;
+
+    @Value("${cdl.atlas.export.dropfolder.tag.value}")
+    private String dropFolderTagValue;
+
+    @Value("${cdl.atlas.export.systemfolder.tag}")
+    private String systemFolderTag;
+
+    @Value("${cdl.atlas.export.systemfolder.tag.value}")
+    private String systemFolderTagValue;
 
     @Inject
     private AtlasExportProxy atlasExportProxy;
@@ -169,9 +178,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-//        String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
-//        queueName = LedpQueueAssigner.overwriteQueueAssignment(queueName, emrEnvService.getYarnQueueScheme());
-//        String finalQueueName = queueName;
         String customerSpaceStr = configuration.getCustomerSpace().toString();
         AtlasExport exportRecord = atlasExportProxy.findAtlasExportById(customerSpaceStr,
                 configuration.getAtlasExportId());
@@ -222,8 +228,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 if (ctx.getRetryCount() > 0) {
                     log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
                 }
-//                HdfsUtils.distcp(yarnConfiguration, csvGzFilePath, finalTargetPath, queueName);
-                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath);
+                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, systemFolderTag, systemFolderTagValue);
                 return true;
             });
         } catch (Exception e) {
@@ -247,8 +252,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 if (ctx.getRetryCount() > 0) {
                     log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
                 }
-//                HdfsUtils.distcp(yarnConfiguration, csvGzFilePath, finalTargetPath, queueName);
-                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath);
+                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, dropFolderTag, dropFolderTagValue);
                 return true;
             });
         } catch (Exception e) {
@@ -257,10 +261,12 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName);
     }
 
-    private void copyToS3(Configuration configuration, String hdfsPath, String s3Path) throws IOException {
+    private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
+            throws IOException {
         log.info("Copy from " + hdfsPath + " to " + s3Path);
         try (InputStream stream = HdfsUtils.getInputStream(configuration, hdfsPath)) {
             s3Service.uploadInputStream(s3Bucket, s3Path, stream, true);
+            s3Service.addTagToObject(s3Bucket, s3Path, tag, tagValue);
         }
     }
 

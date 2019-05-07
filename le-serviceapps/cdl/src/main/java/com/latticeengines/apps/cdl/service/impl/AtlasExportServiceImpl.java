@@ -63,28 +63,6 @@ public class AtlasExportServiceImpl implements AtlasExportService {
         atlasExportEntityMgr.update(atlasExport);
     }
 
-//    @Override
-//    public void updateAtlasExportSystemPath(String customerSpace, String uuid, String systemPath) {
-//        AtlasExport atlasExport = atlasExportEntityMgr.findByUuid(uuid);
-//        if (atlasExport == null) {
-//            log.error("Cannot find Atlas Export Object with uuid: " + uuid);
-//            throw new IllegalArgumentException("Cannot find Atlas Export Object with uuid: " + uuid);
-//        }
-//        atlasExport.setSystemPath(systemPath);
-//        atlasExportEntityMgr.update(atlasExport);
-//    }
-//
-//    @Override
-//    public void updateAtlasExportDropfolderpath(String customerSpace, String uuid, String dropfolderPath) {
-//        AtlasExport atlasExport = atlasExportEntityMgr.findByUuid(uuid);
-//        if (atlasExport == null) {
-//            log.error("Cannot find Atlas Export Object with uuid: " + uuid);
-//            throw new IllegalArgumentException("Cannot find Atlas Export Object with uuid: " + uuid);
-//        }
-//        atlasExport.setDropfolderPath(dropfolderPath);
-//        atlasExportEntityMgr.update(atlasExport);
-//    }
-
     @Override
     public AtlasExport getAtlasExport(String customerSpace, String uuid) {
         return atlasExportEntityMgr.findByUuid(uuid);

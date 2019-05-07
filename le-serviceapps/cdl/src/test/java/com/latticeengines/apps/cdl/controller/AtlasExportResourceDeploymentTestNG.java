@@ -61,11 +61,5 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
                 "Account-" + atlasExport.getUuid() + ".csv.gz");
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord.getUuid());
         Assert.assertEquals(atlasExport.getFilesUnderSystemPath().size(), 1);
-
-
     }
-
-
-
-
 }

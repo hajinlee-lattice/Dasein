@@ -70,9 +70,6 @@ public class DropBoxServiceImpl implements DropBoxService {
     // Export folder:
     private static final String EXPORT = "Export";
 
-//    private static final SimpleDateFormat exportDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-
-
     @Inject
     private DropBoxEntityMgr entityMgr;
 

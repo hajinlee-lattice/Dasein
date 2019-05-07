@@ -64,14 +64,6 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Enumerated(EnumType.STRING)
     private AtlasExportType exportType;
 
-//    @JsonProperty("system_path")
-//    @Column(name = "SYSTEM_PATH")
-//    private String systemPath;
-//
-//    @JsonProperty("dropfolder_path")
-//    @Column(name = "DROPFOLDER_PATH")
-//    private String dropfolderPath;
-
     @JsonProperty("date_prefix")
     @Column(name = "DATE_PREFIX", length = 15)
     private String datePrefix;
@@ -158,20 +150,4 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     public void setFilesUnderDropFolder(List<String> filesUnderDropFolder) {
         this.filesUnderDropFolder = filesUnderDropFolder;
     }
-
-    //    public String getSystemPath() {
-//        return systemPath;
-//    }
-//
-//    public void setSystemPath(String systemPath) {
-//        this.systemPath = systemPath;
-//    }
-//
-//    public String getDropfolderPath() {
-//        return dropfolderPath;
-//    }
-//
-//    public void setDropfolderPath(String dropfolderPath) {
-//        this.dropfolderPath = dropfolderPath;
-//    }
 }
