@@ -49,8 +49,6 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
                 configuration.getSourceSchemaInterpretation());
         parameters.inputSkippedAttributeList = getListObjectFromContext(INPUT_SKIPPED_ATTRIBUTES_KEY, String.class);
         configuration.setDataFlowParams(parameters);
-        configuration.setJobProperties(initJobProperties());
-
     }
 
     protected int getScalingMultiplier(long count) {
