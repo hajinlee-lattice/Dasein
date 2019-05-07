@@ -192,9 +192,31 @@ angular.module('lp.import.entry', [
                 autoImportData = ImportWizardStore.getAutoImport(),
                 postBody = $stateParams.data;
 
-            ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
-                $state.go('home.importtemplates');
-            });
+            console.log(fileName, importOnly, autoImportData, postBody);
+
+            // ImportWizardStore.setCsvFileName()
+            // ImportWizardStore.setEntityType()
+            // null
+            // ImportWizardStore.setFeedType()
+
+            
+
+            // Import Only
+            // file_1556901861309.csv 
+            // true 
+            // true 
+            // Exist: true
+            // FeedType: "HierarchySchema"
+            // ImportStatus: "Active"
+            // LastEditedDate: 1556825524000
+            // Object: "Product Hierarchy"
+            // Path: "latticeengines-qa-customers/dropfolder/k9adsbgl/Templates/HierarchySchema/"
+            // SystemName: ""
+            // TemplateName: "k"
+
+            // ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+            //     $state.go('home.importtemplates');
+            // });
         }
     }
 

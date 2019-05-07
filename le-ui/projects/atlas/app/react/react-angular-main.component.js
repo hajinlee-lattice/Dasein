@@ -14,8 +14,6 @@ export default class ReactAngularMainComponent extends Component {
         super(props);
         NgState.setAngularState(this.props.$state);
     }
-
-
     componentDidMount() {
         let router = ReactRouter.getRouter();
         router.stateService.go(this.props.path);

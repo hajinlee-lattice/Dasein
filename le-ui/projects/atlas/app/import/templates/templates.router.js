@@ -28,9 +28,10 @@ angular
                 path: () => {
                     return 'templatelist';
                 },
-                ngservices: (TemplatesStore) => {
+                ngservices: (TemplatesStore, ImportWizardStore) => {
                     let obj = {
-                        TemplatesStore : TemplatesStore
+                        TemplatesStore : TemplatesStore,
+                        ImportWizardStore: ImportWizardStore
                     }
                     return obj;
                 }
