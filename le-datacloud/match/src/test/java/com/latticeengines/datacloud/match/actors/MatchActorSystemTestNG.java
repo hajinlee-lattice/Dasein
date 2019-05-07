@@ -116,9 +116,9 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             AccountMatchPlannerMicroEngineActor.class.getSimpleName(), //
             EntitySystemIdBasedMicroEngineActor.class.getSimpleName(), //
             FUZZY_MATCH_JUNCTION_ACTOR, //
-            EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
             EntityDomainCountryBasedMicroEngineActor.class.getSimpleName(), //
             EntityNameCountryBasedMicroEngineActor.class.getSimpleName(), //
+            EntityDunsBasedMicroEngineActor.class.getSimpleName(), //
             EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
             EntityIdResolveMicroEngineActor.class.getSimpleName(), //
     };

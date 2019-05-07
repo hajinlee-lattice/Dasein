@@ -119,8 +119,8 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     // MatchKeys used in Account match decision graph (Don't consider MatchKey
     // combinations in LDC match)
-    private static final String[] ACCOUNT_KEYS_PRIORITIZED = { ID_ACCT, ID_MKTO, MatchKey.DUNS.name(),
-            MatchKey.Domain.name(), MatchKey.Name.name() };
+    private static final String[] ACCOUNT_KEYS_PRIORITIZED = { ID_ACCT, ID_MKTO, MatchKey.Domain.name(),
+            MatchKey.Name.name(), MatchKey.DUNS.name() };
     // Reduced set of MatchKeys used in Account match decision graph. Only one
     // key per actor to reduce # test case
     private static final String[] ACCOUNT_KEYS_REDUCED = { ID_ACCT, MatchKey.DUNS.name(), MatchKey.Domain.name(),
