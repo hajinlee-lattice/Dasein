@@ -234,6 +234,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                     return getPredefinedColumnSelectionFromDb(pair.getRight(), pair.getLeft());
                 }) //
                 .initKeys(initKeys) //
+                .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
                 .build();
         codeBookCache = WatcherCache.builder() //
                 .name("CodeBookCache") //
@@ -246,6 +247,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                     return ImmutablePair.of(codeBookLookup, codeBookMap);
                 }) //
                 .initKeys(new String[] { currentApproved }) //
+                .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
                 .build();
     }
 

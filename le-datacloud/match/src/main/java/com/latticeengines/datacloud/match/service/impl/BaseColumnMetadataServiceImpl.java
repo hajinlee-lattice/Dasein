@@ -179,6 +179,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                     return fromMetadataColumnService(pair.getRight(), pair.getLeft());
                 }) //
                 .initKeys(initKeys) //
+                .waitBeforeRefreshInSec((int) (Math.random() * 30))
                 .build();
     }
 

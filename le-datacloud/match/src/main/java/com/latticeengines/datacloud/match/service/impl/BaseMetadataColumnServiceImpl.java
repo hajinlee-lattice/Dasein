@@ -181,16 +181,22 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     private void initWatcher() {
-        NodeWatcher.registerWatcher(AMRelease.name());
-        NodeWatcher.registerListener(AMRelease.name(), () -> {
-            log.info("ZK watcher " + AMRelease.name() + " changed, updating white and black columns caches ...");
-            refreshCaches();
-        });
         BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
         if (WebApp.equals(currentEnv)) {
-            log.warn("Eagerly initialize metadata cache in WebApp env.");
-            refreshCaches();
+            NodeWatcher.registerWatcher(AMRelease.name());
+            NodeWatcher.registerListener(AMRelease.name(), () -> {
+                int waitInSec = (int) (Math.random() * 30);
+                log.info(String.format(
+                        "ZK watcher %s is changed. To avoid refresh congestion, wait for %d seconds before start.",
+                        AMRelease.name(), waitInSec));
+                Thread.sleep(waitInSec * 1000);
+                log.info(String.format("For changed ZK watcher %s, updating white and black columns caches ...",
+                        AMRelease.name()));
+                refreshCaches();
+            });
         }
+        log.info("Initial loading - updating white and black columns caches ...");
+        refreshCaches();
     }
 
     protected abstract MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
