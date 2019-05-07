@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum CDLExternalSystemName {
-    Marketo ("Marketo"),
-    Eloqua ("Eloqua"),
-    Salesforce ("Salesforce"),
-    Facebook ("Facebook"),
-    LinkedIn ("LinkedIn"),
-    GoogleAds ("Google Ads"),
-    Others ("Others");
+    Marketo("Marketo"), //
+    Eloqua("Eloqua"), //
+    Salesforce("Salesforce"), //
+    Facebook("Facebook"), //
+    LinkedIn("LinkedIn"), //
+    GoogleAds("Google Ads"), //
+    AWS_S3("AWS S3"), //
+    Others("Others");
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 

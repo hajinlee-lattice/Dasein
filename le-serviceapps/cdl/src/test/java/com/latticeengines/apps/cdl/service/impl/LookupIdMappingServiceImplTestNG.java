@@ -30,12 +30,12 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testBasicOperations() {
         Assert.assertTrue(CollectionUtils.isNotEmpty(lookupIdMappingLaunchService.getAllCDLExternalSystemType()));
-//        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
+        // Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
         Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null,
                 true);
         Assert.assertNotNull(lookupIdsMapping);
-        Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
-        Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
+        Assert.assertEquals(lookupIdsMapping.size(), 1, JsonUtils.serialize(lookupIdsMapping));
+        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
         String orgName = "n1234_1";
@@ -44,7 +44,6 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         String configId = extractedLookupIdMap.getId();
 
-        extractedLookupIdMap = testRegisterDeregister(orgId, orgName, false, configId);
         extractedLookupIdMap = testRegisterDeregister(orgId, orgName, true, null);
 
         LookupIdMap duplicateLookupIdMap = new LookupIdMap();
