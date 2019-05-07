@@ -122,6 +122,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
+        int partitions = Math.max(maxExe * executorCores * 2, 200);
+        conf.put("spark.default.parallelism", String.valueOf(partitions));
+        conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         return conf;
     }
 
