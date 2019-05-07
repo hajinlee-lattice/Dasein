@@ -255,7 +255,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                             key = "";
                         }
                         return requestLatestVersion(key);
-                    }, 10);
+                    }, 10, (int) (Math.random() * 30));
                     log.info("Initialized local cache DataCloudVersionCache.");
                 }
             }
@@ -272,7 +272,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                                 String key = str.replace(KEY_PREFIX + "|", "");
                                 return requestAllColumnsWithRetry(key);
                             }, //
-                            10); //
+                            10, (int) (Math.random() * 30)); //
                     log.info("Initialized local cache DataCloudCMCache.");
                 }
             }
@@ -286,7 +286,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                     amStatsCache = new LocalCacheManager<>(CacheName.DataCloudStatsCache, str -> {
                         String key = str.replace(KEY_PREFIX + "|", "");
                         return getStatsObjectViaREST(key);
-                    }, 10);
+                    }, 10, (int) (Math.random() * 30));
                     log.info("Initialized local cache DataCloudStatsCache.");
                 }
             }
