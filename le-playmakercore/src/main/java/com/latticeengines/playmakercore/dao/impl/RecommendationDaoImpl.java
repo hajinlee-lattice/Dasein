@@ -2,6 +2,7 @@ package com.latticeengines.playmakercore.dao.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -507,7 +508,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             List<String> accountIds) {
         log.info("contact requst with launchIds: " + launchIds.toString());
         if (CollectionUtils.isEmpty(launchIds)) {
-            return null;
+            return Collections.emptyList();
         }
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
