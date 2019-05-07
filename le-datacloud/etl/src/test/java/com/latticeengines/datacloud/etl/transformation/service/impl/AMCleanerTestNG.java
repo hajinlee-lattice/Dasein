@@ -175,7 +175,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
 
     private String getAMCleanerConfigStep2() throws JsonProcessingException {
         AMCleanerConfig conf = new AMCleanerConfig();
-        String maxDataCloudVersion = srcAttrEntityMgr.getDataCloudVersionAttrs(
+        String maxDataCloudVersion = srcAttrEntityMgr.getMaxDataCloudVersion(
                 AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME);
         conf.setDataCloudVersion(maxDataCloudVersion);
         conf.setIsMini(true);

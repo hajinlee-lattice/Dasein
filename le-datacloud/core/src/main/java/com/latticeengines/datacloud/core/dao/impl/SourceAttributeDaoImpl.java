@@ -46,7 +46,7 @@ public class SourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
     }
 
     @Override
-    public String getDataCloudVersionAttrs(String sourceName, String stage,
+    public String getMaxDataCloudVersion(String sourceName, String stage,
             String transformer) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
