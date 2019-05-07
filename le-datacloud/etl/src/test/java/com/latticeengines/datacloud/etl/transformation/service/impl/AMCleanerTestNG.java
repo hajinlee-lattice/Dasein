@@ -221,12 +221,12 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             // verifying LatticeAccountId exists with String type and value all populated
             Object latticeAccId = record.get(DataCloudConstants.LATTICE_ACCOUNT_ID);
             Assert.assertTrue(latticeAccId instanceof String || latticeAccId instanceof Utf8);
-            String strLatAccId = (latticeAccId == null) ? null : latticeAccId.toString();
+            String strLatAccId = (latticeAccId == null) ? null : String.valueOf(latticeAccId);
             Assert.assertTrue(StringUtils.isNotBlank(strLatAccId));
             // verifying LatticeID exists with Long type and value all populated
             Object latticeId = record.get(DataCloudConstants.LATTICE_ID);
             Assert.assertEquals(latticeId.getClass(), Long.class);
-            String strLatId = (latticeId == null) ? null : latticeId.toString();
+            String strLatId = (latticeId == null) ? null : String.valueOf(latticeId);
             Assert.assertTrue(StringUtils.isNotBlank(strLatId));
             // Verifying no String attribute exists with empty string "" (should
             // all be replaced by null)
@@ -235,7 +235,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                 Object objVal = record.get(colsIterate.next());
                 String strVal = (objVal == null) ? null : String.valueOf(objVal);
                 if (strVal != null) {
-                    Assert.assertFalse(strVal.equals(""));
+                    Assert.assertFalse(strVal.isEmpty());
                 }
             }
         }
@@ -254,7 +254,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             if (schemaType.equals("INT")) {
                 schemaType = "INTEGER";
             }
-            if (schemaType.equals("STRING")) {
+            if (schemaType.equals("STRING")) { // adding all string attributes to set
                 strAttrs.add(field.name());
             }
             mapFieldType.put(field.name(), schemaType);
