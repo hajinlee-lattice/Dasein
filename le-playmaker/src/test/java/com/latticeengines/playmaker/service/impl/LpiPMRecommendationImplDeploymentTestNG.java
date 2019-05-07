@@ -1,5 +1,8 @@
 package com.latticeengines.playmaker.service.impl;
 
+import static org.testng.Assert.assertEquals;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -136,21 +139,6 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
                 SynchronizationDestinationEnum.SFDC, null, orgInfo, eloquaAppId2);
         Assert.assertNotNull(recommendations2);
         Assert.assertEquals(count, recommendations2.size());
-        // AtomicLong idx = new AtomicLong(0);
-        // recommendations.stream() //
-        // .forEach(r -> {
-        // Map<String, Object> r2 = recommendations2.get(idx.intValue());
-        // idx.incrementAndGet();
-        // Assert.assertNotNull(r2);
-        // Assert.assertTrue(r2.size() > 0);
-        // Assert.assertEquals(r2.get(PlaymakerConstants.ID), r.getId());
-        // Assert.assertEquals(r2.get(PlaymakerConstants.PlayID +
-        // PlaymakerConstants.V2), r.getPlayId());
-        // Assert.assertEquals(r2.get(PlaymakerConstants.LaunchID +
-        // PlaymakerConstants.V2), r.getLaunchId());
-        // Assert.assertEquals(r2.get(PlaymakerConstants.LEAccountExternalID),
-        // r.getLeAccountExternalID());
-        // });
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testRecommendations" })
@@ -193,18 +181,27 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetLastLaunchedRecommendation" })
     public void testGetContacts() throws Exception {
-        List<String> lunchIDs = lpiPMPlay.getLaunchIdsFromDashboard(false, 0, null, 0, orgInfo);
-        System.out.println("This is launchIDs List:");
-        System.out.println(lunchIDs.toString());
-
-        List<Map<String, Object>> contacts = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null, 140000000L, orgInfo,
-                eloquaAppId1);
+        // Get Contacts with out play filter
+        List<Map<String, Object>> contacts = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null, 140000000L, null,
+                orgInfo, eloquaAppId1);
         Assert.assertNotNull(contacts);
         int count = contacts.size();
+        logger.info("Contact Count: " + count);
         Assert.assertTrue(count >= maxUpdateRows);
-        System.out.println("This is Contacts List:");
-        System.out.println(contacts.toString());
+
+        // Get Contacts with play filter
+        List<Map<String, Object>> contactsWithPlayFilter = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null,
+                140000000L, Arrays.asList(play.getName()), orgInfo, eloquaAppId1);
+        Assert.assertNotNull(contactsWithPlayFilter);
+        assertEquals(contactsWithPlayFilter.size(), contacts.size());
+
+        // Get Contacts with dummy play filter
+        List<Map<String, Object>> contactsWithDummyPlayFilter = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null,
+                140000000L, Arrays.asList("DUMMY"), orgInfo, eloquaAppId1);
+        Assert.assertNotNull(contactsWithDummyPlayFilter);
+        assertEquals(contactsWithDummyPlayFilter.size(), 0);
     }
+
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
