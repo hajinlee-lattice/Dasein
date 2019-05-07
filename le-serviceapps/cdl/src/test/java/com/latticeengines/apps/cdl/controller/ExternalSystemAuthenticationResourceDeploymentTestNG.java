@@ -44,12 +44,13 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
                 null, null, true);
         assertNotNull(lookupIdConfigs);
-        assertTrue(lookupIdConfigs.keySet().size() == 0);
+        assertEquals(lookupIdConfigs.keySet().size(), 1);
+        assertTrue(lookupIdConfigs.containsKey(CDLExternalSystemType.FILE_SYSTEM.name()));
 
         List<ExternalSystemAuthentication> extSysAuthLst = extSysAuthenticationProxy
                 .findAuthentications(mainCustomerSpace);
         assertNotNull(extSysAuthLst);
-        assertTrue(extSysAuthLst.size() == 0);
+        assertEquals(extSysAuthLst.size(), 0);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "verifyBaseSetup")
@@ -94,7 +95,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         try {
             Thread.sleep(2000L);
         } catch (InterruptedException e) {
-            //Ignore
+            // Ignore
         }
         verifyCurrentAuthentication(extSysAuth);
     }
