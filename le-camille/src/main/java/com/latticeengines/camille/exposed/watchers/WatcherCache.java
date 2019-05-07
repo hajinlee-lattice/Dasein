@@ -34,8 +34,10 @@ public class WatcherCache<K, V> {
     private BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver;
     private BiFunction<String, Set<K>, Collection<K>> evictKeyResolver;
     private Cache<K, V> cache;
+    // To avoid congestion caused by simultaneously refresh
+    private int waitBeforeRefreshInSec = 0;
 
-    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity,
+    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec,
             Object... initKeys) {
         this.load = load;
         this.cacheName = cacheName;
@@ -44,6 +46,7 @@ public class WatcherCache<K, V> {
         this.capacity = capacity;
         this.refreshKeyResolver = (s, k) -> cache.asMap().keySet();
         this.evictKeyResolver = (s, k) -> Collections.emptyList();
+        this.waitBeforeRefreshInSec = waitBeforeRefreshInSec;
     }
 
     public static <K, V> Builder<K, V> builder() {
@@ -127,8 +130,19 @@ public class WatcherCache<K, V> {
 
     private void refresh(String watchedData) {
         if (cache != null) {
-            long startTime = System.currentTimeMillis();
             log.info("Received a signal " + String.valueOf(watchedData));
+            if (waitBeforeRefreshInSec != 0) {
+                log.info(String.format(
+                        "To avoid WatcherCache %s refresh congestion for signal %s, wait for %d seconds before start.",
+                        cacheName, String.valueOf(watchedData), waitBeforeRefreshInSec));
+                try {
+                    Thread.sleep(waitBeforeRefreshInSec * 1000);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+            log.info(String.format("Start refreshing WatcherCache %s for signal %s.", cacheName, watchedData));
+            long startTime = System.currentTimeMillis();
             Collection<K> keysToEvict = new ArrayList<>(
                     evictKeyResolver.apply(watchedData, cache.asMap().keySet()));
             if (!keysToEvict.isEmpty()) {
@@ -197,6 +211,7 @@ public class WatcherCache<K, V> {
         private String watcherName;
         private Object[] initKeys;
         private int capacity = 10;
+        private int waitBeforeRefreshInSec = 0;
 
         Builder() {
             this.watcherName = "Watcher-" + UUID.randomUUID().toString();
@@ -233,8 +248,14 @@ public class WatcherCache<K, V> {
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
+        public Builder waitBeforeRefreshInSec(int waitBeforeRefreshInSec) {
+            this.waitBeforeRefreshInSec = waitBeforeRefreshInSec;
+            return this;
+        }
+
         public WatcherCache<K, V> build() {
-            return new WatcherCache<>(cacheName, watcherName, load, capacity, initKeys);
+            return new WatcherCache<>(cacheName, watcherName, load, capacity, waitBeforeRefreshInSec, initKeys);
         }
 
     }

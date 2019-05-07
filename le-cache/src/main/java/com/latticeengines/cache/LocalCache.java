@@ -26,16 +26,22 @@ public class LocalCache<K, V> implements Cache {
 
     private WatcherCache<K, V> cache;
 
-    @SuppressWarnings("unchecked")
     public LocalCache(CacheName cacheName, Function<K, V> load, int capacity) {
+        this(cacheName, load, capacity, 0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public LocalCache(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec) {
         cache = WatcherCache.builder() //
                 .name(cacheName.name()) //
                 .watch(cacheName.name()) //
                 .maximum(capacity) //
                 .load(load) //
+                .waitBeforeRefreshInSec(waitBeforeRefreshInSec) //
                 .build();
     }
 
+    @Override
     public String getName() {
         return cache.getCacheName();
     }

@@ -17,11 +17,15 @@ public class LocalCacheManager<K, V> implements CacheManager {
     private LocalCache<K, V> cache;
 
     public LocalCacheManager(CacheName cacheName, Function<K, V> load, int capacity) {
-        cache = new LocalCache<>(cacheName, load, capacity);
+        this(cacheName, load, capacity, 0);
+    }
+
+    public LocalCacheManager(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec) {
+        cache = new LocalCache<>(cacheName, load, capacity, waitBeforeRefreshInSec);
         cache.setEvictKeyResolver((updateSignal, existingKeys) -> //
-                cache.getDefaultKeyResolver(updateSignal, existingKeys, CacheOperation.Evict));
+        cache.getDefaultKeyResolver(updateSignal, existingKeys, CacheOperation.Evict));
         cache.setRefreshKeyResolver((updateSignal, existingKeys) -> //
-                cache.getDefaultKeyResolver(updateSignal, existingKeys, CacheOperation.Put));
+        cache.getDefaultKeyResolver(updateSignal, existingKeys, CacheOperation.Put));
     }
 
     @Override
