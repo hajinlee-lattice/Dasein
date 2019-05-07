@@ -26,7 +26,8 @@
     background-color: $dark-gray;
     color: $pearl-white;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px $dark-gray;
+    // box-shadow: 0px 8px 16px 0px $dark-gray;
+    box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.5);
     // padding: 12px 6px;
     // margin-top: 0.5rem; // margin-left: -8px;
     z-index: 1;

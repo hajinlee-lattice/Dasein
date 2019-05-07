@@ -14,41 +14,90 @@ export default class S3FileList extends Component {
     constructor(props) {
         super(props);
 
-        console.log(props);
+        this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
+
         this.state = {
             forceReload: false,
             showEmpty: false,
-            showLoading: false,
+            showLoading: true,
             enableButton: false,
             selectedItem: null,
             data: [],
-            path: ''
+            path: '',
+            angularGoTo: ''
         };
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+
+    componentDidMount() {
+        injectAsyncReducer(store, 's3files', s3reducer);
+        this.unsubscribe = store.subscribe(this.handleChange);
+        let path = store.getState()['s3files'].path;
+        s3actions.fetchS3Files(path);
     }
 
     handleChange = () => {
         const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
 
-sf  
-        this.setState({
-            forceReload: false,
-            showEmpty: false,
-            showLoading: true,
-            path: path
-        });
+        let state = Object.assign({}, this.state);
+        state.showEmpty = s3Files && s3Files.length == 0;
+        state.showLoading = false;
+        state.data = s3Files;
+        state.path = data.path;
+
+        let ImportWizardStore = this.ImportWizardStore;
+        let feedType = ImportWizardStore.getFeedType();
+        
+        let angularGoTo = '';
+        switch (feedType) {
+            case "AccountSchema": {
+                angularGoTo = 'home.import.data.accounts';
+                break;
+            }
+            case "ContactSchema": {
+                angularGoTo = 'home.import.data.contacts';
+                break;
+            }
+            case "TransactionSchema": {
+                angularGoTo = 'home.import.data.productpurchases';
+                break;
+            }
+            case "BundleSchema": {
+                angularGoTo = 'home.import.data.productbundles';
+                break;
+            }
+            case "HierarchySchema": {
+                angularGoTo = 'home.import.data.producthierarchy';
+                break;
+            }
+        }
+
+        state.angularGoTo = angularGoTo;
+        this.setState(state);
     }
 
-    getFilesFromFolder(folder) {
+    selectFile = (file) => {
+        let ImportWizardStore = this.ImportWizardStore;
+        ImportWizardStore.setCsvFileName(file.file_name);
+
+        let state = Object.assign({}, this.state);
+        state.selectedItem = file;
+        state.enableButton = true;
+        this.setState(state);
+    }
+
+    getFilesFromFolder = (folder) => {
         let newPath = this.state.path + folder;
         let folderData = s3actions.fetchS3Files(newPath);
-
-        this.setState({
-            data: folderData
-        });
+        let state = Object.assign({}, this.state);
+        state.data = folderData;
     }
 
-    backToParentFolder() {
+    backToParentFolder = () => {
         let parentFolderData = s3actions.fetchS3Files(this.state.path);
 
         this.setState({
@@ -77,14 +126,14 @@ sf
                     sortable: false
                 },
                 {
-                    name: "last_modified",
+                    name: "lastModified",
                     displayName: "Time",
                     sortable: true
                 }
             ],
             columns: [
                 {
-                    colSpan: 6,
+                    colSpan: 5,
                     template: cell => {
                         if (cell.props.rowData.file_type != null) {
                             return (
@@ -102,16 +151,17 @@ sf
                     }
                 },
                 {
-                    colSpan: 2
+                    colSpan: 1
                 },
                 {
-                    colSpan: 2
+                    colSpan: 1
                 },
                 {
-                    colSpan: 2,
+                    colSpan: 5,
                     template: cell => {
+                        let date = new Date(cell.props.rowData.last_modified);
                         return (
-                            cell.props.rowData.last_modified
+                            <span>{date.toString()}</span>
                         );
                     }
                 }
@@ -122,68 +172,64 @@ sf
     }
 
     render() {
-        return (
-            <ReactMainContainer>
-                <section className="container setup-import data-import">
-                    <div className="row">
-                        <div className="columns eight offset-two box-outline">
-                            <div className="section-header"><h4>Browse S3</h4></div>
-                            <hr />
-                            <div className="section-body s3files with-padding">
-                                
-                                <h5>Account Data</h5>
-
-                                
-                                
-                                <LeTable
-                                    name="s3files-table"
-                                    config={this.getConfig()}
-                                    forceReload={this.state.forceReload}
-                                    showLoading={this.state.showLoading}
-                                    showEmpty={this.state.showEmpty}
-                                    data={this.state.data}
-                                    onClick={(rowsSelected) => {
-                                        this.setState({ 
-                                            enableButton: true,
-                                            selectedItem: rowsSelected[0]
-                                        });
-                                    }}
-                                />
-                            </div>
-                            <hr />
-                            <div className="container section-actions row form-actions">
-                                <div className="pull-left">
-                                    <LeButton
-                                        name="add"
-                                        config={{
-                                            label: "Cancel",
-                                            classNames: "white-button"
-                                        }}
-                                        callback={() => {
-                                            NgState.getAngularState().go('home.importtemplates', {});
+        if (this.state.data.length > 0) {
+            return (
+                <ReactMainContainer>
+                    <section className="container setup-import data-import">
+                        <div className="row">
+                            <div className="columns twelve box-outline">
+                                <div className="section-header"><h4>Browse S3</h4></div>
+                                <hr />
+                                <div className="section-body s3files with-padding">
+                                    <h5>Account Data</h5>
+                                    <LeTable
+                                        name="s3files-table"
+                                        config={this.getConfig()}
+                                        forceReload={this.state.forceReload}
+                                        showLoading={this.state.showLoading}
+                                        showEmpty={this.state.showEmpty}
+                                        data={this.state.data}
+                                        onClick={(rowsSelected) => {
+                                            this.selectFile(rowsSelected[0]);
                                         }}
                                     />
                                 </div>
-                                <div className="pull-right">
-                                    <LeButton
-                                        name="add"
-                                        disabled={!this.state.enableButton}
-                                        config={{
-                                            label: "Select",
-                                            classNames: "blue-button"
-                                        }}
-                                        callback={() => {
-                                            
-                                            // Same functionality as Next, Field mappings 
-                                            NgState.getAngularState().go('home.import.entry.producthierarchy', {selectedItem: this.state.selectedItem});
-                                        }}
-                                    />
+                                <hr />
+                                <div className="container section-actions row form-actions">
+                                    <div className="pull-left">
+                                        <LeButton
+                                            name="add"
+                                            config={{
+                                                label: "Cancel",
+                                                classNames: "white-button"
+                                            }}
+                                            callback={() => {
+                                                NgState.getAngularState().go('home.importtemplates', {});
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="pull-right">
+                                        <LeButton
+                                            name="add"
+                                            disabled={!this.state.enableButton}
+                                            config={{
+                                                label: "Select",
+                                                classNames: "blue-button"
+                                            }}
+                                            callback={() => {
+                                                // Same functionality as Next, Field mappings 
+                                                NgState.getAngularState().go(this.state.angularGoTo, {selectedItem: this.state.selectedItem});
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-            </ReactMainContainer>
-        );
+                    </section>
+                </ReactMainContainer>
+            );
+        } else {
+            return (<ReactMainContainer>Loading...</ReactMainContainer>);
+        }
     }
 }
