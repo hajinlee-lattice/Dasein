@@ -4,7 +4,6 @@ import org.apache.avro.reflect.AvroName;
 import org.apache.avro.reflect.Nullable;
 import org.apache.avro.reflect.Union;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -238,12 +237,64 @@ public class MatchHistory implements HasId<String> {
     @AvroName("MatchMode")
     private String matchMode; // Batch or Realtime
 
-    // Temporary: Entity Match Result
+    //// Temporary: Entity Match Result
+    //@JsonProperty("EntityMatchHistory")
+    //@Nullable
+    //@AvroName("EntityMatchHistory")
+    //private EntityMatchHistory entityMatchHistory;
 
-    @JsonProperty("EntityMatchHistory")
     @Nullable
-    @AvroName("EntityMatchHistory")
-    private EntityMatchHistory entityMatchHistory;
+    @AvroName("BusinessEntity")
+    private String businessEntity;
+
+    @Nullable
+    @AvroName("EntityMatched")
+    private String entityMatched;
+
+    @Nullable
+    @AvroName("EntityId")
+    private String entityId;
+
+    @Nullable
+    @AvroName("UserId")
+    private String userId;
+
+    @Nullable
+    @AvroName("FullMatchKeyTuple")
+    private MatchKeyTuple fullMatchKeyTuple;
+
+    @Nullable
+    @AvroName("MatchedMatchKeyTuple")
+    private MatchKeyTuple matchedMatchKeyTuple;
+
+    @Nullable
+    @AvroName("MatchType")
+    private String matchType;
+
+    // Lead to Account (l2a) Results when main entity is Contact.
+    @Nullable
+    @AvroName("L2AEntityMatched")
+    private String l2aEntityMatched;
+
+    @Nullable
+    @AvroName("L2AEntityId")
+    private String l2aEntityId;
+
+    @Nullable
+    @AvroName("L2AUserId")
+    private String l2aUserId;
+
+    @Nullable
+    @AvroName("L2AFullMatchKeyTuple")
+    private MatchKeyTuple l2aFullMatchKeyTuple;
+
+    @Nullable
+    @AvroName("L2AMatchedMatchKeyTuple")
+    private MatchKeyTuple l2aMatchedMatchKeyTuple;
+
+    @Nullable
+    @AvroName("L2AMatchType")
+    private String l2aMatchType;
 
     @Override
     @Union({})
@@ -1070,6 +1121,8 @@ public class MatchHistory implements HasId<String> {
         this.standardisedCountryCode = standardisedCountryCode;
         return this;
     }
+
+    /*
     @Union({})
     public EntityMatchHistory getEntityMatchHistory() {
         return entityMatchHistory;
@@ -1079,6 +1132,156 @@ public class MatchHistory implements HasId<String> {
     public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
         this.entityMatchHistory = entityMatchHistory;
         return this;
+    }
+    */
+
+    @Union({})
+    public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
+        businessEntity = entityMatchHistory.getBusinessEntity();
+        entityMatched = entityMatchHistory.getEntityMatched();
+        entityId = entityMatchHistory.getEntityId();
+        userId = entityMatchHistory.getUserId();
+        fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
+        matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
+        matchType = entityMatchHistory.getMatchType();
+        l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
+        l2aEntityId = entityMatchHistory.getL2aEntityId();
+        l2aUserId = entityMatchHistory.getL2aUserId();
+        l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
+        l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
+        l2aMatchType = entityMatchHistory.getL2aMatchType();
+
+        return this;
+    }
+
+    @Union({})
+    public void setBusinessEntity(String businessEntity) {
+        this.businessEntity = businessEntity;
+    }
+
+    @Union({})
+    public String getBusinessEntity() {
+        return businessEntity;
+    }
+
+    @Union({})
+    public void setEntityMatched(String entityMatched) {
+        this.entityMatched = entityMatched;
+    }
+
+    @Union({})
+    public String getEntityMatched() {
+        return entityMatched;
+    }
+
+    @Union({})
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    @Union({})
+    public String getEntityId() {
+        return entityId;
+    }
+
+    @Union({})
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Union({})
+    public String getUserId() {
+        return userId;
+    }
+
+    @Union({})
+    public void setFullMatchKeyTuple(MatchKeyTuple fullMatchKeyTuple) {
+        this.fullMatchKeyTuple = fullMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getFullMatchKeyTuple() {
+        return fullMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setMatchedMatchKeyTuple(MatchKeyTuple matchedMatchKeyTuple) {
+        this.matchedMatchKeyTuple = matchedMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getMatchedMatchKeyTuple() {
+        return matchedMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setMatchType(EntityMatchType entityMatchType) {
+        this.matchType = entityMatchType.name();
+    }
+
+    @Union({})
+    public String getMatchType() {
+        return matchType;
+    }
+
+    @Union({})
+    public void setL2aEntityMatched(String l2aEntityMatched) {
+        this.l2aEntityMatched = l2aEntityMatched;
+    }
+
+    @Union({})
+    public String getL2aEntityMatched() {
+        return l2aEntityMatched;
+    }
+
+    @Union({})
+    public void setL2aEntityId(String l2aEntityId) {
+        this.l2aEntityId = l2aEntityId;
+    }
+
+    @Union({})
+    public String getL2aEntityId() {
+        return l2aEntityId;
+    }
+
+    @Union({})
+    public void setL2aUserId(String l2aUserId) {
+        this.l2aUserId = l2aUserId;
+    }
+
+    @Union({})
+    public String getL2aUserId() {
+        return l2aUserId;
+    }
+
+    @Union({})
+    public void setL2aFullMatchKeyTuple(MatchKeyTuple l2aFullMatchKeyTuple) {
+        this.l2aFullMatchKeyTuple = l2aFullMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getL2aFullMatchKeyTuple() {
+        return l2aFullMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setL2aMatchedMatchKeyTuple(MatchKeyTuple l2aMatchedMatchKeyTuple) {
+        this.l2aMatchedMatchKeyTuple = l2aMatchedMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getL2aMatchedMatchKeyTuple() {
+        return l2aMatchedMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setL2aMatchType(EntityMatchType l2aEntityMatchType) {
+        this.l2aMatchType = l2aEntityMatchType.name();
+    }
+
+    @Union({})
+    public String getL2aMatchType() {
+        return l2aMatchType;
     }
 
     public MatchHistory withDnBMatchResult(DnBMatchContext dnbMatchContext) {

@@ -140,9 +140,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             // $JAW$ Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
 
-
-                    //JsonUtils.serialize(record.getEntityMatchHistory(), EntityMatchHistory.class));
-
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {

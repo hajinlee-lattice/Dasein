@@ -121,8 +121,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     // into the InternalOutputRecord.
                     copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
 
-                    // $JAW$ Need copy information from MatchTraveler to a place where we can add it to
-                    // EntityMatchHistory.
+                    // $JAW$ Need copy information from MatchTraveler to a place where we can add it to MatchHistory.
                     matchRecord.setEntityMatchHistory(generateEntityMatchHistory(traveler));
 
                 } else {
@@ -486,15 +485,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
         history.setEntityId(traveler.getEntityIds().get(history.getBusinessEntity()));
         if (history.getEntityId().equals(ENTITY_ANONYMOUS_ID)) {
-            history.setMatched("ANONYMOUS");
+            history.setEntityMatched("ANONYMOUS");
         } else if (MapUtils.isNotEmpty(traveler.getNewEntityIds()) &&
                 traveler.getNewEntityIds().containsKey(history.getBusinessEntity())) {
             // TODO(slin): Is this the correct way to determine no match?
-            history.setMatched("NO MATCH");
+            history.setEntityMatched("NO MATCH");
         } else {
-            history.setMatched("MATCHED");
+            history.setEntityMatched("MATCHED");
         }
-        log.error("Matched: " + history.getMatched());
+        log.error("Matched: " + history.getEntityMatched());
         log.error("Entity Id: " + history.getEntityId());
 
         //
@@ -702,15 +701,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             }
             history.setL2aEntityId(traveler.getEntityIds().get(accountEntity));
             if (history.getL2aEntityId().equals(ENTITY_ANONYMOUS_ID)) {
-                history.setL2aMatched("ANONYMOUS");
+                history.setL2aEntityMatched("ANONYMOUS");
             } else if (MapUtils.isNotEmpty(traveler.getNewEntityIds()) &&
                     traveler.getNewEntityIds().containsKey(accountEntity)) {
                 // TODO(slin): Is this the correct way to determine no match?
-                history.setL2aMatched("NO MATCH");
+                history.setL2aEntityMatched("NO MATCH");
             } else {
-                history.setL2aMatched("MATCHED");
+                history.setL2aEntityMatched("MATCHED");
             }
-            log.error("  Matched: " + history.getL2aMatched());
+            log.error("  Matched: " + history.getL2aEntityMatched());
             log.error("  Entity Id: " + history.getL2aEntityId());
 
             //

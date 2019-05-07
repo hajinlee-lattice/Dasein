@@ -6,8 +6,8 @@ public class EntityMatchHistory {
     @JsonProperty("BusinessEntity")
     private String businessEntity;
 
-    @JsonProperty("Matched")
-    private String matched;
+    @JsonProperty("EntityMatched")
+    private String entityMatched;
 
     @JsonProperty("EntityId")
     private String entityId;
@@ -25,8 +25,8 @@ public class EntityMatchHistory {
     private String matchType;
 
     // Lead to Account (l2a) Results when main entity is Contact.
-    @JsonProperty("L2AMatched")
-    private String l2aMatched;
+    @JsonProperty("L2AEntityMatched")
+    private String l2aEntityMatched;
 
     @JsonProperty("L2AEntityId")
     private String l2aEntityId;
@@ -51,12 +51,12 @@ public class EntityMatchHistory {
         return businessEntity;
     }
 
-    public void setMatched(String matched) {
-        this.matched = matched;
+    public void setEntityMatched(String entityMatched) {
+        this.entityMatched = entityMatched;
     }
 
-    public String getMatched() {
-        return matched;
+    public String getEntityMatched() {
+        return entityMatched;
     }
 
     public void setEntityId(String entityId) {
@@ -99,12 +99,12 @@ public class EntityMatchHistory {
         return matchType;
     }
 
-    public void setL2aMatched(String l2aMatched) {
-        this.l2aMatched = l2aMatched;
+    public void setL2aEntityMatched(String l2aEntityMatched) {
+        this.l2aEntityMatched = l2aEntityMatched;
     }
 
-    public String getL2aMatched() {
-        return l2aMatched;
+    public String getL2aEntityMatched() {
+        return l2aEntityMatched;
     }
 
     public void setL2aEntityId(String l2aEntityId) {
