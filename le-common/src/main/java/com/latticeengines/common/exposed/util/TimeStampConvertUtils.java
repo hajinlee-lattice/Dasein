@@ -319,8 +319,8 @@ public class TimeStampConvertUtils {
         if (monthMatcher.find() && monthMatcher.groupCount() == 2) {
             log.debug("Reformatting text form of month to proper case for Java DateTimeFormatter.");
             log.debug("Original dateTime is: " + dateTime);
-            //log.debug("Group 1 is: " + matcher.group(1));
-            //log.debug("Group 2 is: " + matcher.group(2));
+            //log.debug("Group 1 is: " + monthMatcher.group(1));
+            //log.debug("Group 2 is: " + monthMatcher.group(2));
             dateTime = dateTime.replaceFirst(monthMatcher.group(1) + monthMatcher.group(2),
                     monthMatcher.group(1).toUpperCase() + monthMatcher.group(2).toLowerCase());
             log.debug("Formatted month dateTime is: " + dateTime);
