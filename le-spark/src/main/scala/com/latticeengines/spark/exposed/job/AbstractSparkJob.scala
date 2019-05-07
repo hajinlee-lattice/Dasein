@@ -88,7 +88,6 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       df.write.format("avro").save(path)
       val df2 = spark.read.format("avro").load(path)
       tgt.setCount(df2.count())
-      df.unpersist(blocking = true)
       tgt
     }
   }
