@@ -34,6 +34,14 @@ public class TimeStampConvertUtils {
 
     private static final Pattern MONTH = Pattern.compile("([a-zA-Z])([a-zA-Z]{2,})");
 
+    private static final Pattern TZ_DATE_TIME = Pattern.compile(
+            "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
+                    + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)[Zz]?");
+
+    private static final Pattern DATE_TIME = Pattern.compile(
+            "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})\\s+"
+                    + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)");
+
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.
     // Mapping from user exposed date format to Java 8 date/time library format.
@@ -304,14 +312,14 @@ public class TimeStampConvertUtils {
         // Heuristic for https://solutions.lattice-engines.com/browse/DP-9768.
         // Assume any contiguous set of 3 or more letters is a month in long format and convert it to Title Case
         // (first letter capitalized) to allow Java 8 DateTimeFormatter to work properly.
-        Matcher matcher = MONTH.matcher(dateTime);
-        if (matcher.find() && matcher.groupCount() == 2) {
+        Matcher monthMatcher = MONTH.matcher(dateTime);
+        if (monthMatcher.find() && monthMatcher.groupCount() == 2) {
             log.debug("Reformatting text form of month to proper case for Java DateTimeFormatter.");
             log.debug("Original dateTime is: " + dateTime);
             //log.debug("Group 1 is: " + matcher.group(1));
             //log.debug("Group 2 is: " + matcher.group(2));
-            dateTime = dateTime.replaceFirst(matcher.group(1) + matcher.group(2),
-                    matcher.group(1).toUpperCase() + matcher.group(2).toLowerCase());
+            dateTime = dateTime.replaceFirst(monthMatcher.group(1) + monthMatcher.group(2),
+                    monthMatcher.group(1).toUpperCase() + monthMatcher.group(2).toLowerCase());
             log.debug("Formatted month dateTime is: " + dateTime);
         }
 
@@ -334,8 +342,24 @@ public class TimeStampConvertUtils {
                             log.debug("Found user defined time format: " + userTimeFormatStr);
                             String javaTimeFormatStr = userToJavaTimeFormatMap.get(userTimeFormatStr);
 
-                            log.debug("Java date/time format string is: " + javaDateFormatStr + " "
+                            log.error("Java date/time format string is: " + javaDateFormatStr + " "
                                     + javaTimeFormatStr);
+
+
+                            // DEBUG
+                            log.error("Date/Time value is: " + dateTime);
+
+                            Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
+                            if (dateTimeMatcher.matches()) {
+                                log.error("Regular expression matches with " + dateTimeMatcher.groupCount() + " groups");
+                                for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
+                                    log.error("  Group " + i + ": " + dateTimeMatcher.group(i));
+                                }
+                                dateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+                                log.error("Stripping T & Z to end up with: " + dateTime);
+                            } else {
+                                log.error("No regular expression match");
+                            }
 
                             // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
                             dateTime = dateTime.replaceAll("([aA])([mM])", "AM")
