@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -31,16 +32,22 @@ import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
+import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -91,6 +98,12 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private AtlasSchedulingService atlasSchedulingService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
@@ -165,6 +178,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             } catch (Exception e) {
                 log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
+                throw e;
+            }
+        } else if (cdlJobType == CDLJobType.EXPORT) {
+            try {
+                exportScheduleJob();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.EXPORT failed" + e);
                 throw e;
             }
         }
@@ -482,5 +502,78 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         return false;
+    }
+
+    private void exportScheduleJob() {
+        log.info("111");
+        List<AtlasScheduling> atlasSchedulingList =
+                atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
+        log.info(JsonUtils.serialize(atlasSchedulingList));
+        if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
+            log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
+            for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
+                Tenant tenant = tenantEntityMgr.findByTenantPid(atlasScheduling.getTenantId());
+                if (tenant != null) {
+                    boolean allowAutoSchedule = false;
+                    try {
+                        allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
+                                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+                    } catch (Exception e) {
+                        log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+                    }
+                    if (allowAutoSchedule) {
+                        Long nextFireTime =
+                                CronUtils.getNextFireTime(atlasScheduling.getCronExpression()).getMillis() / 1000;
+                        boolean triggered = false;
+                        boolean is_changed = false;
+                        if (atlasScheduling.getNextFireTime() == null) {
+                            atlasScheduling.setNextFireTime(nextFireTime);
+                            is_changed = true;
+                        } else {
+                            Long currentSecond = (new Date().getTime()) / 1000;
+                            if (atlasScheduling.getNextFireTime() <= currentSecond) {
+                                atlasScheduling.setPrevFireTime(atlasScheduling.getNextFireTime());
+                                atlasScheduling.setNextFireTime(nextFireTime);
+                                triggered = true;
+                                is_changed = true;
+                            } else {
+                                if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
+                                    atlasScheduling.setNextFireTime(nextFireTime);
+                                    is_changed = true;
+                                }
+                            }
+                        }
+                        if (is_changed) {
+                            atlasSchedulingService.updateExportScheduling(atlasScheduling);
+                        }
+                        if (triggered) {
+                            if(submitExportJob(tenant)) {
+                                log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
+                                        new Date(atlasScheduling.getPrevFireTime()).toString(),
+                                        tenant.getName()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    boolean submitExportJob(Tenant tenant) {
+        ApplicationId applicationId = null;
+        boolean success = true;
+        MultiTenantContext.setTenant(tenant);
+        String customerSpace = MultiTenantContext.getShortTenantId();
+        try {
+            EntityExportRequest request = new EntityExportRequest();
+            request.setDataCollectionVersion(dataCollectionService.getActiveVersion(customerSpace));
+            applicationId = cdlProxy.entityExport(customerSpace, request);
+        } catch (Exception e) {
+            log.info(String.format("Failed to submit entity export job for tenant name: %s", tenant.getName()));
+            success = false;
+        }
+        log.info(String.format("Submit entity export job success %s", success ? "y" : "n"));
+        return success;
     }
 }
