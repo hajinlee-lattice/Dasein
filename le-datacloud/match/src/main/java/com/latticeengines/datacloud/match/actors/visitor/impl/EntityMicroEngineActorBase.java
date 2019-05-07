@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +35,8 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociatio
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -128,11 +131,12 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 }) //
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
-        Map<String, String> extraAttributes = null;
+        Map<String, String> extraAttributes = new HashMap<>();
         if (StringUtils.isNotBlank(traveler.getLatticeAccountId())) {
-            extraAttributes = Collections.singletonMap(
-                    DataCloudConstants.LATTICE_ACCOUNT_ID, traveler.getLatticeAccountId());
+            extraAttributes.put(DataCloudConstants.LATTICE_ACCOUNT_ID, traveler.getLatticeAccountId());
         }
+        saveAccountIdInContactMatch(extraAttributes, traveler);
+
         return new EntityAssociationRequest(standardizedTenant, entity,
                 postProcessLookupResults(traveler, lookupResults), extraAttributes);
     }
@@ -161,6 +165,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                     // add newly allocated entity
                     traveler.addNewlyAllocatedEntityId(associationResponse.getAssociatedEntityId());
                 }
+                updateAccountEntityIdInContactMatch(traveler, associationResponse);
                 traveler.debug(String.format(
                         "Associate to entity successfully. Entity=%s, EntityId=%s, NewlyAllocated=%b, AssociationErrors=%s",
                         associationResponse.getEntity(), associationResponse.getAssociatedEntityId(), //
@@ -228,6 +233,51 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                     Pair.of(lookupResponse.getTuple(), lookupResponse.getEntityIds()));
         } else {
             log.error("Got invalid entity lookup response in actor {}, should not have happened", self());
+        }
+    }
+
+    /*
+     * Save matched Account Entity ID as Contact seed attributes for record that
+     * does NOT only have email as account info.
+     */
+    private void saveAccountIdInContactMatch(@NotNull Map<String, String> extraAttributes,
+            @NotNull MatchTraveler traveler) {
+        if (!BusinessEntity.Contact.name().equals(traveler.getEntity())) {
+            // only save account entity ID as seed attrs in contact match
+            return;
+        }
+
+        String accountEntityId = EntityMatchUtils.getValidEntityId(BusinessEntity.Account.name(), traveler);
+        if (accountEntityId == null || EntityMatchUtils.hasEmailAccountInfoOnly(traveler)) {
+            // not saving to attributes if it is email only or there is no account entity ID
+            return;
+        }
+
+        extraAttributes.put(InterfaceName.AccountId.name(), accountEntityId);
+    }
+
+    /*
+     * In contact match, when Email is the only account info, use the Account Entity
+     * ID stored in contact seed (if any) instead of the matched Account Entity ID
+     */
+    private void updateAccountEntityIdInContactMatch(@NotNull MatchTraveler traveler,
+            @NotNull EntityAssociationResponse response) {
+        if (!BusinessEntity.Contact.name().equals(traveler.getEntity())) {
+            // only save account entity ID as seed attrs in contact match
+            return;
+        }
+        if (response.getAssociatedSeed() == null || !EntityMatchUtils.hasEmailAccountInfoOnly(traveler)) {
+            // not update if it is not email only
+            return;
+        }
+
+        String accountEntityIdInSeed = response.getAssociatedSeed().getAttributes().get(InterfaceName.AccountId.name());
+        if (StringUtils.isNotBlank(accountEntityIdInSeed)) {
+            traveler.getEntityIds().put(BusinessEntity.Account.name(), accountEntityIdInSeed);
+            // update new entity ID as well
+            if (traveler.getNewEntityIds().containsKey(BusinessEntity.Account.name())) {
+                traveler.getNewEntityIds().put(BusinessEntity.Account.name(), accountEntityIdInSeed);
+            }
         }
     }
 

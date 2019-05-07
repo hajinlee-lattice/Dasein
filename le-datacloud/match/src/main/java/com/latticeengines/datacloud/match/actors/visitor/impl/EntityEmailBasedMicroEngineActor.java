@@ -6,9 +6,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
  * For Contact lookup if Email is provided, but matched AccountId is anonymous
@@ -25,17 +24,7 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-        MatchKeyTuple accountTuple = traveler.getEntityMatchKeyTuple(BusinessEntity.Account.name());
-        String aid = traveler.getEntityIds().get(BusinessEntity.Account.name());
-        // Assumption is: If Contact has Email, it must be mapped in
-        // Account Domain match key because in Account match, there is
-        // no concept of "Email", thus we can only detect how many
-        // domain fields are mapped
-        return tuple.getEmail() != null //
-                && (aid == null || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid) //
-                        || (accountTuple != null && accountTuple.hasDomainOnly()
-                                && !accountTuple.isDomainFromMultiCandidates()));
+        return EntityMatchUtils.hasEmailAccountInfoOnly(traveler);
     }
 
     @Override

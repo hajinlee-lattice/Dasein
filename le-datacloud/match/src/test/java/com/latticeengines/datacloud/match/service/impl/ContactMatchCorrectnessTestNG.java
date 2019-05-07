@@ -599,8 +599,9 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                                 { null, "l.torvalds@google.com", null, null, "C_AID_1", null, null, null }, //
                                 { null, "j.reese@google.com", null, null, "C_AID_2", null, null, null } }, //
                         new String[] { null, "j.reese@google.com", null, null, null, null, null, null }, //
-                        // merge to account 1 (won google.com) and contact 2 (matched with Email only)
-                        EntityMatchStatus.MERGE_EXISTING, EntityMatchStatus.MERGE_EXISTING, 0, 1) }, //
+                        // merge to account 2 (use email to match to account 1 but use the account in
+                        // contact 2 since it is email only) and contact 2 (matched with Email only)
+                        EntityMatchStatus.MERGE_EXISTING, EntityMatchStatus.MERGE_EXISTING, 1, 1) }, //
         };
     }
 
@@ -649,6 +650,59 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                         new String[][] { { null, null, null, "111-111-1111", null, null, "USA", null } }, //
                         new String[] { null, null, "John Reese", "111-111-1111", null, "Google", "USA", "CA" }, //
                         EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
+        };
+    }
+
+    @Test(groups = "functional", dataProvider = "emailOnly", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testMatchEmailOnlyContacts(ContactMatchTestCase testCase) {
+        matchAndVerify(testCase);
+    }
+
+    @DataProvider(name = "emailOnly", parallel = true)
+    private Object[][] emailOnlyContactsTestData() {
+        return new Object[][] { //
+                { new ContactMatchTestCase( //
+                        null, //
+                        new String[] { "C_CID_1", "j.reese@google.com", null, null, null, null, null, null }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
+                // existing data is email only (not saving AID), so result is netflix's AID
+                { new ContactMatchTestCase( //
+                        new String[][] { //
+                                { "C_CID_1", "j.reese@google.com", null, null, null, null, null, null }, //
+                        }, //
+                        new String[] { "C_CID_1", "j.reese@netflix.com", null, null, null, null, null, null }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.MERGE_EXISTING) }, //
+                // existing data has account info (save AID), import data match to a different
+                // AID but will use AID from existing Contact because import is email only
+                { new ContactMatchTestCase( //
+                        new String[][] { //
+                                { "C_CID_1", "j.reese@google.com", null, null, "C_AID_1", null, null, null },
+                        //
+                        }, //
+                        new String[] { "C_CID_1", "j.reese@netflix.com", null, null, null, null, null, null }, //
+                        EntityMatchStatus.MERGE_EXISTING, EntityMatchStatus.MERGE_EXISTING) }, //
+                // import data is NOT email only, make sure no regression
+                { new ContactMatchTestCase( //
+                        new String[][] { //
+                                { "C_CID_1", "j.reese@google.com", null, null, null, null, null, null }, //
+                        }, //
+                        new String[] { "C_CID_1", "j.reese@netflix.com", null, "C_AID_2", null, null, null, null }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.MERGE_EXISTING) }, //
+                { new ContactMatchTestCase( //
+                        new String[][] { //
+                                { "C_CID_1", "j.reese@google.com", null, null, "C_AID_1", null, null, null }, //
+                        }, //
+                        new String[] { "C_CID_1", "j.reese@netflix.com", null, null, "C_AID_2", null, null, null }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.MERGE_EXISTING) }, //
+                // NOTE with current implementation, any account field counts as not email only,
+                // even if there is no valid account match key combination (state only in this
+                // case)
+                { new ContactMatchTestCase( //
+                        new String[][] { //
+                                { "C_CID_1", "j.reese@google.com", null, null, null, null, null, "CA" }, //
+                        }, //
+                        new String[] { "C_CID_1", "j.reese@netflix.com", null, null, null, null, null, null }, //
+                        EntityMatchStatus.MERGE_EXISTING, EntityMatchStatus.MERGE_EXISTING) }, //
         };
     }
 
@@ -824,7 +878,7 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         @Override
         public String toString() {
             return "ContactMatchTestCase{" //
-                    + "tenant=" + tenant.getId() //
+                    + "tenant=" + (tenant == null ? null : tenant.getId()) //
                     + ", testCase=" + idx //
                     + ", fields=" + Arrays.toString(fields) //
                     + ", existingData="

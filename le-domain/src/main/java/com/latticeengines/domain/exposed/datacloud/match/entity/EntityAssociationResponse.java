@@ -15,14 +15,17 @@ public class EntityAssociationResponse {
     private final String entity;
     private final boolean isNewlyAllocated; // should be false if associatedEntityId is null
     private final String associatedEntityId;
+    private final EntityRawSeed associatedSeed;
     private final List<String> associationErrors;
 
     public EntityAssociationResponse(@NotNull Tenant tenant, @NotNull String entity, String associatedEntityId,
+            EntityRawSeed associatedSeed,
             boolean isNewlyAllocated) {
-        this(tenant, entity, isNewlyAllocated, associatedEntityId, Collections.emptyList());
+        this(tenant, entity, isNewlyAllocated, associatedEntityId, associatedSeed, Collections.emptyList());
     }
 
     public EntityAssociationResponse(Tenant tenant, String entity, boolean isNewlyAllocated, String associatedEntityId,
+            EntityRawSeed associatedSeed,
             List<String> associationErrors) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
@@ -31,6 +34,7 @@ public class EntityAssociationResponse {
         this.entity = entity;
         this.isNewlyAllocated = isNewlyAllocated;
         this.associatedEntityId = associatedEntityId;
+        this.associatedSeed = associatedSeed;
         this.associationErrors = associationErrors;
     }
 
@@ -48,6 +52,10 @@ public class EntityAssociationResponse {
 
     public String getAssociatedEntityId() {
         return associatedEntityId;
+    }
+
+    public EntityRawSeed getAssociatedSeed() {
+        return associatedSeed;
     }
 
     public List<String> getAssociationErrors() {
