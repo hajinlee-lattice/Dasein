@@ -2,12 +2,16 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +27,7 @@ import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
@@ -135,7 +140,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             step1.setBaseSources(baseSourcesStep1);
             step1.setTransformer(AMCleaner.TRANSFORMER_NAME);
             step1.setTargetSource(accMasterCleaned.getSourceName());
-            String confParamStr1 = getAMCleanerConfig();
+            String confParamStr1 = getAMCleanerConfigStep1();
             step1.setConfiguration(confParamStr1);
 
             TransformationStepConfig step2 = new TransformationStepConfig();
@@ -143,8 +148,9 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             baseSourcesStep2.add(baseSourceAccMaster2.getSourceName());
             step2.setBaseSources(baseSourcesStep2);
             step2.setTransformer(AMCleaner.TRANSFORMER_NAME);
-            step2.setConfiguration(getAMCleanerConfig());
             step2.setTargetSource(source.getSourceName());
+            String confParamStr2 = getAMCleanerConfigStep2();
+            step2.setConfiguration(confParamStr2);
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -160,9 +166,18 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         }
     }
 
-    private String getAMCleanerConfig() throws JsonProcessingException {
+    private String getAMCleanerConfigStep1() throws JsonProcessingException {
         AMCleanerConfig conf = new AMCleanerConfig();
         conf.setDataCloudVersion(DATA_CLOUD_VERSION);
+        conf.setIsMini(true);
+        return JsonUtils.serialize(conf);
+    }
+
+    private String getAMCleanerConfigStep2() throws JsonProcessingException {
+        AMCleanerConfig conf = new AMCleanerConfig();
+        String maxDataCloudVersion = srcAttrEntityMgr.getDataCloudVersionAttrs(
+                AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME);
+        conf.setDataCloudVersion(maxDataCloudVersion);
         conf.setIsMini(true);
         return JsonUtils.serialize(conf);
     }
@@ -188,7 +203,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Object[] expectedResult = expectedMap.get(record.get("LatticeID"));
+            Object[] expectedResult = expectedMap.get(record.get(DataCloudConstants.LATTICE_ID));
             for (int i = 0; i < inputData.length; i++) {
                 Assert.assertTrue(isObjEquals(record.get(inputData[i]), expectedResult[i]));
             }
@@ -200,26 +215,66 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         Assert.assertEquals(rowNum, expectedData.length);
     }
 
+    private boolean verifyValueForAllRecords(Iterator<GenericRecord> records, Set<String> columns) {
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            // verifying LatticeAccountId exists with String type and value all populated
+            Object latticeAccId = record.get(DataCloudConstants.LATTICE_ACCOUNT_ID);
+            Assert.assertTrue(latticeAccId instanceof String || latticeAccId instanceof Utf8);
+            String strLatAccId = (latticeAccId == null) ? null : latticeAccId.toString();
+            Assert.assertTrue(StringUtils.isNotBlank(strLatAccId));
+            // verifying LatticeID exists with Long type and value all populated
+            Object latticeId = record.get(DataCloudConstants.LATTICE_ID);
+            Assert.assertEquals(latticeId.getClass(), Long.class);
+            String strLatId = (latticeId == null) ? null : latticeId.toString();
+            Assert.assertTrue(StringUtils.isNotBlank(strLatId));
+            // Verifying no String attribute exists with empty string "" (should
+            // all be replaced by null)
+            Iterator<String> colsIterate = columns.iterator();
+            while (colsIterate.hasNext()) {
+                Object objVal = record.get(colsIterate.next());
+                String strVal = (objVal == null) ? null : String.valueOf(objVal);
+                if (strVal != null) {
+                    Assert.assertFalse(strVal.equals(""));
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-            GenericRecord record = records.next();
+        GenericRecord record = records.next();
         List<Field> amfields = record.getSchema().getFields();
         // set of field and its type
         Map<String, String> mapFieldType = new HashMap<>();
+        Set<String> strAttrs = new HashSet<>();
         for (Field field : amfields) {
             String schemaType = field.schema().getTypes().get(0).getType().name();
             if (schemaType.equals("INT")) {
                 schemaType = "INTEGER";
             }
+            if (schemaType.equals("STRING")) {
+                strAttrs.add(field.name());
+            }
             mapFieldType.put(field.name(), schemaType);
         }
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN,
-                AMCleaner.TRANSFORMER_NAME, DATA_CLOUD_VERSION, false);
+                AMCleaner.TRANSFORMER_NAME, "2.0.18", false);
         int count = 0;
+        int countlatId = 0;
         for (SourceAttribute srcAttr : srcAttrs) {
             if (!srcAttr.getArguments().equals(("DROP"))) {
                 // counting total attributes retained
                 count++;
+                // verifying LatticeAccountId exists & verifying LatticeID exists
+                if (srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)
+                        || srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ID)) {
+                    // check value of these attributes for all the records
+                    Assert.assertTrue(verifyValueForAllRecords(records, strAttrs));
+                    countlatId++;
+                }
+
                 // verifying the presence of required attribute
                 if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
                     Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
@@ -227,12 +282,11 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                     // verifying type of the argument
                     Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
                 }
-            } else { // verifying columns which need to be dropped are really
-                     // dropped
+            } else { // verifying columns which need to be dropped are really dropped
                 Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
             }
         }
         Assert.assertEquals(amfields.size(), count);
+        Assert.assertEquals(countlatId, 2); // verifying if both lattice account id and lattice id are present
     }
-
 }
