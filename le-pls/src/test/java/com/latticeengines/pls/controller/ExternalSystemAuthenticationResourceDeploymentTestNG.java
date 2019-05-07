@@ -44,7 +44,8 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends PlsDep
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(TEST_TENANT_ID, null,
                 null, true);
         assertNotNull(lookupIdConfigs);
-        assertTrue(lookupIdConfigs.keySet().size() == 0);
+        assertEquals(lookupIdConfigs.keySet().size(), 1);
+        assertTrue(lookupIdConfigs.containsKey(CDLExternalSystemType.FILE_SYSTEM.name()));
 
         List<?> listObject = restTemplate.getForObject(REST_RESOURCE + "/", List.class);
         List<ExternalSystemAuthentication> extSysAuthLst = JsonUtils.convertList(listObject,
