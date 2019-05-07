@@ -143,14 +143,15 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     
     function removeUniqueIdsMapped( entity, fieldsMapped){
         let unique = [];
-        Object.keys(fieldsMapped).forEach(index => {
-            let obj = fieldsMapped[index];
-            let entityUniqueIds = ImportUtils.uniqueIds[entity];
-            if(entityUniqueIds && entityUniqueIds[obj.mappedField] && !isUniqueIdAlreadyAdded(unique, fieldsMapped[index].mappedField, fieldsMapped[index].userField)){
-                unique.push(Object.assign({}, fieldsMapped[index]));
-                delete fieldsMapped.index;
-            }
-        });
+        if(fieldsMapped){
+            fieldsMapped.forEach((fieldMapped, index) => {
+                let entityUniqueIds = ImportUtils.uniqueIds[entity];
+                if(entityUniqueIds && entityUniqueIds[fieldMapped.mappedField] && !isUniqueIdAlreadyAdded(unique, fieldMapped.mappedField, fieldMapped.userField)){
+                    unique.push(Object.assign({}, fieldMapped));
+                    fieldsMapped.splice(index,1);
+                }
+            });
+        }
         return unique;
     }
 
