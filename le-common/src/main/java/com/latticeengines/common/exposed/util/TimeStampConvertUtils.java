@@ -34,10 +34,13 @@ public class TimeStampConvertUtils {
 
     private static final Pattern MONTH = Pattern.compile("([a-zA-Z])([a-zA-Z]{2,})");
 
+    // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
+    // and optional "Z" at the end.
     private static final Pattern TZ_DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
                     + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)[Zz]?");
 
+    // Regular expression pattern to match all current date/time formats.
     private static final Pattern DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})\\s+"
                     + "(\\d{1,2}[-: ]\\d{1,2}([-: ]\\d{1,2})?(\\s+[aApP][mM])?)");
@@ -342,24 +345,23 @@ public class TimeStampConvertUtils {
                             log.debug("Found user defined time format: " + userTimeFormatStr);
                             String javaTimeFormatStr = userToJavaTimeFormatMap.get(userTimeFormatStr);
 
-                            log.error("Java date/time format string is: " + javaDateFormatStr + " "
+                            log.debug("Java date/time format string is: " + javaDateFormatStr + " "
                                     + javaTimeFormatStr);
 
-
-                            // DEBUG
-                            log.error("Date/Time value is: " + dateTime);
-
                             Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
-                            if (dateTimeMatcher.matches()) {
-                                log.error("Regular expression matches with " + dateTimeMatcher.groupCount() + " groups");
-                                for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
-                                    log.error("  Group " + i + ": " + dateTimeMatcher.group(i));
-                                }
+                            if (dateTimeMatcher.find()) {
+                                log.debug("Found Date/Time value with ISO 8601 format (T & Z): " + dateTime);
+                                //log.debug("Regular expression matches with " + dateTimeMatcher.groupCount()
+                                //        + " group(s)");
+                                //for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
+                                //    log.debug("  Group " + i + ": " + dateTimeMatcher.group(i));
+                                //}
                                 dateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
-                                log.error("Stripping T & Z to end up with: " + dateTime);
-                            } else {
-                                log.error("No regular expression match");
+                                log.debug("Stripping T & Z to end up with: " + dateTime);
                             }
+                            //else {
+                            //    log.debug("No regular expression match");
+                            //}
 
                             // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
                             dateTime = dateTime.replaceAll("([aA])([mM])", "AM")

@@ -207,7 +207,7 @@ public class TimeStampConvertUtilsUnitTestNG {
 
         // Test Case 14: Test case 13 again with leading and trailing whitespace in the formats strings.
         actualTime = TimeStampConvertUtils.convertToLong("4-3-2018 01:23:45 am",
-                " \t \tMM-DD-YYYY    ", "			00:00:00 12H  ", "\t			UTC");
+                " \t \tMM-DD-YYYY	    ", "			00:00:00 12H  ", "\t			UTC ");
         Assert.assertEquals(actualTime, 1522718625000L);
 
         // Test Case 15: Test case 13 again with arbitrary whitespace before and between date and time in value.
@@ -255,8 +255,7 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test Case 22: Test case where time is in ISO 8601 format but no date/time format is given.  Conversion code
         // reverts to legacy code which runs Natty Parser to successfully parse date.
         // From https://solutions.lattice-engines.com/browse/DP-10017
-        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z",
-                "", "", "");
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z", "", "", "");
         Assert.assertEquals(actualTime, 1554679864000L);
     }
 
@@ -304,33 +303,44 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "MM-DD-YYYY", "00:00:00 12H", "UTC");
         Assert.assertEquals(actualTime, 1522718625000L);
 
-        // Test Case 14: Test case 13 again with leading and trailing whitespace in the formats strings.
+        // Test Case 8: Test case 7 again with leading and trailing whitespace in the formats strings.
         actualTime = TimeStampConvertUtils.convertToLong("4-3-2018t01:23:45 amz",
                 " \t \tMM-DD-YYYY    ", "			00:00:00 12H  ", "\t			UTC");
         Assert.assertEquals(actualTime, 1522718625000L);
 
-        // Test Case 15: Date/time with format MM.DD.YYYY 00:00 12H, in timezone America/Los_Angeles.
+        // Test Case 9: Date/time with format MM.DD.YYYY 00:00 12H, in timezone America/Los_Angeles.
         // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
         actualTime = TimeStampConvertUtils.convertToLong("11.02.2018T11:11 AM",
                 "MM.DD.YYYY", "00:00 12H", "America/Los_Angeles");
         Assert.assertEquals(actualTime, 1541182260000L);
 
-        // Test Case 16: Date/time with format YYYY-MM-DD 00:00 24H, in timezone America/New_York.
+        // Test Case 10: Date/time with format YYYY-MM-DD 00:00 24H, in timezone America/New_York.
         // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10z",
                 "YYYY-MM-DD", "00:00 24H", "America/New_York");
         Assert.assertEquals(actualTime, 1554419400000L);
 
-        // Test Case 17: Date/time with format DD.MM.YY 00 00 24H, in timezone Pacific/Honolulu.
+        // Test Case 11: Date/time with format DD.MM.YY 00 00 24H, in timezone Pacific/Honolulu.
         // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
         actualTime = TimeStampConvertUtils.convertToLong("31.01.70t00 00",
                 "DD.MM.YY", "00 00 24H", "Pacific/Honolulu");
         Assert.assertEquals(actualTime, 3158388000000L);
 
-        // Test Case 18: Test case with standard IS0 8601 format for date and time.
+        // Test Case 12: Test case with standard IS0 8601 format for date and time.
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z",
                 "YYYY-MM-DD", "00:00:00 24H", "UTC");
         Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 13: Test that any random characters after the date/time format will be ignored.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Zabcdefghijklmnopqrstuvwzyz123",
+                "YYYY-MM-DD", "00:00:00 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 14: Test that any random characters even in case without a trailing "Z" will be ignored.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10998877665544332211",
+                "YYYY-MM-DD", "00:00 24H", "America/New_York");
+        Assert.assertEquals(actualTime, 1554419400000L);
     }
 
     // Test error cases for date to timestamp conversion with date/time formats.
