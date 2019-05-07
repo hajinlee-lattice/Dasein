@@ -123,8 +123,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         } else {
             int pagesRequired = (int) Math.ceil((double) maximum / MAX_ROWS);
             for (int page = 0; page < pagesRequired; page++) {
+                long currentOffset = offset + (page * MAX_ROWS);
                 internalAccountIds.addAll(getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn,
-                        start, offset + (page * MAX_ROWS), maximum));
+                        start, currentOffset, Math.min(maximum, maximum - currentOffset)));
             }
         }
 
