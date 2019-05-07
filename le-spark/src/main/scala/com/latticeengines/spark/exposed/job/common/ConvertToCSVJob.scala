@@ -86,10 +86,10 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     }
     targets.zip(output).map { t =>
       val tgt = t._1
-      val df = t._2.persist(StorageLevel.DISK_ONLY_2).toDF()
+      val df = t._2.persist(StorageLevel.DISK_ONLY).toDF()
       saveToCsv(df, tgt.getPath, compress=compress)
       tgt.setCount(df.count())
-      df.unpersist()
+      df.unpersist(blocking = false)
       tgt
     }
   }

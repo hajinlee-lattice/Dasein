@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -84,12 +83,12 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     }
     targets.zip(output).map { t =>
       val tgt = t._1
-      val df = t._2.persist(StorageLevel.MEMORY_AND_DISK_SER)
+      val df = t._2
       val path = tgt.getPath
       df.write.format("avro").save(path)
       val df2 = spark.read.format("avro").load(path)
       tgt.setCount(df2.count())
-      df.unpersist()
+      df.unpersist(blocking = true)
       tgt
     }
   }

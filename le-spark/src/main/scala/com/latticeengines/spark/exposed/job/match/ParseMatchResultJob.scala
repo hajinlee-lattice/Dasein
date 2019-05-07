@@ -6,9 +6,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -86,10 +84,8 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
   def joinSourceTable(matchResult: DataFrame, sourceTable: DataFrame, joinKey: String): DataFrame = {
     val retainAttrs = joinKey::matchResult.columns.diff(sourceTable.columns).toList
     val dropAttrs = matchResult.columns.diff(retainAttrs)
-    val reducedResult = matchResult.drop(dropAttrs:_*).persist(StorageLevel.DISK_ONLY)
-    val count = reducedResult.count()
-    val partitions = math.max(count / 4000, 200).toInt
-    reducedResult.join(sourceTable.repartition(partitions, col(joinKey)), Seq(joinKey))
+    val reducedResult = matchResult.drop(dropAttrs:_*)
+    sourceTable.join(reducedResult, Seq(joinKey))
   }
 
 }
