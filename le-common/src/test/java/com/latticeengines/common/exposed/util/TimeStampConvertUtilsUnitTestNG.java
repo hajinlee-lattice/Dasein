@@ -99,6 +99,7 @@ public class TimeStampConvertUtilsUnitTestNG {
                 "YYYY/MMM/DD", "", "");
         Assert.assertEquals(actualTime, 1517443200000L);
 
+        // Test Case 6: Date/time with format MMM-DD-YYYY 00-00-00 12H in timezone Europe/London.
         actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018 01-23-45 Pm",
                 "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
         Assert.assertEquals(actualTime, 1522758225000L);
@@ -341,6 +342,31 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-04t19:10998877665544332211",
                 "YYYY-MM-DD", "00:00 24H", "America/New_York");
         Assert.assertEquals(actualTime, 1554419400000L);
+
+        // Test Case 15: Date/time with format MMM-DD-YYYY 00-00-00 12H in timezone Europe/London.
+        actualTime = TimeStampConvertUtils.convertToLong("Apr-3-2018T01-23-45 PmZ",
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
+        Assert.assertEquals(actualTime, 1522758225000L);
+
+        // Test Case 16: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago.
+        // From https://solutions.lattice-engines.com/browse/DP-9733: Testing time formats without seconds.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-Dec-31t6:10 PMzZzZzZz",
+                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 17: Date/time with format YYYY-MMM-DD 00:00 12H, in timezone America/Chicago, and month with
+        // improper casing.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("1969-dEC-31T6:10 PM",
+                "YYYY-MMM-DD", "00:00 12H", "America/Chicago");
+        Assert.assertEquals(actualTime, 600000L);
+
+        // Test Case 18: Same as 6th case above, but with April in all capitals, eg. APR.
+        // From https://solutions.lattice-engines.com/browse/DP-9768: Fix long form month formatting.
+        actualTime = TimeStampConvertUtils.convertToLong("APR-3-2018t01-23-45 PmABCDEFG123456",
+                "MMM-DD-YYYY", "00-00-00 12H", "Europe/London");
+        Assert.assertEquals(actualTime, 1522758225000L);
+
     }
 
     // Test error cases for date to timestamp conversion with date/time formats.
