@@ -205,16 +205,23 @@ class SparkScriptClient {
     }
 
     private String parseOutput(String text) {
-        List<String> outputLines = new ArrayList<>();
+        List<String> outputParagraphs = new ArrayList<>();
         while (text.contains(BEGIN_OUTPUT)) {
             text = text.substring(text.indexOf(BEGIN_OUTPUT) + BEGIN_OUTPUT.length());
+            String output;
             if (text.contains(END_OUTPUT)) {
-                String output = text.substring(0, text.indexOf(END_OUTPUT));
-                outputLines.add(output);
+                output = text.substring(0, text.indexOf(END_OUTPUT));
                 text = text.substring(text.indexOf(END_OUTPUT) + END_OUTPUT.length());
+            } else {
+                output = text;
+                text = "";
             }
+            if (output.endsWith("\n")) {
+                output = output.substring(0, output.lastIndexOf("\n"));
+            }
+            outputParagraphs.add(output);
         }
-        return StringUtils.join(outputLines, "\n");
+        return StringUtils.join(outputParagraphs, "\n");
     }
 
 }

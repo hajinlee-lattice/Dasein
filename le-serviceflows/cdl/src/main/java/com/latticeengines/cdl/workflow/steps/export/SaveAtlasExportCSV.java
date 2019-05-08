@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -34,14 +37,20 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -76,6 +85,12 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     @Inject
     private AtlasExportProxy atlasExportProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Resource(name = "redshiftSegmentJdbcTemplate")
+    private JdbcTemplate redshiftJdbcTemplate;
 
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
@@ -163,6 +178,29 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 if (!BusinessEntity.Contact.equals(entity)) {
                     List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
                             .getOrDefault(entity, Collections.emptyList());
+                    if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                        AttributeRepository attrRepo = //
+                                WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
+                        if (attrRepo == null) {
+                            throw new RuntimeException("Cannot find attribute repo in context");
+                        }
+                        CustomerSpace customerSpace = parseCustomerSpace(configuration);
+                        DataCollection.Version version = configuration.getDataCollectionVersion();
+                        String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                                TableRoleInCollection.SortedProduct, version);
+                        if (StringUtils.isBlank(tblName)) {
+                            throw new RuntimeException("Cannot find sorted product table.");
+                        }
+                        for (ColumnMetadata cm: cms) {
+                            String attrName = cm.getAttrName();
+                            String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
+                            String productName = getProductNameFromRedshift(tblName, productId);
+                            String displayName = cm.getDisplayName();
+                            if (!displayName.startsWith(productName)) {
+                                cm.setDisplayName(productName + ": " + displayName);
+                            }
+                        }
+                    }
                     schema.addAll(cms);
                 }
             }
@@ -174,6 +212,13 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             throw new UnsupportedOperationException("Unknown export entity " + exportEntity);
         }
         return schema;
+    }
+
+    private String getProductNameFromRedshift(String tableName, String productId) {
+        String sql = String.format("SELECT %s FROM %s WHERE %s = '%s' LIMIT 1", InterfaceName.ProductName.name(), tableName, //
+                InterfaceName.ProductId.name(), productId);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> redshiftJdbcTemplate.queryForObject(sql, String.class));
     }
 
     @Override

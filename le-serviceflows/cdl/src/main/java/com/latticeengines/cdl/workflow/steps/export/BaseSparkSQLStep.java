@@ -101,7 +101,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     }
 
     void stopLivySession() {
-        if (livySession  != null) {
+        if (livySession != null) {
             livySessionService.stopSession(livySession);
         }
     }
