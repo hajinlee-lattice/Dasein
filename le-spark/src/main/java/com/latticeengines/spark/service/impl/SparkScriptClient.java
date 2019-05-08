@@ -98,7 +98,11 @@ class SparkScriptClient {
     String runStatement(String statement) {
         int id = submitStatement(statement);
         String statementPrint = waitStatementOutput(id).block();
-        log.info("Statement " + id + " prints: " + statementPrint);
+        if (StringUtils.isNotBlank(statementPrint)) {
+            log.info("Statement " + id + " prints: " + statementPrint);
+        } else {
+            log.info("Statement " + id + " is finished.");
+        }
         return statementPrint;
     }
 
@@ -201,22 +205,23 @@ class SparkScriptClient {
     }
 
     private String parseOutput(String text) {
-        boolean inOutputRegion = false;
-        List<String> outputLines = new ArrayList<>();
-        for (String line: StringUtils.split(text, "\n")) {
-            if (inOutputRegion) {
-                if (END_OUTPUT.equals(line)) {
-                    inOutputRegion = false;
-                } else {
-                    outputLines.add(line);
-                }
+        List<String> outputParagraphs = new ArrayList<>();
+        while (text.contains(BEGIN_OUTPUT)) {
+            text = text.substring(text.indexOf(BEGIN_OUTPUT) + BEGIN_OUTPUT.length());
+            String output;
+            if (text.contains(END_OUTPUT)) {
+                output = text.substring(0, text.indexOf(END_OUTPUT));
+                text = text.substring(text.indexOf(END_OUTPUT) + END_OUTPUT.length());
             } else {
-                if (BEGIN_OUTPUT.equals(line)) {
-                    inOutputRegion = true;
-                }
+                output = text;
+                text = "";
             }
+            if (output.endsWith("\n")) {
+                output = output.substring(0, output.lastIndexOf("\n"));
+            }
+            outputParagraphs.add(output);
         }
-        return StringUtils.join(outputLines, "\n");
+        return StringUtils.join(outputParagraphs, "\n");
     }
 
 }

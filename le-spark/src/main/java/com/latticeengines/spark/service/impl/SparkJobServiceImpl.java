@@ -125,19 +125,15 @@ public class SparkJobServiceImpl implements SparkJobService {
         cleanupTargetDirs(config.getTargets());
         SparkScriptClient client = getClient(retrieved, script);
         client.runPreScript(config);
-        String output;
         switch (script.getType()) {
             case InputStream:
-                output = runInputStreamScript(client, (InputStreamSparkScript) script);
+                runInputStreamScript(client, (InputStreamSparkScript) script);
                 break;
             case LocalFile:
-                output = runLocalFileScript(client, (LocalFileSparkScript) script);
+                runLocalFileScript(client, (LocalFileSparkScript) script);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown script type " + script.getType());
-        }
-        if (StringUtils.isNotBlank(output)) {
-            log.info("Script prints out: " + output);
         }
         String outputStr = client.printOutputStr();
         List<HdfsDataUnit> targets = client.runPostScript();
@@ -170,7 +166,6 @@ public class SparkJobServiceImpl implements SparkJobService {
     }
 
     private String submitLines(SparkScriptClient client, LineIterator lineIterator) {
-
         List<String> lines = new ArrayList<>();
         String output = null;
         for (String line : (Iterable<String>) () -> lineIterator) {

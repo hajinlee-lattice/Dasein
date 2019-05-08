@@ -91,9 +91,18 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
-            LivySession session = livySessionService.startSession(livyHost, jobName, //
-                    getLivyConf(), getSparkConf(scalingFactor));
-            bootstrapAttrRepo(session, hdfsPathMap);
+            LivySession session = null;
+            try {
+                session = livySessionService.startSession(livyHost, jobName, //
+                        getLivyConf(), getSparkConf(scalingFactor));
+                bootstrapAttrRepo(session, hdfsPathMap);
+            } catch (Exception e) {
+                log.warn("Failed to launch a new livy session.", e);
+                if (session != null) {
+                    livySessionService.stopSession(session);
+                }
+                throw e;
+            }
             return session;
         });
     }
