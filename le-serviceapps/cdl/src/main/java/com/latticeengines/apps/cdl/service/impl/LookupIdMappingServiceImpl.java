@@ -40,7 +40,8 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             boolean descending) {
         Map<String, List<LookupIdMap>> toReturn = lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType,
                 sortby, descending);
-        if (!toReturn.containsKey(CDLExternalSystemType.FILE_SYSTEM.name())) {
+        if ((externalSystemType == null || externalSystemType == CDLExternalSystemType.FILE_SYSTEM)
+                && !toReturn.containsKey(CDLExternalSystemType.FILE_SYSTEM.name())) {
             // Every tenant should have an AWS S3 connection, set one up if its missing for this tenant
             log.info("No FileSystem connection found, creating it now");
             LookupIdMap awsS3 = new LookupIdMap();
