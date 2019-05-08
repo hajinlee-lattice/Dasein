@@ -81,6 +81,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
+    static LinkedHashMap<String, String> exportAppidMap;
+
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
@@ -560,16 +562,31 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @VisibleForTesting
     boolean submitExportJob(Tenant tenant) {
-        ApplicationId applicationId = null;
+        String applicationId = null;
         boolean success = true;
         MultiTenantContext.setTenant(tenant);
         String customerSpace = MultiTenantContext.getShortTenantId();
+        if (exportAppidMap != null && exportAppidMap.get(customerSpace) != null) {
+            applicationId  = exportAppidMap.get(tenant.getName());
+            if (StringUtils.isNotEmpty(applicationId)) {
+                Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
+                if (job != null) {
+                    if (job.getJobStatus() != JobStatus.COMPLETED || job.getJobStatus() != JobStatus.FAILED || job.getJobStatus() != JobStatus.CANCELLED) {
+                        return true;
+                    }
+                }
+            }
+        }
         try {
             EntityExportRequest request = new EntityExportRequest();
             request.setDataCollectionVersion(dataCollectionService.getActiveVersion(customerSpace));
-            applicationId = cdlProxy.entityExport(customerSpace, request);
+            ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
+            applicationId = tempApplicationId.toString();
+            exportAppidMap.put(customerSpace, applicationId);
+            log.info("export applicationId map is " + JsonUtils.serialize(exportAppidMap));
         } catch (Exception e) {
-            log.info(String.format("Failed to submit entity export job for tenant name: %s", tenant.getName()));
+            log.info(String.format("Failed to submit entity export job for tenant name: %s，message is %s",
+                    tenant.getName(), e.getMessage()));
             success = false;
         }
         log.info(String.format("Submit entity export job success %s", success ? "y" : "n"));
