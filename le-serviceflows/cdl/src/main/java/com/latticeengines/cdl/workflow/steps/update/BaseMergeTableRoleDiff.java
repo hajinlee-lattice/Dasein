@@ -2,9 +2,9 @@ package com.latticeengines.cdl.workflow.steps.update;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -94,10 +94,10 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
     }
 
     private void overlayMetadata(Table resultTable) {
-        Map<String, Attribute> attributeMap = new HashMap<>();
-        masterTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
-        diffTable.getAttributes().forEach(attr -> attributeMap.putIfAbsent(attr.getName(), attr));
-        super.overlayTableSchema(resultTable, attributeMap);
+        List<Attribute> masterAttrs = masterTable.getAttributes().stream() //
+                .peek(attr -> attr.setPid(null)) //
+                .collect(Collectors.toList());
+        resultTable.setAttributes(masterAttrs);
     }
 
     private Table getDiffTable() {

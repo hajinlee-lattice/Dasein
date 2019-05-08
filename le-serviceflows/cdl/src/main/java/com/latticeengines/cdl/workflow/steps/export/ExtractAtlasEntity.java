@@ -3,8 +3,6 @@ package com.latticeengines.cdl.workflow.steps.export;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +21,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableMap;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,7 +35,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -53,9 +48,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
 
     @Inject
     private PeriodProxy periodProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -124,7 +116,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     protected AttributeRepository parseAttrRepo(EntityExportStepConfiguration stepConfiguration) {
         AttributeRepository attrRepo = WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
         if (attrRepo == null) {
-            attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
+            throw new RuntimeException("Cannot find attribute repo in context");
         }
         return attrRepo;
     }
@@ -175,29 +167,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             if (CollectionUtils.isNotEmpty(cms)) {
                 schemaMap.put(entity, cms);
             }
+            log.info("Found " + CollectionUtils.size(cms) + " attrs to export for " + entity);
         }
         return schemaMap;
-    }
-
-    private Map<ExportEntity, HdfsDataUnit> fakeOutputUntis(String workspace) {
-        HdfsDataUnit account = extractFakeAvro(workspace, "Account.avro", 0);
-        HdfsDataUnit contact = extractFakeAvro(workspace, "Contact.avro", 1);
-        return ImmutableMap.of(ExportEntity.Account, account, ExportEntity.Contact, contact);
-    }
-
-    private HdfsDataUnit extractFakeAvro(String workspace, String avroName, int outputIdx) {
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream( //
-                "com/latticeengines/cdl/workflow/" + avroName);
-        String hdfsPath = workspace + "/Output" + outputIdx + "/part-0000.avro";
-        try {
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, hdfsPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to copy avro to " + hdfsPath);
-        }
-        HdfsDataUnit dataUnit = new HdfsDataUnit();
-        dataUnit.setPath(workspace + "/Output" + outputIdx);
-        dataUnit.setCount(900L);
-        return dataUnit;
     }
 
 }

@@ -57,7 +57,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     protected abstract String parseEvaluationDateStr(S stepConfiguration);
     protected abstract AttributeRepository parseAttrRepo(S stepConfiguration);
 
-    protected Map<String, String> getHdfsPaths(AttributeRepository attrRepo) {
+    Map<String, String> getHdfsPaths(AttributeRepository attrRepo) {
         String customer = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         Map<String, String> pathMap = new HashMap<>();
         attrRepo.getTableNames().forEach(tblName -> {
@@ -71,7 +71,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         return pathMap;
     }
 
-    protected void startLivySession(Map<String, String> hdfsPathMap) {
+    void startLivySession(Map<String, String> hdfsPathMap) {
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         QueryServiceUtils.setAttrRepo(attrRepo);
         QueryServiceUtils.toLocalAttrRepoMode();
@@ -79,7 +79,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 1, getClass().getSimpleName());
     }
 
-    protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
+    HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
         setCustomerSpace();
 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
@@ -100,8 +100,8 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         });
     }
 
-    protected  void stopLivySession() {
-        if (livySession  != null) {
+    void stopLivySession() {
+        if (livySession != null) {
             livySessionService.stopSession(livySession);
         }
     }
