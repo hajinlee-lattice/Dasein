@@ -65,9 +65,11 @@
         </button>
     </div>
 </div>
-<p 
+<a 
     class="s3help"
-     ng-if="vm_uploader.hasSthreeFiles == 'true'">What's S3?</p>
+    ng-if="vm_uploader.hasSthreeFiles == 'true'"
+    ng-href="https://aws.amazon.com/s3/"
+    target="_blank">What's S3?</a>
 
 <p class="help-block">
   {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}

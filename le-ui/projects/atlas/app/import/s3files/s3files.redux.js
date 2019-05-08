@@ -23,7 +23,6 @@ export const s3actions = {
             }
         );
         httpService.get(`/pls/cdl/s3import/fileList?s3Path=${path}`, observer, {});
-        // httpService.get(`/pls/cdl/s3import/fileList?s3Path=latticeengines-qa-customers/dropfolder/k9adsbgl/Templates/TestS3Browser/`, observer, {});
     },
     setPath: (path) => {
         return store.dispatch({
