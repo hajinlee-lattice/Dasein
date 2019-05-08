@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.latticeengines.aws.emr.EMRService;
+import com.latticeengines.common.exposed.util.NamingUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
@@ -32,5 +33,12 @@ public class EMRServiceImplTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(CollectionUtils.isNotEmpty(clusterSummaries));
     }
 
+    @Test(groups = "functional")
+    public void testIllegalClusters() {
+        boolean isActive = emrService.isActive("");
+        Assert.assertFalse(isActive);
+        isActive = emrService.isActive(NamingUtils.timestamp(this.getClass().getSimpleName()));
+        Assert.assertFalse(isActive);
+    }
 
 }
