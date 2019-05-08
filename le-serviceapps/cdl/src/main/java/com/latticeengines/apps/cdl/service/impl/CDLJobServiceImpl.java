@@ -152,6 +152,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 return System.currentTimeMillis() - eldest.getValue() > TimeUnit.HOURS.toMillis(2);
             }
         };
+        exportAppidMap = new LinkedHashMap<>();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -507,53 +508,55 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void exportScheduleJob() {
+        updateExportAppIdMap();
         List<AtlasScheduling> atlasSchedulingList =
                 atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
         log.info(JsonUtils.serialize(atlasSchedulingList));
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
             log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
-                Tenant tenant = tenantEntityMgr.findByTenantPid(atlasScheduling.getTenantId());
-                if (tenant != null) {
-                    boolean allowAutoSchedule = false;
-                    try {
-                        allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
-                                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
-                    } catch (Exception e) {
-                        log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
-                    }
-                    if (allowAutoSchedule) {
-                        Long nextFireTime =
-                                CronUtils.getNextFireTime(atlasScheduling.getCronExpression()).getMillis() / 1000;
-                        boolean triggered = false;
-                        boolean is_changed = false;
-                        if (atlasScheduling.getNextFireTime() == null) {
+                Tenant tenant = atlasScheduling.getTenant();
+                String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
+                boolean allowAutoSchedule = false;
+                try {
+                    allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
+                            LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+                } catch (Exception e) {
+                    log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+                }
+                if (allowAutoSchedule) {
+                    Long nextFireTime =
+                            CronUtils.getNextFireTime(atlasScheduling.getCronExpression()).getMillis() / 1000;
+                    boolean triggered = false;
+                    boolean changed = false;
+                    if (atlasScheduling.getNextFireTime() == null) {
+                        atlasScheduling.setNextFireTime(nextFireTime);
+                        changed = true;
+                    } else {
+                        Long currentSecond = (new Date().getTime()) / 1000;
+                        if (atlasScheduling.getNextFireTime() <= currentSecond) {
+                            atlasScheduling.setPrevFireTime(atlasScheduling.getNextFireTime());
                             atlasScheduling.setNextFireTime(nextFireTime);
-                            is_changed = true;
+                            triggered = true;
+                            changed = true;
                         } else {
-                            Long currentSecond = (new Date().getTime()) / 1000;
-                            if (atlasScheduling.getNextFireTime() <= currentSecond) {
-                                atlasScheduling.setPrevFireTime(atlasScheduling.getNextFireTime());
+                            if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
                                 atlasScheduling.setNextFireTime(nextFireTime);
-                                triggered = true;
-                                is_changed = true;
-                            } else {
-                                if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
-                                    atlasScheduling.setNextFireTime(nextFireTime);
-                                    is_changed = true;
-                                    triggered = verifyJobStatus(tenant, true);
-                                }
+                                changed = true;
                             }
                         }
-                        if (is_changed) {
-                            atlasSchedulingService.updateExportScheduling(atlasScheduling);
+                    }
+                    if (changed) {
+                        atlasSchedulingService.updateExportScheduling(atlasScheduling);
+                    }
+                    if (triggered) {
+                        if (exportAppidMap.get(customerSpace) != null) {
+                            continue;
                         }
-                        if (triggered) {
-                            if(submitExportJob(tenant)) {
-                                log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
-                                        new Date(atlasScheduling.getPrevFireTime()).toString(),
-                                        tenant.getName()));
-                            }
+                        if(submitExportJob(customerSpace, tenant)) {
+                            log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
+                                    atlasScheduling.getPrevFireTime(),
+                                    tenant.getName()));
                         }
                     }
                 }
@@ -561,59 +564,67 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
+    boolean submitExportJob(String customerSpace, Tenant tenant) {
+        return submitExportJob(customerSpace, false, tenant);
+    }
+
     @VisibleForTesting
-    boolean submitExportJob(Tenant tenant) {
+    boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant) {
         String applicationId = null;
         boolean success = true;
-        MultiTenantContext.setTenant(tenant);
-        String customerSpace = MultiTenantContext.getShortTenantId();
-        if (!verifyJobStatus(tenant, false)) {
-            return true;
+        if (tenant == null) {
+            setMultiTenantContext(customerSpace);
+        } else {
+            MultiTenantContext.setTenant(tenant);
         }
         try {
             EntityExportRequest request = new EntityExportRequest();
             request.setDataCollectionVersion(dataCollectionService.getActiveVersion(customerSpace));
             ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
             applicationId = tempApplicationId.toString();
-            exportAppidMap.put(customerSpace, applicationId);
+            if (!retry) {
+                exportAppidMap.put(applicationId, customerSpace);
+            }
             log.info("export applicationId map is " + JsonUtils.serialize(exportAppidMap));
         } catch (Exception e) {
             log.info(String.format("Failed to submit entity export job for tenant name: %s，message is %s",
-                    tenant.getName(), e.getMessage()));
+                    customerSpace, e.getMessage()));
             success = false;
         }
         log.info(String.format("Submit entity export job success %s", success ? "y" : "n"));
         return success;
     }
 
-    private boolean verifyJobStatus(Tenant tenant, boolean retry) {
-        String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
-        if (exportAppidMap != null && exportAppidMap.get(customerSpace) != null) {
-            String applicationId  = exportAppidMap.get(tenant.getName());
-            if (StringUtils.isNotEmpty(applicationId)) {
-                Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
-                if (job != null) {
-                    if (job.getJobStatus() != JobStatus.COMPLETED || job.getJobStatus() != JobStatus.FAILED || job.getJobStatus() != JobStatus.CANCELLED) {
-                        return false;
-                    } else {
-                        exportAppidMap.remove(customerSpace, applicationId);
-                        if (retry) {
-                            return job.getJobStatus() == JobStatus.FAILED;
-                        }
-                        return true;
+    private void updateExportAppIdMap() {
+        String clusterId = getCurrentClusterID();
+        log.debug(String.format("Current cluster id is : %s.", clusterId));
+        List<String> jobStatus = new ArrayList<>();
+        jobStatus.add(JobStatus.FAILED.getName());
+        jobStatus.add(JobStatus.CANCELLED.getName());
+        jobStatus.add(JobStatus.COMPLETED.getName());
+        if (StringUtils.isNotEmpty(clusterId)) {
+            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
+                    jobStatus);
+            if (CollectionUtils.isNotEmpty(workflowJobs)) {
+                for (WorkflowJob workflowJob : workflowJobs) {
+                    if (workflowJob.getStatus() == JobStatus.COMPLETED.getName() || workflowJob.getStatus() == JobStatus.CANCELLED.getName()) {
+                        exportAppidMap.remove(workflowJob.getApplicationId());
+                        continue;
                     }
-                } else {
-                    long currentTime = new Date().getTime();
-                    long applicationTime = Long.valueOf(applicationId.substring(applicationId.indexOf("_") + 1,
-                            applicationId.lastIndexOf("_")));
-                    log.info("currentTime is " + currentTime + " applicationTime is :" + applicationTime + " the time" +
-                            " distance is " + (currentTime - applicationTime));
-                    if (currentTime - applicationTime < 400000) {
-                         return false;
+                    if (workflowJob.getStatus() == JobStatus.FAILED.getName()) {
+                        submitExportJob(exportAppidMap.get(workflowJob.getApplicationId()), true, null);
+                        exportAppidMap.remove(workflowJob.getApplicationId());
                     }
                 }
             }
         }
-        return true;
+    }
+
+    private void setMultiTenantContext(String customerSpace) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        if (tenant == null) {
+            throw new RuntimeException(String.format("No tenant found with id %s", customerSpace));
+        }
+        MultiTenantContext.setTenant(tenant);
     }
 }

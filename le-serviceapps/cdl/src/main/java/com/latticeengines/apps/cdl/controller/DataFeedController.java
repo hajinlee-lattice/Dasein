@@ -94,11 +94,8 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
-                                                   @RequestBody(required = false) EntityExportRequest request) {
+                                                   @RequestBody EntityExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        if (request == null) {
-            request = defaultEntityExportRequest();
-        }
         try {
             ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,
                     new WorkflowPidWrapper(-1L));
@@ -112,7 +109,4 @@ public class DataFeedController {
         return new ProcessAnalyzeRequest();
     }
 
-    private EntityExportRequest defaultEntityExportRequest() {
-        return new EntityExportRequest();
-    }
 }
