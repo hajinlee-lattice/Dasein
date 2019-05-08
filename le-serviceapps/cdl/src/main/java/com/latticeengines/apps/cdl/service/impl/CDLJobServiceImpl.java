@@ -541,6 +541,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                                 if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
                                     atlasScheduling.setNextFireTime(nextFireTime);
                                     is_changed = true;
+                                    triggered = verifyJobStatus(tenant, true);
                                 }
                             }
                         }
@@ -566,16 +567,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         boolean success = true;
         MultiTenantContext.setTenant(tenant);
         String customerSpace = MultiTenantContext.getShortTenantId();
-        if (exportAppidMap != null && exportAppidMap.get(customerSpace) != null) {
-            applicationId  = exportAppidMap.get(tenant.getName());
-            if (StringUtils.isNotEmpty(applicationId)) {
-                Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
-                if (job != null) {
-                    if (job.getJobStatus() != JobStatus.COMPLETED || job.getJobStatus() != JobStatus.FAILED || job.getJobStatus() != JobStatus.CANCELLED) {
-                        return true;
-                    }
-                }
-            }
+        if (!verifyJobStatus(tenant, false)) {
+            return true;
         }
         try {
             EntityExportRequest request = new EntityExportRequest();
@@ -591,5 +584,36 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info(String.format("Submit entity export job success %s", success ? "y" : "n"));
         return success;
+    }
+
+    private boolean verifyJobStatus(Tenant tenant, boolean retry) {
+        String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        if (exportAppidMap != null && exportAppidMap.get(customerSpace) != null) {
+            String applicationId  = exportAppidMap.get(tenant.getName());
+            if (StringUtils.isNotEmpty(applicationId)) {
+                Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId, customerSpace);
+                if (job != null) {
+                    if (job.getJobStatus() != JobStatus.COMPLETED || job.getJobStatus() != JobStatus.FAILED || job.getJobStatus() != JobStatus.CANCELLED) {
+                        return false;
+                    } else {
+                        exportAppidMap.remove(customerSpace, applicationId);
+                        if (retry) {
+                            return job.getJobStatus() == JobStatus.FAILED;
+                        }
+                        return true;
+                    }
+                } else {
+                    long currentTime = new Date().getTime();
+                    long applicationTime = Long.valueOf(applicationId.substring(applicationId.indexOf("_") + 1,
+                            applicationId.lastIndexOf("_")));
+                    log.info("currentTime is " + currentTime + " applicationTime is :" + applicationTime + " the time" +
+                            " distance is " + (currentTime - applicationTime));
+                    if (currentTime - applicationTime < 400000) {
+                         return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
