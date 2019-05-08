@@ -34,6 +34,9 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("save_to_local")
     private boolean saveToLocal;
 
+    @JsonProperty("atlas_export_id")
+    private String atlasExportId;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -88,5 +91,13 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setSaveToLocal(boolean saveToLocal) {
         this.saveToLocal = saveToLocal;
+    }
+
+    public String getAtlasExportId() {
+        return atlasExportId;
+    }
+
+    public void setAtlasExportId(String atlasExportId) {
+        this.atlasExportId = atlasExportId;
     }
 }

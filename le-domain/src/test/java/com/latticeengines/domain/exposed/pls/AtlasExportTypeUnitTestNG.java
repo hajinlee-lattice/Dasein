@@ -12,11 +12,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class MetadataSegmentExportTypeUnitTestNG {
+public class AtlasExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void testAccountType() {
-        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = AtlasExportType.ACCOUNT
                 .getDefaultAttributeTuples();
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
         defaultAttributeTuples.stream().forEach(p -> {
@@ -32,7 +32,7 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void testContactType() {
-        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.CONTACT
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = AtlasExportType.CONTACT
                 .getDefaultAttributeTuples();
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
         defaultAttributeTuples.stream().forEach(p -> {
@@ -48,7 +48,7 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void testAccountAndContactType() {
-        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT_AND_CONTACT
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = AtlasExportType.ACCOUNT_AND_CONTACT
                 .getDefaultAttributeTuples();
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
         defaultAttributeTuples.stream().forEach(p -> {
@@ -64,7 +64,7 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void testAccountIdType() {
-        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = MetadataSegmentExportType.ACCOUNT_ID
+        List<Triple<BusinessEntity, String, String>> defaultAttributeTuples = AtlasExportType.ACCOUNT_ID
                 .getDefaultAttributeTuples();
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultAttributeTuples));
         defaultAttributeTuples.stream().forEach(p -> {
@@ -80,7 +80,7 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void getDefaultExportAttributesAccount() {
-        Set<InterfaceName> defaultExportAttributes = MetadataSegmentExportType
+        Set<InterfaceName> defaultExportAttributes = AtlasExportType
                 .getDefaultExportAttributes(BusinessEntity.Account);
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
         defaultExportAttributes.stream().forEach(p -> {
@@ -91,7 +91,7 @@ public class MetadataSegmentExportTypeUnitTestNG {
 
     @Test(groups = "unit")
     public void getDefaultExportAttributesContact() {
-        Set<InterfaceName> defaultExportAttributes = MetadataSegmentExportType
+        Set<InterfaceName> defaultExportAttributes = AtlasExportType
                 .getDefaultExportAttributes(BusinessEntity.Contact);
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
         defaultExportAttributes.stream().forEach(p -> {

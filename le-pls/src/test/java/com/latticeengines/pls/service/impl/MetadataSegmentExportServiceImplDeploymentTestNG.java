@@ -12,9 +12,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -42,7 +42,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
     @Test(groups = "deployment")
     public void testBasicOperations() {
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
-        metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT);
+        metadataSegmentExport.setType(AtlasExportType.ACCOUNT);
         metadataSegmentExport.setAccountFrontEndRestriction(new FrontEndRestriction());
         metadataSegmentExport.setContactFrontEndRestriction(new FrontEndRestriction());
         metadataSegmentExport.setStatus(Status.RUNNING);

@@ -33,9 +33,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -94,7 +94,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     @Test(groups = "deployment")
     public void testAccountExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace, MetadataSegmentExportType.ACCOUNT,
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT,
                 internalResourceRestApiProxy);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
@@ -103,7 +103,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     @Test(groups = "deployment", dependsOnMethods = { "testAccountExport" })
     public void testContactExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace, MetadataSegmentExportType.CONTACT,
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.CONTACT,
                 internalResourceRestApiProxy);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
@@ -114,7 +114,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     @Test(groups = "deployment", dependsOnMethods = { "testContactExport" })
     public void testAccountAndContactExport() throws IOException {
         MetadataSegmentExport segmentExport = createExportJob(customerSpace,
-                MetadataSegmentExportType.ACCOUNT_AND_CONTACT, internalResourceRestApiProxy);
+                AtlasExportType.ACCOUNT_AND_CONTACT, internalResourceRestApiProxy);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
                 BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name(),
@@ -122,7 +122,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
                 BusinessEntity.Account.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name());
     }
 
-    private MetadataSegmentExport createExportJob(CustomerSpace customerSpace, MetadataSegmentExportType type,
+    private MetadataSegmentExport createExportJob(CustomerSpace customerSpace, AtlasExportType type,
             InternalResourceRestApiProxy internalResourceRestApiProxy) {
         String segmentName = UUID.randomUUID().toString();
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
@@ -181,8 +181,8 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
         String ratingAttribute = "Rating" + SegmentExportProcessor.SEPARATOR + ratingId;
 
         boolean shouldCheckRating = //
-                segmentExport.getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT
-                        || segmentExport.getType() == MetadataSegmentExportType.ACCOUNT;
+                segmentExport.getType() == AtlasExportType.ACCOUNT_AND_CONTACT
+                        || segmentExport.getType() == AtlasExportType.ACCOUNT;
         int notNullRatingCount = 0;
         while (iterator.hasNext()) {
             Object row = iterator.next();
