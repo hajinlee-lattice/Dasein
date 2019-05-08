@@ -124,7 +124,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     protected AttributeRepository parseAttrRepo(EntityExportStepConfiguration stepConfiguration) {
         AttributeRepository attrRepo = WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
         if (attrRepo == null) {
-            attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
+            throw new RuntimeException("Cannot find attribute repo in context");
         }
         return attrRepo;
     }
@@ -175,6 +175,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             if (CollectionUtils.isNotEmpty(cms)) {
                 schemaMap.put(entity, cms);
             }
+            log.info("Found " + CollectionUtils.size(cms) + " attrs to export for " + entity);
         }
         return schemaMap;
     }

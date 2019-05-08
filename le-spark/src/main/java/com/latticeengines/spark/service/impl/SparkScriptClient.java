@@ -98,7 +98,11 @@ class SparkScriptClient {
     String runStatement(String statement) {
         int id = submitStatement(statement);
         String statementPrint = waitStatementOutput(id).block();
-        log.info("Statement " + id + " prints: " + statementPrint);
+        if (StringUtils.isNotBlank(statementPrint)) {
+            log.info("Statement " + id + " prints: " + statementPrint);
+        } else {
+            log.info("Statement " + id + " is finished.");
+        }
         return statementPrint;
     }
 
@@ -201,19 +205,13 @@ class SparkScriptClient {
     }
 
     private String parseOutput(String text) {
-        boolean inOutputRegion = false;
         List<String> outputLines = new ArrayList<>();
-        for (String line: StringUtils.split(text, "\n")) {
-            if (inOutputRegion) {
-                if (END_OUTPUT.equals(line)) {
-                    inOutputRegion = false;
-                } else {
-                    outputLines.add(line);
-                }
-            } else {
-                if (BEGIN_OUTPUT.equals(line)) {
-                    inOutputRegion = true;
-                }
+        while (text.contains(BEGIN_OUTPUT)) {
+            text = text.substring(text.indexOf(BEGIN_OUTPUT) + BEGIN_OUTPUT.length());
+            if (text.contains(END_OUTPUT)) {
+                String output = text.substring(0, text.indexOf(END_OUTPUT));
+                outputLines.add(output);
+                text = text.substring(text.indexOf(END_OUTPUT) + END_OUTPUT.length());
             }
         }
         return StringUtils.join(outputLines, "\n");
