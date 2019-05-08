@@ -654,6 +654,13 @@ public class MatchInput implements Fact, Dimension {
         @JsonProperty("KeyMap")
         private Map<MatchKey, List<String>> keyMap;
 
+        public EntityKeyMap() {
+        }
+
+        public EntityKeyMap(Map<MatchKey, List<String>> keyMap) {
+            this.keyMap = keyMap;
+        }
+
         public Map<MatchKey, List<String>> getKeyMap() {
             return keyMap;
         }

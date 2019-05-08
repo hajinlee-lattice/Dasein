@@ -9,6 +9,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.State;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.SystemId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerContactId;
@@ -30,9 +31,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.testframework.EntityMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -706,6 +709,46 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         };
     }
 
+    /**
+     * Make sure we match to anonymous account & contact when user does not map any
+     * account & contact match key
+     */
+    @Test(groups = "functional", dataProvider = "noUserMappingKeyMap", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testNoUserMapping(EntityKeyMap accountKeyMap, EntityKeyMap contactKeyMap) {
+        Tenant tenant = newTestTenant();
+        String[] data = new String[] { "C_CID_1", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_1",
+                "Google", "USA", "CA" };
+        Map<String, EntityKeyMap> maps = new HashMap<>();
+        maps.put(BusinessEntity.Account.name(), accountKeyMap);
+        maps.put(BusinessEntity.Contact.name(), contactKeyMap);
+        Pair<MatchInput, MatchOutput> result = matchContactWithDefaultFields(tenant, data, maps);
+        String accountEntityId = verifyAndGetEntityId(result.getRight(), AccountId.name());
+        String contactEntityId = verifyAndGetEntityId(result.getRight(), ContactId.name());
+        Assert.assertEquals(accountEntityId, DataCloudConstants.ENTITY_ANONYMOUS_ID,
+                String.format("Matched account should be anonymous for key maps = %s", JsonUtils.serialize(maps)));
+        Assert.assertEquals(contactEntityId, DataCloudConstants.ENTITY_ANONYMOUS_ID,
+                String.format("Matched contact should be anonymous for key maps = %s", JsonUtils.serialize(maps)));
+    }
+
+    /*
+     * Three cases for both account/contact key map 1. null entity key map 2. entity
+     * key map with null match key column map 3. entity key map with empty match key
+     * column map
+     */
+    @DataProvider(name = "noUserMappingKeyMap")
+    private Object[][] noUserMappingKeyMapTestData() {
+        return new Object[][] { //
+                { null, null }, //
+                { null, new EntityKeyMap() }, //
+                { null, new EntityKeyMap(new HashMap<>()) }, //
+                { new EntityKeyMap(), null }, //
+                { new EntityKeyMap(), new EntityKeyMap() }, //
+                { new EntityKeyMap(), new EntityKeyMap(new HashMap<>()) }, //
+                { new EntityKeyMap(new HashMap<>()), null }, //
+                { new EntityKeyMap(new HashMap<>()), new EntityKeyMap() }, //
+                { new EntityKeyMap(new HashMap<>()), new EntityKeyMap(new HashMap<>()) }, }; //
+    }
+
     private void matchAndVerify(ContactMatchTestCase testCase) {
         Tenant tenant = newTestTenant();
         testCase.setTenant(tenant);
@@ -715,7 +758,8 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         if (testCase.existingData != null) {
             for (String[] existingData : testCase.existingData) {
                 // populate existing data
-                Pair<MatchInput, MatchOutput> result = matchContactWithDefaultFields(tenant, existingData);
+                Pair<MatchInput, MatchOutput> result = matchContactWithDefaultFields(tenant, existingData,
+                        getDefaultKeyMaps());
                 MatchOutput output = result.getRight();
                 Assert.assertNotNull(output,
                         String.format("MatchOutput of existing data for test case %s should not be null", testCase));
@@ -728,7 +772,8 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         }
 
         // match import data
-        Pair<MatchInput, MatchOutput> result = matchContactWithDefaultFields(tenant, testCase.importData);
+        Pair<MatchInput, MatchOutput> result = matchContactWithDefaultFields(tenant, testCase.importData,
+                getDefaultKeyMaps());
         MatchOutput output = result.getRight();
         Assert.assertNotNull(output,
                 String.format("MatchOutput of import data for test case %s should not be null", testCase));
@@ -768,9 +813,10 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     /*
      * contact match using default test fields in allocateId mode
      */
-    private Pair<MatchInput, MatchOutput> matchContactWithDefaultFields(Tenant tenant, String[] data) {
+    private Pair<MatchInput, MatchOutput> matchContactWithDefaultFields(Tenant tenant, String[] data,
+            Map<String, EntityKeyMap> entityKeyMapMaps) {
         String entity = BusinessEntity.Contact.name();
-        MatchInput input = prepareEntityMatchInput(tenant, entity, getDefaultKeyMaps());
+        MatchInput input = prepareEntityMatchInput(tenant, entity, entityKeyMapMaps);
         input.setFields(Arrays.asList(DEFAULT_FIELDS));
         input.setData(Collections.singletonList(Arrays.asList(data)));
         entityMatchConfigurationService.setIsAllocateMode(true);
@@ -790,15 +836,15 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         return log;
     }
 
-    private static Map<String, MatchInput.EntityKeyMap> getDefaultKeyMaps() {
-        Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
+    private static Map<String, EntityKeyMap> getDefaultKeyMaps() {
+        Map<String, EntityKeyMap> keyMaps = new HashMap<>();
         keyMaps.put(BusinessEntity.Account.name(), getDefaultAccountKeyMap());
         keyMaps.put(BusinessEntity.Contact.name(), getDefaultContactKeyMap());
         return keyMaps;
     }
 
-    private static MatchInput.EntityKeyMap getDefaultAccountKeyMap() {
-        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+    private static EntityKeyMap getDefaultAccountKeyMap() {
+        EntityKeyMap map = new EntityKeyMap();
         map.addMatchKey(SystemId, CustomerAccountId.name());
         map.addMatchKey(Name, CompanyName.name());
         // only use email for account domain for now, TODO add more later
@@ -808,8 +854,8 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         return map;
     }
 
-    private static MatchInput.EntityKeyMap getDefaultContactKeyMap() {
-        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+    private static EntityKeyMap getDefaultContactKeyMap() {
+        EntityKeyMap map = new EntityKeyMap();
         map.addMatchKey(SystemId, CustomerContactId.name());
         map.addMatchKey(Email, Email.name());
         map.addMatchKey(Name, ContactName.name());

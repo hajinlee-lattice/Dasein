@@ -140,7 +140,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // State, DUNS
         // test allocate mode
         List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null);
-        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
         String entityId = verifyAndGetEntityId(output);
 
         // publish for testing lookup
@@ -196,7 +196,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // public domain, in email format, with PublicDomainAsNormalDomain set
         // true, treat as normal domain
         data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS, true).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, true).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, publicAsNormalDomainEntityId);
@@ -679,6 +679,23 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         runAndVerifyMatchPair(tenant, keys1, data, keys2, data, true);
     }
 
+    /**
+     * Make sure we match to anonymous account when user does not map any account
+     * match key
+     *
+     * @param accountKeyMap
+     */
+    @Test(groups = "functional", dataProvider = "noUserMappingKeyMap", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testNoUserMapping(EntityKeyMap accountKeyMap) {
+        Tenant tenant = newTestTenant();
+        List<Object> data = Arrays.asList("acct_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
+                "060902413");
+        Pair<MatchInput, MatchOutput> inputOutput = matchAccount(data, true, tenant, accountKeyMap, FIELDS, false);
+        String entityId = verifyAndGetEntityId(inputOutput.getRight());
+        Assert.assertEquals(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID, String
+                .format("Should match to anonymous account with EntityKeyMap=%s", JsonUtils.serialize(accountKeyMap)));
+    }
+
     private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
             List<Object> data2, boolean isMatched) {
         Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data1, true, tenant,
@@ -712,7 +729,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private String lookupAccount(Tenant tenant, String acctId, String mktoId, String eloquaId, String name,
             String domain, String country, String state, String duns) {
         List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns);
-        MatchOutput output = matchAccount(data, false, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(), FIELDS).getRight();
         return verifyAndGetEntityId(output);
     }
 
@@ -729,8 +746,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
             Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields, boolean publicDomainAsNormalDomain) {
         String entity = BusinessEntity.Account.name();
-        entityKeyMap = entityKeyMap == null ? getEntityKeyMap() : entityKeyMap;
-        MatchInput input = prepareEntityMatchInput(tenant, entity, Collections.singletonMap(entity, entityKeyMap));
+        Map<String, EntityKeyMap> maps = new HashMap<>();
+        maps.put(entity, entityKeyMap);
+        MatchInput input = prepareEntityMatchInput(tenant, entity, maps);
         input.setAllocateId(isAllocateMode); // Not take effect in this test
         entityMatchConfigurationService.setIsAllocateMode(isAllocateMode);
         input.setFields(fields);
@@ -752,6 +770,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
      */
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
                                                        Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields) {
+        if (entityKeyMap == null) {
+            entityKeyMap = getEntityKeyMap();
+        }
         return matchAccount(data, isAllocateMode, tenant, entityKeyMap, fields, false);
     }
 
@@ -1022,6 +1043,15 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Verify all combinations of match keys are covered
         Assert.assertEquals(toReturn.size(), total);
         return dedupMatchKeys(toReturn);
+    }
+
+    @DataProvider(name = "noUserMappingKeyMap")
+    private Object[][] noUserMappingKeyMapTestData() {
+        return new Object[][] { //
+                { null }, // null account key map
+                { new EntityKeyMap() }, // key map with null map for match key -> column names
+                { new EntityKeyMap(new HashMap<>()) }, // key map with empty map for match key -> column names
+        }; //
     }
 
     private static String concatIdxes(Integer idx1, Integer idx2) {
