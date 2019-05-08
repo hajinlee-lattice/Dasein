@@ -68,8 +68,7 @@
             .le-title-container {
                 font-size: 20px;
                 width: 90%;
-                padding: 10px 1.2em;
-                padding-left: 0.5em;
+                margin: 0 auto;
                 display: flex;
                 align-items: center;
   
@@ -144,7 +143,7 @@
             border-bottom: 1px solid rgba(153, 152, 152, 0.405);
             overflow: auto;
             padding: 10px;
-            
+
             p {
               margin-bottom: 1em;
             }
@@ -169,6 +168,11 @@
   
             br {
               display: none;
+            }
+
+            .le-modal-body-container {
+              width: 90%;
+              margin: 0 auto;
             }
   
             .le-modal-message {

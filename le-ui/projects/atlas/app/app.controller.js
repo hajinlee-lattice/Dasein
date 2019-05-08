@@ -21,6 +21,7 @@ export default function (
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
 
+    window.BrowserStorageUtility = BrowserStorageUtility;
     SessionTimeoutUtility.init();
 
     if (loginDocument && mustUserChangePassword(loginDocument)) {

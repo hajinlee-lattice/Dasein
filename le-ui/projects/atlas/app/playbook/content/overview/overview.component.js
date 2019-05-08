@@ -24,7 +24,6 @@ import {
 
 export default class OverviewComponent extends Component {
     constructor(props) {
-console.log('constructor');
         super(props);
         this.state = {
             play: props.play,
@@ -52,10 +51,26 @@ console.log('constructor');
         //console.log('handleChange', state);
     }
 
+    makeTalkingpoints(play) {
+        if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
+            return (
+                <div className="talking-points">
+                    <a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create Talking Points</a>
+                    No talking points
+                </div>
+            );
+        } else {
+            return (
+                <div className="talking-points">
+                    <a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit Talking points</a>
+                    {play.talkingPoints.length} talking points have been created
+                </div>
+            );
+        }
+    }
+
     render() {
-console.log('OverviewComponent');
         if (this.state.play) {
-console.log('this.state.play');
             return (
                 <ReactMainContainer className={'container playbook-overview'}>
                     <LeHPanel hstretch={"true"} vstretch={"true"}>
@@ -63,25 +78,13 @@ console.log('this.state.play');
                             <SystemsComponent play={this.state.play} connections={this.state.connections} />
                         </div>
                         <div class="main-component">
-                            <RatingsComponent play={this.state.play} />
                             <GridLayout classNames="overview-grid extend">
                                 <span>
-                                    Segment: {this.state.play.targetSegment.display_name}
+                                    <RatingsComponent play={this.state.play} />
                                 </span>
                                 <span>
-                                    Campaign Type: {this.state.play.playType.displayName}
-                                </span>
-                                <span>
-                                    Model: {this.state.play.ratingEngine.displayName}
-                                </span>
-                                <span>
-                                    Talking Point: {this.state.play.talkingPoints.length} talking points
-                                </span>
-                                <span>
-                                    Available Targets: {this.state.play.targetSegment.accounts} Accounts | {this.state.play.targetSegment.contacts} Contacts
-                                </span>
-                                <span>
-                                    Description: {this.state.play.description}
+                                    <h2>Talking Points</h2>
+                                    {this.makeTalkingpoints(this.state.play)}
                                 </span>
                             </GridLayout>
                         </div>

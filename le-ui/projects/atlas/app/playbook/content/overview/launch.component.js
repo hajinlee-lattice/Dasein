@@ -41,9 +41,9 @@ class LaunchComponent extends Component {
         super(props);
 
         this.state = {
-            refresh: false,
             play: props.play,
             ratings: null,
+            coverage: null,
             selectedBuckets: [],
             recommendationCounts: {},
             unscored: false,
@@ -75,7 +75,6 @@ class LaunchComponent extends Component {
     }
 
     bucketClick = (bucket, coverage, play) => {
-        return false;
         var selectedBuckets = this.state.selectedBuckets,
             index = selectedBuckets.indexOf(bucket.bucket);
 
@@ -87,34 +86,13 @@ class LaunchComponent extends Component {
 
         this.state.selectedBuckets = selectedBuckets;
         this.setState(this.state);
-        //console.log(this.state, selectedBuckets, this.state.selectedBuckets);
-
-        //PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
-        //updatePage();
-        this.state.recommendationCounts = this.makeRecommendationCounts(coverage, play);
-        this.setState(this.state);
     }
 
-    updateTopNCount() {
-        var vm = {}; // placeholder
-        vm.topNCount = Math.floor(vm.topNCount);
-        if (vm.topNClicked && (vm.topNCount <= 0 || vm.topNCount == null)){
-            vm.showError = true;
-        } else {
-            vm.showError = false;
-            vm.topNClicked ? PlaybookWizardStore.setTopNCount(vm.topNCount) : PlaybookWizardStore.setTopNCount(null);
-        }
-    }
-
-    makeRecommendationCounts(coverage, play, launchUnscored) {
-        console.log('makeRecommendationCounts()');
+    makeRecommendationCounts(coverage, play) {
         var vm = this; // placeholder
-        var launchUnscored = this.state.unscored; // bool that should come from the include unscored checkbox
-        var topNClicked  = false; //bool from Limit to only x recommentations
-        var topNCount = play.launchHistory.mostRecentLaunch.topNCount; // can be changed by updateTopNCount()
 
         if(!coverage || !coverage.bucketCoverageCounts) {
-            vm.recommendationCounts = null;
+            this.state.recommendationCounts = null;
             return false;
         }
         var sections = {
@@ -129,8 +107,8 @@ class LaunchComponent extends Component {
         sections.total = play.targetSegment.accounts;
 
         var _contacts = 0;
-        for(var i in vm.selectedBuckets) {
-            var bucket = vm.selectedBuckets[i],
+        for(var i in vm.state.selectedBuckets) {
+            var bucket = vm.state.selectedBuckets[i],
                 count = coverage.bucketCoverageCounts.find(function(value) {
                     return value.bucket === bucket;
                 });
@@ -140,28 +118,27 @@ class LaunchComponent extends Component {
             _contacts = _contacts + parseInt(count.contactCount || 0);
         }
 
-        sections.selected = launchUnscored ? coverage.unscoredAccountCount + sections.selected : sections.selected;
+        sections.selected = this.state.unscored ? coverage.unscoredAccountCount + sections.selected : sections.selected;
 
-        if (topNClicked && topNCount <= sections.selected){
-            sections.launched = topNCount <= 0 ? 0 : topNCount;
+        if (this.state.limitRecommendations && this.state.limitRecommendationsAmount <= sections.selected){
+            sections.launched = this.state.limitRecommendationsAmount <= 0 ? 0 : this.state.limitRecommendationsAmount;
         } else {
             sections.launched = sections.selected;
         }
 
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
 
-        sections.contacts = _contacts + (launchUnscored ? (coverage.unscoredContactCount ? coverage.unscoredContactCount  : 0) : 0); 
-        
+        sections.contacts = _contacts + (this.state.unscored ? (coverage.unscoredContactCount ? coverage.unscoredContactCount  : 0) : 0);
+
         return sections;
     }
 
     makeBuckets(coverage, play) {
-        console.log('makeBuckets()');
         var buckets = [],
             total = 0,
             vm = this;
 
-        if(coverage && coverage.bucketCoverageCounts.length) {
+        if(coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length) {
             coverage.bucketCoverageCounts.forEach(function(bucket) {
                 total = total + parseInt(bucket.count);
             });
@@ -178,6 +155,144 @@ class LaunchComponent extends Component {
             });
         }
         return buckets;
+    }
+
+    makeBucketList(play, coverage, unscoredAccountCountPercent) {
+        if(coverage) {
+            return (
+                <Aux>
+                    <h2>Model Ratings</h2>
+                    <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
+                        {this.makeBuckets(coverage, play)}
+                    </LeHPanel>
+                    <input id="unscored" type="checkbox" onChange={this.clickUnscored} /> 
+                    <label for="unscored">
+                        Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
+                    </label>
+                </Aux>
+            );
+        }
+    }
+
+    nextSaveLaunch = (play, connection, opts) => {
+        console.log(play, connection, opts);
+        console.group('nextSaveLaunch');
+        // what are audience name and id and waht is folder name?
+        // how to call fetch ratings from in here, or do I call it from react and then access the store (currently doing this)?
+        var opts = opts || {},
+            play = opts.play || store.getState().playbook.play,
+            ratings = store.getState().playbook.ratings,
+            launchObj = opts.launchObj || {
+                bucketsToLaunch: this.state.selectedBuckets,
+                destinationOrgId: connection.orgId,
+                destinationSysType: connection.externalSystemType,
+                destinationAccountId: connection.orgName,
+                topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
+                launchUnscored: this.state.unscored,
+                excludeItemsWithoutSalesforceId: false
+                // audienceName: PlaybookWizardStore.getAudienceName(), //?
+                // audienceId: PlaybookWizardStore.getAudienceId(), //?
+                // folderName: PlaybookWizardStore.getMarketoProgramName(), //?
+            },
+            saveOnly = opts.saveOnly || false,
+            lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
+            lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
+
+
+        if(play) {
+            // do I need to do this?
+            // if(play.ratingEngine){
+            //     RatingsEngineStore.getRating(play.ratingEngine.id).then(function(result){
+            //         PlaybookWizardStore.setRating(result);
+            //     });
+            // } else {
+            //     var ratingEngine = PlaybookWizardStore.getSavedRating(); //?
+            //     play.ratingEngine = ratingEngine;
+            // }
+            // launch saved play
+            if(lastIncompleteLaunch) {
+                // ow do I call saveLaunch?
+                console.group('lastIncompleteLaunch');
+                    console.log('lastIncompleteLaunch:', lastIncompleteLaunch);
+                    console.log('saveLaunch()', 'save');
+                    console.log('saveLaunch()', 'launch');
+                console.groupEnd();
+                // PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                //     launch_id: lastIncompleteLaunch.launchId,
+                //     launchObj: Object.assign({},lastIncompleteLaunch, launchObj)
+                // }).then(function(launch) {
+                //     PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                //         launch_id: lastIncompleteLaunch.launchId,
+                //         action: 'launch'
+                //     }).then(function(saved) {
+                //         $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                //     });
+                // });
+            } else if(lastIncompleteLaunchId) {
+                // save play
+                console.group('lastIncompleteLaunchId');
+                    console.log('lastIncompleteLaunchId:', lastIncompleteLaunchId);
+                    console.log('savePlay()?');
+                    console.log('saveLaunch()', 'save');
+                    if(!saveOnly) {
+                        console.log('saveLaunch()', 'launch');
+                    }
+                console.groupEnd();
+                // PlaybookWizardStore.savePlay(play).then(function(play) {
+                //     // save launch
+                //     PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                //         launch_id: lastIncompleteLaunchId,
+                //         launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj)
+                //     }).then(function(saved) {
+                //         if(!saveOnly) {
+                //             // launch
+                //             PlaybookWizardService.saveLaunch(play.name, {
+                //                 launch_id: lastIncompleteLaunchId,
+                //                 action: 'launch'
+                //             }).then(function(launch) {
+                //                 // after launch
+                //                 $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                //             });
+                //         } else {
+                //             // saved but not launched
+                //             $state.go('home.playbook');
+                //         }
+                //     });
+                // });
+            } else {
+                console.group('else');
+                    console.log('savePlay()?');
+                    console.log('saveLaunch()', 'save');
+                    if(!saveOnly) {
+                        console.log('saveLaunch()', 'launch');
+                    }
+                console.groupEnd();
+
+                // save play
+                // PlaybookWizardStore.savePlay(play).then(function(play) {
+                //     // get launchid
+                //     PlaybookWizardService.saveLaunch(play.name, {
+                //         launchObj: launchObj
+                //     }).then(function(launch) {
+                //         var launch = launch || {};
+                //         // save launch
+                //         if(launch && !saveOnly) {
+                //             PlaybookWizardService.saveLaunch(PlaybookWizardStore.currentPlay.name, {
+                //                 launch_id: launch.id,
+                //                 action: 'launch',
+                //             }).then(function(saved) {
+                //                 // after launch
+                //                 $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: saved.applicationId});
+                //             });
+                //         } else {
+                //             // saved but not launched
+                //             $state.go('home.playbook');
+                //         }
+                //     });
+                // });
+            }
+        }
+        console.groupEnd();
     }
 
     clickUnscored = (e) => {
@@ -207,20 +322,39 @@ class LaunchComponent extends Component {
         console.log(e.target.checked);
     }
 
+    launch = (play, connection, save) => {
+        let launchObj = {
+          "bucketsToLaunch": this.state.selectedBuckets,
+          "destinationOrgId": connection.orgId,
+          "destinationSysType": connection.externalSystemType,
+          "destinationAccountId": connection.orgName,
+          "topNCount": (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
+          "launchUnscored": this.state.unscored,
+          "excludeItemsWithoutSalesforceId": false
+        }
+        actions.saveLaunch(play.name, launchObj);
+        //console.log(launchObj);
+    }
+
     render() {
         if(this.state.ratings) {
             var play = this.state.play,
+                connection = this.props.connection,
                 accountsCoverage = this.state.ratings,
                 engineId = (accountsCoverage && accountsCoverage.ratingEngineIdCoverageMap && accountsCoverage.ratingEngineIdCoverageMap[Object.keys(accountsCoverage.ratingEngineIdCoverageMap)[0]] ? Object.keys(accountsCoverage.ratingEngineIdCoverageMap)[0] : ''),
                 coverage = (engineId && accountsCoverage.ratingEngineIdCoverageMap[engineId] ? accountsCoverage.ratingEngineIdCoverageMap[engineId] : {}),
                 unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
                 bucketsToLaunch = play.launchHistory.mostRecentLaunch.bucketsToLaunch,
                 selectedBuckets = this.selectedBuckets,
-                numAccounts = coverage.unscoredAccountCount + coverage.accountCount;
+                numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
+                recommendationCounts = this.makeRecommendationCounts(coverage, play),
+                canLaunch = recommendationCounts.launched;
 
-            var recommendationCounts = this.makeRecommendationCounts(coverage, play);
+            // let state = this.state;
+            // state.coverage = coverage;
+            // this.setState(state);
 
-            if(coverage){
+            if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
                     if(bucketsToLaunch == null) {
                         //selectedBuckets.push(bucket.bucket);
@@ -236,17 +370,10 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <LeVPanel className={'campaign-launch'} hstretch={true}>
-                        <div>
-                            <h2>Model Ratings</h2>
-                            <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
-                                {this.makeBuckets(coverage, play)}
-                            </LeHPanel>
-                            <input id="unscored" type="checkbox" onChange={this.clickUnscored} /> 
-                            <label for="unscored">
-                                Include the <strong>{coverage.unscoredAccountCount.toLocaleString()} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
-                            </label>
+                        <div className={'launch-section model-ratings'}>
+                            {this.makeBucketList(play, coverage, unscoredAccountCountPercent)}
                         </div>
-                        <div>
+                        <div className={'launch-section account-options'}>
                             <h2>Account Options</h2>
                             <ul>
                                 <li>
@@ -259,7 +386,7 @@ class LaunchComponent extends Component {
                                 </li>
                             </ul>
                         </div>
-                        <div>
+                        <div className={'launch-section recommendations'}>
                             <h2>Recommendations to be Launched: {recommendationCounts.launched}</h2>
                             <ul>
                                 <li>
@@ -273,7 +400,7 @@ class LaunchComponent extends Component {
                                 </li>
                             </ul>
                         </div>
-                        <div className={'launch-buttons'}>
+                        <div className={'launch-section launch-buttons'}>
                             <ul>
                                 <li>
                                     <LeButton
@@ -283,37 +410,43 @@ class LaunchComponent extends Component {
                                             label: "Cancel",
                                             classNames: "white-button"
                                         }}
-                                        callback={() => { this.props.closeFn(); this.setState({refresh: true}) }} />
+                                        callback={() => { this.props.closeFn(); }} />
                                 </li>
                                 <li>
                                     <LeButton
                                         name="launchlater"
-                                        disabled={false}
+                                        disabled={!canLaunch}
                                         config={{
                                             label: "Launch Later",
                                             classNames: "white-button"
                                         }}
-                                        callback={() => { modalActions.closeModal(store); this.setState({refresh: true}) }} />
+                                        callback={() => { 
+                                            this.nextSaveLaunch(play, connection, {saveOnly: true, lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch}); 
+                                        }} />
                                 </li>
                                 <li>
                                     <LeButton
                                         name="launchnow"
-                                        disabled={false}
+                                        disabled={!canLaunch}
                                         config={{
                                             label: "Launch Now",
                                             classNames: "white-button"
                                         }}
-                                        callback={() => { modalActions.closeModal(store); this.setState({refresh: true}) }} />
+                                        callback={() => { 
+                                            this.nextSaveLaunch(play, connection, {saveOnly: false, lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch}); 
+                                        }} />
                                 </li>
                                 <li>
                                     <LeButton
                                         name="launchautomatically"
-                                        disabled={false}
+                                        disabled={true}
                                         config={{
                                             label: "Launch Automatically",
                                             classNames: "blue-button"
                                         }}
-                                        callback={() => { modalActions.closeModal(store); this.setState({refresh: true}) }} />
+                                        callback={() => {
+                                            console.log('Launch Automatically Clicked');
+                                        }} />
                                 </li>
                             </ul>
                         </div>
