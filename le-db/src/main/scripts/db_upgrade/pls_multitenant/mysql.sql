@@ -223,3 +223,4 @@ CALL `CreateDataIntegrationMonitoringTable`();
 CALL `CreateDataIntegrationMessageTable`();
 CALL `CreateS3ImportSystemTable`();
 CALL `CreateAtlasSchedulingTable`();
+CALL `CreateAtlasExportTable`();
