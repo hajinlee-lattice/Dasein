@@ -2,6 +2,7 @@ import React, { Component, react2angular } from "common/react-vendor";
 import Aux from 'common/widgets/hoc/_Aux';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
+import './systems.component.scss';
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
 import { actions, reducer } from '../../playbook.redux';
 import { store, injectAsyncReducer } from 'store';
@@ -74,23 +75,20 @@ class SystemsComponent extends Component {
         var launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
             text = [];
+            console.log(launch);
 
         if(launched) {
             text.push(
                 <div class="launch-text launched">
-                    <h3>Last Launch settings</h3>
                     <ul>
                         <li>
-                            Yesterday at 9:00am (created)?
+                            Last Launched: {new Date(launch.created).toLocaleDateString("en-US")}
                         </li>
                         <li>
-                            Automatically every 2 months?
+                            Accounts Sent: {launch.accountsLaunched.toLocaleString()}
                         </li>
                         <li>
-                            Destination: {launch.folderName}
-                        </li>
-                        <li>
-                            Contacts: {launch.contactsLaunched.toLocaleString()}
+                            Contacts Sent: {launch.contactsLaunched.toLocaleString()}
                         </li>
                     </ul>
                 </div>
@@ -98,7 +96,7 @@ class SystemsComponent extends Component {
         } else {
             text.push(
                 <div class="launch-text unlaunched">
-                    No previous launch.
+                    No previous launch
                 </div>
             );
         }
@@ -175,14 +173,12 @@ class SystemsComponent extends Component {
             },
             className: 'rating-modal',
             template: () => {
-                console.log('modal, template: ()');
-
                 function closeModal() {
                     modalActions.closeModal(store);
                 }
 
                 return (
-                    <LaunchComponent closeFn={closeModal} play={this.state.play} />
+                    <LaunchComponent closeFn={closeModal} connection={connection} play={this.state.play} />
                 );
             },
             title: () => {

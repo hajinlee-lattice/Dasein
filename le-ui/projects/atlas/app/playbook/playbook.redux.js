@@ -6,14 +6,17 @@ var CONST = {
     FETCH_PLAY: 'FETCH_PLAY',
     FETCH_PLAYS: 'FETCH_PLAYS',
     FETCH_CONNECTIONS: 'FETCH_CONNECTIONS',
-    FETCH_RATINGS: 'FETCH_RATINGS'
+    FETCH_RATINGS: 'FETCH_RATINGS',
+    SAVE_LAUNCH: 'SAVE_LAUNCH',
+    SAVE_PLAY: 'SAVE_PLAY'
 }
 
 const initialState = {
     play: null,
     plays: null,
     connections: null,
-    ratings: null
+    ratings: null,
+    saveLaunch: null
 };
 
 export const actions = {
@@ -75,59 +78,66 @@ export const actions = {
             ratingEngineIds: ratingEngineIds,
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
+    },
+    storePlay: (opts) => {
+        // do we have client session in react?
+        // pass it via angular maybe
+        return false;
+        var deferred = $q.defer();
+        var ClientSession = window.BrowserStorageUtility.getClientSession();
+        opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
+        opts.updatedBy = ClientSession.EmailAddress;
+
+        // how to call savePlay?
+        PlaybookWizardService.savePlay(opts).then(function(data){
+            PlaybookWizardStore.setPlay(data);
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    },
+    savePlay: (opts) => {
+        deferred = deferred || { resolve: (data) => data }
+
+        var opts = opts || {};
+
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.SAVE_PLAY,
+                    payload: response.data
+                });
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.post(`/pls/play/`, opts, observer, {});
+    },
+    saveLaunch: (play_name, opts, deferred) => {
+        console.log(play_name, opts);
+        return false;
+        var ClientSession = window.BrowserStorageUtility.getClientSession();
+        console.log(ClientSession);
+        console.log(play_name, opts, store.getState().playbook);
+        return false;
+        deferred = deferred || { resolve: (data) => data }
+
+        var opts = opts || {},
+            launch_id = opts.launch_id || '',
+            action = opts.action || '',
+            launchObj = opts.launchObj || '';
+
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.SAVE_LAUNCH,
+                    payload: response.data
+                });
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.post('/pls/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : ''), launchObj, observer, {});
     }
-    // this.getRatingsCounts = function(ratings, noSalesForceId) {
-    //     var deferred = $q.defer();
-    //     $http({
-    //         method: 'POST',
-    //         url: this.host + '/ratingengines/coverage',
-    //         data: {
-    //             ratingEngineIds: ratings,
-    //             restrictNotNullSalesforceId: noSalesForceId,
-
-    //         }
-    //     }).then(
-    //         function onSuccess(response) {
-    //             var result = response.data;
-    //             deferred.resolve(result);
-    //         }, function onError(response) {
-    //             if (!response.data) {
-    //                 response.data = {};
-    //             }
-
-    //             var errorMsg = response.data.errorMsg || 'unspecified error';
-    //             deferred.resolve(errorMsg);
-    //         }
-    //     );
-    //     return deferred.promise;
-    // }
-    
-    // this.saveLaunch = function(play_name, opts) {
-    //     var deferred = $q.defer(),
-    //         opts = opts || {},
-    //         launch_id = opts.launch_id || '',
-    //         action = opts.action || '',
-    //         launchObj = opts.launchObj || '';
-
-    //     $http({
-    //         method: 'POST',
-    //         url: this.host + '/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : ''),
-    //         data: launchObj
-    //     }).then(
-    //         function onSuccess(response) {
-    //             var result = response.data;
-    //             deferred.resolve(result);
-    //         }, function onError(response) {
-    //             if (!response.data) {
-    //                 response.data = {};
-    //             }
-
-    //             var errorMsg = response.data.errorMsg || 'unspecified error';
-    //             deferred.resolve(errorMsg);
-    //         }
-    //     );
-    //     return deferred.promise;
-    // }
 };
 
 export const reducer = (state = initialState, action) => {
@@ -151,6 +161,16 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 ratings: action.payload
+            }
+        case CONST.SAVE_LAUNCH:
+            return {
+                ...state,
+                saveLaunch: action.payload
+            }
+        case CONST.SAVE_PLAY:
+            return {
+                ...state,
+                play: action.payload
             }
         default:
             return state;

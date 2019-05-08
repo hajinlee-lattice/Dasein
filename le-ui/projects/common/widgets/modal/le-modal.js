@@ -153,7 +153,9 @@ export default class LeModal extends Component {
                         </div>
                     </div>
                     <div className="le-modal-body">
-                        {this.getTemplate()}
+                        <div className="le-modal-body-container">
+                            {this.getTemplate()}
+                        </div>
                     </div>
                     {this.getFooter()}
                 </div>
