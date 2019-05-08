@@ -12,8 +12,6 @@ angular
 ])
 .config(function($stateProvider) {
     $stateProvider
-
-
         .state('home.importtemplates', {
             url: '/templates',
             onEnter: function(ImportWizardStore){

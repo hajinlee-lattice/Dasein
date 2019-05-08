@@ -337,9 +337,7 @@ export default class TemplatesComponent extends Component {
 
                             copyComponent = <CopyComponent
                                     title="Copy Link"
-                                    data={
-                                        cell.props.rowData[cell.props.colName]
-                                    }
+                                    data={longRootFolder}
                                     callback={() => {
                                         messageService.sendMessage(
                                             new Message(
