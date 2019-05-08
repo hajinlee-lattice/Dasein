@@ -3,11 +3,11 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.List;
 import java.util.Map;
 
-public class PlayLaunchConfigurations {
+public class PlayLaunchChannelMap {
 
     private Map<String, List<LookupIdMap>> uniqueLookupIdMapping;
 
-    private Map<String, PlayLaunch> launchConfigurations;
+    private Map<String, PlayLaunchChannel> launchChannelMap;
 
     public Map<String, List<LookupIdMap>> getUniqueLookupIdMapping() {
         return uniqueLookupIdMapping;
@@ -17,12 +17,12 @@ public class PlayLaunchConfigurations {
         this.uniqueLookupIdMapping = uniqueLookupIdMapping;
     }
 
-    public Map<String, PlayLaunch> getLaunchConfigurations() {
-        return launchConfigurations;
+    public Map<String, PlayLaunchChannel> getLaunchChannelMap() {
+        return launchChannelMap;
     }
 
-    public void setLaunchConfigurations(Map<String, PlayLaunch> launchConfigurations) {
-        this.launchConfigurations = launchConfigurations;
+    public void setLaunchChannelMap(Map<String, PlayLaunchChannel> launchChannelMap) {
+        this.launchChannelMap = launchChannelMap;
     }
 
 }

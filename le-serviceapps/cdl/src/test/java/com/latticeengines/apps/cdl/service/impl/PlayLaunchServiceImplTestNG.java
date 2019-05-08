@@ -44,7 +44,8 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
@@ -121,7 +122,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setUpdatedBy(CREATED_BY);
         play.setTargetSegment(playTargetSegment);
         play.setPlayType(playTypes.get(0));
-        
+
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
         assertPlayTargetSegment(play);
@@ -299,17 +300,17 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertTrue(actualBucketsToLaunch.contains(expectedBucket));
         }
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
-    public void testGetLaunchConfigurations(){
+    public void testGetLaunchConfigurations() {
         lookupIdMappingService.registerExternalSystem(lookupIdMap1);
         lookupIdMappingService.registerExternalSystem(lookupIdMap2);
 
-        PlayLaunchConfigurations configurations = playLaunchService.getPlayLaunchConfigurations(play.getPid());
-        Assert.assertNotNull(configurations);
-        Map<String, PlayLaunch> configurationMap = configurations.getLaunchConfigurations();
-        Assert.assertEquals(configurationMap.get(org1).getPid(), playLaunch1.getPid());
-        Assert.assertEquals(configurationMap.get(org2).getPid(), playLaunch2.getPid());
+        PlayLaunchChannelMap channelMap = playLaunchService.getPlayLaunchChannelMap(play.getName());
+        Assert.assertNotNull(channelMap);
+        Map<String, PlayLaunchChannel> configurationMap = channelMap.getLaunchChannelMap();
+        Assert.assertEquals(configurationMap.get(org1).getPlayLaunch().getPid(), playLaunch1.getPid());
+        Assert.assertEquals(configurationMap.get(org2).getPlayLaunch().getPid(), playLaunch2.getPid());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetLaunchConfigurations" })
@@ -350,7 +351,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
     public void testCreateExportIntegrationStatusMonitor() throws InterruptedException {
-        // Simulate workflow Launch and external integration with Tray Export Flow
+        // Simulate workflow Launch and external integration with Tray Export
+        // Flow
         DataIntegrationStatusMonitorMessage statusMessage1 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
                 DataIntegrationEventType.WorkflowSubmitted, playLaunch1);
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage1);
