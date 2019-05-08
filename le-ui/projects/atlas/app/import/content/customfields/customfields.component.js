@@ -1,3 +1,5 @@
+import { format } from "path";
+
 angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
     $state, $stateParams, $scope, ResourceUtility, 
@@ -116,6 +118,11 @@ angular.module('lp.import.wizard.customfields', [])
         ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone});
         ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
         vm.validate();
+    }
+    
+    vm.updateFormats = (formats) => {
+        let field = formats.field;
+        ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
     }
 
     vm.getNumberDroppedFields = function(){
