@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -104,7 +104,7 @@ public class SchemaRepository {
     }
 
     public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
-        return MetadataSegmentExportType.getDefaultExportAttributes(entity);
+        return AtlasExportType.getDefaultExportAttributes(entity);
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {

@@ -45,8 +45,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -112,7 +112,7 @@ public abstract class SegmentExportProcessor {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public abstract boolean accepts(MetadataSegmentExportType type);
+    public abstract boolean accepts(AtlasExportType type);
 
     protected abstract void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext,
             File localFile) throws IOException;
@@ -129,7 +129,7 @@ public abstract class SegmentExportProcessor {
             metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
         }
 
-        MetadataSegmentExportType exportType = metadataSegmentExport.getType();
+        AtlasExportType exportType = metadataSegmentExport.getType();
 
         Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap = new TreeMap<>();
         BusinessEntity.SEGMENT_ENTITIES.forEach(i -> configuredBusEntityAttrMap.put(i, new ArrayList<Attribute>()));
@@ -140,8 +140,8 @@ public abstract class SegmentExportProcessor {
         List<Attribute> configuredPurHistoryAttributes = configuredBusEntityAttrMap.get(BusinessEntity.PurchaseHistory);
         List<Attribute> configuredCuratedAccAttributes = configuredBusEntityAttrMap.get(BusinessEntity.CuratedAccount);
 
-        if (exportType == MetadataSegmentExportType.ACCOUNT
-                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
+        if (exportType == AtlasExportType.ACCOUNT
+                || exportType == AtlasExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
 
             Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
@@ -176,9 +176,9 @@ public abstract class SegmentExportProcessor {
             });
         }
 
-        if (exportType == MetadataSegmentExportType.CONTACT
-                || exportType == MetadataSegmentExportType.ACCOUNT_AND_CONTACT
-                || exportType == MetadataSegmentExportType.ORPHAN_CONTACT) {
+        if (exportType == AtlasExportType.CONTACT
+                || exportType == AtlasExportType.ACCOUNT_AND_CONTACT
+                || exportType == AtlasExportType.ORPHAN_CONTACT) {
             configuredContactAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Contact));
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
             exportType.getDefaultAttributeTuples().stream() //
@@ -288,7 +288,7 @@ public abstract class SegmentExportProcessor {
         List<Object> modifiableAccountIdCollectionForContacts = new ArrayList<>();
 
         FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
-        if (metadataSegmentExport.getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
+        if (metadataSegmentExport.getType() == AtlasExportType.ACCOUNT_AND_CONTACT) {
             FrontEndRestriction contactRestrictionWithAccountIdList = prepareContactRestriction(
                     metadataSegmentExport.getContactFrontEndRestriction().getRestriction(),
                     modifiableAccountIdCollectionForContacts);
@@ -296,7 +296,7 @@ public abstract class SegmentExportProcessor {
             setSortField(BusinessEntity.Contact,
                     Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
                     contactFrontEndQuery);
-        } else if (metadataSegmentExport.getType() == MetadataSegmentExportType.ORPHAN_CONTACT) {
+        } else if (metadataSegmentExport.getType() == AtlasExportType.ORPHAN_CONTACT) {
             Restriction restriction = Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name())
                     .isNull().build();
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
@@ -317,7 +317,7 @@ public abstract class SegmentExportProcessor {
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, configuredBusEntityAttrMap);
 
-        if (metadataSegmentExport.getType() == MetadataSegmentExportType.CONTACT) {
+        if (metadataSegmentExport.getType() == AtlasExportType.CONTACT) {
             Lookup specialHandlingForAccountNameLookupForContacts = new AttributeLookup(BusinessEntity.Account,
                     InterfaceName.LDC_Name.name());
             contactFrontEndQuery.getLookups().add(specialHandlingForAccountNameLookupForContacts);

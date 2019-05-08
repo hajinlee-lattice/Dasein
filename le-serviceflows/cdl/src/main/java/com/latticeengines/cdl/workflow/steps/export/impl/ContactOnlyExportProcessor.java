@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
 @Component
@@ -29,8 +29,8 @@ public class ContactOnlyExportProcessor extends SegmentExportProcessor {
     private static final Logger log = LoggerFactory.getLogger(ContactOnlyExportProcessor.class);
 
     @Override
-    public boolean accepts(MetadataSegmentExportType type) {
-        return MetadataSegmentExportType.CONTACT.equals(type) || MetadataSegmentExportType.ORPHAN_CONTACT.equals(type);
+    public boolean accepts(AtlasExportType type) {
+        return AtlasExportType.CONTACT.equals(type) || AtlasExportType.ORPHAN_CONTACT.equals(type);
     }
 
     @Override

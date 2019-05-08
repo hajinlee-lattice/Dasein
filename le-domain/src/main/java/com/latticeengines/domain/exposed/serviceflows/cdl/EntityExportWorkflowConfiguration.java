@@ -51,6 +51,11 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
+        public Builder atlasExportId(String atlasExportId) {
+            step.setAtlasExportId(atlasExportId);
+            return this;
+        }
+
         public EntityExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("entityExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

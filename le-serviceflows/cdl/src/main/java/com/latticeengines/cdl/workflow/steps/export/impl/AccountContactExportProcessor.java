@@ -23,7 +23,7 @@ import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
 @Component
@@ -32,11 +32,11 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
     private static final Logger log = LoggerFactory.getLogger(AccountContactExportProcessor.class);
 
     @Override
-    public boolean accepts(MetadataSegmentExportType type) {
-        return type == MetadataSegmentExportType.ACCOUNT //
-                || type == MetadataSegmentExportType.ACCOUNT_AND_CONTACT //
-                || type == MetadataSegmentExportType.ACCOUNT_ID //
-                || type == MetadataSegmentExportType.ORPHAN_TXN;
+    public boolean accepts(AtlasExportType type) {
+        return type == AtlasExportType.ACCOUNT //
+                || type == AtlasExportType.ACCOUNT_AND_CONTACT //
+                || type == AtlasExportType.ACCOUNT_ID //
+                || type == AtlasExportType.ORPHAN_TXN;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
         if (CollectionUtils.isNotEmpty(accountList)) {
 
             if (segmentExportContext.getMetadataSegmentExport()
-                    .getType() == MetadataSegmentExportType.ACCOUNT_AND_CONTACT) {
+                    .getType() == AtlasExportType.ACCOUNT_AND_CONTACT) {
                 List<Object> accountIds = getAccountsIds(accountList);
 
                 // make sure to clear list of account Ids in contact query and
@@ -144,9 +144,9 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                         }
                     }
                 }
-            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT //
+            } else if (segmentExportContext.getMetadataSegmentExport().getType() == AtlasExportType.ACCOUNT //
                     || segmentExportContext.getMetadataSegmentExport()
-                            .getType() == MetadataSegmentExportType.ACCOUNT_ID) {
+                            .getType() == AtlasExportType.ACCOUNT_ID) {
                 for (Map<String, Object> account : accountList) {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 

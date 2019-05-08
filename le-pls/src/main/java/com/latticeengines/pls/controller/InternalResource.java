@@ -59,13 +59,13 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -598,7 +598,7 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody MetadataSegmentExport export, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
-        MetadataSegmentExportType exportType = export.getType();
+        AtlasExportType exportType = export.getType();
         String exportTypeStr = exportType.getDisplayName();
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {

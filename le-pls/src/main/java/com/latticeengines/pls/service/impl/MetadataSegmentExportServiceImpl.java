@@ -23,8 +23,8 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -99,7 +99,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(metadataSegmentExportJob.getAccountFrontEndRestriction());
         frontEndQuery.setContactRestriction(metadataSegmentExportJob.getContactFrontEndRestriction());
-        frontEndQuery.setMainEntity(metadataSegmentExportJob.getType() == MetadataSegmentExportType.ACCOUNT
+        frontEndQuery.setMainEntity(metadataSegmentExportJob.getType() == AtlasExportType.ACCOUNT
                 ? BusinessEntity.Account : BusinessEntity.Contact);
 
         Tenant tenant = MultiTenantContext.getTenant();
