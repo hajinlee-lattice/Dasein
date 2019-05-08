@@ -260,12 +260,12 @@ if __name__ == '__main__':
     # Account
     # dict: AID -> Account, list: Account, list: Account field names
     aid_to_account, accounts, account_schema = read_account_base(ACCOUNT_FILE)
-    # 1st import for ProcessAccount test
+    # For ProcessAccount test
     accounts1 = split(accounts, 0, 900)
-    # 2nd import for ProcessAccount test
+    # 1st import for UpdateAccount test
     accounts2 = split(accounts, 400, 500)
     update_account(accounts2)
-    # for UpdateAccount test
+    # 2nd import for UpdateAccount test
     accounts3 = split(accounts, 900, 1000)
     output(accounts1, 'EntityMatch_Account_1_900.csv', account_schema)
     output(accounts2, 'EntityMatch_Account_401_500.csv', account_schema)
@@ -274,13 +274,13 @@ if __name__ == '__main__':
     # Contact
     # list: Contact, list: Contact field names
     contacts, contact_schema = read_contact_base(CONTACT_FILE)
-    # 1st import for ProcessAccount test
+    # For ProcessAccount test
     contacts1 = split(contacts, 0, 900)
-    # for UpdateAccount test
+    # 1st import for UpdateAccount test
     contacts3 = split(contacts, 900, 1000)
     update_account_in_contact(contacts1, aid_to_account)
     update_account_in_contact(contacts3, aid_to_account)
-    # 2nd import for ProcessAccount test
+    # 2nd import for UpdateAccount test
     contacts2 = split(contacts1, 400, 500)
     update_contact(contacts2)
     output(contacts1, 'EntityMatch_Contact_1_900.csv', contact_schema)
