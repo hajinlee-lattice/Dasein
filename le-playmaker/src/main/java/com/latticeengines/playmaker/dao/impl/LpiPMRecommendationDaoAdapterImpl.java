@@ -158,13 +158,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<String> contactIds,
-            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
+            List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         //log.info("Atlas getContacts: " + orgInfo.toString() + "\t" + appId.toString() + "\n");
-        List<Map<String, Object>> contactList = null;
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, playIds, 0, orgInfo);
         //log.info("Atlas get accountIds: " + launchIds + "\n");
-        contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, start, accountIds);
-        //log.info("Atlas queried contacts : " + contactList + "\n");
+        List<Map<String, Object>> contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, start, accountIds);
+        //log.info("Atlas queried contacts : " + contactList );
         if (CollectionUtils.isNotEmpty(contactList)) {
             contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
                     Math.min(maximum, contactList.size()));
@@ -175,9 +174,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
-            Map<String, String> orgInfo, Map<String, String> appId) {
+            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         int result = 0;
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, null, 0, orgInfo);
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, playIds, 0, orgInfo);
         result = recommendationEntityMgr.findContactsCountByLaunchIds(launchIds, start, accountIds);
         return result;
     }

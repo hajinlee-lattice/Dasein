@@ -440,7 +440,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     @Test(groups = "functional")
     public void getContacts() {
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), null, 1000, 0,
-                100, null, null, null, null, eloquaAppId);
+                100, null, null, null,null, null, eloquaAppId);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> contacts = (List<Map<String, Object>>) result
@@ -454,7 +454,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         accountIds.add("10");
         accountIds.add("12");
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), null, 1000, 0,
-                100, null, accountIds, null, null, eloquaAppId);
+                100, null, accountIds, null, null, null, eloquaAppId);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> contacts = (List<Map<String, Object>>) result
@@ -469,7 +469,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         accountIds.add("10");
         accountIds.add("12");
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), null,
-                1000, null, accountIds, null, null, eloquaAppId);
+                1000, null, accountIds, null, null, null, eloquaAppId);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -477,7 +477,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getContactCount() {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), null,
-                1000, null, null, null, null, eloquaAppId);
+                1000, null, null, null, null, null, eloquaAppId);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
