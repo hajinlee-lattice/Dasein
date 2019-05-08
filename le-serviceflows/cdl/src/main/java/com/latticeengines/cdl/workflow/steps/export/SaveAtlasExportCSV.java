@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,30 +14,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
-
 
 @Component("saveAtlasExportCSV")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -46,6 +64,33 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     private Map<ExportEntity, HdfsDataUnit> inputUnits;
     private Map<ExportEntity, HdfsDataUnit> outputUnits = new HashMap<>();
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${cdl.atlas.export.dropfolder.tag}")
+    private String dropFolderTag;
+
+    @Value("${cdl.atlas.export.dropfolder.tag.value}")
+    private String dropFolderTagValue;
+
+    @Value("${cdl.atlas.export.systemfolder.tag}")
+    private String systemFolderTag;
+
+    @Value("${cdl.atlas.export.systemfolder.tag.value}")
+    private String systemFolderTagValue;
+
+    @Inject
+    private AtlasExportProxy atlasExportProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Resource(name = "redshiftSegmentJdbcTemplate")
+    private JdbcTemplate redshiftJdbcTemplate;
 
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
@@ -133,6 +178,29 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 if (!BusinessEntity.Contact.equals(entity)) {
                     List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
                             .getOrDefault(entity, Collections.emptyList());
+                    if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                        AttributeRepository attrRepo = //
+                                WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
+                        if (attrRepo == null) {
+                            throw new RuntimeException("Cannot find attribute repo in context");
+                        }
+                        CustomerSpace customerSpace = parseCustomerSpace(configuration);
+                        DataCollection.Version version = configuration.getDataCollectionVersion();
+                        String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                                TableRoleInCollection.SortedProduct, version);
+                        if (StringUtils.isBlank(tblName)) {
+                            throw new RuntimeException("Cannot find sorted product table.");
+                        }
+                        for (ColumnMetadata cm: cms) {
+                            String attrName = cm.getAttrName();
+                            String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
+                            String productName = getProductNameFromRedshift(tblName, productId);
+                            String displayName = cm.getDisplayName();
+                            if (!displayName.startsWith(productName)) {
+                                cm.setDisplayName(productName + ": " + displayName);
+                            }
+                        }
+                    }
                     schema.addAll(cms);
                 }
             }
@@ -146,8 +214,23 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return schema;
     }
 
+    private String getProductNameFromRedshift(String tableName, String productId) {
+        String sql = String.format("SELECT %s FROM %s WHERE %s = '%s' LIMIT 1", InterfaceName.ProductName.name(), tableName, //
+                InterfaceName.ProductId.name(), productId);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> redshiftJdbcTemplate.queryForObject(sql, String.class));
+    }
+
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        AtlasExport exportRecord = atlasExportProxy.findAtlasExportById(customerSpaceStr,
+                configuration.getAtlasExportId());
+        if (exportRecord == null) {
+            log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
+                    configuration.getAtlasExportId()));
+            return;
+        }
         outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
             String outputDir = hdfsDataUnit.getPath();
             String csvGzPath;
@@ -159,30 +242,77 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read " + outputDir);
             }
-            processResultCSV(exportEntity, csvGzPath);
+            processResultCSV(exportEntity, csvGzPath, exportRecord);
         }));
         if (configuration.isSaveToDropfolder()) {
             saveSupportingFilesToDropfolder();
         }
     }
 
-    private void processResultCSV(ExportEntity exportEntity, String csvGzFilePath) {
+    private void processResultCSV(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
         if (configuration.isSaveToLocal()) {
             saveToLocalForTesting(exportEntity, csvGzFilePath);
         }
         if (configuration.isSaveToDropfolder()) {
-            saveToDropfolder(exportEntity, csvGzFilePath);
+            saveToDropfolder(exportEntity, csvGzFilePath, exportRecord);
         } else {
-            saveToDataFiles(exportEntity, csvGzFilePath);
+            saveToDataFiles(exportEntity, csvGzFilePath, exportRecord);
         }
     }
 
-    private void saveToDataFiles(ExportEntity exportEntity, String csvGzFilePath) {
-
+    private void saveToDataFiles(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        String targetPath = atlasExportProxy.getSystemExportPath(customerSpaceStr, false);
+        String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
+        String fileName = exportEntity + "_" + exportRecord.getUuid() + suffix;
+        targetPath = targetPath + fileName;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            String finalTargetPath = targetPath;
+            retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
+                }
+                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, systemFolderTag, systemFolderTagValue);
+                return true;
+            });
+        } catch (Exception e) {
+            log.error(String.format("Cannot save export file %s to %s", csvGzFilePath, targetPath));
+        }
+        atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName);
     }
 
-    private void saveToDropfolder(ExportEntity exportEntity, String csvGzFilePath) {
+    private void saveToDropfolder(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        String targetPath = atlasExportProxy.getDropFolderExportPath(customerSpaceStr, exportRecord.getExportType(),
+                exportRecord.getDatePrefix(), false);
+        String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
+        String fileName = exportEntity + suffix;
+        targetPath = targetPath + fileName;
 
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            String finalTargetPath = targetPath;
+            retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
+                }
+                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, dropFolderTag, dropFolderTagValue);
+                return true;
+            });
+        } catch (Exception e) {
+            log.error(String.format("Cannot save export file %s to %s", csvGzFilePath, targetPath));
+        }
+        atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName);
+    }
+
+    private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
+            throws IOException {
+        log.info("Copy from " + hdfsPath + " to " + s3Path);
+        try (InputStream stream = HdfsUtils.getInputStream(configuration, hdfsPath)) {
+            s3Service.uploadInputStream(s3Bucket, s3Path, stream, true);
+            s3Service.addTagToObject(s3Bucket, s3Path, tag, tagValue);
+        }
     }
 
     private void saveToLocalForTesting(ExportEntity exportEntity, String csvGzFilePath) {

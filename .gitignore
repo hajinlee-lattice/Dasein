@@ -45,3 +45,4 @@ jacoco/
 *.dot
 
 /le-ui.tar.gz
+/.metadata/

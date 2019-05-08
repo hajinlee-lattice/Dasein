@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

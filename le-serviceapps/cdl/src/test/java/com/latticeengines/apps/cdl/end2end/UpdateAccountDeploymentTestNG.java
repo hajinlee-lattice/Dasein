@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
-    static final String CHECK_POINT = "update1";
+    public static final String CHECK_POINT = "update1";
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {

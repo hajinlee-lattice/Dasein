@@ -79,7 +79,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     }
 
     @Override
-    public File downloadTestArtifact(String objectDir, String version, String fileName) {
+    public synchronized File downloadTestArtifact(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
         GetObjectRequest getObjectRequest = new GetObjectRequest(S3_BUCKET, objectKey);
 
@@ -95,6 +95,17 @@ public class TestArtifactServiceImpl implements TestArtifactService {
         File dir = new File(DOWNLOAD_DIR + File.separator + eTag);
         String outputFileName = dir.getPath() + File.separator + fileName;
         File outputFile = new File(outputFileName);
+        String downloadingFlag = dir.getPath() + File.separator + "_DOWNLOADING_";
+        File downloadingFlagFile = new File(downloadingFlag);
+
+        while (downloadingFlagFile.exists()) {
+            log.info("Another process is downloading the file ...");
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         if (outputFile.exists() && FileUtils.sizeOf(outputFile) >= objectMetadata.getContentLength()) {
             // same ETag already downloaded
@@ -105,7 +116,14 @@ public class TestArtifactServiceImpl implements TestArtifactService {
                     objectMetadata.getContentType(),
                     FileUtils.byteCountToDisplaySize(objectMetadata.getContentLength()), outputFile.getPath()));
             createTargetDir(dir);
-            downloadS3Object(s3Object, outputFile);
+            try {
+                FileUtils.touch(downloadingFlagFile);
+                downloadS3Object(s3Object, outputFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to download test artifact from S3.", e);
+            } finally {
+                FileUtils.deleteQuietly(downloadingFlagFile);
+            }
         }
         return outputFile;
     }
@@ -113,7 +131,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     private void downloadS3Object(S3Object s3Object, File outputFile) {
         InputStream is = s3Object.getObjectContent();
         byte[] content = new byte[BUFFER_SIZE];
-        double totalSize = new Long(s3Object.getObjectMetadata().getContentLength()).doubleValue();
+        double totalSize = Long.valueOf(s3Object.getObjectMetadata().getContentLength()).doubleValue();
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             int totalRead = 0;
             int bytesRead;

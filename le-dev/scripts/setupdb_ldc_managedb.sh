@@ -21,15 +21,12 @@ else
 fi
 
 # 2.0.6 & 2.0.14 version is needed for some testing purpose, don't remove them
-# Besided above 2 versions, most recent 3 versions should be enough
+# Besides above 2 versions, most recent 3 versions should be enough
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2014.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2014.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2014.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2015.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2015.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2015.csv
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2016.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2016.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2016.csv

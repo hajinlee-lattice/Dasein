@@ -274,10 +274,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         String accountEntityIdInSeed = response.getAssociatedSeed().getAttributes().get(InterfaceName.AccountId.name());
         if (StringUtils.isNotBlank(accountEntityIdInSeed)) {
             traveler.getEntityIds().put(BusinessEntity.Account.name(), accountEntityIdInSeed);
-            // update new entity ID as well
-            if (traveler.getNewEntityIds().containsKey(BusinessEntity.Account.name())) {
-                traveler.getNewEntityIds().put(BusinessEntity.Account.name(), accountEntityIdInSeed);
-            }
         }
     }
 

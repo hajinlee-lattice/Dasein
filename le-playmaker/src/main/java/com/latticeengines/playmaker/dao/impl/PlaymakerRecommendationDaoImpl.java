@@ -521,7 +521,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<String> contactIds,
-            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId) {
+            List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         String sql = "SELECT * FROM (SELECT C.[LEContact_ID] AS ID, C.[External_ID] AS ExternalID, C.[Display_Name] AS Name, C.[Account_ID] AS AccountID, "
                 + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone, "
                 + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
@@ -551,7 +551,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
-            Map<String, String> orgInfo, Map<String, String> appId) {
+            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds, accountIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);

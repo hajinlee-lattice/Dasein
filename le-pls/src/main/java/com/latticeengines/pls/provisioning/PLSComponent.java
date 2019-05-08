@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
@@ -30,18 +31,19 @@ public class PLSComponent {
 
     @PostConstruct
     private void registerBootStrapper() {
-        BatonService batonService = new BatonServiceImpl();
-        boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
-        if (needToRegister && !batonService.getRegisteredServices().contains(componentName)) {
-            ServiceProperties serviceProps = new ServiceProperties();
-            serviceProps.dataVersion = 1;
-            serviceProps.versionString = getVersionString();
-            ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
-                    getInstaller(), //
-                    new PLSUpgrader(), //
-                    getDestroyer(),
-                    null);
-            ServiceWarden.registerService(componentName, serviceInfo);
+        if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
+            BatonService batonService = new BatonServiceImpl();
+            if (!batonService.getRegisteredServices().contains(componentName)) {
+                ServiceProperties serviceProps = new ServiceProperties();
+                serviceProps.dataVersion = 1;
+                serviceProps.versionString = getVersionString();
+                ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
+                        getInstaller(), //
+                        new PLSUpgrader(), //
+                        getDestroyer(),
+                        null);
+                ServiceWarden.registerService(componentName, serviceInfo);
+            }
         }
     }
 

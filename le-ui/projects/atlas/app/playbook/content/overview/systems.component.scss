@@ -1,0 +1,44 @@
+.connected-systems {
+    margin: 20px;
+    .systems-grid {
+        .connection-card {
+            border: 1px solid transparent;
+            border-radius: 4px;
+            align-items: center;
+            padding: 10px;
+            h2, h3 {
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: none;
+            }
+            &:hover {
+                border: 1px solid green;
+            }
+            .connection-logo {
+                flex: 0 1 auto;
+                width: 100px;
+                h2 {
+                    width: 100%;
+                    text-align: center;
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+            .connection-info {
+                flex: 1 1 auto;
+                height: 100%;
+                border-left: 1px solid #ccc;
+                border-right: 1px solid #ccc;
+                padding: 0 10px;
+                margin: 0 10px;
+            }
+            .connection-launch {
+                flex: 0 1 auto;
+                width: 100px;
+            }
+        }
+    }
+}

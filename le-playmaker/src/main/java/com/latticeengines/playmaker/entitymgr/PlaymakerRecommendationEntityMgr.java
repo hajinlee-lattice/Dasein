@@ -50,11 +50,11 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getPlayGroupCount(String tenantName, String lookupSource, long start);
 
     Map<String, Object> getContacts(String tenantName, String lookupSource, long start, int offset, int maximum,
-            List<String> contactIds, List<String> accountIds, Long recStart, Map<String, String> orgInfo,
+            List<String> contactIds, List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo,
             Map<String, String> appId);
 
     Map<String, Object> getContactCount(String tenantName, String lookupSource, long start, List<String> contactIds,
-            List<String> accountIds, Long recStart, Map<String, String> orgInfo, Map<String, String> appId);
+            List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId);
 
     Map<String, Object> getContactExtensionColumnCount(String tenantName, String lookupSource);
 

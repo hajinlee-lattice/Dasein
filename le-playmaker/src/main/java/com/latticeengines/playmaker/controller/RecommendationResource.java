@@ -181,14 +181,13 @@ public class RecommendationResource {
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
                     + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
                     + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
-            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart,
+            @ApiParam(value = "AccountIds are filtered by given PlayIds", required = false) @RequestParam(value = "playId", required = false) List<String> playIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        log.info("getContact API: {}",request.getPathInfo());
-        log.debug("getContact API: {}", request.getQueryString());
-        
+
         return playmakerRecommendationMgr.getContacts(tenantName, lookupSource, start, offset, maximum, contactIds,
-                accountIds, recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                accountIds, recStart, playIds, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 
@@ -203,11 +202,12 @@ public class RecommendationResource {
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
                     + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
                     + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
-            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart) {
+            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart,
+            @ApiParam(value = "AccountIds are filtered by given PlayIds", required = false) @RequestParam(value = "playId", required = false) List<String> playIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactCount(tenantName, lookupSource, start, contactIds, accountIds,
-                recStart, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
+                recStart, playIds, tenantProxy.getOrgInfoFromOAuthRequest(requestEntity),
                 tenantProxy.getAppIdFromOAuthRequest(requestEntity));
     }
 

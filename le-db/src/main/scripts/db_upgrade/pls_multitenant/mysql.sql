@@ -131,6 +131,34 @@ CREATE PROCEDURE `CreateAtlasSchedulingTable`()
 //
 DELIMITER;
 
+CREATE PROCEDURE `CreateAtlasExportTable`()
+  BEGIN
+    CREATE TABLE `ATLAS_EXPORT`
+      (
+         `PID`                     BIGINT NOT NULL auto_increment,
+         `DATE_PREFIX`             VARCHAR(15),
+         `EXPORT_TYPE`             VARCHAR(255),
+         `FILES_UNDER_DROPFOLDER`  JSON,
+         `FILES_UNDER_SYSTEM_PATH` JSON,
+         `TENANT_ID`               BIGINT NOT NULL,
+         `UUID`                    VARCHAR(255) NOT NULL,
+         `FK_TENANT_ID`            BIGINT NOT NULL,
+         PRIMARY KEY (`PID`)
+      )
+    engine=InnoDB;
+
+    CREATE INDEX IX_UUID ON `ATLAS_EXPORT` (`UUID`);
+
+    ALTER TABLE `ATLAS_EXPORT`
+      ADD CONSTRAINT UX_UUID UNIQUE (`TENANT_ID`, `UUID`);
+
+    ALTER TABLE `ATLAS_EXPORT`
+      ADD CONSTRAINT `FK_ATLASEXPORT_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
+      REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+  END;
+//
+DELIMITER;
+
 CREATE PROCEDURE `CreateS3ImportSystemTable`()
   BEGIN
     CREATE TABLE `ATLAS_S3_IMPORT_SYSTEM`
@@ -195,3 +223,4 @@ CALL `CreateDataIntegrationMonitoringTable`();
 CALL `CreateDataIntegrationMessageTable`();
 CALL `CreateS3ImportSystemTable`();
 CALL `CreateAtlasSchedulingTable`();
+CALL `CreateAtlasExportTable`();
