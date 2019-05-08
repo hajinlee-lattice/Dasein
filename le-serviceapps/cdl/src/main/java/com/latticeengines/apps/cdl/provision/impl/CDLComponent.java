@@ -9,6 +9,7 @@ import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
@@ -33,17 +34,19 @@ public class CDLComponent {
 
     @PostConstruct
     private void registerBootStrapper() {
-        BatonService batonService = new BatonServiceImpl();
-        if (!batonService.getRegisteredServices().contains(componentName)) {
-            ServiceProperties serviceProps = new ServiceProperties();
-            serviceProps.dataVersion = 1;
-            serviceProps.versionString = getVersionString();
-            ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
-                    getInstaller(), //
-                    new CDLUpgrader(), //
-                    getDestroyer(),
-                    null);
-            ServiceWarden.registerService(componentName, serviceInfo);
+        if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
+            BatonService batonService = new BatonServiceImpl();
+            if (!batonService.getRegisteredServices().contains(componentName)) {
+                ServiceProperties serviceProps = new ServiceProperties();
+                serviceProps.dataVersion = 1;
+                serviceProps.versionString = getVersionString();
+                ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
+                        getInstaller(), //
+                        new CDLUpgrader(), //
+                        getDestroyer(),
+                        null);
+                ServiceWarden.registerService(componentName, serviceInfo);
+            }
         }
     }
 
