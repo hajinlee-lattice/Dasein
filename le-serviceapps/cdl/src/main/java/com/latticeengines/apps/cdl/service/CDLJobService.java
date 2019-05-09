@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.service;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 public interface CDLJobService {
