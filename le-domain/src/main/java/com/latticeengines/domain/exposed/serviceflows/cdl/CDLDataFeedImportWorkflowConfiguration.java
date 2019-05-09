@@ -5,7 +5,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.InputFileValidatorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -71,10 +71,13 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             return configuration;
         }
 
-        // for now only check file with entity ProductHierarchy
-        public Builder fileValidation(String businessEntity) {
-            if (!BusinessEntity.ProductHierarchy.name().equals(businessEntity)) {
+        // file with entity Account, Contact, Product
+        public Builder fileValidation(BusinessEntity businessEntity) {
+            if (BusinessEntity.Account != businessEntity && BusinessEntity.Contact != businessEntity
+                    && BusinessEntity.Product != businessEntity) {
                 inputFileValidatorConfiguration.setSkipStep(true);
+            } else {
+                inputFileValidatorConfiguration.setEntity(businessEntity);
             }
             return this;
         }

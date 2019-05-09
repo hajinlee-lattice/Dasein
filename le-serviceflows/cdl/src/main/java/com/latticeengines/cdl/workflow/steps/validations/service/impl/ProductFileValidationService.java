@@ -1,134 +1,154 @@
-package com.latticeengines.cdl.workflow.steps.importdata;
+package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.InputFileValidatorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("inputFileValidator")
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
+@Component("productFileValidationService")
+@Lazy(value = false)
+public class ProductFileValidationService
+        extends InputFileValidationService<ProductFileValidationConfiguration> {
+
+    public ProductFileValidationService() {
+        super(ProductFileValidationConfiguration.class.getSimpleName());
+    }
+
+    private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
-    @Inject
-    private EaiJobDetailProxy eaiJobDetailProxy;
-
     @Override
-    public void execute() {
-        String applicationId = getOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
-        String tenantId = configuration.getCustomerSpace().getTenantId();
-
-        if (applicationId == null) {
-            log.warn("There's no application Id! tenentId=" + tenantId);
-            return;
-        }
-        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
-        if (eaiImportJobDetail == null) {
-            log.warn(String.format("Cannot find the job detail for applicationId=%s, tenantId=%s", applicationId,
-                    tenantId));
-            return;
-        }
-        List<String> pathList = eaiImportJobDetail.getPathDetail();
-        pathList = pathList == null ? null
-                : pathList.stream().filter(StringUtils::isNotBlank).map(path -> {
-            int index = path.indexOf("/Pods/");
-            path = index > 0 ? path.substring(index) : path;
-            return path;
-        }).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(pathList)) {
-            log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
-        }
-        List<Product> inputProducts = new ArrayList<>();
-
-        pathList.forEach(path -> inputProducts.addAll(ProductUtils.loadProducts(yarnConfiguration, path, null, null)));
-        Table currentTable = getCurrentConsolidateProductTable(configuration.getCustomerSpace());
+    public void validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
+        Map<String, Product> inputProducts = new HashMap<>();
+        List<String> pathList = productFileValidationServiceConfiguration.getPathList();
+        pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
+        Table currentTable = getCurrentConsolidateProductTable(
+                productFileValidationServiceConfiguration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
-        List<String> errorMessages = new ArrayList<>();
-        mergeProducts(inputProducts, currentProducts, errorMessages);
-        if (CollectionUtils.isNotEmpty(errorMessages)) {
-            String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
-            writeErrorFile(filePath, errorMessages);
-            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
-        }
-    }
-
-    private void writeErrorFile(String filePath, List<String> errorMessages) {
-
         CSVFormat format = LECSVFormat.format;
         // copy error file if file exists
+        String errorFile = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, filePath, ImportProperty.ERROR_FILE);
+            if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, errorFile, ImportProperty.ERROR_FILE);
             } else {
                 format = format.withHeader(ImportProperty.ERROR_HEADER);
             }
         } catch (IOException e) {
-            log.info("Error when copying file to local");
+            log.info("Error when copying error file to local");
         }
-        // append error message to error file
+
+     // append error message to error file
+        boolean hasError = false;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
-            for (String message : errorMessages) {
-                csvFilePrinter.printRecord("", "", message);
-            }
-            csvFilePrinter.close();
+            hasError = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
-        // copy error file back to hdfs
-        try {
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, filePath);
-        } catch (IOException e) {
-            log.info("Error when copying file to hdfs");
+       
+
+        // copy error file back to hdfs, remove local error.csv
+        if (hasError) {
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, errorFile);
+                }
+                HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, errorFile);
+                FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
+            } catch (IOException e) {
+                log.info("Error when copying file to hdfs");
+            }
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
         }
     }
 
-    @VisibleForTesting
-    List<Product> mergeProducts(List<Product> inputProducts, List<Product> currentProducts,
-            List<String> errorMessages) {
+    public static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
+            List<String> productTypes, List<String> productStatuses) {
+        filePath = getPath(filePath);
+        log.info("Load products from " + filePath + "/*.avro");
+        Map<String, Product> productMap = new HashMap<>();
+
+        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        while (iter.hasNext()) {
+            GenericRecord record = iter.next();
+            Product product = new Product();
+
+            String productId = getFieldValue(record, InterfaceName.Id.name());
+            if (productId == null) {
+                productId = getFieldValue(record, InterfaceName.ProductId.name());
+            }
+            product.setProductId(productId);
+            product.setProductBundle(getFieldValue(record, InterfaceName.ProductBundle.name()));
+            product.setProductBundleId(getFieldValue(record, InterfaceName.ProductBundleId.name()));
+            product.setProductName(getFieldValue(record, InterfaceName.ProductName.name()));
+            product.setProductDescription(getFieldValue(record, InterfaceName.Description.name()));
+            product.setProductLine(getFieldValue(record, InterfaceName.ProductLine.name()));
+            product.setProductLineId(getFieldValue(record, InterfaceName.ProductLineId.name()));
+            product.setProductFamily(getFieldValue(record, InterfaceName.ProductFamily.name()));
+            product.setProductFamilyId(getFieldValue(record, InterfaceName.ProductFamilyId.name()));
+            product.setProductCategory(getFieldValue(record, InterfaceName.ProductCategory.name()));
+            product.setProductCategoryId(getFieldValue(record, InterfaceName.ProductCategoryId.name()));
+            product.setProductType(getFieldValue(record, InterfaceName.ProductType.name()));
+            product.setProductStatus(getFieldValue(record, InterfaceName.ProductStatus.name()));
+            if (productTypes != null && !productTypes.contains(product.getProductType())) {
+                continue;
+            }
+            if (productStatuses != null && !productStatuses.contains(product.getProductStatus())) {
+                continue;
+            }
+            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+            productMap.put(lineId, product);
+        }
+        return productMap;
+    }
+
+    private boolean mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
+            CSVPrinter csvFilePrinter) throws IOException {
+        boolean hasError = false;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
-        for (Product inputProduct : inputProducts) {
+        for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
+            Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
                 continue;
             }
@@ -161,11 +181,12 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
                 try {
                     mergeHierarchyProduct(inputProduct, inputProductMap);
                 } catch (RuntimeException e) {
-                    errorMessages.add(e.getMessage());
+                    hasError = true;
+                    csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
                 }
             }
         }
-        return new ArrayList<>(inputProductMap.values());
+        return hasError;
     }
 
     private Product mergeSpendingProduct(String id, String name, String categoryId, String familyId, String lineId,
@@ -331,23 +352,5 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         newProduct.setProductCategoryId(categoryId);
         newProduct.setProductType(ProductType.Hierarchy.name());
         inputProductMap.put(compositeId, newProduct);
-    }
-
-    private static String getPath(String avroDir) {
-        log.info("Get avro path input " + avroDir);
-        if (!avroDir.endsWith(".avro")) {
-            return avroDir;
-        } else {
-            String[] dirs = avroDir.trim().split("/");
-            avroDir = "";
-            for (int i = 0; i < (dirs.length - 1); i++) {
-                log.info("Get avro path dir " + dirs[i]);
-                if (!dirs[i].isEmpty()) {
-                    avroDir = avroDir + "/" + dirs[i];
-                }
-            }
-        }
-        log.info("Get avro path output " + avroDir);
-        return avroDir;
     }
 }
