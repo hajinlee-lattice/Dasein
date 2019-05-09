@@ -183,31 +183,35 @@ export default class SystemComponent extends Component {
         return null;
     }
 
+    getNewTokenButton() {
+        return (
+            <LeButton
+                disabled={this.state.saving || !this.state.system.isRegistered}
+                config={{
+                    label: "New Token",
+                    classNames: "blue-button"
+                }}
+                callback={() => {
+                    httpService.get(
+                        "/pls/dropbox",
+                        new Observer(response => {
+                        }),
+                        {
+                            ErrorDisplayMethod: "Banner",
+                            ErrorDisplayOptions: '{"title": "Warning"}',
+                            ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+                        }
+                    );
+                }}
+            />
+        );
+    }
     getActionsButtons() {
         switch (this.state.system.externalSystemType) {
             case 'FILE_SYSTEM':
                 return (
                     <div className="files-system-actions">
-                        <LeButton
-                            disabled={this.state.saving || !this.state.system.isRegistered}
-                            config={{
-                                label: "New Token",
-                                classNames: "blue-button"
-                            }}
-                            callback={() => {
-                                httpService.get(
-                                    "/pls/dropbox",
-                                    new Observer(response => {
-                                    }),
-                                    {
-                                        ErrorDisplayMethod: "Banner",
-                                        ErrorDisplayOptions: '{"title": "Warning"}',
-                                        ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                                    }
-                                );
-                            }}
-                        />
-
+                        {this.getNewTokenButton()}
                         <LeButton
                             disabled={this.state.saving || !this.state.system.isRegistered}
                             config={{
