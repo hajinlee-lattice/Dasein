@@ -21,10 +21,12 @@ import { actions, reducer } from './connections.redux';
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
 import { store, injectAsyncReducer } from 'store';
 
+import SystemService from './system.service';
+
 export default class SystemComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = { system: props.system, openModal: false, saving: false, userId: null , userAccessToken: null};
+        this.state = { system: props.system, openModal: false, saving: false, userId: null, userAccessToken: null };
         this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
         this.modalCallback = this.modalCallback.bind(this);
         this.getEditTemplate = this.getEditTemplate.bind(this);
@@ -51,7 +53,7 @@ export default class SystemComponent extends Component {
     editMappingClickHandler() {
         if (!this.isExternallyAuthenticatedSystem()) {
             let config = {
-                callback : this.modalCallback,
+                callback: this.modalCallback,
                 template: () => {
                     this.editMapping = Object.assign({}, this.state.system);
                     return (
@@ -93,8 +95,8 @@ export default class SystemComponent extends Component {
         let observer = new Observer(
             response => {
                 if (response.data) {
-                    this.setState({accessToken: response.data.token});
-        
+                    this.setState({ accessToken: response.data.token });
+
                     httpService.unsubscribeObservable(observer);
                 }
             },
@@ -141,16 +143,6 @@ export default class SystemComponent extends Component {
         }
     }
 
-
-    getSystemStatus() {
-        switch (this.state.system.isRegistered) {
-            case true:
-                return 'Connected';
-            case false:
-                return 'Disconnected';
-        }
-    }
-
     getSystemStatusClass() {
         let color = 'color-';
         switch (this.state.system.isRegistered) {
@@ -177,34 +169,10 @@ export default class SystemComponent extends Component {
         );
     }
 
-    getValueDateFormatted(longValue) {
-        if (longValue && longValue != null) {
-            var options = {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-            };
-            var formatted = new Date(longValue);
 
-            var ret = "err";
-            try {
-                ret = formatted.toLocaleDateString(
-                    "en-US",
-                    options
-                );
-            } catch (e) {
-                console.log(e);
-            }
-
-            return ret;
-        } else {
-            return '-';
-        }
-    }
 
     getAccountIdRow() {
-        if (this.props.system.externalSystemType != "MAP") {
-
+        if (SystemService.canHaveAccountId(this.state.system)) {
             return (
                 <Aux>
                     <span className="s-label">Account Id:</span>
@@ -215,16 +183,65 @@ export default class SystemComponent extends Component {
         return null;
     }
 
+    getActionsButtons() {
+        switch (this.state.system.externalSystemType) {
+            case 'FILE_SYSTEM':
+                return (
+                    <div className="files-system-actions">
+                        <LeButton
+                            disabled={this.state.saving || !this.state.system.isRegistered}
+                            config={{
+                                label: "New Token",
+                                classNames: "blue-button"
+                            }}
+                            callback={() => {
+                                httpService.get(
+                                    "/pls/dropbox",
+                                    new Observer(response => {
+                                    }),
+                                    {
+                                        ErrorDisplayMethod: "Banner",
+                                        ErrorDisplayOptions: '{"title": "Warning"}',
+                                        ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+                                    }
+                                );
+                            }}
+                        />
+
+                        <LeButton
+                            disabled={this.state.saving || !this.state.system.isRegistered}
+                            config={{
+                                label: "Get Existing Token",
+                                classNames: "blue-button"
+                            }}
+                            callback={() => {
+
+                            }}
+                        />
+                    </div>
+                )
+            default:
+                return (
+                    <LeButton
+                        name={`${"edit-mappings-"}${this.state.system.orgName}`}
+                        disabled={this.state.saving || !this.state.system.isRegistered}
+                        config={{
+                            label: "Edit Mappings",
+                            classNames: "blue-button aptrinsic-connections-edit-mappings"
+                        }}
+                        callback={this.editMappingClickHandler}
+                    />
+                );
+        }
+    }
 
     render() {
-        // console.log('Render', this.state.openModal);
         return (
             <Aux>
-                {/* <LeModal opened={this.state.openModal} callback={this.modalCallback} title="Org ID to Account ID Mapping" template={this.getEditTemplate} /> */}
-                <LeTile>
-                    <LeTileHeader>
+                <LeTile classNames={'system-tile'}>
+                    <LeTileHeader classNames={'system-header'}>
                         <LeHPanel valignment={CENTER}>
-                            <img src={this.props.img} className="s-image" />
+                            <img src={this.props.config.img} className="s-image" />
                             <p className="s-title">{this.state.system.externalSystemName}</p>
                         </LeHPanel>
                     </LeTileHeader>
@@ -236,22 +253,15 @@ export default class SystemComponent extends Component {
                             <span className="s-text">{this.state.system.orgId}</span>
                             {this.getAccountIdRow()}
                             <span className="s-label">Last Updated:</span>
-                            <span className="s-text">{this.getValueDateFormatted(this.state.system.updated)}</span>
+                            <span className="s-text">{SystemService.getValueDateFormatted(this.state.system.updated)}</span>
                             <span className="s-label">Status:</span>
-                            <span className={`${'s-text'} ${this.getSystemStatusClass()}`}>{this.getSystemStatus()}</span>
+                            <span className={`${'s-text'} ${this.getSystemStatusClass()}`}>{SystemService.getSystemStatus(this.state.system)}</span>
                         </GridLayout>
                     </LeTileBody>
                     <LeTileFooter>
                         <LeHPanel hstretch={true} halignment={RIGHT} className="s-controls">
-                            <LeButton
-                                name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                                disabled={this.state.saving || !this.state.system.isRegistered}
-                                config={{
-                                    label: "Edit Mappings",
-                                    classNames: "blue-button aptrinsic-connections-edit-mappings"
-                                }}
-                                callback={this.editMappingClickHandler}
-                            /></LeHPanel>
+                            {this.getActionsButtons()}
+                        </LeHPanel>
                     </LeTileFooter>
                 </LeTile>
             </Aux>
