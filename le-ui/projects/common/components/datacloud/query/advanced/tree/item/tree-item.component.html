@@ -4,7 +4,9 @@
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('String')">
-        <strong>{{vm.getOperationValue('String')}}</strong>
+        <strong
+            ng-repeat="value in (values = vm.getOperationValue('String'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
+        <!-- <strong ng-if="typeof(vm.getOperationValue('String')) == 'string'">{{vm.getOperationValue('String')}}</strong> -->
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
@@ -18,14 +20,23 @@
     </span>
 
     <span class="query-section-item-value" ng-if="vm.showItem('Numerical')">
-        <strong>{{vm.getOperationValue('Numerical', 0)}}</strong>
-        <span ng-if="vm.showTo()" class="operation-and">-</span>
-        <strong ng-if="vm.showTo()">{{vm.getOperationValue('Numerical', 1)}}</strong>
+        <strong ng-if="vm.isNumericalChips()"
+            ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getSuffixLabel($index) }}{{ value }}</strong>
+        <span ng-if="!vm.isNumericalChips()">
+            <strong>{{vm.getOperationValue('Numerical', 0)}}</strong>
+            <span ng-if="vm.showTo()" class="operation-and">-</span>
+            <strong ng-if="vm.showTo()">{{vm.getOperationValue('Numerical', 1)}}</strong>
+        </span>
     </span>
 
-    <strong class="query-section-item-value" ng-if="vm.showItem('Enum')" ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
+    <span class="query-section-item-value" ng-if="vm.showItem('Enum')">
+        <strong
+            ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getSuffixLabel($index) }}{{ value }}</strong>
+    </span>
+
     <span class="query-section-item-value" ng-if="vm.showItem('Transaction')">
-        <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" purchased="vm.getOperationValue('Boolean')"></transaction-directive>
+        <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type"
+            purchased="vm.getOperationValue('Boolean')"></transaction-directive>
     </span>
 </span>
 <span class="query-section-item-operation" ng-if="!vm.unused && vm.showItem('Percent')">
