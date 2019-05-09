@@ -392,6 +392,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void processAnalyzeSkipPublishToS3() {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(true);
+        request.setSkipDynamoExport(true);
         processAnalyze(request);
     }
 

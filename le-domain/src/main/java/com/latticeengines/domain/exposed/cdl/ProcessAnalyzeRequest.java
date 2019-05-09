@@ -65,6 +65,12 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("SkipPublishToS3")
     private Boolean skipPublishToS3;
 
+    /**
+     * Skip Export to Dynamo step. Mainly for QA
+     */
+    @JsonProperty("SkipDynamoExport")
+    private Boolean skipDynamoExport;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -159,5 +165,13 @@ public class ProcessAnalyzeRequest {
 
     public void setSkipPublishToS3(Boolean skipPublishToS3) {
         this.skipPublishToS3 = skipPublishToS3;
+    }
+
+    public Boolean getSkipDynamoExport() {
+        return skipDynamoExport;
+    }
+
+    public void setSkipDynamoExport(Boolean skipDynamoExport) {
+        this.skipDynamoExport = skipDynamoExport;
     }
 }
