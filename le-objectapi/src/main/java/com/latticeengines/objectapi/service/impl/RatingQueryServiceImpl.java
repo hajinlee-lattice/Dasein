@@ -230,8 +230,9 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null, timeTranslator, sqlUser);
+                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(), //
+                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, //
+                        timeTranslator, sqlUser);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();
@@ -284,10 +285,8 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         if (lookup instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lookup;
             String attributeName = attrLookup.getAttribute();
-            if (attributeName.equals(InterfaceName.CompanyName.toString())
-                    && BusinessEntity.Contact == attrLookup.getEntity()) {
-                return true;
-            }
+            return attributeName.equals(InterfaceName.CompanyName.toString())
+                    && BusinessEntity.Contact == attrLookup.getEntity();
         }
         return false;
     }
