@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -130,19 +131,20 @@ public class MatchInputValidator {
                     + "Automatic match key resolution not yet supported.");
         }
 
-        // Verify that EntityKeyMap is set.
-        if (MapUtils.isEmpty(input.getEntityKeyMaps())) {
-            throw new IllegalArgumentException("MatchInput for Entity Match must contain EntityKeyMap.");
+        // instantiate empty key maps if necessary
+        if (input.getEntityKeyMaps() == null) {
+            input.setEntityKeyMaps(new HashMap<>());
         }
 
         // TODO: Add other code to process other EntityKeyMaps besides the Account EntityKeyMap.
         for (Map.Entry<String, EntityKeyMap> entry : input.getEntityKeyMaps().entrySet()) {
             EntityKeyMap entityKeyMap = entry.getValue();
             if (entityKeyMap == null) {
-                throw new IllegalArgumentException(
-                        "EntityKeyMap for entity " + entry.getKey() + " needs to be initialized.");
+                // instantiate an empty key map
+                entityKeyMap = new EntityKeyMap();
+                entry.setValue(entityKeyMap);
             }
-            entityKeyMap.setKeyMap(resolveKeyMap(entityKeyMap.getKeyMap(), input.getFields(), true));
+            entityKeyMap.setKeyMap(resolveKeyMap(entityKeyMap.getKeyMap(), input.getFields(), true, true));
         }
 
         if (input.getEntityKeyMaps().containsKey(BusinessEntity.Account.name())) {
@@ -150,13 +152,6 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly());
-        }
-
-        // TODO add validation to check key maps for required entities are valid
-        if (!input.getEntityKeyMaps().containsKey(BusinessEntity.Account.name())
-                && !input.getEntityKeyMaps().containsKey(BusinessEntity.Contact.name())) {
-            throw new UnsupportedOperationException(
-                    "Entity Map currently only supports Account & Contact match and requires this entity's key map.");
         }
     }
 
@@ -249,11 +244,11 @@ public class MatchInputValidator {
             }
         }
 
-        return resolveKeyMap(input.getKeyMap(), input.getFields(), input.isSkipKeyResolution());
+        return resolveKeyMap(input.getKeyMap(), input.getFields(), input.isSkipKeyResolution(), false);
     }
 
     private static Map<MatchKey, List<String>> resolveKeyMap(Map<MatchKey, List<String>> keyMap,
-                                                             List<String> inputFields, boolean isSkipKeyResolution) {
+            List<String> inputFields, boolean isSkipKeyResolution, boolean allowEmptyKeyMap) {
         Map<MatchKey, List<String>> newKeyMap = keyMap;
         // TODO: Automatic key resolution is not allowed for the Entity Match case.  This code would have to be
         //     changed to work because it is not set up to handle multiple key maps, one for each entity, and
@@ -267,7 +262,13 @@ public class MatchInputValidator {
                 }
             }
         } else if (MapUtils.isEmpty(newKeyMap)) {
-            throw new IllegalArgumentException("Have to provide a key map, when skipping automatic key resolution.");
+            if (!allowEmptyKeyMap) {
+                throw new IllegalArgumentException(
+                        "Have to provide a key map, when skipping automatic key resolution.");
+            } else {
+                // allow user to not map any fields, instantiating an empty map
+                newKeyMap = new HashMap<>();
+            }
         }
 
         // Validate the MatchKeys by checking:

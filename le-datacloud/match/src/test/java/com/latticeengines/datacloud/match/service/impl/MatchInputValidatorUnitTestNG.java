@@ -209,6 +209,8 @@ public class MatchInputValidatorUnitTestNG {
         failed = false;
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country", "DUNS",
                 "SfdcId", "MktoId"));
+        input.setData(Collections.singletonList(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province",
+                "Country", "DUNS", "SfdcId", "MktoId")));
         input.setAllocateId(false);
 
         try {
@@ -259,56 +261,37 @@ public class MatchInputValidatorUnitTestNG {
 
 
         // EntityKeyMaps must be populated.
-        failed = false;
         input.setPredefinedSelection(Predefined.Seed);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (IllegalArgumentException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains("MatchInput for Entity Match must contain EntityKeyMap"));
         } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
+            Assert.fail("Should allow Entity Key Map to be empty or null. Error: " + e.getMessage());
         }
-        Assert.assertTrue(failed, "Should fail when Entity Key Map is empty or null.");
 
 
         // Each EntityKeyMap must be initialized.
-        failed = false;
         input.setEntityKeyMaps(new HashMap<>());
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), null);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (IllegalArgumentException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "EntityKeyMap for entity " + BusinessEntity.Account.name() + " needs to be initialized."),
-                    "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
+            Assert.fail("Should allow EntityKeyMap for entity: " + BusinessEntity.Account.name()
+                    + " to be null. Error: " + e.getMessage());
         }
-        Assert.assertTrue(failed, "Should fail when an EntityKeyMap is not initialized.");
-
 
         // Key Map cannot be null or empty.
-        failed = false;
         input.getEntityKeyMaps().remove(BusinessEntity.Account.name());
         EntityKeyMap entityKeyMap = new EntityKeyMap();
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (IllegalArgumentException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "Have to provide a key map, when skipping automatic key resolution."),
-                    "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
+            Assert.fail("Should allow EntityKeyMap for entity: " + BusinessEntity.Account.name()
+                    + " to be empty. Error: " + e.getMessage());
         }
-        Assert.assertTrue(failed, "Should fail when Key Map inside Entity Key Map is empty.");
-
 
         // Match Key key cannot be null.
         failed = false;
@@ -379,20 +362,16 @@ public class MatchInputValidatorUnitTestNG {
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
-        } catch (UnsupportedOperationException e) {
-            failed = true;
-            Assert.assertTrue(e.getMessage().contains(
-                    "Entity Map currently only supports Account & Contact match and requires this entity's key map."),
-                    "Wrong error message: " + e.getMessage());
         } catch (Exception e) {
-            Assert.fail("Failed on wrong exception: " + e.getMessage());
+            Assert.fail("Entity Key Map should be able to contain entity other than Account & Contact. Error: "
+                    + e.getMessage());
         }
-        Assert.assertTrue(failed, "Entity Key Map must contain Account Key Map.");
 
 
         // Should fail on empty data.
         failed = false;
         input.getEntityKeyMaps().put(BusinessEntity.Account.name(), entityKeyMap);
+        input.setData(Collections.emptyList());
 
         try {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
