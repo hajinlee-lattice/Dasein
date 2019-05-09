@@ -564,7 +564,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    public boolean submitExportJob(String customerSpace, Tenant tenant) {
+    boolean submitExportJob(String customerSpace, Tenant tenant) {
         return submitExportJob(customerSpace, false, tenant);
     }
 

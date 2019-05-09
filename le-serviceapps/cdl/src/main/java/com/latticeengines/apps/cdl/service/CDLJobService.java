@@ -12,5 +12,4 @@ public interface CDLJobService {
 
     Date getNextInvokeTime(CustomerSpace customerSpace);
 
-    boolean submitExportJob(String customerSpace, Tenant tenant);
 }
