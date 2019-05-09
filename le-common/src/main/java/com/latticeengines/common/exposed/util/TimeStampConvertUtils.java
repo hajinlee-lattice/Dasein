@@ -36,7 +36,7 @@ public class TimeStampConvertUtils {
 
     // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
     // and optional "Z" at the end.
-    private static final Pattern TZ_DATE_TIME = Pattern.compile(
+    public static final Pattern TZ_DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
                     + "(\\d{1,2}((:\\d{1,2}){1,2}|(-\\d{1,2}){1,2}|( \\d{1,2}){1,2})(\\s+[aApP][mM])?)[Zz]?");
 
