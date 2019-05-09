@@ -354,7 +354,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
         List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream().filter(ColumnMetadata::isDateAttribute)
                 .collect(Collectors.toList());
-        return AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata, matchOutput);
+        return AccountExtensionUtil.processMatchOutputResults(dateAttributesMetadata, matchOutput);
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -389,20 +389,16 @@ public class DataLakeServiceImpl implements DataLakeService {
                 && matchOutput.getResult().get(0) != null) {
 
             if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
-                log.info("Didn't find any match from lattice data cloud. "
-                        + "Still continue to process the result as we may "
-                        + "have found partial match in my data table.");
+                log.info("No match on MatchApi, reverting to ObjectApi");
             } else {
                 log.info("Found full match from lattice data cloud as well as from my data table.");
+                final Map<String, Object> tempDataRef = new HashMap<>();
+                List<String> fields = matchOutput.getOutputFields();
+                List<Object> values = matchOutput.getResult().get(0).getOutput();
+                IntStream.range(0, fields.size()) //
+                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
+                data = tempDataRef;
             }
-
-            final Map<String, Object> tempDataRef = new HashMap<>();
-            List<String> fields = matchOutput.getOutputFields();
-            List<Object> values = matchOutput.getResult().get(0).getOutput();
-            IntStream.range(0, fields.size()) //
-                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-            data = tempDataRef;
-
         }
 
         if (MapUtils.isNotEmpty(data)) {

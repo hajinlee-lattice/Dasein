@@ -40,48 +40,41 @@ public class AccountExtensionUtil {
 
     private static final Logger log = LoggerFactory.getLogger(AccountExtensionUtil.class);
 
-    private static List<String> LOOKUP_FIELDS = Collections
-            .singletonList(InterfaceName.AccountId.name());
+    private static List<String> LOOKUP_FIELDS = Collections.singletonList(InterfaceName.AccountId.name());
 
-    public static FrontEndQuery constructFrontEndQuery(String customerSpace,
-            List<String> accountIds, String lookupIdColumn, Long start,
-            boolean shouldAddLookupIdClause) {
+    public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
+            String lookupIdColumn, Long start, boolean shouldAddLookupIdClause) {
 
-        ArrayList<String> attributes = new ArrayList<String>(
-                Arrays.asList(InterfaceName.AccountId.name()));
+        ArrayList<String> attributes = new ArrayList<String>(Arrays.asList(InterfaceName.AccountId.name()));
         return constructFrontEndQuery(customerSpace, accountIds, lookupIdColumn, attributes, start,
                 shouldAddLookupIdClause);
     }
 
-    public static FrontEndQuery constructFrontEndQuery(String customerSpace,
-            List<String> accountIds, String lookupIdColumn, List<String> attributes, Long start,
-            boolean shouldAddLookupIdClause) {
-        
+    public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
+            String lookupIdColumn, List<String> attributes, Long start, boolean shouldAddLookupIdClause) {
+
         List<Restriction> restrictions = new ArrayList<>();
         List<Restriction> idRestrictions = new ArrayList<>();
 
         if (start != null) {
             long lastModifiedTime = start;
             Restriction lastModifiedRestriction = Restriction.builder()
-                    .let(BusinessEntity.Account, InterfaceName.CDLUpdatedTime.name())
-                    .gte(lastModifiedTime).build();
+                    .let(BusinessEntity.Account, InterfaceName.CDLUpdatedTime.name()).gte(lastModifiedTime).build();
             restrictions.add(lastModifiedRestriction);
         }
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
             RestrictionBuilder[] accountIdRestrictions = accountIds.stream()
-                    .map(id -> Restriction.builder()
-                            .let(BusinessEntity.Account, InterfaceName.AccountId.name()).eq(id))
+                    .map(id -> Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name()).eq(id))
                     .toArray(RestrictionBuilder[]::new);
             accoundIdRestrictionBuilder.or(accountIdRestrictions);
             idRestrictions.add(accoundIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
                 RestrictionBuilder sfdcRestrictionBuilder = Restriction.builder();
-                RestrictionBuilder[] sfdcRestrictions = accountIds
-                        .stream().map(id -> Restriction.builder()
-                                .let(BusinessEntity.Account, lookupIdColumn).eq(id))
+                RestrictionBuilder[] sfdcRestrictions = accountIds.stream()
+                        .map(id -> Restriction.builder().let(BusinessEntity.Account, lookupIdColumn).eq(id))
                         .toArray(RestrictionBuilder[]::new);
                 sfdcRestrictionBuilder.or(sfdcRestrictions);
                 idRestrictions.add(sfdcRestrictionBuilder.build());
@@ -99,13 +92,12 @@ public class AccountExtensionUtil {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
         List<AttributeLookup> sortLookups = new ArrayList<>();
-        sortLookups.add(new AttributeLookup(BusinessEntity.Account,InterfaceName.CDLUpdatedTime.name()));
-        sortLookups.add(new AttributeLookup(BusinessEntity.Account,InterfaceName.AccountId.name()));
-        FrontEndSort sort = new FrontEndSort(sortLookups,false);
+        sortLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CDLUpdatedTime.name()));
+        sortLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
+        FrontEndSort sort = new FrontEndSort(sortLookups, false);
         frontEndQuery.setSort(sort);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.addLookups(BusinessEntity.Account,
-                attributes.toArray(new String[attributes.size()]));
+        frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
 
         return frontEndQuery;
     }
@@ -115,10 +107,8 @@ public class AccountExtensionUtil {
 
         if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
             internalAccountIds = dataPage.getData().stream()
-                    .filter(internalAccoundIdObj -> internalAccoundIdObj
-                            .get(InterfaceName.AccountId.name()) != null)
-                    .map(internalAccoundIdObj -> internalAccoundIdObj
-                            .get(InterfaceName.AccountId.name()).toString())
+                    .filter(internalAccoundIdObj -> internalAccoundIdObj.get(InterfaceName.AccountId.name()) != null)
+                    .map(internalAccoundIdObj -> internalAccoundIdObj.get(InterfaceName.AccountId.name()).toString())
                     .collect(Collectors.toList());
         }
 
@@ -126,8 +116,8 @@ public class AccountExtensionUtil {
         return internalAccountIds;
     }
 
-    public static MatchInput constructMatchInput(String customerSpace,
-            List<String> internalAccountIds, Set<String> attributes, String dataCloudVersion) {
+    public static MatchInput constructMatchInput(String customerSpace, List<String> internalAccountIds,
+            Set<String> attributes, String dataCloudVersion) {
 
         MatchInput matchInput = new MatchInput();
         List<List<Object>> data = new ArrayList<>();
@@ -142,8 +132,7 @@ public class AccountExtensionUtil {
         matchInput.setKeyMap(keyMap);
         matchInput.setDataCloudVersion(dataCloudVersion);
         matchInput.setUseRemoteDnB(false);
-        List<Column> columnSelections = attributes.stream().map(Column::new)
-                .collect(Collectors.toList());
+        List<Column> columnSelections = attributes.stream().map(Column::new).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columnSelections);
         matchInput.setCustomSelection(columnSelection);
@@ -151,9 +140,8 @@ public class AccountExtensionUtil {
         return matchInput;
     }
 
-    public static MatchInput constructMatchInput(String customerSpace,
-            List<String> internalAccountIds, ColumnSelection.Predefined predefined,
-            String dataCloudVersion) {
+    public static MatchInput constructMatchInput(String customerSpace, List<String> internalAccountIds,
+            ColumnSelection.Predefined predefined, String dataCloudVersion) {
 
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
@@ -176,7 +164,7 @@ public class AccountExtensionUtil {
     /*
      * Reformats date attributes and converts matchOutput to data page
      */
-    public static DataPage processMatchOutputResults(String customerSpace, List<ColumnMetadata> dateAttributesMetadata,
+    public static DataPage processMatchOutputResults(List<ColumnMetadata> dateAttributesMetadata,
             MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, ColumnMetadata> dateAttributesMap = dateAttributesMetadata.stream()
@@ -193,36 +181,34 @@ public class AccountExtensionUtil {
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("Didn't find any match from lattice data cloud. "
-                                    + "Still continue to process the result as we may "
-                                    + "have found partial match in my data table.");
+                            log.info("No match on MatchApi, reverting to ObjectApi");
                         } else {
                             log.info("Found full match from lattice data cloud as well as from my data table.");
-                        }
 
-                        final Map<String, Object> tempDataRef = new HashMap<>();
-                        List<Object> values = matchOutput.getResult().get(i).getOutput();
-                        IntStream.range(0, fields.size()) //
-                                .forEach(j -> {
-                                    Object value = values.get(j);
-                                    if (dateAttributesMap.containsKey(fields.get(j))) {
-                                        ColumnMetadata cm = dateAttributesMap.get(fields.get(j));
-                                        log.info("Date attribute to reformat: " + JsonUtils.serialize(cm));
-                                        final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
-                                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
+                            final Map<String, Object> tempDataRef = new HashMap<>();
+                            List<Object> values = matchOutput.getResult().get(i).getOutput();
+                            IntStream.range(0, fields.size()) //
+                                    .forEach(j -> {
+                                        Object value = values.get(j);
+                                        if (dateAttributesMap.containsKey(fields.get(j))) {
+                                            ColumnMetadata cm = dateAttributesMap.get(fields.get(j));
+                                            log.info("Date attribute to reformat: " + JsonUtils.serialize(cm));
+                                            final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
+                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
 
-                                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-                                        try {
-                                            value = simpleDateFormat.format(value);
-                                        } catch (Exception e) {
-                                            log.info(String.format("Could not reformat date value %s for column %s",
-                                                    String.valueOf(value), fields.get(j)));
+                                            try {
+                                                value = simpleDateFormat.format(value);
+                                            } catch (Exception e) {
+                                                log.info(String.format("Could not reformat date value %s for column %s",
+                                                        String.valueOf(value), fields.get(j)));
+                                            }
                                         }
-                                    }
-                                    tempDataRef.put(fields.get(j), value);
-                                });
-                        data = tempDataRef;
+                                        tempDataRef.put(fields.get(j), value);
+                                    });
+                            data = tempDataRef;
+                        }
 
                     }
 
