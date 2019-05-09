@@ -89,6 +89,8 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             int partitions = cascadingPartitions * scalingMultiplier;
             jobProperties.put("mapreduce.job.reduces", String.valueOf(partitions));
             jobProperties.put("mapred.reduce.tasks", String.valueOf(partitions));
+            jobProperties.put("mapreduce.job.running.map.limit", "200");
+            jobProperties.put("mapreduce.job.running.reduce.limit", "100");
             dataFlowConfig.setJobProperties(jobProperties);
             dataFlowConfig.setPartitions(partitions);
         } else {

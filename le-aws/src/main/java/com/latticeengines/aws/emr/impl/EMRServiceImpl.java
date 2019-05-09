@@ -251,6 +251,9 @@ public class EMRServiceImpl implements EMRService {
         } catch (NoSuchEntityException e) {
             log.warn("No cluster with id " + clusterId, e);
             return null;
+        } catch (InvalidRequestException e) {
+            log.warn("No cluster with id " + clusterId, e);
+            return null;
         }
         return cluster;
     }
