@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -45,5 +47,15 @@ public class AtlasSchedulingServiceImpl implements AtlasSchedulingService {
     @Override
     public AtlasScheduling findSchedulingByType(String customerSpace, AtlasScheduling.ScheduleType type) {
         return atlasSchedulingEntityMgr.findAtlasSchedulingByType(type);
+    }
+
+    @Override
+    public List<AtlasScheduling> findAllByType(AtlasScheduling.ScheduleType type) {
+        return atlasSchedulingEntityMgr.getAllAtlasSchedulingByType(type);
+    }
+
+    @Override
+    public void updateExportScheduling(AtlasScheduling atlasScheduling) {
+        atlasSchedulingEntityMgr.updateSchedulingObj(atlasScheduling);
     }
 }

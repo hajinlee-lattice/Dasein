@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -73,4 +75,15 @@ public class AtlasSchedulingEntityMgrImpl
             return writerRepository.findByType(type);
         }
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AtlasScheduling> getAllAtlasSchedulingByType(AtlasScheduling.ScheduleType type) {
+        if (isReaderConnection()) {
+            return readerRepository.findAllByType(type);
+        } else {
+            return writerRepository.findAllByType(type);
+        }
+    }
+
 }

@@ -58,6 +58,14 @@ public class AtlasScheduling implements HasPid, HasTenant, HasTenantId {
     @Enumerated(EnumType.STRING)
     private ScheduleType type;
 
+    @JsonProperty("prev_fire_time")
+    @Column(name = "PREV_FIRE_TIME")
+    private Long prevFireTime;
+
+    @JsonProperty("next_fire_time")
+    @Column(name = "NEXT_FIRE_TIME")
+    private Long nextFireTime;
+
     @Override
     public Long getPid() {
         return pid;
@@ -105,6 +113,22 @@ public class AtlasScheduling implements HasPid, HasTenant, HasTenantId {
 
     public void setType(ScheduleType type) {
         this.type = type;
+    }
+
+    public Long getPrevFireTime() {
+        return prevFireTime;
+    }
+
+    public void setPrevFireTime(Long prevFireTime) {
+        this.prevFireTime = prevFireTime;
+    }
+
+    public Long getNextFireTime() {
+        return nextFireTime;
+    }
+
+    public void setNextFireTime(Long nextFireTime) {
+        this.nextFireTime = nextFireTime;
     }
 
     public enum ScheduleType {
