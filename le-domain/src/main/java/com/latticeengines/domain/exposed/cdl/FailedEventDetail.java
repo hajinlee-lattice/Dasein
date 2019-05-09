@@ -5,6 +5,7 @@ import java.util.Map;
 public class FailedEventDetail extends EventDetail {
 
     public FailedEventDetail() {
+        super("Failed");
     }
 
     private Map<String, String> errorFile;

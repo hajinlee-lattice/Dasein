@@ -2,6 +2,10 @@ package com.latticeengines.domain.exposed.cdl;
 
 public class AudienceCreationEventDetail extends EventDetail {
 
+    public AudienceCreationEventDetail() {
+        super("AudienceCreation");
+    }
+
     private String audienceId;
 
     private String audienceName;
