@@ -55,6 +55,7 @@ angular.module('lp.import.wizard.customfields', [])
             });
             setTimeout(function(){
                 setDefaultIgnore();
+                vm.validate();
             },250);
         }
     };
@@ -123,6 +124,7 @@ angular.module('lp.import.wizard.customfields', [])
     vm.updateFormats = (formats) => {
         let field = formats.field;
         ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
+        vm.validate();
     }
 
     vm.getNumberDroppedFields = function(){
