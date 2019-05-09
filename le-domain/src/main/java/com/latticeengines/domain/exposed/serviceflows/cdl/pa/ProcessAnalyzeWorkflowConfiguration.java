@@ -235,8 +235,13 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder setFullRematch(boolean fullRematch) {
+        public Builder fullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
+            return this;
+        }
+
+        public Builder autoSchedule(boolean autoSchedule) {
+            processStepConfiguration.setAutoSchedule(autoSchedule);
             return this;
         }
 

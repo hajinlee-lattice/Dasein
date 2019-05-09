@@ -484,7 +484,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .entityMatchEnabled(entityMatchEnabled) //
-                .setFullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
+                .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
+                .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)// put dataQuotaLimit into
                 // stepConfiguration
                 .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)

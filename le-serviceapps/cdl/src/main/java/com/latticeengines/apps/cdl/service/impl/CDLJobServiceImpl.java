@@ -410,7 +410,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             } else {
                 ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
-
+                request.setAutoSchedule(true);
                 applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
             }
             appIdMap.put(applicationId.toString(), System.currentTimeMillis());
