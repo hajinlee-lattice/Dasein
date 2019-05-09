@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -260,5 +262,28 @@ public class EntityMatchUtils {
             return null;
         }
         return entityId;
+    }
+
+    /**
+     * Get match key -> column name map for target entity in the given input.
+     *
+     * @param input
+     *            match input object
+     * @param entity
+     *            target entity
+     * @return map for target entity, return an empty map if no such map exists
+     */
+    public static Map<MatchKey, List<String>> getKeyMapForEntity(MatchInput input, @NotNull String entity) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(entity),
+                String.format("Target entity=%s should not be blank", entity));
+        if (input == null || MapUtils.isEmpty(input.getEntityKeyMaps())) {
+            return Collections.emptyMap();
+        }
+        if (input.getEntityKeyMaps().get(entity) == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<MatchKey, List<String>> keyMap = input.getEntityKeyMaps().get(entity).getKeyMap();
+        return keyMap == null ? new HashMap<>() : keyMap;
     }
 }
