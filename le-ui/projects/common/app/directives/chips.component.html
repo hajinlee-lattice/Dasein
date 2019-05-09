@@ -1,47 +1,33 @@
 <div class="chips-query-container">
-    
-    <div 
-        class="chips-container" 
-        >
-        <div 
-            class="chip" 
-            ng-repeat="(key, value) in chips">
+
+    <div class="chips-container">
+        <div class="chip" ng-repeat="(key, item) in chips">
             <div class="chip-container">
-                <span>{{getDisplayName(value)}}</span>
-                <i class="chip-remove fa fa-times" aria-hidden="true" ng-click="removeItem(value)"></i>
+                <span>{{getDisplayName(item)}}</span>
+                <i class="chip-remove fa fa-times" aria-hidden="true" ng-click="removeItem(item)"></i>
             </div>
         </div>
     </div>
 
-    <div 
-        class="text-container dropdown" 
-        ng-class="(showQueryList) ?'show-dropdown' : ''">
+    <div class="text-container dropdown" ng-class="(showQueryList) ?'show-dropdown' : ''">
         <div ng-class="{'ng-search': showIcon}" ng-show="!isSelectionDone()">
             <a class="button icon-button white-button" ng-if="showIcon">
                 <span class="{{getClassIcon()}}"></span>
-            </a> 
-            <input 
-                id="id"
-                class="query"
-                type="text" 
-                placeholder="{{placeholder}}" 
-                ng-keyup="queryKeyPressed($event)" 
-                ng-model="query" 
-                ng-blur="blurText()"
-                ng-show="!isSelectionDone()"
-                autocomplete="off"
-                >
+            </a>
+            <input id="id" class="query" type="text" placeholder="{{placeholder}}" ng-keyup="queryKeyPressed($event)"
+                ng-focus="focusInput($event)" ng-blur="blurText()" ng-model="query" ng-show="!isSelectionDone()"
+                autocomplete="off">
         </div>
 
-        <div 
-            class="dropdown-content" 
-            ng-class="(showQueryList) ?'show-dropdown' : ''">
-            <div 
-                class="query-result-row" 
-                ng-repeat="item in (filteredItems = (queryItems | filter: filterFunction ))" 
-                ng-class="(isRowSelected($index)) ?'query-result-row-selected-test' : ''"
-                ng-mouseover="hoverIn()" ng-mouseleave="hoverOut()">
-                <span ng-click="chooseItem(item)">{{getDisplayName(item)}}</span>
+        <div class="dropdown-content" ng-class="(showQueryList) ?'show-dropdown' : ''"
+            ng-show="(filteredItems || []).length > 0">
+            <div class="query-result-row" ng-repeat="item in (filteredItems = (queryItems | filter: filterFunction ))"
+                ng-class="(isRowSelected($index)) ?'query-result-row-selected-test' : ''" ng-mouseover="hoverIn()"
+                ng-mouseleave="hoverOut()">
+                <span ng-click="chooseItem(item)" title="{{getDisplayName(item)}}">
+                    <span class="pull-right" ng-if="getAltLabel(item)">{{getAltLabel(item)}}</span>
+                    {{getDisplayName(item)}}
+                </span>
                 <i class="fa fa-trash-o" aria-hidden="true" ng-if="showRemove()" ng-click="removeRow(item)"></i>
             </div>
         </div>
@@ -51,4 +37,4 @@
 </div>
 
 <!-- ng-mouseover="hoverIn()"  -->
-                <!-- ng-mouseleave="hoverOut()" -->
+<!-- ng-mouseleave="hoverOut()" -->
