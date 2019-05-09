@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
@@ -57,72 +59,75 @@ public class AccountFileValidationService
         } catch (IOException e) {
             log.info("Error when copying error file to local");
         }
-
-        // iterate through all files, remove all illegal record row
         boolean hasError = false;
-        for (String path : pathList) {
-            try {
-                path = getPath(path);
-                log.info("begin dealing with path " + path);
-                List<String> avroFileList = HdfsUtils.getFilesByGlob(yarnConfiguration, path + "/*.avro");
-                for (String avroFile : avroFileList) {
-                    String avrofileName = avroFile.substring(avroFile.lastIndexOf("/") + 1);
-                    boolean fileError = false;
-                    try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration,
-                            new Path(avroFile))) {
-                        // create temp file in local
-                        Schema schema = reader.getSchema();
+        try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
+            // iterate through all files, remove all illegal record row
+            for (String path : pathList) {
+                try {
+                    path = getPath(path);
+                    log.info("begin dealing with path " + path);
+                    List<String> avroFileList = HdfsUtils.getFilesByGlob(yarnConfiguration, path + "/*.avro");
+                    for (String avroFile : avroFileList) {
+                        String avrofileName = avroFile.substring(avroFile.lastIndexOf("/") + 1);
+                        boolean fileError = false;
+                        try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration,
+                                new Path(avroFile))) {
+                            // create temp file in local
+                            Schema schema = reader.getSchema();
 
-                        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                                new GenericDatumWriter<>())) {
-                            dataFileWriter.create(schema, new File(avrofileName));
-                            // iterate through record in avro file
+                            try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
+                                    new GenericDatumWriter<>())) {
+                                dataFileWriter.create(schema, new File(avrofileName));
+                                // iterate through record in avro file
 
-                            for (GenericRecord record : reader) {
-                                boolean rowError = false;
-                                String id = getFieldValue(record, InterfaceName.AccountId.name());
-                                if (StringUtils.isEmpty(id)) {
-                                    id = getFieldValue(record, InterfaceName.Id.name());
-                                }
-                                if (StringUtils.isEmpty(id)) {
-                                    log.info("Empty id is found from avro file");
-                                    continue;
-                                }
-                                for (Character c : invalidChars) {
-                                    if (id.indexOf(c) != -1) {
-                                        String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                        String message = String.format("Invalid account id is found due to %s in %s.",
-                                                c.toString(), id);
-                                        writeErrorFile(lineId, message, format);
-                                        rowError = true;
-                                        fileError = true;
-                                        break;
+                                for (GenericRecord record : reader) {
+                                    boolean rowError = false;
+                                    String id = getFieldValue(record, InterfaceName.AccountId.name());
+                                    if (StringUtils.isEmpty(id)) {
+                                        id = getFieldValue(record, InterfaceName.Id.name());
+                                    }
+                                    if (StringUtils.isEmpty(id)) {
+                                        log.info("Empty id is found from avro file");
+                                        continue;
+                                    }
+                                    for (Character c : invalidChars) {
+                                        if (id.indexOf(c) != -1) {
+                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                            String message = String.format(
+                                                    "Invalid account id is found due to %s in %s.", c.toString(), id);
+                                            csvFilePrinter.printRecord(lineId, "", message);
+                                            rowError = true;
+                                            fileError = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!rowError) {
+                                        dataFileWriter.append(record);
                                     }
                                 }
-                                if (!rowError) {
-                                    dataFileWriter.append(record);
-                                }
                             }
+
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
 
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    // record error in error.csv if not empty, copy the
-                    // new generated avro file to hdfs
-                    if (fileError) {
-                        hasError = true;
-                        if (HdfsUtils.fileExists(yarnConfiguration, avroFile)) {
-                            HdfsUtils.rmdir(yarnConfiguration, avroFile);
+                        // record error in error.csv if not empty, copy the
+                        // new generated avro file to hdfs
+                        if (fileError) {
+                            hasError = true;
+                            if (HdfsUtils.fileExists(yarnConfiguration, avroFile)) {
+                                HdfsUtils.rmdir(yarnConfiguration, avroFile);
+                            }
+                            HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, avrofileName, avroFile);
                         }
-                        HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, avrofileName, avroFile);
+                        FileUtils.forceDelete(new File(avrofileName));
                     }
-                    FileUtils.forceDelete(new File(avrofileName));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        } catch (IOException ex) {
+            log.info("Error when writing error message to error file");
         }
 
         // copy error file back to hdfs, remove local error.csv

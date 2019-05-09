@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -76,7 +78,14 @@ public class ProductFileValidationService
             log.info("Error when copying error file to local");
         }
 
-        boolean hasError = mergeProducts(inputProducts, currentProducts, format);
+     // append error message to error file
+        boolean hasError = false;
+        try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
+            hasError = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
+        } catch (IOException ex) {
+            log.info("Error when writing error message to error file");
+        }
+       
 
         // copy error file back to hdfs, remove local error.csv
         if (hasError) {
@@ -134,7 +143,7 @@ public class ProductFileValidationService
     }
 
     private boolean mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            CSVFormat format) {
+            CSVPrinter csvFilePrinter) throws IOException {
         boolean hasError = false;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
@@ -173,7 +182,7 @@ public class ProductFileValidationService
                     mergeHierarchyProduct(inputProduct, inputProductMap);
                 } catch (RuntimeException e) {
                     hasError = true;
-                    writeErrorFile(entry.getKey(), e.getMessage(), format);
+                    csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
                 }
             }
         }
