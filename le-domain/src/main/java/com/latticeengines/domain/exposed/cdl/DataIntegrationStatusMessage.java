@@ -24,6 +24,7 @@ import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -32,7 +33,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Table(name = "DATA_INTEG_STATUS_MESSAGE")
 @Entity
-@JsonIgnoreProperties(value = { "eventDetail" }, allowGetters = true, ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataIntegrationStatusMessage implements HasPid, HasTenant, HasAuditingFields {
 
     @Id
@@ -158,12 +160,6 @@ public class DataIntegrationStatusMessage implements HasPid, HasTenant, HasAudit
         return eventDetail;
     }
 
-//    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "eventType")
-//    @JsonSubTypes({ //
-//            @JsonSubTypes.Type(value = ProgressEventDetail.class, name = "Progress"), //
-//            @JsonSubTypes.Type(value = AudienceCreationEventDetail.class, name = "AudienceCreation"),
-//            @JsonSubTypes.Type(value = FailedEventDetail.class, name = "Failed"),
-//            @JsonSubTypes.Type(value = InitiatedEventDetail.class, name = "Initiated") })
     public void setEventDetail(EventDetail eventDetail) {
         this.eventDetail = eventDetail;
     }

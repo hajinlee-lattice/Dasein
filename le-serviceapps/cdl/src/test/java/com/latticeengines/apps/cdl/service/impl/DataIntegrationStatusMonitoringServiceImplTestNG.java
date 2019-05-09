@@ -27,6 +27,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+
 
 public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -237,17 +239,16 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch1.getId());
         Assert.assertEquals(LaunchState.Syncing, playLaunch.getLaunchState());
 
-        // List<DataIntegrationStatusMessage> messages =
-        // dataIntegrationStatusMessageEntityMgr
-        // .getAllStatusMessages(statusMonitor.getPid());
-        //
-        // Assert.assertNotNull(messages);
-        // Assert.assertEquals(messages.size(), 2);
+        List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
+                .getAllStatusMessages(statusMonitor.getPid());
+
+        Assert.assertNotNull(messages);
+        Assert.assertEquals(messages.size(), 2);
     }
 
 
     @Test(groups = "functional")
-    public void testUpdateWithIncorrectOrder() {
+    public void testUpdateWithIncorrectOrder() throws Exception {
         String workflowRequestId = UUID.randomUUID().toString();
         DataIntegrationStatusMonitorMessage createStatusMonitorMessage = createDefaultStatusMessage(workflowRequestId,
                 DataIntegrationEventType.WorkflowSubmitted.toString(), playLaunch2.getId());
@@ -278,12 +279,14 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId());
         Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
+        Assert.assertEquals(new Long(1), playLaunch.getContactsErrored());
 
         updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
         updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Initiated.toString());
         updateStatusMonitorMessage.setEventTime(new Date());
         updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
+        updateStatusMonitorMessage.setEventDetail(new InitiatedEventDetail());
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
@@ -294,13 +297,12 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor.getEventCompletedTime());
         Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
 
-        // List<DataIntegrationStatusMessage> messages =
-        // dataIntegrationStatusMessageEntityMgr
-        // .getAllStatusMessages(statusMonitor.getPid());
-        //
-        // Assert.assertNotNull(messages);
-        // Assert.assertEquals(messages.size(), 3);
-
+        List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
+                .getAllStatusMessages(statusMonitor.getPid());
+        Assert.assertNotNull(messages);
+        Assert.assertEquals(messages.size(), 3);
+        
+        // throw new Exception();
     }
 
     private void addReaderDelay() {
