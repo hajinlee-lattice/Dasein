@@ -299,6 +299,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull EntityRawSeed targetEntitySeed) {
         Tenant tenant = request.getTenant();
         String tenantId = tenant.getId();
+        if (ANONYMOUS_ENTITY_ID.equals(targetEntitySeed.getId())) {
+            // not creating anonymous seed entry
+            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed.isNewlyAllocated(),
+                    targetEntitySeed);
+        }
         if (CollectionUtils.isEmpty(request.getLookupResults())) {
             log.debug("No lookup entry for request (ID={}), attributes={}, tenant (ID={})," +
                     " entity={}, target entity ID={}", requestId, request.getExtraAttributes(),
