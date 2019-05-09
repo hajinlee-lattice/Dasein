@@ -201,7 +201,7 @@
         <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
         <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlExportScheduleJob&quot;}" />
-        <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout}" />
+        <property name="jobTimeout" value="${quartz.cdl.export.job.timeout}" />
     </bean>
 
     <bean name="datacloudCollectionJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">

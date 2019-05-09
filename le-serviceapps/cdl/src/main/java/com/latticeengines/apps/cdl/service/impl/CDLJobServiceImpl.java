@@ -81,7 +81,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
-    static LinkedHashMap<String, String> exportAppidMap;
+    static LinkedHashMap<String, String> EXPORT_APPID_MAP;
 
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -152,7 +152,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 return System.currentTimeMillis() - eldest.getValue() > TimeUnit.HOURS.toMillis(2);
             }
         };
-        exportAppidMap = new LinkedHashMap<>();
+        EXPORT_APPID_MAP = new LinkedHashMap<>();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -550,7 +550,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         atlasSchedulingService.updateExportScheduling(atlasScheduling);
                     }
                     if (triggered) {
-                        if (exportAppidMap.get(customerSpace) != null) {
+                        if (EXPORT_APPID_MAP.containsValue(customerSpace)) {
                             continue;
                         }
                         if(submitExportJob(customerSpace, tenant)) {
@@ -583,9 +583,9 @@ public class CDLJobServiceImpl implements CDLJobService {
             ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
             applicationId = tempApplicationId.toString();
             if (!retry) {
-                exportAppidMap.put(applicationId, customerSpace);
+                EXPORT_APPID_MAP.put(applicationId, customerSpace);
             }
-            log.info("export applicationId map is " + JsonUtils.serialize(exportAppidMap));
+            log.info("export applicationId map is " + JsonUtils.serialize(EXPORT_APPID_MAP));
         } catch (Exception e) {
             log.info(String.format("Failed to submit entity export job for tenant name: %s，message is %s",
                     customerSpace, e.getMessage()));
@@ -608,12 +608,12 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (WorkflowJob workflowJob : workflowJobs) {
                     if (workflowJob.getStatus() == JobStatus.COMPLETED.getName() || workflowJob.getStatus() == JobStatus.CANCELLED.getName()) {
-                        exportAppidMap.remove(workflowJob.getApplicationId());
+                        EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
                         continue;
                     }
                     if (workflowJob.getStatus() == JobStatus.FAILED.getName()) {
-                        submitExportJob(exportAppidMap.get(workflowJob.getApplicationId()), true, null);
-                        exportAppidMap.remove(workflowJob.getApplicationId());
+                        submitExportJob(EXPORT_APPID_MAP.get(workflowJob.getApplicationId()), true, null);
+                        EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
                     }
                 }
             }
