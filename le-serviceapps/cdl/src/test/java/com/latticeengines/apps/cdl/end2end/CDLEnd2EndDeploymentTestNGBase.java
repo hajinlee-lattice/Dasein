@@ -171,8 +171,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
     static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 106L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1051L;
+    static final Long ENTITY_MATCH_ACCOUNT_2 = 103L;
+    static final Long ENTITY_MATCH_ACCOUNT_3 = 1006L;
     static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
     static final Long CONTACT_2 = 100L;
     static final Long CONTACT_3 = 1000L;

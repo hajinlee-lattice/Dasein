@@ -1,6 +1,12 @@
 .connected-systems {
     margin: 20px;
     .systems-grid {
+        & > div {
+            margin-bottom: 10px;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
         .connection-card {
             border: 1px solid transparent;
             border-radius: 4px;
