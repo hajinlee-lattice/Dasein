@@ -28,9 +28,11 @@ export default class SystemsListComponent extends Component {
         httpService.get(
             "/pls/lookup-id-mapping",
             new Observer(response => {
+                console.log(response);
                 let CRMs = response.data.CRM || [];
                 let MAPs = response.data.MAP || [];
-                let connectors = CRMs.concat(MAPs);
+                let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
+                let connectors = FILE_SYSTEM.concat(CRMs, MAPs);
                 SystemsService.cleanupLookupId(connectors);
                 this.setState({ loading: false, connectors: connectors, count: connectors.length });
             })
@@ -41,7 +43,13 @@ export default class SystemsListComponent extends Component {
         let ret = [];
         if (this.state.connectors && this.state.connectors.length > 0) {
             this.state.connectors.forEach(system => {
-                ret.push((<SystemComponent system={system} img={ConnectorService.getImgByConnector(system.externalSystemName)} />));
+                console.log(system.externalSystemName);
+                ret.push((
+                <SystemComponent system={system} 
+                config={{
+                    img: ConnectorService.getImgByConnector(system.externalSystemName)
+                }}
+             />));
             });
 
         } else {
