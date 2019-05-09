@@ -50,6 +50,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("full_rematch")
     private boolean fullRematch;
 
+    @JsonProperty("auto_schedule")
+    private boolean autoSchedule;
+
     @JsonProperty("input_properties")
     private Map<String, String> inputProperties;
 
@@ -145,6 +148,14 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setFullRematch(boolean fullRematch) {
         this.fullRematch = fullRematch;
+    }
+
+    public boolean isAutoSchedule() {
+        return autoSchedule;
+    }
+
+    public void setAutoSchedule(boolean autoSchedule) {
+        this.autoSchedule = autoSchedule;
     }
 
     public Map<String, String> getInputProperties() {

@@ -197,6 +197,10 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         reportService.createOrUpdateReport(report);
+        log.info(String.format(
+                "Registered a report for tenant=%s, name=%s, purpose=%s, payload=%s", report.getTenant().getId(),
+                report.getName(), report.getPurpose().name(),
+                report.getJson().getPayload()));
     }
 
     @RequestMapping(value = "/reports/{reportName}/"
@@ -563,8 +567,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after orphan records export")
     public void sendOrphanRecordsExportEmail(@PathVariable String result, @PathVariable String tenantId,
-                                             @RequestBody OrphanRecordsExportRequest exportRequest,
-                                             HttpServletRequest request) {
+            @RequestBody OrphanRecordsExportRequest exportRequest, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = exportRequest.getExportId();
         String exportType = exportRequest.getOrphanRecordsType().getDisplayName();
@@ -573,17 +576,17 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(exportRequest.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    String url = String.format("%s/atlas/tenant/%s/orphanexport/%s",
-                            appPublicUrl, tenantName, exportID);
+                    String url = String.format("%s/atlas/tenant/%s/orphanexport/%s", appPublicUrl, tenantName,
+                            exportID);
                     log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
-                        case "READY":
-                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
-                                    exportID, exportType);
-                            break;
-                        case "GENERATING":
-                            emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
-                            break;
+                    case "READY":
+                        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
+                                exportID, exportType);
+                        break;
+                    case "GENERATING":
+                        emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
+                        break;
                     }
                 }
             }
@@ -626,7 +629,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 import")
     public void sendS3ImportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-                                  @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
 
@@ -642,7 +645,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template created")
     public void sendS3TemplateCreateEmail(@PathVariable("tenantId") String tenantId,
-                                          @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
         for (User user : users) {
@@ -657,7 +660,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after s3 template update")
     public void sendS3TemplateUpdateEmail(@PathVariable("tenantId") String tenantId,
-                                          @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
+            @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
 
@@ -921,17 +924,15 @@ public class InternalResource extends InternalResourceBase {
         return metadataSegmentExportService.updateSegmentExportJob(metadataSegmentExport);
     }
 
-
     @PostMapping(value = "/segment/orphan/customerspace/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "create orphan record through MetadataSegmentExportEntityMgr")
-    public MetadataSegmentExport createOrphanRecordThruMgr(@PathVariable("tenantId") String tenantId, HttpServletRequest request,
-            @RequestBody MetadataSegmentExport metadataSegmentExport){
+    public MetadataSegmentExport createOrphanRecordThruMgr(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request, @RequestBody MetadataSegmentExport metadataSegmentExport) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return metadataSegmentExportService.createOrphanRecordThruMgr(metadataSegmentExport);
     }
-
 
     public List<String> getTestTenantIds() {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
@@ -1092,13 +1093,15 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/external-scoring-config-context/{configUuid}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get attributes within a predefined group for a tenant")
-    public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request, @PathVariable(name="configUuid") String configUuid) {
+    public ScoringRequestConfigContext getScoringRequestConfigContext(HttpServletRequest request,
+            @PathVariable(name = "configUuid") String configUuid) {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Retrieve ScoringRequestConfiguration metadata for ConfigId: %s", configUuid));
         }
-        ScoringRequestConfigContext srcContext = scoringRequestConfigService.retrieveScoringRequestConfigContext(configUuid);
+        ScoringRequestConfigContext srcContext = scoringRequestConfigService
+                .retrieveScoringRequestConfigContext(configUuid);
         if (srcContext == null) {
-            throw new LedpException(LedpCode.LEDP_18194, new String[] {configUuid});
+            throw new LedpException(LedpCode.LEDP_18194, new String[] { configUuid });
         }
         return srcContext;
     }

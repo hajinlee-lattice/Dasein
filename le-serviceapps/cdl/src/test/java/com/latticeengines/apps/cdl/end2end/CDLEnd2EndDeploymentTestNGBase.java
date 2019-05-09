@@ -889,7 +889,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         assertEquals(reports.size(), 1);
         Report summaryReport = reports.get(0);
         verifySystemActionReport(summaryReport);
+        verifyDecisionReport(summaryReport);
         verifyConsolidateSummaryReport(summaryReport, expectedReport);
+    }
+
+    private void verifyDecisionReport(Report summaryReport) {
+        log.info("DecisionReport: " + summaryReport.getJson().getPayload());
+        try {
+            ObjectMapper om = JsonUtils.getObjectMapper();
+            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode decisionNode = (ObjectNode) report.get(ReportPurpose.PROCESS_ANALYZE_DECISIONS_SUMMARY.getKey());
+            Assert.assertNotNull(decisionNode);
+            for (JsonNode n : decisionNode) {
+                Assert.assertNotNull(n);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+        }
+
     }
 
     private void verifySystemActionReport(Report summaryReport) {

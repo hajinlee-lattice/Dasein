@@ -4,6 +4,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -145,6 +146,15 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             return true;
         }
         return rebuildNotForDataCloudChange;
+    }
+
+    @Override
+    protected Set<String> getExtraDecisions() {
+        TreeSet<String> decisions = new TreeSet<>();
+        decisions.add(dataCloudChanged ? "dataCloudChanged=true" : "");
+        decisions.add(hasAttrLifeCycleChange ? "hasAttrLifeCycleChange=true" : "");
+        decisions.add(shouldRematch ? "shouldRematch=true" : "");
+        return decisions;
     }
 
     @Override

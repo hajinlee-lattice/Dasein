@@ -47,6 +47,10 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("ForceRun")
     private Boolean forceRun;
 
+    // flag to indiate if it's auto-scheduled
+    @JsonProperty("AutoSchedule")
+    private Boolean autoSchedule;
+
     /*
      * flag to inherit all import actions from last failed PA
      */
@@ -149,6 +153,14 @@ public class ProcessAnalyzeRequest {
 
     public void setForceRun(Boolean forceRun) {
         this.forceRun = forceRun;
+    }
+
+    public Boolean getAutoSchedule() {
+        return autoSchedule;
+    }
+
+    public void setAutoSchedule(Boolean autoSchedule) {
+        this.autoSchedule = autoSchedule;
     }
 
     public Boolean getFullRematch() {
