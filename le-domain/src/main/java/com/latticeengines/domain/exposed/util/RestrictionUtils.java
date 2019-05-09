@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.query.ComparisonType.IS_EMPTY;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 
@@ -69,6 +70,36 @@ public class RestrictionUtils {
 
             }
         }
+    }
+
+    public static Restriction cleanupBucketsInRestriction(Restriction restriction) {
+        if (restriction != null) {
+            if (restriction instanceof LogicalRestriction) {
+                BreadthFirstSearch search = new BreadthFirstSearch();
+                search.run(restriction, (object, ctx) -> {
+                    if (object instanceof BucketRestriction) {
+                        cleanupBucketRestriction((BucketRestriction) object);
+                    }
+                });
+            } else if (restriction instanceof BucketRestriction) {
+                cleanupBucketRestriction((BucketRestriction) restriction);
+            }
+        }
+        return restriction;
+    }
+
+    private static void cleanupBucketRestriction(BucketRestriction bucketRestriction) {
+        Bucket bkt = bucketRestriction.getBkt();
+        bkt.setId(null);
+        bkt.setLabel(null);
+        if (isValueFreeOperator(bkt.getComparisonType())) {
+            bkt.setValues(null);
+        }
+        bucketRestriction.setBkt(bkt);
+    }
+
+    private static boolean isValueFreeOperator(ComparisonType operator) {
+        return IS_NULL.equals(operator) || IS_NOT_NULL.equals(operator) || IS_EMPTY.equals(operator);
     }
 
     public static List<BucketRestriction> validateBktsInRestriction(Restriction restriction) {
