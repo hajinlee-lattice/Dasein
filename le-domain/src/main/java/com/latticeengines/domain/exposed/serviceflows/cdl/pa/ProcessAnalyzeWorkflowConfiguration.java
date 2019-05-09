@@ -230,6 +230,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipDynamoExport(boolean skipDynamoExport) {
+            exportToDynamo.setSkipStep(skipDynamoExport);
+            return this;
+        }
+
         public Builder setFullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
             return this;

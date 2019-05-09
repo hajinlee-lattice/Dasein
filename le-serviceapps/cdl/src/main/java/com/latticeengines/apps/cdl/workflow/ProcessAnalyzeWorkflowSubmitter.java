@@ -493,6 +493,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
+                .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
                 .build();
     }
 
