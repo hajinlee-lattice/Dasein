@@ -229,16 +229,10 @@ angular
                         return play; 
                     },
                     path: () => {
-                        return 'playbookOverview';
-                    },
-                    ngservices: (PlaybookWizardStore) => {
-                        let obj = {
-                            PlaybookWizardStore: PlaybookWizardStore
-                        }
-                        return obj;
+                        return 'playbookoverview';
                     }
                 },
-
+                
                 views: {
                     "navigation@home": {
                         controller: 'SidebarPlaybookController',

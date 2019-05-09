@@ -61,7 +61,7 @@ export default class LeModal extends Component {
     }
 
     getTitleIcon() {
-        if (typeof this.state.title === 'function') {
+        if (typeof this.state.title === 'function' && this.state.titleIcon) {
             return this.state.titleIcon();
         }
         return (
