@@ -1,13 +1,12 @@
-import React, { Component, react2angular } from "common/react-vendor";
+import React, { Component } from "common/react-vendor";
 import Aux from 'common/widgets/hoc/_Aux';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import './systems.component.scss';
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { actions, reducer } from '../../playbook.redux';
-import { store, injectAsyncReducer } from 'store';
+import { actions } from '../../playbook.redux';
+import { store } from 'store';
 import LaunchComponent from "./launch.component";
-import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
 import GridLayout from 'common/widgets/container/grid-layout.component';
@@ -22,6 +21,7 @@ import {
   SPACEBETWEEN,
   SPACEEVEN
 } from "common/widgets/container/le-alignments";
+import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
 
 /**
  * need time utility
@@ -75,7 +75,6 @@ class SystemsComponent extends Component {
         var launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
             text = [];
-            console.log(launch);
 
         if(launched) {
             text.push(
@@ -140,7 +139,7 @@ class SystemsComponent extends Component {
         var connectionsTemplate = [];
         if(connection) {
             var launchState = (connection.launchConfiguration ? connection.launchConfiguration.launchState : 'Unlaunched'),
-                launched = (launchState === 'Launched' ? true : false);
+                launched = (launchState === 'Launching' ? true : false);
 
             return (
                 <LeHPanel hstretch={"true"} className={'connection-card'}>
@@ -201,20 +200,18 @@ class SystemsComponent extends Component {
     render() {
         if(this.state.connections) {
             return (
-                <Aux>
-                    <div class="connected-systems">
-                        <h2>Connected Systems</h2>
-                        <p>Activate a system to automate sending accounts and contacts.</p>
-                        <LeVPanel hstretch={"true"} className={'systems-grid'}>
-                            {this.makeConnections(this.props.connections, this.props.play)}
-                        </LeVPanel>
-                    </div>
-                </Aux>
+                <div class="connected-systems">
+                    <h2>Connected Systems</h2>
+                    <p>Activate a system to automate sending accounts and contacts.</p>
+                    <LeVPanel hstretch={"true"} className={'systems-grid'}>
+                        {this.makeConnections(this.props.connections, this.props.play)}
+                    </LeVPanel>
+                </div>
             );
         } else {
             return (
                 <Aux>
-                    loading...
+                    <p>Loading...</p>
                 </Aux>
             );
         }

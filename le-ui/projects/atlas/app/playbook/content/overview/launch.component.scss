@@ -31,6 +31,7 @@
         }
     }
     .rating-buckets {
+        margin-bottom: 10px;
         & > span {
             flex: 1 1 auto;
             max-width: 200px;
@@ -51,6 +52,11 @@
                 margin-right: 0;
             }
             position: relative;
+            &[disabled] {
+                background-color: lightgray;
+                pointer-events: none;
+                opacity: .5;
+            }
             &.selected {
                 color: white;
                 h3 {
