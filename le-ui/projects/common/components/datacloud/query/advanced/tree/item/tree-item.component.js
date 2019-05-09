@@ -8,24 +8,35 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/item/tree-item.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, DataCloudStore, QueryStore, QueryTreeService) {
+            controller: function ($scope, QueryTreeService) {
                 var vm = $scope.vm;
+                vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
-                vm.getOperationLabel = function() {
+                vm.getOperationLabel = function () {
                     return QueryTreeService.getOperationLabel(vm.type, vm.tree.bucketRestriction);
                 }
 
-                vm.getOperationValue = function(operatorType, position) {
-                    var val = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, operatorType, position);
-                    // console.log('VAL', val);
-                    return val;
+                vm.getOperationValue = function (type, pos) {
+                    var val = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, type, pos);
+                    return type == 'String' && typeof val == 'string' ? [val] : val;
                 }
-                vm.showItem = function(typeToShow){
-                    var ret = QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
-                    // console.log('Show Item ==> ', vm.type, typeToShow, ret);
+
+                vm.isNumericalChips = function () {
+                    let ret = vm.chipsOperations.indexOf(vm.tree.bucketRestriction.bkt.Cmp) > -1;
+                    //console.log('[tree-item] isNumericalChips()', ret);
                     return ret;
                 }
-                vm.showTo = function(){
+
+                vm.getSuffixLabel = function (index) {
+                    let suffix = vm.showTo() ? ' - ' : ', ';
+                    return vm.getOperationValue('Enum').length > 1 && index != 0 ? suffix : '';
+                }
+
+                vm.showItem = function (typeToShow) {
+                    return QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
+                }
+
+                vm.showTo = function () {
                     return QueryTreeService.showTo(vm.tree.bucketRestriction);
                 }
             }

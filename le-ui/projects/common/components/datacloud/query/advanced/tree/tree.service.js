@@ -13,19 +13,19 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'rating': 'account',
             'purchasehistory': 'account',
             'account': 'account',
-            'contact':'contact',
+            'contact': 'contact',
             'curatedaccount': 'account'
 
         };
         this.transactionMap = {
-            'EVER': 'Ever',
-            'IN_CURRENT_PERIOD': 'Current',
-            'WITHIN': 'Previous',
-            'PRIOR_ONLY': 'Only Prior to Last',
-            'BETWEEN': 'Between Last',
-            'BETWEEN_DATE':'Between',
-            'BEFORE': 'Before',
-            'AFTER': 'After' 
+            'EVER': 'ever',
+            'IN_CURRENT_PERIOD': 'current',
+            'WITHIN': 'previous',
+            'PRIOR_ONLY': 'only prior to last',
+            'BETWEEN': 'between last',
+            'BETWEEN_DATE': 'between',
+            'BEFORE': 'before',
+            'AFTER': 'after'
         };
         this.cmpMap = {
             "Yes": "is",
@@ -37,7 +37,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'IS_NULL': 'is empty',
             'IS_NOT_NULL': 'is present',
             'EQUAL': 'is equal to',
-            'NOT_EQUAL': 'is not equal to',
+            'NOT_EQUAL': 'is not',
             'GREATER_THAN': 'is greater than',
             'GREATER_OR_EQUAL': 'is greater than or equal to',
             'LESS_THAN': 'is less than',
@@ -46,64 +46,59 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'GTE_AND_LT': 'is between',
             'GT_AND_LTE': "is greater than and lesser or equal",
             'GT_AND_LT': "is greater than and less than",
-            'IN_COLLECTION': 'in collection',
+            'IN_COLLECTION': 'is equal to',
             'NOT_IN_COLLECTION': 'is not',
             'CONTAINS': 'contains',
             'NOT_CONTAINS': 'not contains',
             'STARTS_WITH': 'starts with',
-            'IN_CURRENT_PERIOD': 'Current',
-            'EVER': 'Ever',
-            'Any': 'Any',
-            'BEFORE': 'Before',
-            'BETWEEN': 'Between',
-            'AFTER': 'After',
-            'BETWEEN_LT': 'Between Last',
-            'PREVIOUS': 'Previous',
-            'PRIOR_ONLY_LT': 'Only Prior to Last',
+            'IN_CURRENT_PERIOD': 'current',
+            'EVER': 'ever',
+            'Any': 'any',
+            'BEFORE': 'before',
+            'BETWEEN': 'between',
+            'AFTER': 'after',
+            'BETWEEN_LT': 'between last',
+            'PREVIOUS': 'previous',
+            'PRIOR_ONLY_LT': 'only prior to last',
             'ENDS_WITH': 'ends with',
-            'WITHIN': 'Previous',
-            'PRIOR_ONLY': 'Only Prior to Last',
-            'BETWEEN_DATE': 'Between'
+            'WITHIN': 'previous',
+            'PRIOR_ONLY': 'only prior to last',
+            'BETWEEN_DATE': 'between'
         };
-
         this.numerical_operations = {
-            'EQUAL': 'Equal to',
-            'NOT_EQUAL': 'Not Equal to',
-            'GREATER_THAN': 'Greater Than',
-            'GREATER_OR_EQUAL': 'Greater than or Equal to',
-            'LESS_THAN': 'Less Than',
-            'LESS_OR_EQUAL': 'Less than or Equal to',
-            'GTE_AND_LT': 'Between',
-            'IS_NULL': 'Is Empty'
-        };
-
-        this.enum_operations = {
-            'EQUAL': 'is',
-            'NOT_EQUAL': 'is not',
-            'IN_COLLECTION': 'is',
-            'NOT_IN_COLLECTION': 'is not'
-        };
-
-        this.string_operations = {
-            'STARTS_WITH': 'starts with',
-            'ENDS_WITH': 'ends with',
-            'CONTAINS': 'contains',
-            'NOT_CONTAINS'  : 'does not contain',
-            'EQUAL' : 'equals',
-            'NOT_EQUAL': 'does not equal',
+            'IN_COLLECTION': 'equal to',
+            'NOT_IN_COLLECTION': 'not equal to',
+            'GREATER_THAN': 'greater than',
+            'GREATER_OR_EQUAL': 'greater than or equal to',
+            'LESS_THAN': 'less than',
+            'LESS_OR_EQUAL': 'less than or equal to',
+            'GTE_AND_LT': 'between',
             'IS_NULL': 'is empty',
             'IS_NOT_NULL': 'is present'
         };
-
+        this.enum_operations = {
+            'EQUAL': 'is equal to',
+            'NOT_EQUAL': 'is not',
+            'IN_COLLECTION': 'is equal to',
+            'NOT_IN_COLLECTION': 'is not'
+        };
+        this.string_operations = {
+            'IN_COLLECTION': 'equal to',
+            'NOT_IN_COLLECTION': 'not equal to',
+            'STARTS_WITH': 'starts with',
+            'ENDS_WITH': 'ends with',
+            'CONTAINS': 'contains',
+            'NOT_CONTAINS': 'does not contain',
+            'IS_NULL': 'is empty',
+            'IS_NOT_NULL': 'is present'
+        };
         this.no_inputs = [
             'IS_NULL',
             'IS_NOT_NULL'
         ];
-
         this.two_inputs = [
             'GTE_AND_LT'
         ];
-
         this.numerical_labels = {
             'EQUAL': '=',
             'NOT_EQUAL': '!=',
@@ -111,7 +106,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'GREATER_OR_EQUAL': '>=',
             'LESS_THAN': '<',
             'LESS_OR_EQUAL': '<=',
-            'IS_NULL': 'is empty'
+            'IS_NULL': 'is empty',
+            'IS_NOT_NULL': 'is present'
         };
 
         this.prevBucketCountAttr = null;
@@ -269,7 +265,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return service.isBucketUsed(bucket);
         }
 
-        this.hasInputs = function(type, bucketRestriction) {
+        this.hasInputs = function (type, bucketRestriction) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             var cmpModel = bucketRestriction.bkt.Cmp;
@@ -289,7 +285,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             } else {
                 console.warn('getCmpModel() service not implemented');
             }
-            
+
         }
 
         //***************** Editing ************************************/
@@ -352,31 +348,22 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 console.warn(' changeBooleanValue() Service not implemented');
             }
         }
-        this.changeEnumCmpValue = function (bucketRestriction, value) {
+        this.changeCmpValue = function (bucketRestriction, value) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
-                return service.changeEnumCmpValue(bucketRestriction, value);
+                return service.changeCmpValue(bucketRestriction, value);
             } else {
-                console.warn(' changeEnumCmpValue() Service not implemented');
+                console.warn(' changeCmpValue() Service not implemented');
             }
         }
-        this.changeStringValue = function (bucketRestriction, stringValue) {
+        this.changeVals = function (bucketRestriction, value) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
-                service.changeStringValue(bucketRestriction, stringValue);
+                service.changeVals(bucketRestriction, value);
             } else {
-                console.warn(' changeStringValue() Service not implemented');
-            }
-        }
-        this.changeStringCmpValue = function (bucketRestriction, value) {
-            var entity = getEntity(bucketRestriction);
-            var service = getService(entity);
-            if (service) {
-                return service.changeStringCmpValue(bucketRestriction, value);
-            } else {
-                console.warn(' changeStringCmpValue() Service not implemented');
+                console.warn(' changeVals() Service not implemented');
             }
         }
         this.changeNumericalCmpValue = function (bucketRestriction, value) {
@@ -502,7 +489,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             var segment = {
                 "free_form_text_search": ""
             };
-            if(segmentName){
+            if (segmentName) {
                 segment.preexisting_segment_name = segmentName;
                 // segment.contact_restriction = {};
             }
@@ -656,30 +643,25 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 return;
             }
             var cmp = bucketRestriction.bkt.Cmp;
+            var vals = bucketRestriction.bkt.Vals;
 
             switch (type) {
                 case 'Boolean':
                     return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
-
                 case 'Numerical':
                     return cmpMap[cmp];
-
-                case 'Enum':
-                    var ret = '';
-
-                    switch (cmp) {
-                        case 'EQUAL': ret = 'is'; break;
-                        case 'IN_COLLECTION': ret = 'is'; break;
-                        case 'NOT_EQUAL': ret = 'is not'; break;
-                        case 'NOT_IN_COLLECTION': ret = 'is not'; break;
-                        case 'IS_NULL': ret = 'is empty'; break;
-                        case 'IS_NOT_NULL': ret = 'is present'; break;
-                    }
-
-                    return ret;
-
                 case 'String':
-                    return cmpMap[cmp];
+                case 'Enum':
+                    switch (cmp) {
+                        case 'EQUAL':
+                        case 'IN_COLLECTION':
+                            return cmpMap['IN_COLLECTION'];
+                        case 'NOT_EQUAL':
+                        case 'NOT_IN_COLLECTION':
+                            return cmpMap['NOT_IN_COLLECTION'];
+                        default:
+                            return cmpMap[cmp];
+                    }
                 case 'Date':
                     return 'in timeframe';
                 default:
@@ -708,9 +690,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (bucketRestriction.bkt.Cmp == 'IS_NULL' || bucketRestriction.bkt.Cmp == 'IS_NOT_NULL') {
                 return '';
             }
-            return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] ? bucketRestriction.bkt.Vals[0] : 'any (*)';
+            return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0 ? bucketRestriction.bkt.Vals : 'any (*)';
         }
-        function getDateValue(bucketRestriction){
+        function getDateValue(bucketRestriction) {
             if (bucketRestriction.bkt.Fltr.Cmp == 'IS_NULL' || bucketRestriction.bkt.Fltr.Cmp == 'IS_NOT_NULL') {
                 return '';
             }
@@ -746,11 +728,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
             var isSameBucket = true;
             if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                 isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
-            }else if(bucket && bucket.Fltr !== undefined && bucket.Fltr.Vals != null && bkt.Fltr && bkt.Fltr.Vals !== undefined && bkt.Fltr.Vals != null){
+            } else if (bucket && bucket.Fltr !== undefined && bucket.Fltr.Vals != null && bkt.Fltr && bkt.Fltr.Vals !== undefined && bkt.Fltr.Vals != null) {
                 isSameBucket = bkt.Fltr.Vals[0] == bucket.Fltr.Vals[0] && bkt.Fltr.Vals[1] == bucket.Fltr.Vals[1] && bkt.Fltr.Cmp == bucket.Fltr.Cmp;
             }
 
-            
+
 
             return isSameAttribute && isSameBucket;
         }
@@ -764,34 +746,31 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return bucketRestriction.bkt && bucketRestriction.bkt.Vals;
         }
 
-        this.getValue = function (bucketRestriction, type, position, subType) { 
-            
+        this.getValue = function (bucketRestriction, type, position, subType) {
+            console.log('getValue', bucketRestriction, type, position, subType)
         }
 
         this.getValues = function (bucketRestriction, type, subType) {
-            switch(type){
+            switch (type) {
                 case 'Date':
-                    if(bucketRestriction.bkt.Fltr.Cmp == 'EVER'){
+                    if (bucketRestriction.bkt.Fltr.Cmp == 'EVER') {
                         return [];
-                    }else{
+                    } else {
                         return bucketRestriction.bkt.Fltr.Vals;
                     }
-                
+
                 default: return [];
             }
-         };
+        };
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             bucketRestriction.bkt.Vals[0] = booleanValue.length ? booleanValue : null;
         }
-        this.changeStringValue = function (bucketRestriction, stringValue) {
-            bucketRestriction.bkt.Vals[0] = stringValue ? stringValue : '';
+        this.changeVals = function (bucketRestriction, value) {
+            bucketRestriction.bkt.Vals = value;
         }
-        this.changeStringCmpValue = function(bucketRestriction, value) {
-            bucketRestriction.bkt.Cmp = value;
-        }
-        this.changeEnumCmpValue = function (bucketRestriction, value) {
+        this.changeCmpValue = function (bucketRestriction, value) {
             bucketRestriction.bkt.Cmp = value;
         }
         this.changeNumericalCmpValue = function (bucketRestriction, value) {
@@ -806,13 +785,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
         this.changeValue = function (bucketRestriction, type, value, position, subType) { }
 
         this.changeTimeframePeriod = function (bucketRestriction, type, value) {
-            switch(type){
+            switch (type) {
                 case 'Date':
-                    if(bucketRestriction){
+                    if (bucketRestriction) {
                         bucketRestriction.bkt.Fltr.Period = value.Period;
                         bucketRestriction.bkt.Fltr.Vals = value.Vals;
                     }
-                break;
+                    break;
             }
         }
 
@@ -846,16 +825,16 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.getCmp = function (bucketRestriction, type, subType) {
-            switch(type){
-                case 'Date': 
+            switch (type) {
+                case 'Date':
                     return bucketRestriction.bkt.Fltr ? bucketRestriction.bkt.Fltr.Cmp : bucketRestriction.bkt.Cmp;
             }
             return '';
         }
 
         this.getPeriodValue = function (bucketRestriction, type, subtype) {
-            switch(type){
-                case 'Date': 
+            switch (type) {
+                case 'Date':
                     return bucketRestriction.bkt.Fltr ? bucketRestriction.bkt.Fltr.Period : bucketRestriction.bkt.Period;
             }
             return '';
