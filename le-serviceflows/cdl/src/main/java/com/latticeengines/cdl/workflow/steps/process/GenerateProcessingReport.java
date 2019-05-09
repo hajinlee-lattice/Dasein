@@ -135,11 +135,35 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         ObjectNode jsonReport = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
                 ObjectNode.class);
         updateSystemActionsReport(jsonReport);
+        updateDecisionsReport(jsonReport);
         updateReportEntitiesSummaryReport(jsonReport);
         Report report = createReport(jsonReport.toString(), ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY,
                 UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
         log.info("Registered report: " + jsonReport.toString());
+    }
+
+    private void updateDecisionsReport(ObjectNode report) {
+        Map<String, String> decisions = getMapObjectFromContext(PROCESS_ANALYTICS_DECISIONS_KEY, String.class,
+                String.class);
+        if (MapUtils.isNotEmpty(decisions)) {
+            ObjectNode decisionsNode = (ObjectNode) report
+                    .get(ReportPurpose.PROCESS_ANALYZE_DECISIONS_SUMMARY.getKey());
+            if (decisionsNode == null) {
+                log.info("No decisions summary reports found. Create it.");
+                decisionsNode = report.putObject(ReportPurpose.PROCESS_ANALYZE_DECISIONS_SUMMARY.getKey());
+            }
+            for (String key : decisions.keySet()) {
+                decisionsNode.put(key, decisions.get(key));
+            }
+            StringBuilder builder = new StringBuilder();
+            if (getConfiguration().isAutoSchedule()) {
+                builder.append("isAutoSchedule=true;");
+            }
+            if (builder.length() > 0) {
+                decisionsNode.put("Generic", builder.toString());
+            }
+        }
     }
 
     private void updateSystemActionsReport(ObjectNode report) {
@@ -221,7 +245,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
     }
 
-
     private Map<BusinessEntity, Long> retrieveCurrentEntityCnts() {
         Map<BusinessEntity, Long> currentCnts = new HashMap<>();
         currentCnts.put(BusinessEntity.Account, countInRedshift(BusinessEntity.Account));
@@ -270,9 +293,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             String hdfsPath = table.getExtracts().get(0).getPath();
             if (tableRole == TableRoleInCollection.ConsolidatedProduct) {
                 log.info("Count products in HDFS " + hdfsPath);
-                result = ProductUtils
-                        .countProducts(yarnConfiguration, hdfsPath,
-                                Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()));
+                result = ProductUtils.countProducts(yarnConfiguration, hdfsPath,
+                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()));
             } else {
                 if (!hdfsPath.endsWith("*.avro")) {
                     if (hdfsPath.endsWith("/")) {

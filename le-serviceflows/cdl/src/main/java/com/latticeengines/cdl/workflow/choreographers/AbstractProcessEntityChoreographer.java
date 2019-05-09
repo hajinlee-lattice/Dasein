@@ -5,9 +5,14 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -41,6 +46,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean jobImpacted = false;
     private boolean initialized = false;
     private boolean hasBatchStore = false;
+    private float diffRate = 0;
 
     boolean rebuild = false;
     boolean update = false;
@@ -67,6 +73,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             rebuild = shouldRebuild();
             update = shouldUpdate();
             log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
+            saveDecisions(step);
             if (reset && (rebuild || update)) {
                 throw new IllegalStateException("When reset, neither rebuild nor update can be true.");
             }
@@ -106,6 +113,36 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         return false;
+    }
+
+    private void saveDecisions(AbstractStep<? extends BaseStepConfiguration> step) {
+        TreeSet<String> decisions = new TreeSet<>();
+        decisions.add(reset ? "reset=true" : (update ? "update=true" : "rebuild=true"));
+        decisions.add(enforceRebuild ? "enforceRebuild=true" : "");
+        decisions.add(hasSchemaChange ? "hasSchemaChange=true" : "");
+        decisions.add(hasImports ? "hasImports=true" : "");
+        decisions.add(hasManyUpdate ? "hasManyUpdate=true" : "");
+        decisions.add(hasManyUpdate ? String.format("diffRate=%f", diffRate) : "");
+        decisions.add(jobImpacted ? "jobImpacted=true" : "");
+        decisions.addAll(getExtraDecisions());
+        decisions.remove("");
+        StringBuilder builder = new StringBuilder();
+        for (String decision : decisions) {
+            builder.append(decision).append(";");
+        }
+        Map<String, String> map = step.getMapObjectFromContext(PROCESS_ANALYTICS_DECISIONS_KEY, String.class,
+                String.class);
+        if (map == null) {
+            map = new HashMap<>();
+        }
+        if (builder.length() > 0) {
+            map.put(mainEntity().name(), builder.toString());
+            step.putObjectInContext(PROCESS_ANALYTICS_DECISIONS_KEY, map);
+        }
+    }
+
+    protected Set<String> getExtraDecisions() {
+        return Collections.emptySet();
     }
 
     private boolean isMergeStep(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -235,7 +272,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
         if (existingCount != null && existingCount != 0L) {
-            hasManyUpdate = (diffCount * 1.0F / existingCount) >= 0.3;
+            diffRate = diffCount * 1.0F / existingCount;
+            hasManyUpdate = diffRate >= 0.3;
         }
     }
 
@@ -267,7 +305,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return true;
         } else if (hasManyUpdate) {
             log.info("Has more than 30% update, going to rebuild " + mainEntity());
-//            return true;
+            // return true;
             return false;
         } else if (jobImpacted) {
             return true;
