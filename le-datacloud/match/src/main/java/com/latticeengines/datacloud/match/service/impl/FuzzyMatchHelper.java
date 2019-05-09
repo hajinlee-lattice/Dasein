@@ -137,7 +137,10 @@ public class FuzzyMatchHelper implements DbHelper {
                         record.setLatticeAccountId(inputId);
                     }
                 } else {
-                    record.addErrorMessages("Cannot find a custom account by " + lookupIdKey + "=" + lookupIdValue);
+                    record.setMatched(false);
+                    String msg = "Cannot find a custom account by " + lookupIdKey + "=" + lookupIdValue;
+                    record.addErrorMessages(msg);
+                    log.warn(msg);
                 }
             }
         }
