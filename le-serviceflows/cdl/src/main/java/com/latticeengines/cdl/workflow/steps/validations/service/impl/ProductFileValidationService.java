@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,7 +11,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -18,8 +21,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -32,17 +37,17 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationServiceConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("productFileValidationService")
 @Lazy(value = false)
 public class ProductFileValidationService
-        extends InputFileValidationService<ProductFileValidationServiceConfiguration> {
+        extends InputFileValidationService<ProductFileValidationConfiguration> {
 
     public ProductFileValidationService() {
-        super(ProductFileValidationServiceConfiguration.class.getSimpleName());
+        super(ProductFileValidationConfiguration.class.getSimpleName());
     }
 
     private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
@@ -51,18 +56,39 @@ public class ProductFileValidationService
     protected DataCollectionProxy dataCollectionProxy;
 
     @Override
-    public void validate(ProductFileValidationServiceConfiguration productFileValidationServiceConfiguration) {
+    public void validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
         Table currentTable = getCurrentConsolidateProductTable(
                 productFileValidationServiceConfiguration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
-        Map<String, String> errorMessages = new HashMap<>();
-        mergeProducts(inputProducts, currentProducts, errorMessages);
-        if (MapUtils.isNotEmpty(errorMessages)) {
-            String filePath = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
-            writeErrorFile(filePath, errorMessages);
+        CSVFormat format = LECSVFormat.format;
+        // copy error file if file exists
+        String errorFile = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, errorFile, ImportProperty.ERROR_FILE);
+            } else {
+                format = format.withHeader(ImportProperty.ERROR_HEADER);
+            }
+        } catch (IOException e) {
+            log.info("Error when copying error file to local");
+        }
+
+        boolean hasError = mergeProducts(inputProducts, currentProducts, format);
+
+        // copy error file back to hdfs, remove local error.csv
+        if (hasError) {
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, errorFile);
+                }
+                HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, errorFile);
+                FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
+            } catch (IOException e) {
+                log.info("Error when copying file to hdfs");
+            }
             throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
         }
     }
@@ -78,37 +104,38 @@ public class ProductFileValidationService
             GenericRecord record = iter.next();
             Product product = new Product();
 
-            String productId = getString(record, InterfaceName.Id.name());
+            String productId = getFieldValue(record, InterfaceName.Id.name());
             if (productId == null) {
-                productId = getString(record, InterfaceName.ProductId.name());
+                productId = getFieldValue(record, InterfaceName.ProductId.name());
             }
             product.setProductId(productId);
-            product.setProductBundle(getString(record, InterfaceName.ProductBundle.name()));
-            product.setProductBundleId(getString(record, InterfaceName.ProductBundleId.name()));
-            product.setProductName(getString(record, InterfaceName.ProductName.name()));
-            product.setProductDescription(getString(record, InterfaceName.Description.name()));
-            product.setProductLine(getString(record, InterfaceName.ProductLine.name()));
-            product.setProductLineId(getString(record, InterfaceName.ProductLineId.name()));
-            product.setProductFamily(getString(record, InterfaceName.ProductFamily.name()));
-            product.setProductFamilyId(getString(record, InterfaceName.ProductFamilyId.name()));
-            product.setProductCategory(getString(record, InterfaceName.ProductCategory.name()));
-            product.setProductCategoryId(getString(record, InterfaceName.ProductCategoryId.name()));
-            product.setProductType(getString(record, InterfaceName.ProductType.name()));
-            product.setProductStatus(getString(record, InterfaceName.ProductStatus.name()));
+            product.setProductBundle(getFieldValue(record, InterfaceName.ProductBundle.name()));
+            product.setProductBundleId(getFieldValue(record, InterfaceName.ProductBundleId.name()));
+            product.setProductName(getFieldValue(record, InterfaceName.ProductName.name()));
+            product.setProductDescription(getFieldValue(record, InterfaceName.Description.name()));
+            product.setProductLine(getFieldValue(record, InterfaceName.ProductLine.name()));
+            product.setProductLineId(getFieldValue(record, InterfaceName.ProductLineId.name()));
+            product.setProductFamily(getFieldValue(record, InterfaceName.ProductFamily.name()));
+            product.setProductFamilyId(getFieldValue(record, InterfaceName.ProductFamilyId.name()));
+            product.setProductCategory(getFieldValue(record, InterfaceName.ProductCategory.name()));
+            product.setProductCategoryId(getFieldValue(record, InterfaceName.ProductCategoryId.name()));
+            product.setProductType(getFieldValue(record, InterfaceName.ProductType.name()));
+            product.setProductStatus(getFieldValue(record, InterfaceName.ProductStatus.name()));
             if (productTypes != null && !productTypes.contains(product.getProductType())) {
                 continue;
             }
             if (productStatuses != null && !productStatuses.contains(product.getProductStatus())) {
                 continue;
             }
-            String lineId = getString(record, InterfaceName.InternalId.name());
+            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
             productMap.put(lineId, product);
         }
         return productMap;
     }
 
-    private List<Product> mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            Map<String, String> errorMessages) {
+    private boolean mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
+            CSVFormat format) {
+        boolean hasError = false;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
         for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
@@ -145,11 +172,12 @@ public class ProductFileValidationService
                 try {
                     mergeHierarchyProduct(inputProduct, inputProductMap);
                 } catch (RuntimeException e) {
-                    errorMessages.put(entry.getKey(), e.getMessage());
+                    hasError = true;
+                    writeErrorFile(entry.getKey(), e.getMessage(), format);
                 }
             }
         }
-        return new ArrayList<>(inputProductMap.values());
+        return hasError;
     }
 
     private Product mergeSpendingProduct(String id, String name, String categoryId, String familyId, String lineId,

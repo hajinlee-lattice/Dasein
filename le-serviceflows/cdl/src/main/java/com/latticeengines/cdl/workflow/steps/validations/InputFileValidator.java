@@ -17,10 +17,10 @@ import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValida
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationServiceConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationServiceConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationServiceConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationServiceConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -64,37 +64,27 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
 
         BusinessEntity entity = configuration.getEntity();
         log.info(String.format("Begin to validate data with entity %s.", entity.name()));
-        InputFileValidationServiceConfiguration fileConfiguration = generateConfiguration(entity, pathList);
+        InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList);
         InputFileValidationService fileValidationService = InputFileValidationService
                 .getValidationService(fileConfiguration.getClass().getSimpleName());
-        log.info(
-                pathList.get(0) + " " + 
-                fileConfiguration.getClass().getSimpleName() + "     " + fileValidationService + "   "
-                + InputFileValidationService
-                        .getValidationService(AccountFileValidationServiceConfiguration.class.getSimpleName())
-                + " "
-                + InputFileValidationService
-                        .getValidationService(ContactFileValidationServiceConfiguration.class.getSimpleName())
-                + " " + InputFileValidationService
-                        .getValidationService(ProductFileValidationServiceConfiguration.class.getSimpleName()));
         fileValidationService.validate(fileConfiguration);
 
     }
 
-    private InputFileValidationServiceConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList) {
+    private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList) {
         switch (entity) {
         case Account:
-            AccountFileValidationServiceConfiguration accountConfig = new AccountFileValidationServiceConfiguration();
+            AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
             accountConfig.setEntity(entity);
             accountConfig.setPathList(pathList);
             return accountConfig;
         case Contact:
-            ContactFileValidationServiceConfiguration contactConfig = new ContactFileValidationServiceConfiguration();
+            ContactFileValidationConfiguration contactConfig = new ContactFileValidationConfiguration();
             contactConfig.setEntity(entity);
             contactConfig.setPathList(pathList);
             return contactConfig;
         case Product:
-            ProductFileValidationServiceConfiguration productConfig = new ProductFileValidationServiceConfiguration();
+            ProductFileValidationConfiguration productConfig = new ProductFileValidationConfiguration();
             productConfig.setCustomerSpace(configuration.getCustomerSpace());
             productConfig.setEntity(entity);
             productConfig.setPathList(pathList);
