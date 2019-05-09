@@ -583,9 +583,13 @@ public class MetadataResolver {
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
-                try {
-                    TimeStampConvertUtils.convertToLong(columnField, "", "", "");
-                } catch (Exception e) {
+                TemporalAccessor dateTime = null;
+                Matcher dateTimeMatcher = TimeStampConvertUtils.TZ_DATE_TIME.matcher(columnField);
+                if (dateTimeMatcher.find()) {
+                    columnField = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+                }
+                dateTime = TimeStampConvertUtils.parseDateTime(columnField);
+                if (dateTime == null) {
                     return false;
                 }
             }
