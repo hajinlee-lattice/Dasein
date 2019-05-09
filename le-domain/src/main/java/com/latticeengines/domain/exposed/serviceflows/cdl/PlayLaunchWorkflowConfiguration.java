@@ -7,18 +7,22 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 
 public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
+    public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
+    public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
 
     public static class Builder {
         private PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration();
         private PlayLaunchInitStepConfiguration initStepConf = new PlayLaunchInitStepConfiguration();
         private PlayLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new PlayLaunchExportFilesGeneratorConfiguration();
         private PlayLaunchExportFilesToS3Configuration exportFilesToS3Conf = new PlayLaunchExportFilesToS3Configuration();
+        private PlayLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new PlayLaunchExportPublishToSNSConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("playLaunchWorkflow", customerSpace,
@@ -26,6 +30,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setCustomerSpace(customerSpace);
             exportFileGeneratorConf.setCustomerSpace(customerSpace);
             exportFilesToS3Conf.setCustomerSpace(customerSpace);
+            exportPublishToSNSConf.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -33,16 +38,15 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
-            exportFilesToS3Conf.setExternalFolderName(playLaunch.getFolderName());
-            exportFilesToS3Conf.setExternalAudienceId(playLaunch.getAudienceId());
-            exportFilesToS3Conf.setExternalAudienceName(playLaunch.getAudienceName());
+            exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
+            exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
+            exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
             return this;
         }
 
         public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
             if (!canBeLaunchedToExternal) {
-                exportFilesToS3Conf.setSkipStep(true);
-                exportFileGeneratorConf.setSkipStep(true);
+                exportPublishToSNSConf.setSkipStep(true);
                 return this;
             }
             exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
@@ -51,7 +55,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
             return this;
         }
-        
+
         public Builder lookupIdMap(LookupIdMap lookupIdMap) {
             if (lookupIdMap == null) {
                 return this;
@@ -60,6 +64,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportFileGeneratorConf.setDestinationOrgId(lookupIdMap.getOrgId());
             exportFileGeneratorConf.setDestinationSysName(lookupIdMap.getExternalSystemName());
             exportFilesToS3Conf.setLookupIdMap(lookupIdMap);
+            exportPublishToSNSConf.setLookupIdMap(lookupIdMap);
             return this;
         }
 
@@ -78,6 +83,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             configuration.add(initStepConf);
             configuration.add(exportFileGeneratorConf);
             configuration.add(exportFilesToS3Conf);
+            configuration.add(exportPublishToSNSConf);
             return configuration;
         }
 

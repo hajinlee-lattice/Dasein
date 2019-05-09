@@ -77,19 +77,13 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
-        
-        playLaunchConfig = new PlayLaunchConfig.Builder()
-                .existingTenant(existingTenant)
-                .mockRatingTable(false)
-                .testPlayCrud(false)
-                .destinationSystemType(CDLExternalSystemType.MAP)
+
+        playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
+                .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemName(CDLExternalSystemName.Marketo)
-                .destinationSystemId("Marketo_"+System.currentTimeMillis())
-                .trayAuthenticationId(UUID.randomUUID().toString())
-                .audienceId(UUID.randomUUID().toString())
-                .topNCount(160L)
-                .featureFlags(featureFlags)
-                .build(); 
+                .destinationSystemId("Marketo_" + System.currentTimeMillis())
+                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
+                .topNCount(160L).featureFlags(featureFlags).build();
 
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
@@ -135,7 +129,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
-        String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket)+exportS3Bucket.length());
+        String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket) + exportS3Bucket.length());
 
         log.info("Verifying S3 Folder Path " + s3FolderPath);
         // Get S3 Files for this PlayLaunch Config
