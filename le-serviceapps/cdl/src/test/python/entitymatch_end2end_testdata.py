@@ -2,6 +2,7 @@ import copy
 import csv
 import os
 import re
+import uuid
 
 from enum import Enum
 from random import randrange
@@ -32,6 +33,9 @@ TEST_SCENARIO = 'Test_Scenario'
 ACC_COMPANY_NAME = 'Company Name'
 ACC_POSTAL_CODE = 'Postal Code'
 
+UUID_STR = str(uuid.uuid1())
+
+
 # Don't cover name + location only case due to remote DnB is desired to be avoided in end2end test
 class ContactToAccount(Enum):
     aid = 0
@@ -46,6 +50,15 @@ class ContactToAccount(Enum):
     webiste = 9
     website_nl = 10
     website_new = 11
+
+class AccountInfo:
+    def __init__(self, website, name, country, state, city, postal_code):
+        self.website = website
+        self.name = name
+        self.country = country
+        self.state = state
+        self.city = city
+        self.postal_code = postal_code
 
 
 def read_account_base(file):
@@ -124,7 +137,7 @@ def update_account(accounts):
         update_scenario(account, 'No AID;')
 
 
-def update_account_in_contact(contacts, aid_to_account):
+def update_account_in_contact(contacts, aid_to_account, update_mode):
     for k in range(len(contacts)):
         contact = contacts[k]
         i = k % len(list(ContactToAccount))
@@ -134,6 +147,7 @@ def update_account_in_contact(contacts, aid_to_account):
         acct_company_state = aid_to_account[contact[CUSTOMER_ACCOUNT_ID]][STATE]
         acct_company_city = aid_to_account[contact[CUSTOMER_ACCOUNT_ID]][CITY]
         acct_postal_code = aid_to_account[contact[CUSTOMER_ACCOUNT_ID]][ACC_POSTAL_CODE]
+        account = AccountInfo(acct_website, acct_company_name, acct_company_country, acct_company_state, acct_company_city, acct_postal_code)
         # MatchKey = AID
         if ContactToAccount(i) == ContactToAccount.aid:
             contact[EMAIL] = None
@@ -161,74 +175,90 @@ def update_account_in_contact(contacts, aid_to_account):
             update_scenario(contact, 'Contact to Account: AID + Name + Location;')
         # MatchKey = AID (New) -- Also covers case that multiple contacts match to same account
         elif ContactToAccount(i) == ContactToAccount.aid_new:
-            contact[CUSTOMER_ACCOUNT_ID] = 'AID_NEW_1'
+            contact[CUSTOMER_ACCOUNT_ID] = 'AID_NEW_1' if not update_mode else 'AID_NEW_2'
             contact[REF_CUSTOMER_ACCOUNT_ID] = contact[CUSTOMER_ACCOUNT_ID]
-            contact[EMAIL] = '%s@new.domain1.com' % (contact[EMAIL][:contact[EMAIL].index('@')])
-            contact[COMPANY_NAME] = 'New Testing Company 1'
+            contact[EMAIL] = ('%s@new.domain1.com' if not update_mode else '%s@new.domain2.com') % (contact[EMAIL][:contact[EMAIL].index('@')])
+            contact[COMPANY_NAME] = ('FakeName_%s_1' if not update_mode else 'FakeName_%s_2') % (UUID_STR)
             contact[COUNTRY] = 'USA'
             contact[POSTAL_CODE] = None
             update_scenario(contact, 'Contact to Account: new AID (multiple Contacts with same Account info);')
         # MatchKey = Email
         elif ContactToAccount(i) == ContactToAccount.email:
-            contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], acct_website[acct_website.find('@')+1:])
-            contact[POSTAL_CODE] = None
-            update_scenario(contact, 'Contact to Account: Email only;')
+            if acct_company_country == 'United States':
+                contact[CUSTOMER_ACCOUNT_ID] = None
+                contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], acct_website[acct_website.find('@')+1:])
+                contact[POSTAL_CODE] = None
+                update_scenario(contact, 'Contact to Account: Email only;')
+            else:
+                update_account_in_contact_case_email_nl(contact, account)
         # MatchKey = Email + Website
         elif ContactToAccount(i) == ContactToAccount.email_website:
-            contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], acct_website[acct_website.find('@')+1:])
-            contact[WEBSITE] = 'google.com' # Email is higher priority than Website, so google.com is not honored
-            contact[POSTAL_CODE] = None
-            update_scenario(contact, 'Contact to Account: Email + Website;')
+            if acct_company_country == 'United States':
+                contact[CUSTOMER_ACCOUNT_ID] = None
+                contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], acct_website[acct_website.find('@')+1:])
+                contact[WEBSITE] = 'google.com' # Email is higher priority than Website, so google.com is not honored
+                contact[POSTAL_CODE] = None
+                update_scenario(contact, 'Contact to Account: Email + Website;')
+            else:
+                update_account_in_contact_case_email_nl(contact, account)
         # MatchKey = Email + Name + Location
         elif ContactToAccount(i) == ContactToAccount.email_nl:
-            contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], acct_website[acct_website.find('@')+1:])
-            contact[COMPANY_NAME] = acct_company_name
-            contact[COUNTRY] = acct_company_country
-            contact[STATE] = acct_company_state
-            contact[CITY] = acct_company_city
-            contact[POSTAL_CODE] = acct_postal_code
-            update_scenario(contact, 'Contact to Account: Email + Name + Location;')
+            update_account_in_contact_case_email_nl(contact, account)
         # MatchKey = Email (New) -- Also covers case that multiple contacts match to same account
         elif ContactToAccount(i) == ContactToAccount.email_new:
             contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = '%s@new.domain2.com' % (contact[EMAIL][:contact[EMAIL].index('@')])
-            contact[COMPANY_NAME] = 'New Testing Company 2'
+            contact[REF_CUSTOMER_ACCOUNT_ID] = contact[CUSTOMER_ACCOUNT_ID]
+            contact[EMAIL] = ('%s@new.domain3.com' if not update_mode else '%s@new.domain4.com') % (contact[EMAIL][:contact[EMAIL].index('@')])
+            contact[COMPANY_NAME] = ('FakeName_%s_3' if not update_mode else 'FakeName_%s_4') % (UUID_STR)
             contact[COUNTRY] = 'USA'
             contact[POSTAL_CODE] = None
             update_scenario(contact, 'Contact to Account: new Email (multiple Contacts with same Account info);')
         # MatchKey = Website
         elif ContactToAccount(i) == ContactToAccount.webiste:
-            contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = None
-            contact[WEBSITE] = acct_website
-            contact[POSTAL_CODE] = None
-            update_scenario(contact, 'Contact to Account: Website only;')
+            if acct_company_country == 'United States':
+                contact[CUSTOMER_ACCOUNT_ID] = None
+                contact[EMAIL] = None
+                contact[WEBSITE] = acct_website
+                contact[POSTAL_CODE] = None
+                update_scenario(contact, 'Contact to Account: Website only;')
+            else:
+                update_account_in_contact_case_website_nl(contact, account)
         # MatchKey = Website + Name + Location
         elif ContactToAccount(i) == ContactToAccount.website_nl:
-            contact[CUSTOMER_ACCOUNT_ID] = None
-            contact[EMAIL] = None
-            contact[WEBSITE] = acct_website
-            contact[COMPANY_NAME] = acct_company_name
-            contact[COUNTRY] = acct_company_country
-            contact[STATE] = acct_company_state
-            contact[CITY] = acct_company_city
-            contact[POSTAL_CODE] = acct_postal_code
-            update_scenario(contact, 'Contact to Account: Website + Name + Location;')
+            update_account_in_contact_case_website_nl(contact, account)
         # MatchKey = Website (New) -- Also covers case that multiple contacts match to same account
         elif ContactToAccount(i) == ContactToAccount.website_new:
             contact[CUSTOMER_ACCOUNT_ID] = None
+            contact[REF_CUSTOMER_ACCOUNT_ID] = contact[CUSTOMER_ACCOUNT_ID]
             contact[EMAIL] = None
-            contact[WEBSITE] = 'new.domain3.com'
-            contact[COMPANY_NAME] = 'New Testing Company 3'
+            contact[WEBSITE] = 'new.domain5.com' if not update_mode else 'new.domain6.com'
+            contact[COMPANY_NAME] = ('FakeName_%s_5' if not update_mode else 'FakeName_%s_6') % (UUID_STR)
             contact[COUNTRY] = 'USA'
             contact[POSTAL_CODE] = None
             update_scenario(contact, 'Contact to Account: new Website (multiple Contacts with same Account info);')
         else:
             raise Exception('Unknown Contact to Account match scenario: %s' % ContactToAccount(i))
 
+def update_account_in_contact_case_email_nl(contact, account):
+    contact[CUSTOMER_ACCOUNT_ID] = None
+    contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], account.website[account.website.find('@')+1:])
+    contact[COMPANY_NAME] = account.name
+    contact[COUNTRY] = account.country
+    contact[STATE] = account.state
+    contact[CITY] = account.city
+    contact[POSTAL_CODE] = account.postal_code
+    update_scenario(contact, 'Contact to Account: Email + Name + Location;')
+
+def update_account_in_contact_case_website_nl(contact, account):
+    contact[CUSTOMER_ACCOUNT_ID] = None
+    contact[EMAIL] = None
+    contact[WEBSITE] = account.website
+    contact[COMPANY_NAME] = account.name
+    contact[COUNTRY] = account.country
+    contact[STATE] = account.state
+    contact[CITY] = account.city
+    contact[POSTAL_CODE] = account.postal_code
+    update_scenario(contact, 'Contact to Account: Website + Name + Location;')
 
 def update_contact(contacts):
     for contact in contacts:
@@ -260,12 +290,12 @@ if __name__ == '__main__':
     # Account
     # dict: AID -> Account, list: Account, list: Account field names
     aid_to_account, accounts, account_schema = read_account_base(ACCOUNT_FILE)
-    # 1st import for ProcessAccount test
+    # For ProcessAccount test
     accounts1 = split(accounts, 0, 900)
-    # 2nd import for ProcessAccount test
+    # 1st import for UpdateAccount test
     accounts2 = split(accounts, 400, 500)
     update_account(accounts2)
-    # for UpdateAccount test
+    # 2nd import for UpdateAccount test
     accounts3 = split(accounts, 900, 1000)
     output(accounts1, 'EntityMatch_Account_1_900.csv', account_schema)
     output(accounts2, 'EntityMatch_Account_401_500.csv', account_schema)
@@ -274,13 +304,13 @@ if __name__ == '__main__':
     # Contact
     # list: Contact, list: Contact field names
     contacts, contact_schema = read_contact_base(CONTACT_FILE)
-    # 1st import for ProcessAccount test
+    # For ProcessAccount test
     contacts1 = split(contacts, 0, 900)
-    # for UpdateAccount test
+    # 1st import for UpdateAccount test
     contacts3 = split(contacts, 900, 1000)
-    update_account_in_contact(contacts1, aid_to_account)
-    update_account_in_contact(contacts3, aid_to_account)
-    # 2nd import for ProcessAccount test
+    update_account_in_contact(contacts1, aid_to_account, False)
+    update_account_in_contact(contacts3, aid_to_account, True)
+    # 2nd import for UpdateAccount test
     contacts2 = split(contacts1, 400, 500)
     update_contact(contacts2)
     output(contacts1, 'EntityMatch_Contact_1_900.csv', contact_schema)
