@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 public class InitiatedEventDetail extends EventDetail {
 
     public InitiatedEventDetail() {
+        super("Initiated");
     }
 
     private Long batchId;
