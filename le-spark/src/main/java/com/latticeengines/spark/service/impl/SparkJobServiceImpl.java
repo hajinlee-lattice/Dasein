@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.livy.scalaapi.LivyScalaClient;
 import org.apache.livy.scalaapi.ScalaJobHandle;
-import org.apache.livy.shaded.kryo.kryo.KryoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
