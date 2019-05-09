@@ -228,7 +228,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
                 } catch (Exception e) {
                     log.error("Unable to batch create records " + tableName, e);
                 }
-
             } while (outcome.getUnprocessedItems().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
             if (outcome.getUnprocessedItems().size() > 0) {
                 throw new RuntimeException("Failed to finish a batch write within timeout");
