@@ -206,14 +206,47 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         });
     }
 
+    @Test(groups = "functional")
+    public void testRuleModelWithEncodedAttrIsNull() {
+        RuleBasedModel model = new RuleBasedModel();
+        model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
+        RatingRule rule = RatingRule.constructDefaultRule();
+        Map<String, Restriction> ruleA = new HashMap<>();
+        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and( //
+                new BucketRestriction(BusinessEntity.Account, "BmbrSurge_AdNetworks_Intent", Bucket.nullBkt())
+        ).build());
+        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
+        rule.setDefaultBucketName(RatingBucketName.C.getName());
+        model.setRatingRule(rule);
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+
+        frontEndQuery.addLookups(BusinessEntity.Account, InterfaceName.AccountId.name());
+        frontEndQuery.addLookups(BusinessEntity.Rating, model.getId());
+
+        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertNotNull(dataPage);
+        List<Map<String, Object>> data = dataPage.getData();
+        Assert.assertFalse(data.isEmpty());
+        data.forEach(row -> {
+            Assert.assertFalse(row.containsKey("Score"), JsonUtils.serialize(row));
+            Assert.assertTrue(row.containsKey(model.getId()), JsonUtils.serialize(row));
+        });
+    }
+
     private RuleBasedModel ruleBasedModel() {
         RuleBasedModel model = new RuleBasedModel();
         model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
         RatingRule rule = RatingRule.constructDefaultRule();
 
         Map<String, Restriction> ruleA = new HashMap<>();
-        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("B", "G")));
+        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and(
+                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("B", "G")),
+                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.notNullBkt())
+        ).build());
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
