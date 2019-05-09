@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 
@@ -30,12 +32,15 @@ public class DataFeedController {
 
     private final ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter;
     private final OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
+    private final EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
-            OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter) {
+            OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
+                              EntityExportWorkflowSubmitter entityExportWorkflowSubmitter) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
+        this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
     }
 
     @PostMapping(value = "/processanalyze", headers = "Accept=application/json")
@@ -85,7 +90,23 @@ public class DataFeedController {
         }
     }
 
+    @PostMapping(value = "/entityexport", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
+    public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
+                                                   @RequestBody EntityExportRequest request) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        try {
+            ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     private ProcessAnalyzeRequest defaultProcessAnalyzeRequest() {
         return new ProcessAnalyzeRequest();
     }
+
 }

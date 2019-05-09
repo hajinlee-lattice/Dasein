@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -387,5 +388,22 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             throw new RuntimeException("Cannot encode systemName: " + systemName);
         }
         return get("get s3 import system", url, S3ImportSystem.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId entityExport(String customerSpace, EntityExportRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/entityexport",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("entity export", url, request, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start entityExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 }
