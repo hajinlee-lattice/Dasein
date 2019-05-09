@@ -48,7 +48,7 @@ abstract class QueryTranslator {
 
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
 
-    static final int MAX_CARDINALITY = 20000;
+    private static final int MAX_CARDINALITY = 20000;
     static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     QueryFactory queryFactory;
@@ -83,8 +83,8 @@ abstract class QueryTranslator {
         return results;
     }
 
-    void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
-            Map<ComparisonType, Set<AttributeLookup>> map) {
+    private void needPreprocess(FrontEndQuery frontEndQuery, TimeFilterTranslator timeTranslator,
+                                Map<ComparisonType, Set<AttributeLookup>> map) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
         inspectFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), timeTranslator, map);
         inspectInnerRestriction(frontEndQuery, mainEntity, timeTranslator, map);
@@ -145,16 +145,16 @@ abstract class QueryTranslator {
         return RestrictionOptimizer.optimize(translated);
     }
 
-    void inspectFrontEndRestriction(FrontEndRestriction frontEndRestriction, TimeFilterTranslator timeTranslator,
-            Map<ComparisonType, Set<AttributeLookup>> map) {
+    private void inspectFrontEndRestriction(FrontEndRestriction frontEndRestriction, TimeFilterTranslator timeTranslator,
+                                            Map<ComparisonType, Set<AttributeLookup>> map) {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return;
         }
         inspectBucketRestriction(frontEndRestriction.getRestriction(), map, timeTranslator);
     }
 
-    void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map,
-            TimeFilterTranslator timeTranslator) {
+    private void inspectBucketRestriction(Restriction restriction, Map<ComparisonType, Set<AttributeLookup>> map,
+                                          TimeFilterTranslator timeTranslator) {
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
             search.run(restriction, (object, ctx) -> {
@@ -191,8 +191,8 @@ abstract class QueryTranslator {
         return restriction;
     }
 
-    Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            Restriction outerRestriction, TimeFilterTranslator timeTranslator, String sqlUser) {
+    private Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+                                                  Restriction outerRestriction, TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:
@@ -210,8 +210,8 @@ abstract class QueryTranslator {
         return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
-    void inspectInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-            TimeFilterTranslator timeTranslator, Map<ComparisonType, Set<AttributeLookup>> map) {
+    private void inspectInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+                                         TimeFilterTranslator timeTranslator, Map<ComparisonType, Set<AttributeLookup>> map) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
         case Contact:

@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -44,11 +45,13 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -56,6 +59,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageR
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineDashboardProxy;
@@ -196,6 +200,7 @@ public class RatingEngineResource {
         String user = MultiTenantContext.getEmailAddress();
         RatingEngine res;
         try {
+            cleanupBucketsInRules(ratingEngine);
             res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
                     createAction);
         } catch (Exception ex) {
@@ -310,6 +315,7 @@ public class RatingEngineResource {
         String user = MultiTenantContext.getEmailAddress();
         RatingModel res;
         try {
+            cleanupBucketsInRules(ratingModel);
             res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
@@ -547,4 +553,25 @@ public class RatingEngineResource {
             throw new RuntimeException("Unable to validate due to an unknown server error");
         }
     }
+
+    private void cleanupBucketsInRules(RatingEngine re) {
+        if (re != null) {
+            cleanupBucketsInRules(re.getLatestIteration());
+        }
+    }
+
+    private void cleanupBucketsInRules(RatingModel model) {
+        if ((model instanceof RuleBasedModel)) {
+            RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
+            TreeMap<String, Map<String, Restriction>> ruleMap = ruleBasedModel.getRatingRule().getBucketToRuleMap();
+            if (MapUtils.isNotEmpty(ruleMap)) {
+                ruleMap.values().forEach(rules -> {
+                    if (MapUtils.isNotEmpty(rules)) {
+                        rules.values().forEach(RestrictionUtils::cleanupBucketsInRestriction);
+                    }
+                });
+            }
+        }
+    }
+
 }

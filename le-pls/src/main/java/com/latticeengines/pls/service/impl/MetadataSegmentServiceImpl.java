@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
@@ -99,6 +100,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
         MetadataSegment translatedSegment = translateForBackend(segment);
+        translatedSegment.setAccountRestriction( //
+                RestrictionUtils.cleanupBucketsInRestriction(translatedSegment.getAccountRestriction()));
+        translatedSegment.setContactRestriction( //
+                RestrictionUtils.cleanupBucketsInRestriction(translatedSegment.getContactRestriction()));
         MetadataSegment metadataSegment;
         try {
             metadataSegment = segmentProxy.createOrUpdateSegment(customerSpace, translatedSegment,

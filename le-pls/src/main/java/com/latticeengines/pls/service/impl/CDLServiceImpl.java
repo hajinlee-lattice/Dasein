@@ -263,10 +263,6 @@ public class CDLServiceImpl implements CDLService {
             throw new RuntimeException(
                     String.format("Source file %s doesn't have a table template!", templateFileName));
         }
-        if (dataSourceFile.isPartialFile()) {
-            throw new RuntimeException(
-                    String.format("Source file %s can not auto import!", templateFileName));
-        }
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         importConfig.setTemplateName(templateSourceFile.getTableName());
         importConfig.setFilePath(dataSourceFile.getPath());
@@ -275,6 +271,7 @@ public class CDLServiceImpl implements CDLService {
         importFileInfo.setFileUploadInitiator(email);
         importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
         importFileInfo.setReportFileName(dataSourceFile.getName());
+        importFileInfo.setPartialFile(dataSourceFile.isPartialFile());
         CSVImportConfig csvImportConfig = new CSVImportConfig();
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvImportConfig.setCSVImportFileInfo(importFileInfo);
