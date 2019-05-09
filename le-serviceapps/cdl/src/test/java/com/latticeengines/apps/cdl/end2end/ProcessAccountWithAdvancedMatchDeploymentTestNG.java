@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
@@ -48,9 +47,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
 
     @Inject
     private MatchProxy matchProxy;
@@ -195,7 +191,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
                 ACCOUNT_1);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
-        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 9L);
+        accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 8L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ENTITY_MATCH_ACCOUNT_1);
 

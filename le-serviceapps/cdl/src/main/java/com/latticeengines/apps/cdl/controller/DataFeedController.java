@@ -15,6 +15,7 @@ import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
@@ -48,7 +49,7 @@ public class DataFeedController {
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace,
                                                    @RequestBody(required = false) ProcessAnalyzeRequest request) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        customerSpace = MultiTenantContext.getCustomerSpace().toString();
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
@@ -67,7 +68,7 @@ public class DataFeedController {
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
                                             @ApiParam(value = "Memory in MB", required = false)
                                             @RequestParam(value = "memory", required = false) Integer memory) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        customerSpace = MultiTenantContext.getCustomerSpace().toString();
         ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory);
         return ResponseDocument.successResponse(appId.toString());
     }

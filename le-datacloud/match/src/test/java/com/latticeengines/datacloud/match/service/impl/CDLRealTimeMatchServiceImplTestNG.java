@@ -118,7 +118,6 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         cdlColumnSelectionService.setDataCollectionProxy(dataCollectionProxy);
     }
 
-    // FIXME re-enable this test after publication finishes
     @Test(groups = "functional")
     public void testCDLLookupByAccountId() {
         Object[][] data = new Object[][] { { 123, ACCOUNT_ID } };
