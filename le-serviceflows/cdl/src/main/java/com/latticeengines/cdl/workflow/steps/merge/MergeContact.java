@@ -89,8 +89,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         if (configuration.isEntityMatchEnabled()) {
             table.getAttributes().forEach(attr -> {
                 // update metadata for AccountId attribute since it is only created
-                // after lead
-                // to account match and does not have the correct metadata
+                // after lead to account match and does not have the correct metadata
                 if (InterfaceName.AccountId.name().equals(attr.getName())) {
                     attr.setInterfaceName(InterfaceName.AccountId);
                     attr.setTags(Tag.INTERNAL);

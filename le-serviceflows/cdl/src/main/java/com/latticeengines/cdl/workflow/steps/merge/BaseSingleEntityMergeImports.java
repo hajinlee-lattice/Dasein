@@ -144,7 +144,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig upsertMaster(boolean entityMatch, String matchedTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, matchedTable);
-        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         setTargetTable(step, batchStoreTablePrefix);
         UpsertConfig config = getUpsertConfig(entityMatch, false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
