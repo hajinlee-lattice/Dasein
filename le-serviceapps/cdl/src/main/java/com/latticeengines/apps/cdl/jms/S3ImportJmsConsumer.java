@@ -32,6 +32,7 @@ import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -92,12 +93,14 @@ public class S3ImportJmsConsumer {
 
     @JmsListener(destination = "${cdl.s3.file.import.sqs.name}")
     public void processMessage(@Payload String message) {
-        if (StringUtils.isEmpty(message)) {
-            log.warn("S3 Import message is empty!");
-            return;
+        if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
+            if (StringUtils.isEmpty(message)) {
+                log.warn("S3 Import message is empty!");
+                return;
+            }
+            log.info("Process message : " + message);
+            submitImport(message);
         }
-        log.info("Process message : " + message);
-        submitImport(message);
     }
 
     private void submitImport(String message) {
