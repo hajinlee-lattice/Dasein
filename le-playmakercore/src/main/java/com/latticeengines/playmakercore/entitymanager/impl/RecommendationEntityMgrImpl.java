@@ -187,14 +187,8 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, List<String> accountIds) {
-        return recommendationDao.findContactsByLaunchIds(launchIds, start, accountIds);
-    }
-
-    @Override
-    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds) {
-        return recommendationDao.findContactsCountByLaunchIds(launchIds, start, accountIds);
+    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, List<String> accountIds) {
+        return recommendationDao.findContactsByLaunchIds(launchIds, start, offset, maximum, accountIds);
     }
 
 }

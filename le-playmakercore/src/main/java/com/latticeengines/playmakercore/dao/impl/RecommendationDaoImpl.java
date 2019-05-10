@@ -505,7 +505,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     @SuppressWarnings("unchecked")
     @Override
     public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start,
-            List<String> accountIds) {
+            int offset, int maximum, List<String> accountIds) {
         log.info("contact requst with launchIds: " + launchIds.toString());
         if (CollectionUtils.isEmpty(launchIds)) {
             return Collections.emptyList();
@@ -523,6 +523,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         Query<Object[]> query = session.createQuery(queryStr);
         query.setParameter("deleted", Boolean.FALSE);
+        query.setMaxResults(maximum);
+        query.setFirstResult(offset);
         query.setParameterList("launchIds", launchIds);
         query.setParameter("lastUpdatedTimestamp", start);
         if (CollectionUtils.isNotEmpty(accountIds)) {
@@ -543,12 +545,5 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             }
         });
         return contacts;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds) {
-        List<Map<String, Object>> contacts = findContactsByLaunchIds(launchIds, start, accountIds);
-        return contacts.size();
     }
 }

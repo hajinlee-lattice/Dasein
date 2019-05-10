@@ -62,10 +62,9 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         testPlayCreationHelper.setTenant(mainTestTenant);
         testPlayCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
         testPlayCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
-        testPlayCreationHelper.setupPlayTestEnv();
+        testPlayCreationHelper.setupRatingEngineAndSegment();
         testPlay = testPlayCreationHelper.createPlayOnlyAndGet();
     }
-
 
     @Test(groups = "deployment-app")
     public void testCreateUpdate() {
