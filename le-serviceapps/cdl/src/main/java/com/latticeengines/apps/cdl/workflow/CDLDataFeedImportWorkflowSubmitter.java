@@ -133,7 +133,12 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
             @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo) {
         String filePath = "";
         if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
-                filePath = csvImportFileInfo.getReportFilePath();
+            filePath = csvImportFileInfo.getReportFilePath();
+        }
+
+        String warning = "";
+        if (StringUtils.isNotEmpty(csvImportFileInfo.getReportWarning())) {
+            warning = csvImportFileInfo.getReportWarning();
         }
 
         String emailInfoStr = "";
@@ -155,6 +160,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                                 csvImportFileInfo.getReportFileDisplayName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, filePath)
+                        .put(WorkflowContextConstants.Inputs.REPORT_WARNING, warning)
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))//
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO, emailInfoStr)
