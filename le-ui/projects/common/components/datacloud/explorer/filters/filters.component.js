@@ -380,6 +380,15 @@ export default function () {
                     AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && AuthorizationUtility.checkFeatureFlags(featureFlags);
 
             }
+            
+            vm.getImportState = () => {
+                var flags = FeatureFlagService.Flags();
+                if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+                    return 'home.multipletemplates';
+                }else{
+                    return 'home.importtemplates';
+                }
+            }
 
             vm.init_filters();
         }
