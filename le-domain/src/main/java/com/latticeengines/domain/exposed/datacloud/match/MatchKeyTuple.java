@@ -238,7 +238,7 @@ public class MatchKeyTuple implements Fact {
     @Override
     public String toString() {
         if (serializedFormat == null) {
-            log.error("$JAW$ serializedFormat was null!  Refreshing cached strings");
+            log.warn("serializedFormat was null.  Refreshing cached strings");
             refreshCachedStrings();
         }
         return serializedFormat;

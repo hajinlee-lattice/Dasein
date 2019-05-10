@@ -135,7 +135,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setDomainSource(record.getDomainSource())
                     .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
 
-            // $JAW$ Add EntityMatchHistory to MatchHistory.
+            // Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
 
             MatchInput matchInput = matchContext.getInput();
