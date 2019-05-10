@@ -194,16 +194,7 @@ export default class SystemComponent extends Component {
                     classNames: "blue-button"
                 }}
                 callback={() => {
-                    httpService.get(
-                        "/pls/dropbox",
-                        new Observer(response => {
-                        }),
-                        {
-                            ErrorDisplayMethod: "Banner",
-                            ErrorDisplayOptions: '{"title": "Warning"}',
-                            ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                        }
-                    );
+                    this.TemplatesStore.newToken();
                 }}
             />
         );

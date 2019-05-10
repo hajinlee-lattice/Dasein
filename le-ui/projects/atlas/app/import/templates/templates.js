@@ -1,7 +1,20 @@
 angular
   .module("le.import.templates", [])
-  .service("TemplatesStore", function($http, Modal) {
+  .service("TemplatesStore", function ($http, Modal) {
     let TemplatesStore = this;
+
+    this.newToken = () => {
+      $http({
+        method: "GET",
+        url: "/pls/dropbox",
+        headers: {
+          ErrorDisplayMethod: "Banner",
+          ErrorDisplayOptions: '{"title": "Warning"}',
+          ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+        },
+        data: { AccessMode: "LatticeUser" }
+      })
+    };
 
     this.checkIfRegenerate = data => {
       switch (data.action) {
@@ -15,14 +28,14 @@ angular
       }
     };
     this.txtFormat = (htmlFormat) => {
-      if(htmlFormat){
+      if (htmlFormat) {
         let ret = htmlFormat.replace(/<p>/g, '\r\n');
         ret = ret.replace(/<\/p>/g, '\r\n');
         ret = ret.replace(/<br>/g, '\r\n');
         ret = ret.replace(/<strong>/g, '');
         ret = ret.replace(/<\/strong>/g, '');
-      return ret;
-      }else{
+        return ret;
+      } else {
         return 'Please contact your Admin';
       }
     };
