@@ -60,6 +60,28 @@ angular
       );
     };
 
+    this.getExistingToken = () => {
+      $http({
+        method: "PUT",
+        url: "/pls/dropbox/key",
+        headers: {
+          ErrorDisplayMethod: "",
+          ErrorDisplayOptions:
+            '{"confirmtext": "Download","title": "S3 Credentials"}',
+          ErrorDisplayCallback: "TemplatesStore.download"
+        },
+        data: { AccessMode: "LatticeUser" }
+      }).then(
+        function onSuccess(response) {
+          Modal.data = response.data.UIAction.message;
+        },
+        function onError(response) {
+          console.log(response);
+        }
+      );
+    };
+
+
     this.download = response => {
       if (response && response.action != "closedForced") {
         let toDownload = Modal.data;
