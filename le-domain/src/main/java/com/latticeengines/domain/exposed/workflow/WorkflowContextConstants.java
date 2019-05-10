@@ -31,6 +31,7 @@ public class WorkflowContextConstants {
         public static final String SOURCE_DISPLAY_NAME = "SOURCE_DISPLAY_NAME";
         public static final String SOURCE_FILE_NAME = "SOURCE_FILE_NAME";
         public static final String SOURCE_FILE_PATH = "SOURCE_FILE_PATH";
+        public static final String REPORT_WARNING = "REPORT_WARNING";
         public static final String JOB_TYPE = "JOB_TYPE";
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
         public static final String INITIAL_DATAFEED_STATUS = "INITIAL_DATAFEED_STATUS";
