@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -36,6 +38,9 @@ public class AttrConfigResource {
 
     @Inject
     private AttrConfigService attrConfigService;
+
+    @Inject
+    private BatonService batonService;
 
     @GetMapping(value = "/entities/{entity}")
     @ResponseBody
@@ -63,7 +68,9 @@ public class AttrConfigResource {
             @PathVariable String categoryName) {
         AttrConfigRequest request = new AttrConfigRequest();
         Category category = resolveCategory(categoryName);
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
+        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category, entityMatchEnabled);
         request.setAttrConfigs(attrConfigs);
         return request;
     }

@@ -95,7 +95,8 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
                 servingStore = servingStore.filter(cm -> Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()));
             }
 
-            Set<String> systemAttributes = SchemaRepository.getSystemAttributes(entity).stream()
+            // EntityMatch enabled or not doesn't impact raw system metadata
+            Set<String> systemAttributes = SchemaRepository.getSystemAttributes(entity, false).stream()
                     .map(InterfaceName::name).collect(Collectors.toSet());
 
             servingStore = servingStore //

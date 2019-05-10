@@ -34,8 +34,10 @@ import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
@@ -121,6 +123,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private FeatureImportanceUtil featureImportanceUtil;
+
+    @Inject
+    private BatonService batonService;
 
     private static RatingEngineType[] types = //
             new RatingEngineType[] { //
@@ -465,10 +470,12 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
         Map<String, StatsCube> accountStatsCube = getIterationMetadataCube(customerSpace, ratingEngine, aiModel,
                 dataStores);
+        boolean entityMatchEnabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
 
         return StatsCubeUtils.constructTopNTree( //
                 accountStatsCube, ImmutableMap.of(statsCubeKey, metadataAttrs), //
-                false, null);
+                false, null, entityMatchEnabled);
     }
 
     private String getKey(ColumnMetadata cm) {

@@ -10,7 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationPropertyEntityMgr;
-import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppTestNGBase {
+public class AttributeCustomizationPropertyEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
             .parse(AttributeCustomizationPropertyEntityMgrImplTestNG.class.getSimpleName());
     private static final String ATTRIBUTE_NAME_1 = "TestAttribute_1";

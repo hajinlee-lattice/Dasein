@@ -31,8 +31,9 @@ import reactor.core.publisher.ParallelFlux;
 @Component("activityMetricsDecorator")
 public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecoratorFac {
 
+    // Entity match enabled or not doesn't impact activity metrics metadata
     private static final Set<String> systemAttributes = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory).stream() //
+            .getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory, false).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     @Override

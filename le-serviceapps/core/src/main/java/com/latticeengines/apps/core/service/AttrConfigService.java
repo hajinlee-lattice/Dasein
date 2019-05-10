@@ -14,7 +14,7 @@ public interface AttrConfigService {
 
     List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render);
 
-    List<AttrConfig> getRenderedList(Category category);
+    List<AttrConfig> getRenderedList(Category category, boolean entityMatchEnabled);
 
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
             List<String> propertyNames, boolean onlyActive);

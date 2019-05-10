@@ -44,7 +44,7 @@ public class SchemaRepository {
         return instance;
     }
 
-    public static Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
+    public static Set<InterfaceName> getSystemAttributes(BusinessEntity entity, boolean entityMatchEnabled) {
         Set<InterfaceName> sysAttrs = new HashSet<>();
         if (BusinessEntity.LatticeAccount.equals(entity)) {
             sysAttrs.add(InterfaceName.LatticeAccountId);
@@ -54,11 +54,17 @@ public class SchemaRepository {
             sysAttrs.add(InterfaceName.Period_ID);
             sysAttrs.add(InterfaceName.AnalyticPurchaseState_ID);
         } else {
-            // common
-            if (!BusinessEntity.Account.equals(entity)) {
-                sysAttrs.add(InterfaceName.AccountId);
+            if (entityMatchEnabled) {
+                sysAttrs.add(InterfaceName.EntityId);
+                if (!BusinessEntity.Account.equals(entity)) {
+                    sysAttrs.add(InterfaceName.CustomerAccountId);
+                }
+            } else {
+                // common
+                if (!BusinessEntity.Account.equals(entity)) {
+                    sysAttrs.add(InterfaceName.AccountId);
+                }
             }
-            sysAttrs.add(InterfaceName.EntityId);
             sysAttrs.add(InterfaceName.InternalId);
             sysAttrs.add(InterfaceName.CDLCreatedTime);
             sysAttrs.add(InterfaceName.CDLUpdatedTime);
@@ -71,7 +77,7 @@ public class SchemaRepository {
         return sysAttrs;
     }
 
-    public static Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
+    public static Set<InterfaceName> getStandardAttributes(BusinessEntity entity, boolean entityMatchEnabled) {
         Set<InterfaceName> stdAttrs = new HashSet<>();
         // only account and contact has standard attrs
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
@@ -88,13 +94,21 @@ public class SchemaRepository {
             // special
             switch (entity) {
             case Account:
-                stdAttrs.add(InterfaceName.AccountId);
+                if (entityMatchEnabled) {
+                    stdAttrs.add(InterfaceName.CustomerAccountId);
+                } else {
+                    stdAttrs.add(InterfaceName.AccountId);
+                }
                 stdAttrs.add(InterfaceName.Website);
                 stdAttrs.add(InterfaceName.IsMatched);
                 break;
             case Contact:
                 stdAttrs.add(InterfaceName.ContactName);
-                stdAttrs.add(InterfaceName.ContactId);
+                if (entityMatchEnabled) {
+                    stdAttrs.add(InterfaceName.CustomerContactId);
+                } else {
+                    stdAttrs.add(InterfaceName.ContactId);
+                }
                 stdAttrs.add(InterfaceName.Email);
                 break;
             default:
@@ -105,6 +119,25 @@ public class SchemaRepository {
 
     public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
         return AtlasExportType.getDefaultExportAttributes(entity);
+    }
+
+    public static Set<InterfaceName> getInternalLookupIdAttributes(BusinessEntity entity, boolean enableEntityMatch) {
+        Set<InterfaceName> idAttrs = new HashSet<>();
+        if (!enableEntityMatch) {
+            return idAttrs;
+        }
+        switch (entity) {
+        case Account:
+            idAttrs.add(InterfaceName.AccountId);
+            break;
+        case Contact:
+            idAttrs.add(InterfaceName.ContactId);
+            idAttrs.add(InterfaceName.AccountId);
+            break;
+        default:
+            break;
+        }
+        return idAttrs;
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
