@@ -57,7 +57,9 @@ class SystemsComponent extends Component {
     componentDidMount() {
         let playstore = store.getState()['playbook'];
 
-        actions.fetchRatings([playstore.play.ratingEngine.id], false);
+        if(playstore.play.ratingEngine) {
+            actions.fetchRatings([playstore.play.ratingEngine.id], false);
+        }
 
         this.unsubscribe = store.subscribe(this.handleChange);
     }

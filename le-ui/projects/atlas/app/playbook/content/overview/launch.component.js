@@ -51,7 +51,8 @@ class LaunchComponent extends Component {
             unscored: false,
             limitRecommendations: false,
             limitRecommendationsAmount: null,
-            excludeItemsWithoutSalesforceId: false,
+            excludeItemsWithoutSalesforceId: true,
+            destinationAccountId: null,
             launchAccountsCoverage: null
         };
 
@@ -60,19 +61,27 @@ class LaunchComponent extends Component {
     componentDidMount() {
         let playstore = store.getState()['playbook'];
 
-        if(!playstore.ratings) {
-            actions.fetchRatings([playstore.play.ratingEngine.id], false);
-        } else {
-            this.setState({ratings: playstore.ratings});
+        if(playstore.play.ratingEngine) {
+            if(!playstore.ratings) {
+                actions.fetchRatings([playstore.play.ratingEngine.id], false);
+            } else {
+                this.setState({ratings: playstore.ratings});
+            }
         }
 
         var vm = this;
-        playstore.playbookWizardStore.launchAccountsCoverage(this.state.play.name, true).then(function(response) {
+        playstore.playbookWizardStore.launchAccountsCoverage(this.state.play.name, {
+            sendEngineId: true,
+            getExcludeItems: true,
+            //getDestinationAccountId: this.state.destinationAccountId
+        }).then(function(response) {
+            var coverage = vm.getCoverage(response).coverage,
+                hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
+
+            vm.state.unscored = !hasBuckets;
             vm.state.launchAccountsCoverage = response;
             vm.setState(vm.state);
         });
-
-        //console.log(this.PlaybookWizardStore.launchAccountsCoverage(this.state.play.name));
 
         this.unsubscribe = store.subscribe(this.handleChange);
     }
@@ -171,7 +180,7 @@ class LaunchComponent extends Component {
         return _buckets;
     }
 
-    makeBucketList(play, coverage, unscoredAccountCountPercent) {
+    makeBucketList = (play, coverage, unscoredAccountCountPercent) => {
         /**
          * If no buckets this should produce 5 default buckets
          */
@@ -194,9 +203,8 @@ class LaunchComponent extends Component {
             bucket: 'F',
             count: 0,
         }],
-        noBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? null : _noBuckets);
-
-        console.log(coverage, coverage.bucketCoverageCounts, coverage.bucketCoverageCounts.length, noBuckets);
+        hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
+        noBuckets = (hasBuckets ? null : _noBuckets);
 
         if(coverage) {
             return (
@@ -205,7 +213,7 @@ class LaunchComponent extends Component {
                     <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
                         {this.makeBuckets(coverage, play, noBuckets)}
                     </LeHPanel>
-                    <input id="unscored" type="checkbox" onChange={this.clickUnscored} /> 
+                    <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
                     <label for="unscored">
                         Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
                     </label>
@@ -234,27 +242,33 @@ class LaunchComponent extends Component {
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
 
+            actions.destinationAccountId(connection.orgId);
+
         if(play) {
+            let vm = this,
+                closeModal = (response) => {
+                    vm.props.closeFn();
+                };
             if(lastIncompleteLaunch) {
                 actions.saveLaunch(play.name, {
                     engineId: opts.engineId,
                     launch_id: lastIncompleteLaunch.launchId,
                     launchObj: Object.assign({},lastIncompleteLaunch, launchObj),
                     save: true
-                });
+                }, closeModal);
             } else if(lastIncompleteLaunchId) {
                 actions.savePlayLaunch(play.name, {
                     engineId: opts.engineId,
                     launch_id: lastIncompleteLaunchId,
                     launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj),
                     save: save
-                });
+                }, closeModal);
             } else {
                 actions.savePlayLaunch(play.name, {
                     engineId: opts.engineId,
                     launchObj: launchObj,
                     save: save
-                });
+                }, closeModal);
             }
         }
     }
@@ -297,33 +311,37 @@ class LaunchComponent extends Component {
         // </li>
     }
 
+    getCoverage(accountsCoverage) {
+        var coverageType = (accountsCoverage.ratingModelsCoverageMap ? 'ratingModelsCoverageMap' : 'ratingEngineIdCoverageMap'),
+            engineId,
+            coverage;
+
+        if(coverageType === 'ratingModelsCoverageMap') {
+            engineId = (accountsCoverage && accountsCoverage.engineId ? accountsCoverage.engineId : '');
+            coverage = (engineId && accountsCoverage[coverageType] ? accountsCoverage[coverageType] : {});
+        } else {
+            engineId = (accountsCoverage && accountsCoverage[coverageType] && accountsCoverage[coverageType][Object.keys(accountsCoverage[coverageType])[0]] ? Object.keys(accountsCoverage[coverageType])[0] : '');
+            coverage = (engineId && accountsCoverage[coverageType][engineId] ? accountsCoverage[coverageType][engineId] : {});
+        }
+        return {
+            engineId: engineId,
+            coverage: coverage
+        }
+    }
+
     render() {
         if(this.state.launchAccountsCoverage) {
             var play = this.state.play,
                 connection = this.props.connection,
-                bucketsToLaunch = play.launchHistory.mostRecentLaunch.bucketsToLaunch,
-                accountsCoverage = this.state.launchAccountsCoverage, //this.state.ratings,
-                coverageType = (accountsCoverage.ratingModelsCoverageMap ? 'ratingModelsCoverageMap' : 'ratingEngineIdCoverageMap'),
-                engineId,
-                coverage;
-
-            if(coverageType === 'ratingModelsCoverageMap') {
-                engineId = (accountsCoverage && accountsCoverage.engineId ? accountsCoverage.engineId : '');
-                coverage = (engineId && accountsCoverage[coverageType] ? accountsCoverage[coverageType] : {});
-            } else {
-                engineId = (accountsCoverage && accountsCoverage[coverageType] && accountsCoverage[coverageType][Object.keys(accountsCoverage[coverageType])[0]] ? Object.keys(accountsCoverage[coverageType])[0] : '');
-                coverage = (engineId && accountsCoverage[coverageType][engineId] ? accountsCoverage[coverageType][engineId] : {});
-            }
-
-            var unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
+                bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),
+                coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
+                engineId = coverageObj.engineId,
+                coverage = coverageObj.coverage,
+                unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
                 canLaunch = recommendationCounts.launched;
-
-            // let state = this.state;
-            // state.coverage = coverage;
-            // this.setState(state);
 
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
@@ -347,7 +365,11 @@ class LaunchComponent extends Component {
                         <h2>Account Options</h2>
                         <ul>
                             <li>
-                                <input id="requireAccountId" onChange={this.clickRequireAccountId} type="checkbox" /> 
+                                <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
+                                <label for="requireAccountId">Must have email</label>
+                            </li>
+                            <li>
+                                <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
                                 <label for="requireAccountId">Must have account ID</label>
                             </li>
                         </ul>
@@ -358,7 +380,7 @@ class LaunchComponent extends Component {
                             <li>
                                 <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
                                 <label for="limitRecommendations"> 
-                                    Limit to only <input id="limitRecommendationsAmount" type="number" min="1" class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
+                                    Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
                                 </label>
                             </li>
                         </ul>
