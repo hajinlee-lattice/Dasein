@@ -212,7 +212,7 @@ export default class SystemComponent extends Component {
                                 classNames: "blue-button"
                             }}
                             callback={() => {
-                                this.TemplatesStore.regenerate();
+                                this.TemplatesStore.getExistingToken();
                             }}
                         />
                     </div>
