@@ -68,6 +68,8 @@ public class FirehoseServiceImpl implements FirehoseService {
                     List<String> subStreams = streams.subList(i * batchSize, (i + 1) * batchSize);
                     sendMiniBatch(deliveryStreamName, subStreams);
                 }
+            } else {
+                sendMiniBatch(deliveryStreamName, streams);
             }
 
         } catch (Throwable t) {
@@ -79,7 +81,7 @@ public class FirehoseServiceImpl implements FirehoseService {
     private void sendMiniBatch(String deliveryStreamName, List<String> streams) {
         PutRecordBatchRequest putRecordBatchRequest = new PutRecordBatchRequest();
         putRecordBatchRequest.setDeliveryStreamName(deliveryStreamName);
-        List<Record> recordList = new ArrayList<Record>();
+        List<Record> recordList = new ArrayList<>();
         for (String data : streams) {
             data = data + "\n";
             Record record = createRecord(data);
