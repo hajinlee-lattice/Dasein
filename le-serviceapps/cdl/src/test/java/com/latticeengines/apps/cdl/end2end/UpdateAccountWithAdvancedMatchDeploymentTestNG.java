@@ -48,11 +48,8 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccountDeploymentTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateAccountWithAdvancedMatchDeploymentTestNG.class);
-    // number of account/contact in segment 3 for entity match
-    // compare to the checkpoint, three contact now match to anonymous acc. two
-    // added contacts match to existing account and satisfy the segment criteria
-    private static final long SEGMENT3_ACCOUNT_CNT = 24;
-    private static final long SEGMENT3_CONTACT_CNT = 24;
+    private static final long SEGMENT3_ACCOUNT_CNT = 46;
+    private static final long SEGMENT3_CONTACT_CNT = 46;
 
     static final String CHECK_POINT = "entitymatch_update1";
 
