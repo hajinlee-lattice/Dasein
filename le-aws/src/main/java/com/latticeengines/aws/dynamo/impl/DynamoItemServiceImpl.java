@@ -25,7 +25,6 @@ import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
-import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
@@ -147,7 +146,7 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public void batchWrite(String tableName, List<Item> items) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
             DynamoDB dynamoDB = dynamoService.getDynamo();
-            Pair<String, String> keys = findTableKeys(dynamoDB, tableName);
+            Pair<String, String> keys = findTableKeys(tableName);
             List<Item> batch = new ArrayList<>();
             for (Item item : items) {
                 batch.add(item);
@@ -172,15 +171,16 @@ public class DynamoItemServiceImpl implements DynamoItemService {
             for (PrimaryKey pk: primaryKeys) {
                 batch.add(pk);
                 if (batch.size() >= 100) {
-                    List<Item> batchResult = submitBatchGet(dynamoDB, tableName, batch);
-                    results.addAll(batchResult);
+                    results.addAll(submitBatchGet(dynamoDB, tableName, batch));
                     batch.clear();
                 }
             }
             if (CollectionUtils.isNotEmpty(batch)) {
                 results.addAll(submitBatchGet(dynamoDB, tableName, batch));
             }
-            timer.setTimerMessage("Get " + primaryKeys.size() + " items from table " + tableName);
+            timer.setThreshold(0L);
+            timer.setTimerMessage("Get " + results.size() + " items using " + primaryKeys.size() //
+                    + " keys from table " + tableName);
         }
         return results;
     }
@@ -197,25 +197,39 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         primaryKeys.forEach(keys::addPrimaryKey);
         List<Item> results = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(primaryKeys)) {
-            BatchGetItemOutcome outcome = dynamoDB.batchGetItem(keys);
-            Map<String, KeysAndAttributes> unprocessed;
-            do {
-                List<Item> items = outcome.getTableItems().get(tableName);
-                results.addAll(items);
-                // Check for unprocessed keys which could happen if you exceed
-                // provisioned throughput or reach the limit on response size.
-                unprocessed = outcome.getUnprocessedKeys();
-                if (MapUtils.isNotEmpty(unprocessed)) {
-                    outcome = dynamoDB.batchGetItemUnprocessed(unprocessed);
+            try (PerformanceTimer timer = new PerformanceTimer()) {
+                long startTime = System.currentTimeMillis();
+                int backoff = 15;
+                BatchGetItemOutcome outcome = dynamoDB.batchGetItem(keys);
+                results.addAll(outcome.getTableItems().get(tableName));
+                do {
+                    // Check for unprocessed keys which could happen if you exceed
+                    // provisioned throughput or reach the limit on response size.
+                    try {
+                        Map<String, KeysAndAttributes> unprocessed = outcome.getUnprocessedKeys();
+                        if (MapUtils.isNotEmpty(unprocessed)) {
+                            outcome = dynamoDB.batchGetItemUnprocessed(unprocessed);
+                            results.addAll(outcome.getTableItems().get(tableName));
+                        }
+                    } catch (ProvisionedThroughputExceededException e) {
+                        backoff = handleExceedThrouputError(backoff, e);
+                    } catch (Exception e) {
+                        log.error("Unable to batch read records from " + tableName, e);
+                    }
+                } while (outcome.getUnprocessedKeys().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
+                if (outcome.getUnprocessedKeys().size() > 0) {
+                    throw new RuntimeException("Failed to finish a batch write within timeout");
                 }
-            } while (MapUtils.isNotEmpty(unprocessed));
+                timer.setThreshold(0L);
+                timer.setTimerMessage("Retrieved a single batch of " + results.size() //
+                        + " items using " + primaryKeys.size() + " keys from table " + tableName);
+            }
         }
         return results;
     }
 
-    private Pair<String, String> findTableKeys(DynamoDB dynamoDB, String tableName) {
-        Table table = dynamoDB.getTable(tableName);
-        TableDescription description = table.getDescription();
+    private Pair<String, String> findTableKeys(String tableName) {
+        TableDescription description = dynamoService.describeTable(tableName);
         String hashKey = "";
         String rangeKey = "";
         if (description != null) {
@@ -229,6 +243,8 @@ public class DynamoItemServiceImpl implements DynamoItemService {
                     log.info("Found range key of table " + tableName + " to be " + rangeKey);
                 }
             }
+        } else {
+            log.warn("Table " + tableName + " does not have a description.");
         }
         return Pair.of(hashKey, rangeKey);
     }
@@ -245,30 +261,24 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         TableWriteItems writeItems = new TableWriteItems(tableName);
         items.forEach(writeItems::addItemToPut);
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
             long startTime = System.currentTimeMillis();
             int backoff = 15;
+            BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
             do {
                 try {
                     // Check for unprocessed keys which could happen if you exceed
                     // provisioned throughput
                     Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
                     if (outcome.getUnprocessedItems().size() != 0) {
-                        List<String> ids = extractIdsFromUnprocessItems(unprocessedItems.get(tableName), //
+                        List<String> ids = extractIdsFromUnprocessedItems(unprocessedItems.get(tableName), //
                                 partitionKey, rangeKey);
                         log.info("Resubmit unprocessed items: " + StringUtils.join(ids, ", "));
                         outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
                     }
                 } catch (ProvisionedThroughputExceededException e) {
-                    log.warn("Exceeded provisioned throughput, retry after " + backoff + " seconds.");
-                    try {
-                        Thread.sleep(backoff * 1000);
-                        backoff = Math.min(backoff * 2, 240);
-                    } catch (InterruptedException e2) {
-                        log.warn("Sleep interrupted.", e2);
-                    }
+                    backoff = handleExceedThrouputError(backoff, e);
                 } catch (Exception e) {
-                    log.error("Unable to batch create records " + tableName, e);
+                    log.error("Unable to batch create records in " + tableName, e);
                 }
             } while (outcome.getUnprocessedItems().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
             if (outcome.getUnprocessedItems().size() > 0) {
@@ -278,8 +288,8 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         }
     }
 
-    private List<String> extractIdsFromUnprocessItems(List<WriteRequest> writeRequests, //
-                                                      String partitionKey, String rangeKey) {
+    private List<String> extractIdsFromUnprocessedItems(List<WriteRequest> writeRequests, //
+                                                        String partitionKey, String rangeKey) {
         List<String> ids = new ArrayList<>();
         writeRequests.forEach(writeRequest -> {
             if (writeRequest.getPutRequest() != null) {
@@ -310,6 +320,17 @@ public class DynamoItemServiceImpl implements DynamoItemService {
             }
         });
         return ids;
+    }
+
+    private int handleExceedThrouputError(int backoff, ProvisionedThroughputExceededException e) {
+        log.warn("Exceeded provisioned throughput, retry after " + backoff + " seconds.");
+        try {
+            Thread.sleep(backoff * 1000);
+            backoff = Math.min(backoff * 2, 240);
+        } catch (InterruptedException e2) {
+            log.warn("Sleep interrupted.", e2);
+        }
+        return backoff;
     }
 
 }

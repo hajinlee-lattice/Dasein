@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -22,15 +23,18 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.SSESpecification;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.model.Tag;
 import com.amazonaws.services.dynamodbv2.model.TagResourceRequest;
 import com.amazonaws.services.dynamodbv2.model.TagResourceResult;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Component("dynamoService")
 public class DynamoServiceImpl implements DynamoService {
@@ -139,11 +143,12 @@ public class DynamoServiceImpl implements DynamoService {
     // table to be active
     private void waitForTableActivated(Table table) throws InterruptedException {
         int retries = 0;
-        while (retries < 2) {
+        while (retries++ < 2) {
             try {
                 table.waitForActive();
                 return;
             } catch (InterruptedException e) {
+                log.warn("Wait interrupted.", e);
             }
         }
         table.waitForActive();
@@ -196,4 +201,16 @@ public class DynamoServiceImpl implements DynamoService {
         TagResourceResult result = client.tagResource(request);
         log.info("TagResourceResult: " + result.toString());
     }
+
+    @Override
+    public TableDescription describeTable(String tableName) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        DescribeTableResult result = retry.execute(ctx -> getClient().describeTable(tableName));
+        if (result != null) {
+            return result.getTable();
+        } else {
+            return null;
+        }
+    }
+
 }

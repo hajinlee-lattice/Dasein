@@ -40,9 +40,7 @@ public interface RecommendationDao extends BaseDao<Recommendation> {
 
     int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows);
 
-    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
-
-    int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
+    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, List<String> accountIds);
 
     List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max);
 

@@ -248,7 +248,7 @@ public class TestPlayCreationHelper {
         } else {
             setupTenantAndData(playLaunchConfig);
         }
-        setupPlayTestEnv();
+        setupRatingEngineAndSegment();
         if (playLaunchConfig.isMockRatingTable()) {
             cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
         }
@@ -267,7 +267,7 @@ public class TestPlayCreationHelper {
         }
     }
 
-    public void setupPlayTestEnv() throws Exception {
+    public void setupRatingEngineAndSegment() throws Exception {
         Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL, BusinessEntity.Account,
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);

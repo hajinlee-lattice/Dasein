@@ -469,7 +469,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         accountIds.add("10");
         accountIds.add("12");
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), null,
-                1000, null, accountIds, null, null, null, eloquaAppId);
+                1000L, null, accountIds, null, null, null, eloquaAppId);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -477,7 +477,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getContactCount() {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), null,
-                1000, null, null, null, null, null, eloquaAppId);
+                1000L, null, null, null, null, null, eloquaAppId);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 

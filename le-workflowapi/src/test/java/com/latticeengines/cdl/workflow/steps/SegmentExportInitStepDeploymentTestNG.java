@@ -84,7 +84,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndData();
-        testPlayCreationHelper.setupPlayTestEnv();
+        testPlayCreationHelper.setupRatingEngineAndSegment();
         tenant = testPlayCreationHelper.getTenant();
 
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
