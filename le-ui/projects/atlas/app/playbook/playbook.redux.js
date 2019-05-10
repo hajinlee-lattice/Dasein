@@ -133,7 +133,7 @@ export const actions = {
             actions.saveLaunch(play_name, opts);
         });
     },
-    saveLaunch: (play_name, opts) => {
+    saveLaunch: (play_name, opts, cb) => {
         var opts = opts || {},
             launch_id = opts.launch_id || '',
             action = opts.action || '',
@@ -150,24 +150,27 @@ export const actions = {
                         type: CONST.SAVE_LAUNCH,
                         payload: response.data
                     });
-                    console.log(response);
-                    //actions.fetchPlay(play_name);
+                    if(cb && typeof cb === 'function') {
+                        cb();
+                    }
+                }, function(err) {
+                    if(cb && typeof cb === 'function') {
+                        cb();
+                    }
                 });
-            } else {
-                //actions.fetchPlay(play_name);
             } 
         });
     },
-    excludeItemsWithoutSalesforceId: () => {
+    excludeItemsWithoutSalesforceId: (bool) => {
         store.dispatch({
             type: CONST.EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID,
-            payload: response.data
+            payload: bool
         });
     },
-    DestinationAccountId: () => {
+    destinationAccountId: (id) => {
         store.dispatch({
             type: CONST.DESTINATION_ACCOUNT_ID,
-            payload: response.data
+            payload: id
         });
     }
 };

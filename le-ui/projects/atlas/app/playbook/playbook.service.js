@@ -853,22 +853,25 @@ angular.module('lp.playbook')
         return this.externalSystemAuthentication && this.externalSystemAuthentication.trayAuthenticationId;
     }
 
-    this.launchAccountsCoverage = function(play_name, sendEngineId) {
+    this.launchAccountsCoverage = function(play_name, opts) {
         var deferred = $q.defer(),
-            play_name = play_name || $stateParams.play_name;
+            play_name = play_name || $stateParams.play_name,
+            sendEngineId = opts.sendEngineId,
+            getExcludeItems = opts.getExcludeItems || PlaybookWizardStore.getExcludeItems(),
+            getDestinationAccountId = opts.getDestinationAccountId ||  PlaybookWizardStore.getDestinationAccountId();
 
         PlaybookWizardStore.getPlay(play_name, true).then(function (data) {
             if (data.ratingEngine && data.ratingEngine.id) {
                 var engineId = data.ratingEngine.id,
                     engineIdObject = [{ id: engineId }],
-                    getExcludeItems = PlaybookWizardStore.getExcludeItems(),
+                    getExcludeItems = getExcludeItems,
                     getSegmentsOpts = {
                         loadContactsCount: true,
                         loadContactsCountByBucket: true
                     };
 
                 if (getExcludeItems) {
-                    getSegmentsOpts.lookupId = PlaybookWizardStore.getDestinationAccountId();
+                    getSegmentsOpts.lookupId = getDestinationAccountId;
                     getSegmentsOpts.restrictNullLookupId = true;
                 }
 
@@ -884,7 +887,7 @@ angular.module('lp.playbook')
                 });
             } else {
                 var segment = PlaybookWizardStore.getCurrentPlay().targetSegment;
-                if (PlaybookWizardStore.getExcludeItems()) {
+                if (getExcludeItems) {
                     var accountId = PlaybookWizardStore.crmselection_form.crm_selection.accountId,
                         template = {
                             account_restriction: {
