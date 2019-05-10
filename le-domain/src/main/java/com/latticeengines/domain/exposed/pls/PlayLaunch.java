@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
@@ -111,7 +112,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Tenant tenant;
 
     @JsonProperty("applicationId")
-    @Column(name = "APPLICATION_ID", nullable = true)
+    @Column(name = "APPLICATION_ID")
     private String applicationId;
 
     @JsonIgnore
@@ -151,7 +152,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
 
     @JsonProperty("topNCount")
-    @Column(name = "TOP_N_COUNT", nullable = true)
+    @Column(name = "TOP_N_COUNT")
     private Long topNCount;
 
     @JsonProperty("bucketsToLaunch")
@@ -164,33 +165,37 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private boolean launchUnscored = false;
 
     @JsonProperty("table_name")
-    @Column(name = "TABLE_NAME", nullable = true)
+    @Column(name = "TABLE_NAME")
     private String tableName;
 
     @JsonProperty("destinationOrgId")
-    @Column(name = "DESTINATION_ORG_ID", nullable = true)
+    @Column(name = "DESTINATION_ORG_ID")
     private String destinationOrgId;
 
     @JsonProperty("destinationSysType")
-    @Column(name = "DESTINATION_SYS_TYPE", nullable = true)
+    @Column(name = "DESTINATION_SYS_TYPE")
     @Enumerated(EnumType.STRING)
     private CDLExternalSystemType destinationSysType;
 
     @JsonProperty("destinationAccountId")
-    @Column(name = "DESTINATION_ACC_ID", nullable = true)
+    @Column(name = "DESTINATION_ACC_ID")
     private String destinationAccountId;
 
     @JsonProperty("audienceId")
-    @Column(name = "AUDIENCE_ID", nullable = true)
+    @Column(name = "AUDIENCE_ID")
     private String audienceId;
 
     @JsonProperty("audienceName")
-    @Column(name = "AUDIENCE_NAME", nullable = true)
+    @Column(name = "AUDIENCE_NAME")
     private String audienceName;
 
     @JsonProperty("folderName")
-    @Column(name = "FOLDER_NAME", nullable = true)
+    @Column(name = "FOLDER_NAME")
     private String folderName;
+
+    @JsonProperty("exportFile")
+    @Transient
+    private String exportFile;
 
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
@@ -479,4 +484,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public void setFolderName(String folderName) {
         this.folderName = folderName;
     }
+
+    public String getExportFile() {
+        return exportFile;
+    }
+
+    public void setExportFile(String exportFile) {
+        this.exportFile = exportFile;
+    }
+
 }

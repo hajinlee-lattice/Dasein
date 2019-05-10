@@ -134,6 +134,7 @@ public class TestPlayCreationHelper {
 
     private String tenantIdentifier;
     private Tenant tenant;
+    private String customerSpace;
     private MetadataSegment segment;
     private MetadataSegment playTargetSegment;
     private ModelSummary modelSummary;
@@ -265,6 +266,8 @@ public class TestPlayCreationHelper {
         if (playLaunchConfig.isLaunchPlay()) {
             launchPlayWorkflow(playLaunchConfig);
         }
+        // setup Lattice_S3 lookupIdMapping
+        lookupIdMappingProxy.getLookupIdsMapping(CustomerSpace.parse(tenant.getId()).getTenantId(), null, null, false);
     }
 
     public void setupRatingEngineAndSegment() throws Exception {
@@ -279,8 +282,7 @@ public class TestPlayCreationHelper {
         log.info("Tenant = " + tenant.getId());
         ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
         playTargetSegment = createPlayTargetSegment();
-        // crossSellRatingEngine =
-        // createCrossSellRatingEngineWithPublishedRating(segment);
+
     }
 
     public void createPlay(PlayLaunchConfig playLaunchConfig) {
@@ -363,12 +365,15 @@ public class TestPlayCreationHelper {
 
     private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(playLaunchConfig.getBucketsToLaunch() != null
-                ? playLaunchConfig.getBucketsToLaunch() : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
-        playLaunch.setDestinationOrgId(playLaunchConfig.getDestinationSystemId() != null
-                ? playLaunchConfig.getDestinationSystemId() : destinationOrgId);
-        playLaunch.setDestinationSysType(playLaunchConfig.getDestinationSystemType() != null
-                ? playLaunchConfig.getDestinationSystemType() : destinationOrgType);
+        playLaunch.setBucketsToLaunch(
+                playLaunchConfig.getBucketsToLaunch() != null ? playLaunchConfig.getBucketsToLaunch()
+                        : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
+        playLaunch.setDestinationOrgId(
+                playLaunchConfig.getDestinationSystemId() != null ? playLaunchConfig.getDestinationSystemId()
+                        : destinationOrgId);
+        playLaunch.setDestinationSysType(
+                playLaunchConfig.getDestinationSystemType() != null ? playLaunchConfig.getDestinationSystemType()
+                        : destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
@@ -801,11 +806,7 @@ public class TestPlayCreationHelper {
     private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
             boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
             BusinessEntity entity, String attrName, Object min, Object max) {
-        Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
-        if (bucketInfo == null) {
-            bucketInfo = new HashMap<>();
-            bucketToRuleMap.put(bucketName.name(), bucketInfo);
-        }
+        Map<String, Restriction> bucketInfo = bucketToRuleMap.computeIfAbsent(bucketName.name(), k -> new HashMap<>());
         Restriction info;
         if (createConcreteRestriction) {
             AttributeLookup lhs = new AttributeLookup(entity, attrName);

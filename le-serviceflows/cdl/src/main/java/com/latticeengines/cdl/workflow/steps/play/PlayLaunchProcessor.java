@@ -351,8 +351,7 @@ public class PlayLaunchProcessor {
     private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
         Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
                 .isNotNull().build();
-        Restriction newContactRestriction = Restriction.builder().and(contactRestriction, emailFilter).build();
-        return newContactRestriction;
+        return Restriction.builder().and(contactRestriction, emailFilter).build();
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,

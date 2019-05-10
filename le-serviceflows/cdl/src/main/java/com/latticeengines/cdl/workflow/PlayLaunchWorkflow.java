@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.listeners.PlayLaunchWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.PlayLaunchInitStep;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportPublishToSNSStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.PlayLaunchExportFilesToS3Step;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -31,15 +32,19 @@ public class PlayLaunchWorkflow extends AbstractWorkflow<PlayLaunchWorkflowConfi
     private PlayLaunchExportFilesToS3Step playLaunchExportFilesToS3Step;
 
     @Inject
+    private PlayLaunchExportPublishToSNSStep playLaunchExportPublishToSNSStep;
+
+    @Inject
     private PlayLaunchWorkflowListener playLaunchWorkflowListener;
 
     @Override
     public Workflow defineWorkflow(PlayLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(playLaunchInitStep) //
-                .next(playLaunchExportFileGeneratorStep)
-                .next(playLaunchExportFilesToS3Step)
-                .listener(playLaunchWorkflowListener)
+                .next(playLaunchExportFileGeneratorStep) //
+                .next(playLaunchExportFilesToS3Step) //
+                .next(playLaunchExportPublishToSNSStep) //
+                .listener(playLaunchWorkflowListener) //
                 .build();
     }
 }
