@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 public interface SparkSQLService {
 
     LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
-                                      int scalingFactor, String secondaryJobName);
+                                      int scalingFactor, boolean persist, String secondaryJobName);
 
     long getCount(CustomerSpace customerSpace, LivySession livySession, String sql);
 
