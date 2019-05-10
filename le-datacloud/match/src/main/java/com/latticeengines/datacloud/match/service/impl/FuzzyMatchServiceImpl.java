@@ -401,9 +401,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         log.debug("------------------------ Entity Match History Debug Logs ------------------------");
 
-        //
         // Extract Business Entity
-        //
         if (StringUtils.isBlank(traveler.getMatchInput().getTargetEntity())) {
             log.error("Found null or blank BusinessEntity in MatchTraveler");
             return null;
@@ -411,37 +409,27 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
         log.debug("Business Entity: " + history.getBusinessEntity());
 
-        //
         // Check if DUNS was a provided MatchKey and extract Input MatchKeys
-        //
         Boolean inputHasDuns = checkDunsAndPrintInputMatchKeys(traveler, history.getBusinessEntity());
         if (inputHasDuns == null) {
             return null;
         }
 
-        //
         // Extract the matched Entity ID and whether there was a match.
-        //
         history.setEntityId(extractEntityId(traveler, history.getBusinessEntity()));
         history.setEntityMatched(extractMatchedState(traveler, history.getBusinessEntity(), history.getEntityId()));
 
-        //
         // Get Full MatchKeyTuple for Business Entity.
-        //
         history.setFullMatchKeyTuple(extractFullMatchKeyTuple(traveler, history.getBusinessEntity()));
         if (history.getFullMatchKeyTuple() == null) {
             return null;
         }
 
-        //
         // Get Customer Entity Id, if provided.
-        //
         history.setCustomerEntityId(extractCustomerEntityId(history.getFullMatchKeyTuple(),
                 history.getBusinessEntity()));
 
-        //
         // Get MatchKeyTuple that found Entity ID.
-        //
         if (!checkEntityMatchLookupResults(traveler, history.getBusinessEntity())) {
             return null;
         }
@@ -449,61 +437,45 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         history.setMatchedMatchKeyTuple(extractMatchedMatchKeyTuple(traveler, history.getBusinessEntity(),
                 lookupResultList));
 
-        //
         // Generate Match Type Enum describing the match.
-        //
         history.setMatchType(extractEntityMatchType(history.getBusinessEntity(), history.getMatchedMatchKeyTuple(),
                 lookupResultList, inputHasDuns));
         if (history.getMatchType() == null) {
             return null;
         }
 
-        //
         // Add LeadToAccount Matching Results for Contacts.
-        //
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             String accountEntity = BusinessEntity.Account.name();
             log.debug("+++ LeadToAccount Account Match Data +++");
 
-            //
             // Check if DUNS was a provided MatchKey and extract Input MatchKeys
-            //
             inputHasDuns = checkDunsAndPrintInputMatchKeys(traveler, accountEntity);
             if (inputHasDuns == null) {
                 return null;
             }
 
-            //
             // Extract the matched Entity ID and whether there was a match.
-            //
             history.setL2aEntityId(extractEntityId(traveler, accountEntity));
             history.setL2aEntityMatched(extractMatchedState(traveler, accountEntity, history.getL2aEntityId()));
 
-            //
             // Get Full MatchKeyTuple for Business Entity.
-            //
             history.setL2aFullMatchKeyTuple(extractFullMatchKeyTuple(traveler, accountEntity));
             if (history.getL2aFullMatchKeyTuple() == null) {
                 return null;
             }
 
-            //
             // Get Customer Entity Id, if provided.
-            //
             history.setL2aCustomerEntityId(extractCustomerEntityId(history.getL2aFullMatchKeyTuple(), accountEntity));
 
-            //
             // Get MatchKeyTuple that found Entity ID.
-            //
             if (!checkEntityMatchLookupResults(traveler, accountEntity)) {
                 return null;
             }
             lookupResultList = new ArrayList<>();
             history.setL2aMatchedMatchKeyTuple(extractMatchedMatchKeyTuple(traveler, accountEntity, lookupResultList));
 
-            //
             // Generate Match Type Enum describing the match.
-            //
             history.setL2aMatchType(extractEntityMatchType(accountEntity, history.getL2aMatchedMatchKeyTuple(),
                     lookupResultList, inputHasDuns));
             if (history.getL2aMatchType() == null) {
