@@ -396,6 +396,11 @@ angular
 
                         $scope.showImportButton = AuthorizationUtility.checkAccessLevel(AuthorizationUtility.excludeExternalUser) && 
                                                     AuthorizationUtility.checkFeatureFlags(featureFlagsConfig);
+                        $scope.importState = 'home.importtemplates';
+                        var flags = FeatureFlagService.Flags();
+                        if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+                            $scope.importState = 'home.multipletemplates';
+                        }
 
                     },
                     templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
