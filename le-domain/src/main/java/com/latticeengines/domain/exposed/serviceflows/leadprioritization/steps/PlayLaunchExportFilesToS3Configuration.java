@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
@@ -7,15 +8,13 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     private String playName;
 
+    private String playDisplayName;
+
     private String playLaunchId;
 
+    private CDLExternalSystemType playLaunchDestination;
+
     private LookupIdMap lookupIdMap;
-
-    private String externalAudienceId;
-
-    private String externalAudienceName;
-
-    private String externalFolderName;
 
     public String getPlayName() {
         return playName;
@@ -23,6 +22,14 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
 
     public void setPlayName(String playName) {
         this.playName = playName;
+    }
+
+    public String getPlayDisplayName() {
+        return playDisplayName;
+    }
+
+    public void setPlayDisplayName(String playDisplayName) {
+        this.playDisplayName = playDisplayName;
     }
 
     public String getPlayLaunchId() {
@@ -41,28 +48,12 @@ public class PlayLaunchExportFilesToS3Configuration extends ImportExportS3StepCo
         this.lookupIdMap = lookupIdMap;
     }
 
-    public String getExternalAudienceId() {
-        return externalAudienceId;
+    public CDLExternalSystemType getPlayLaunchDestination() {
+        return playLaunchDestination;
     }
 
-    public void setExternalAudienceId(String externalAudienceId) {
-        this.externalAudienceId = externalAudienceId;
-    }
-
-    public String getExternalAudienceName() {
-        return externalAudienceName;
-    }
-
-    public void setExternalAudienceName(String externalAudienceName) {
-        this.externalAudienceName = externalAudienceName;
-    }
-
-    public String getExternalFolderName() {
-        return externalFolderName;
-    }
-
-    public void setExternalFolderName(String externalFolderName) {
-        this.externalFolderName = externalFolderName;
+    public void setPlayLaunchDestination(CDLExternalSystemType playLaunchDestination) {
+        this.playLaunchDestination = playLaunchDestination;
     }
 
 }

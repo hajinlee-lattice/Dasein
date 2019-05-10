@@ -71,7 +71,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String EXPORT = "Export";
 
     @Inject
-    private DropBoxEntityMgr entityMgr;
+    private DropBoxEntityMgr dropBoxEntityMgr;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -93,7 +93,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public DropBox create() {
-        DropBox dropbox = entityMgr.createDropBox(region);
+        DropBox dropbox = dropBoxEntityMgr.createDropBox(region);
         String prefix = toPrefix(dropbox);
         if (!s3Service.isNonEmptyDirectory(customersBucket, prefix)) {
             s3Service.createFolder(customersBucket, prefix);
@@ -103,7 +103,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public void delete() {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox != null) {
             String prefix = toPrefix(dropbox);
             s3Service.cleanupPrefix(customersBucket, prefix);
@@ -117,7 +117,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             }
             revokeDropBoxFromBucket(dropBoxId, dropbox.getExternalAccount());
         }
-        entityMgr.delete(dropbox);
+        dropBoxEntityMgr.delete(dropbox);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public String getDropBoxPrefix() {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox == null) {
             return null;
         } else {
@@ -141,7 +141,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public Tenant getDropBoxOwner(String dropBox) {
-        return entityMgr.getDropBoxOwner(dropBox);
+        return dropBoxEntityMgr.getDropBoxOwner(dropBox);
     }
 
     @Override
@@ -262,7 +262,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public DropBoxSummary getDropBoxSummary() {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox == null) {
             return null;
         } else {
@@ -288,7 +288,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public GrantDropBoxAccessResponse grantAccess(GrantDropBoxAccessRequest request) {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox == null) {
             log.info("Tenant " + MultiTenantContext.getShortTenantId() //
                     + " does not have a dropbox yet, create one.");
@@ -309,12 +309,12 @@ public class DropBoxServiceImpl implements DropBoxService {
             default:
                 throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
         }
-        entityMgr.update(dropbox);
+        dropBoxEntityMgr.update(dropbox);
         return response;
     }
 
     public GrantDropBoxAccessResponse refreshAccessKey() {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox == null) {
             throw new RuntimeException("Tenant " + MultiTenantContext.getShortTenantId() //
                     + " does not have a dropbox.");
@@ -338,7 +338,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public void revokeAccess() {
-        DropBox dropbox = entityMgr.getDropBox();
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox != null && dropbox.getAccessMode() != null) {
             switch (dropbox.getAccessMode()) {
                 case LatticeUser:
@@ -353,7 +353,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             dropbox.setExternalAccount(null);
             dropbox.setLatticeUser(null);
             dropbox.setAccessMode(null);
-            entityMgr.update(dropbox);
+            dropBoxEntityMgr.update(dropbox);
         }
     }
 

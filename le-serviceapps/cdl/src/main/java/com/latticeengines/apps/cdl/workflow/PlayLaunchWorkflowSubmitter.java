@@ -38,17 +38,15 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
 
-        boolean enableExport = batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
+        boolean enableExport = batonService.isEnabled(getCustomerSpace(),
+                LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
         boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
 
         PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration.Builder()
-                .customer(getCustomerSpace())
-                .workflow("playLaunchWorkflow")
-                .inputProperties(inputProperties)
-                .playLaunch(playLaunch)
-                .lookupIdMap(lookupIdMap)
-                .exportPlayLaunch(playLaunch, canBeLaunchedToExternal)
-                .build();
+                .workflow("playLaunchWorkflow").customer(getCustomerSpace()).inputProperties(inputProperties)
+                .playLaunch(playLaunch).lookupIdMap(lookupIdMap)
+                .playLaunchDestination(playLaunch.getDestinationSysType())
+                .exportPublishPlayLaunch(playLaunch, canBeLaunchedToExternal).build();
         return workflowJobService.submit(configuration);
     }
 

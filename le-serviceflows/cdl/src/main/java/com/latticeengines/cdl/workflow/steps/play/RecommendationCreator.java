@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,13 +34,13 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component
-public class RecommendationCreator {
+class RecommendationCreator {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
-    public void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
-            DataFileWriter<GenericRecord> dataFileWriter) {
+    void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
+                                 Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
+                                 DataFileWriter<GenericRecord> dataFileWriter) {
 
         List<Recommendation> recommendations = accountList//
                 .stream().parallel() //
@@ -54,7 +55,7 @@ public class RecommendationCreator {
                                 return null;
                             }
                         }) //
-                .filter(rec -> rec != null) //
+                .filter(Objects::nonNull) //
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(recommendations)) {
@@ -63,8 +64,7 @@ public class RecommendationCreator {
                             .map(rec -> createRecommendationRecord(dataFileWriter, playLaunchContext.getSchema(), rec)) //
                             .collect(Collectors.toList());
 
-            records.stream() //
-                    .forEach(datum -> {
+            records.forEach(datum -> {
                         try {
                             dataFileWriter.append(datum);
                         } catch (IOException e) {
@@ -147,13 +147,14 @@ public class RecommendationCreator {
 
         recommendation.setTenantId(tenant.getPid());
 
-        if (playLaunchContext.getRatingId() != null){
+        if (playLaunchContext.getRatingId() != null) {
             String score = checkAndGet(account,
                     playLaunchContext.getRatingId() + PlaymakerConstants.RatingScoreColumnSuffix);
             String bucketName = checkAndGet(account, playLaunchContext.getRatingId(),
                     RatingBucketName.getUnscoredBucketName());
             RatingBucketName bucket = EnumUtils.isValidEnum(RatingBucketName.class, bucketName)
-                    ? RatingBucketName.valueOf(bucketName) : null;
+                    ? RatingBucketName.valueOf(bucketName)
+                    : null;
             recommendation.setLikelihood(
                     StringUtils.isNotEmpty(score) ? Double.parseDouble(score) : getDefaultLikelihood(bucket));
 
@@ -163,14 +164,15 @@ public class RecommendationCreator {
                     .setMonetaryValue(StringUtils.isNotEmpty(expectedValue) ? Double.parseDouble(expectedValue) : null);
 
             setSyncDestination(playLaunch, recommendation);
-    
+
             recommendation.setPriorityID(bucket);
             recommendation.setPriorityDisplayName(bucketName);
 
             recommendation.setRatingModelId(playLaunchContext.getPublishedIteration().getId());
             recommendation.setModelSummaryId(
                     playLaunchContext.getPlay().getRatingEngine().getType() != RatingEngineType.RULE_BASED
-                            ? ((AIModel) playLaunchContext.getPublishedIteration()).getModelSummaryId() : "");
+                            ? ((AIModel) playLaunchContext.getPublishedIteration()).getModelSummaryId()
+                            : "");
 
         }
         if (mapForAccountAndContactList.containsKey(accountId)) {
@@ -192,6 +194,9 @@ public class RecommendationCreator {
         } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.MAP) {
             synchronizationDestination = SynchronizationDestinationEnum.MAP.name();
             destinationSysType = CDLExternalSystemType.MAP.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.FILE_SYSTEM) {
+            synchronizationDestination = SynchronizationDestinationEnum.FILE_SYSTEM.name();
+            destinationSysType = CDLExternalSystemType.FILE_SYSTEM.name();
         } else {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));
@@ -217,20 +222,20 @@ public class RecommendationCreator {
             return 0;
 
         switch (bucket) {
-        case A:
-            return 95.0D;
-        case B:
-            return 70.0D;
-        case C:
-            return 40.0D;
-        case D:
-            return 20.0D;
-        case E:
-            return 10.0D;
-        case F:
-            return 5.0D;
-        default:
-            throw new UnsupportedOperationException("Unknown bucket " + bucket);
+            case A:
+                return 95.0D;
+            case B:
+                return 70.0D;
+            case C:
+                return 40.0D;
+            case D:
+                return 20.0D;
+            case E:
+                return 10.0D;
+            case F:
+                return 5.0D;
+            default:
+                throw new UnsupportedOperationException("Unknown bucket " + bucket);
         }
     }
 
