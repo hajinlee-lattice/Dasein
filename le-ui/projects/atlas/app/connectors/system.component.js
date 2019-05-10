@@ -120,7 +120,7 @@ export default class SystemComponent extends Component {
             let observer = new Observer(
                 response => {
                     // httpService.printObservables();
-                    console.log('HEY ', response);
+                    // console.log('HEY ', response);
                     if (response.data) {
                         let tmp = response.data;
                         this.setState({ saving: false, system: tmp });
@@ -232,13 +232,23 @@ export default class SystemComponent extends Component {
         }
     }
 
+    getConnectionImgClass() {
+        // awss3
+        switch (this.state.system.externalSystemType) {
+            case 'FILE_SYSTEM':
+                return `${'s-image'} ${'awss3'}`;
+            default:
+                return `${'s-image'}`;
+        }
+    }
+
     render() {
         return (
             <Aux>
                 <LeTile classNames={'system-tile'}>
                     <LeTileHeader classNames={'system-header'}>
                         <LeHPanel valignment={CENTER}>
-                            <img src={this.props.config.img} className="s-image" />
+                            <img src={this.props.config.img} className={this.getConnectionImgClass()} />
                             <p className="s-title">{this.state.system.externalSystemName}</p>
                         </LeHPanel>
                     </LeTileHeader>
