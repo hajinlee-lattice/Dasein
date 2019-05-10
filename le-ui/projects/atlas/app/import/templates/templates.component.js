@@ -1,25 +1,26 @@
-import React, { Component } from "../../../../common/react-vendor";
+import React, { Component } from "common/react-vendor";
 import NgState from "../../ng-state";
 
 import ReactRouter from 'atlas/react/router';
 
 import ReactMainContainer from "atlas/react/react-main-container";
-import httpService from "../../../../common/app/http/http-service";
-import { SUCCESS } from "../../../../common/app/http/response";
+import httpService from "common/app/http/http-service";
+import { SUCCESS } from "common/app/http/response";
 
 import { store, injectAsyncReducer } from 'store';
 import { s3actions, s3reducer } from 'atlas/import/s3files/s3files.redux';
 
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
+    VIEW_TEMPLATE,
     EDIT_TEMPLATE,
     IMPORT_DATA
 } from "./templates-row-actions";
 import "./templates.scss";
-import Observer from "../../../../common/app/http/observer";
-import EditControl from "../../../../common/widgets/table/controlls/edit-controls";
-import CopyComponent from "../../../../common/widgets/table/controlls/copy-controll";
-import EditorText from "../../../../common/widgets/table/editors/editor-text";
+import Observer from "common/app/http/observer";
+import EditControl from "common/widgets/table/controlls/edit-controls";
+import CopyComponent from "common/widgets/table/controlls/copy-controll";
+import EditorText from "common/widgets/table/editors/editor-text";
 
 import LeButton from "common/widgets/buttons/le-button";
 import {
@@ -27,6 +28,8 @@ import {
 } from "common/widgets/toolbar/le-toolbar";
 import "./templates.scss";
 
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
 import messageService from "common/app/utilities/messaging-service";
 import Message, {
     NOTIFICATION
@@ -48,78 +51,80 @@ export default class TemplatesComponent extends Component {
             forceReload: false,
             showEmpty: false,
             showLoading: false,
-            data: []
+            data: [],
+            entity: '',
+            entityType: '',
+            feedType: ''
         };
 
     }
 
-    createTemplate(response) {
-        let entity = '';
-        let entityType = '';
-        let feedType = '';
+    setDataTypes = (response) => {
+        let state = Object.assign({}, this.state);
         switch (response.type) {
             case "Accounts": {
-                entity = "accounts";
-                entityType = 'Accounts';
-                feedType = 'AccountSchema';
+                state.entity = "accounts";
+                state.entityType = 'Accounts';
+                state.feedType = 'AccountSchema';
                 break;
             }
             case "Contacts": {
-                entity = "contacts";
-                entityType = 'Contacts';
-                feedType = 'ContactSchema';
+                state.entity = "contacts";
+                state.entityType = 'Contacts';
+                state.feedType = 'ContactSchema';
                 break;
             }
             case "Product Purchases": {
-                entity = "productpurchases";
-                entityType = 'Product';
-                feedType = 'TransactionSchema';
+                state.entity = "productpurchases";
+                state.entityType = 'Product';
+                state.feedType = 'TransactionSchema';
                 break;
             }
             case "Product Bundles": {
-                entity = "productbundles";
-                entityType = 'Product';
-                feedType = 'BundleSchema';
+                state.entity = "productbundles";
+                state.entityType = 'Product';
+                state.feedType = 'BundleSchema';
                 break;
             }
             case "Product Hierarchy": {
-                entity = "producthierarchy";
-                entityType = 'Product';
-                feedType = 'HierarchySchema';
+                state.entity = "producthierarchy";
+                state.entityType = 'Product';
+                state.feedType = 'HierarchySchema';
                 break;
             }
         }
 
-        let ImportWizardStore = this.ImportWizardStore;
-        ImportWizardStore.setEntityType(entityType);
-        ImportWizardStore.setFeedType(feedType);
-
-
-        console.log(response);
-
-
-        let goTo = `home.import.entry.${entity}`;
-        s3actions.setPath(response.data.Path);
-        NgState.getAngularState().go(goTo, response);
+        this.setState(state, function () {
+            let action = response.action;
+            let ImportWizardStore = this.ImportWizardStore;
+            ImportWizardStore.setEntityType(this.state.entityType);
+            ImportWizardStore.setFeedType(this.state.feedType);
+            ImportWizardStore.setTemplateAction(action);
+            if (action == 'view-template') {
+                this.viewTemplate();
+            } else {
+                this.createTemplate(response);
+            }
+        });
     }
 
-    actionCallbackHandler = (response) => {
-        switch (response.action) {
-            case CREATE_TEMPLATE:
-                this.createTemplate(response);
-                break;
-            case EDIT_TEMPLATE:
-                this.createTemplate(response);
-                break;
-            case IMPORT_DATA:
-                this.createTemplate(response);
-                break;
+    createTemplate = (response) => {
+        let params = {
+            importOnly: (response.action == 'import-data') ? true : false,
+            action: response.action
         }
+
+        let goTo = `home.import.entry.${this.state.entity}`;
+        s3actions.setPath(response.data.Path);
+        NgState.getAngularState().go(goTo, params);
+    }
+
+    viewTemplate() {
+        NgState.getAngularState().go('home.viewmappings', {});
     }
 
     componentWillUnmount() {
         httpService.unsubscribeObservable(this.observer);
-
     }
 
     componentDidMount() {
@@ -189,7 +194,6 @@ export default class TemplatesComponent extends Component {
     }
 
     updateStatus = (rowData) => {
-
         let templates = this.state.data;
         let dataItem = templates.find( template => template.FeedType == rowData.FeedType);
         let newStatus = dataItem.ImportStatus == "Active" ? "Pause" : "Active";
@@ -399,7 +403,7 @@ export default class TemplatesComponent extends Component {
                                 {lastEditedDate}
                                 <TemplatesRowActions
                                     rowData={cell.props.rowData}
-                                    callback={this.actionCallbackHandler}
+                                    callback={this.setDataTypes}
                                 />
                             </div>
                         );

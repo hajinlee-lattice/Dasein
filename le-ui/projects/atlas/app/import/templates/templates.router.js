@@ -40,6 +40,29 @@ angular
                 }
             },
         })
+        .state('home.viewmappings', {
+            url: '/mappings',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Data Processing & Analysis'
+            },
+            resolve: {
+                path: () => {
+                    return 'fieldmappings';
+                },
+                ngservices: (ImportWizardStore) => {
+                    let obj = {
+                        ImportWizardStore: ImportWizardStore
+                    }
+                    return obj;
+                }
+            },
+            views: {
+                'main@': {
+                    component: 'reactAngularMainComponent'
+                }
+            },
+        })
         .state('home.multipletemplates', {
             url:'/multitemplates',
             params: {
