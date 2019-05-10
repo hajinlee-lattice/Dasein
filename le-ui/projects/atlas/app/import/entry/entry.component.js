@@ -88,13 +88,6 @@ angular.module('lp.import.entry', [
                 break;
         }
         vm.next = false;
-
-        if ($stateParams.selectedItem) {
-            console.log($stateParams.selectedItem);
-            // vm.fileName = $stateParams.selectedItem.file_name;
-            // vm.fileDone($stateParams.selectedItem);
-            // vm.next = true;
-        }
     }
 
     vm.getDefaultMessage = function()  {
@@ -194,13 +187,6 @@ angular.module('lp.import.entry', [
 
             console.log(fileName, importOnly, autoImportData, postBody);
 
-            // ImportWizardStore.setCsvFileName()
-            // ImportWizardStore.setEntityType()
-            // null
-            // ImportWizardStore.setFeedType()
-
-            
-
             // Import Only
             // file_1556901861309.csv 
             // true 
@@ -214,9 +200,9 @@ angular.module('lp.import.entry', [
             // SystemName: ""
             // TemplateName: "k"
 
-            // ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
-            //     $state.go('home.importtemplates');
-            // });
+            ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
+                $state.go('home.importtemplates');
+            });
         }
     }
 

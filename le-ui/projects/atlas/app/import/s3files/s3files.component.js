@@ -4,10 +4,14 @@ import { s3actions, s3reducer } from './s3files.redux';
 import ReactRouter from '../../react/router';
 import NgState from "atlas/ng-state";
 
+import ReactMainContainer from "atlas/react/react-main-container";
+import httpService from "common/app/http/http-service";
+import { SUCCESS } from "common/app/http/response";
+import Observer from "common/app/http/observer";
+
 import Breadcrumbs from "common/widgets/breadcrumbs/breadcrumbs";
 import LeTable from "common/widgets/table/table";
 import LeButton from "common/widgets/buttons/le-button";
-import ReactMainContainer from "atlas/react/react-main-container";
 import './s3files.component.scss';
 
 export default class S3FileList extends Component {
@@ -23,6 +27,8 @@ export default class S3FileList extends Component {
             showLoading: false,
             enableButton: false,
             selectedItem: null,
+            entity: '',
+            sourceFile: null,
             data: [],
             path: '',
             angularGoTo: '',
@@ -40,7 +46,12 @@ export default class S3FileList extends Component {
         let path = store.getState()['s3files'].path;
 
         this.setState({
-            showLoading: true
+            showLoading: true,
+            breadcrumbs: [
+                {
+                    label: 'Account Data'
+                }
+            ]
         });
         s3actions.fetchS3Files(path);
     }
@@ -54,12 +65,6 @@ export default class S3FileList extends Component {
         state.showLoading = false;
         state.data = s3Files;
         state.path = data.path;
-        state.breadcrumbs = [
-            {
-                name: 'files',
-                label: 'Account Data'
-            }
-        ]
         state.forceReload = true;
 
         let ImportWizardStore = this.ImportWizardStore;
@@ -94,35 +99,93 @@ export default class S3FileList extends Component {
         this.setState({ forceReload: false });
     }
 
+    nextStep = () => {
+
+        // Get feedtype from selection on template list (AccountSchema, ContactSchema, etc.)
+        let ImportWizardStore = this.ImportWizardStore;
+        let feedType = ImportWizardStore.getFeedType();
+
+        // Import from S3 file into our system
+        let postBody = this.state.selectedItem;
+        httpService.post(
+            "/pls/models/uploadfile/importFile?entity=" + feedType,
+            postBody,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                        console.log(response);
+                        this.setState({ sourceFile: response });
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
+
+        // Set CSV File Name
+        // let sourceFileName = this.state.sourceFile.name;
+        // ImportWizardStore.setCsvFileName(this.state.sourceFile.name);
+
+        // Go to correct route to get FieldMapping
+        // NgState.getAngularState().go(this.state.angularGoTo, {selectedItem: this.state.selectedItem});
+    }
+
     selectFile = (fileObj) => {
         let file = Object.values(fileObj)[0];
         if (file.is_directory) {
             this.getFilesFromFolder(file.file_name);
         } else {
-            let ImportWizardStore = this.ImportWizardStore;
-            ImportWizardStore.setCsvFileName(file.file_name);
 
+
+            console.log(file);
             let state = Object.assign({}, this.state);
             state.selectedItem = file;
+            // state.entity = ;
             state.enableButton = true;
             this.setState(state);
         }
     }
 
     getFilesFromFolder = (folder) => {
-        let newPath = this.state.path + folder;
-        let folderData = s3actions.fetchS3Files(newPath);
-        // let state = Object.assign({}, this.state);
-        // state.data = folderData;
-        // this.setState(state);
-    }
 
-    backToParentFolder = () => {
-        let parentFolderData = s3actions.fetchS3Files(this.state.path);
+        let state = Object.assign({}, this.state);
+        state.breadcrumbs = [
+            {
+                "label": 'Account Data'
+            },
+            {
+                "label": folder
+            }
+        ];
 
-        this.setState({
-            data: parentFolderData
-        });
+        if (typeof folder == 'object'){
+            let folderLabel = folder.label;
+            switch (folderLabel) {
+                case "Account Data": {
+                    let path = this.state.path;
+                    s3actions.fetchS3Files(path);
+                    state.breadcrumbs = [
+                        {
+                            "label": 'Account Data'
+                        }
+                    ];
+                    break;
+                }
+                default: {
+                    let path = this.state.path + folderLabel;
+                    s3actions.fetchS3Files(path);
+                    break;
+                }
+            }
+        } else {
+            let newPath = this.state.path + folder;
+            let folderData = s3actions.fetchS3Files(newPath);
+        }
+        
+        state.forceReload = true;
+        this.setState(state);
+        this.setState({ forceReload: false });
     }
 
     getConfig() {
@@ -215,9 +278,9 @@ export default class S3FileList extends Component {
                                 <Breadcrumbs 
                                     name="s3files-breadcrumb"
                                     breadcrumbs={this.state.breadcrumbs}
-                                    callback={name => {
-                                        console.log("NAME ", name);
-                                    }} 
+                                    onClick={(crumb) => {
+                                        this.getFilesFromFolder(crumb);
+                                    }}
                                 />
 
                                 <LeTable
@@ -255,8 +318,10 @@ export default class S3FileList extends Component {
                                             classNames: "blue-button"
                                         }}
                                         callback={() => {
+
+                                            this.nextStep();
+
                                             // Same functionality as Next, Field mappings 
-                                            NgState.getAngularState().go(this.state.angularGoTo, {selectedItem: this.state.selectedItem});
                                         }}
                                     />
                                 </div>

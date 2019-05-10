@@ -116,8 +116,7 @@ angular
             params: {
                 action: null,
                 type: null,
-                data: null,
-                selectedItem: null
+                data: null
             },
             resolve:{
                 DateSupport : function($state, $stateParams){
