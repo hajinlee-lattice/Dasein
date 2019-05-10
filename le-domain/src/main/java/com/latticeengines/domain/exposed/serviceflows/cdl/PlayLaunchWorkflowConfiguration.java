@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
@@ -38,21 +40,31 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
+            exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
+            exportFilesToS3Conf.setPlayDisplayName(playLaunch.getPlay().getDisplayName());
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
             exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
             exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
             return this;
         }
 
-        public Builder exportPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
+        public Builder exportPublishPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
+            if (!Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.FILE_SYSTEM)
+                    .contains(playLaunch.getDestinationSysType())) {
+                exportFileGeneratorConf.setSkipStep(true);
+                exportFilesToS3Conf.setSkipStep(true);
+                exportPublishToSNSConf.setSkipStep(true);
+                return this;
+            }
+
+            exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
+            exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
+            exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
+
             if (!canBeLaunchedToExternal) {
                 exportPublishToSNSConf.setSkipStep(true);
                 return this;
             }
-            exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
-            exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
-            exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
-            exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
             return this;
         }
 
@@ -65,6 +77,11 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportFileGeneratorConf.setDestinationSysName(lookupIdMap.getExternalSystemName());
             exportFilesToS3Conf.setLookupIdMap(lookupIdMap);
             exportPublishToSNSConf.setLookupIdMap(lookupIdMap);
+            return this;
+        }
+
+        public Builder playLaunchDestination(CDLExternalSystemType destination) {
+            exportFilesToS3Conf.setPlayLaunchDestination(destination);
             return this;
         }
 

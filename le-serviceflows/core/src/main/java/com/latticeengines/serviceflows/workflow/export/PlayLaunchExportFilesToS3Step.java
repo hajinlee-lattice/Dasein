@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
@@ -53,16 +54,30 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         if (exportFiles == null || exportFiles.isEmpty()) {
             return;
         }
+
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
-        exportFiles.forEach(hdfsFilePath -> {
-            ImportExportRequest request = new ImportExportRequest();
-            request.srcPath = hdfsFilePath;
-            request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,
-                    exportS3Bucket);
-            requests.add(request);
-            // Collect all S3 FilePaths
-            s3ExportFilePaths.add(request.tgtPath);
-        });
+        if (getConfiguration().getPlayLaunchDestination() == CDLExternalSystemType.MAP) {
+            exportFiles.forEach(hdfsFilePath -> {
+                ImportExportRequest request = new ImportExportRequest();
+                request.srcPath = hdfsFilePath;
+                request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,
+                        exportS3Bucket);
+                requests.add(request);
+                // Collect all S3 FilePaths
+                s3ExportFilePaths.add(request.tgtPath);
+            });
+        } else {
+            exportFiles.forEach(hdfsFilePath -> {
+                ImportExportRequest request = new ImportExportRequest();
+                request.srcPath = hdfsFilePath;
+                request.tgtPath = pathBuilder.convertS3CampaignExportDir(hdfsFilePath, s3Bucket, dropBoxSummary.getDropBox(),
+                        getConfiguration().getPlayName(), getConfiguration().getPlayDisplayName());
+                requests.add(request);
+                // Collect all S3 FilePaths
+                s3ExportFilePaths.add(request.tgtPath);
+            });
+        }
+
         log.info("Uploaded S3 Files. {}", s3ExportFilePaths);
 
     }

@@ -57,18 +57,20 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
     private S3Service s3Service;
 
     @Value("${aws.customer.export.s3.bucket}")
-    protected String exportS3Bucket;
+    private String exportS3Bucket;
 
     String randId = UUID.randomUUID().toString();
 
     private Play defaultPlay;
     private PlayLaunch defaultPlayLaunch;
 
-    PlayLaunchConfig playLaunchConfig = null;
+    private PlayLaunchConfig marketoPlayLaunchConfig;
 
-    DropBoxSummary dropboxSummary = null;
+    private PlayLaunchConfig s3PlayLaunchConfig;
 
-    public Tenant currentTestTenant() {
+    private DropBoxSummary dropboxSummary = null;
+
+    private Tenant currentTestTenant() {
         return testPlayCreationHelper.getTenant();
     }
 
@@ -78,18 +80,24 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
 
-        playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
+        marketoPlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
                 .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_" + System.currentTimeMillis())
                 .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
                 .topNCount(160L).featureFlags(featureFlags).build();
 
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        s3PlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
+                .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.FILE_SYSTEM)
+                .destinationSystemName(CDLExternalSystemName.AWS_S3).destinationSystemId("Lattice_S3").topNCount(200L)
+                .featureFlags(featureFlags).build();
+
+        testPlayCreationHelper.setupTenantAndCreatePlay(marketoPlayLaunchConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
         setMainTestTenant(super.testBed.getMainTestTenant());
         FeatureFlagValueMap ffVMap = super.testBed.getFeatureFlags();
         log.info("Feature Flags for Tenant: " + ffVMap);
+
         Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         dropboxSummary = dropBoxProxy.getDropBox(currentTestTenant().getId());
@@ -102,9 +110,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment-app")
-    public void testPlayLaunchWorkflow() {
+    public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
-        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(playLaunchConfig);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoPlayLaunchConfig);
         assertNotNull(defaultPlayLaunch);
         assertNotNull(defaultPlayLaunch.getApplicationId());
         log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
@@ -113,17 +121,17 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testPlayLaunchWorkflow")
-    public void testVerifyAndCleanupUploadedS3File() {
+    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoPlayLaunchWorkflow")
+    public void testVerifyAndCleanupMarketoUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
         // Create PlayLaunchExportFilesGeneratorConfiguration Config
         PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
         config.setPlayName(defaultPlay.getName());
         config.setPlayLaunchId(defaultPlayLaunch.getId());
-        config.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
-        config.setDestinationSysType(playLaunchConfig.getDestinationSystemType());
-        config.setDestinationSysName(playLaunchConfig.getDestinationSystemName());
+        config.setDestinationOrgId(marketoPlayLaunchConfig.getDestinationSystemId());
+        config.setDestinationSysType(marketoPlayLaunchConfig.getDestinationSystemType());
+        config.setDestinationSysName(marketoPlayLaunchConfig.getDestinationSystemName());
 
         PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
@@ -157,6 +165,20 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File")
+    public void testS3LaunchWorkflow() {
+        log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
+        testPlayCreationHelper.createPlayLaunch(s3PlayLaunchConfig);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(s3PlayLaunchConfig);
+        assertNotNull(defaultPlayLaunch);
+        assertNotNull(defaultPlayLaunch.getApplicationId());
+        log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
+
+        JobStatus completedStatus = waitForWorkflowStatus(defaultPlayLaunch.getApplicationId(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+        int i = 0;
     }
 
     @AfterClass(groups = "deployment-app")
