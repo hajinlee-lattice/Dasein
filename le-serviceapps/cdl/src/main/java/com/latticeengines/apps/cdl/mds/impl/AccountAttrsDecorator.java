@@ -28,18 +28,24 @@ import reactor.core.publisher.ParallelFlux;
 
 public class AccountAttrsDecorator implements Decorator {
 
-    private static final Set<String> systemAttributes = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.Account).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
+    private final Set<String> systemAttrs;
 
-    private static Set<String> exportAttributes = SchemaRepository //
+    private final Set<String> internalLookupIdAttrs;
+
+    private static final Set<String> exportAttrs = SchemaRepository //
             .getDefaultExportAttributes(BusinessEntity.Account).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     private final boolean internalEnrichEnabled;
 
-    AccountAttrsDecorator(boolean internalEnrichEnabled) {
+    AccountAttrsDecorator(boolean internalEnrichEnabled, boolean entityMatchEnabled) {
         this.internalEnrichEnabled = internalEnrichEnabled;
+        this.systemAttrs = SchemaRepository //
+                .getSystemAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
+                .map(InterfaceName::name).collect(Collectors.toSet());
+        this.internalLookupIdAttrs = SchemaRepository //
+                .getInternalLookupIdAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
+                .map(InterfaceName::name).collect(Collectors.toSet());
     }
 
     @Override
@@ -65,13 +71,27 @@ public class AccountAttrsDecorator implements Decorator {
         cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
         cm.setAttrState(AttrState.Active);
 
-        if (systemAttributes.contains(cm.getAttrName())) {
+        if (systemAttrs.contains(cm.getAttrName())) {
+            return cm;
+        }
+
+        if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())
+                || InterfaceName.CustomerAccountId.name().equalsIgnoreCase(cm.getAttrName())) {
+            cm.setSubcategory("Account IDs");
+        }
+
+        if (internalLookupIdAttrs.contains(cm.getAttrName())) {
+            cm.enableGroup(Enrichment);
+            cm.disableGroup(Segment);
+            cm.disableGroup(Model);
+            cm.disableGroup(TalkingPoint);
+            cm.disableGroup(CompanyProfile);
             return cm;
         }
 
         cm.enableGroup(Segment);
         // enable some attributes for Export
-        if (exportAttributes.contains(cm.getAttrName())) {
+        if (exportAttrs.contains(cm.getAttrName())) {
             cm.enableGroup(Enrichment);
         } else {
             cm.disableGroup(Enrichment);
@@ -79,10 +99,6 @@ public class AccountAttrsDecorator implements Decorator {
         cm.enableGroup(TalkingPoint);
         cm.disableGroup(CompanyProfile);
         cm.disableGroup(Model);
-
-        if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())) {
-            cm.setSubcategory("Account IDs");
-        }
 
         //TODO: should move allow change part to attr-specification
         // disable date attributes to be used in modeling

@@ -22,27 +22,36 @@ import reactor.core.publisher.ParallelFlux;
 
 public class ContactAttrsDecorator implements Decorator {
 
-    private static final Set<String> exportAttributes = SchemaRepository //
+    private final Set<String> stdAttrs;
+
+    private final Set<String> systemAttrs;
+
+    private final Set<String> internalLookupIdAttrs;
+
+    private static final Set<String> exportAttrs = SchemaRepository //
             .getDefaultExportAttributes(BusinessEntity.Contact).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
-
-    private static final Set<String> stdAttrs = SchemaRepository //
-            .getStandardAttributes(BusinessEntity.Contact).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
-
-    private static final Set<String> systemAttributes = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.Contact).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
+    ContactAttrsDecorator(boolean entityMatchEnabled) {
+        this.stdAttrs = SchemaRepository //
+                .getStandardAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
+                .map(InterfaceName::name).collect(Collectors.toSet());
+        this.systemAttrs = SchemaRepository //
+                .getSystemAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
+                .map(InterfaceName::name).collect(Collectors.toSet());
+        this.internalLookupIdAttrs = SchemaRepository //
+                .getInternalLookupIdAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
+                .map(InterfaceName::name).collect(Collectors.toSet());
+    }
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-        return metadata.map(ContactAttrsDecorator::staticFilter);
+        return metadata.map(this::filter);
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-        return metadata.map(ContactAttrsDecorator::staticFilter);
+        return metadata.map(this::filter);
     }
 
     @Override
@@ -50,16 +59,27 @@ public class ContactAttrsDecorator implements Decorator {
         return "contact-attrs";
     }
 
-    private static ColumnMetadata staticFilter(ColumnMetadata cm) {
+    private ColumnMetadata filter(ColumnMetadata cm) {
         if (BusinessEntity.Contact.equals(cm.getEntity())) {
             cm.setCategory(Category.CONTACT_ATTRIBUTES);
             cm.setAttrState(AttrState.Active);
-            if (systemAttributes.contains(cm.getAttrName())) {
+
+            if (systemAttrs.contains(cm.getAttrName())) {
                 return cm;
             }
+
+            if (internalLookupIdAttrs.contains(cm.getAttrName())) {
+                cm.enableGroup(Enrichment);
+                cm.disableGroup(Segment);
+                cm.disableGroup(Model);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                return cm;
+            }
+
             cm.enableGroup(Segment);
             // enable some attributes for Export
-            if (exportAttributes.contains(cm.getAttrName())) {
+            if (exportAttrs.contains(cm.getAttrName())) {
                 cm.enableGroup(Enrichment);
             } else {
                 cm.disableGroup(Enrichment);

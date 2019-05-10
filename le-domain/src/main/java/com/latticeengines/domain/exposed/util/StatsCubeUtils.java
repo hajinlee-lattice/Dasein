@@ -82,6 +82,11 @@ public class StatsCubeUtils {
             DataCloudConstants.ATTR_CITY, //
             DataCloudConstants.ATTR_STATE));
     private static final ConcurrentMap<BusinessEntity, Set<String>> SYSTEM_ATTRS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<BusinessEntity, Set<String>> SYSTEM_ATTRS_ENTITY_MATCH_ENABLED = new ConcurrentHashMap<>();
+
+    private static final ConcurrentMap<BusinessEntity, Set<String>> INTERNAL_LOOKUPID_ATTRS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<BusinessEntity, Set<String>> INTERNAL_LOOKUPID_ATTRS_ENTITY_MATCH_ENABLED = new ConcurrentHashMap<>();
+
     private static final Scheduler SORTER = Schedulers.newParallel("attr-sorter");
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
@@ -469,33 +474,73 @@ public class StatsCubeUtils {
         return dbl;
     }
 
-    public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm) {
+    public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm, boolean entityMatchEnabled) {
         // Hide Date Attributes not in category Account Attributes (aka "My Attributes") or Contact Attributes.
         // Also hide all system attributes.
         return (cm.isDateAttribute() && !(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
-                || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory()))) || isSystemAttribute(entity, cm);
+                || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory())))
+                || isSystemAttribute(entity, cm, entityMatchEnabled)
+                || isInternalLookupIdAttribute(entity, cm, entityMatchEnabled);
     }
 
     public static boolean isDateAttribute(ColumnMetadata cm) {
         return cm.isDateAttribute();
     }
 
-    public static boolean isSystemAttribute(BusinessEntity entity, ColumnMetadata cm) {
-        return getSystemAttrs(entity).contains(cm.getAttrName());
+    public static boolean isSystemAttribute(BusinessEntity entity, ColumnMetadata cm, boolean entityMatchEnabled) {
+        return getSystemAttrs(entity, entityMatchEnabled).contains(cm.getAttrName());
     }
 
-    private static Set<String> getSystemAttrs(BusinessEntity entity) {
-        if (!SYSTEM_ATTRS.containsKey(entity)) {
+    private static Set<String> getSystemAttrs(BusinessEntity entity, boolean entityMatchEnabled) {
+        ConcurrentMap<BusinessEntity, Set<String>> systemAttrsMap = getSystemAttrsMap(entityMatchEnabled);
+        if (!systemAttrsMap.containsKey(entity)) {
             synchronized (StringUtils.class) {
-                if (!SYSTEM_ATTRS.containsKey(entity)) {
+                if (!systemAttrsMap.containsKey(entity)) {
                     Set<String> systemAttrs = new HashSet<>();
-                    SchemaRepository.getSystemAttributes(entity)
+                    SchemaRepository.getSystemAttributes(entity, entityMatchEnabled)
                             .forEach(interfaceName -> systemAttrs.add(interfaceName.name()));
-                    SYSTEM_ATTRS.put(entity, systemAttrs);
+                    systemAttrsMap.put(entity, systemAttrs);
                 }
             }
         }
-        return SYSTEM_ATTRS.get(entity);
+        return systemAttrsMap.get(entity);
+    }
+
+    public static boolean isInternalLookupIdAttribute(BusinessEntity entity, ColumnMetadata cm,
+            boolean entityMatchEnabled) {
+        return getInternalLookupIdAttrs(entity, entityMatchEnabled).contains(cm.getAttrName());
+    }
+
+    private static Set<String> getInternalLookupIdAttrs(BusinessEntity entity, boolean entityMatchEnabled) {
+        ConcurrentMap<BusinessEntity, Set<String>> internalLookupIdAttrsMap = getInternalLookupIdAttrsMap(entityMatchEnabled);
+        if (!internalLookupIdAttrsMap.containsKey(entity)) {
+            synchronized (StringUtils.class) {
+                if (!internalLookupIdAttrsMap.containsKey(entity)) {
+                    Set<String> internalLookupIdAttrs = new HashSet<>();
+                    SchemaRepository.getInternalLookupIdAttributes(entity, entityMatchEnabled)
+                            .forEach(interfaceName -> internalLookupIdAttrs.add(interfaceName.name()));
+                    internalLookupIdAttrsMap.put(entity, internalLookupIdAttrs);
+                }
+            }
+        }
+        return internalLookupIdAttrsMap.get(entity);
+    }
+
+    private static ConcurrentMap<BusinessEntity, Set<String>> getSystemAttrsMap(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return SYSTEM_ATTRS_ENTITY_MATCH_ENABLED;
+        } else {
+            return SYSTEM_ATTRS;
+        }
+    }
+
+    private static ConcurrentMap<BusinessEntity, Set<String>> getInternalLookupIdAttrsMap(
+            boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return INTERNAL_LOOKUPID_ATTRS_ENTITY_MATCH_ENABLED;
+        } else {
+            return INTERNAL_LOOKUPID_ATTRS;
+        }
     }
 
     @Deprecated
@@ -554,7 +599,7 @@ public class StatsCubeUtils {
     }
 
     public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
-            boolean includeTopBkt, ColumnSelection.Predefined selectedGroup) {
+            boolean includeTopBkt, ColumnSelection.Predefined selectedGroup, boolean entityMatchEnabled) {
         TopNTree topNTree = new TopNTree();
         for (Map.Entry<String, StatsCube> cubeEntry : cubeMap.entrySet()) {
             String key = cubeEntry.getKey();
@@ -570,7 +615,7 @@ public class StatsCubeUtils {
                         }
                     });
                 }
-                addToTopNTree(key, cube, cmList, topNTree, includeTopBkt);
+                addToTopNTree(key, cube, cmList, topNTree, includeTopBkt, entityMatchEnabled);
             } else {
                 log.warn("Did not provide column metadata for " + key //
                         + ", skipping the stats for the whole cube.");
@@ -580,7 +625,7 @@ public class StatsCubeUtils {
     }
 
     private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList, TopNTree topNTree,
-            boolean includeTopBkt) {
+            boolean includeTopBkt, boolean entityMatchEnabled) {
         BusinessEntity entity = BusinessEntity.valueOf(key);
         Map<String, ColumnMetadata> cmMap = new HashMap<>();
         cmList.forEach(cm -> cmMap.put(cm.getAttrName(), cm));
@@ -592,7 +637,7 @@ public class StatsCubeUtils {
                 // column metadata for " + entity + ", skipping it.");
                 continue;
             }
-            if (shouldHideAttr(entity, cm)) {
+            if (shouldHideAttr(entity, cm, entityMatchEnabled)) {
                 continue;
             }
             AttributeStats statsInCube = attrStatsMap.get(name);

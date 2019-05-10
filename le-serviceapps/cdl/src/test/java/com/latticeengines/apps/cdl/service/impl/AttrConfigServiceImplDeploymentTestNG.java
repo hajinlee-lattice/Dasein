@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -44,47 +45,86 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     @Inject
     private AttrConfigService attrConfigService;
 
-    private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account).stream() //
+    private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account, false)
+            .stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> accountSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Account).stream() //
+    private Set<String> accountStandardAttrsEntityMatchEnabled = SchemaRepository
+            .getStandardAttributes(BusinessEntity.Account, true).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> accountSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Account, false)
+            .stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> accountSystemAttrsEntityMatchEnabled = SchemaRepository
+            .getSystemAttributes(BusinessEntity.Account, true).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> accountInternalLookupIdAttrs = SchemaRepository
+            .getInternalLookupIdAttributes(BusinessEntity.Account, false).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> accountInternalLookupIdAttrsEntityMatchEnabled = SchemaRepository
+            .getInternalLookupIdAttributes(BusinessEntity.Account, true).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> accountExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Account)
             .stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
-    private Set<String> contactStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Contact).stream() //
+    private Set<String> contactStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Contact, false)
+            .stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> contactSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Contact).stream() //
+    private Set<String> contactStandardAttrsEntityMatchEnabled = SchemaRepository
+            .getStandardAttributes(BusinessEntity.Contact, true).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.Contact, false)
+            .stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactSystemAttrsEntityMatchEnabled = SchemaRepository
+            .getSystemAttributes(BusinessEntity.Contact, true).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactInternalLookupIdAttrs = SchemaRepository
+            .getInternalLookupIdAttributes(BusinessEntity.Contact, false).stream() //
+            .map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactInternalLookupIdAttrsEntityMatchEnabled = SchemaRepository
+            .getInternalLookupIdAttributes(BusinessEntity.Contact, true).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
     private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
-    private Set<String> psSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory) //
+    private Set<String> psSystemAttrs = SchemaRepository
+            .getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory, false) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
-    private Set<String> apsSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.AnalyticPurchaseState) //
+    private Set<String> apsSystemAttrs = SchemaRepository
+            .getSystemAttributes(BusinessEntity.AnalyticPurchaseState, false) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
-    private Set<String> caSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.CuratedAccount) //
+    private Set<String> caSystemAttrs = SchemaRepository.getSystemAttributes(BusinessEntity.CuratedAccount, false) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", priority = 1)
     public void test() {
+        testMyAttributes(false);
+        testContactAttributes(false);
         testLDCAttrs();
-        testContactAttributes();
-        testMyAttributes();
         testProductSpendAttributes();
         testCuratedAccountAttributes();
     }
 
-    private void testMyAttributes() {
+    @Test(groups = "deployment-app", priority = 2)
+    public void testEntityMatchEnabled() {
+        // Enable EntityMatch feature flag
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+
+        testMyAttributes(true);
+        testContactAttributes(true);
+    }
+
+    private void testMyAttributes(boolean entityMatchEnabled) {
         final Category cat = Category.ACCOUNT_ATTRIBUTES;
         checkAndVerifyCategory(cat, config -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-            String partition = getMyAttributesPartition(attrName);
+            String partition = getMyAttributesPartition(attrName, entityMatchEnabled);
             switch (partition) {
             case Partition.SYSTEM:
                 verifySystemAttr(config, cat);
@@ -98,6 +138,15 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         true, true, //
                         false, true, //
                         false, true);
+                break;
+            case Partition.INTERNAL_LOOKUP_ID:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        false, false, //
+                        true, true, //
+                        false, false, //
+                        false, false, //
+                        false, false);
                 break;
             case Partition.EXTERNAL_ID:
                 verifyFlags(config, cat, partition, //
@@ -121,11 +170,13 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         });
     }
 
-    private String getMyAttributesPartition(String attrName) {
+    private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
-        if (accountSystemAttrs.contains(attrName)) {
+        if (getAccountSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
-        } else if (accountStandardAttrs.contains(attrName)) {
+        } else if (getAccountInternalLookupIdAttrs(entityMatchEnabled).contains(attrName)) {
+            partiion = Partition.INTERNAL_LOOKUP_ID;
+        } else if (getAccountStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
         } else if (CRM_ID.equals(attrName)) {
             partiion = Partition.EXTERNAL_ID;
@@ -135,12 +186,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         return partiion;
     }
 
-    private void testContactAttributes() {
+    private void testContactAttributes(boolean entityMatchEnabled) {
         final Category cat = Category.CONTACT_ATTRIBUTES;
         checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
-            String partition = getContactAttributesPartition(attrName);
+            String partition = getContactAttributesPartition(attrName, entityMatchEnabled);
             switch (partition) {
             case Partition.SYSTEM:
                 verifySystemAttr(config, cat);
@@ -153,6 +204,15 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         exportByDefault, true, //
                         true, true, //
                         false, true, //
+                        false, false);
+                break;
+            case Partition.INTERNAL_LOOKUP_ID:
+                verifyFlags(config, cat, partition, //
+                        Active, false, //
+                        false, false, //
+                        true, true, //
+                        false, false, //
+                        false, false, //
                         false, false);
                 break;
             case Partition.OTHERS:
@@ -168,11 +228,13 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         });
     }
 
-    private String getContactAttributesPartition(String attrName) {
+    private String getContactAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
-        if (contactSystemAttrs.contains(attrName)) {
+        if (getContactSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
-        } else if (contactStandardAttrs.contains(attrName)) {
+        } else if (getContactInternalLookupIdAttrs(entityMatchEnabled).contains(attrName)) {
+            partiion = Partition.INTERNAL_LOOKUP_ID;
+        } else if (getContactStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
         } else {
             partiion = Partition.OTHERS;
@@ -512,12 +574,61 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         Assert.assertEquals(chg, expectedChg, String.format("%s allow change %s usage", logPrefix, property));
     }
 
+    private Set<String> getAccountStandardAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return accountStandardAttrsEntityMatchEnabled;
+        } else {
+            return accountStandardAttrs;
+        }
+    }
+
+    private Set<String> getAccountSystemAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return accountSystemAttrsEntityMatchEnabled;
+        } else {
+            return accountSystemAttrs;
+        }
+    }
+
+    private Set<String> getAccountInternalLookupIdAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return accountInternalLookupIdAttrsEntityMatchEnabled;
+        } else {
+            return accountInternalLookupIdAttrs;
+        }
+    }
+
+    private Set<String> getContactStandardAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return contactStandardAttrsEntityMatchEnabled;
+        } else {
+            return contactStandardAttrs;
+        }
+    }
+
+    private Set<String> getContactSystemAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return contactSystemAttrsEntityMatchEnabled;
+        } else {
+            return contactSystemAttrs;
+        }
+    }
+
+    private Set<String> getContactInternalLookupIdAttrs(boolean entityMatchEnabled) {
+        if (entityMatchEnabled) {
+            return contactInternalLookupIdAttrsEntityMatchEnabled;
+        } else {
+            return contactInternalLookupIdAttrs;
+        }
+    }
+
     private static final class Partition {
         static final String SYSTEM = "System";
         static final String STD_ATTRS = "StdAttrs";
         static final String EXTERNAL_ID = "ExternalID";
         static final String HAS_PURCHASED = "HasPurchased";
         static final String APS = "APS";
+        static final String INTERNAL_LOOKUP_ID = "InternalLookupId";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes

@@ -16,7 +16,7 @@ import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationProper
 import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropertyEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
-import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class AttributeServiceImplTestNG extends AppTestNGBase {
+public class AttributeServiceImplTestNG extends AppFunctionalTestNGBase {
 
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
             .parse(AttributeServiceImplTestNG.class.getSimpleName());

@@ -7,20 +7,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.app.exposed.service.DataLakeService;
-import com.latticeengines.app.testframework.AppTestNGBase;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
@@ -28,40 +29,27 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.PageFilter;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
-public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
-
-    @Inject
-    private DataLakeService dataLakeService;
+/**
+ * $ dpltc deploy -a admin,matchapi,pls,metadata,cdl,lp,objectapi
+ */
+public class DataLakeServiceImplDeploymentTestNG extends DataLakeServiceImplDeploymentTestNGBase {
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
-
-    @Inject
-    private CDLTestDataService cdlTestDataService;
-
-    @Inject
-    private EntityProxy entityProxy;
 
     @Mock
     private MatchProxy mockedMatchProxyWithMatchedResult;
 
     @Mock
     private MatchProxy mockedMatchProxyWithNoMatchResult;
-
-    private String actualInternalAccountId;
-    private String actualSfdcAccountId;
 
     private Map<String, String> orgInfo;
     private Map<String, String> orgInfo2;
@@ -78,7 +66,7 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
-        mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
+        mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
 
         setupRedshiftData();
@@ -87,32 +75,6 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
 
         orgInfo = setupLookupIdMapping(accountIdColumn);
         orgInfo2 = setupLookupIdMapping(accountIdColumn2);
-    }
-
-    private void setupRedshiftData() {
-        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
-
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.addLookups(BusinessEntity.Account, InterfaceName.AccountId.name(),
-                InterfaceName.SalesforceAccountID.name());
-        PageFilter pageFilter = new PageFilter(0L, 1L);
-        frontEndQuery.setPageFilter(pageFilter);
-
-        DataPage result = entityProxy.getDataFromObjectApi(mainTestTenant.getId(), frontEndQuery);
-        Assert.assertNotNull(result);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
-        Assert.assertEquals(result.getData().size(), 1);
-        Map<String, Object> row = result.getData().get(0);
-        Assert.assertTrue(row.containsKey(InterfaceName.AccountId.name()));
-        Assert.assertTrue(row.containsKey(InterfaceName.SalesforceAccountID.name()));
-
-        actualInternalAccountId = row.get(InterfaceName.AccountId.name()) == null ? null
-                : row.get(InterfaceName.AccountId.name()).toString();
-        actualSfdcAccountId = row.get(InterfaceName.SalesforceAccountID.name()) == null ? null
-                : row.get(InterfaceName.SalesforceAccountID.name()).toString();
-        Assert.assertNotNull(actualInternalAccountId);
-        Assert.assertNotNull(actualSfdcAccountId);
     }
 
     private Map<String, String> setupLookupIdMapping(String accountIdColumn) {
@@ -229,5 +191,23 @@ public class DataLakeServiceImplDeploymentTestNG extends AppTestNGBase {
             Assert.assertNotNull(result.getData());
             Assert.assertTrue(result.getData().isEmpty());
         }
+    }
+
+    @Test(groups = "deployment")
+    public void testGetAttributes() {
+        testAndVerifyGetAttributes();
+    }
+
+    @Override
+    protected Set<Pair<String, Category>> getExpectedAttrs() {
+        return ImmutableSet.of( //
+                Pair.of(InterfaceName.AccountId.name(), Category.ACCOUNT_ATTRIBUTES), //
+                Pair.of(InterfaceName.ContactId.name(), Category.CONTACT_ATTRIBUTES));
+    }
+
+    @Override
+    protected Set<Pair<String, Category>> getUnexpectedAttrs() {
+        return ImmutableSet.of( //
+                Pair.of(InterfaceName.AccountId.name(), Category.CONTACT_ATTRIBUTES));
     }
 }

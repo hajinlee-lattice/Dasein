@@ -104,10 +104,11 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
         StatsCube statsCube = readStatisticsFromHdfs(dataCloudVersion);
         List<ColumnMetadata> cms = fromPredefinedSelection(Predefined.Enrichment, dataCloudVersion);
+        // AccountMasterStats has nothing to do with EntityMatch feature flag
         TopNTree topNTree = StatsCubeUtils.constructTopNTree( //
                 ImmutableMap.of("LatticeAccount", statsCube), //
                 ImmutableMap.of("LatticeAccount", cms), //
-                true, ColumnSelection.Predefined.Enrichment);
+                true, ColumnSelection.Predefined.Enrichment, false);
         return ImmutablePair.of(statsCube, topNTree);
     }
 
