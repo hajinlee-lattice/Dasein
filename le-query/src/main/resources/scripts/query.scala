@@ -22,7 +22,7 @@ val sql = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.g
 println("----- BEGIN SCRIPT OUTPUT -----")
 println("SQL Statement:")
 println(sql)
-println("----- END SCRIPT OUTPUT -----")
+// -----CELL BREAKER----
 
 val sqlDF = spark.sql(sql)
 

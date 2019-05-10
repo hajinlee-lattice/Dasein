@@ -229,7 +229,12 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     }
 
     private Pair<String, String> findTableKeys(String tableName) {
-        TableDescription description = dynamoService.describeTable(tableName);
+        TableDescription description = null;
+        try {
+            description = dynamoService.describeTable(tableName);
+        } catch (Exception e) {
+            log.warn("Failed to describe table " + tableName, e);
+        }
         String hashKey = "";
         String rangeKey = "";
         if (description != null) {
