@@ -192,6 +192,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         int partitions = Math.max(maxExe * executorCores * 2, 200);
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
+//        conf.put("spark.driver.maxResultSize", "4g");
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;
     }
