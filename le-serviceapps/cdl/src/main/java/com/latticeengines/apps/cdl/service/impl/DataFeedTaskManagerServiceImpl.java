@@ -370,7 +370,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(), importConfig.getS3FileName(),
                 dataFeedTask, new Date());
         // validate
-        validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, backupPath);
+        String warning = validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, backupPath);
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
@@ -378,6 +378,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFilePath(backupPath);
+        csvImportFileInfo.setReportWarning(warning);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, true, emailInfo, new WorkflowPidWrapper(-1L));
@@ -453,13 +454,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
      *            when downloading file
      */
     @VisibleForTesting
-    void validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
+    String validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
             String customerSpace, S3ImportEmailInfo emailInfo, String initialS3FilePath) {
         Table template = dataFeedTask.getImportTemplate();
         String s3Bucket = importConfig.getS3Bucket();
         String s3FilePath = importConfig.getS3FilePath();
         boolean needUpdateTask = false;
         List<String> warnings = new ArrayList<>();
+        String message = null;
         try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
             InputStreamReader reader = new InputStreamReader(
                     new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
@@ -541,7 +543,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setImportTemplate(template);
                 dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
             }
-            String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
+            message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
             emailInfo.setErrorMsg(message);
             sendS3ImportEmail(customerSpace, "In_Progress", emailInfo);
         } catch (LedpException e) {
@@ -572,6 +574,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             sendS3ImportEmail(customerSpace, "Failed", emailInfo);
             throw e;
         }
+        return message;
     }
 
     private List<DataFeedTask> getAllDataFeedTask(String customerSpaceStr, BusinessEntity entity) {
