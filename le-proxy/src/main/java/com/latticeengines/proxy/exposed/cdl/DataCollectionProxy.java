@@ -303,7 +303,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         if (version != null) {
             key += "." + version.name();
         }
-        return key.toLowerCase();
+        return key;
     }
 
     private Pair<String, DataCollection.Version> parseCacheKey(String key) {
