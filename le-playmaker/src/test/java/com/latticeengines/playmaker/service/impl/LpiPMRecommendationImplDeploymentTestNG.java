@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.dao.impl.LpiPMRecommendationDaoAdapterImpl;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
-import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -64,9 +63,6 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     @Inject
     private LpiPMAccountExtension lpiAccountExt;
-
-    @Inject
-    private LpiPMPlay lpiPMPlay;
 
     @Inject
     private PlayProxy playProxy;
@@ -104,7 +100,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         eloquaAppId1.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
         eloquaAppId2.put(CDLConstants.AUTH_APP_ID, "BIS01234");
 
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        String existingTenant = "";
+        //existingTenant = "LETest1557442767258";
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).build();
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
@@ -114,7 +112,6 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         playLaunch = testPlayCreationHelper.getPlayLaunch();
         orgInfo = testPlayCreationHelper.getOrgInfo();
         playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launching);
-        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
         // List<Recommendation> recommendations =
         // recommendationEntityMgr.findAll();
         // Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
@@ -122,7 +119,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         // orgInfo.put(CDLConstants.ORG_ID, "DOID");
         // orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
         launchTime = new Date();
-        createDummyRecommendations(maxUpdateRows * 2, launchTime);
+        Long count = createDummyRecommendations(maxUpdateRows * 2, launchTime);
+        playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(), playLaunch.getLaunchId(), 100.0, count, count, 0L, 0L);
+        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
     }
 
     @Test(groups = "deployment")
@@ -145,8 +144,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     public void testGetLastLaunchedRecommendation() {
         List<Map<String, Object>> result = lpiReDaoAdapter.getRecommendations(0, 0, 1000, 0, null, orgInfo,
                 eloquaAppId1);
-        System.out.println("\nThis is Recommendation List:");
-        System.out.println(result.toString() + "\n");
+        logger.info("Last Launched Recommendations Count: " + result.size());
+        logger.info("Last Launched Recommendations: " + result);
         Assert.assertTrue(result.size() > 0);
     }
 
@@ -182,26 +181,31 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     @Test(groups = "deployment", dependsOnMethods = { "testGetLastLaunchedRecommendation" })
     public void testGetContacts() throws Exception {
         // Get Contacts with out play filter
-        List<Map<String, Object>> contacts = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null, 140000000L, null,
+        List<Map<String, Object>> contacts = lpiReDaoAdapter.getContacts(0, 0, 1000, null, null, 140000000L, null,
                 orgInfo, eloquaAppId1);
         Assert.assertNotNull(contacts);
-        int count = contacts.size();
+        long count = contacts.size();
         logger.info("Contact Count: " + count);
         Assert.assertTrue(count >= maxUpdateRows);
+        long contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, null, orgInfo, eloquaAppId1);
+        assertEquals(contactCount, count);
 
         // Get Contacts with play filter
-        List<Map<String, Object>> contactsWithPlayFilter = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null,
+        List<Map<String, Object>> contactsWithPlayFilter = lpiReDaoAdapter.getContacts(0, 0, 1000, null, null,
                 140000000L, Arrays.asList(play.getName()), orgInfo, eloquaAppId1);
         Assert.assertNotNull(contactsWithPlayFilter);
         assertEquals(contactsWithPlayFilter.size(), contacts.size());
+        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList(play.getName()), orgInfo, eloquaAppId1);
+        assertEquals(contactCount, contactsWithPlayFilter.size());
 
         // Get Contacts with dummy play filter
-        List<Map<String, Object>> contactsWithDummyPlayFilter = lpiReDaoAdapter.getContacts(0, 1, 1000, null, null,
+        List<Map<String, Object>> contactsWithDummyPlayFilter = lpiReDaoAdapter.getContacts(0, 0, 1000, null, null,
                 140000000L, Arrays.asList("DUMMY"), orgInfo, eloquaAppId1);
         Assert.assertNotNull(contactsWithDummyPlayFilter);
         assertEquals(contactsWithDummyPlayFilter.size(), 0);
+        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList("DUMMY"), orgInfo, eloquaAppId1);
+        assertEquals(contactCount, contactsWithDummyPlayFilter.size());
     }
-
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
@@ -256,8 +260,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
                 });
     }
 
-    private void createDummyRecommendations(int newRecommendationsCount, Date launchDate) {
-        while (newRecommendationsCount-- > 0) {
+    private long createDummyRecommendations(int newRecommendationsCount, Date launchDate) {
+        for (int i=0; i<newRecommendationsCount; i++) {
             Recommendation rec = new Recommendation();
             rec.setAccountId("Acc_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
             rec.setCompanyName("CN_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
@@ -278,5 +282,6 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
             rec.setContacts(contactStr);
             recommendationEntityMgr.create(rec);
         }
+        return newRecommendationsCount;
     }
 }

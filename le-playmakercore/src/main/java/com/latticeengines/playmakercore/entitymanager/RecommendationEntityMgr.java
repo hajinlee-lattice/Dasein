@@ -42,7 +42,5 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
 
     List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max);
 
-    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
-
-    int findContactsCountByLaunchIds(List<String> launchIds, long start, List<String> accountIds);
+    List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, List<String> accountIds);
 }
