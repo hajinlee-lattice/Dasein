@@ -237,12 +237,6 @@ public class MatchHistory implements HasId<String> {
     @AvroName("MatchMode")
     private String matchMode; // Batch or Realtime
 
-    //// Temporary: Entity Match Result
-    //@JsonProperty("EntityMatchHistory")
-    //@Nullable
-    //@AvroName("EntityMatchHistory")
-    //private EntityMatchHistory entityMatchHistory;
-
     @Nullable
     @AvroName("BusinessEntity")
     private String businessEntity;
@@ -256,8 +250,8 @@ public class MatchHistory implements HasId<String> {
     private String entityId;
 
     @Nullable
-    @AvroName("UserId")
-    private String userId;
+    @AvroName("CustomerEntityId")
+    private String customerEntityId;
 
     @Nullable
     @AvroName("FullMatchKeyTuple")
@@ -281,8 +275,8 @@ public class MatchHistory implements HasId<String> {
     private String l2aEntityId;
 
     @Nullable
-    @AvroName("L2AUserId")
-    private String l2aUserId;
+    @AvroName("L2ACustomerEntityId")
+    private String l2aCustomerEntityId;
 
     @Nullable
     @AvroName("L2AFullMatchKeyTuple")
@@ -1122,38 +1116,6 @@ public class MatchHistory implements HasId<String> {
         return this;
     }
 
-    /*
-    @Union({})
-    public EntityMatchHistory getEntityMatchHistory() {
-        return entityMatchHistory;
-    }
-
-    @Union({})
-    public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
-        this.entityMatchHistory = entityMatchHistory;
-        return this;
-    }
-    */
-
-    @Union({})
-    public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
-        businessEntity = entityMatchHistory.getBusinessEntity();
-        entityMatched = entityMatchHistory.getEntityMatched();
-        entityId = entityMatchHistory.getEntityId();
-        userId = entityMatchHistory.getUserId();
-        fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
-        matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
-        matchType = entityMatchHistory.getMatchType();
-        l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
-        l2aEntityId = entityMatchHistory.getL2aEntityId();
-        l2aUserId = entityMatchHistory.getL2aUserId();
-        l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
-        l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
-        l2aMatchType = entityMatchHistory.getL2aMatchType();
-
-        return this;
-    }
-
     @Union({})
     public void setBusinessEntity(String businessEntity) {
         this.businessEntity = businessEntity;
@@ -1185,13 +1147,13 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setCustomerEntityId(String customerEntityId) {
+        this.customerEntityId = customerEntityId;
     }
 
     @Union({})
-    public String getUserId() {
-        return userId;
+    public String getCustomerEntityId() {
+        return customerEntityId;
     }
 
     @Union({})
@@ -1245,13 +1207,13 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public void setL2aUserId(String l2aUserId) {
-        this.l2aUserId = l2aUserId;
+    public void setL2aCustomerEntityId(String l2aCustomerEntityId) {
+        this.l2aCustomerEntityId = l2aCustomerEntityId;
     }
 
     @Union({})
-    public String getL2aUserId() {
-        return l2aUserId;
+    public String getL2aCustomerEntityId() {
+        return l2aCustomerEntityId;
     }
 
     @Union({})
@@ -1282,6 +1244,25 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public String getL2aMatchType() {
         return l2aMatchType;
+    }
+
+    @Union({})
+    public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
+        businessEntity = entityMatchHistory.getBusinessEntity();
+        entityMatched = entityMatchHistory.getEntityMatched();
+        entityId = entityMatchHistory.getEntityId();
+        customerEntityId = entityMatchHistory.getCustomerEntityId();
+        fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
+        matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
+        matchType = entityMatchHistory.getMatchType();
+        l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
+        l2aEntityId = entityMatchHistory.getL2aEntityId();
+        l2aCustomerEntityId = entityMatchHistory.getL2aCustomerEntityId();
+        l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
+        l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
+        l2aMatchType = entityMatchHistory.getL2aMatchType();
+
+        return this;
     }
 
     public MatchHistory withDnBMatchResult(DnBMatchContext dnbMatchContext) {

@@ -12,8 +12,8 @@ public class EntityMatchHistory {
     @JsonProperty("EntityId")
     private String entityId;
 
-    @JsonProperty("UserId")
-    private String userId;
+    @JsonProperty("CustomerEntityId")
+    private String customerEntityId;
 
     @JsonProperty("FullMatchKeyTuple")
     private MatchKeyTuple fullMatchKeyTuple;
@@ -24,15 +24,17 @@ public class EntityMatchHistory {
     @JsonProperty("MatchType")
     private String matchType;
 
+    //
     // Lead to Account (l2a) Results when main entity is Contact.
+    //
     @JsonProperty("L2AEntityMatched")
     private String l2aEntityMatched;
 
     @JsonProperty("L2AEntityId")
     private String l2aEntityId;
 
-    @JsonProperty("L2AUserId")
-    private String l2aUserId;
+    @JsonProperty("L2ACustomerEntityId")
+    private String l2aCustomerEntityId;
 
     @JsonProperty("L2AFullMatchKeyTuple")
     private MatchKeyTuple l2aFullMatchKeyTuple;
@@ -67,12 +69,12 @@ public class EntityMatchHistory {
         return entityId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setCustomerEntityId(String customerEntityId) {
+        this.customerEntityId = customerEntityId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getCustomerEntityId() {
+        return customerEntityId;
     }
 
     public void setFullMatchKeyTuple(MatchKeyTuple fullMatchKeyTuple) {
@@ -115,12 +117,12 @@ public class EntityMatchHistory {
         return l2aEntityId;
     }
 
-    public void setL2aUserId(String l2aUserId) {
-        this.l2aUserId = l2aUserId;
+    public void setL2aCustomerEntityId(String l2aCustomerEntityId) {
+        this.l2aCustomerEntityId = l2aCustomerEntityId;
     }
 
-    public String getL2aUserId() {
-        return l2aUserId;
+    public String getL2aCustomerEntityId() {
+        return l2aCustomerEntityId;
     }
 
     public void setL2aFullMatchKeyTuple(MatchKeyTuple l2aFullMatchKeyTuple) {

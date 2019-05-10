@@ -61,7 +61,7 @@ public class InternalOutputRecord extends OutputRecord {
     // Match result: entity -> entityId
     private Map<String, String> entityIds;
 
-    // $JAW$ Potentially temporary location.
+    // Store the EntityMatchHistory so it can be passed between the MatchTraveler and the MatchHistory.
     private EntityMatchHistory entityMatchHistory;
 
     public String getParsedDomain() {

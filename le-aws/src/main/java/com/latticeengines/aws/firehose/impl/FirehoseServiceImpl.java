@@ -57,7 +57,6 @@ public class FirehoseServiceImpl implements FirehoseService {
 
     @Override
     public void sendBatch(String deliveryStreamName, List<String> streams) {
-        log.error("$JAW$ In Firehose sendBatch");
         try {
             int batchSize = firehoseBatchSize;
             if (streams.size() > batchSize) {
@@ -65,13 +64,11 @@ public class FirehoseServiceImpl implements FirehoseService {
                 if (streams.size() % batchSize > 0) {
                     batches++;
                 }
-                log.error("$JAW$ There are " + batches + " batches!");
                 for (int i = 0; i < batches; i++) {
                     List<String> subStreams = streams.subList(i * batchSize, (i + 1) * batchSize);
                     sendMiniBatch(deliveryStreamName, subStreams);
                 }
             } else {
-                log.error("$JAW$ Only one batch!");
                 sendMiniBatch(deliveryStreamName, streams);
             }
 
@@ -84,16 +81,13 @@ public class FirehoseServiceImpl implements FirehoseService {
     private void sendMiniBatch(String deliveryStreamName, List<String> streams) {
         PutRecordBatchRequest putRecordBatchRequest = new PutRecordBatchRequest();
         putRecordBatchRequest.setDeliveryStreamName(deliveryStreamName);
-        List<Record> recordList = new ArrayList<Record>();
+        List<Record> recordList = new ArrayList<>();
         for (String data : streams) {
             data = data + "\n";
             Record record = createRecord(data);
             recordList.add(record);
         }
         putRecordBatchRequest.setRecords(recordList);
-
-        log.error("$JAW$ In sendMiniBatch to send " + streams.size() + " streams");
-
         firehoseClient.putRecordBatch(putRecordBatchRequest);
     }
 

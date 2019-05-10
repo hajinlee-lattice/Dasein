@@ -106,7 +106,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
 
-        // TODO(slin):  Is this the right place to grab the completed Match Lookup Results.
+        // For Allocate ID Mode, capture entity's MatchLookupResults into entity map.
         traveler.addEntityMatchLookupResults(entity, traveler.getMatchLookupResults());
 
         List<Pair<MatchKeyTuple, String>> lookupResults = traveler.getMatchLookupResults()

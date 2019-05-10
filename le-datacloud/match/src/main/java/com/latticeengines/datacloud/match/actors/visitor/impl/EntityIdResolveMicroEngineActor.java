@@ -57,7 +57,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
     protected void execute(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
 
-        // TODO(slin):  Is this the right place to grab the completed Match Lookup Results.
+        // For Lookup (Non-Allocate) Mode, capture entity's MatchLookupResults into entity map.
         matchTraveler.addEntityMatchLookupResults(matchTraveler.getEntity(), matchTraveler.getMatchLookupResults());
 
         // select the entityId found by the highest priority key
