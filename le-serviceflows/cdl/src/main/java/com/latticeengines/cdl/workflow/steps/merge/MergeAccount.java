@@ -143,6 +143,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         return steps;
     }
 
+    // for Account batch store
     @Override
     protected void enrichTableSchema(Table table) {
         Map<String, Attribute> attrsToInherit = new HashMap<>();
@@ -150,7 +151,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         addAttrsToMap(attrsToInherit, matchedAccountTable);
         addAttrsToMap(attrsToInherit, newAccountTableFromContactMatch);
         updateAttrs(table, attrsToInherit);
-        table.getAttributes().forEach(attr -> attr.setTags(Tag.INTERNAL));
+        table.getAttributes().forEach(attr -> {
+            attr.setTags(Tag.INTERNAL);
+            if (configuration.isEntityMatchEnabled() && InterfaceName.AccountId.name().equals(attr.getName())) {
+                attr.setDisplayName("Atlas Account ID");
+            }
+        });
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
 
