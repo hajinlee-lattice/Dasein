@@ -75,7 +75,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
-                                             int scalingFactor, String secondaryJobName) {
+                                             int scalingFactor, boolean persist, String secondaryJobName) {
         String tenantId = attrRepo.getCustomerSpace().getTenantId();
         String jobName;
         if (StringUtils.isNotBlank(secondaryJobName)) {
@@ -95,7 +95,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
             try {
                 session = livySessionService.startSession(livyHost, jobName, //
                         getLivyConf(), getSparkConf(scalingFactor));
-                bootstrapAttrRepo(session, hdfsPathMap);
+                bootstrapAttrRepo(session, hdfsPathMap, persist);
             } catch (Exception e) {
                 log.warn("Failed to launch a new livy session.", e);
                 if (session != null) {
@@ -137,12 +137,13 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return result.getTargets().get(0);
     }
 
-    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap) {
+    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, boolean persist) {
         InputStreamSparkScript sparkScript = getAttrRepoScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         params.put("TABLE_MAP", hdfsPathMap);
+        params.put("PERSIST_ON_DISK", persist);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         log.info("Output: " + result.getOutput());

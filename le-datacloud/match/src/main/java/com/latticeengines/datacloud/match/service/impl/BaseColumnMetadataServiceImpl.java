@@ -74,12 +74,12 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     }
 
     private ColumnMetadata toColumnMetadata(E column) {
+        if (column == null) {
+            throw new IllegalArgumentException("Found a null column in column list");
+        }
         try {
             return column.toColumnMetadata();
         } catch (Exception e) {
-            if (column == null) {
-                throw new IllegalArgumentException("Found a null column in column list");
-            }
             throw new RuntimeException("Failed to extract metadata from MetadataColumn ["
                     + column.getColumnId() + "]", e);
         }

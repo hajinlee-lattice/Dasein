@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 

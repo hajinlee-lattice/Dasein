@@ -15,8 +15,6 @@ public interface CDLLookupService {
 
     List<DynamoDataUnit> parseCustomDynamo(MatchInput input);
 
-    Map<String, Object> lookup(DynamoDataUnit dynamoDataUnit, String lookupIdKey, String lookupIdValue);
-
     Map<String, Object> lookup(List<DynamoDataUnit> dynamoDataUnits, String lookupIdKey, String lookupIdValue);
 
 }

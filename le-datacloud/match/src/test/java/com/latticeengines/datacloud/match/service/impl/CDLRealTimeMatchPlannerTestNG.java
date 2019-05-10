@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -103,6 +104,7 @@ public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestN
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setOperationalMode(OperationalMode.CDL_LOOKUP);
 
         input.setPredefinedSelection(ColumnSelection.Predefined.Enrichment);
         List<ColumnMetadata> cms = cdlMetadataService.parseMetadata(input);
