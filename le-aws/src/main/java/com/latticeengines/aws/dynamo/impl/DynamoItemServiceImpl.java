@@ -218,14 +218,16 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         TableDescription description = table.getDescription();
         String hashKey = "";
         String rangeKey = "";
-        for (KeySchemaElement schema: description.getKeySchema()) {
-            KeyType keyType = KeyType.fromValue(schema.getKeyType());
-            if (KeyType.HASH.equals(keyType)) {
-                hashKey = schema.getAttributeName();
-                log.info("Found hash key of table " + tableName + " to be " + hashKey);
-            } else if (KeyType.RANGE.equals(keyType)) {
-                rangeKey = schema.getAttributeName();
-                log.info("Found range key of table " + tableName + " to be " + rangeKey);
+        if (description != null) {
+            for (KeySchemaElement schema : description.getKeySchema()) {
+                KeyType keyType = KeyType.fromValue(schema.getKeyType());
+                if (KeyType.HASH.equals(keyType)) {
+                    hashKey = schema.getAttributeName();
+                    log.info("Found hash key of table " + tableName + " to be " + hashKey);
+                } else if (KeyType.RANGE.equals(keyType)) {
+                    rangeKey = schema.getAttributeName();
+                    log.info("Found range key of table " + tableName + " to be " + rangeKey);
+                }
             }
         }
         return Pair.of(hashKey, rangeKey);
