@@ -14,7 +14,7 @@
     background-color: $orange-text;
   }
   .menu-content {
-    margin-left: -146px;
+    margin-left: -134px;
     margin-top: 24px;
   }
   .le-cell-template > div {
@@ -22,6 +22,9 @@
   }
   .le-menu {
     float: right;
+    .menu-container {
+      padding: 0.5em 1em;
+    }
   }
   .le-table-cell {
     display: block;
@@ -31,7 +34,7 @@
     }
   }
   .le-table-row > .le-table-cell > .le-cell-template {
-   
+    flex: 1;
     .le-blu-link {
       .le-link{
         border-bottom: 0px solid white;

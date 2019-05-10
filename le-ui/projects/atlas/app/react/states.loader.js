@@ -1,5 +1,6 @@
 import states from 'atlas/import/templates/multiple/states';
 import s3filestates from 'atlas/import/s3files/s3files.states';
+import mappingsstate from 'atlas/import/templates/viewMappings/viewMappings.states';
 import connectrosstates from 'atlas/connectors/connectors.states';
 import overviewstates from 'atlas/playbook/content/overview/overview.states';
 import statessingle from 'atlas/import/templates/states';
@@ -16,6 +17,7 @@ mergeStates(states);
 mergeStates(connectrosstates);
 mergeStates(overviewstates);
 mergeStates(s3filestates);
+mergeStates(mappingsstate);
 mergeStates(statessingle);
 
 export default modulesStates;

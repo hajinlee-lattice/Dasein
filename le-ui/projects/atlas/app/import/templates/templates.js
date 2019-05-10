@@ -62,7 +62,7 @@ angular
 
     this.getExistingToken = () => {
       $http({
-        method: "PUT",
+        method: "GET",
         url: "/pls/dropbox/key",
         headers: {
           ErrorDisplayMethod: "",
