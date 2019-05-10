@@ -1,80 +1,20 @@
-// import React, {
-//   Component,
-//   react2angular
-// } from "../../../../common/react-vendor";
-// import LeButton from "../../../../common/widgets/buttons/le-button";
-// import {
-//   LeToolBar,
-//   VERTICAL
-// } from "../../../../common/widgets/toolbar/le-toolbar";
-// import "./templates.scss";
-// import { clean, getRouter } from "./react-routing";
-// import { UIRouter, UIView } from "../../../../common/react-vendor";
-// import NgState from "../../ng-state";
-// import httpService from "../../../../common/app/http/http-service";
-// import Observer from "../../../../common/app/http/observer";
-
-// class TemplatesComponent extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.emailCredentialConfig = {
-//       label: "Setup Automation",
-//       classNames: "gray-button"
-//     };
-//     NgState.setAngularState(this.props.$state);
-    
-//     // let stateStore = this.props.$state.get('home.importtemplates');
-//     // this.redux = stateStore.data.redux;
-//     // console.log('FORMATS ', this.redux.store);
-  
-//   }
-
-//   componentDidMount() {
-//     let router = getRouter();
-//     router.stateService.go("templatelist");
-//   }
-//   componentWillUnmount() {
-//     clean();
-//   }
-
-//   render() {
-//     return (
-//       <div className="le-flex-v-panel main-container center-h">
-//         <div className="le-flex-v-panel templates-main-container">
-//           <LeToolBar>
-//             <div className="right">
-//               <LeButton
-//                 name="credentials"
-//                 config={this.emailCredentialConfig}
-//                 callback={() => {
-//                   httpService.get(
-//                     "/pls/dropbox",
-//                     new Observer(response => {
-//                       // console.log("BACK HERE ", response);
-//                     }),
-//                     {
-//                       ErrorDisplayMethod: "Banner",
-//                       ErrorDisplayOptions: '{"title": "Warning"}',
-//                       ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-//                     }
-//                   );
-//                 }}
-//               />
-//             </div>
-//           </LeToolBar>
-//           <UIRouter router={getRouter()}>
-//             <UIView name="reactmain" />
-//           </UIRouter>
-//         </div>
-//       </div>
-//     );
-//   }
-// }
-
 angular
   .module("le.import.templates", [])
-  .service("TemplatesStore", function($http, Modal) {
+  .service("TemplatesStore", function ($http, Modal) {
     let TemplatesStore = this;
+
+    this.newToken = () => {
+      $http({
+        method: "GET",
+        url: "/pls/dropbox",
+        headers: {
+          ErrorDisplayMethod: "Banner",
+          ErrorDisplayOptions: '{"title": "Warning"}',
+          ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+        },
+        data: { AccessMode: "LatticeUser" }
+      })
+    };
 
     this.checkIfRegenerate = data => {
       switch (data.action) {
@@ -88,14 +28,14 @@ angular
       }
     };
     this.txtFormat = (htmlFormat) => {
-      if(htmlFormat){
+      if (htmlFormat) {
         let ret = htmlFormat.replace(/<p>/g, '\r\n');
         ret = ret.replace(/<\/p>/g, '\r\n');
         ret = ret.replace(/<br>/g, '\r\n');
         ret = ret.replace(/<strong>/g, '');
         ret = ret.replace(/<\/strong>/g, '');
-      return ret;
-      }else{
+        return ret;
+      } else {
         return 'Please contact your Admin';
       }
     };
@@ -135,8 +75,6 @@ angular
         element.click();
         document.body.removeChild(element);
         TemplatesStore.removeUIActionModal(response.name);
-        // let modal = Modal.get(response.name);
-        // Modal.modalRemoveFromDOM(modal, { name: response.name });
       }
     };
 
@@ -145,7 +83,3 @@ angular
       Modal.modalRemoveFromDOM(modal, { name: modalName });
     };
   });
-  // .component(
-  //   "templatesComponent",
-  //   react2angular(TemplatesComponent, [], ["$state"])
-  // );
