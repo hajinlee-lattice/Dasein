@@ -33,6 +33,7 @@ import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.BitTransferUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -365,13 +366,17 @@ public class DropBoxServiceImpl implements DropBoxService {
         List<S3ObjectSummary> s3ObjectSummaries = s3Service.getFilesWithInfoForDir(bucket, prefix);
         List<FileProperty> fileList = new LinkedList<>();
         for (S3ObjectSummary summary : s3ObjectSummaries) {
-            FileProperty fileProperty = new FileProperty();
             String fileName = summary.getKey();
             if (fileName.startsWith(prefix)) {
                 fileName = fileName.replaceFirst(prefix, "");
             }
+            String fileType = PathUtils.getFileType(fileName);
+            if (fileName.contains("/") || fileType == null || !PathUtils.getFileType(fileName).equalsIgnoreCase("csv")) {
+                continue;
+            }
+            FileProperty fileProperty = new FileProperty();
             fileProperty.setFileName(PathUtils.formatPath(fileName));
-            fileProperty.setFileSize(summary.getSize());
+            fileProperty.setFileSize(BitTransferUtils.formatSize(summary.getSize()));
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());
             fileProperty.setFileType(PathUtils.getFileType(fileName));
