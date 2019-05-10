@@ -13,7 +13,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
