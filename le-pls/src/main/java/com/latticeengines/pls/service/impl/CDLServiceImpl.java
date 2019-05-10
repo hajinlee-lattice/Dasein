@@ -357,7 +357,8 @@ public class CDLServiceImpl implements CDLService {
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
-                display.setImportStatus(task.getS3ImportStatus());
+                display.setImportStatus(task.getS3ImportStatus() == null ?
+                        DataFeedTask.S3ImportStatus.Pause : task.getS3ImportStatus());
                 templates.add(display);
             }
         }

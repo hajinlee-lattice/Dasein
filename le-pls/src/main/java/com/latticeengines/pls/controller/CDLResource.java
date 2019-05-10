@@ -237,7 +237,8 @@ public class CDLResource {
             if (dataFeedTask == null) {
                 throw new RuntimeException("Cannot find template for S3 import!");
             }
-            if (!dataFeedTask.getS3ImportStatus().equals(templateDisplay.getImportStatus())) {
+            if (templateDisplay.getImportStatus() != null &&
+                    !templateDisplay.getImportStatus().equals(dataFeedTask.getS3ImportStatus())) {
                 dataFeedTask.setS3ImportStatus(templateDisplay.getImportStatus());
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             }
