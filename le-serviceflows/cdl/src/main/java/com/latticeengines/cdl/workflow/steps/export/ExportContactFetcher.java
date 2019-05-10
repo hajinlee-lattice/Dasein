@@ -94,7 +94,7 @@ public class ExportContactFetcher {
         processedContactsCount += contactPage.getData().size();
 
         contactPage //
-                .getData().stream() //
+                .getData() //
                 .forEach( //
                         contact -> processContToUpdMapForAccContList(mapForAccountAndContactList, contact));
         return processedContactsCount;
