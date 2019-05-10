@@ -61,7 +61,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final Map<String, String> newEntityIds = new HashMap<>();
 
     // Entity -> MatchKeyTuple
+    // A map from each entity in the match process to the full MatchKeyTuple containing all the match keys provided.
     private final Map<String, MatchKeyTuple> entityMatchKeyTuples = new HashMap<>();
+
+    // Entity -> (List of Pairs (MatchKeyTuple, List of LookupResults))
+    // A map from each eneity in the match process to an ordered list of MatchKeyTuples used for lookup and the list
+    // of lookup results.  The lookup results is a list of strings, rather than one result, because SystemId may
+    // contain multiple IDs for lookup, giving multiple results.
+    private Map<String, List<Pair<MatchKeyTuple, List<String>>>> entityMatchLookupResults = new HashMap<>();
 
     // Entity match errors
     private List<String> entityMatchErrors;
@@ -82,14 +89,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Default value: entity for ldc match
     private String entity = BusinessEntity.LatticeAccount.name();
 
+    // List of Pairs (MatchKeyTuple, List of LookupResults)
     // Entity Match results.  Contains an ordered list of MatchKeyTuples used for lookup and the resulting lookup
     // results.  Lookup result is a list of strings because the MatchKeyTuple for SystemId may contain multiple System
     // IDs for lookup, giving multiple results.  If lookup failed, the result should be a list with one or more null
     // string elements corresponding to the MatchKeyTuples for which the lookup failed.
-    private List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults;
+    private List<Pair<MatchKeyTuple, List<String>>> matchLookupResults;
 
     // actor name -> index of entity match lookup result got from the actor in
-    // entityMatchLookupResults list
+    // matchLookupResults list
     private Map<String, Integer> actorLookupResIdxes;
 
     /***********************
@@ -128,12 +136,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Pushed order needs to be in sync with recoverOtherTransitionHistory()
     @Override
     protected List<Object> getOtherTransitionHistoryToPush() {
-        return Arrays.asList(entityMatchLookupResults, actorLookupResIdxes);
+        return Arrays.asList(matchLookupResults, actorLookupResIdxes);
     }
 
     @Override
     protected void clearOtherCurrentTransitionHistory() {
-        entityMatchLookupResults = null;
+        matchLookupResults = null;
         actorLookupResIdxes = null;
     }
 
@@ -141,7 +149,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @SuppressWarnings("unchecked")
     @Override
     protected void recoverOtherTransitionHistory(List<Object> others) {
-        entityMatchLookupResults = (List<Pair<MatchKeyTuple, List<String>>>) others.get(0);
+        matchLookupResults = (List<Pair<MatchKeyTuple, List<String>>>) others.get(0);
         actorLookupResIdxes = (Map<String, Integer>) others.get(1);
     }
 
@@ -280,34 +288,34 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     // Use addLookupResult() to add entity match lookup result instead of
     // directly adding to the list
-    public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResults() {
-        if (entityMatchLookupResults == null) {
-            entityMatchLookupResults = new ArrayList<>();
+    public List<Pair<MatchKeyTuple, List<String>>> getMatchLookupResults() {
+        if (matchLookupResults == null) {
+            matchLookupResults = new ArrayList<>();
         }
-        return entityMatchLookupResults;
+        return matchLookupResults;
     }
 
-    public void setEntityMatchLookupResults(List<Pair<MatchKeyTuple, List<String>>> entityMatchLookupResults) {
-        this.entityMatchLookupResults = entityMatchLookupResults;
+    public void setMatchLookupResults(List<Pair<MatchKeyTuple, List<String>>> matchLookupResults) {
+        this.matchLookupResults = matchLookupResults;
     }
 
     // Use this method to add entity match lookup result instead of
-    // directly adding to list entityMatchLookupResults
+    // directly adding to list matchLookupResults
     public void addLookupResult(String actorName, Pair<MatchKeyTuple, List<String>> lookupResults) {
         if (actorLookupResIdxes == null) {
             actorLookupResIdxes = new HashMap<>();
         }
-        if (entityMatchLookupResults == null) {
-            entityMatchLookupResults = new ArrayList<>();
+        if (matchLookupResults == null) {
+            matchLookupResults = new ArrayList<>();
         }
         if (actorLookupResIdxes.get(actorName) == null) {
             // 1st time lookup
-            entityMatchLookupResults.add(lookupResults);
-            actorLookupResIdxes.put(actorName, entityMatchLookupResults.size() - 1);
+            matchLookupResults.add(lookupResults);
+            actorLookupResIdxes.put(actorName, matchLookupResults.size() - 1);
         } else {
             // overwrite existing lookup result in retried lookup
             int idx = actorLookupResIdxes.get(actorName);
-            entityMatchLookupResults.set(idx, lookupResults);
+            matchLookupResults.set(idx, lookupResults);
         }
     }
 
@@ -316,21 +324,13 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
             return false;
         }
         int idx = actorLookupResIdxes.get(actorName);
-        if (entityMatchLookupResults.size() <= idx || entityMatchLookupResults.get(idx) == null) {
+        if (matchLookupResults.size() <= idx || matchLookupResults.get(idx) == null) {
             return false; // should not happen
         }
-        if (CollectionUtils.isEmpty(entityMatchLookupResults.get(idx).getRight())) {
+        if (CollectionUtils.isEmpty(matchLookupResults.get(idx).getRight())) {
             return false; // should not happen
         }
-        return !entityMatchLookupResults.get(idx).getRight().contains(null);
-    }
-
-    public List<String> getEntityMatchErrors() {
-        return entityMatchErrors;
-    }
-
-    public void setEntityMatchErrors(List<String> entityMatchErrors) {
-        this.entityMatchErrors = entityMatchErrors;
+        return !matchLookupResults.get(idx).getRight().contains(null);
     }
 
     public Map<String, MatchKeyTuple> getEntityMatchKeyTuples() {
@@ -343,6 +343,26 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void addEntityMatchKeyTuple(String entity, MatchKeyTuple tuple) {
         entityMatchKeyTuples.put(entity, tuple);
+    }
+
+    public Map<String, List<Pair<MatchKeyTuple, List<String>>>> getEntityMatchLookupResults() {
+        return entityMatchLookupResults;
+    }
+
+    public List<Pair<MatchKeyTuple, List<String>>> getEntityMatchLookupResult(String entity) {
+        return entityMatchLookupResults.get(entity);
+    }
+
+    public void addEntityMatchLookupResults(String entity, List<Pair<MatchKeyTuple, List<String>>> lookupResult) {
+        entityMatchLookupResults.put(entity, lookupResult);
+    }
+
+    public List<String> getEntityMatchErrors() {
+        return entityMatchErrors;
+    }
+
+    public void setEntityMatchErrors(List<String> entityMatchErrors) {
+        this.entityMatchErrors = entityMatchErrors;
     }
 
 }

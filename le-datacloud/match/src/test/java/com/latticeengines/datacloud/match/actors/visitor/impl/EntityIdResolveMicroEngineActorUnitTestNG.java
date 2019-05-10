@@ -160,7 +160,7 @@ public class EntityIdResolveMicroEngineActorUnitTestNG {
                     .map(Arrays::asList)
                     .map(list -> Pair.of(TEST_TUPLE, list))
                     .collect(Collectors.toList());
-            traveler.setEntityMatchLookupResults(results);
+            traveler.setMatchLookupResults(results);
         }
         return traveler;
     }

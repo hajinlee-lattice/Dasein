@@ -106,6 +106,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void processMatchHistory(MatchContext matchContext) {
         if (!isMatchHistoryEnabled) {
+            log.debug("MatchHistory not enabled, returning.");
             return;
         }
         List<InternalOutputRecord> records = matchContext.getInternalResults();
@@ -134,6 +135,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setDomainSource(record.getDomainSource())
                     .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
 
+            // Add EntityMatchHistory to MatchHistory.
+            matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
+
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
@@ -152,6 +156,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
+            log.debug("MatchHistory not enabled, returning.");
             return;
         }
         if (CollectionUtils.isEmpty(matchHistories)) {
