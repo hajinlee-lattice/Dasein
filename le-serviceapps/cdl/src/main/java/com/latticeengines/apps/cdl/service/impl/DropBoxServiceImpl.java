@@ -370,12 +370,13 @@ public class DropBoxServiceImpl implements DropBoxService {
             if (fileName.startsWith(prefix)) {
                 fileName = fileName.replaceFirst(prefix, "");
             }
+            fileName = PathUtils.formatPath(fileName);
             String fileType = PathUtils.getFileType(fileName);
             if (fileName.contains("/") || fileType == null || !PathUtils.getFileType(fileName).equalsIgnoreCase("csv")) {
                 continue;
             }
             FileProperty fileProperty = new FileProperty();
-            fileProperty.setFileName(PathUtils.formatPath(fileName));
+            fileProperty.setFileName(fileName);
             fileProperty.setFileSize(BitTransferUtils.formatSize(summary.getSize()));
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());
