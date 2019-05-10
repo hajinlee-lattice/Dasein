@@ -71,8 +71,8 @@ public class SystemMetadataStoreImpl extends
         // order in sync with ChainedDecoratorFactory.project() below
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList(//
                 accountAttrsDecorator, //
-                contactAttrsDecorator, //
                 lookupIdDecorator, //
+                contactAttrsDecorator, //
                 activityMetricsDecorator, //
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
@@ -98,8 +98,8 @@ public class SystemMetadataStoreImpl extends
                 // order in sync with getDecoratorChain()
                 return Arrays.asList( //
                         accountNs, //
-                        contactNs, //
                         lookupIdNs, //
+                        contactNs, //
                         activityMetricsNs, //
                         Namespace0.NS, //
                         ratingNs, //

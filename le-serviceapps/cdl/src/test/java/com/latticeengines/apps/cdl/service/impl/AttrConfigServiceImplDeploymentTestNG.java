@@ -15,11 +15,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -101,22 +101,27 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
-    @Test(groups = "deployment-app", dataProvider = "FeatureFlags")
-    public void testWithFeatureFlags(boolean entityMatchEnabled) {
-        testMyAttributes(entityMatchEnabled);
-        testContactAttributes(entityMatchEnabled);
-    }
-
-    @Test(groups = "deployment-app")
-    public void testWithoutFeatureFlags() {
+    @Test(groups = "deployment-app", priority = 1)
+    public void test() {
+        testMyAttributes(false);
+        testContactAttributes(false);
         testLDCAttrs();
         testProductSpendAttributes();
         testCuratedAccountAttributes();
     }
 
+    @Test(groups = "deployment-app", priority = 2)
+    public void testEntityMatchEnabled() {
+        // Enable EntityMatch feature flag
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+
+        testMyAttributes(true);
+        testContactAttributes(true);
+    }
+
     private void testMyAttributes(boolean entityMatchEnabled) {
         final Category cat = Category.ACCOUNT_ATTRIBUTES;
-        checkAndVerifyCategory(cat, entityMatchEnabled, config -> {
+        checkAndVerifyCategory(cat, config -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getMyAttributesPartition(attrName, entityMatchEnabled);
@@ -183,7 +188,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void testContactAttributes(boolean entityMatchEnabled) {
         final Category cat = Category.CONTACT_ATTRIBUTES;
-        checkAndVerifyCategory(cat, entityMatchEnabled, (config) -> {
+        checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getContactAttributesPartition(attrName, entityMatchEnabled);
@@ -239,8 +244,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void testProductSpendAttributes() {
         final Category cat = Category.PRODUCT_SPEND;
-        // Entity match enabled or not doesn't impact Product Spend attributes
-        checkAndVerifyCategory(cat, false, (config) -> {
+        checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             String partition = getProductSpentPartition(attrName);
@@ -293,8 +297,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void testCuratedAccountAttributes() {
         final Category cat = Category.CURATED_ACCOUNT_ATTRIBUTES;
-        // Entity match enabled or not doesn't impact Curated Account attributes
-        checkAndVerifyCategory(cat, false, (config) -> {
+        checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
             Assert.assertNotNull(attrName, JsonUtils.pprint(config));
             if (caSystemAttrs.contains(attrName)) {
@@ -323,8 +326,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCFirmographics() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.FIRMOGRAPHICS, false, (config) -> {
+        checkAndVerifyCategory(Category.FIRMOGRAPHICS, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -341,8 +343,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCGrowthTrends() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.GROWTH_TRENDS, false, (config) -> {
+        checkAndVerifyCategory(Category.GROWTH_TRENDS, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -359,8 +360,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCOnlinePresence() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.ONLINE_PRESENCE, false, (config) -> {
+        checkAndVerifyCategory(Category.ONLINE_PRESENCE, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -377,8 +377,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCWebsiteProfile() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.WEBSITE_PROFILE, false, (config) -> {
+        checkAndVerifyCategory(Category.WEBSITE_PROFILE, (config) -> {
             AttrState initialState = AttrState.Active;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -395,8 +394,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCIntent() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.INTENT, false, (config) -> {
+        checkAndVerifyCategory(Category.INTENT, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -413,8 +411,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCTechProfile() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.TECHNOLOGY_PROFILE, false, (config) -> {
+        checkAndVerifyCategory(Category.TECHNOLOGY_PROFILE, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -431,8 +428,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCWebsiteKeywords() {
-        // Entity match enabled or not doesn't impact LDC attributes
-        checkAndVerifyCategory(Category.WEBSITE_KEYWORDS, false, (config) -> {
+        checkAndVerifyCategory(Category.WEBSITE_KEYWORDS, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
@@ -510,9 +506,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         }
     }
 
-    private void checkAndVerifyCategory(Category category, boolean entityMatchEnabled,
-            Function<AttrConfig, Boolean> verifier) {
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category, entityMatchEnabled);
+    private void checkAndVerifyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
                 .map(verifier).sequential().count().block();
@@ -625,15 +620,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         } else {
             return contactInternalLookupIdAttrs;
         }
-    }
-
-    // Schema: EntityMatchEnabled
-    @DataProvider(name = "FeatureFlags")
-    private Object[][] getFeatureFlags() {
-        return new Object[][] { //
-                { false }, //
-                // { true }//
-        };
     }
 
     private static final class Partition {

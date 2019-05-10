@@ -17,7 +17,9 @@ import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -45,17 +47,19 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
     private final TableRoleTemplate tableRoleTemplate;
     private final AMMetadataStore amMetadataStore;
     private final CDLNamespaceService cdlNamespaceService;
+    private final BatonService batonService;
 
     @Inject
     RawSystemMetadataStoreImpl(DataCollectionService dataCollectionService, //
             TableRoleTemplate tableRoleTemplate, //
             AMMetadataStore amMetadataStore, //
-            CDLNamespaceService cdlNamespaceService) {
+            CDLNamespaceService cdlNamespaceService, //
+            BatonService batonService) {
         this.dataCollectionService = dataCollectionService;
         this.tableRoleTemplate = tableRoleTemplate;
         this.amMetadataStore = amMetadataStore;
         this.cdlNamespaceService = cdlNamespaceService;
-
+        this.batonService = batonService;
     }
 
     @Override
@@ -76,6 +80,8 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
 
         DataCollection.Version version = namespace.getCoord2();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
         if (BusinessEntity.Account.equals(entity) && CollectionUtils.isEmpty(tableNames)) {
             // for account try serving store
@@ -95,8 +101,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
                 servingStore = servingStore.filter(cm -> Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()));
             }
 
-            // EntityMatch enabled or not doesn't impact raw system metadata
-            Set<String> systemAttributes = SchemaRepository.getSystemAttributes(entity, false).stream()
+            Set<String> systemAttributes = SchemaRepository.getSystemAttributes(entity, entityMatchEnabled).stream()
                     .map(InterfaceName::name).collect(Collectors.toSet());
 
             servingStore = servingStore //

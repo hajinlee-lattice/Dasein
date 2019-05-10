@@ -299,7 +299,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public List<AttrConfig> getRenderedList(Category category, boolean entityMatchEnabled) {
+    public List<AttrConfig> getRenderedList(Category category) {
+        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        return getRenderedList(category, entityMatchEnabled);
+    }
+
+    private List<AttrConfig> getRenderedList(Category category, boolean entityMatchEnabled) {
         List<AttrConfig> renderedList;
         String tenantId = MultiTenantContext.getShortTenantId();
         List<BusinessEntity> entities = CategoryUtils.getEntity(category);
