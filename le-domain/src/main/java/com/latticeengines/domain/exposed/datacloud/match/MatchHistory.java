@@ -1248,20 +1248,21 @@ public class MatchHistory implements HasId<String> {
 
     @Union({})
     public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
-        businessEntity = entityMatchHistory.getBusinessEntity();
-        entityMatched = entityMatchHistory.getEntityMatched();
-        entityId = entityMatchHistory.getEntityId();
-        customerEntityId = entityMatchHistory.getCustomerEntityId();
-        fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
-        matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
-        matchType = entityMatchHistory.getMatchType();
-        l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
-        l2aEntityId = entityMatchHistory.getL2aEntityId();
-        l2aCustomerEntityId = entityMatchHistory.getL2aCustomerEntityId();
-        l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
-        l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
-        l2aMatchType = entityMatchHistory.getL2aMatchType();
-
+        if (entityMatchHistory != null) {
+            businessEntity = entityMatchHistory.getBusinessEntity();
+            entityMatched = entityMatchHistory.getEntityMatched();
+            entityId = entityMatchHistory.getEntityId();
+            customerEntityId = entityMatchHistory.getCustomerEntityId();
+            fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
+            matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
+            matchType = entityMatchHistory.getMatchType();
+            l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
+            l2aEntityId = entityMatchHistory.getL2aEntityId();
+            l2aCustomerEntityId = entityMatchHistory.getL2aCustomerEntityId();
+            l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
+            l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
+            l2aMatchType = entityMatchHistory.getL2aMatchType();
+        }
         return this;
     }
 

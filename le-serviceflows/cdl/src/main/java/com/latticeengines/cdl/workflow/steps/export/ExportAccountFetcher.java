@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -129,6 +130,7 @@ public class ExportAccountFetcher {
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         matchInput.setUseRemoteDnB(false);
         matchInput.setDataCloudVersion(dataCloudVersion);
+        matchInput.setOperationalMode(OperationalMode.CDL_LOOKUP);
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);

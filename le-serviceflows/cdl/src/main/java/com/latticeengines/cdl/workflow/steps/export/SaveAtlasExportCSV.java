@@ -139,15 +139,15 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 String originalDisplayName = cm.getDisplayName();
                 String displayName = originalDisplayName;
                 int suffix = 1;
-                while (outputCols.contains(displayName)) {
+                while (outputCols.contains(displayName.toLowerCase())) {
                     log.warn("Displayname [" + displayName + "] has already been assigned to another attr, " +
                             "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate." );
                     displayName = originalDisplayName + " (" + (++suffix) + ")";
                 }
                 displayNameMap.put(cm.getAttrName(), displayName);
-                outputCols.add(displayName);
+                outputCols.add(displayName.toLowerCase());
             } else {
-                outputCols.add(cm.getAttrName());
+                outputCols.add(cm.getAttrName().toLowerCase());
             }
         });
         return displayNameMap;

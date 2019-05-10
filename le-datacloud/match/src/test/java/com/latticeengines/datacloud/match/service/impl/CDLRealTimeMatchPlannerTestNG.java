@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -103,6 +104,7 @@ public class CDLRealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestN
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setOperationalMode(OperationalMode.CDL_LOOKUP);
 
         input.setPredefinedSelection(ColumnSelection.Predefined.Enrichment);
         List<ColumnMetadata> cms = cdlMetadataService.parseMetadata(input);

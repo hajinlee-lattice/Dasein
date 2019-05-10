@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
@@ -171,6 +172,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         input.setPredefinedSelection(null);
         input.setCustomSelection(columnSelection);
         input.setDataCloudVersion(DATACLOUD_VERSION);
+        input.setOperationalMode(OperationalMode.CDL_LOOKUP);
         return input;
     }
 
