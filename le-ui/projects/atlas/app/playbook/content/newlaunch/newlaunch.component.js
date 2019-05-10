@@ -62,18 +62,18 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             PlaybookWizardStore.nextSaveLaunch(null, {lastIncompleteLaunch: PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch});
         }
 
-        vm.updateListSelection = function() {
+        vm.updateListSelection = function(onInit) {
             console.log(vm.listSelection);
             if (vm.listSelection != null) {
                 vm.audienceName =  vm.listSelection.name;
                 vm.audienceId = vm.listSelection.id;
                 vm.createNewList = false;
             } else {
-                vm.audienceName =  "";
+                vm.audienceName =  onInit ? (vm.mostRecentLaunch.audienceName || "") : "";
                 vm.audienceId = "";
                 vm.createNewList = true;
-
             }
+            vm.updatePlayStore();
         }
 
         vm.updateProgramName = function(onInit) {           
@@ -84,16 +84,21 @@ angular.module('lp.playbook.wizard.newlaunch', [])
                 if (onInit) {
                     var mostRecentAudience = vm.staticLists.filter((list) => {
                         return list.name == vm.mostRecentLaunch.audienceName;
-                    }); 
+                    });
                     if (mostRecentAudience.length == 1 && mostRecentAudience[0].name) {
                         vm.listSelection = mostRecentAudience[0];
                     } else {
                         vm.listSelection = null;
                     }
-                    vm.updateListSelection();
+                    vm.updateListSelection(onInit);
                 }
             });
-            
+        }
+
+        vm.updatePlayStore = function() {
+            PlaybookWizardStore.setAudienceId(vm.audienceId);
+            PlaybookWizardStore.setAudienceName(vm.audienceName);
+            PlaybookWizardStore.setMarketoProgramName(vm.programName);
         }
 
         vm.isInvalidAudienceSelection = function() {
