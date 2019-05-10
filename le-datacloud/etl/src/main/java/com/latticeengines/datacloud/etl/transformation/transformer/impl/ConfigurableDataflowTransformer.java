@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -106,7 +105,8 @@ public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, TransformationFlowParameters paramters,
                                           TransformerConfig configuration) {
-        String avroGlob = workflowDir + (workflowDir.endsWith("/") ? "*.avro" : "/*.avro");
-        TransformerUtils.removeEmptyAvros(yarnConfiguration, avroGlob);
+        // M28: better not remove empty avros, as it may break downstream steps in the pipeline
+//        String avroGlob = workflowDir + (workflowDir.endsWith("/") ? "*.avro" : "/*.avro");
+//        TransformerUtils.removeEmptyAvros(yarnConfiguration, avroGlob);
     }
 }
