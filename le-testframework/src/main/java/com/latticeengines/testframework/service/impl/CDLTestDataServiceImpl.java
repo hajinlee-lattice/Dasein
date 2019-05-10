@@ -168,6 +168,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(shortTenantId, status, active);
     }
 
+    @Override
     public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
                                                 List<BucketMetadata> coverage) {
         if (CollectionUtils.isNotEmpty(coverage)) {
@@ -177,6 +178,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
     }
 
+    @Override
     public void mockRatingTable(String tenantId, List<String> engineIds, //
             Map<String, List<BucketMetadata>> modelRatingBuckets) {
         tenantId = CustomerSpace.parse(tenantId).getTenantId();

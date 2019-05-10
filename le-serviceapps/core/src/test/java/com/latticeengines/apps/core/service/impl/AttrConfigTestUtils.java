@@ -984,6 +984,19 @@ public class AttrConfigTestUtils {
         return data;
     }
 
+    public static ColumnMetadata getContactAccountIdData(Category category) {
+        ColumnMetadata data = new ColumnMetadata();
+        data.setAttrName(InterfaceName.CustomerAccountId.name());
+        data.setEntity(BusinessEntity.Contact);
+
+        data.setCategory(category);
+        data.setDescription("Customer provided Account ID in Contact");
+        data.setAttrState(AttrState.Active);
+        data.setDisplayName("AccountId");
+        data.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+        return data;
+    }
+
     public static AttrConfig getAnnualRevenue() {
         AttrConfig attrConfig = new AttrConfig();
         attrConfig.setAttrName(InterfaceName.AnnualRevenue.name());

@@ -15,6 +15,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -59,10 +60,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
+            boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(entity);
             if (render) {
-                renderedList = render(columns, customConfig);
+                renderedList = render(columns, customConfig, entityMatchEnabled);
             } else {
                 renderedList = customConfig;
             }

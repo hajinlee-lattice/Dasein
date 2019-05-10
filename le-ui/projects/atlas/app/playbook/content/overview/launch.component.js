@@ -42,11 +42,15 @@ class LaunchComponent extends Component {
     constructor(props) {
         super(props);
 
+        let connection = this.props.connection,
+            type = (connection.config.name ? connection.config.name.toLowerCase() : 'none');
+
         this.state = {
             play: props.play,
             ratings: null,
             coverage: null,
-            selectedBuckets: [],
+            // FIXME crappy hack to select all buckets because of setState recursion
+            selectedBuckets: (type === 'salesforce' ? ['A','B','C','D','E','F'] : []),
             recommendationCounts: {},
             unscored: false,
             limitRecommendations: false,
@@ -180,11 +184,12 @@ class LaunchComponent extends Component {
         return _buckets;
     }
 
-    makeBucketList = (play, coverage, unscoredAccountCountPercent) => {
+    makeBucketList = (play, coverage, opts) => {
         /**
          * If no buckets this should produce 5 default buckets
          */
-        let _noBuckets = [{
+        let vm = this,
+            _noBuckets = [{
             bucket: 'A',
             count: 0,
         },{
@@ -203,6 +208,7 @@ class LaunchComponent extends Component {
             bucket: 'F',
             count: 0,
         }],
+        unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
         hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
         noBuckets = (hasBuckets ? null : _noBuckets);
 
@@ -211,7 +217,7 @@ class LaunchComponent extends Component {
                 <Aux>
                     <h2>Model Ratings</h2>
                     <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
-                        {this.makeBuckets(coverage, play, noBuckets)}
+                        {this.makeBuckets(coverage, play, noBuckets, opts)}
                     </LeHPanel>
                     <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
                     <label for="unscored">
@@ -223,6 +229,11 @@ class LaunchComponent extends Component {
     }
 
     launch = (play, connection, opts) => {
+        // FIXME crappy hack to select all buckets because of setState recursion
+        var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
+        this.state.selectedBuckets = this.state.selectedBuckets.splice(0,4);
+        this.setState(this.state);
+
         var opts = opts || {},
             play = opts.play || store.getState().playbook.play,
             ratings = store.getState().playbook.ratings,
@@ -333,6 +344,7 @@ class LaunchComponent extends Component {
         if(this.state.launchAccountsCoverage) {
             var play = this.state.play,
                 connection = this.props.connection,
+                type = (connection.config.name ? connection.config.name.toLowerCase() : 'none'),
                 bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),
                 coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
                 engineId = coverageObj.engineId,
@@ -359,7 +371,9 @@ class LaunchComponent extends Component {
             return (
                 <LeVPanel className={'campaign-launch'} hstretch={true}>
                     <div className={'launch-section model-ratings'}>
-                        {this.makeBucketList(play, coverage, unscoredAccountCountPercent)}
+                        {this.makeBucketList(play, coverage, {
+                            unscoredAccountCountPercent: unscoredAccountCountPercent
+                        })}
                     </div>
                     <div className={'launch-section account-options'}>
                         <h2>Account Options</h2>
@@ -375,7 +389,7 @@ class LaunchComponent extends Component {
                         </ul>
                     </div>
                     <div className={'launch-section recommendations'}>
-                        <h2>Recommendations to be Launched: {recommendationCounts.launched}</h2>
+                        <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: {recommendationCounts.launched}</h2>
                         <ul>
                             <li>
                                 <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 

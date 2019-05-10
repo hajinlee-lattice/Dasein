@@ -100,7 +100,7 @@ export default class MultipleTemplatesList extends Component {
             name: "import-templates",
             header: [
                 {
-                    name: "Actions",
+                    name: "Active",
                     displayName: "Active",
                     sortable: false
                 },
@@ -128,10 +128,6 @@ export default class MultipleTemplatesList extends Component {
                     name: "LastEditedDate",
                     displayName: "Last Modified",
                     sortable: false
-                },
-                {
-                    name: "actions",
-                    sortable: false
                 }
             ],
             columns: [
@@ -144,12 +140,7 @@ export default class MultipleTemplatesList extends Component {
                         if (!cell.state.saving && !cell.state.editing) {
                             if (cell.props.rowData.Exist) {
                                 return (
-                                    <EditControl
-                                        icon="fa fa-pencil-square-o"
-                                        title="Edit Name"
-                                        toogleEdit={cell.toogleEdit}
-                                        classes="initially-hidden"
-                                    />
+                                    null
                                 );
                             } else {
                                 return null;
@@ -179,7 +170,7 @@ export default class MultipleTemplatesList extends Component {
                     colSpan: 1
                 },
                 {
-                    colSpan: 2
+                    colSpan: 1
                 },
                 {
                     colSpan: 3,
@@ -210,54 +201,41 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 2,
-                    mask: value => {
-                        var options = {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                        };
-                        var formatted = new Date(value);
-                        var buh = "err";
-                        try {
-                            buh = formatted.toLocaleDateString(
-                                "en-US",
-                                options
-                            );
-                        } catch (e) {
-                            // console.log(e);
+                    colSpan: 4,
+                    template: cell => {
+                        let lastEditedDate = '';
+                        let lastEditedDateNumeric = null;
+
+                        if (cell.props.rowData.Exist) {
+                            lastEditedDateNumeric = cell.props.rowData.LastEditedDate;
+                            var options = {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            };
+                            var formatted = new Date(lastEditedDateNumeric);
+                            var buh = "err";
+                            try {
+                                buh = formatted.toLocaleDateString(
+                                    "en-US",
+                                    options
+                                );
+                            } catch (e) {
+                                console.log(e);
+                            }
+                            lastEditedDate = buh;
                         }
 
-                        return buh;
-                    }
-                },
-                {
-                    colSpan: 1,
-                    template: cell => {
                         return (
-                            <LeHPanel hstretch={'true'} halignment={SPACEEVEN} valignment={CENTER}>
-                                <i class="fa fa-upload" aria-hidden="true" onClick={() => {
-                                    bannerActions.info(store, {title: 'Test Banner', message: 'Here the message'});
-                                }}></i>
-                                <i class="fa fa-plus" aria-hidden="true" onClick={() => {
-                                    NgState.getAngularState().go('home.import.entry', response);                                    
-                                    // bannerActions.error(store, {title: 'Test Banner 2', message: 'Here the message 1'});
-                                }}></i>
-                                <i class="fa fa-pencil-square-o" aria-hidden="true" onClick={() => {
-                                    NgState.getAngularState().go('home.import.entry', response);
-                                    // bannerActions.success(store, {title: 'Test Banner 3', message: 'Here the message 2'});
-                                }}></i>
-
-                            </LeHPanel>
-                            // <TemplatesRowActions
-                            //     rowData={cell.props.rowData}
-                            //     callback={this.actionCallbackHandler}
-                            // />
-                            // rowData={cell.props.rowData}
-                            // callback={this.actionCallbackHandler}
-                            // />
+                            <div>
+                                {/* {lastEditedDate} */}
+                                <TemplatesRowActions
+                                    rowData={cell.props.rowData}
+                                    callback={this.setDataTypes}
+                                />
+                            </div>
                         );
                     }
                 }

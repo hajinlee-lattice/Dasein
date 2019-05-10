@@ -16,11 +16,11 @@ import org.testng.annotations.Test;
 
 import com.amazonaws.util.StringInputStream;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
-import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
-public class ImportFromS3ServiceImplTestNG extends AppTestNGBase {
+public class ImportFromS3ServiceImplTestNG extends AppFunctionalTestNGBase {
 
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
             .parse(ImportFromS3ServiceImplTestNG.class.getSimpleName());

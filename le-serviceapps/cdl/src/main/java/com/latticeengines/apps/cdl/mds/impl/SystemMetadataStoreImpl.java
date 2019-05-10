@@ -36,7 +36,8 @@ public class SystemMetadataStoreImpl extends
     @Inject
     public SystemMetadataStoreImpl( //
             RawSystemMetadataStoreImpl rawSystemMetadataStore, //
-            AccountAttrsDecoratorFac accountAttrsDecorator, //
+            AccountAttrsDecoratorFacImpl accountAttrsDecorator, //
+            ContactAttrsDecoratorFacImpl contactAttrsDecorator, //
             ActivityMetricsDecoratorFac activityMetricsDecorator, //
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
@@ -44,6 +45,7 @@ public class SystemMetadataStoreImpl extends
         super(rawSystemMetadataStore, //
                 getDecoratorChain(//
                         accountAttrsDecorator, //
+                        contactAttrsDecorator, //
                         activityMetricsDecorator, //
                         ratingDisplayMetadataStore, //
                         externalSystemMetadataStore, //
@@ -52,7 +54,8 @@ public class SystemMetadataStoreImpl extends
     }
 
     private static ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>> getDecoratorChain(
-            AccountAttrsDecoratorFac accountAttrsDecorator, //
+            AccountAttrsDecoratorFacImpl accountAttrsDecorator, //
+            ContactAttrsDecoratorFacImpl contactAttrsDecorator, //
             ActivityMetricsDecoratorFac activityMetricsDecorator, //
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
@@ -63,14 +66,13 @@ public class SystemMetadataStoreImpl extends
                 MdsDecoratorFactory.fromMds("LookupId", externalSystemMetadataStore);
         DecoratorFactory<Namespace2<String, DataCollection.Version>> curatedAttrsDecorator = //
                 MdsDecoratorFactory.fromMds("CuratedAttrs", curatedAttrsMetadataStore);
-        Decorator contactDecorator = new ContactAttrsDecorator();
         Decorator apsAttrDecorator = new APSAttrsDecorator();
         Decorator postRenderDecorator = new SystemPostRenderDecorator();
         // order in sync with ChainedDecoratorFactory.project() below
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList(//
                 accountAttrsDecorator, //
                 lookupIdDecorator, //
-                contactDecorator, //
+                contactAttrsDecorator, //
                 activityMetricsDecorator, //
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
@@ -85,6 +87,7 @@ public class SystemMetadataStoreImpl extends
                 BusinessEntity entity = namespace.getCoord1();
                 String tenantId = MultiTenantContext.getShortTenantId();
                 Namespace accountNs = Namespace.as(BusinessEntity.Account.equals(entity) ? tenantId : "");
+                Namespace contactNs = Namespace.as(BusinessEntity.Contact.equals(entity) ? tenantId : "");
                 Namespace activityMetricsNs = Namespace
                         .as(BusinessEntity.PurchaseHistory.equals(entity) ? tenantId : "");
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
@@ -96,7 +99,7 @@ public class SystemMetadataStoreImpl extends
                 return Arrays.asList( //
                         accountNs, //
                         lookupIdNs, //
-                        Namespace0.NS, //
+                        contactNs, //
                         activityMetricsNs, //
                         Namespace0.NS, //
                         ratingNs, //
