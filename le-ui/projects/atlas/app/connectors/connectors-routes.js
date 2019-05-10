@@ -1,7 +1,7 @@
 import 'atlas/react/react-angular-main.component';
 import { actions, reducer } from './connections.redux';
 angular
-.module('le.connectors', ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal'])
+.module('le.connectors', ['lp.sfdc', 'common.utilities.browserstorage', 'common.services.featureflag', 'common.modal', 'le.import.templates'])
 .service('ConnectorsService', function ($state, BrowserStorageUtility, FeatureFlagService, SfdcService, Notice) {
         let ConnectorsService = this;
         this.getConnector = function () {
@@ -53,9 +53,10 @@ angular
                 path: () => {
                     return 'connectorslist';
                 },
-                ngservices: (ConnectorsService) => {
+                ngservices: (ConnectorsService, TemplatesStore) => {
                     let obj = {
-                        ConnectorsService: ConnectorsService
+                        ConnectorsService: ConnectorsService,
+                        TemplatesStore: TemplatesStore
                     }
                     return obj;
                 }

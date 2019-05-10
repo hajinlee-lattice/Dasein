@@ -22,6 +22,7 @@ import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
 import { store, injectAsyncReducer } from 'store';
 
 import SystemService from './system.service';
+import ReactRouter from 'atlas/react/router';
 
 export default class SystemComponent extends Component {
     constructor(props) {
@@ -32,6 +33,7 @@ export default class SystemComponent extends Component {
         this.getEditTemplate = this.getEditTemplate.bind(this);
         this.editMapping = Object.assign({}, props.system);
         this.mappingClosed = this.mappingClosed.bind(this);
+        this.TemplatesStore = ReactRouter.getRouter().ngservices.TemplatesStore;
     }
 
     handleChange = () => {
@@ -219,7 +221,7 @@ export default class SystemComponent extends Component {
                                 classNames: "blue-button"
                             }}
                             callback={() => {
-
+                                this.TemplatesStore.regenerate();
                             }}
                         />
                     </div>
