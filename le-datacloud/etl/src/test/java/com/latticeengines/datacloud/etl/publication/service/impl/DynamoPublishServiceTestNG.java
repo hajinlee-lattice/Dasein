@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -265,6 +266,11 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
         public void tagTable(String tableName, Map<String, String> tags) {
             MockDynamoTable table = dynamoTables.get(tableName);
             table.tag(tags);
+        }
+
+        @Override
+        public TableDescription describeTable(String tableName) {
+            return null;
         }
     }
 

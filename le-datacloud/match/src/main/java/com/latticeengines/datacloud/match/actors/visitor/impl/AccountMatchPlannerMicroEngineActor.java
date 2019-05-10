@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,8 @@ import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
@@ -85,20 +86,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
             throw new IllegalArgumentException("MatchTraveler must have EntityKeyPositionMap set.");
         }
 
-        if (MapUtils.isEmpty(matchTraveler.getEntityKeyPositionMaps().get(matchTraveler.getEntity()))) {
-            throw new IllegalArgumentException("MatchTraveler EntityKeyPositionMap must have map for set entity");
-        }
         if (MapUtils.isEmpty(matchTraveler.getMatchInput().getEntityKeyMaps())) {
             throw new IllegalArgumentException("MatchTraveler's MatchInput EntityKeyMaps should not be empty");
-        }
-        Map<String, MatchInput.EntityKeyMap> entityKeyMaps = matchTraveler.getMatchInput().getEntityKeyMaps();
-        if (!entityKeyMaps.containsKey(matchTraveler.getEntity())) {
-            throw new IllegalArgumentException(
-                    "MatchTraveler missing EntityMatchKey map for match entity " + matchTraveler.getEntity());
-        }
-        if (MapUtils.isEmpty(entityKeyMaps.get(matchTraveler.getEntity()).getKeyMap())) {
-            throw new IllegalArgumentException(
-                    "MatchTraveler missing MatchKey map for match entity " + matchTraveler.getEntity());
         }
     }
 
@@ -122,7 +111,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         List<Object> inputRecord = matchTraveler.getInputDataRecord();
         Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
-                .get(BusinessEntity.Account.name());
+                .getOrDefault(BusinessEntity.Account.name(), new HashMap<>());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
@@ -133,8 +122,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
 
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
 
-        Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
-                .get(BusinessEntity.Account.name()).getKeyMap();
+        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(matchTraveler.getMatchInput(),
+                BusinessEntity.Account.name());
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);
 

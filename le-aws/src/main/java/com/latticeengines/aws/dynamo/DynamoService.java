@@ -5,6 +5,7 @@ import java.util.Map;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 public interface DynamoService {
 
@@ -27,5 +28,6 @@ public interface DynamoService {
 
     void switchToLocal(boolean local);
 
+    TableDescription describeTable(String tableName);
 
 }

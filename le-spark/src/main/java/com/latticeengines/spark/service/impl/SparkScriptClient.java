@@ -208,6 +208,9 @@ class SparkScriptClient {
         List<String> outputParagraphs = new ArrayList<>();
         while (text.contains(BEGIN_OUTPUT)) {
             text = text.substring(text.indexOf(BEGIN_OUTPUT) + BEGIN_OUTPUT.length());
+            if (text.startsWith("\n")) {
+                text = text.substring(1);
+            }
             String output;
             if (text.contains(END_OUTPUT)) {
                 output = text.substring(0, text.indexOf(END_OUTPUT));

@@ -1,5 +1,4 @@
 angular.module('common.datacloud.query.builder.tree.edit', [])
-
     .directive('queryItemEditDirective', function () {
         return {
             restrict: 'E',
@@ -9,16 +8,261 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
             require: 'ngModel',
             templateUrl: '/components/datacloud/query/advanced/tree/edit/tree-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
+            controller: function ($scope, $http, $timeout, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
-                vm.booleanChanged = false;
                 vm.presetOperation;
+                vm.booleanChanged = false;
                 vm.showFromNumerical = false;
                 vm.showToNumerical = false;
-                // console.log(vm.tree.bucketRestriction);
+                vm.vals = vm.vals || [];
+                vm.buckets = vm.buckets || [];
+                vm.loading = vm.buckets.length === 0;
+                vm.form = $scope.form || {};
+                vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
-                function showNumericalRange() {
-                    switch (vm.numericalCmpModel) {
+                vm.init = function () {
+                    //setTimeout(() => { vm.initVariables() }, 0);
+                    vm.initVariables();
+                    vm.resetCmp();
+                    console.log('[tree-edit] init', vm.item.ColumnId, vm.item.FundamentalType + '/' + vm.type, vm);
+                }
+
+                vm.initVariables = function () {
+                    vm.string_operations = QueryTreeService.string_operations;
+                    if (vm.showItem('Boolean') && !vm.showItem('Percent')) {
+                        vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
+                    }
+                    if (vm.showItem('String')) {
+                        convertEqualToCollection();
+                        let value = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
+                        vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
+                        console.log('[tree-edit] initVariables()', value, vm.vals, vm.tree);
+                        vm.vals = value;
+                    }
+                    if (vm.showItem('Enum')) {
+                        convertEqualToCollection();
+                        switch (vm.item.FundamentalType) {
+                            case 'alpha':
+                                vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
+                                break;
+                            case 'enum':
+                                vm.operation = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+                                vm.string_operations = QueryTreeService.numerical_operations;
+                                initNumericalRange();
+                                break;
+                        }
+                        vm.vals = vm.tree.bucketRestriction.bkt.Vals;
+                        vm.getBuckets();
+                    }
+                    if (vm.showItem('Numerical')) {
+                        vm.operation = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+                        vm.vals = vm.tree.bucketRestriction.bkt.Vals;
+                        initNumericalRange();
+                    }
+                    if (vm.showItem('Date')) { }
+                };
+
+                vm.changeNumericalCmpValue = function () {
+                    QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.operation);
+                    initNumericalRange(true);
+                }
+
+                vm.changeBooleanValue = function () {
+                    vm.booleanChanged = true;
+                    QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, vm.booleanValue);
+                }
+
+                vm.changeVals = function () {
+                    let bkt = vm.tree.bucketRestriction.bkt;
+                    console.log('[tree-edit] changeCmpValue start', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
+                    QueryTreeService.changeVals(vm.tree.bucketRestriction, vm.vals);
+                    console.log('[tree-edit] changeCmpValue end', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
+                }
+
+                vm.changeCmpValue = function () {
+                    console.log('[tree-edit] changeCmpValue start', vm.operation, vm.tree.bucketRestriction.bkt.Cmp, vm.vals);
+                    vm.clear = true;
+                    let _operation = vm.tree.bucketRestriction.bkt.Cmp;
+
+                    switch (vm.operation) {
+                        case 'EQUAL':
+                        case 'IN_COLLECTION':
+                            vm.operation = 'IN_COLLECTION';
+                            break;
+                        case 'NOT_EQUAL':
+                        case 'NOT_IN_COLLECTION':
+                            vm.operation = 'NOT_IN_COLLECTION';
+                            break;
+                        default:
+                            vm.vals.length = 0;
+                    }
+
+                    if (vm.chipsOperations.indexOf(_operation) < 0 && vm.chipsOperations.indexOf(vm.operation) > -1) {
+                        vm.vals.length = 0;
+                    }
+
+                    QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
+                    console.log('[tree-edit] changeCmpValue end', vm.operation, vm.vals);
+                }
+
+                vm.showChips = function () {
+                    let equals = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
+                    let check = vm.showItem;
+                    let cmp = equals.indexOf(vm.operation) > -1;
+                    return cmp && (check('Enum') || check('Numerical') || check('String'));
+                }
+
+                vm.updateChips = function (items) {
+                    console.log('[tree-edit] updateChips start', vm.operation, items, vm.vals);
+                    items = items || [];
+                    vm.changeChips(items);
+                    vm.changeVals();
+                    vm.changeCmpValue();
+                    //vm.resetCmp();
+                    console.log('[tree-edit] updateChips end', vm.operation, items, vm.vals);
+                }
+
+                vm.changeChips = function (items) {
+                    console.log('[tree-edit] changeChips start', vm.operation, vm.vals);
+                    if (vm.clear) {
+                        vm.vals.length = 0;
+                        vm.clear = false;
+                    }
+
+                    items.forEach(item => {
+                        if (vm.vals.indexOf(item.Lbl) < 0) {
+                            vm.vals.push(item.Lbl);
+                        }
+                    });
+                    console.log('[tree-edit] changeChips end', vm.operation, vm.vals);
+                }
+
+                vm.getBuckets = function () {
+                    var id = vm.item.ColumnId;
+                    var entity = vm.item.Entity;
+
+                    $http({
+                        'url': '/pls/datacollection/statistics/attrs/' + entity + '/' + id,
+                        method: 'GET'
+                    }).then(function (response) {
+                        vm.loading = false;
+                        vm.buckets.length = 0;
+
+                        if (response.data && response.data.Bkts && response.data.Bkts.List) {
+                            response.data.Bkts.List.forEach(item => vm.buckets.push(item));
+                        }
+
+                        vm.clear = true;
+                        vm.ChipsController.init();
+                    });
+                }
+
+                vm.getOperationValue = function (operation, position) {
+                    return QueryTreeService.getOperationValue(vm.tree.bucketRestriction, operation, position);
+                }
+
+                vm.getCubeBktList = function () {
+                    return QueryTreeService.getCubeBktList(vm.tree.bucketRestriction, vm.item.cube);
+                }
+
+                vm.showInput = function (operation) {
+                    let not_hidden = QueryTreeService.no_inputs.indexOf(operation) < 0;
+                    let is_alpha = vm.checkAlphaNumeric(operation) === 'alpha';
+                    return not_hidden && is_alpha;
+                }
+
+                vm.showNumericRange = function (operation) {
+                    let not_hidden = QueryTreeService.no_inputs.indexOf(operation) < 0;
+                    let is_numeric = vm.checkAlphaNumeric(operation) === 'numeric';
+                    showNumericalRange(operation);
+                    return not_hidden && is_numeric;
+                }
+
+                vm.checkAlphaNumeric = function (operation) {
+                    return {
+                        'STARTS_WITH': 'alpha',
+                        'ENDS_WITH': 'alpha',
+                        'CONTAINS': 'alpha',
+                        'NOT_CONTAINS': 'alpha',
+                        'GREATER_THAN': 'numeric',
+                        'GREATER_OR_EQUAL': 'numeric',
+                        'LESS_THAN': 'numeric',
+                        'LESS_OR_EQUAL': 'numeric',
+                        'GTE_AND_LT': 'numeric'
+                    }[operation];
+                }
+
+                vm.showUnsetButton = function () {
+                    return vm.root.mode === 'rules' || vm.root.mode === 'dashboardrules';
+                }
+
+                vm.showEmptyOption = function () {
+                    return QueryTreeService.showEmptyOption(vm.tree.bucketRestriction);
+                }
+
+                vm.showItem = function (typeToShow) {
+                    return QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
+                }
+
+                vm.showTo = function () {
+                    return QueryTreeService.showTo(vm.tree.bucketRestriction);
+                }
+
+                vm.isValid = function () {
+                    QueryStore.setPublicProperty('enableSaveSegmentButton', $scope.form.$valid === true);
+                    return $scope.form.$valid;
+                }
+
+                vm.callbackChangedNumericalValue = function (type, position, value) {
+                    QueryTreeService.changeValue(vm.tree.bucketRestriction, vm.type, value, position);
+                }
+
+                // hacky fix for vanishing operation value -lazarus
+                vm.resetCmp = function () {
+                    let operation = vm.operation;
+                    vm.operation = '';
+                    $timeout(() => vm.operation = operation, 16);
+                }
+
+                vm.clickEditMode = function (value) {
+                    vm.editMode = value;
+                    if (value !== 'Custom') {
+                        var bucket = vm.getCubeBktList()[0];
+                        if (bucket) {
+                            vm.presetOperation = bucket.Lbl;
+                        }
+                        vm.changePreset(bucket);
+                    } else {
+                        QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.type);
+                        vm.initVariables();
+                    }
+                }
+
+                function initNumericalRange(reset) {
+                    if (!reset) {
+                        let fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 0);
+                        let toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 1);
+                        let from = (fromNumerical != null) ? Number(fromNumerical) : undefined;
+                        let to = (toNumerical != null) ? Number(toNumerical) : undefined;
+                        vm.rangeConfig = {
+                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical' },
+                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical' }
+                        };
+                        showNumericalRange();
+                    } else {
+                        vm.rangeConfig = {
+                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
+                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                        };
+                        QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
+                        setTimeout(() => { showNumericalRange() }, 0);
+                    }
+                    return vm.rangeConfig;
+                }
+
+                function showNumericalRange(operation) {
+                    operation = operation || vm.operation;
+                    switch (operation) {
                         case 'EQUAL':
                         case 'GREATER_OR_EQUAL':
                         case 'GREATER_THAN':
@@ -33,7 +277,6 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             vm.showToNumerical = true;
                             break;
                         }
-
                         case 'GTE_AND_LT': {
                             vm.showFromNumerical = true;
                             vm.showToNumerical = true;
@@ -46,211 +289,16 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     }
                 }
 
-                function initNumericalRange(reset) {
-                    if (!reset) {
-                        
-                        var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 0);
-                        let from = (fromNumerical != null) ? Number(fromNumerical) : undefined;
-                        var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, 1);
-                        let to = (toNumerical != null) ? Number(toNumerical) : undefined;
-                        vm.numericalConfiguration = {
-                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical' }
-                        };
-                        showNumericalRange();
-                        
-                    } else {
-                        vm.showFromNumerical = false;
-                        vm.showToNumerical = false;
-                        vm.numericalConfiguration = {
-                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
-                        };
-                        QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
-                        setTimeout(() => {
-                            showNumericalRange();
-                        }, 0);
-                        
-                    }
+                function convertEqualToCollection() {
+                    let map = {
+                        'EQUAL': 'IN_COLLECTION',
+                        'NOT_EQUAL': 'NOT_IN_COLLECTION'
+                    };
+                    let bucket = vm.tree.bucketRestriction.bkt;
+                    bucket.Cmp = map[bucket.Cmp] || bucket.Cmp;
                 }
 
-                vm.initVariables = function(){
-                    if(vm.showItem('Boolean') && !vm.showItem('Percent')){
-                        vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
-                    }
-                    if(vm.showItem('String')){
-                        vm.stringValue = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
-                        vm.stringCmpModel = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
-                    }
-                    if(vm.showItem('Enum')){
-                        vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
-                        vm.vals = vm.tree.bucketRestriction.bkt.Vals;
-                    }
-                    if(vm.showItem('Numerical')){
-                        vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                        vm.showFromNumerical = false;
-                        vm.showToNumerical = false;
-                        vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                        // setTimeout(() => {
-                            initNumericalRange();
-                        // });
-
-                    }
-                    if(vm.showItem('Date')){
-                        // console.log('=== DATE ===');
-                    }
-
-                    vm.string_operations = QueryTreeService.string_operations;
-                    // console.log(vm.string_operations);
-                   
-                };
-
-                vm.init = function () {
-                    // console.log('INIT ',vm.tree.bucketRestriction);
-                    setTimeout(() => {
-                        vm.initVariables();
-                    },0);
-                    
-                }
-                
                 vm.init();
-
-                vm.showInput = function(cmpModel) {
-                    return QueryTreeService.no_inputs.indexOf(cmpModel) < 0;
-                }
-
-
-                vm.clickEditMode = function(value) {
-                    vm.editMode = value;
-                    if(value !== 'Custom'){
-                        var bucket = vm.getCubeBktList()[0];
-                        if(bucket){
-                            vm.presetOperation = bucket.Lbl;
-                        }
-                        vm.changePreset(bucket);
-                    }else{
-                        QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
-                        vm.initVariables();
-                    }
-                }
-
-                vm.showNumericalFrom = function () {
-                    return vm.showFromNumerical;
-                }
-
-                vm.showNumericalTo = function () {
-                    return vm.showToNumerical;
-                }
-
-                vm.getForm = function () {
-                    return $scope.form;
-                }
-
-                vm.showEmptyOption = function () {
-                    return QueryTreeService.showEmptyOption(vm.tree.bucketRestriction);
-                }
-
-                vm.getOperationLabel = function () {
-                    return QueryTreeService.getOperationLabel(vm.type, vm.tree.bucketRestriction);
-                }
-
-                vm.getOperationValue = function (operatorType, position) {
-                    return QueryTreeService.getOperationValue(vm.tree.bucketRestriction, operatorType, position);
-                }
-
-                vm.showItem = function (typeToShow) {
-                    return QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
-                }
-
-                vm.showTo = function () {
-                    return QueryTreeService.showTo(vm.tree.bucketRestriction);
-                }
-
-                vm.changeBooleanValue = function () {
-                    vm.booleanChanged = true;
-                    QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, vm.booleanValue);
-                }
-
-                vm.changeEnumCmpValue = function () {
-                    switch (vm.enumCmpModel) {
-                        case 'IS_NULL':
-                        case 'IS_NOT_NULL': 
-                            vm.vals.length = 0;
-                            break;
-                    }
-                    QueryTreeService.changeEnumCmpValue(vm.tree.bucketRestriction, vm.enumCmpModel);
-                }
-
-                vm.getBktValue = function (position) {
-                    return QueryTreeService.getBktValue(vm.tree.bucketRestriction, position);
-                }
-                vm.getCubeBktList = function () {
-                    return QueryTreeService.getCubeBktList(vm.tree.bucketRestriction, vm.item.cube);
-                }
-
-                vm.changeNumericalCmpValue = function () {
-                    QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.numericalCmpModel);
-                    initNumericalRange(true);
-                }
-
-                vm.changeStringValue = function () {
-                    QueryTreeService.changeStringValue(vm.tree.bucketRestriction, vm.stringValue);
-                }
-
-                vm.changeStringCmpValue = function () {
-                    QueryTreeService.changeStringCmpValue(vm.tree.bucketRestriction, vm.stringCmpModel);
-                }
-
-                vm.changeBktVal = function (position) {
-                    var val = vm['bktVals' + position];
-                    QueryTreeService.changeBktValue(vm.tree.bucketRestriction, val, position);
-                }
-
-                vm.goToEnumPicker = function () {
-                    QueryTreeService.setPickerObject({
-                        item: vm.item,
-                        restriction: vm.tree
-                    });
-
-                    var state = vm.root.mode == 'rules'
-                        ? 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker'
-                        : (vm.root.mode == 'dashboardrules'
-                            ? 'home.ratingsengine.dashboard.segment.attributes.rules.picker'
-                            : 'home.segment.explorer.enumpicker');
-                    
-                    $state.go(state, { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
-                }
-
-                vm.isValid = function () {
-                    if($scope.form.$valid === true){
-                        QueryStore.setPublicProperty('enableSaveSegmentButton', true);
-                    }else {
-                        QueryStore.setPublicProperty('enableSaveSegmentButton', false);
-                    }
-                    return $scope.form.$valid;
-                }
-
-                vm.showUnsetButton = function(){
-                    if(vm.root.mode === 'rules' || vm.root.mode === 'dashboardrules'){
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                vm.getEntity = function(){
-                    return vm.item.Entity;
-                }
-
-                //================= Numerical ==============================
-
-                vm.getNumericalConfigString = function () {
-                    return vm.numericalConfiguration;
-                }
-
-                vm.callbackChangedNumericalValue = function (type, position, value) {
-                    QueryTreeService.changeValue(vm.tree.bucketRestriction, vm.type, value, position);
-                }
             }
         }
     });

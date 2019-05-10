@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -118,7 +119,6 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         cdlColumnSelectionService.setDataCollectionProxy(dataCollectionProxy);
     }
 
-    // FIXME re-enable this test after publication finishes
     @Test(groups = "functional")
     public void testCDLLookupByAccountId() {
         Object[][] data = new Object[][] { { 123, ACCOUNT_ID } };
@@ -172,6 +172,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         input.setPredefinedSelection(null);
         input.setCustomSelection(columnSelection);
         input.setDataCloudVersion(DATACLOUD_VERSION);
+        input.setOperationalMode(OperationalMode.CDL_LOOKUP);
         return input;
     }
 

@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import scala.concurrent.Future;
@@ -128,6 +129,10 @@ public class FuzzyMatchHelper implements DbHelper {
                 Map<String, Object> customAccount = cdlLookupService.lookup(dynamoDataUnits, lookupIdKey,
                         lookupIdValue);
                 if (MapUtils.isNotEmpty(customAccount)) {
+                    if (InterfaceName.AccountId.name().equals(record.getLookupIdKey())) {
+                        record.setEntityIds(new HashMap<>());
+                        record.getEntityIds().put(BusinessEntity.Account.name(), record.getLookupIdValue());
+                    }
                     record.setCustomAccount(customAccount);
                     String latticeAccountId = (String) customAccount.get(InterfaceName.LatticeAccountId.name());
                     if (StringUtils.isNotBlank(latticeAccountId)) {
@@ -137,7 +142,10 @@ public class FuzzyMatchHelper implements DbHelper {
                         record.setLatticeAccountId(inputId);
                     }
                 } else {
-                    record.addErrorMessages("Cannot find a custom account by " + lookupIdKey + "=" + lookupIdValue);
+                    record.setMatched(false);
+                    String msg = "Cannot find a custom account by " + lookupIdKey + "=" + lookupIdValue;
+                    record.addErrorMessages(msg);
+                    log.warn(msg);
                 }
             }
         }

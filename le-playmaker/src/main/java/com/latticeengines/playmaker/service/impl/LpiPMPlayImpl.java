@@ -1,6 +1,7 @@
 package com.latticeengines.playmaker.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,18 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     @Override
     public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds, int syncDestination,
             Map<String, String> orgInfo) {
+        List<LaunchSummary> summaries = getLaunchSummariesFromDashboard(latest, start, playIds, syncDestination, orgInfo);
+        if (CollectionUtils.isEmpty(summaries)) {
+            return Collections.EMPTY_LIST;
+        }
+        return summaries.stream().map(launchSummary -> launchSummary.getLaunchId()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LaunchSummary> getLaunchSummariesFromDashboard(boolean latest, long start, List<String> playIds,
+            int syncDestination, Map<String, String> orgInfo) {
+
+        List<LaunchSummary> filteredLaunchSummaries = new ArrayList<>();
         PlayLaunchDashboard dashboard;
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
@@ -112,13 +125,10 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                     effectiveOrgInfo.getRight());
         }
         if (dashboard == null) {
-            return null;
+            return filteredLaunchSummaries;
         }
-        List<LaunchSummary> summaries = dashboard.getLaunchSummaries();
-        List<String> launchIds = new ArrayList<String>();
-        if (CollectionUtils.isEmpty(summaries)) {
-            return null;
-        }
+        List<LaunchSummary> queriedSummaries = dashboard.getLaunchSummaries();
+
         Map<String, String> activePlays = new HashMap<String, String>();
         if (CollectionUtils.isNotEmpty(playIds)) {
             playIds.forEach(playId -> {
@@ -130,35 +140,35 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
         if (latest) {
             Map<String, String> match = new HashMap<String, String>();
-            summaries.stream().forEach(launch -> {
+            queriedSummaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (!match.containsKey(launch.getPlayName())) {
                         if (CollectionUtils.isNotEmpty(playIds)) {
                             if (activePlays.containsKey(launch.getPlayName())) {
                                 match.put(launch.getPlayName(), launch.getLaunchId());
-                                launchIds.add(launch.getLaunchId());
+                                filteredLaunchSummaries.add(launch);
                             }
                         } else {
                             match.put(launch.getPlayName(), launch.getLaunchId());
-                            launchIds.add(launch.getLaunchId());
+                            filteredLaunchSummaries.add(launch);
                         }
                     }
                 }
             });
         } else {
-            summaries.stream().forEach(launch -> {
+            queriedSummaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (CollectionUtils.isNotEmpty(playIds)) {
                         if (activePlays.containsKey(launch.getPlayName())) {
-                            launchIds.add(launch.getLaunchId());
+                            filteredLaunchSummaries.add(launch);
                         }
                     } else {
-                        launchIds.add(launch.getLaunchId());
+                        filteredLaunchSummaries.add(launch);
                     }
                 }
             });
         }
-        return launchIds;
+        return filteredLaunchSummaries;
     }
 
     private List<Map<String, Object>> getAllProducts() {

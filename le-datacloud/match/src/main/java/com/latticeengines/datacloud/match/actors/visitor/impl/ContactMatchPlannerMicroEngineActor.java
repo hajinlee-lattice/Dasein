@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -94,13 +96,13 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         List<Object> inputRecord = matchTraveler.getInputDataRecord();
         Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
-                .get(BusinessEntity.Contact.name());
+                .getOrDefault(BusinessEntity.Contact.name(), new HashMap<>());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForContact(inputRecord, keyPositionMap, entityMatchKeyRecord);
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createContactMatchKeyTuple(entityMatchKeyRecord);
-        Map<MatchKey, List<String>> keyMap = matchTraveler.getMatchInput().getEntityKeyMaps()
-                .get(BusinessEntity.Contact.name()).getKeyMap();
+        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(matchTraveler.getMatchInput(),
+                BusinessEntity.Contact.name());
         // MatchKeyTuple.SystemIds is updated during parsing
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);

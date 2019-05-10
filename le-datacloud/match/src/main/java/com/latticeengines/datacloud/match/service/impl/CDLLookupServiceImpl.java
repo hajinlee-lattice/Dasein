@@ -98,18 +98,27 @@ public class CDLLookupServiceImpl implements CDLLookupService {
 
         final List<ColumnSelection.Predefined> finalPredefinedList = new ArrayList<>(predefinedList);
         final Set<String> finalExtraColumns = new HashSet<>(extraColumns);
+        final Set<String> outputColumnNames = new HashSet<>();
         flux = flux.filter(cm -> {
-            boolean inExtraColumnList = finalExtraColumns.contains(cm.getAttrName());
-            boolean inPredefinedList = false;
-            if (CollectionUtils.isNotEmpty(finalPredefinedList)) {
-                for (ColumnSelection.Predefined predefined : finalPredefinedList) {
-                    if (cm.isEnabledFor(predefined)) {
-                        inPredefinedList = true;
-                        break;
+            boolean alreadyIncluded = outputColumnNames.contains(cm.getAttrName());
+            boolean shouldAdd = false;
+            if (!alreadyIncluded) {
+                boolean inExtraColumnList = finalExtraColumns.contains(cm.getAttrName());
+                boolean inPredefinedList = false;
+                if (CollectionUtils.isNotEmpty(finalPredefinedList)) {
+                    for (ColumnSelection.Predefined predefined : finalPredefinedList) {
+                        if (cm.isEnabledFor(predefined)) {
+                            inPredefinedList = true;
+                            break;
+                        }
                     }
                 }
+                shouldAdd = inExtraColumnList || inPredefinedList;
+                if (shouldAdd) {
+                    outputColumnNames.add(cm.getAttrName());
+                }
             }
-            return inExtraColumnList || inPredefinedList;
+            return shouldAdd;
         });
 
         return flux.collectList().block();
@@ -133,31 +142,6 @@ public class CDLLookupServiceImpl implements CDLLookupService {
                 TableRoleInCollection.CalculatedCuratedAccountAttribute //
         };
         return dataCollectionProxy.getDynamoDataUnits(customerSpace, version, Arrays.asList(tableRoles));
-    }
-
-
-    @Override
-    public Map<String, Object> lookup(DynamoDataUnit dynamoDataUnit, String lookupIdKey, String lookupIdValue) {
-        Map<String, Object> account = new HashMap<>();
-        if (dynamoDataUnit != null) {
-            GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(dynamoDataUnit.getSignature());
-            String tenantId = StringUtils.isNotBlank(dynamoDataUnit.getLinkedTenant())
-                    ? dynamoDataUnit.getLinkedTenant() : dynamoDataUnit.getTenant();
-            String tableName = StringUtils.isNotEmpty(dynamoDataUnit.getLinkedTable()) ? dynamoDataUnit.getLinkedTable()
-                    : dynamoDataUnit.getName();
-            if (InterfaceName.AccountId.name().equals(lookupIdKey)) {
-                Pair<String, String> keyPair = Pair.of(lookupIdValue, "0");
-                Map<String, Object> result = tableEntityMgr.getByKeyPair(tenantId, tableName, keyPair);
-                if (MapUtils.isNotEmpty(result)) {
-                    account.putAll(result);
-                }
-            } else {
-                throw new UnsupportedOperationException("Only support lookup by AccountId.");
-            }
-        } else {
-            log.info("No dynamo data unit found for custom account.");
-        }
-        return account;
     }
 
     @Override

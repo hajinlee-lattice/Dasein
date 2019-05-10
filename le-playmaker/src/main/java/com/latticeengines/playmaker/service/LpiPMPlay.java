@@ -3,6 +3,7 @@ package com.latticeengines.playmaker.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 
 public interface LpiPMPlay {
@@ -16,4 +17,7 @@ public interface LpiPMPlay {
 
     List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds, int syncDestination,
             Map<String, String> orgInfo);
+
+    List<LaunchSummary> getLaunchSummariesFromDashboard(boolean latest, long start, List<String> playIds,
+            int syncDestination, Map<String, String> orgInfo);
 }

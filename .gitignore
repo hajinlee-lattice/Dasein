@@ -38,6 +38,7 @@ jacoco/
 **/.sass-cache/**
 **/.vscode/
 **/storybook-static/
+**/test-output/
 **/uicomponents/.cache
 **/uicomponents/storybook-static/**
 

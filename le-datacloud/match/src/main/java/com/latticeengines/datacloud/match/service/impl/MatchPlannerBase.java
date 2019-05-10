@@ -251,10 +251,16 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     MatchContext scanEntityInputData(MatchInput input, MatchContext context) {
-        // EntityKeyMaps should be non-null, the EntityKeyMap for targetEntity should have a non-null entry since
-        // this was checked during validation.  The Key Map for this entry should be non-null since this was also
-        // checked.
+        // EntityKeyMaps should be non-null, the EntityKeyMap is allowed to be empty now
+        // since no fields are mandatory instantiate EntityKeyMap if it is not set
+        if (!input.getEntityKeyMaps().containsKey(input.getTargetEntity())) {
+            input.getEntityKeyMaps().put(input.getTargetEntity(), new MatchInput.EntityKeyMap());
+        }
         Map<MatchKey, List<String>> keyMap = input.getEntityKeyMaps().get(input.getTargetEntity()).getKeyMap();
+        if (MapUtils.isEmpty(keyMap)) {
+            keyMap = new HashMap<>();
+            input.getEntityKeyMaps().get(input.getTargetEntity()).setKeyMap(keyMap);
+        }
         Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps = MatchKeyUtils.getEntityKeyPositionMaps(input);
 
         Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(input.getTenant());

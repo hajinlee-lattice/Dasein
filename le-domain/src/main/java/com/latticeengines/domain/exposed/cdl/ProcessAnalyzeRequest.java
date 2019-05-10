@@ -47,6 +47,10 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("ForceRun")
     private Boolean forceRun;
 
+    // flag to indiate if it's auto-scheduled
+    @JsonProperty("AutoSchedule")
+    private Boolean autoSchedule;
+
     /*
      * flag to inherit all import actions from last failed PA
      */
@@ -64,6 +68,12 @@ public class ProcessAnalyzeRequest {
      */
     @JsonProperty("SkipPublishToS3")
     private Boolean skipPublishToS3;
+
+    /**
+     * Skip Export to Dynamo step. Mainly for QA
+     */
+    @JsonProperty("SkipDynamoExport")
+    private Boolean skipDynamoExport;
 
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
@@ -145,6 +155,14 @@ public class ProcessAnalyzeRequest {
         this.forceRun = forceRun;
     }
 
+    public Boolean getAutoSchedule() {
+        return autoSchedule;
+    }
+
+    public void setAutoSchedule(Boolean autoSchedule) {
+        this.autoSchedule = autoSchedule;
+    }
+
     public Boolean getFullRematch() {
         return fullRematch;
     }
@@ -159,5 +177,13 @@ public class ProcessAnalyzeRequest {
 
     public void setSkipPublishToS3(Boolean skipPublishToS3) {
         this.skipPublishToS3 = skipPublishToS3;
+    }
+
+    public Boolean getSkipDynamoExport() {
+        return skipDynamoExport;
+    }
+
+    public void setSkipDynamoExport(Boolean skipDynamoExport) {
+        this.skipDynamoExport = skipDynamoExport;
     }
 }

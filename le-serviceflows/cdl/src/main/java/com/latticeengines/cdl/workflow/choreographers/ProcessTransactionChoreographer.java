@@ -6,6 +6,8 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOME
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -200,8 +202,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
 
-        log.info(String.format("Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, " +
-                        "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b",
+        log.info(String.format(
+                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, "
+                        + "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b",
                 reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged));
 
         if (reset) {
@@ -221,6 +224,14 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             should = false;
         }
         return should;
+    }
+
+    @Override
+    protected Set<String> getExtraDecisions() {
+        TreeSet<String> decisions = new TreeSet<>();
+        decisions.add(isBusinessCalenderChanged ? "isBusinessCalenderChanged=true" : "");
+        decisions.add(hasRawStore && hasProducts && productChoreographer.hasChange ? "hasProductChange=true" : "");
+        return decisions;
     }
 
     @Override

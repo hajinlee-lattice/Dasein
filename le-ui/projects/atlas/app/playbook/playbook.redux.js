@@ -3,12 +3,17 @@ import Observer from "common/app/http/observer";
 import { store } from 'store';
 
 var CONST = {
+    FETCHING: 'FETCHING',
     FETCH_PLAY: 'FETCH_PLAY',
     FETCH_PLAYS: 'FETCH_PLAYS',
     FETCH_CONNECTIONS: 'FETCH_CONNECTIONS',
     FETCH_RATINGS: 'FETCH_RATINGS',
     SAVE_LAUNCH: 'SAVE_LAUNCH',
-    SAVE_PLAY: 'SAVE_PLAY'
+    SAVE_PLAY: 'SAVE_PLAY',
+    ACCOUNTS_COVERAGE: 'ACCOUNTS_COVERAGE',
+    EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID: 'EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID',
+    DESTINATION_ACCOUNT_ID: 'DESTINATION_ACCOUNT_ID',
+    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE'
 }
 
 const initialState = {
@@ -16,10 +21,20 @@ const initialState = {
     plays: null,
     connections: null,
     ratings: null,
-    saveLaunch: null
+    saveLaunch: null,
+    accountsCoverage: null,
+    excludeItemsWithoutSalesforceId: null,
+    destinationAccountId: null,
+    playbookWizardStore: null
 };
 
 export const actions = {
+    addPlaybookWizardStore: (playbookWizardStore) => {
+        store.dispatch({
+            type: CONST.ADD_PLAYBOOKWIZARDSTORE,
+            payload: playbookWizardStore
+        });
+    },
     fetchPlay: (play_name, deferred) => {
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
@@ -63,6 +78,10 @@ export const actions = {
         httpService.get(`/pls/play/${play_name}/launches/configurations`, observer, {});
     },
     fetchRatings: (ratingEngineIds, restrictNotNullSalesforceId, deferred) => {
+        let playstore = store.getState()['playbook'];
+        if(playstore.ratings) {
+            return false;
+        }
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
             response => {
@@ -78,22 +97,6 @@ export const actions = {
             ratingEngineIds: ratingEngineIds,
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
-    },
-    storePlay: (opts) => {
-        // do we have client session in react?
-        // pass it via angular maybe
-        return false;
-        var deferred = $q.defer();
-        var ClientSession = window.BrowserStorageUtility.getClientSession();
-        opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
-        opts.updatedBy = ClientSession.EmailAddress;
-
-        // how to call savePlay?
-        PlaybookWizardService.savePlay(opts).then(function(data){
-            PlaybookWizardStore.setPlay(data);
-            deferred.resolve(data);
-        });
-        return deferred.promise;
     },
     savePlay: (opts) => {
         deferred = deferred || { resolve: (data) => data }
@@ -112,36 +115,73 @@ export const actions = {
         );
         httpService.post(`/pls/play/`, opts, observer, {});
     },
-    saveLaunch: (play_name, opts, deferred) => {
-        console.log(play_name, opts);
-        return false;
+    savePlayLaunch: (play_name, opts) => {
         var ClientSession = window.BrowserStorageUtility.getClientSession();
-        console.log(ClientSession);
-        console.log(play_name, opts, store.getState().playbook);
-        return false;
-        deferred = deferred || { resolve: (data) => data }
 
+        http.post(`/pls/play/`, {
+            name: play_name,
+            ratingEngine: {
+                id: opts.engineId
+            },
+            createdBy: opts.createdBy || ClientSession.EmailAddress,
+            updatedBy: ClientSession.EmailAddress
+        }).then((response) => {
+            store.dispatch({
+                type: CONST.SAVE_PLAY,
+                payload: response.data
+            });
+            actions.saveLaunch(play_name, opts);
+        });
+    },
+    saveLaunch: (play_name, opts, cb) => {
         var opts = opts || {},
             launch_id = opts.launch_id || '',
             action = opts.action || '',
-            launchObj = opts.launchObj || '';
+            launchObj = opts.launchObj || '',
+            save = opts.save || false,
+            getUrl = function(play_name, launch_id, action) {
+                return '/pls/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : '');
+            };
 
-        let observer = new Observer(
-            response => {
-                httpService.unsubscribeObservable(observer);
-                store.dispatch({
-                    type: CONST.SAVE_LAUNCH,
-                    payload: response.data
+        http.post(getUrl(play_name, launch_id, action), launchObj).then((response) => {
+            if(save) {
+                http.post(getUrl(play_name, response.data.launchId, 'launch')).then((response) => {
+                    store.dispatch({
+                        type: CONST.SAVE_LAUNCH,
+                        payload: response.data
+                    });
+                    if(cb && typeof cb === 'function') {
+                        cb();
+                    }
+                }, function(err) {
+                    if(cb && typeof cb === 'function') {
+                        cb();
+                    }
                 });
-                return deferred.resolve(response.data);
-            }
-        );
-        httpService.post('/pls/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : ''), launchObj, observer, {});
+            } 
+        });
+    },
+    excludeItemsWithoutSalesforceId: (bool) => {
+        store.dispatch({
+            type: CONST.EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID,
+            payload: bool
+        });
+    },
+    destinationAccountId: (id) => {
+        store.dispatch({
+            type: CONST.DESTINATION_ACCOUNT_ID,
+            payload: id
+        });
     }
 };
 
 export const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case CONST.ADD_PLAYBOOKWIZARDSTORE:
+            return {
+                ...state,
+                playbookWizardStore: action.payload
+            }
         case CONST.FETCH_PLAY:
             return {
                 ...state,
@@ -171,6 +211,21 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 play: action.payload
+            }
+        case CONST.ACCOUNTS_COVERAGE:
+            return {
+                ...state,
+                accountsCoverage: action.payload
+            }
+        case CONST.EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID:
+            return {
+                ...state,
+                excludeItemsWithoutSalesforceId: action.payload
+            }
+        case CONST.DESTINATION_ACCOUNT_ID:
+            return {
+                ...state,
+                destinationAccountId: action.payload
             }
         default:
             return state;

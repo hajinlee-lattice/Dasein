@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -132,19 +133,25 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
             @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo) {
         String filePath = "";
         if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
-                filePath = csvImportFileInfo.getReportFilePath();
+            filePath = csvImportFileInfo.getReportFilePath();
+        }
+
+        String warning = "";
+        if (StringUtils.isNotEmpty(csvImportFileInfo.getReportWarning())) {
+            warning = csvImportFileInfo.getReportWarning();
         }
 
         String emailInfoStr = "";
         if (s3ImportEmail && emailInfo != null) {
             emailInfoStr = JsonUtils.serialize(emailInfo);
         }
+        BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
         return new CDLDataFeedImportWorkflowConfiguration.Builder() //
                 .customer(customerSpace) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
-                .fileValidation(dataFeedTask.getTemplateDisplayName()) //
+                .fileValidation(entity) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
                 .inputProperties(ImmutableMap.<String, String>builder()
@@ -153,6 +160,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                                 csvImportFileInfo.getReportFileDisplayName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, filePath)
+                        .put(WorkflowContextConstants.Inputs.REPORT_WARNING, warning)
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))//
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO, emailInfoStr)

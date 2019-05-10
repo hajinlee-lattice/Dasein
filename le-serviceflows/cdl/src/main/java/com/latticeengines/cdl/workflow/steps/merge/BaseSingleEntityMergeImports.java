@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -144,7 +146,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig upsertMaster(boolean entityMatch, String matchedTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, matchedTable);
-        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         setTargetTable(step, batchStoreTablePrefix);
         UpsertConfig config = getUpsertConfig(entityMatch, false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -230,6 +232,18 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 .stream() //
                 .map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toSet());
+    }
+
+    protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
+        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
+        DynamoExportConfig config = new DynamoExportConfig();
+        config.setTableName(tableName);
+        config.setInputPath(PathUtils.toAvroGlob(inputPath));
+        config.setPartitionKey(partitionKey);
+        if (StringUtils.isNotBlank(sortKey)) {
+            config.setSortKey(sortKey);
+        }
+        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     protected void enrichTableSchema(Table table) {

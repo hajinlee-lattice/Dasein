@@ -103,8 +103,8 @@ public abstract class RatingEngineTemplate {
 
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
-            Boolean completed = ratingEngineSummary.getScoringIterationId() != null || //
-                    ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
+            Boolean completed = ratingEngine.getLatestIteration().getIteration() != 1
+                    || ((AIModel) ratingEngine.getLatestIteration()).getModelingJobStatus() != JobStatus.PENDING;
             ratingEngineSummary.setCompleted(completed);
         } else if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             ratingEngineSummary.setCompleted(true);

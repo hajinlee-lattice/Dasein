@@ -1,4 +1,4 @@
-import React, { Component, react2angular } from "common/react-vendor";
+import React, { Component } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import LeVPanel from "common/widgets/container/le-v-panel";

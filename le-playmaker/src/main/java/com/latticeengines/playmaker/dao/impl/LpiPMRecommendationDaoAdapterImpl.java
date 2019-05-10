@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -162,23 +163,21 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         //log.info("Atlas getContacts: " + orgInfo.toString() + "\t" + appId.toString() + "\n");
         List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, playIds, 0, orgInfo);
         //log.info("Atlas get accountIds: " + launchIds + "\n");
-        List<Map<String, Object>> contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, start, accountIds);
-        //log.info("Atlas queried contacts : " + contactList );
-        if (CollectionUtils.isNotEmpty(contactList)) {
-            contactList = contactList.subList(Math.min(contactList.size() - 1, offset),
-                    Math.min(maximum, contactList.size()));
-        }
-        //log.info("Atlas reply contacts : " + contactList + "\n");
+        List<Map<String, Object>> contactList = recommendationEntityMgr.findContactsByLaunchIds(launchIds, start, offset, maximum, accountIds);
         return contactList;
     }
 
     @Override
     public long getContactCount(long start, List<String> contactIds, List<String> accountIds, Long recStart,
             List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
-        int result = 0;
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(true, start, playIds, 0, orgInfo);
-        result = recommendationEntityMgr.findContactsCountByLaunchIds(launchIds, start, accountIds);
-        return result;
+        List<LaunchSummary> launchSummaries = lpiPMPlay.getLaunchSummariesFromDashboard(true, start, playIds, 0,
+                orgInfo);
+        if (CollectionUtils.isEmpty(launchSummaries)) {
+            return 0;
+        }
+        return launchSummaries.stream()
+                .map(launchSummary -> launchSummary.getStats().getContactsWithinRecommendations()).reduce(0L, Long::sum)
+                .longValue();
     }
 
     @Override

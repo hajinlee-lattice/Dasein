@@ -39,13 +39,13 @@ angular
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
-                
-                function validateMainConfig(){
+
+                function validateMainConfig() {
                     $scope.conf = {};
-                    if($scope.mainconfig){
+                    if ($scope.mainconfig) {
                         var tmp = JSON.parse($scope.mainconfig);
-                        $scope.conf.debounce = (tmp.debounce ? tmp.debounce: 500);
-                    }else {
+                        $scope.conf.debounce = (tmp.debounce ? tmp.debounce : 500);
+                    } else {
                         $scope.conf.debounce = 500;
                     }
                 }
@@ -53,17 +53,17 @@ angular
                 $scope.init = function () {
                     validateMainConfig();
                     var conf = $scope.config;
-                    if($scope.initialvalidation === undefined){
+                    if ($scope.initialvalidation === undefined) {
                         $scope.initialvalidation = true;
-                    }else {
+                    } else {
                         $scope.initialvalidation = !!$scope.initialvalidation;
                     }
-                    if($scope.fromdisabled === undefined){
+                    if ($scope.fromdisabled === undefined) {
                         $scope.fromdisabled = false;
-                    }else{
+                    } else {
                         $scope.fromdisabled = !!$scope.fromdisabled;
                     }
-                    if($scope.todisabled === undefined){
+                    if ($scope.todisabled === undefined) {
                         $scope.todisabled = false;
                     } else {
                         $scope.todisabled = !!$scope.todisabled;
@@ -72,7 +72,7 @@ angular
                     $scope.values = JSON.parse($scope.config);
                 }
 
-                $scope.getSteps = function(position){
+                $scope.getSteps = function (position) {
                     var conf = getConfigField(position);
                     return conf.step ? conf.step : 0.1;
                 }
@@ -88,7 +88,7 @@ angular
                     if (!$scope.showFrom() || !$scope.showTo()) {
                         return conf.min != undefined ? conf.min : '';
                     }
-                    
+
                     switch (conf.position) {
                         case 0: {
                             return conf.min != undefined ? conf.min : '';
@@ -115,13 +115,13 @@ angular
                  * @param {*} position 
                  */
                 $scope.getMaxVal = function (position) {
-                    
+
                     var conf = getConfigField(position);
 
                     if (!$scope.showFrom() || !$scope.showTo()) {
                         return conf.max != undefined ? conf.max : '';
                     }
-                    
+
                     switch (conf.position) {
                         case 0: {
                             var toVal = $scope.values.to.value;
@@ -224,30 +224,28 @@ angular
                 $scope.isValValid = function (position) {
                     var conf = getConfigField(position);
                     var valid = true;
-                    if($scope.form[conf.name]){
-                        // console.log($scope.form[conf.name]);
-                        if ($scope.form[conf.name].$dirty === true || 
+                    if ($scope.form[conf.name]) {
+                        if ($scope.form[conf.name].$dirty === true ||
                             ($scope.form[conf.name].$dirty === false) && $scope.initialvalidation === true) {
                             valid = $scope.form[conf.name].$valid;
                         }
                     }
-                    // console.log(valid);
                     return valid;
                 }
 
-                $scope.getErrorMsg = function(){
-                    if($scope.showFrom() && $scope.showTo()){
+                $scope.getErrorMsg = function () {
+                    if ($scope.showFrom() && $scope.showTo()) {
                         return 'Enter a valid range';
-                    }else {
+                    } else {
                         return 'Enter a valid number';
                     }
                 }
 
-                $scope.showErrorMessage = function() {
+                $scope.showErrorMessage = function () {
                     var ret = false;
                     var show = $scope.showmessage != undefined ? $scope.showmessage : true;
 
-                    if(show && !$scope.isValValid(0) || !$scope.isValValid(1)){
+                    if (show && !$scope.isValValid(0) || !$scope.isValValid(1)) {
                         ret = true;
                     }
                     return ret;
@@ -259,11 +257,11 @@ angular
                  * This is going to be transformed into \d*
                  * @param {*} position 
                  */
-                $scope.getPattern = function(position){
+                $scope.getPattern = function (position) {
                     var conf = getConfigField(position);
-                    if(conf.pattern !== undefined){
+                    if (conf.pattern !== undefined) {
                         return conf.pattern;
-                    }else {
+                    } else {
                         return '';
                     }
                 }

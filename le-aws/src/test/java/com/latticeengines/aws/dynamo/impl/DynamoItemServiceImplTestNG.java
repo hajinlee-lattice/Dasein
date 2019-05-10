@@ -48,22 +48,19 @@ public class DynamoItemServiceImplTestNG extends AbstractTestNGSpringContextTest
 
         long readCapacityUnits = 10;
         long writeCapacityUnits = 10;
-        String partitionKeyName = PARTITION_KEY;
         String partitionKeyType = ScalarAttributeType.S.name();
-        String sortKeyName = SORT_KEY;
         String sortKeyType = ScalarAttributeType.S.name();
-
-        dynamoService.createTable(tableName, readCapacityUnits, writeCapacityUnits, partitionKeyName, partitionKeyType,
-                sortKeyName, sortKeyType);
+        dynamoService.createTable(tableName, readCapacityUnits, writeCapacityUnits, PARTITION_KEY, partitionKeyType,
+                SORT_KEY, sortKeyType);
     }
 
     @AfterClass(groups = "functional")
     private void teardown() {
-        // dynamoService.deleteTable(tableName);
+//         dynamoService.deleteTable(tableName);
     }
 
     @Test(groups = "functional")
-    public void testDynamoCrud() {
+    public void testDynamoCrud() throws InterruptedException {
         Assert.assertTrue(true);
         List<Item> itemList = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -74,7 +71,6 @@ public class DynamoItemServiceImplTestNG extends AbstractTestNGSpringContextTest
         }
         dynamoItemService.batchWrite(tableName, itemList);
 
-
         List<PrimaryKey> pks = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             String pid = String.valueOf(i / 10);
@@ -83,7 +79,7 @@ public class DynamoItemServiceImplTestNG extends AbstractTestNGSpringContextTest
             pks.add(pk);
         }
         List<Item> retrieved = dynamoItemService.batchGet(tableName, pks);
-        Assert.assertEquals(retrieved.size(), 200);
+        Assert.assertEquals(retrieved.size(), 100);
     }
 
     private Item createItem(String pid, String sid, String value) {

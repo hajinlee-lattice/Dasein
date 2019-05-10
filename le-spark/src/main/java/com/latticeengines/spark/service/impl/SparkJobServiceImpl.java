@@ -171,7 +171,7 @@ public class SparkJobServiceImpl implements SparkJobService {
         for (String line : (Iterable<String>) () -> lineIterator) {
             lines.add(line);
             if (CELL_BREAKER_SCALA.equals(line) || CELL_BREAKER_PYTHON.equals(line)) {
-                log.info("Found a cell breaker, going to submit " + CollectionUtils.size(lines) //
+                log.info("Find a cell breaker, going to submit " + CollectionUtils.size(lines) //
                         + " lines as one statement to spark.");
                 output = submitLines(client, lines);
                 lines.clear();

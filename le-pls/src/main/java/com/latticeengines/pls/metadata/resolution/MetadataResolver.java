@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -583,6 +584,10 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
+                Matcher dateTimeMatcher = TimeStampConvertUtils.TZ_DATE_TIME.matcher(columnField);
+                if (dateTimeMatcher.find()) {
+                    columnField = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+                }
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime == null) {
                     return false;
@@ -604,6 +609,10 @@ public class MetadataResolver {
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
+                Matcher dateTimeMatcher = TimeStampConvertUtils.TZ_DATE_TIME.matcher(columnField);
+                if (dateTimeMatcher.find()) {
+                    columnField = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+                }
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;

@@ -152,8 +152,10 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 tempTables.removeAll(tablesInCollection);
             }
             tempTables.forEach(table -> {
-                log.info("Removing orphan table " + table);
-                metadataProxy.deleteTable(customerSpace.toString(), table);
+                if (StringUtils.isNotBlank(table)) {
+                    log.info("Removing orphan table " + table);
+                    metadataProxy.deleteTable(customerSpace.toString(), table);
+                }
             });
         }
     }

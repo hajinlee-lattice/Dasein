@@ -19,16 +19,24 @@ class ConnectorService {
             };
             this._connectors = {
                 Salesforce: {
+                    defaultConnector: false,
                     name: 'Salesforce',
                     config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive recommendations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' }
                 },
                 Marketo: {
+                    defaultConnector: false,
                     name: 'Marketo',
                     config: { img: '/atlas/assets/images/logo_marketo_2.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' }
                 },
                 Eloqua: {
+                    defaultConnector: false,
                     name: 'Eloqua',
                     config: { img: '/atlas/assets/images/eloqua.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' }
+                },
+                AWS_S3: {
+                    defaultConnector: true,
+                    name: 'AWS_S3',
+                    config: { img: '/atlas/assets/images/amazon-s3.png', text: '' }
                 }
             };
             this._connectorsList = [
@@ -40,7 +48,12 @@ class ConnectorService {
     }
     getImgByConnector(connectorName) {
         let element = this._connectors[connectorName];
-        return element.config.img;
+        // console.log('CN ',connectorName, element);
+        if(element){
+            return element.config.img;
+        }else{
+            return '';
+        }
     }
     getConnectorCreationTitle(otherTxt) {
         switch (this.connectorInfo.name) {
@@ -85,9 +98,9 @@ class ConnectorService {
         if (this._connectorsList.length == 0) {
             Object.keys(this._connectors).forEach(element => {
                 let el = this._connectors[element];
-                if (element !== MARKETO && el) {
+                if (element !== MARKETO && el && el.defaultConnector == false) {
                     this._connectorsList.push(this._connectors[element]);
-                } else if (markettoEnabled && el) {
+                } else if (markettoEnabled && el && el.defaultConnector == false) {
                     this._connectorsList.push(this._connectors[element]);
                 }
             });

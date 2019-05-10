@@ -78,7 +78,7 @@ public class SparkSQLQueryTester {
     }
 
     private void setupLivyEnvironment() {
-        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, null);
+        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, true, null);
     }
 
     private void reuseLivyEnvironment(int sessionId) {
@@ -108,10 +108,6 @@ public class SparkSQLQueryTester {
         return sparkSQLService.getData(customerSpace, session, sql, null);
     }
 
-    public long getCountFromSpark(String queryString) {
-        return sparkSQLService.getCount(customerSpace, session, queryString);
-    }
-
     public HdfsDataUnit getDataFromSpark(String queryString) {
         return sparkSQLService.getData(customerSpace, session, queryString, null);
     }
@@ -124,7 +120,7 @@ public class SparkSQLQueryTester {
             Map<String, Object> row = new HashMap<>();
             for (Field field: record.getSchema().getFields()) {
                 Object value = record.get(field.name());
-                if (value != null && value instanceof Utf8) {
+                if (value instanceof Utf8) {
                     value = ((Utf8)value).toString();
                 }
                 row.put(field.name(), value);

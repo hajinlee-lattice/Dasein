@@ -42,6 +42,7 @@ export default class TemplatesComponent extends Component {
         super(props);
 
         this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
+        this.TemplatesStore = ReactRouter.getRouter().ngservices.TemplatesStore;
 
         this.emailCredentialConfig = {
             label: "Setup Automation",
@@ -455,17 +456,18 @@ export default class TemplatesComponent extends Component {
                                 name="credentials"
                                 config={this.emailCredentialConfig}
                                 callback={() => {
-                                    httpService.get(
-                                        "/pls/dropbox",
-                                        new Observer(response => {
-                                            // console.log("BACK HERE ", response);
-                                        }),
-                                        {
-                                            ErrorDisplayMethod: "Banner",
-                                            ErrorDisplayOptions: '{"title": "Warning"}',
-                                            ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                                        }
-                                    );
+                                    this.TemplatesStore.newToken();
+                                    // httpService.get(
+                                    //     "/pls/dropbox",
+                                    //     new Observer(response => {
+                                    //         // console.log("BACK HERE ", response);
+                                    //     }),
+                                    //     {
+                                    //         ErrorDisplayMethod: "Banner",
+                                    //         ErrorDisplayOptions: '{"title": "Warning"}',
+                                    //         ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
+                                    //     }
+                                    // );
                                 }}
                             />
                         </div>

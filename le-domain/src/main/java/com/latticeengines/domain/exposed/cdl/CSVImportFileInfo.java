@@ -17,6 +17,12 @@ public class CSVImportFileInfo {
     @JsonProperty("report_file_path")
     private String reportFilePath;
 
+    @JsonProperty("partial_file")
+    private boolean partialFile = false;
+
+    @JsonProperty("report_warning")
+    private String reportWarning;
+
     public String getFileUploadInitiator() {
         return this.fileUploadInitiator;
     }
@@ -49,9 +55,24 @@ public class CSVImportFileInfo {
         this.reportFilePath = reportFilePath;
     }
 
+    public String getReportWarning() {
+        return reportWarning;
+    }
+
+    public void setReportWarning(String reportWarning) {
+        this.reportWarning = reportWarning;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
 
+    public boolean isPartialFile() {
+        return partialFile;
+    }
+
+    public void setPartialFile(boolean partialFile) {
+        this.partialFile = partialFile;
+    }
 }

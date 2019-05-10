@@ -1,9 +1,9 @@
-import React, { Component, react2angular } from "common/react-vendor";
-import { store, injectAsyncReducer } from 'store';
-import { actions, reducer } from '../../playbook.redux';
-import './overview.component.scss';
+import React, { Component } from "common/react-vendor";
+import { store } from 'store';
+import { actions } from '../../playbook.redux';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
+import NgState from "atlas/ng-state";
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
 import GridLayout from 'common/widgets/container/grid-layout.component';
@@ -21,6 +21,7 @@ import {
     SPACEBETWEEN,
     SPACEEVEN
 } from "common/widgets/container/le-alignments";
+import './overview.component.scss';
 
 export default class OverviewComponent extends Component {
     constructor(props) {
@@ -32,11 +33,10 @@ export default class OverviewComponent extends Component {
     }
 
     componentDidMount() {
-        // injectAsyncReducer(store, 'playbook', reducer);
         let playstore = store.getState()['playbook'];
 
-        //actions.fetchPlay(playstore.play.name);
         actions.fetchConnections(playstore.play.name);
+        actions.addPlaybookWizardStore(this.props.PlaybookWizardStore);
 
         this.unsubscribe = store.subscribe(this.handleChange);
     }
@@ -51,28 +51,45 @@ export default class OverviewComponent extends Component {
         //console.log('handleChange', state);
     }
 
+    goto = (route, params) => {
+        //ngState.getAngularState().go(route, params)
+    }
     makeTalkingpoints(play) {
         if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
             return (
                 <div className="talking-points">
-                    <a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create Talking Points</a>
+                    <a href="javascript:void(0);" onClick={() => {
+                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
+                    }}>Create Talking Points</a>
                     No talking points
                 </div>
             );
         } else {
             return (
                 <div className="talking-points">
-                    <a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit Talking points</a>
+                    <a href="javascript:void(0);" onClick={() => {
+                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
+                    }}>Edit Talking points</a>
                     {play.talkingPoints.length} talking points have been created
                 </div>
             );
         }
     }
 
+    launchHistoryLink(play) {
+        if(play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || (play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState)) {
+            return(
+                <a href="javascript:void(0);" onClick={() => {
+                    NgState.getAngularState().go('home.playbook.dashboard.launchhistory', {play_name: play.name}); 
+                }}><span class="ico ico-cog ico-black"></span> Launch History</a>
+            );
+        }
+    }
     render() {
         if (this.state.play) {
             return (
-                <ReactMainContainer className={'container playbook-overview'}>
+                <ReactMainContainer className={'container playbook-overview show-spinner'}>
+                    <div className="launch-history">{this.launchHistoryLink(this.state.play)}</div>
                     <LeHPanel hstretch={"true"} vstretch={"true"}>
                         <div class="systems-component">
                             <SystemsComponent play={this.state.play} connections={this.state.connections} />
@@ -94,16 +111,9 @@ export default class OverviewComponent extends Component {
         } else {
             return (
                 <ReactMainContainer className={'container playbook-overview'}>
-                    loading...
+                    <p>Loading...</p>
                 </ReactMainContainer>
             );
         }
     }
 }
-
-// angular
-//     .module("lp.playbook.overview", [])
-//     .component(
-//         "playbookOverview",
-//         react2angular(OverviewComponent, ['play', 'connections'], ['$state', '$stateParams'])
-//     );

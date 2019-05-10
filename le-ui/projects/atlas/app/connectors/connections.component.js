@@ -37,7 +37,7 @@ export default class ConnectionsComponent extends Component {
             solutionInstanceId: null,
             openModal: false
         };
-        this.connectors = this.connectors = ConnectorService.getList(this.ConnectorsService.isMarketoEnabled());
+        this.connectors = ConnectorService.getList(this.ConnectorsService.isMarketoEnabled());
         // console.log('UUUUUUU ',ReactRouter.getRouter().ngservices.ConnectorsService.isMarketoEnabled());
     }
 

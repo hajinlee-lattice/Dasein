@@ -51,7 +51,7 @@
                         <select class="audience-dropdown" ng-model="$ctrl.listSelection" ng-options="list.name for list in $ctrl.staticLists | orderBy:'name'" ng-change="$ctrl.updateListSelection()" ng-class="{'disabled': $ctrl.loadingLists || !$ctrl.programName}">
                             <option value="" ng-selected="$ctrl.createNewList"> ------ Create new list ------ </option>
                         </select>
-                        <input type="text" ng-if="$ctrl.createNewList" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updateAudienceName()" maxlength="255">
+                        <input type="text" ng-if="$ctrl.createNewList" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updatePlayStore()" maxlength="255">
                     </td>
                 </tr>
             </tbody>

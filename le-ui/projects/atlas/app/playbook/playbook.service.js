@@ -1,6 +1,7 @@
 angular.module('lp.playbook')
 .service('PlaybookWizardStore', function($q, $state, $stateParams,  $interval,
-    PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore){
+    PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility, RatingsEngineStore, QueryStore){
+
     var PlaybookWizardStore = this;
 
     this.current = {
@@ -35,7 +36,7 @@ angular.module('lp.playbook')
                 bucketCoverageCounts: []
             }
         }
-         return ret;  
+        return ret;  
     }
 
     this.init = function() {
@@ -850,6 +851,88 @@ angular.module('lp.playbook')
 
     this.isExternallyAuthenticatedOrg = function() {
         return this.externalSystemAuthentication && this.externalSystemAuthentication.trayAuthenticationId;
+    }
+
+    this.launchAccountsCoverage = function(play_name, opts) {
+        var deferred = $q.defer(),
+            play_name = play_name || $stateParams.play_name,
+            sendEngineId = opts.sendEngineId,
+            getExcludeItems = opts.getExcludeItems || PlaybookWizardStore.getExcludeItems(),
+            getDestinationAccountId = opts.getDestinationAccountId ||  PlaybookWizardStore.getDestinationAccountId();
+
+        PlaybookWizardStore.getPlay(play_name, true).then(function (data) {
+            if (data.ratingEngine && data.ratingEngine.id) {
+                var engineId = data.ratingEngine.id,
+                    engineIdObject = [{ id: engineId }],
+                    getExcludeItems = getExcludeItems,
+                    getSegmentsOpts = {
+                        loadContactsCount: true,
+                        loadContactsCountByBucket: true
+                    };
+
+                if (getExcludeItems) {
+                    getSegmentsOpts.lookupId = getDestinationAccountId;
+                    getSegmentsOpts.restrictNullLookupId = true;
+                }
+
+                var segmentName = PlaybookWizardStore.getCurrentPlay().targetSegment.name;
+                PlaybookWizardService.getRatingSegmentCounts(segmentName, [engineId], getSegmentsOpts).then(function (result) {
+                    var accountsCoverage = {};
+                    accountsCoverage.errorMap = result.errorMap;
+                    accountsCoverage.ratingModelsCoverageMap = result.ratingModelsCoverageMap[Object.keys(result.ratingModelsCoverageMap)[0]];
+                    if(sendEngineId) {
+                        accountsCoverage.engineId = engineId;
+                    }
+                    deferred.resolve(accountsCoverage);
+                });
+            } else {
+                var segment = PlaybookWizardStore.getCurrentPlay().targetSegment;
+                if (getExcludeItems) {
+                    var accountId = PlaybookWizardStore.crmselection_form.crm_selection.accountId,
+                        template = {
+                            account_restriction: {
+                                restriction: {
+                                    logicalRestriction: {
+                                        operator: "AND",
+                                        restrictions: []
+                                    }
+                                }
+                            },
+                            page_filter: {
+                                num_rows: 10,
+                                row_offset: 0
+                            }
+                        };
+                    template.account_restriction.restriction.logicalRestriction.restrictions.push(segment.account_restriction.restriction);
+                    template.account_restriction.restriction.logicalRestriction.restrictions.push({
+                        bucketRestriction: {
+                            attr: 'Account.' + accountId,
+                            bkt: {
+                                Cmp: 'IS_NOT_NULL',
+                                Id: 1,
+                                ignored: false,
+                                Vals: []
+                            }
+                        }
+                    });
+                    QueryStore.getEntitiesCounts(template).then(function (result) {
+                        deferred.resolve(
+                            PlaybookWizardStore.getCoverageMap({
+                                accounts: result.Account || 0,
+                                contacts: result.Contact || 0,
+                            }));
+                    });
+                }
+                else {
+                    deferred.resolve(
+                        PlaybookWizardStore.getCoverageMap({
+                            accounts: segment.accounts || 0,
+                            contacts: segment.contacts || 0
+                        }));
+                }
+            }
+        });
+        return deferred.promise;
     }
 
 })

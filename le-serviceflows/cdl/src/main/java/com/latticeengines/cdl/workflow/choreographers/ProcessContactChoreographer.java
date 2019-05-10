@@ -2,6 +2,9 @@ package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -119,6 +122,15 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
+    protected Set<String> getExtraDecisions() {
+        TreeSet<String> decisions = new TreeSet<>();
+        decisions.add(hasAttrLifeCycleChange ? "hasAttrLifeCycleChange=true" : "");
+        decisions.add(accountChoreographer.hasNonTrivialChange() ? "hasNonTrivialChange=true" : "");
+        decisions.add(hasAccounts && !hasActiveServingStore ? "hasNoActiveServingStore=true" : "");
+        return decisions;
+    }
+
+    @Override
     protected boolean shouldUpdate() {
         if (!hasAccounts) {
             log.info("Should not update, since no accounts.");
@@ -127,7 +139,6 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
             return super.shouldUpdate();
         }
     }
-
 
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {

@@ -84,7 +84,9 @@ public class Bucket implements Serializable {
     }
 
     public static Bucket nullBkt() {
-        return new Bucket();
+        Bucket bucket = new Bucket();
+        bucket.setComparisonType(ComparisonType.IS_NULL);
+        return bucket;
     }
 
     public static Bucket notNullBkt() {

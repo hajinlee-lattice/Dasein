@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -31,16 +32,22 @@ import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
+import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -74,6 +81,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
+    static LinkedHashMap<String, String> EXPORT_APPID_MAP;
+
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
@@ -91,6 +100,12 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private AtlasSchedulingService atlasSchedulingService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
@@ -137,6 +152,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 return System.currentTimeMillis() - eldest.getValue() > TimeUnit.HOURS.toMillis(2);
             }
         };
+        EXPORT_APPID_MAP = new LinkedHashMap<>();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -165,6 +181,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             } catch (Exception e) {
                 log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
+                throw e;
+            }
+        } else if (cdlJobType == CDLJobType.EXPORT) {
+            try {
+                exportScheduleJob();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.EXPORT failed" + e);
                 throw e;
             }
         }
@@ -410,7 +433,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             } else {
                 ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
-
+                request.setAutoSchedule(true);
                 applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
             }
             appIdMap.put(applicationId.toString(), System.currentTimeMillis());
@@ -482,5 +505,126 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         return false;
+    }
+
+    private void exportScheduleJob() {
+        updateExportAppIdMap();
+        List<AtlasScheduling> atlasSchedulingList =
+                atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
+        log.info(JsonUtils.serialize(atlasSchedulingList));
+        if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
+            log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
+            for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
+                Tenant tenant = atlasScheduling.getTenant();
+                String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
+                boolean allowAutoSchedule = false;
+                try {
+                    allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
+                            LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+                } catch (Exception e) {
+                    log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+                }
+                if (allowAutoSchedule) {
+                    Long nextFireTime =
+                            CronUtils.getNextFireTime(atlasScheduling.getCronExpression()).getMillis() / 1000;
+                    boolean triggered = false;
+                    boolean changed = false;
+                    if (atlasScheduling.getNextFireTime() == null) {
+                        atlasScheduling.setNextFireTime(nextFireTime);
+                        changed = true;
+                    } else {
+                        Long currentSecond = (new Date().getTime()) / 1000;
+                        if (atlasScheduling.getNextFireTime() <= currentSecond) {
+                            atlasScheduling.setPrevFireTime(atlasScheduling.getNextFireTime());
+                            atlasScheduling.setNextFireTime(nextFireTime);
+                            triggered = true;
+                            changed = true;
+                        } else {
+                            if (nextFireTime - atlasScheduling.getNextFireTime() != 0) {
+                                atlasScheduling.setNextFireTime(nextFireTime);
+                                changed = true;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        atlasSchedulingService.updateExportScheduling(atlasScheduling);
+                    }
+                    if (triggered) {
+                        if (EXPORT_APPID_MAP.containsValue(customerSpace)) {
+                            continue;
+                        }
+                        if(submitExportJob(customerSpace, tenant)) {
+                            log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
+                                    atlasScheduling.getPrevFireTime(),
+                                    tenant.getName()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    boolean submitExportJob(String customerSpace, Tenant tenant) {
+        return submitExportJob(customerSpace, false, tenant);
+    }
+
+    @VisibleForTesting
+    boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant) {
+        String applicationId = null;
+        boolean success = true;
+        if (tenant == null) {
+            setMultiTenantContext(customerSpace);
+        } else {
+            MultiTenantContext.setTenant(tenant);
+        }
+        try {
+            EntityExportRequest request = new EntityExportRequest();
+            request.setDataCollectionVersion(dataCollectionService.getActiveVersion(customerSpace));
+            ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
+            applicationId = tempApplicationId.toString();
+            if (!retry) {
+                EXPORT_APPID_MAP.put(applicationId, customerSpace);
+            }
+            log.info("export applicationId map is " + JsonUtils.serialize(EXPORT_APPID_MAP));
+        } catch (Exception e) {
+            log.info(String.format("Failed to submit entity export job for tenant name: %s，message is %s",
+                    customerSpace, e.getMessage()));
+            success = false;
+        }
+        log.info(String.format("Submit entity export job success %s", success ? "y" : "n"));
+        return success;
+    }
+
+    private void updateExportAppIdMap() {
+        String clusterId = getCurrentClusterID();
+        log.debug(String.format("Current cluster id is : %s.", clusterId));
+        List<String> jobStatus = new ArrayList<>();
+        jobStatus.add(JobStatus.FAILED.getName());
+        jobStatus.add(JobStatus.CANCELLED.getName());
+        jobStatus.add(JobStatus.COMPLETED.getName());
+        if (StringUtils.isNotEmpty(clusterId)) {
+            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
+                    jobStatus);
+            if (CollectionUtils.isNotEmpty(workflowJobs)) {
+                for (WorkflowJob workflowJob : workflowJobs) {
+                    if (workflowJob.getStatus() == JobStatus.COMPLETED.getName() || workflowJob.getStatus() == JobStatus.CANCELLED.getName()) {
+                        EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
+                        continue;
+                    }
+                    if (workflowJob.getStatus() == JobStatus.FAILED.getName()) {
+                        submitExportJob(EXPORT_APPID_MAP.get(workflowJob.getApplicationId()), true, null);
+                        EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
+                    }
+                }
+            }
+        }
+    }
+
+    private void setMultiTenantContext(String customerSpace) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        if (tenant == null) {
+            throw new RuntimeException(String.format("No tenant found with id %s", customerSpace));
+        }
+        MultiTenantContext.setTenant(tenant);
     }
 }

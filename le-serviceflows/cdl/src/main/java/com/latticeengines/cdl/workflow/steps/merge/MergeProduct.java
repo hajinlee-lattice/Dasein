@@ -78,14 +78,6 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 
         Map<String, Integer> productCounts = countProducts(currentProducts);
         log.info("product count is " + JsonUtils.serialize(productCounts));
-        if (configuration.getDataQuotaLimit(ProductType.Analytic) < productCounts.get("nProductAnalytics"))
-            throw new IllegalStateException(
-                    "the Analytics Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Analytic)
-                            + ", The data you uploaded has exceeded the limit.");
-        if (configuration.getDataQuotaLimit(ProductType.Spending) < productCounts.get("nProductSpendings"))
-            throw new IllegalStateException(
-                    "the Spending Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Spending)
-                            + ", The data you uploaded has exceeded the limit.");
         mergeReport = constructMergeReport(productCounts, currentProducts.size());
 
         List<Product> productList = new ArrayList<>();
@@ -102,6 +94,14 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         }
 
         productCounts = countProducts(productList);
+        if (configuration.getDataQuotaLimit(ProductType.Analytic) < productCounts.get("nProductAnalytics"))
+            throw new IllegalStateException(
+                    "the Analytics Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Analytic)
+                            + ", The data you uploaded has exceeded the limit.");
+        if (configuration.getDataQuotaLimit(ProductType.Spending) < productCounts.get("nProductSpendings"))
+            throw new IllegalStateException(
+                    "the Spending Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Spending)
+                            + ", The data you uploaded has exceeded the limit.");
         updateMergeReport(inputProducts.size(), nInvalids, productList.size(), productCounts);
         updateEntityValueMapInContext(FINAL_RECORDS, (Integer) mergeReport.get("Merged_NumProductAnalytics"),
                 Integer.class);

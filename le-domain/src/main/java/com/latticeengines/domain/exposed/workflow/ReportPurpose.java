@@ -31,6 +31,7 @@ public enum ReportPurpose {
      */
     CONSOLIDATE_RECORDS_SUMMARY("ConsolidateRecordsSummary"), //
     PROCESS_ANALYZE_RECORDS_SUMMARY("ProcessAnalyzeRecordsSummary"), //
+    PROCESS_ANALYZE_DECISIONS_SUMMARY("ProcessAnalyzeDecisionsSummary"), //
     MAINTENANCE_OPERATION_SUMMARY("MaintenanceOperationSummary"), //
     ENTITY_STATS_SUMMARY("EntityStatsSummary"), //
     ENTITY_MATCH_SUMMARY("EntityMatchSummary"), //

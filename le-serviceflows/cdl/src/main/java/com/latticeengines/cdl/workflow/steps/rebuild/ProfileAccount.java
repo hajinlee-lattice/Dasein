@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Pr
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -218,7 +217,6 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     private void finishing() {
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
         enrichMasterTableSchema(masterTableName);
-        exportToDynamo(masterTableName, InterfaceName.AccountId.name(), null);
     }
 
 }

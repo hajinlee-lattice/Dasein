@@ -225,24 +225,14 @@ angular
 
                         return deferred.promise;
                     },
-                    // connections: ($q, $stateParams, playstore) => {
-                    //     var deferred = $q.defer();
-
-                    //     actions.fetchConnections($stateParams.play_name, deferred);
-
-                    //     return deferred.promise;
-                    // },
-                    // playname: ($stateParams) => {
-                    //     return $stateParams.play_name;
-                    // },
                     Play: (play) => { 
                         return play; 
                     },
                     path: () => {
-                        return 'playbookOverview';
+                        return 'playbookoverview';
                     }
                 },
-
+                
                 views: {
                     "navigation@home": {
                         controller: 'SidebarPlaybookController',
@@ -250,7 +240,6 @@ angular
                         templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                     },
                     'main@': {
-                        // component: 'playbookOverview'
                         component: 'reactAngularMainComponent'
                     },
                     'header.back@': 'backNav'
