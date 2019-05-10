@@ -9,11 +9,11 @@ import org.apache.avro.Schema;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Copy;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CopierParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CopierConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
@@ -72,10 +72,11 @@ public class SourceCopier extends AbstractDataflowTransformer<CopierConfig, Copi
     @Override
     protected void postDataFlowProcessing(TransformStep step, String workflowDir, CopierParameters paramters,
             CopierConfig configuration) {
+        String avroGlob = PathUtils.toAvroGlob(workflowDir);
         if (configuration.getSortKeys() != null && !configuration.getSortKeys().isEmpty()) {
-            String wd = new Path(workflowDir).toString();
-            String avroGlob = wd + (wd.endsWith("/") ? "*.avro" : "/*.avro");
             TransformerUtils.removeAllButBiggestAvro(yarnConfiguration, avroGlob);
+        } else {
+            TransformerUtils.removeEmptyAvros(yarnConfiguration, avroGlob);
         }
     }
 
