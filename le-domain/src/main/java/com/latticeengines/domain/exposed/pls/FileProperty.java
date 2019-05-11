@@ -11,7 +11,7 @@ public class FileProperty {
     private String fileName;
 
     @JsonProperty("file_size")
-    private Long fileSize;
+    private String fileSize;
 
     @JsonProperty("last_modified")
     private Date lastModified;
@@ -41,11 +41,11 @@ public class FileProperty {
         this.lastModified = lastModified;
     }
 
-    public Long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(Long fileSize) {
+    public void setFileSize(String fileSize) {
         this.fileSize = fileSize;
     }
 
