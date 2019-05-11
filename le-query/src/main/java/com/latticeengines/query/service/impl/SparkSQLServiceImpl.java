@@ -143,7 +143,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         params.put("TABLE_MAP", hdfsPathMap);
-        params.put("PERSIST_ON_DISK", persist);
+        params.put("PERSIST_RAW_TABLES", persist);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         log.info("Output: " + result.getOutput());
