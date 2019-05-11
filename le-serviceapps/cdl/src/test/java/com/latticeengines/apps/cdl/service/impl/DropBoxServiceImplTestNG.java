@@ -181,7 +181,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
             if (count > 3) {
                 log.info("Verify access, attempt=" + count);
             }
-            String objectKey = prefix + "/le.html";
+            String objectKey = prefix + "/le.csv";
             if (upload) {
                 uploadFile(s3Client, bucket, prefix);
             }
@@ -239,7 +239,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void uploadFile(AmazonS3 s3Client, String bucket, String prefix) {
-        String key = prefix + "/le.html";
+        String key = prefix + "/le.csv";
         InputStream inputStream = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("dropbox/le.html");
         ObjectMetadata om = new ObjectMetadata();
