@@ -92,6 +92,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 // after lead to account match and does not have the correct metadata
                 if (InterfaceName.AccountId.name().equals(attr.getName())) {
                     attr.setInterfaceName(InterfaceName.AccountId);
+                    attr.setDisplayName("Atlas Account ID");
                     attr.setTags(Tag.INTERNAL);
                     attr.setLogicalDataType(LogicalDataType.Id);
                     attr.setNullable(false);
@@ -101,6 +102,9 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                     attr.setAllowedDisplayNames(
                             Arrays.asList("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT"));
                     attr.setFundamentalType(FundamentalType.ALPHA.getName());
+                }
+                if (InterfaceName.ContactId.name().equals(attr.getName())) {
+                    attr.setDisplayName("Atlas Contact ID");
                 }
             });
         }
