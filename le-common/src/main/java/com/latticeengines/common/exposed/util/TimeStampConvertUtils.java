@@ -348,20 +348,9 @@ public class TimeStampConvertUtils {
                             log.debug("Java date/time format string is: " + javaDateFormatStr + " "
                                     + javaTimeFormatStr);
 
-                            Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
-                            if (dateTimeMatcher.find()) {
-                                log.debug("Found Date/Time value with ISO 8601 format (T & Z): " + dateTime);
-                                //log.debug("Regular expression matches with " + dateTimeMatcher.groupCount()
-                                //        + " group(s)");
-                                //for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
-                                //    log.debug("  Group " + i + ": " + dateTimeMatcher.group(i));
-                                //}
-                                dateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
-                                log.debug("Stripping T & Z to end up with: " + dateTime);
-                            }
-                            //else {
-                            //    log.debug("No regular expression match");
-                            //}
+                            // Check if the date is in ISO 8601 format, and remove the "T" and trailing time zone
+                            // (eg. "Z").
+                            dateTime = removeIso8601TandZFromDateTime(dateTime);
 
                             // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
                             dateTime = dateTime.replaceAll("([aA])([mM])", "AM")
@@ -549,4 +538,23 @@ public class TimeStampConvertUtils {
         }
         return dateTime;
     }
+
+    public static String removeIso8601TandZFromDateTime(String dateTime) {
+        Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
+        if (dateTimeMatcher.find()) {
+            //log.debug("Found Date/Time value with ISO 8601 format (T & Z): " + dateTime);
+            //log.debug("Regular expression matches with " + dateTimeMatcher.groupCount()
+            //        + " group(s)");
+            //for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
+            //    log.debug("  Group " + i + ": " + dateTimeMatcher.group(i));
+            //}
+            dateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+            //log.debug("Stripping T & Z to end up with: " + dateTime);
+        }
+        //else {
+        //    log.debug("No regular expression match");
+        //}
+        return dateTime;
+    }
+
 }
