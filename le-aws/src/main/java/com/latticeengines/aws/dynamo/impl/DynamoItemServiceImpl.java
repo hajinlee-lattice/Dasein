@@ -178,7 +178,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
             if (CollectionUtils.isNotEmpty(batch)) {
                 results.addAll(submitBatchGet(dynamoDB, tableName, batch));
             }
-            timer.setThreshold(0L);
             timer.setTimerMessage("Get " + results.size() + " items using " + primaryKeys.size() //
                     + " keys from table " + tableName);
         }
@@ -220,7 +219,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
                 if (outcome.getUnprocessedKeys().size() > 0) {
                     throw new RuntimeException("Failed to finish a batch write within timeout");
                 }
-                timer.setThreshold(0L);
                 timer.setTimerMessage("Retrieved a single batch of " + results.size() //
                         + " items using " + primaryKeys.size() + " keys from table " + tableName);
             }
