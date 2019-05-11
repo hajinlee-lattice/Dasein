@@ -1,5 +1,7 @@
 package com.latticeengines.spark.util
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.StructType
@@ -40,10 +42,18 @@ private[spark] object MergeUtils {
             } else {
               (row.get(rhsColPos(attr)), row.get(lhsColPos(attr)))
             }
-          if (overwriteByNull || firstVal != null) {
-            firstVal
+          if (InterfaceName.AccountId.name().equals(attr) && DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(firstVal)) {
+            if (secondVal == null) {
+              firstVal
+            } else {
+              secondVal
+            }
           } else {
-            secondVal
+            if (overwriteByNull || firstVal != null) {
+              firstVal
+            } else {
+              secondVal
+            }
           }
         }
       })

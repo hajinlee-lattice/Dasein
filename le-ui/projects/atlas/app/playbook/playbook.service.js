@@ -864,7 +864,7 @@ angular.module('lp.playbook')
             if (data.ratingEngine && data.ratingEngine.id) {
                 var engineId = data.ratingEngine.id,
                     engineIdObject = [{ id: engineId }],
-                    getExcludeItems = getExcludeItems,
+                    getExcludeItems = opts.getExcludeItems || PlaybookWizardStore.getExcludeItems(),
                     getSegmentsOpts = {
                         loadContactsCount: true,
                         loadContactsCountByBucket: true
