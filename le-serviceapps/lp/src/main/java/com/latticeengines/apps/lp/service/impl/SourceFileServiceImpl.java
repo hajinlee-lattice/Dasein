@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -171,8 +172,9 @@ public class SourceFileServiceImpl implements SourceFileService {
             SourceFile file = new SourceFile();
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
-            file.setSchemaInterpretation(SchemaInterpretation.getByName(entity));
-            file.setBusinessEntity(BusinessEntity.getByName(entity));
+            file.setSchemaInterpretation(StringUtils.isNotEmpty(entity) ? SchemaInterpretation.getByName(entity) :
+                    null);
+            file.setBusinessEntity(StringUtils.isNotEmpty(entity) ? BusinessEntity.getByName(entity) : null);
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(fileProperty.getFileName());
             file.setPartialFile(true);

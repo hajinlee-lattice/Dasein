@@ -84,7 +84,7 @@ public class SourceFileResource {
     @PostMapping(value = "/fromS3")
     @ApiOperation(value = "Get file inputStream from s3")
     public SourceFile createSourceFileFromS3(@PathVariable String customerSpace,
-                                             @RequestParam(value = "entity") String entity,
+                                             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
                                              @RequestBody FileProperty fileProperty) {
         return sourceFileService.createSourceFileFromS3(customerSpace, fileProperty, entity);
     }
