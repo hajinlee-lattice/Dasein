@@ -73,18 +73,10 @@ class LaunchComponent extends Component {
             }
         }
 
-        var vm = this;
-        playstore.playbookWizardStore.launchAccountsCoverage(this.state.play.name, {
+        this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: true,
-            //getDestinationAccountId: this.state.destinationAccountId
-        }).then(function(response) {
-            var coverage = vm.getCoverage(response).coverage,
-                hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
-
-            vm.state.unscored = !hasBuckets;
-            vm.state.launchAccountsCoverage = response;
-            vm.setState(vm.state);
+            getDestinationAccountId: this.props.connection.accountId
         });
 
         this.unsubscribe = store.subscribe(this.handleChange);
@@ -97,6 +89,23 @@ class LaunchComponent extends Component {
     handleChange = () => {
         const state = store.getState()['playbook'];
         this.setState(state);
+    }
+
+    getLaunchAccountsCoverage(play, opts) {
+        let playstore = store.getState()['playbook'],
+            vm = this;
+        playstore.playbookWizardStore.launchAccountsCoverage(play.name, {
+            sendEngineId: opts.sendEngineId,
+            getExcludeItems: opts.getExcludeItems,
+            getDestinationAccountId: opts.getDestinationAccountId
+        }).then(function(response) {
+            var coverage = vm.getCoverage(response).coverage,
+                hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
+
+            vm.state.unscored = !hasBuckets;
+            vm.state.launchAccountsCoverage = response;
+            vm.setState(vm.state);
+        });
     }
 
     bucketClick = (bucket, coverage, play) => {
@@ -241,7 +250,7 @@ class LaunchComponent extends Component {
                 bucketsToLaunch: this.state.selectedBuckets,
                 destinationOrgId: connection.orgId,
                 destinationSysType: connection.externalSystemType,
-                destinationAccountId: connection.orgName,
+                destinationAccountId: connection.accountId,
                 topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
                 launchUnscored: this.state.unscored,
                 excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId
@@ -301,6 +310,11 @@ class LaunchComponent extends Component {
     clickRequireAccountId = (e) => {
         this.state.excludeItemsWithoutSalesforceId = e.target.checked;
         this.setState(this.state);
+        this.getLaunchAccountsCoverage(this.state.play.name, {
+            sendEngineId: true,
+            getExcludeItems: e.target.checked,
+            getDestinationAccountId: this.props.connection.accountId
+        });
     }
 
     clickLimitRecommendations = (e) => {
