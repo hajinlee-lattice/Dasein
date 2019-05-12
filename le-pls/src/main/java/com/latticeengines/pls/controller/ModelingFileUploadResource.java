@@ -237,7 +237,7 @@ public class ModelingFileUploadResource {
     @ApiOperation(value = "Import a file from s3")
     public ResponseDocument<SourceFile> importFile( //
                                                     @RequestBody FileProperty csvFile, //
-                                                    @RequestParam(value = "entity", required = false, defaultValue = "") String entity) {
+                                                    @RequestParam(value = "entity") String entity) {
         return ResponseDocument.successResponse(
                 uploadFileFromS3(csvFile, entity));
     }
