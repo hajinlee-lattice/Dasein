@@ -8,16 +8,16 @@
 
     <properties>
         <component-name>auth</component-name>
-        <le.common.version>4.16.0-SNAPSHOT</le.common.version>
-        <le.db.version>4.16.0-SNAPSHOT</le.db.version>
-        <le.domain.version>4.16.0-SNAPSHOT</le.domain.version>
-        <le.graph.version>4.16.0-SNAPSHOT</le.graph.version>
+        <le.common.version>4.18.0-SNAPSHOT</le.common.version>
+        <le.db.version>4.18.0-SNAPSHOT</le.db.version>
+        <le.domain.version>4.18.0-SNAPSHOT</le.domain.version>
+        <le.graph.version>4.18.0-SNAPSHOT</le.graph.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.16.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

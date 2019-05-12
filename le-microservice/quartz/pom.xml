@@ -9,14 +9,14 @@
 
     <properties>
         <component-name>quartz-microservice</component-name>
-        <le.microservice.version>4.16.0-SNAPSHOT</le.microservice.version>
-        <le.quartz.version>4.16.0-SNAPSHOT</le.quartz.version>
+        <le.microservice.version>4.18.0-SNAPSHOT</le.microservice.version>
+        <le.quartz.version>4.18.0-SNAPSHOT</le.quartz.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-web</artifactId>
-        <version>4.16.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../web-pom.xml</relativePath>
     </parent>
 

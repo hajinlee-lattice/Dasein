@@ -8,12 +8,12 @@
     <bean id="versionManager"
         class="com.latticeengines.common.exposed.version.VersionManager">
         <constructor-arg index="0"
-            value="${dataplatform.version:4.16.0-SNAPSHOT}" />
+            value="${dataplatform.version:4.18.0-SNAPSHOT}" />
     </bean>
 
     <bean id="docVersionManager"
         class="com.latticeengines.common.exposed.version.VersionManager">
-        <constructor-arg index="0" value="4.16.0-SNAPSHOT" />
+        <constructor-arg index="0" value="4.18.0-SNAPSHOT" />
     </bean>
 
     <bean id="beanValidationService"

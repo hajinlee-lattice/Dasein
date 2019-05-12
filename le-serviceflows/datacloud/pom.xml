@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-serviceflows</artifactId>
-        <version>4.16.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
