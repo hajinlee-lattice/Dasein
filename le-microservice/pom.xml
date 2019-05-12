@@ -9,12 +9,12 @@
 
     <properties>
         <component-name>microservice-parent</component-name>
-        <le.monitor.version>4.17.0-SNAPSHOT</le.monitor.version>
-        <le.microservice.version>4.17.0-SNAPSHOT</le.microservice.version>
-        <le.propdata.version>4.17.0-SNAPSHOT</le.propdata.version>
-        <le.network.version>4.17.0-SNAPSHOT</le.network.version>
-        <le.quartz.version>4.17.0-SNAPSHOT</le.quartz.version>
-        <le.modelquality.version>4.17.0-SNAPSHOT</le.modelquality.version>
+        <le.monitor.version>4.18.0-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>4.18.0-SNAPSHOT</le.microservice.version>
+        <le.propdata.version>4.18.0-SNAPSHOT</le.propdata.version>
+        <le.network.version>4.18.0-SNAPSHOT</le.network.version>
+        <le.quartz.version>4.18.0-SNAPSHOT</le.quartz.version>
+        <le.modelquality.version>4.18.0-SNAPSHOT</le.modelquality.version>
         <jetty.port>8080</jetty.port>
         <jetty.ssl.port>9080</jetty.ssl.port>
         <jett.stop.port>10980</jett.stop.port>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-spring-boot-tomcat-parent</artifactId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-parent/spring-boot/tomcat</relativePath>
     </parent>
 
