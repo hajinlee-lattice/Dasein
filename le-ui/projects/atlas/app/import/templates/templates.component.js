@@ -96,6 +96,8 @@ export default class TemplatesComponent extends Component {
         }
 
         this.setState(state, function () {
+            
+            // Wait until setState is completed and do some stuff.
             let action = response.action;
             let ImportWizardStore = this.ImportWizardStore;
             ImportWizardStore.setEntityType(this.state.entityType);
@@ -106,6 +108,7 @@ export default class TemplatesComponent extends Component {
             } else {
                 this.createTemplate(response);
             }
+
         });
     }
 
