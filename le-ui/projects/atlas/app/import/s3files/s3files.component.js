@@ -103,6 +103,7 @@ export default class S3FileList extends Component {
         // Get feedtype from selection on template list (AccountSchema, ContactSchema, etc.)
         let ImportWizardStore = this.ImportWizardStore;
         let entityType = ImportWizardStore.getEntityType();
+        let action = ImportWizardStore.getTemplateAction();
 
         // Import from S3 file into our system
         let postBody = this.state.selectedItem;
@@ -112,10 +113,21 @@ export default class S3FileList extends Component {
             new Observer(
                 response => {
                     if (response.getStatus() === SUCCESS) {
-                        console.log(response);
-                        let sourceFile = response.data.Result;
-                        ImportWizardStore.setCsvFileName(sourceFile.name);
-                        NgState.getAngularState().go(this.state.angularGoTo, {});
+
+                        switch (action) {
+                            case "create-template": 
+                            case "edit-template": {
+                                console.log(response);
+                                let sourceFile = response.data.Result;
+                                ImportWizardStore.setCsvFileName(sourceFile.name);
+                                NgState.getAngularState().go(this.state.angularGoTo, {});
+                                break;
+                            }
+                            case "import-data": {
+                                NgState.getAngularState().go('home.importtemplates', {});
+                                break;
+                            }
+                        }
                     }
                 },
                 error => {
