@@ -65,4 +65,14 @@
     .text-block {
         margin: 2em 0;
     }
+
+    .contactid-note {
+        strong {
+            font-weight: bold;
+        }
+        ol {
+            list-style-type: decimal;
+            list-style-position: inside;
+        }
+    }
 }
