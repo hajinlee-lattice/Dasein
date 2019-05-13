@@ -437,6 +437,11 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
+
+                    console.log(ImportWizardStore.getCsvFileName());
+                    console.log(ImportWizardStore.getEntityType());
+                    console.log(ImportWizardStore.getFeedType());
+                    
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
                         //console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);

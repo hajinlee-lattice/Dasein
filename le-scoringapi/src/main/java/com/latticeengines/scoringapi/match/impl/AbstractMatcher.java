@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -40,22 +43,29 @@ public abstract class AbstractMatcher implements Matcher {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractMatcher.class);
 
-    protected static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+    private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
 
-    @Autowired
+    @Inject
     protected Warnings warnings;
 
-    @Autowired
+    @Inject
     protected MatchProxy matchProxy;
 
-    @Autowired
+    @Inject
     protected List<MatchInputBuilder> matchInputBuilders;
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
     protected InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    @PostConstruct
+    public void initialize() {
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");
@@ -143,24 +153,24 @@ public abstract class AbstractMatcher implements Matcher {
 
     /*
      * LOGIC
-     * 
+     *
      * if no enrichment needed
-     * 
+     *
      * .....then follow regular path
-     * 
+     *
      * else if enrichment needed
-     * 
+     *
      * .....if model datacloud version is for account master
-     * 
+     *
      * .........then follow regular path
-     * 
+     *
      * .....else if model datacloud version is for RTS
-     * 
+     *
      * .........then follow regular path but without enrichment
-     * 
+     *
      * .........and explicitly call account master based matching with
      * ..........enrichment option (without Predefined column selection)
-     * 
+     *
      */
     protected boolean shouldCallEnrichmentExplicitly(ModelSummary modelSummary, boolean forEnrichment,
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {

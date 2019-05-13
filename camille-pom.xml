@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-toplevel</artifactId>
-    <version>4.18.0-SNAPSHOT</version>
+    <version>4.17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Lattice Data Platform Top Level Module</name>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.18.0-SNAPSHOT</version>
+        <version>4.17.0-SNAPSHOT</version>
         <relativePath>le-parent</relativePath>
     </parent>
 
