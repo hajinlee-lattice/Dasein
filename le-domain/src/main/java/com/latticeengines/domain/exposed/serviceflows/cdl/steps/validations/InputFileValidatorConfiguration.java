@@ -6,12 +6,22 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 public class InputFileValidatorConfiguration extends MicroserviceStepConfiguration {
     private BusinessEntity entity;
 
+    private boolean enableEntityMatch;
+
     public BusinessEntity getEntity() {
         return entity;
     }
 
     public void setEntity(BusinessEntity entity) {
         this.entity = entity;
+    }
+
+    public boolean isEnableEntityMatch() {
+        return enableEntityMatch;
+    }
+
+    public void setEnableEntityMatch(boolean enableEntityMatch) {
+        this.enableEntityMatch = enableEntityMatch;
     }
 
 }

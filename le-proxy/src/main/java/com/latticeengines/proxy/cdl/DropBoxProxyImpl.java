@@ -97,9 +97,9 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
     }
 
     @Override
-    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path) {
-        String url = "/customerspaces/{customerSpace}/dropbox/fileList?s3Path={s3Path}";
-        url = constructUrl(url, customerSpace, s3Path);
+    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter) {
+        String url = "/customerspaces/{customerSpace}/dropbox/fileList?s3Path={s3Path}&filter={filter}";
+        url = constructUrl(url, customerSpace, s3Path, filter);
         List<?> results = get("get all files under s3Path", url, List.class);
         return JsonUtils.convertList(results, FileProperty.class);
     }

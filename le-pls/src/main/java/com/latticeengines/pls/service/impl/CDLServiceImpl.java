@@ -370,8 +370,8 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path) {
-        return dropBoxProxy.getFileListForPath(customerSpace, s3Path);
+    public List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter) {
+        return dropBoxProxy.getFileListForPath(customerSpace, s3Path, filter);
     }
 
     @Override

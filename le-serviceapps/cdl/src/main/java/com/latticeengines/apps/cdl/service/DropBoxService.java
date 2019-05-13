@@ -38,7 +38,7 @@ public interface DropBoxService {
 
     boolean uploadFileToS3(String customerSpace, String key, String s3FileName, String hdfsPath);
 
-    List<FileProperty> getFileListForPath(String customerSpace, String s3Path);
+    List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter);
 
     String getExportPath(String customerSpace, AtlasExportType exportType, String datePrefix, String optionalId);
 }

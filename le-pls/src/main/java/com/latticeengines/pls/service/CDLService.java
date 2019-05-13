@@ -40,7 +40,7 @@ public interface CDLService {
 
     List<S3ImportTemplateDisplay> getS3ImportTemplate(String string);
 
-    List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path);
+    List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 
     void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType);
 
