@@ -65,13 +65,13 @@ export default class TemplatesComponent extends Component {
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
-                state.entityType = 'Accounts';
+                state.entityType = 'Account';
                 state.feedType = 'AccountSchema';
                 break;
             }
             case "Contacts": {
                 state.entity = "contacts";
-                state.entityType = 'Contacts';
+                state.entityType = 'Contact';
                 state.feedType = 'ContactSchema';
                 break;
             }

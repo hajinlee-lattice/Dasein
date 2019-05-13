@@ -40,22 +40,42 @@ export default class ViewMappings extends Component {
     handleChange = () => {
         let ImportWizardStore = this.ImportWizardStore;
         let entity = ImportWizardStore.getEntityType();
+        let feedType = ImportWizardStore.getFeedType();
 
         let state = Object.assign({}, this.state);
         state.forceReload = true;
         state.entity = entity;
-        state.latticeMappings = [
-            {
-                "fileName": "yo",
-                "latticeField": "homey",
-                "dataType": "String"
-            },
-            {
-                "fileName": "yo",
-                "latticeField": "homey",
-                "dataType": "String"
-            }
-        ];
+
+        let postBody = {};
+
+        httpService.post(
+            "/pls/cdl/s3import/template/preview?feedType=" + feedType,
+            postBody,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                        console.log(response);
+                        state.latticeMappings = response;
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
+
+        // state.latticeMappings = [
+        //     {
+        //         "fileName": "yo",
+        //         "latticeField": "homey",
+        //         "dataType": "String"
+        //     },
+        //     {
+        //         "fileName": "yo",
+        //         "latticeField": "homey",
+        //         "dataType": "String"
+        //     }
+        // ];
         state.customMappings = [
             {
                 "fileName": "yo",
