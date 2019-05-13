@@ -154,7 +154,9 @@ class SystemsComponent extends Component {
         if(connection) {
             var launchState = (connection.launchConfiguration ? connection.launchConfiguration.launchState : 'Unlaunched'),
                 launched = (launchState === 'Launching' ? true : false);
-                
+
+            console.log(this.state.play);
+
             return (
                 <LeHPanel hstretch={"true"} className={'connection-card'}>
                     <div class="connection-logo">
@@ -169,8 +171,8 @@ class SystemsComponent extends Component {
                             name="launch"
                             disabled={launched}
                             config={{
-                                label: "Launch",
-                                classNames: "orange-button"
+                                label: "Ready to launch",
+                                classNames: "borderless-button campaign-activate"
                             }}
                             callback={() => {this.launchButtonClickHandler(connection, play)} } />
                     </div>
