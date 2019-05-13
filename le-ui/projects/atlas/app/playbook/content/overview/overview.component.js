@@ -100,7 +100,7 @@ export default class OverviewComponent extends Component {
                                     <RatingsComponent play={this.state.play} />
                                 </span>
                                 <span>
-                                    <h2>Talking Points</h2>
+                                    <h2>SFDC Talking Points</h2>
                                     {this.makeTalkingpoints(this.state.play)}
                                 </span>
                             </GridLayout>

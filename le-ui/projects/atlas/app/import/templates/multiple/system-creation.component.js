@@ -104,25 +104,25 @@ export default class SystemCreationComponent extends Component {
                         name="create"
                         disabled={!this.state.valid}
                         config={{
-                            label: "Create Leo",
+                            label: "Create",
                             classNames: "blue-button"
                         }}
                         callback={() => {
-                            let config = {
-                                callback: (action) => {
-                                    modalActions.closeModal(store);
-                                },
-                                template: () => {
-                                    return (<p>Leo test</p>)
-                                },
-                                title: () => {
-                                    return (<p>TEST</p>);
-                                },
-                                oneButton: false,
-                                hideFooter: false,
-                                size: MEDIUM_SIZE
-                            }
-                            modalActions.error(store, config);
+                            // let config = {
+                            //     callback: (action) => {
+                            //         modalActions.closeModal(store);
+                            //     },
+                            //     template: () => {
+                            //         return (<p>Leo test</p>)
+                            //     },
+                            //     title: () => {
+                            //         return (<p>TEST</p>);
+                            //     },
+                            //     oneButton: false,
+                            //     hideFooter: false,
+                            //     size: MEDIUM_SIZE
+                            // }
+                            // modalActions.error(store, config);
                         }}
                     />
                 </LeToolBar>

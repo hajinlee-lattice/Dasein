@@ -563,13 +563,15 @@ public class RatingEngineResource {
     private void cleanupBucketsInRules(RatingModel model) {
         if ((model instanceof RuleBasedModel)) {
             RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-            TreeMap<String, Map<String, Restriction>> ruleMap = ruleBasedModel.getRatingRule().getBucketToRuleMap();
-            if (MapUtils.isNotEmpty(ruleMap)) {
-                ruleMap.values().forEach(rules -> {
-                    if (MapUtils.isNotEmpty(rules)) {
-                        rules.values().forEach(RestrictionUtils::cleanupBucketsInRestriction);
-                    }
-                });
+            if (ruleBasedModel.getRatingRule() != null) {
+                TreeMap<String, Map<String, Restriction>> ruleMap = ruleBasedModel.getRatingRule().getBucketToRuleMap();
+                if (MapUtils.isNotEmpty(ruleMap)) {
+                    ruleMap.values().forEach(rules -> {
+                        if (MapUtils.isNotEmpty(rules)) {
+                            rules.values().forEach(RestrictionUtils::cleanupBucketsInRestriction);
+                        }
+                    });
+                }
             }
         }
     }

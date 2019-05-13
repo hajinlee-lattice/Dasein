@@ -41,15 +41,27 @@ class SystemsComponent extends Component {
         this._connectors = {
             Salesforce: {
                 name: 'Salesforce',
-                config: { img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' }
+                config: { 
+                    name: 'Salesforce',
+                    img: '/atlas/assets/images/logo_salesForce_2.png', 
+                    text: 'Send and receive reccomandations about how likely leads, accounts and customers are to buy, what they are likely to buy and when, by connecting to this CRM' 
+                }
             },
             Marketo: {
                 name: 'Marketo',
-                config: { img: '/atlas/assets/images/logo_marketo_2.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' }
+                config: { 
+                    name: 'Marketo',
+                    img: '/atlas/assets/images/logo_marketo_2.png', 
+                    text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Marketo' 
+                }
             },
             Eloqua: {
                 name: 'Eloqua',
-                config: { img: '/atlas/assets/images/eloqua.png', text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' }
+                config: { 
+                    name: 'Eloqua',
+                    img: '/atlas/assets/images/eloqua.png', 
+                    text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' 
+                }
             }
         };
     }
@@ -142,7 +154,7 @@ class SystemsComponent extends Component {
         if(connection) {
             var launchState = (connection.launchConfiguration ? connection.launchConfiguration.launchState : 'Unlaunched'),
                 launched = (launchState === 'Launching' ? true : false);
-
+                
             return (
                 <LeHPanel hstretch={"true"} className={'connection-card'}>
                     <div class="connection-logo">

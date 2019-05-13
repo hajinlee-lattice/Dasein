@@ -92,6 +92,7 @@ angular.module('common.services.featureflag', [
         LAUNCH_PLAY_TO_MAP_SYSTEM: 'LaunchPlayToMapSystem',
         ENABLE_EXTERNAL_INTEGRATION: 'EnableExternalIntegration',
         MIGRATION_TENANT: 'MigrationTenant',
+        ENABLE_MULTI_TEMPLATE_IMPORT: 'EnableMultiTemplateImport',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',

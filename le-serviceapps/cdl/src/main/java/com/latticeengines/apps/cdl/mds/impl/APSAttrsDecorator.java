@@ -22,7 +22,7 @@ import reactor.core.publisher.ParallelFlux;
 public class APSAttrsDecorator implements Decorator {
 
     private static final Set<String> systemAttributes = SchemaRepository
-            .getSystemAttributes(BusinessEntity.AnalyticPurchaseState).stream().map(InterfaceName::name)
+            .getSystemAttributes(BusinessEntity.AnalyticPurchaseState, false).stream().map(InterfaceName::name)
             .collect(Collectors.toSet());
 
     @Override

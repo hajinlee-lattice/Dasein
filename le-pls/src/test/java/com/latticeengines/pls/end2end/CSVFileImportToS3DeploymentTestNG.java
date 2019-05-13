@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTestNGBase  {
@@ -52,17 +51,15 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
     @Test(groups = "deployment")
     public void testMain() {
         for (S3ImportTemplateDisplay display : templates) {
-            EntityType entityType = EntityType.fromDisplayNameToEntityType(display.getObject());
-            importFile(entityType.getEntity().name(), display.getPath());
+            importFile(display.getEntity().name(), display.getPath());
         }
         for (S3ImportTemplateDisplay display : templates) {
-            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace, display.getPath());
+            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace, display.getPath(), "csv");
             log.info("under the path: " + display.getPath() + " , the fileLists is " + JsonUtils.serialize(fileLists));
-            EntityType entityType = EntityType.fromDisplayNameToEntityType(display.getObject());
-            switch (entityType.getEntity().name()) {
+            switch (display.getEntity().name()) {
                 case ENTITY_ACCOUNT:
                     Assert.assertEquals(fileLists.size(), 4);
-                    testConfigTemplate(fileLists.get(0), entityType.getEntity().name(), display.getFeedType());
+                    testConfigTemplate(fileLists.get(0), display.getEntity().name(), display.getFeedType());
                     break;
                 case ENTITY_CONTACT: Assert.assertEquals(fileLists.size(), 1);break;
                 case ENTITY_TRANSACTION: Assert.assertEquals(fileLists.size(), 1);

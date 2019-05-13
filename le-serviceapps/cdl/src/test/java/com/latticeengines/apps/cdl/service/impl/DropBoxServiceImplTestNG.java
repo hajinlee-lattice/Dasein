@@ -187,7 +187,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
             }
             Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
             List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace
-            , prefix);
+            , prefix, null);
             log.info(JsonUtils.serialize(result));
             Assert.assertTrue(result.size() > 0);
             return true;

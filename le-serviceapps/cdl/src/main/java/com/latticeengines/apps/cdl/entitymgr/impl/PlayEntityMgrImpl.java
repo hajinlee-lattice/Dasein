@@ -246,21 +246,23 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     @Override
     public Set<Triple<String, String, String>> extractDependencies(Play play) {
         Set<Triple<String, String, String>> attrDepSet = null;
-        if (play != null && play.getRatingEngine() != null) {
-            String ratingId = play.getRatingEngine().getId();
-            RatingEngine rating = findRatingEngine(play);
-            String targetSegmentName = findTargetSegment(play).getName();
-            String ratingEngineSegment = rating.getSegment().getName();
-
+        if (play != null) {
             attrDepSet = new HashSet<>();
-            attrDepSet.add(ParsedDependencies.tuple(ratingEngineSegment, //
-                    VertexType.SEGMENT, EdgeType.DEPENDS_ON));
+            String targetSegmentName = findTargetSegment(play).getName();
             attrDepSet.add(ParsedDependencies.tuple(targetSegmentName, //
                     VertexType.SEGMENT, EdgeType.DEPENDS_ON));
-            attrDepSet.add(ParsedDependencies.tuple(ratingId, //
-                    VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
-            attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
-                    VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+
+            if (play.getRatingEngine() != null) {
+                String ratingId = play.getRatingEngine().getId();
+                RatingEngine rating = findRatingEngine(play);
+                String ratingEngineSegment = rating.getSegment().getName();
+                attrDepSet.add(ParsedDependencies.tuple(ratingEngineSegment, //
+                        VertexType.SEGMENT, EdgeType.DEPENDS_ON));
+                attrDepSet.add(ParsedDependencies.tuple(ratingId, //
+                        VertexType.RATING_ENGINE, EdgeType.DEPENDS_ON));
+                attrDepSet.add(ParsedDependencies.tuple(BusinessEntity.Rating + "." + ratingId, //
+                        VertexType.RATING_ATTRIBUTE, EdgeType.DEPENDS_ON));
+            }
         }
         if (CollectionUtils.isNotEmpty(attrDepSet)) {
             log.info(String.format("Extracted dependencies from play %s: %s", play.getName(),

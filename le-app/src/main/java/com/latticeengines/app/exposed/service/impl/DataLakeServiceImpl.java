@@ -37,12 +37,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -101,6 +103,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BatonService batonService;
 
     private final DataLakeServiceImpl _dataLakeService;
 
@@ -304,7 +309,10 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
-            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment);
+            boolean entityMatchEnabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment,
+                    entityMatchEnabled);
         }
     }
 
@@ -354,7 +362,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
         List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream().filter(ColumnMetadata::isDateAttribute)
                 .collect(Collectors.toList());
-        return AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata, matchOutput);
+        return AccountExtensionUtil.processMatchOutputResults(dateAttributesMetadata, matchOutput);
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -389,20 +397,16 @@ public class DataLakeServiceImpl implements DataLakeService {
                 && matchOutput.getResult().get(0) != null) {
 
             if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
-                log.info("Didn't find any match from lattice data cloud. "
-                        + "Still continue to process the result as we may "
-                        + "have found partial match in my data table.");
+                log.info("No match on MatchApi, reverting to ObjectApi");
             } else {
                 log.info("Found full match from lattice data cloud as well as from my data table.");
+                final Map<String, Object> tempDataRef = new HashMap<>();
+                List<String> fields = matchOutput.getOutputFields();
+                List<Object> values = matchOutput.getResult().get(0).getOutput();
+                IntStream.range(0, fields.size()) //
+                        .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
+                data = tempDataRef;
             }
-
-            final Map<String, Object> tempDataRef = new HashMap<>();
-            List<String> fields = matchOutput.getOutputFields();
-            List<Object> values = matchOutput.getResult().get(0).getOutput();
-            IntStream.range(0, fields.size()) //
-                    .forEach(i -> tempDataRef.put(fields.get(i), values.get(i)));
-            data = tempDataRef;
-
         }
 
         if (MapUtils.isNotEmpty(data)) {
@@ -420,6 +424,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getShortTenantId();
+        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+
         Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
         Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();
         Map<String, StatsCube> cubeMap = new HashMap<>();
@@ -441,7 +448,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                         Set<String> attrsInStats = statsMap.keySet();
                         flux = flux //
                                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
-                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm)) //
+                                .filter(cm -> !StatsCubeUtils.shouldHideAttr(entity, cm, entityMatchEnabled)) //
                                 .filter(cm -> {
                                     boolean avail = availableAttrs.contains(cm.getAttrName());
                                     if (!avail) {

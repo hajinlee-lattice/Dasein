@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ public class HdfsToS3PathBuilder {
     private String protocol = "s3n";
 
     private static final String PATH_SEPARATOR = "/";
+    private static final String FILE_NAME_SEPARATOR = "-";
 
     private String hdfsAnalyticsBaseDir = "/user/s-analytics/customers";
     private String hdfsAnalyticsDir = hdfsAnalyticsBaseDir + "/%s";
@@ -46,6 +48,7 @@ public class HdfsToS3PathBuilder {
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasExportFileDir = s3AtlasDataDir + "/Files/Export";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
+    private String s3ExportDir = s3BucketDir + "/dropfolder/%s/export";
 
     public HdfsToS3PathBuilder() {
     }
@@ -139,6 +142,14 @@ public class HdfsToS3PathBuilder {
 
     public String getS3AtlasIntegrationsDir(String s3Bucket, String dropboxName) {
         return String.format(protocol + s3AtlasIntegrationDir, s3Bucket, dropboxName);
+    }
+
+    public String getS3ExportDir(String s3Bucket, String dropboxName) {
+        return String.format(protocol + s3ExportDir, s3Bucket, dropboxName);
+    }
+
+    public String getS3CampaignExportDir(String s3Bucket, String dropboxName) {
+        return getS3ExportDir(s3Bucket, dropboxName) + PATH_SEPARATOR + "campaigns";
     }
 
     public String getS3AtlasMetadataDir(String s3Bucket, String tenantId) {
@@ -251,15 +262,24 @@ public class HdfsToS3PathBuilder {
     }
 
     public String convertAtlasFileExport(String inputExportFileDir, String pod, String tenantId,
-            DropBoxSummary dropBoxSumamry, String s3Bucket) {
+            DropBoxSummary dropBoxSummary, String s3Bucket) {
         StringBuilder builder = new StringBuilder();
         String hdfsExportsDir = getHdfsAtlasFileExportDir(pod, tenantId);
         if (inputExportFileDir.startsWith(hdfsExportsDir)) {
-            return builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSumamry.getDropBox()))
+            return builder.append(getS3AtlasFileExportsDir(s3Bucket, dropBoxSummary.getDropBox()))
                     .append(inputExportFileDir.substring(hdfsExportsDir.length())).toString();
         }
         String fileName = FilenameUtils.getName(inputExportFileDir);
         return builder.append(getS3AtlasFileExportsDir(s3Bucket, tenantId)).append(PATH_SEPARATOR).append(fileName)
+                .toString();
+    }
+
+    public String convertS3CampaignExportDir(String inputExportFile, String s3Bucket, String dropboxName, String playId,
+            String playName) {
+        StringBuilder builder = new StringBuilder();
+        return builder.append(getS3CampaignExportDir(s3Bucket, dropboxName)).append(PATH_SEPARATOR).append(playName)
+                .append(FILE_NAME_SEPARATOR).append(playId).append(FILE_NAME_SEPARATOR).append(new Date().getTime())
+                .append(FilenameUtils.EXTENSION_SEPARATOR).append(FilenameUtils.getExtension(inputExportFile))
                 .toString();
     }
 
@@ -395,4 +415,5 @@ public class HdfsToS3PathBuilder {
     public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
+
 }

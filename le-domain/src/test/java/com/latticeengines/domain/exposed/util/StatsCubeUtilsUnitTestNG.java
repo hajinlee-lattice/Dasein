@@ -117,7 +117,7 @@ public class StatsCubeUtilsUnitTestNG {
         }
 
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true, //
-                ColumnSelection.Predefined.Segment);
+                ColumnSelection.Predefined.Segment, false);
         verifyCategoryOrder(topNTree);
         verifyDateAttrInTopN(topNTree, cmMap);
     }
@@ -185,7 +185,7 @@ public class StatsCubeUtilsUnitTestNG {
                 // allowed to be in the TopN Tree as long as they are not system attributes.
                 if (!(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
                         || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory()))
-                        || StatsCubeUtils.isSystemAttribute(topAttr.getEntity(), cm)) {
+                        || StatsCubeUtils.isSystemAttribute(topAttr.getEntity(), cm, false)) {
                     Assert.assertNotEquals(cm.getFundamentalType(), FundamentalType.DATE);
                     Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Timestamp);
                     Assert.assertNotEquals(cm.getLogicalDataType(), LogicalDataType.Date);

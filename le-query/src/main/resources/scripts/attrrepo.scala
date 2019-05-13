@@ -2,13 +2,13 @@ import org.apache.spark.storage.StorageLevel
 
 // read config
 val tableMap = mapper.convertValue[Map[String, String]](lattice.params.get("TABLE_MAP"))
-val persistOnDisk: Boolean = lattice.params.get("PERSIST_ON_DISK").asBoolean()
+val persistRawTables: Boolean = lattice.params.get("PERSIST_RAW_TABLES").asBoolean()
 
 // computation
 for ((tbl, path) <- tableMap) {
   val read = spark.read.format("avro").load("hdfs://" + path)
-  if (persistOnDisk) {
-    read.persist(StorageLevel.DISK_ONLY).createOrReplaceTempView(tbl)
+  if (persistRawTables) {
+    read.persist(StorageLevel.MEMORY_AND_DISK_SER).createOrReplaceTempView(tbl)
   } else {
     read.createOrReplaceTempView(tbl)
   }

@@ -12,6 +12,8 @@ public enum AttrSubType {
     ProductBundle, //
     HasPurchased, //
     APS, //
-    CuratedAccount
+    CuratedAccount, //
+    // IDs generated/maintained by Atlas
+    InternalLookupId, //
 
 }

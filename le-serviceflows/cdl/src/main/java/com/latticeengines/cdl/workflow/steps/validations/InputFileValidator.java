@@ -63,25 +63,30 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         }
 
         BusinessEntity entity = configuration.getEntity();
-        log.info(String.format("Begin to validate data with entity %s.", entity.name()));
-        InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList);
+        boolean enableEntityMatch = configuration.isEnableEntityMatch();
+        log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
+                String.valueOf(enableEntityMatch)));
+        InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList, enableEntityMatch);
         InputFileValidationService fileValidationService = InputFileValidationService
                 .getValidationService(fileConfiguration.getClass().getSimpleName());
         fileValidationService.validate(fileConfiguration);
 
     }
 
-    private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList) {
+    private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
+            boolean enableEntityMatch) {
         switch (entity) {
         case Account:
             AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
             accountConfig.setEntity(entity);
             accountConfig.setPathList(pathList);
+            accountConfig.setEnableEntityMatch(enableEntityMatch);
             return accountConfig;
         case Contact:
             ContactFileValidationConfiguration contactConfig = new ContactFileValidationConfiguration();
             contactConfig.setEntity(entity);
             contactConfig.setPathList(pathList);
+            contactConfig.setEnableEntityMatch(enableEntityMatch);
             return contactConfig;
         case Product:
             ProductFileValidationConfiguration productConfig = new ProductFileValidationConfiguration();

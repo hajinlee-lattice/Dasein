@@ -180,8 +180,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
             if (recordModelTuple.getRecord().isPerformEnrichment()) {
                 selectedLeadEnrichmentAttributes = new ArrayList<>();
-                List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache
-                        .getEnrichmentAttributesMetadata(space);
+                List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = internalResourceRestApiProxy
+                        .getLeadEnrichmentAttributes(space, null,
+                                null, true, true);
                 for (LeadEnrichmentAttribute attr : tempSelectedLeadEnrichmentAttributes) {
                     if (enrichInternalAttributes || !attr.getIsInternal()) {
                         selectedLeadEnrichmentAttributes.add(attr);

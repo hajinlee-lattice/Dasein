@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,6 +29,8 @@ public class S3ImportTemplateDisplay {
     private String systemName;
     @JsonProperty("ImportStatus")
     private DataFeedTask.S3ImportStatus importStatus;
+    @JsonProperty("Entity")
+    private BusinessEntity entity;
 
     public String getObject() {
         return object;
@@ -96,5 +99,13 @@ public class S3ImportTemplateDisplay {
 
     public void setImportStatus(DataFeedTask.S3ImportStatus importStatus) {
         this.importStatus = importStatus;
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 }

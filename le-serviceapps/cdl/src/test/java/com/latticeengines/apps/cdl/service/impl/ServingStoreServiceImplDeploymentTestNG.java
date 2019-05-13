@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
@@ -8,11 +9,11 @@ import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.ServingStoreService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
@@ -25,12 +26,10 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    @Inject
-    private ServingStoreService servingStoreService;
-
     @Test(groups = "deployment-app")
     public void testDecoratedMetadata() {
         testAccountMetadata();
+        testContactMetadata();
     }
 
     @Test(groups = "deployment-app")
@@ -45,11 +44,42 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
         Assert.assertTrue(allModelingAttrs.all(p).block());
     }
 
-    private void testAccountMetadata() {
-        List<ColumnMetadata> cms = servingStoreService //
-                .getDecoratedMetadataFromCache(mainCustomerSpace, BusinessEntity.Account);
-        cms.forEach(cm -> Assert.assertNotNull(cm.getJavaClass(), //
-                String.format("[%s] does not have a java class: %s", cm.getAttrName(), JsonUtils.serialize(cm))));
+
+
+    // AttributeName -> ColumnMetadata (Only involve columns to verify, not
+    // complete)
+    @Override
+    protected Map<String, ColumnMetadata> getAccountMetadataToVerify() {
+        Map<String, ColumnMetadata> cms = new HashMap<>();
+        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.AccountId.name()) //
+                .withCategory(Category.ACCOUNT_ATTRIBUTES) //
+                .withSubcategory("Account IDs") //
+                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
+                        ColumnSelection.Predefined.Segment) //
+                .build());
+        return cms;
     }
+
+    // AttributeName -> ColumnMetadata (Only involve columns to verify, not
+    // complete)
+    @Override
+    protected Map<String, ColumnMetadata> getContactMetadataToVerify() {
+        Map<String, ColumnMetadata> cms = new HashMap<>();
+        cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.AccountId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory("Other") //
+                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
+                        ColumnSelection.Predefined.Segment) //
+                .build());
+        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.ContactId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory("Other") //
+                .build());
+        return cms;
+    }
+
 
 }

@@ -42,6 +42,12 @@ public class ContactFileValidationService
 
     @Override
     public void validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration) {
+        // first check entity match
+        if (contactFileValidationServiceConfiguration.isEnableEntityMatch()) {
+            log.info("skip check as entity match is true");
+            return;
+        }
+
         List<String> pathList = contactFileValidationServiceConfiguration.getPathList();
 
         CSVFormat format = LECSVFormat.format;

@@ -10,17 +10,18 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
-import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-app-context.xml" })
-public class AppTestNGBase extends AbstractTestNGSpringContextTests {
+public class AppDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Inject
-    protected GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
+    protected GlobalAuthDeploymentTestBed testBed;
 
     @Inject
     protected DynamoService dynamoService;
@@ -34,7 +35,7 @@ public class AppTestNGBase extends AbstractTestNGSpringContextTests {
     protected Tenant mainTestTenant;
 
     protected void setupTestEnvironmentWithOneTenant() {
-        globalAuthFunctionalTestBed.bootstrap(1);
-        mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
+        testBed.bootstrapForProduct(LatticeProduct.CG);
+        mainTestTenant = testBed.getMainTestTenant();
     }
 }

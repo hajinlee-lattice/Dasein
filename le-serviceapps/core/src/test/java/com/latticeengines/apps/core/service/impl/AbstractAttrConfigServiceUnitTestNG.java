@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -159,10 +160,10 @@ public class AbstractAttrConfigServiceUnitTestNG {
 
     }
 
-    @Test(groups = "unit")
-    public void testRenderMethodWithCornerCase() {
+    @Test(groups = "unit", dataProvider = "FeatureFlags")
+    public void testRenderMethodWithCornerCase(boolean entityMatchEnabled) {
         try {
-            cdlAttrConfigServiceImpl.render(null, null);
+            cdlAttrConfigServiceImpl.render(null, null, entityMatchEnabled);
         } catch (Exception e) {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_40022);
         }
@@ -170,22 +171,27 @@ public class AbstractAttrConfigServiceUnitTestNG {
         config.setAttrName(NamingUtils.timestamp(this.getClass().getSimpleName()));
         try {
             cdlAttrConfigServiceImpl.render(generateMetadataList(Category.FIRMOGRAPHICS),
-                    Arrays.asList(config, config));
+                    Arrays.asList(config, config), entityMatchEnabled);
         } catch (Exception e) {
             Assert.fail("Should not have thrown exception");
         }
         // system don't render internal attributes
         List<AttrConfig> renderedConfig = cdlAttrConfigServiceImpl.render(
-                Collections.singletonList(AttrConfigTestUtils.getAccountIdData(Category.ACCOUNT_ATTRIBUTES)), null);
+                Collections.singletonList(AttrConfigTestUtils.getAccountIdData(Category.ACCOUNT_ATTRIBUTES)), null,
+                entityMatchEnabled);
+        Assert.assertEquals(renderedConfig.size(), 0);
+        renderedConfig = cdlAttrConfigServiceImpl.render(
+                Collections.singletonList(AttrConfigTestUtils.getContactAccountIdData(Category.CONTACT_ATTRIBUTES)),
+                null, true);
         Assert.assertEquals(renderedConfig.size(), 0);
     }
 
-    @Test(groups = "unit")
-    public void testRender() {
+    @Test(groups = "unit", dataProvider = "FeatureFlags")
+    public void testRender(boolean entityMatchEnabled) {
         // default column metadata don't set flag canSegment, canEnrich,
         ColumnMetadata data = AttrConfigTestUtils.getLDCNonPremiumData(Category.FIRMOGRAPHICS);
         List<ColumnMetadata> dataList = Collections.singletonList(data);
-        List<AttrConfig> renderList = cdlAttrConfigServiceImpl.render(dataList, null);
+        List<AttrConfig> renderList = cdlAttrConfigServiceImpl.render(dataList, null, entityMatchEnabled);
         Assert.assertEquals(renderList.size(), dataList.size());
         AttrConfig config = renderList.get(0);
         Map<String, AttrConfigProp<?>> props = config.getAttrProps();
@@ -208,7 +214,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         data.setCanSegment(true);
         dataList = Collections.singletonList(data);
         // transfer null customer config
-        renderList = cdlAttrConfigServiceImpl.render(dataList, null);
+        renderList = cdlAttrConfigServiceImpl.render(dataList, null, entityMatchEnabled);
         Assert.assertEquals(renderList.size(), dataList.size());
         List<AttrConfig> expectedList = Collections
                 .singletonList(AttrConfigTestUtils.getLDCNonPremiumAttr(Category.FIRMOGRAPHICS, false));
@@ -222,31 +228,31 @@ public class AbstractAttrConfigServiceUnitTestNG {
         }
         Assert.assertEquals(renderList, expectedList);
         // transfer empty customer config
-        renderList = cdlAttrConfigServiceImpl.render(dataList, new ArrayList<>());
+        renderList = cdlAttrConfigServiceImpl.render(dataList, new ArrayList<>(), entityMatchEnabled);
         Assert.assertEquals(renderList.size(), dataList.size());
         Assert.assertEquals(renderList, expectedList);
         // transfer custom config with partial config
         config = new AttrConfig();
         config.setAttrName("LDC Non-Premium");
-        renderList = cdlAttrConfigServiceImpl.render(dataList, Arrays.asList(config));
+        renderList = cdlAttrConfigServiceImpl.render(dataList, Arrays.asList(config), entityMatchEnabled);
         Assert.assertEquals(expectedList, renderList);
         // transfer customer config
-        renderList = cdlAttrConfigServiceImpl.render(dataList, expectedList);
+        renderList = cdlAttrConfigServiceImpl.render(dataList, expectedList, entityMatchEnabled);
         Assert.assertEquals(expectedList, renderList);
     }
 
-    @Test(groups = "unit")
-    public void testRenderAndTrim() {
+    @Test(groups = "unit", dataProvider = "FeatureFlags")
+    public void testRenderAndTrim(boolean entityMatchEnabled) {
         // transfer one list of metadata, after two time's render and trim,
         // verify it same at two different times
         List<ColumnMetadata> metadataList = generateMetadataList(Category.FIRMOGRAPHICS);
         List<AttrConfig> customConfig = new ArrayList<>();
-        List<AttrConfig> renderConfig = cdlAttrConfigServiceImpl.render(metadataList, customConfig);
+        List<AttrConfig> renderConfig = cdlAttrConfigServiceImpl.render(metadataList, customConfig, entityMatchEnabled);
         List<AttrConfig> copiedList = new ArrayList<>();
         renderConfig.forEach(e -> copiedList.add(e.clone()));
 
         List<AttrConfig> trimConfig = cdlAttrConfigServiceImpl.trim(renderConfig);
-        List<AttrConfig> renderConfig2 = cdlAttrConfigServiceImpl.render(metadataList, trimConfig);
+        List<AttrConfig> renderConfig2 = cdlAttrConfigServiceImpl.render(metadataList, trimConfig, entityMatchEnabled);
 
         Assert.assertEquals(renderConfig.size(), renderConfig2.size());
         Assert.assertEquals(copiedList, renderConfig2);
@@ -343,6 +349,15 @@ public class AbstractAttrConfigServiceUnitTestNG {
                 AttrConfigTestUtils.getAnnualRevenue(), AttrConfigTestUtils.getCustomeAccountAttr(),
                 AttrConfigTestUtils.getContactId(), AttrConfigTestUtils.getContactFirstName());
         return renderedList;
+    }
+
+    // Schema: EntityMatchEnabled
+    @DataProvider(name = "FeatureFlags")
+    private Object[][] getFeatureFlags() {
+        return new Object[][] { //
+                { false }, //
+                { true }//
+        };
     }
 
     static class AttrConfigServiceTestImpl extends AbstractAttrConfigService {

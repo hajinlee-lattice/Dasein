@@ -2,12 +2,17 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -158,4 +163,25 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         }
         return feedType;
     }
+
+    protected void verifyAvroFileNumber(SourceFile sourceFile, int num, String path)
+            throws IOException {
+        String avroFileName = sourceFile.getName().substring(0, sourceFile.getName().lastIndexOf("."));
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, path, file -> !file.isDirectory()
+                && file.getPath().toString().contains(avroFileName) && file.getPath().getName().endsWith("avro"));
+        Assert.assertEquals(avroFiles.size(), 1);
+        String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
+        long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
+
+        Assert.assertEquals(rowCount, num);
+    }
+
+    protected void verifyFailed(SourceFile sourceFile, String entity) {
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
+                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(DEFAULT_SYSTEM, entity));
+
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.FAILED);
+    }
+
 }

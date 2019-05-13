@@ -30,8 +30,9 @@ import reactor.core.publisher.ParallelFlux;
 @Component
 public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore {
 
+    // EntityMatch enabled or not doesn't impact curated attrs metadata
     private static final Set<String> systemAttributes = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.CuratedAccount).stream() //
+            .getSystemAttributes(BusinessEntity.CuratedAccount, false).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     @Inject

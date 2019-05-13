@@ -13,7 +13,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -63,7 +62,7 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private RatingQueryService ratingQueryService;
 
-    @Autowired
+    @Inject
     private SparkSQLQueryTester sparkSQLQueryTester;
 
     @BeforeClass(groups = "functional")
@@ -97,8 +96,6 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName)), false));
 
-        String redshiftQueryStr = ratingQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        System.out.println("Redshift SQL: " + redshiftQueryStr);
         DataPage dataPage = ratingQueryService.getData(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
@@ -112,7 +109,6 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
         });
 
         String sparkQueryStr = ratingQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SPARK_BATCH_USER);
-        System.out.println("Spark SQL: " + sparkQueryStr);
         HdfsDataUnit sparkResult = sparkSQLQueryTester.getDataFromSpark(sparkQueryStr);
 
         Assert.assertEquals(sparkResult.getCount(), Long.valueOf(10)); // spark result has count
