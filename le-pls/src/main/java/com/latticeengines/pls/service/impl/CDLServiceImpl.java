@@ -338,6 +338,7 @@ public class CDLServiceImpl implements CDLService {
                             folderName));
                     display.setExist(Boolean.FALSE);
                     display.setTemplateName(entityType.getDefaultFeedTypeName());
+                    display.setEntity(entityType.getEntity());
                     display.setObject(entityType.getDisplayName());
                     display.setFeedType(folderName);
                     display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
@@ -356,6 +357,7 @@ public class CDLServiceImpl implements CDLService {
                         task.getSubType());
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
+                display.setEntity(entityType.getEntity());
                 display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
                 display.setImportStatus(task.getS3ImportStatus() == null ?
                         DataFeedTask.S3ImportStatus.Pause : task.getS3ImportStatus());
