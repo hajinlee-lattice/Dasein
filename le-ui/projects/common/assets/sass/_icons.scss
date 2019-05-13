@@ -401,6 +401,11 @@ Table of Contents
 		-webkit-mask-image: url("/assets/images/ico-targets.svg");
 		mask: url("/assets/images/ico-targets.svg");
 	}
+	&.ico-lattice-dots-color {
+		height: 15px;
+    	width: 14px;
+		background: url(/assets/images/enrichments/subcategories/latticeratings.png) no-repeat center center;
+	}
     &.ico-lattice-dots {
     	height: 15px;
     	width: 14px;

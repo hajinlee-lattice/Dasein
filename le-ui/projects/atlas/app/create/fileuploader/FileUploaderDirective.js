@@ -32,9 +32,6 @@ angular
                 }
 
                 this.getS3Files = function () {
-
-                    console.log(this.params);
-
                     $state.go('home.import.s3', {}, { reload: true } );
                 }
 

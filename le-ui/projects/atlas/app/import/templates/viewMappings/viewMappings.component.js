@@ -46,45 +46,44 @@ export default class ViewMappings extends Component {
         state.forceReload = true;
         state.entity = entity;
 
-        let postBody = {};
+        // let postBody = {};
+        // httpService.post(
+        //     "/pls/cdl/s3import/template/preview?feedType=" + feedType,
+        //     postBody,
+        //     new Observer(
+        //         response => {
+        //             if (response.getStatus() === SUCCESS) {
+        //                 console.log(response);
+        //                 state.latticeMappings = response;
+        //             }
+        //         },
+        //         error => {
+        //             console.log("error");
+        //         }
+        //     )
+        // );
 
-        httpService.post(
-            "/pls/cdl/s3import/template/preview?feedType=" + feedType,
-            postBody,
-            new Observer(
-                response => {
-                    if (response.getStatus() === SUCCESS) {
-                        console.log(response);
-                        state.latticeMappings = response;
-                    }
-                },
-                error => {
-                    console.log("error");
-                }
-            )
-        );
-
-        // state.latticeMappings = [
-        //     {
-        //         "fileName": "yo",
-        //         "latticeField": "homey",
-        //         "dataType": "String"
-        //     },
-        //     {
-        //         "fileName": "yo",
-        //         "latticeField": "homey",
-        //         "dataType": "String"
-        //     }
-        // ];
-        state.customMappings = [
+        state.latticeMappings = [
             {
-                "fileName": "yo",
-                "latticeField": "homey",
+                "fileName": "Company Name",
+                "latticeField": "Company Name",
                 "dataType": "String"
             },
             {
-                "fileName": "yo",
-                "latticeField": "homey",
+                "fileName": "Company Website",
+                "latticeField": "Company Website",
+                "dataType": "String"
+            }
+        ];
+        state.customMappings = [
+            {
+                "fileName": "Company Revenue",
+                "latticeField": "Company Revenue",
+                "dataType": "Numeric"
+            },
+            {
+                "fileName": "HQ Address 1",
+                "latticeField": "HQ Address 1",
                 "dataType": "String"
             }
         ];
@@ -176,7 +175,7 @@ export default class ViewMappings extends Component {
                             <div className="section-header"><h4>View {this.state.entity} Mappings</h4></div>
                             <hr />
                             <div className="section-body view-mappings with-padding">
-                                <h5>Lattice Fields</h5>
+                                <h5><i className="ico ico-lattice-dots-color"></i> Lattice Fields</h5>
                                 <LeTable
                                     name="lattice-fields"
                                     config={this.getLatticeFieldsConfig()}
@@ -186,7 +185,7 @@ export default class ViewMappings extends Component {
                                     data={this.state.latticeMappings}
                                 />
 
-                                <h5>Custom Fields</h5>
+                                <h5><i className="fa fa-cog"></i> Custom Fields</h5>
                                 <LeTable
                                     name="custom-fields"
                                     config={this.getCustomFieldsConfig()}

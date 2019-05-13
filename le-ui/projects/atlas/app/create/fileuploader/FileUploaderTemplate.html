@@ -38,7 +38,7 @@
         <input 
             type="file"
             accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
-            id="uploadBtn"
+            id="{{ vm_uploader_container.inputName }}"
             name="{{ vm_uploader_container.inputName }}"
             class="upload"
             onclick="this.value = null"
@@ -54,10 +54,11 @@
         <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
     </div>
     <div ng-if="vm_uploader.hasSthreeFiles == 'true'">
-        <button
+        <label
+            for="{{ vm_uploader_container.inputName }}"
             class="button white-button">
             Browse My Computer
-        </button>
+        </label>
         <button 
             class="button white-button"
             ng-click="vm_uploader_container.getS3Files()">
