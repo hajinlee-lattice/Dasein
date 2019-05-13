@@ -25,6 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -36,7 +37,6 @@ import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -55,14 +55,17 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     private PlayLaunchEntityMgr playLaunchEntityMgr;
 
     @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
+
+    @Inject
     DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override
-    public void create(PlayLaunch entity) {
-        playLaunchEntityMgr.create(entity);
+    public void create(PlayLaunch playLaunch) {
+        playLaunchEntityMgr.create(playLaunch);
     }
 
     @Override
@@ -143,7 +146,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 .filter(launchId -> StringUtils.isNotBlank(launchId)).collect(Collectors.toList());
         List<DataIntegrationStatusMonitor> dataIntegrationStatusMonitors = dataIntegrationStatusMonitoringEntityMgr
                 .getAllStatusesByEntityNameAndIds(MultiTenantContext.getTenant().getPid(), "PlayLaunch", launchIds);
-        log.debug("For given {} PlayLaunch objects, {} DataIntegrationStatus objects found", launchIds.size(), dataIntegrationStatusMonitors.size());
+        log.debug("For given {} PlayLaunch objects, {} DataIntegrationStatus objects found", launchIds.size(),
+                dataIntegrationStatusMonitors.size());
         if (CollectionUtils.isEmpty(dataIntegrationStatusMonitors)) {
             return;
         }
@@ -168,8 +172,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 : lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
-        Map<String, List<LookupIdMap>> uniqueLookupIdMapping =
-                mergeLookupIdMapping(allLookupIdMapping, uniqueOrgIdList);
+        Map<String, List<LookupIdMap>> uniqueLookupIdMapping = mergeLookupIdMapping(allLookupIdMapping,
+                uniqueOrgIdList);
         return uniqueLookupIdMapping;
     }
 
@@ -234,33 +238,5 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                     });
         }
         return uniqueLookupIdMapping;
-    }
-
-
-    @Override
-    public PlayLaunchConfigurations getPlayLaunchConfigurations(Long playId) {
-        PlayLaunchConfigurations configurations = new PlayLaunchConfigurations();
-        Tenant tenant = MultiTenantContext.getTenant();
-        Map<String, List<LookupIdMap>> allLookupIdMapping =
-                lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
-        configurations.setUniqueLookupIdMapping(allLookupIdMapping);
-        configurations.setLaunchConfigurations(createLaunchConfigurationMap(playId, allLookupIdMapping));
-        return configurations;
-    }
-
-    private Map<String, PlayLaunch> createLaunchConfigurationMap(Long playId,
-            Map<String, List<LookupIdMap>> allLookupIdMapping) {
-        Map<String, PlayLaunch> configurationMap = new HashMap<>();
-
-        if (MapUtils.isNotEmpty(allLookupIdMapping)) {
-            allLookupIdMapping.keySet().stream() //
-                    .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream().forEach(mapping -> {
-                        String orgId = mapping.getOrgId();
-                        configurationMap.put(orgId, findLatestByPlayAndSysOrg(playId, orgId));
-                    }));
-        }
-
-        return configurationMap;
     }
 }
