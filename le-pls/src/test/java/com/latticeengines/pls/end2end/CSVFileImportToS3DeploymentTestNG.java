@@ -54,7 +54,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
             importFile(display.getEntity().name(), display.getPath());
         }
         for (S3ImportTemplateDisplay display : templates) {
-            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace, display.getPath());
+            List<FileProperty> fileLists = dropBoxProxy.getFileListForPath(customerSpace, display.getPath(), "csv");
             log.info("under the path: " + display.getPath() + " , the fileLists is " + JsonUtils.serialize(fileLists));
             switch (display.getEntity().name()) {
                 case ENTITY_ACCOUNT:

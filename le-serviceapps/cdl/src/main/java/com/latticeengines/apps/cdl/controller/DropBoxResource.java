@@ -113,7 +113,8 @@ public class DropBoxResource {
     @GetMapping(value = "/fileList")
     @ApiOperation(value = "Get all files under path")
     public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace,
-                                               @RequestParam String s3Path) {
-        return dropBoxService.getFileListForPath(customerSpace, s3Path);
+                                               @RequestParam String s3Path,
+                                               @RequestParam(required = false, defaultValue = "") String filter) {
+        return dropBoxService.getFileListForPath(customerSpace, s3Path, filter);
     }
 }

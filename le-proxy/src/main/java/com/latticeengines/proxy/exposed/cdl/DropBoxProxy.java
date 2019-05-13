@@ -21,5 +21,5 @@ public interface DropBoxProxy {
 
     boolean importS3file(String customerSpace, String s3Path, String hdfsPath, String filename);
 
-    List<FileProperty> getFileListForPath(String customerSpace, String s3Path);
+    List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter);
 }

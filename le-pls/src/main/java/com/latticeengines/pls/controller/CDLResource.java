@@ -302,7 +302,7 @@ public class CDLResource {
     @ApiOperation("get file list under s3Path")
     public List<FileProperty> getFileList(@RequestParam String s3Path) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path);
+        return cdlService.getFileListForS3Path(customerSpace.toString(), s3Path, "csv");
     }
 
     @PostMapping(value = "/s3import/system")
