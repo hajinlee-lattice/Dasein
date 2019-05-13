@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
+import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractMatcher implements Matcher {
 
@@ -53,6 +56,17 @@ public abstract class AbstractMatcher implements Matcher {
 
     @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    @PostConstruct
+    public void initialize() {
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");
