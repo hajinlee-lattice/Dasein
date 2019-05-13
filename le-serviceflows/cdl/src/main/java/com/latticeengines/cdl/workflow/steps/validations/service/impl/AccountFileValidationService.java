@@ -46,6 +46,13 @@ public class AccountFileValidationService
     @Override
     public void validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration) {
 
+        // check entity match, change name to transformed name
+        boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
+        InterfaceName interfaceName = InterfaceName.AccountId;
+        if (enableEntityMatch) {
+            interfaceName = InterfaceName.CustomerAccountId;
+        }
+
         List<String> pathList = accountFileValidationServiceConfiguration.getPathList();
         CSVFormat format = LECSVFormat.format;
         // copy error file if file exists
@@ -82,7 +89,7 @@ public class AccountFileValidationService
 
                                 for (GenericRecord record : reader) {
                                     boolean rowError = false;
-                                    String id = getFieldValue(record, InterfaceName.AccountId.name());
+                                    String id = getFieldValue(record, interfaceName.name());
                                     if (StringUtils.isEmpty(id)) {
                                         id = getFieldValue(record, InterfaceName.Id.name());
                                     }
