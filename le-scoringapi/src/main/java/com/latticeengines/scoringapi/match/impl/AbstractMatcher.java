@@ -8,10 +8,10 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -34,10 +34,10 @@ import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
-import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractMatcher implements Matcher {
 
