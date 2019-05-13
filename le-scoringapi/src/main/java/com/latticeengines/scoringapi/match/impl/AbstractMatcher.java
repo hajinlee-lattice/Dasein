@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
-import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
 
@@ -52,10 +52,10 @@ public abstract class AbstractMatcher implements Matcher {
     protected List<MatchInputBuilder> matchInputBuilders;
 
     @Autowired
-    protected EnrichmentMetadataCache enrichmentMetadataCache;
+    protected ColumnMetadataProxy columnMetadataProxy;
 
     @Autowired
-    protected ColumnMetadataProxy columnMetadataProxy;
+    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");
