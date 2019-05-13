@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -232,13 +232,6 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         List list = get("get Play Launches", url, List.class);
         return JsonUtils.convertList(list, PlayLaunch.class);
     }
-    
-    @SuppressWarnings("rawtypes")
-    public PlayLaunchConfigurations getPlayLaunchConfigurations(String customerSpace, String playName) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/launches/configurations", shortenCustomerSpace(customerSpace), playName);
-        log.info("url is " + url);
-        return get("get PlayLaunchConfigurations", url, PlayLaunchConfigurations.class);
-    }
 
     public PlayLaunch getPlayLaunch(String customerSpace, String playName, String launchId) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
@@ -309,22 +302,22 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayType getPlayTypeById(String customerSpace, String playTypeId) {
-        String url =
-                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
         log.info("url is " + url);
         return get("get Play Type", url, PlayType.class);
     }
 
     public void updatePlayType(String customerSpace, String playTypeId, PlayType playType) {
-        String url =
-                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
         log.info("url is " + url);
         post("create new Play Types", url, playType, PlayType.class);
     }
 
     public void deletePlayTypeById(String customerSpace, String playTypeId) {
-        String url =
-                constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace), playTypeId);
+        String url = constructUrl(PLAY_TYPE_URL_PREFIX + "/{playTypeId}", shortenCustomerSpace(customerSpace),
+                playTypeId);
         log.info("url is " + url);
         delete("delete Play Type", url);
     }
@@ -360,5 +353,32 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
                 playGroupId);
         log.info("url is " + url);
         delete("delete Play Group", url);
+    }
+
+    public List<PlayLaunchChannel> getPlayLaunchChannels(String customerSpace, String playName,
+            Boolean includeUnlaunchedChannels) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels", shortenCustomerSpace(customerSpace), playName);
+        log.info("url is " + url);
+        List<String> params = new ArrayList<>();
+        params.add("include-unlaunched-channels=" + includeUnlaunchedChannels);
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+        return getList("get list of play launch channels", url, PlayLaunchChannel.class);
+    }
+
+    public PlayLaunchChannel createPlayLaunchChannel(String customerSpace, String playName,
+            PlayLaunchChannel playLaunchChannel) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels", shortenCustomerSpace(customerSpace), playName);
+        log.info("url is " + url);
+        return post("create play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
+    }
+
+    public PlayLaunchChannel updatePlayLaunchChannel(String customerSpace, String playName, String channelId,
+            PlayLaunchChannel playLaunchChannel) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
+                playName, channelId);
+        log.info("url is " + url);
+        return post("updae play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 }

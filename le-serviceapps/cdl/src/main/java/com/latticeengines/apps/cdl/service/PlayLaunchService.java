@@ -5,12 +5,11 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 
 public interface PlayLaunchService {
 
-    void create(PlayLaunch entity);
+    void create(PlayLaunch playLaunch);
 
     PlayLaunch findByLaunchId(String launchId);
 
@@ -21,7 +20,7 @@ public interface PlayLaunchService {
     List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> launchStates);
 
     PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> launchStates);
-    
+
     PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);
 
     List<PlayLaunch> findByState(LaunchState state);
@@ -34,6 +33,4 @@ public interface PlayLaunchService {
 
     Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp,
             String orgId, String externalSysType);
-    
-    PlayLaunchConfigurations getPlayLaunchConfigurations(Long playId);
 }

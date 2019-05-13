@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
@@ -38,7 +39,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchConfigurations;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -65,6 +66,9 @@ public class PlayResource {
 
     @Inject
     private PlayLaunchService playLaunchService;
+
+    @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
 
     @Inject
     private RatingEngineService ratingEngineService;
@@ -95,8 +99,7 @@ public class PlayResource {
     @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays( //
             @PathVariable String customerSpace, //
-            @RequestParam(value = "should-load-coverage", required = false,
-                    defaultValue = "false") Boolean shouldLoadCoverage, //
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "false") Boolean shouldLoadCoverage, //
             @RequestParam(value = "rating-engine-id", required = false) String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
@@ -108,8 +111,7 @@ public class PlayResource {
     @ApiOperation(value = "Get all deleted play ids for a tenant")
     public List<String> getDeletedPlayIds( //
             @PathVariable String customerSpace, //
-            @RequestParam(value = "for-cleanup-only", required = false,
-                    defaultValue = "false") Boolean forCleanupOnly) {
+            @RequestParam(value = "for-cleanup-only", required = false, defaultValue = "false") Boolean forCleanupOnly) {
         return playService.getAllDeletedPlayIds(forCleanupOnly);
     }
 
@@ -119,10 +121,8 @@ public class PlayResource {
     public Play getPlay(//
             @PathVariable String customerSpace, //
             @PathVariable String playName, //
-            @RequestParam(value = "should-load-coverage", required = false,
-                    defaultValue = "true") Boolean shouldLoadCoverage, //
-            @RequestParam(value = "consider-deleted", required = false,
-                    defaultValue = "false") Boolean considerDeleted) {
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "true") Boolean shouldLoadCoverage, //
+            @RequestParam(value = "consider-deleted", required = false, defaultValue = "false") Boolean considerDeleted) {
         Play play;
         if (shouldLoadCoverage) {
             play = playService.getFullPlayByName(playName, considerDeleted);
@@ -137,8 +137,7 @@ public class PlayResource {
     @ApiOperation(value = "Register a play")
     public Play createOrUpdate(//
             @PathVariable String customerSpace, //
-            @RequestParam(value = "should-load-coverage", required = false,
-                    defaultValue = "true") Boolean shouldLoadCoverage, //
+            @RequestParam(value = "should-load-coverage", required = false, defaultValue = "true") Boolean shouldLoadCoverage, //
             @RequestBody Play play) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
@@ -146,7 +145,7 @@ public class PlayResource {
             return null;
         }
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"Play is null"});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play is null" });
         }
         // TODO: Activate this in M24
         // if (StringUtils.isEmpty(play.getDisplayName())) {
@@ -167,9 +166,93 @@ public class PlayResource {
         playService.deleteByName(playName, hardDelete == Boolean.TRUE);
         return true;
     }
-    // -----
-    // Plays
-    // -----
+
+    // -------------
+    // Channels
+    // -------------
+
+    // TODO: change logic in proxy and pls
+    // TODO: update test cases to not include playlaunchchannelsummary
+    @GetMapping(value = "/{playName}/channels")
+    @ResponseBody
+    @ApiOperation(value = "For the given play, get a list of play launch channels")
+    public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @RequestParam(value = "include-unlaunched-channels", required = false, defaultValue = "false") Boolean includeUnlaunchedChannels) {
+        return playLaunchChannelService.getPlayLaunchChannels(playName, includeUnlaunchedChannels);
+    }
+
+    @PostMapping(value = "/{playName}/channels", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create play launch channel")
+    public PlayLaunchChannel createPlayLaunchChannel( //
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, @RequestBody PlayLaunchChannel playLaunchChannel) {
+        if (playLaunchChannel == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch channel object is null" });
+        }
+        if (playLaunchChannel.getPlayLaunch() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot create a Play launch Channel without play launch id" });
+        }
+        if (playLaunchChannel.getLookupIdMap() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot create a Play launch Channel without lookupIdMap id" });
+        }
+        if (playLaunchChannelService.findByPlayNameAndLookupIdMapId(playName,
+                playLaunchChannel.getLookupIdMap().getId()) != null) {
+            throw new LedpException(LedpCode.LEDP_18220,
+                    new String[] { playName, playLaunchChannel.getLookupIdMap().getId() });
+        }
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
+        }
+        playLaunchChannel.setPlay(play);
+        playLaunchChannel.setTenant(MultiTenantContext.getTenant());
+        playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
+        return playLaunchChannelService.create(playLaunchChannel);
+    }
+
+    @PostMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a play launch channel for a given play and channel id")
+    public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId, //
+            @RequestBody PlayLaunchChannel playLaunchChannel, //
+            HttpServletResponse response) {
+        if (StringUtils.isEmpty(channelId)) {
+            throw new LedpException(LedpCode.LEDP_18219, new String[] { "empty or blank channel Id" });
+        }
+        if (playLaunchChannel == null) {
+            throw new LedpException(LedpCode.LEDP_18219, new String[] { "Invalid play launch channel" });
+        }
+        if (!playLaunchChannel.getId().equals(channelId)) {
+            throw new LedpException(LedpCode.LEDP_18219,
+                    new String[] { "Channel Id is not the same for the Play launch channel being updated" });
+        }
+        if (playLaunchChannel.getPlayLaunch() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot update a Play launch Channel without play launch id" });
+        }
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
+        }
+        playLaunchChannel.setPlay(play);
+        playLaunchChannel.setTenant(MultiTenantContext.getTenant());
+        playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
+        return playLaunchChannelService.update(playLaunchChannel);
+    }
+
+    @PostMapping(value = "/launch-always-on", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Launch every play launch marked as always on")
+    public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
+
+        return false;
+    }
 
     // -------------
     // Play Launches
@@ -190,21 +273,21 @@ public class PlayResource {
             @PathVariable String customerSpace, //
             @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch) {
         if (playLaunch == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"Play launch object is null"});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch object is null" });
         }
 
         if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] {"Cannot create a Play launch without Destination Org  or Destination System"});
+                    new String[] { "Cannot create a Play launch without Destination Org  or Destination System" });
         }
 
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"No Play found with id: " + playName});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
 
-        List<PlayLaunch> playLaunches =
-                playLaunchService.findByPlayId(play.getPid(), Collections.singletonList(LaunchState.UnLaunched));
+        List<PlayLaunch> playLaunches = playLaunchService.findByPlayId(play.getPid(),
+                Collections.singletonList(LaunchState.UnLaunched));
 
         for (PlayLaunch launch : playLaunches) {
             if (playLaunch.getDestinationOrgId() == launch.getDestinationOrgId()) {
@@ -221,16 +304,6 @@ public class PlayResource {
         playLaunchService.create(playLaunch);
         return playLaunch;
     }
-
-    @GetMapping(value = "/{playName}/launches/configurations")
-    @ResponseBody
-    @ApiOperation(value = "For the given play, get a map between each system org and their most recent play launch")
-    public PlayLaunchConfigurations getPlayLaunchConfigurations(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName) {
-        return playLaunchService.getPlayLaunchConfigurations(getPlayId(playName));
-    }
-
-
 
     @GetMapping(value = "/{playName}/launches/{launchId}")
     @ResponseBody
@@ -251,18 +324,18 @@ public class PlayResource {
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         if (StringUtils.isEmpty(launchId)) {
-            throw new LedpException(LedpCode.LEDP_18205, new String[] {"empty or blank launch Id"});
+            throw new LedpException(LedpCode.LEDP_18205, new String[] { "empty or blank launch Id" });
         }
         if (playLaunch == null) {
-            throw new LedpException(LedpCode.LEDP_18205, new String[] {"Invalid play launch"});
+            throw new LedpException(LedpCode.LEDP_18205, new String[] { "Invalid play launch" });
         }
         if (!playLaunch.getId().equals(launchId)) {
             throw new LedpException(LedpCode.LEDP_18205,
-                    new String[] {"LaunchId is not the same for the Play launch being updated"});
+                    new String[] { "LaunchId is not the same for the Play launch being updated" });
         }
         if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] {"Cannot update a Play launch without Destination Org  or Destination System"});
+                    new String[] { "Cannot update a Play launch without Destination Org  or Destination System" });
         }
 
         Play play = playService.getPlayByName(playName, false);
@@ -285,17 +358,17 @@ public class PlayResource {
             @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
             boolean isDryRunMode) {
         if (StringUtils.isEmpty(launchId)) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"Empty or blank launch Id"});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank launch Id" });
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"No Play found by play Id: " + playName});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
         }
         PlayUtils.validatePlay(playName, play);
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         if (playLaunch == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {"No launch found by launchId: " + launchId});
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
         playLaunch.setPlay(play);
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
@@ -330,15 +403,11 @@ public class PlayResource {
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "play-name", required = false) String playName, //
-            @ApiParam(
-                    value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                            + "should consider play launches across all org ids and external system type",
-                    required = false) //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
             @RequestParam(value = "org-id", required = false) String orgId, //
-            @ApiParam(
-                    value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                            + "should consider play launches across all org ids and external system type",
-                    required = false) //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
             @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
@@ -366,15 +435,11 @@ public class PlayResource {
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "play-name", required = false) String playName, //
-            @ApiParam(
-                    value = "Org id for which to load dashboard info. Empty org id means dashboard " //
-                            + "should consider play launches across all org ids and external system type",
-                    required = false) //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
             @RequestParam(value = "org-id", required = false) String orgId, //
-            @ApiParam(
-                    value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
-                            + "should consider play launches across all org ids and external system type",
-                    required = false) //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
             @RequestParam(value = "external-sys-type", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates, //
@@ -441,9 +506,6 @@ public class PlayResource {
             playLaunchService.deleteByLaunchId(launchId, hardDelete == Boolean.TRUE);
         }
     }
-    // -------------
-    // Play Launches
-    // -------------
 
     // --------------
     // Talking Points
@@ -456,10 +518,10 @@ public class PlayResource {
             @PathVariable("playName") String playName) {
         playService.publishTalkingPoints(playName, customerSpace);
     }
-    // --------------
-    // Talking Points
-    // --------------
 
+    // --------------
+    // Private Methods
+    // --------------
     private String createTable(PlayLaunch playLaunch) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
 
@@ -486,7 +548,7 @@ public class PlayResource {
         if (StringUtils.isNotBlank(playName)) {
             Play play = playService.getPlayByName(playName, false);
             if (play == null) {
-                throw new LedpException(LedpCode.LEDP_18151, new String[] {playName});
+                throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
             }
             playId = play.getPid();
         }
@@ -508,7 +570,7 @@ public class PlayResource {
 
         if (coverageResponse == null || MapUtils.isNotEmpty(coverageResponse.getErrorMap())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Unable to validate validity of launch targets due to internal Error, please retry later"});
+                    "Unable to validate validity of launch targets due to internal Error, please retry later" });
         }
 
         Long accountsToLaunch = coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
@@ -521,7 +583,7 @@ public class PlayResource {
                 .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
-            throw new LedpException(LedpCode.LEDP_18176, new String[] {play.getName()});
+            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }
 }
