@@ -28,7 +28,6 @@ export default class S3FileList extends Component {
             enableButton: false,
             selectedItem: null,
             entity: '',
-            sourceFile: null,
             data: [],
             path: '',
             angularGoTo: '',
@@ -73,23 +72,23 @@ export default class S3FileList extends Component {
         let angularGoTo = '';
         switch (feedType) {
             case "AccountSchema": {
-                angularGoTo = 'home.import.data.accounts';
+                angularGoTo = 'home.import.data.accounts.ids';
                 break;
             }
             case "ContactSchema": {
-                angularGoTo = 'home.import.data.contacts';
+                angularGoTo = 'home.import.data.contacts.ids';
                 break;
             }
             case "TransactionSchema": {
-                angularGoTo = 'home.import.data.productpurchases';
+                angularGoTo = 'home.import.data.productpurchases.ids';
                 break;
             }
             case "BundleSchema": {
-                angularGoTo = 'home.import.data.productbundles';
+                angularGoTo = 'home.import.data.productbundles.ids';
                 break;
             }
             case "HierarchySchema": {
-                angularGoTo = 'home.import.data.producthierarchy';
+                angularGoTo = 'home.import.data.producthierarchy.ids';
                 break;
             }
         }
@@ -103,18 +102,20 @@ export default class S3FileList extends Component {
 
         // Get feedtype from selection on template list (AccountSchema, ContactSchema, etc.)
         let ImportWizardStore = this.ImportWizardStore;
-        let feedType = ImportWizardStore.getFeedType();
+        let entityType = ImportWizardStore.getEntityType();
 
         // Import from S3 file into our system
         let postBody = this.state.selectedItem;
         httpService.post(
-            "/pls/models/uploadfile/importFile?entity=" + feedType,
+            "/pls/models/uploadfile/importFile?entity=" + entityType,
             postBody,
             new Observer(
                 response => {
                     if (response.getStatus() === SUCCESS) {
                         console.log(response);
-                        this.setState({ sourceFile: response });
+                        let sourceFile = response.data.Result;
+                        ImportWizardStore.setCsvFileName(sourceFile.name);
+                        NgState.getAngularState().go(this.state.angularGoTo, {});
                     }
                 },
                 error => {
@@ -122,13 +123,6 @@ export default class S3FileList extends Component {
                 }
             )
         );
-
-        // Set CSV File Name
-        // let sourceFileName = this.state.sourceFile.name;
-        // ImportWizardStore.setCsvFileName(this.state.sourceFile.name);
-
-        // Go to correct route to get FieldMapping
-        // NgState.getAngularState().go(this.state.angularGoTo, {selectedItem: this.state.selectedItem});
     }
 
     selectFile = (fileObj) => {
