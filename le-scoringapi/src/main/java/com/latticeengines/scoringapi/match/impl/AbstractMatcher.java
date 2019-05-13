@@ -57,7 +57,6 @@ public abstract class AbstractMatcher implements Matcher {
     @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
-    @Inject
     protected InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Value("${common.pls.url}")
