@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -218,9 +217,10 @@ public class PlayResource {
     @RequestMapping(value = "/{playName}/channels", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "For the given play, get a map between each system org and their most recent play launch")
-    public PlayLaunchChannelMap PlayLaunchChannelMap(@PathVariable("playName") String playName) {
+    public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable("playName") String playName, //
+            @RequestParam(value = "include-unlaunched-channels", required = false, defaultValue = "false") Boolean includeUnlaunchedChannels) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return playProxy.getPlayLaunchChannelMap(tenant.getId(), playName);
+        return playProxy.getPlayLaunchChannels(tenant.getId(), playName, includeUnlaunchedChannels);
     }
 
     @RequestMapping(value = "/{playName}/channels", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -231,12 +231,8 @@ public class PlayResource {
             @PathVariable("playName") String playName, @RequestBody PlayLaunchChannel playLaunchChannel, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (StringUtils.isEmpty(playLaunchChannel.getCreatedBy())) {
-            playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
-        }
-        if (StringUtils.isEmpty(playLaunchChannel.getUpdatedBy())) {
-            playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        }
+        playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
+        playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel);
     }
 
@@ -250,12 +246,7 @@ public class PlayResource {
             @RequestBody PlayLaunchChannel playLaunchChannel, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (StringUtils.isEmpty(playLaunchChannel.getCreatedBy())) {
-            playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
-        }
-        if (StringUtils.isEmpty(playLaunchChannel.getUpdatedBy())) {
-            playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        }
+        playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel);
     }
 

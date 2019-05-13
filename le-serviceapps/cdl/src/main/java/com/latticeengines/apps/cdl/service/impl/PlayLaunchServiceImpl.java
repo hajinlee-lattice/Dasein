@@ -37,8 +37,6 @@ import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -240,34 +238,5 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                     });
         }
         return uniqueLookupIdMapping;
-    }
-
-    @Override
-    public PlayLaunchChannelMap getPlayLaunchChannelMap(String playName) {
-        PlayLaunchChannelMap channelMap = new PlayLaunchChannelMap();
-        Tenant tenant = MultiTenantContext.getTenant();
-        Map<String, List<LookupIdMap>> allLookupIdMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
-                true);
-        channelMap.setUniqueLookupIdMapping(allLookupIdMapping);
-        channelMap.setLaunchChannelMap(createLaunchChannelMap(playName, allLookupIdMapping));
-        return channelMap;
-    }
-
-    private Map<String, PlayLaunchChannel> createLaunchChannelMap(String playName,
-            Map<String, List<LookupIdMap>> allLookupIdMapping) {
-        Map<String, PlayLaunchChannel> configurationMap = new HashMap<>();
-
-        if (MapUtils.isNotEmpty(allLookupIdMapping)) {
-            allLookupIdMapping.keySet().stream() //
-                    .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream().forEach(mapping -> {
-                        String orgId = mapping.getOrgId();
-                        String configId = mapping.getId();
-                        configurationMap.put(orgId,
-                                playLaunchChannelService.findByPlayNameAndLookupIdMapId(playName, configId));
-                    }));
-        }
-
-        return configurationMap;
     }
 }

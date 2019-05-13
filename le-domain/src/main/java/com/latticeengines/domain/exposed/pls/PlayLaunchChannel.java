@@ -17,7 +17,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.OnDelete;
@@ -82,7 +81,8 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
@@ -107,22 +107,6 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     public String generateChannelId() {
         return String.format(PLAY_LAUNCH_CHANNEL_NAME_FORMAT, PLAY_LAUNCH_CHANNEL_NAME_PREFIX,
                 UUID.randomUUID().toString());
-    }
-
-    public PlayLaunchChannel(Tenant tenant, String createdBy, String updatedBy) {
-        this.tenant = tenant;
-        this.tenantId = tenant.getPid();
-        this.createdBy = createdBy;
-        this.updatedBy = updatedBy;
-        this.id = generateId();
-    }
-
-    public static String generateId() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String getIdForBIS(String type) {
-        return StringUtils.isNotEmpty(type) && type.equals("List") ? "ADefault" : type;
     }
 
     @Override

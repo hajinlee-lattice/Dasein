@@ -12,7 +12,10 @@ public interface PlayLaunchChannelService {
 
     List<PlayLaunchChannel> findByIsAlwaysOnTrue();
 
+    List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels);
+
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playName, String lookupId);
 
     PlayLaunchChannel findById(String channelId);
+
 }

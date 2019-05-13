@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 
 public interface PlayLaunchService {
@@ -34,6 +33,4 @@ public interface PlayLaunchService {
 
     Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp,
             String orgId, String externalSysType);
-
-    PlayLaunchChannelMap getPlayLaunchChannelMap(String playName);
 }

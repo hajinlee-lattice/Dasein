@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -356,10 +355,16 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         delete("delete Play Group", url);
     }
 
-    public PlayLaunchChannelMap getPlayLaunchChannelMap(String customerSpace, String playName) {
+    public List<PlayLaunchChannel> getPlayLaunchChannels(String customerSpace, String playName,
+            Boolean includeUnlaunchedChannels) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
-        return get("get PlayLaunchChannelMap", url, PlayLaunchChannelMap.class);
+        List<String> params = new ArrayList<>();
+        params.add("include-unlaunched-channels=" + includeUnlaunchedChannels);
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+        return getList("get list of play launch channels", url, PlayLaunchChannel.class);
     }
 
     public PlayLaunchChannel createPlayLaunchChannel(String customerSpace, String playName,

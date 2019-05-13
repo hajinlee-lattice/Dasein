@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannelMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -171,12 +170,16 @@ public class PlayResource {
     // -------------
     // Channels
     // -------------
+
+    // TODO: change logic in proxy and pls
+    // TODO: update test cases to not include playlaunchchannelsummary
     @GetMapping(value = "/{playName}/channels")
     @ResponseBody
-    @ApiOperation(value = "For the given play, get a map between each system org and their most recent play launch")
-    public PlayLaunchChannelMap getPlayLaunchChannelMap(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName) {
-        return playLaunchService.getPlayLaunchChannelMap(playName);
+    @ApiOperation(value = "For the given play, get a list of play launch channels")
+    public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @RequestParam(value = "include-unlaunched-channels", required = false, defaultValue = "false") Boolean includeUnlaunchedChannels) {
+        return playLaunchChannelService.getPlayLaunchChannels(playName, includeUnlaunchedChannels);
     }
 
     @PostMapping(value = "/{playName}/channels", headers = "Accept=application/json")
@@ -241,6 +244,14 @@ public class PlayResource {
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         return playLaunchChannelService.update(playLaunchChannel);
+    }
+
+    @PostMapping(value = "/launch-always-on", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Launch every play launch marked as always on")
+    public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
+
+        return false;
     }
 
     // -------------

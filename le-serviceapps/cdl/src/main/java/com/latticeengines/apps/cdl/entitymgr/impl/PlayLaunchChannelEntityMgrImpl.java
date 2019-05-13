@@ -76,6 +76,12 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunchChannel> findAll() {
+        return super.findAll();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunchChannel> findByIsAlwaysOnTrue() {
         return readerRepository.findByIsAlwaysOnTrue();
     }
@@ -105,7 +111,7 @@ public class PlayLaunchChannelEntityMgrImpl
     public PlayLaunchChannel updatePlayLaunchChannel(PlayLaunchChannel playLaunchChannel,
             PlayLaunchChannel existingPlayLaunchChannel) {
         existingPlayLaunchChannel.setPlayLaunch(findPlayLaunch(playLaunchChannel));
-        if(playLaunchChannel.getIsAlwaysOn() != null){
+        if (playLaunchChannel.getIsAlwaysOn() != null) {
             existingPlayLaunchChannel.setIsAlwaysOn(playLaunchChannel.getIsAlwaysOn());
         }
         playLaunchChannelDao.update(existingPlayLaunchChannel);
