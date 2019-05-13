@@ -359,7 +359,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     @Override
-    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path) {
+    public List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter) {
         final String delimiter = "/";
         String bucket = getDropBoxBucket();
         String prefix = PathUtils.formatKey(bucket, s3Path);
@@ -372,8 +372,10 @@ public class DropBoxServiceImpl implements DropBoxService {
             }
             fileName = PathUtils.formatPath(fileName);
             String fileType = PathUtils.getFileType(fileName);
-            if (fileName.contains("/") || fileType == null || !PathUtils.getFileType(fileName).equalsIgnoreCase("csv")) {
-                continue;
+            if (StringUtils.isNotEmpty(filter)) {
+                if (fileName.contains("/") || fileType == null || !fileType.equalsIgnoreCase(filter)) {
+                    continue;
+                }
             }
             FileProperty fileProperty = new FileProperty();
             fileProperty.setFileName(fileName);
