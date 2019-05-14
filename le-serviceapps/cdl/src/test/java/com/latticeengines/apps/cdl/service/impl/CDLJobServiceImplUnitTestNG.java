@@ -92,7 +92,7 @@ public class CDLJobServiceImplUnitTestNG {
         cdlJobService.concurrentProcessAnalyzeJobs = 8;
         cdlJobService.minimumScheduledJobCount = 3;
         cdlJobService.maximumScheduledJobCount = 5;
-        cdlJobService.isScheduledNew = false;
+        cdlJobService.isActivityBasedPA = false;
 
         CDLJobDetail cdlJobDetail = new CDLJobDetail();
         when(cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(Collections.singletonList(cdlJobDetail));
@@ -135,7 +135,7 @@ public class CDLJobServiceImplUnitTestNG {
         cdlJobService.minimumHighPriorityScheduledJobCount = 1;
         cdlJobService.maximumLowPriorityScheduledJobCount = 4;
         cdlJobService.minimumLowPriorityScheduledJobCount = 1;
-        cdlJobService.isScheduledNew = true;
+        cdlJobService.isActivityBasedPA = true;
 
         doReturn(false).when(cdlJobService).systemCheck();
         when(columnMetadataProxy.latestBuildNumber()).thenReturn("2.0.18.0");
@@ -166,7 +166,7 @@ public class CDLJobServiceImplUnitTestNG {
         actions.add(action);
         when(actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE)).thenReturn(actions);
 
-        when(batonService.isEnabled(any(CustomerSpace.class), eq(LatticeFeatureFlag.ALLOW_AUTO_DATA_CLOUD_REFRESH))).thenReturn(true);
+        when(batonService.isEnabled(any(CustomerSpace.class), eq(LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY))).thenReturn(true);
         doReturn(true).when(cdlJobService).checkDataCloudChange(anyString(), anyString());
 
         long currentTimeMillis = System.currentTimeMillis();
@@ -209,7 +209,7 @@ public class CDLJobServiceImplUnitTestNG {
         }
         Assert.assertNull(e);
 
-        if (!cdlJobService.isScheduledNew) {
+        if (!cdlJobService.isActivityBasedPA) {
             when(workflowProxy.queryByClusterIDAndTypesAndStatuses(anyString(), anyList(), anyList())).thenReturn(geTesttWorkflowJobs1());
             try {
                 cdlJobService.submitJob(CDLJobType.PROCESSANALYZE, null);

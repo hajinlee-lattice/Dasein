@@ -180,8 +180,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     int minimumLowPriorityScheduledJobCount;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.scheduled.value}")
-    boolean isScheduledNew;
+    @Value("${cdl.activity.based.pa}")
+    boolean isActivityBasedPA;
 
     @Value("${cdl.app.public.url:https://localhost:9081}")
     private String appPublicUrl;
@@ -227,7 +227,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 if (!systemCheck()) {
-                    if (isScheduledNew) {
+                    if (isActivityBasedPA) {
                         orchestrateJob_New();
                     } else {
                         orchestrateJob();
@@ -425,7 +425,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
                 try {
                     boolean allowAutoDataCloudRefresh = batonService.isEnabled(customerSpace,
-                            LatticeFeatureFlag.ALLOW_AUTO_DATA_CLOUD_REFRESH);
+                            LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY);
                     if (allowAutoDataCloudRefresh) {
                         activityObject.setDataCloudRefresh(checkDataCloudChange(currentBuildNumber, customerSpace.toString()));
                     }

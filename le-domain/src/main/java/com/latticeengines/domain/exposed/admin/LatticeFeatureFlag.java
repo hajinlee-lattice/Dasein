@@ -18,7 +18,7 @@ public enum LatticeFeatureFlag {
     ENABLE_ENTITY_MATCH("EnableEntityMatch", "Enable Entity Match"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
-    ALLOW_AUTO_DATA_CLOUD_REFRESH("AllowAutoDataCloudRefresh", "Allow Auto Data Cloud Refresh"), //
+    ENABLE_DATA_CLOUD_REFRESH_ACTIVITY("EnableDataCloudRefreshActivity", "Enable Data Cloud Refresh Activity"), //
     VDB_MIGRATION("VDBMigration", "VDB Migration"), //
     SCORE_EXTERNAL_FILE("ScoreExternalFile", "Score External File"), //
     ENABLE_FILE_IMPORT("EnableFileImport", "Enable File Import"), //

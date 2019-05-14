@@ -84,13 +84,13 @@ public class CDLServiceImpl implements CDLService {
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    @Value("${cdl.processAnalyze.scheduled.value}")
-    boolean isScheduledNew;
+    @Value("${cdl.activity.based.pa}")
+    boolean isActivityBasedPA;
 
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         checkPALimit(customerSpace, request);
-        if (isScheduledNew) {
+        if (isActivityBasedPA) {
             return cdlProxy.scheduleProcessAnalyze(customerSpace, false, request);
         } else {
             return cdlProxy.processAnalyze(customerSpace, request);
