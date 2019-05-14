@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator.sparksql;
 
+import static com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor.SPARK_TEST_GROUP;
 import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.util.Arrays;
@@ -34,13 +35,13 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
     @Autowired
     private SparkSQLQueryTester sparkSQLQueryTester;
 
-    @BeforeClass(groups = "spark")
+    @BeforeClass(groups = SPARK_TEST_GROUP)
     public void setupBase() {
         initializeAttributeRepo(3);
         setupQueryTester(customerSpace, attrRepo, tblPathMap);
     }
 
-    @AfterClass(groups = "spark", alwaysRun = true)
+    @AfterClass(groups = SPARK_TEST_GROUP, alwaysRun = true)
     public void teardown() {
         teardownQueryTester();
     }

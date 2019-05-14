@@ -1,18 +1,16 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.io.File;
-import java.io.IOException;
+import static com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor.SPARK_TEST_GROUP;
+
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -39,12 +37,14 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private static final String PRODUCT_ID = "6368494B622E0CB60F9C80FEB1D0F95F";
 
-    @BeforeClass(groups = "functional")
+    protected boolean isSparkSQLTest = false;
+
+    @BeforeClass(groups = { "functional", SPARK_TEST_GROUP })
     public void setup() {
         super.setupTestData(1);
     }
 
-    @DataProvider(name = "userContexts", parallel = false)
+    @DataProvider(name = "userContexts")
     private Object[][] provideSqlUserContexts() {
         return new Object[][] {
                 { SEGMENT_USER, "Redshift" }
@@ -59,18 +59,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return PRODUCT_ID;
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void testEventQuery() throws IOException {
-        String str = FileUtils.readFileToString(new File("/Users/ygao/Downloads/test_query_1_accountQ_in_seg.json"),
-                "Utf-8");
-        EventFrontEndQuery eventQuery = JsonUtils.deserialize(str, EventFrontEndQuery.class);
-        System.out.println("mainEntity for eQuery: " + eventQuery.getSegmentQuery().getMainEntity());
-
-        long count = getEventQueryService(null).getScoringCount(eventQuery, DataCollection.Version.Blue);
-        System.out.println("count: " + count);
-    }
-
-    @Test(groups = "functional", dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testScoringCount(String sqlUser, String queryContext) {
         // Ever, Amount > 0 and Quantity > 0
         AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN,
@@ -98,21 +87,23 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 .build();
         Restriction cntRestriction = Restriction.builder().or(cntRestriction1, cntRestriction2).build();
 
-        // only transaction restriction
-        verifyScoringQuery(sqlUser, txnRestriction, 832L);
+        Restriction restriction;
+        if (!isSparkSQLTest) {
+            // only transaction restriction
+            verifyScoringQuery(sqlUser, txnRestriction, 832L);
 
-        // only account restriction
-        verifyScoringQuery(sqlUser, accRestriction1, 9L);
-        verifyScoringQuery(sqlUser, accRestriction, 17L);
+            // only account restriction
+            verifyScoringQuery(sqlUser, accRestriction1, 9L);
+            verifyScoringQuery(sqlUser, accRestriction, 17L);
 
-        // only contact restriction
-        verifyScoringQuery(sqlUser, cntRestriction1, 18L);
-        verifyScoringQuery(sqlUser, cntRestriction, 23L);
+            // only contact restriction
+            verifyScoringQuery(sqlUser, cntRestriction1, 18L);
+            verifyScoringQuery(sqlUser, cntRestriction, 23L);
 
-        // account + transaction
-        Restriction restriction = Restriction.builder().and(accRestriction, txnRestriction).build();
-        verifyScoringQuery(sqlUser, restriction, 11L);
-
+            // account + transaction
+            restriction = Restriction.builder().and(accRestriction, txnRestriction).build();
+            verifyScoringQuery(sqlUser, restriction, 11L);
+        }
         // account + contact + transaction
         restriction = Restriction.builder().and(accRestriction, cntRestriction, txnRestriction).build();
         verifyScoringQuery(sqlUser, restriction, 1L);
@@ -129,7 +120,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         }
     }
 
-    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, expectedExceptions = QueryEvaluationException.class, dataProvider = "userContexts")
     public void testCrossPeriodQuery(String sqlUser, String queryContext) {
         Bucket.Transaction txn1 = new Bucket.Transaction(getProductId(), TimeFilter.ever(), null, null, false);
         TimeFilter timeFilter = TimeFilter.ever();
@@ -148,15 +139,21 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    @Test(groups = "functional", dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testHasEngaged(String sqlUser, String queryContext) {
         Bucket.Transaction txn = new Bucket.Transaction(getProductId(), TimeFilter.ever(), null, null, false);
+
         long scoringCount = countTxnBktForScoring(sqlUser, txn);
         testAndAssertCount(sqlUser, scoringCount, 832);
-        scoringCount = countTxnBktForScoringUsingSegmentQuery(sqlUser, txn);
-        testAndAssertCount(sqlUser, scoringCount, 832);
+
+        if (!isSparkSQLTest) {
+            scoringCount = countTxnBktForScoringUsingSegmentQuery(sqlUser, txn);
+            testAndAssertCount(sqlUser, scoringCount, 832);
+        }
+
         long trainingCount = countTxnBktForTraining(sqlUser, txn);
         testAndAssertCount(sqlUser, trainingCount, 16378);
+
         long eventCount = countTxnBktForEvent(sqlUser, txn);
         testAndAssertCount(sqlUser, eventCount, 5374);
     }
@@ -166,22 +163,6 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         EventFrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("dp6881.json");
         long count = getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
         testAndAssertCount(sqlUser, count, 8501);
-    }
-
-    @SuppressWarnings("unused")
-    private long countTxnBktForScoringFromDataPage(String sqlUser, Bucket.Transaction txn) {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
-        EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Bucket bucket = Bucket.txnBkt(txn);
-        Restriction restriction = new BucketRestriction(attrLookup, bucket);
-        frontEndRestriction.setRestriction(restriction);
-        frontEndQuery.setAccountRestriction(frontEndRestriction);
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        DataPage dataPage = getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
-        Assert.assertNotNull(dataPage.getData());
-        return dataPage.getData().size();
     }
 
     private long countTxnBktForScoring(String sqlUser, Bucket.Transaction txn) {

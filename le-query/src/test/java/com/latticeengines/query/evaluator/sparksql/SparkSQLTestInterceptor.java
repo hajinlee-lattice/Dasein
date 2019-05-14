@@ -14,14 +14,16 @@ import org.testng.ITestContext;
 
 public class SparkSQLTestInterceptor implements IMethodInterceptor {
 
+    public static final String SPARK_TEST_GROUP = "spark";
+
     private static final Logger log = LoggerFactory.getLogger(SparkSQLTestInterceptor.class);
 
     @Override
     public List<IMethodInstance> intercept(List<IMethodInstance> list, ITestContext iTestContext) {
         List<String> groups = Arrays.asList(iTestContext.getIncludedGroups());
-        if (CollectionUtils.isNotEmpty(groups) && !groups.contains("spark")) {
-            log.info("Groups [" + StringUtils.join(groups, ", ") + "] does not contain spark. " + //
-                    "Skip all tests.");
+        if (CollectionUtils.isNotEmpty(groups) && !groups.contains(SPARK_TEST_GROUP)) {
+            log.info("Groups [" + StringUtils.join(groups, ", ") + "] does not contain " //
+                    + SPARK_TEST_GROUP + ". Skip all tests.");
             return Collections.emptyList();
         } else {
             return list;
