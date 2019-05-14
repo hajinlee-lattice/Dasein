@@ -164,19 +164,19 @@ public class CDLJobServiceImpl implements CDLJobService {
     private CDLProxy cdlProxy;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.maximum.high.priority.scheduled.high.job.count}")
+    @Value("${cdl.processAnalyze.maximum.high.priority.scheduled.job.count}")
     int maximumHighPriorityScheduledJobCount;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.minimum.high.priority.scheduled.high.job.count}")
+    @Value("${cdl.processAnalyze.minimum.high.priority.scheduled.job.count}")
     int minimumHighPriorityScheduledJobCount;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.maximum.low.priority.scheduled.high.job.count}")
+    @Value("${cdl.processAnalyze.maximum.low.priority.scheduled.job.count}")
     int maximumLowPriorityScheduledJobCount;
 
     @VisibleForTesting
-    @Value("${cdl.processAnalyze.minimum.low.priority.scheduled.high.job.count}")
+    @Value("${cdl.processAnalyze.minimum.low.priority.scheduled.job.count}")
     int minimumLowPriorityScheduledJobCount;
 
     @VisibleForTesting
