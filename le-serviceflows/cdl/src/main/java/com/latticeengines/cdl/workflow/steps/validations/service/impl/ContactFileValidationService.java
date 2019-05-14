@@ -87,11 +87,14 @@ public class ContactFileValidationService
                                     if (StringUtils.isBlank(id)) {
                                         id = getFieldValue(record, InterfaceName.Id.name());
                                     }
+                                    // write avro data before continue;
                                     if (StringUtils.isNotBlank(id)) {
+                                        dataFileWriter.append(record);
                                         continue;
                                     }
                                     String email = getFieldValue(record, InterfaceName.Email.name());
                                     if (StringUtils.isNotBlank(email)) {
+                                        dataFileWriter.append(record);
                                         continue;
                                     }
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
