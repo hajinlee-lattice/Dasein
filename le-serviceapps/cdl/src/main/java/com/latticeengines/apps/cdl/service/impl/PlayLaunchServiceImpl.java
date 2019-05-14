@@ -35,11 +35,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
@@ -49,7 +49,10 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     private static final String NULL_KEY = "NULL_KEY";
 
     @Value("${aws.customer.export.s3.bucket}")
-    protected String exportS3Bucket;
+    private String s3CustomerExportBucket;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3CustomerBucket;
 
     @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
@@ -142,8 +145,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (CollectionUtils.isEmpty(launchSummaries)) {
             return;
         }
-        List<String> launchIds = launchSummaries.stream().map(ls -> ls.getLaunchId())
-                .filter(launchId -> StringUtils.isNotBlank(launchId)).collect(Collectors.toList());
+        List<String> launchIds = launchSummaries.stream().map(LaunchSummary::getLaunchId)
+                .filter(StringUtils::isNotBlank).collect(Collectors.toList());
         List<DataIntegrationStatusMonitor> dataIntegrationStatusMonitors = dataIntegrationStatusMonitoringEntityMgr
                 .getAllStatusesByEntityNameAndIds(MultiTenantContext.getTenant().getPid(), "PlayLaunch", launchIds);
         log.debug("For given {} PlayLaunch objects, {} DataIntegrationStatus objects found", launchIds.size(),
@@ -151,10 +154,12 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (CollectionUtils.isEmpty(dataIntegrationStatusMonitors)) {
             return;
         }
+
         Map<String, DataIntegrationStatusMonitor> dataIntegrationStatusMap = dataIntegrationStatusMonitors.stream()
-                .peek(sm -> sm.setS3Bucket(exportS3Bucket))
-                .collect(Collectors.toMap(dism -> dism.getEntityId(), dism -> dism));
+                .collect(Collectors.toMap(DataIntegrationStatusMonitor::getEntityId, dism -> dism));
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
+        launchSummaries.forEach(ls -> ls.getIntegrationStatusMonitor().setS3Bucket(
+                ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket : s3CustomerBucket));
     }
 
     @Override
@@ -167,14 +172,14 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType,
             boolean skipLoadingAllLookupIdMapping) {
-        Tenant tenant = MultiTenantContext.getTenant();
         Map<String, List<LookupIdMap>> allLookupIdMapping = skipLoadingAllLookupIdMapping ? null
-                : lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+                : LookupIdMapUtils.listToMap(lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true));
+
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
-        Map<String, List<LookupIdMap>> uniqueLookupIdMapping = mergeLookupIdMapping(allLookupIdMapping,
-                uniqueOrgIdList);
-        return uniqueLookupIdMapping;
+        return
+
+        mergeLookupIdMapping(allLookupIdMapping, uniqueOrgIdList);
     }
 
     @VisibleForTesting
@@ -195,9 +200,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (MapUtils.isNotEmpty(allLookupIdMapping)) {
             allLookupIdMapping.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream()
-                            .filter(mapping -> uniqueOrgIdSet //
-                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream().filter(mapping -> uniqueOrgIdSet //
+                            .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
                             .forEach(mapping -> {
                                 if (!uniqueLookupIdMapping.containsKey(k)) {
                                     uniqueLookupIdMapping.put(k, new ArrayList<>());
@@ -213,12 +217,12 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
         // handle orphan orgs
         if (CollectionUtils.isNotEmpty(uniqueOrgIdSet)) {
-            uniqueOrgIdSet.stream() //
+            uniqueOrgIdSet //
                     .forEach(org -> {
                         String orgId = org.getLeft();
                         String externalSysType = org.getRight();
                         LookupIdMap lookupIdMap = new LookupIdMap();
-                        String key = null;
+                        String key;
                         CDLExternalSystemType externalSystemTypeEnum;
 
                         if (StringUtils.isBlank(externalSysType)

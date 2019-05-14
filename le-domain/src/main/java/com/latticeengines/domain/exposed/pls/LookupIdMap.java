@@ -72,16 +72,16 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     private CDLExternalSystemType externalSystemType;
 
     @JsonProperty(CDLConstants.EXTERNAL_SYSTEM_NAME)
-    @Column(name = "EXT_SYS_NAME", nullable = true)
+    @Column(name = "EXT_SYS_NAME")
     @Enumerated(EnumType.STRING)
     private CDLExternalSystemName externalSystemName;
 
     @JsonProperty("accountId")
-    @Column(name = "ACCOUNT_ID", nullable = true)
+    @Column(name = "ACCOUNT_ID")
     private String accountId;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @JsonIgnore

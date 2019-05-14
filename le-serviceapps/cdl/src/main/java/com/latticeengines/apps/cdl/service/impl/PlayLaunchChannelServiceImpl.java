@@ -1,12 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,7 +20,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
-    @Inject
+@Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
     @Inject
@@ -63,30 +61,25 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
-        List<PlayLaunchChannel> channelList = playLaunchChannelEntityMgr.findAll();
+        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findAll();
         if (includeUnlaunchedChannels) {
-            channelList = createChannelListWithUnlaunchedChannels(channelList);
+            addUnlaunchedChannels(channels);
         }
 
-        return channelList;
+        return channels;
     }
 
-    private List<PlayLaunchChannel> createChannelListWithUnlaunchedChannels(List<PlayLaunchChannel> channelList) {
-        Map<String, List<LookupIdMap>> allLookupIdMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
-                true);
-        if (MapUtils.isNotEmpty(allLookupIdMapping)) {
-            allLookupIdMapping.keySet().stream() //
-                    .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream().forEach(mapping -> {
-                        addToListIfDoesntExist(mapping, channelList);
-                    }));
+    private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
+        List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        if (CollectionUtils.isNotEmpty(allConnections)) {
+            allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels));
         }
-        return channelList;
+        return channels;
     }
 
-    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channelList) {
+    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels) {
         String configId = mapping.getId();
-        for (PlayLaunchChannel channel : channelList) {
+        for (PlayLaunchChannel channel : channels) {
             if (channel.getLookupIdMap().getId().equals(configId)) {
                 return;
             }

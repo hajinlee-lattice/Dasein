@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -78,7 +77,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
     public void testFindAll() {
         List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr.findAuthentications();
         assertNotNull(extSysAuthList);
-        assertTrue(extSysAuthList.size() == 1);
+        assertEquals(extSysAuthList.size(), 1);
 
         // Check whether it loaded the transient value LookupMapConfigId
         ExternalSystemAuthentication extSysAuth = extSysAuthList.get(0);
@@ -95,7 +94,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         updatedSysAuth.setId(extSysAuth.getId());
         updatedSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         updatedSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
-        updatedSysAuth = extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
+        extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
         try {
             Thread.sleep(2000L);
         } catch (InterruptedException e) {
@@ -115,7 +114,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr
                 .findAuthenticationsByLookupMapIds(lookupMapIds);
         assertNotNull(extSysAuthList);
-        assertTrue(extSysAuthList.size() == 1);
+        assertEquals(extSysAuthList.size(), 1);
 
         // Check whether it loaded the transient value LookupMapConfigId
         ExternalSystemAuthentication extSysAuth = extSysAuthList.get(0);
