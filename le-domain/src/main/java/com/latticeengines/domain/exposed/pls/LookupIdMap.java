@@ -19,6 +19,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -41,8 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "LOOKUP_ID_MAP", //
         indexes = { @Index(name = "LOOKUP_ID_MAP_CONFIG_ID", columnList = "ID") }, //
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
@@ -72,16 +72,16 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     private CDLExternalSystemType externalSystemType;
 
     @JsonProperty(CDLConstants.EXTERNAL_SYSTEM_NAME)
-    @Column(name = "EXT_SYS_NAME", nullable = true)
+    @Column(name = "EXT_SYS_NAME")
     @Enumerated(EnumType.STRING)
     private CDLExternalSystemName externalSystemName;
 
     @JsonProperty("accountId")
-    @Column(name = "ACCOUNT_ID", nullable = true)
+    @Column(name = "ACCOUNT_ID")
     private String accountId;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION")
     private String description;
 
     @JsonIgnore
@@ -105,8 +105,12 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     private Boolean isRegistered;
 
     @JsonProperty("externalAuthentication")
-    @OneToOne(mappedBy="lookupIdMap", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "lookupIdMap", fetch = FetchType.EAGER)
     private ExternalSystemAuthentication externalAuthentication;
+
+    @JsonProperty("exportFolder")
+    @Transient
+    private String exportFolder;
 
     @Override
     public Long getPid() {
@@ -220,6 +224,14 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setExternalAuthentication(ExternalSystemAuthentication externalAuthentication) {
         this.externalAuthentication = externalAuthentication;
+    }
+
+    public String getExportFolder() {
+        return exportFolder;
+    }
+
+    public void setExportFolder(String exportFolder) {
+        this.exportFolder = exportFolder;
     }
 
     @Override

@@ -12,7 +12,7 @@ val mapper = new ObjectMapper() with ScalaObjectMapper
 mapper.registerModule(DefaultScalaModule)
 
 val spark = SparkSession.builder().appName("SparkSession").getOrCreate()
-val checkpointDir = """{{CHECKPOINT_DIR}}""";
+val checkpointDir = """{{CHECKPOINT_DIR}}"""
 if (checkpointDir.length > 0) {
   spark.sparkContext.setCheckpointDir(checkpointDir)
   println("----- BEGIN SCRIPT OUTPUT -----")
