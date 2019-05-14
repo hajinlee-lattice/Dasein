@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
-import org.testng.annotations.Listeners;
 
 @Listeners(SparkSQLTestInterceptor.class)
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements RedshiftAndSparkQueryTester {
