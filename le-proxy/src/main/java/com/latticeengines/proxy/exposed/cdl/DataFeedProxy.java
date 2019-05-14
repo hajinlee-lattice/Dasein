@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -155,6 +156,11 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         post("updateDataFeedNextInvokeTime", url, time);
     }
 
+    public void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/updatescheduletime?scheduleNow={scheduleNow}",
+                shortenCustomerSpace(customerSpace), scheduleNow);
+        post("updateDataFeedScheduleTime", url, request);
+    }
 
     public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{dataFeedType}/{entity}/exist",

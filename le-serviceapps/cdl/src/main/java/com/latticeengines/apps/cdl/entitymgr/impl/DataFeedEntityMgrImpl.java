@@ -256,7 +256,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         List<DataFeed> dataFeeds = findAll();
-        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
+        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime(),
+                df.isScheduleNow(), df.getScheduleTime(), df.getScheduleRequest()))
                 .collect(Collectors.toList());
     }
 
@@ -264,7 +265,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version) {
         List<DataFeed> dataFeeds = datafeedRepository.getDataFeedsByTenantStatus(status, version);
-        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime()))
+        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus(), df.getNextInvokeTime(),
+                df.isScheduleNow(), df.getScheduleTime(), df.getScheduleRequest()))
                 .collect(Collectors.toList());
     }
 

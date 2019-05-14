@@ -26,7 +26,9 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
@@ -289,6 +291,24 @@ public class DataFeedServiceImpl implements DataFeedService {
             throw new NullPointerException("Datafeed is null. Cannot update next invoke time.");
         } else {
             datafeed.setNextInvokeTime(time);
+            datafeedEntityMgr.update(datafeed);
+        }
+    }
+
+    @Override
+    public void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, "");
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update schedule time.");
+        } else {
+            datafeed.setScheduleNow(scheduleNow);
+            if (scheduleNow) {
+                datafeed.setScheduleTime(new Date());
+                datafeed.setScheduleRequest(JsonUtils.serialize(request));
+            } else {
+                datafeed.setScheduleTime(null);
+                datafeed.setScheduleRequest(null);
+            }
             datafeedEntityMgr.update(datafeed);
         }
     }

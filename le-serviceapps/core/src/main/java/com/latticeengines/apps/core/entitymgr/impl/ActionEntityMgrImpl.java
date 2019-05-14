@@ -19,6 +19,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 
 @Component("actionEntityMgr")
 public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Long> implements ActionEntityMgr {
@@ -102,5 +103,11 @@ public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Lon
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Action> getActionsByJobPids(List<Long> jobPids) {
         return actionRepository.findAllByTrackingPidIn(jobPids);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus) {
+        return actionRepository.findByOwnerIdAndActionStatus(ownerId, actionStatus);
     }
 }

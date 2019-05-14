@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -126,6 +127,11 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public List<Action> getActionsByJobPids(List<Long> jobPids) {
         return actionEntityMgr.getActionsByJobPids(jobPids);
+    }
+
+    @Override
+    public List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus) {
+        return actionEntityMgr.findByOwnerIdAndActionStatus(ownerId, actionStatus);
     }
 
 }
