@@ -17,13 +17,25 @@ public class SimpleDataFeed {
     @JsonProperty("nextinvoketime")
     private Date nextInvokeTime;
 
+    @JsonProperty("schedulenow")
+    private boolean scheduleNow = false;
+
+    @JsonProperty("scheduletime")
+    private Date scheduleTime;
+
+    @JsonProperty("schedulerequest")
+    private String scheduleRequest;
+
     public SimpleDataFeed() {
     }
 
-    public SimpleDataFeed(Tenant tenant, Status status, Date nextInvokeTime) {
+    public SimpleDataFeed(Tenant tenant, Status status, Date nextInvokeTime, Boolean scheduleNow, Date scheduleTime, String scheduleRequest) {
         this.tenant = tenant;
         this.status = status;
         this.nextInvokeTime = nextInvokeTime;
+        this.scheduleNow = scheduleNow;
+        this.scheduleTime = scheduleTime;
+        this.scheduleRequest = scheduleRequest;
     }
 
     public Tenant getTenant() {
@@ -48,5 +60,29 @@ public class SimpleDataFeed {
 
     public void setNextInvokeTime(Date nextInvokeTime) {
         this.nextInvokeTime = nextInvokeTime;
+    }
+
+    public boolean isScheduleNow() {
+        return scheduleNow;
+    }
+
+    public void setScheduleNow(boolean scheduleNow) {
+        this.scheduleNow = scheduleNow;
+    }
+
+    public Date getScheduleTime() {
+        return scheduleTime;
+    }
+
+    public void setScheduleTime(Date scheduleTime) {
+        this.scheduleTime = scheduleTime;
+    }
+
+    public String getScheduleRequest() {
+        return scheduleRequest;
+    }
+
+    public void setScheduleRequest(String scheduleRequest) {
+        this.scheduleRequest = scheduleRequest;
     }
 }

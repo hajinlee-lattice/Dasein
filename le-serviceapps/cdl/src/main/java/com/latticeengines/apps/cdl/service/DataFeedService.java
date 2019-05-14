@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.Date;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -64,4 +65,6 @@ public interface DataFeedService {
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
 
     Boolean unblockPA(String customerSpace, Long workflowId);
+
+    void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request);
 }

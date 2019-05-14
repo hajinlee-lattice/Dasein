@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -112,11 +113,22 @@ public class DefaultDataFeedController {
 
     @PostMapping(value = "/updatenextinvoketime")
     @ResponseBody
-    @ApiOperation(value = "update data feed status by name")
+    @ApiOperation(value = "update data feed next invoke time by name")
     public void updateDataFeedNextInvokeTime(@PathVariable String customerSpace, @RequestBody(required = false) Date time) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.updateDataFeedNextInvokeTime(customerSpace, time);
     }
+
+    @PostMapping(value = "/updatescheduletime")
+    @ResponseBody
+    @ApiOperation(value = "update data feed schedule time by name")
+    public void updateDataFeedScheduleTime(@PathVariable String customerSpace,
+                                           @RequestParam Boolean scheduleNow,
+                                           @RequestBody(required = false) ProcessAnalyzeRequest request) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        datafeedService.updateDataFeedScheduleTime(customerSpace, scheduleNow, request);
+    }
+
 
     @GetMapping(value = "/jobtype/{jobType}/latestexecution")
     @ResponseBody
