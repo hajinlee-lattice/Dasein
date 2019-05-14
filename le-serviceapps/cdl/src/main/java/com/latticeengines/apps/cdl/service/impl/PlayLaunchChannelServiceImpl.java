@@ -93,7 +93,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
         PlayLaunchChannel newChannel = new PlayLaunchChannel();
         newChannel.setLookupIdMap(mapping);
-        return;
     }
 
 }

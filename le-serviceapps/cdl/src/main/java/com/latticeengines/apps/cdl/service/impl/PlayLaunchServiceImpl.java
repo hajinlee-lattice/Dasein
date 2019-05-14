@@ -58,7 +58,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     private PlayLaunchChannelService playLaunchChannelService;
 
     @Inject
-    DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
+    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
