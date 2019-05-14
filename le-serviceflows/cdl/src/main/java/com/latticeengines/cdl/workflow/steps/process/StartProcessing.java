@@ -199,7 +199,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (MapUtils.isEmpty(dcStatus.getDateMap())) {
             dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
         }
-        dcStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
     }
