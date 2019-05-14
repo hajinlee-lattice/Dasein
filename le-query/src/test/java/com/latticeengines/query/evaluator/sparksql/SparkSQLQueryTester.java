@@ -74,6 +74,8 @@ public class SparkSQLQueryTester {
             reuseLivyEnvironment(reuseLivySession);
         } else {
             setupLivyEnvironment();
+            // comment out this statement to reuse the livy session in next run
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> sessionService.stopSession(session)));
         }
     }
 
