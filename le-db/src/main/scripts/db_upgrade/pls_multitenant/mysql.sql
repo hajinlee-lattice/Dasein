@@ -80,6 +80,29 @@ ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_NOW` boolean NULL 
 ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_TIME` DATETIME DEFAULT NULL;
 ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_REQUEST` VARCHAR(4000) DEFAULT NULL;
 
+create table `PLAY_LAUNCH_CHANNEL` 
+  (
+    `PID` bigint not null auto_increment, 
+    `CREATED` datetime not null, 
+    `CREATED_BY` varchar(255) not null, 
+    `ID` varchar(255) not null, 
+    `ALWAYS_ON` bit, 
+    `TENANT_ID` bigint not null, 
+    `UPDATED` datetime not null, 
+    `UPDATED_BY` varchar(255) not null, 
+    `FK_LOOKUP_ID_MAP_ID` bigint not null, 
+    `FK_PLAY_ID` bigint not null, 
+    `FK_PLAY_LAUNCH_ID` bigint not null, 
+    `FK_TENANT_ID` bigint not null, 
+    primary key (`PID`)
+  ) 
+engine=InnoDB;
+
+alter table `PLAY_LAUNCH_CHANNEL` add constraint `FK_PLAYLAUNCHCHANNEL_FKLOOKUPIDMAPID_LOOKUPIDMAP` foreign key (`FK_LOOKUP_ID_MAP_ID`) references `LOOKUP_ID_MAP` (`PID`) on delete cascade;
+alter table `PLAY_LAUNCH_CHANNEL` add constraint `FK_PLAYLAUNCHCHANNEL_FKPLAYID_PLAY` foreign key (`FK_PLAY_ID`) references `PLAY` (`PID`) on delete cascade;
+alter table `PLAY_LAUNCH_CHANNEL` add constraint `FK_PLAYLAUNCHCHANNEL_FKPLAYLAUNCHID_PLAYLAUNCH` foreign key (`FK_PLAY_LAUNCH_ID`) references `PLAY_LAUNCH` (`PID`) on delete cascade;
+alter table `PLAY_LAUNCH_CHANNEL` add constraint `FK_PLAYLAUNCHCHANNEL_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+
   END;
 //
 DELIMITER;
