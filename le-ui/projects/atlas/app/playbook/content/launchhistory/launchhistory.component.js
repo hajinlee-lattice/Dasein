@@ -1,4 +1,4 @@
-import { MARKETO, SALESFORCE, ELOQUA } from 'atlas/connectors/connectors.service';
+import { MARKETO, SALESFORCE, ELOQUA, AWS_S3 } from 'atlas/connectors/connectors.service';
 
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
@@ -254,6 +254,11 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             default: 
                 return launchSummary.stats.accountErrors;
         }
+    }
+
+    vm.isS3Launch = function(launchSummary) {
+        var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
+        return destinationSysName == AWS_S3;
     }
 
     vm.init();
