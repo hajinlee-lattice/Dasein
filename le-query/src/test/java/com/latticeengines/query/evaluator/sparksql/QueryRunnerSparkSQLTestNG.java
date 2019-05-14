@@ -17,7 +17,9 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryRunnerTestNG;
+import org.testng.annotations.Listeners;
 
+@Listeners(SparkSQLTestInterceptor.class)
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements RedshiftAndSparkQueryTester {
 
     private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
@@ -32,18 +34,18 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
     @Autowired
     private SparkSQLQueryTester sparkSQLQueryTester;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "spark")
     public void setupBase() {
         initializeAttributeRepo(3);
         setupQueryTester(customerSpace, attrRepo, tblPathMap);
     }
 
-    @AfterClass(groups = "functional", alwaysRun = true)
+    @AfterClass(groups = "spark", alwaysRun = true)
     public void teardown() {
         teardownQueryTester();
     }
 
-    @DataProvider(name = "userContexts", parallel = false)
+    @DataProvider(name = "userContexts")
     private Object[][] provideSqlUserContexts() {
         return new Object[][] {
                 { SQL_USER, "Redshift" },
@@ -51,7 +53,7 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
         };
     }
 
-    @DataProvider(name = "bitEncodedData", parallel = false)
+    @DataProvider(name = "bitEncodedData")
     private Object[][] provideBitEncodedDataWithSparkUser() {
         Object[][] basicTests = super.getBitEncodedTestData();
 
