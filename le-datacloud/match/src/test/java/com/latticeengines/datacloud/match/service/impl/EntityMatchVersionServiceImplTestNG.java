@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final String TEST_TABLE = "CDLMatchServingDev_20181126";
     private static final Tenant TEST_BASIC_OPERATION_TENANT = new Tenant("test_version_basic_operation");
     private static final Tenant TEST_CACHE_TENANT = new Tenant("test_version_cache");
     private static final List<Tenant> TEST_TENANTS = Arrays.asList(
@@ -25,12 +24,6 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
 
     @Inject
     private EntityMatchVersionServiceImpl entityMatchVersionService;
-
-    @BeforeClass(groups = "functional")
-    private void setupShared() {
-        // mock table
-        entityMatchVersionService.setTableName(TEST_TABLE);
-    }
 
     @BeforeClass(groups = "functional")
     @AfterClass(groups = "functional")

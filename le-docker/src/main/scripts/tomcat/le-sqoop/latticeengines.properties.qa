@@ -913,9 +913,9 @@ datacloud.match.dynamo.fetchers.chunk.size=25
 datacloud.match.publish.match.history=false
 
 # Entity match
-datacloud.match.entity.staging.shards=2
-datacloud.match.entity.staging.table=CDLMatchDev_20181126
-datacloud.match.entity.serving.table=CDLMatchServingDev_20181126
+datacloud.match.entity.staging.shards=5
+datacloud.match.entity.staging.table=EntitySeedLookup_Staging_20190305
+datacloud.match.entity.serving.table=EntitySeedLookup_Serving_20190305
 datacloud.match.entity.staging.ttl=86400
 datacloud.match.entity.lookup.resolve.num.threads=4
 datacloud.match.entity.cache.version.ttl=1800
