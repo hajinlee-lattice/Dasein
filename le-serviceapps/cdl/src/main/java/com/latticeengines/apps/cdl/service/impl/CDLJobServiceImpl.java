@@ -757,7 +757,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                     request.setUserId(USERID);
                 }
 
-                applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), false, request);
+                applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
             }
             List<Object> list = new ArrayList<>();
             list.add(tenant.getName());
