@@ -1056,8 +1056,8 @@ datacloud.match.publish.match.history=true
 
 # Entity match
 datacloud.match.entity.staging.shards=10
-datacloud.match.entity.staging.table=CDLMatchDev_20181126
-datacloud.match.entity.serving.table=CDLMatchServingDev_20181126
+datacloud.match.entity.staging.table=EntitySeedLookup_Staging_20190305
+datacloud.match.entity.serving.table=EntitySeedLookup_Serving_20190305
 datacloud.match.entity.staging.ttl=2629746
 
 datacloud.yarn.container.mem.mb=8192

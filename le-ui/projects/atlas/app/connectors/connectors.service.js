@@ -1,6 +1,7 @@
 export const MARKETO = 'Marketo';
 export const SALESFORCE = 'Salesforce';
 export const ELOQUA = 'Eloqua';
+export const AWS_S3 = 'AWS_S3';
 
 import messageService from 'common/app/utilities/messaging-service';
 import Message, {

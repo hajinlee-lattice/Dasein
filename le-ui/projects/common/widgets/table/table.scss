@@ -49,6 +49,7 @@ $font-size: 12px;
         }
         &.selected{
             background-color: $saphire-two;
+            color: #fff;
         }
         &.selected:hover{
             background-color: $saphire-two;

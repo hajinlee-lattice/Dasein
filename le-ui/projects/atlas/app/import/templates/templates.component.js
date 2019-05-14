@@ -115,7 +115,8 @@ export default class TemplatesComponent extends Component {
     createTemplate = (response) => {
         let params = {
             importOnly: (response.action == 'import-data') ? true : false,
-            action: response.action
+            action: response.action,
+            data: response.data
         }
 
         let goTo = `home.import.entry.${this.state.entity}`;
