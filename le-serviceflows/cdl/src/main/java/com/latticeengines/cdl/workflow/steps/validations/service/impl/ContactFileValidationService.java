@@ -91,8 +91,8 @@ public class ContactFileValidationService
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
                                     String lastName = getFieldValue(record, InterfaceName.LastName.name());
                                     String phone = getFieldValue(record, InterfaceName.PhoneNumber.name());
-                                    if (StringUtils.isBlank(id) || StringUtils.isBlank(email)
-                                            || (StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)
+                                    if (StringUtils.isBlank(id) && StringUtils.isBlank(email)
+                                            && (StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)
                                             && StringUtils.isBlank(phone))) {
                                         String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                         String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
