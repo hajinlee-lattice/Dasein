@@ -8,6 +8,7 @@ import org.springframework.lang.Nullable;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 
 public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
 
@@ -26,4 +27,6 @@ public interface ActionEntityMgr extends BaseEntityMgrRepository<Action, Long> {
     void cancel(Long actionPid);
 
     List<Action> getActionsByJobPids(List<Long> jobPid);
+
+    List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus);
 }

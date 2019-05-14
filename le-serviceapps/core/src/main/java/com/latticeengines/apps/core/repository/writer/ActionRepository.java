@@ -8,6 +8,7 @@ import org.springframework.lang.Nullable;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 
 public interface ActionRepository extends BaseJpaRepository<Action, Long> {
 
@@ -20,4 +21,6 @@ public interface ActionRepository extends BaseJpaRepository<Action, Long> {
     List<Action> findByPidIn(List<Long> actionPids);
 
     List<Action> findAllByTrackingPidIn(@NonNull List<Long> trackingPid);
+
+    List<Action> findByOwnerIdAndActionStatus(@NonNull Long ownerId, ActionStatus actionStatus);
 }

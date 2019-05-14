@@ -47,8 +47,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze",
-                shortenCustomerSpace(customerSpace));
+        return scheduleProcessAnalyze(customerSpace, true, request);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId scheduleProcessAnalyze(String customerSpace, boolean runNow, ProcessAnalyzeRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze?runNow={runNow}",
+                shortenCustomerSpace(customerSpace), runNow);
         ResponseDocument<String> responseDoc = post("process and analyze", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;

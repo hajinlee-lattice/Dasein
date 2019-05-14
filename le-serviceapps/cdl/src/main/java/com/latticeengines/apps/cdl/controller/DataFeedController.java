@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,29 +36,41 @@ public class DataFeedController {
     private final ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter;
     private final OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
     private final EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
+    private final DataFeedService dataFeedService;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
             OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
-                              EntityExportWorkflowSubmitter entityExportWorkflowSubmitter) {
+                              EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
+                              DataFeedService dataFeedService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
+        this.dataFeedService = dataFeedService;
     }
 
     @PostMapping(value = "/processanalyze", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace,
+                                                   @RequestParam(value = "runNow", required = false, defaultValue = "false") boolean runNow,
                                                    @RequestBody(required = false) ProcessAnalyzeRequest request) {
         customerSpace = MultiTenantContext.getCustomerSpace().toString();
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
         try {
-            ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
-                    new WorkflowPidWrapper(-1L));
-            return ResponseDocument.successResponse(appId.toString());
+            if (runNow) {
+                ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
+                        new WorkflowPidWrapper(-1L));
+                return ResponseDocument.successResponse(appId.toString());
+            } else {
+                DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+                if (dataFeed != null && !dataFeed.isScheduleNow()) {
+                    dataFeedService.updateDataFeedScheduleTime(customerSpace, true, request);
+                }
+                return ResponseDocument.successResponse("");
+            }
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }
