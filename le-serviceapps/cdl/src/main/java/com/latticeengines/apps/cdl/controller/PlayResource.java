@@ -84,11 +84,13 @@ public class PlayResource {
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
-            PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter) {
+            PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter,
+            PlayLaunchChannelService playLaunchChannelService) {
         this.playService = playService;
         this.playLaunchService = playLaunchService;
         this.metadataProxy = metadataProxy;
         this.playLaunchWorkflowSubmitter = playLaunchWorkflowSubmitter;
+        this.playLaunchChannelService = playLaunchChannelService;
     }
 
     // -----
@@ -171,8 +173,6 @@ public class PlayResource {
     // Channels
     // -------------
 
-    // TODO: change logic in proxy and pls
-    // TODO: update test cases to not include playlaunchchannelsummary
     @GetMapping(value = "/{playName}/channels")
     @ResponseBody
     @ApiOperation(value = "For the given play, get a list of play launch channels")
@@ -214,7 +214,7 @@ public class PlayResource {
         return playLaunchChannelService.create(playLaunchChannel);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
     public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
@@ -222,15 +222,15 @@ public class PlayResource {
             @PathVariable("channelId") String channelId, //
             @RequestBody PlayLaunchChannel playLaunchChannel, //
             HttpServletResponse response) {
-        if (StringUtils.isEmpty(channelId)) {
-            throw new LedpException(LedpCode.LEDP_18219, new String[] { "empty or blank channel Id" });
-        }
         if (playLaunchChannel == null) {
             throw new LedpException(LedpCode.LEDP_18219, new String[] { "Invalid play launch channel" });
         }
+        if (StringUtils.isEmpty(channelId) || playLaunchChannel.getId() == null) {
+            throw new LedpException(LedpCode.LEDP_18219, new String[] { "Empty or blank channel Id" });
+        }
         if (!playLaunchChannel.getId().equals(channelId)) {
             throw new LedpException(LedpCode.LEDP_18219,
-                    new String[] { "Channel Id is not the same for the Play launch channel being updated" });
+                    new String[] { "ChannelId is not the same for the Play launch channel being updated" });
         }
         if (playLaunchChannel.getPlayLaunch() == null) {
             throw new LedpException(LedpCode.LEDP_32000,
@@ -241,8 +241,6 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
         playLaunchChannel.setPlay(play);
-        playLaunchChannel.setTenant(MultiTenantContext.getTenant());
-        playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         return playLaunchChannelService.update(playLaunchChannel);
     }
 
@@ -250,7 +248,37 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Launch every play launch marked as always on")
     public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
+        List<PlayLaunchChannel> channels = playLaunchChannelService.findByIsAlwaysOnTrue();
+        for (PlayLaunchChannel channel : channels) {
+            // refractor logic to service layer?
+            PlayLaunch playLaunch = channel.getPlayLaunch();
+            if (playLaunch == null) {
+                throw new LedpException(LedpCode.LEDP_32000, new String[] { "No play launch found" });
+            }
+            Play play = channel.getPlay();
+            // are these validations necessary?
+            playLaunch.setPlay(play);
+            PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
+            if (play.getRatingEngine() != null) {
+                validateNonEmptyTargetsForLaunch(customerSpace, play, play.getName(), playLaunch, //
+                        playLaunch.getDestinationAccountId());
+            }
+            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            playLaunch.setApplicationId(appId);
 
+            playLaunch.setLaunchState(LaunchState.Launching);
+            playLaunch.setPlay(play);
+            playLaunch.setTableName(createTable(playLaunch));
+
+            Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+
+            playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
+            playLaunch.setAccountsSuppressed(0L);
+            playLaunch.setAccountsErrored(0L);
+            playLaunch.setAccountsLaunched(0L);
+            playLaunch.setContactsLaunched(0L);
+            playLaunchService.update(playLaunch);
+        }
         return false;
     }
 
@@ -284,18 +312,6 @@ public class PlayResource {
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
-        }
-
-        List<PlayLaunch> playLaunches = playLaunchService.findByPlayId(play.getPid(),
-                Collections.singletonList(LaunchState.UnLaunched));
-
-        for (PlayLaunch launch : playLaunches) {
-            if (playLaunch.getDestinationOrgId() == launch.getDestinationOrgId()) {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] {
-                                "Cannot create new playLaunch since a playLaunch already exists for this Org Id: "
-                                        + playLaunch.getDestinationOrgId() });
-            }
         }
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
@@ -351,7 +367,7 @@ public class PlayResource {
 
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Update a play launch for a given play")
+    @ApiOperation(value = "Launch a play launch for a given play")
     public PlayLaunch launchPlay(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
@@ -371,7 +387,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
         playLaunch.setPlay(play);
-        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
+        PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
         if (play.getRatingEngine() != null) {
             validateNonEmptyTargetsForLaunch(customerSpace, play, playName, playLaunch, //
                     playLaunch.getDestinationAccountId());

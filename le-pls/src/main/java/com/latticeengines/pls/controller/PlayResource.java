@@ -236,7 +236,7 @@ public class PlayResource {
         return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel);
     }
 
-    @RequestMapping(value = "/{playName}/channels/{channelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{playName}/channels/{channelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch channel for a given play")
@@ -248,6 +248,14 @@ public class PlayResource {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel);
+    }
+
+    @RequestMapping(value = "/launch-always-on", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "launch all play launches that are always on for a given tenant")
+    public PlayLaunchChannel launchAlwaysOn(HttpServletResponse response) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playProxy.launchAlwaysOn(tenant.getId());
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)

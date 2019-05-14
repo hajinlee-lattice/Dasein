@@ -19,21 +19,19 @@ public class PlayUtils {
 
     public static void validatePlay(String playName, Play play) {
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_18151, new String[] {playName});
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
 
-        if (play.getRatingEngine() != null
-                && play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
-            throw new LedpException(LedpCode.LEDP_18155, new String[] {play.getName()});
+        if (play.getRatingEngine() != null && play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }
     }
 
-    public static void validatePlayLaunchBeforeLaunch(String customerSpace, PlayLaunch playLaunch,
-            Play play) {
+    public static void validatePlayLaunchBeforeLaunch(PlayLaunch playLaunch, Play play) {
         if (play.getRatingEngine() == null) {
             playLaunch.setBucketsToLaunch(Collections.emptySet());
             if (!playLaunch.isLaunchUnscored()) {
-                throw new LedpException(LedpCode.LEDP_18212, new String[] {play.getName()});
+                throw new LedpException(LedpCode.LEDP_18212, new String[] { play.getName() });
             }
         }
         if (play.getRatingEngine() != null && !playLaunch.isLaunchUnscored()
@@ -51,16 +49,15 @@ public class PlayUtils {
             playLaunch.setBucketsToLaunch(defaultBucketsToLaunch);
         }
 
-        if (StringUtils.isBlank(playLaunch.getDestinationOrgId())
-                || playLaunch.getDestinationSysType() == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "No destination system selected for the launch for play: " + play.getName()});
+        if (StringUtils.isBlank(playLaunch.getDestinationOrgId()) || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No destination system selected for the launch for play: " + play.getName() });
         }
 
         if (playLaunch.getExcludeItemsWithoutSalesforceId()
                 && StringUtils.isBlank(playLaunch.getDestinationAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Cannot restrict accounts with null Ids if account id has not been set up for selected destination"});
+                    "Cannot restrict accounts with null Ids if account id has not been set up for selected destination" });
         }
     }
 
