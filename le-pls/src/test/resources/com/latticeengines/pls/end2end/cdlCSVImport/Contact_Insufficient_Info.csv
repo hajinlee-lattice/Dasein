@@ -1,4 +1,4 @@
-S_Contact_For_PlatformTest,ID,Account_ID,Name,Address_Street_1,City,State,Postal_Code,Country,Phone,Fax,MobilePhone,Email_Address,Title,Department,Created Date,LastActivityDate,IsPrimary,Do_Not_Call,Do_Not_Mail,CompanyName
+S_Contact_For_PlatformTest,ID,Account_ID,Name,Address_Street_1,City,State,Postal_Code,Country,Phone,Fax,MobilePhone,Email,Title,Department,Created Date,LastActivityDate,IsPrimary,Do_Not_Call,Do_Not_Mail,CompanyName
 3,6E9CF86871C4D1CEFC,0012400001DNTmVAAX,CAROL FOULKE,,,,,,,,,cfoulke.acc@amorimusa.com,Buyer,,7/27/2017 4:57:39 PM,,,F,F,AMORIM INDUSTRIAL        SOLUTIONS INC
 19,6C1787FC5655C6E5E1,0012400001DNSpSAAX,SUZANNE -BW_HOLMES,,,,,,9195493539,,,HOLMES@AATCC.ORG,TECHNICAL ASSOCIATE,,7/7/2012 3:20:34 PM,,,F,F,AATCC
 110,9A925F93B78624C494,0012400001DO5I5AAL,ANGELA VARESI,,,,,,,,,cmd,Purchasing Agent,,7/27/2017 4:58:05 PM,,,F,F,GAGE PRODUCTS
