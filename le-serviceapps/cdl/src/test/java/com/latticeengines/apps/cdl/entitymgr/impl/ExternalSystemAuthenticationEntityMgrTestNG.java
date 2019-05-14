@@ -3,11 +3,9 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -42,13 +40,12 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
-                true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         assertNotNull(lookupIdsMapping);
-        assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
+        assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         List<ExternalSystemAuthentication> auths = extSysAuthenticationEntityMgr.findAuthentications();
         assertNotNull(auths);
-        assertTrue(auths.size() == 0);
+        assertEquals(auths.size(), 0);
     }
 
     @Test(groups = "functional")
@@ -76,45 +73,48 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         extSysAuthRef = extSysAuth;
     }
 
-    @Test(groups = "functional", dependsOnMethods="testCreate")
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFindAll() {
         List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr.findAuthentications();
         assertNotNull(extSysAuthList);
-        assertTrue(extSysAuthList.size() == 1);
+        assertEquals(extSysAuthList.size(), 1);
 
         // Check whether it loaded the transient value LookupMapConfigId
         ExternalSystemAuthentication extSysAuth = extSysAuthList.get(0);
         verifyCurrentObject(extSysAuth);
     }
 
-    @Test(groups = "functional", dependsOnMethods= "testCreate")
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
-        ExternalSystemAuthentication extSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
+        ExternalSystemAuthentication extSysAuth = extSysAuthenticationEntityMgr
+                .findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(extSysAuth);
         log.info(JsonUtils.serialize(extSysAuth));
         ExternalSystemAuthentication updatedSysAuth = new ExternalSystemAuthentication();
         updatedSysAuth.setId(extSysAuth.getId());
         updatedSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         updatedSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
-        updatedSysAuth = extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
+        extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
         try {
             Thread.sleep(2000L);
         } catch (InterruptedException e) {
-            //Ignore
+            // Ignore
         }
         updatedSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(updatedSysAuth);
         log.info(JsonUtils.serialize(updatedSysAuth));
         assertNotEquals(updatedSysAuth.getTrayAuthenticationId(), extSysAuth.getTrayAuthenticationId());
-        assertNotEquals(updatedSysAuth.getSolutionInstanceId(), extSysAuth.getSolutionInstanceId(), "SolutionInstaceID was not updated");
+        assertNotEquals(updatedSysAuth.getSolutionInstanceId(), extSysAuth.getSolutionInstanceId(),
+                "SolutionInstaceID was not updated");
     }
 
-    @Test(groups = "functional", dependsOnMethods="testCreate")
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFindByLookupIdMap() {
         List<String> lookupMapIds = Collections.singletonList(lookupIdMapRef.getId());
-        List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr.findAuthenticationsByLookupMapIds(lookupMapIds);
+        List<ExternalSystemAuthentication> extSysAuthList = extSysAuthenticationEntityMgr
+                .findAuthenticationsByLookupMapIds(lookupMapIds);
         assertNotNull(extSysAuthList);
-        assertTrue(extSysAuthList.size() == 1);
+        assertEquals(extSysAuthList.size(), 1);
 
         // Check whether it loaded the transient value LookupMapConfigId
         ExternalSystemAuthentication extSysAuth = extSysAuthList.get(0);
