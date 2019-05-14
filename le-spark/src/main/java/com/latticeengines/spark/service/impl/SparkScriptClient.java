@@ -125,13 +125,15 @@ class SparkScriptClient {
 
     private Mono<String> waitStatementOutput(int id) {
         return Mono.fromCallable(() -> {
-            LivyStatement statement = getStatement(id);
-            while(!LivyStatement.State.TERMINAL_STATES.contains(statement.state)) {
-                Thread.sleep(10000L);
+            LivyStatement statement;
+            long backoff = 500L;
+            do {
+                Thread.sleep(backoff);
+                backoff = Math.min(backoff * 2, 10000L);
                 statement = getStatement(id);
                 log.info("Statement " + id +" is " + statement.state //
                         + " - " + statement.progress * 100);
-            }
+            } while(!LivyStatement.State.TERMINAL_STATES.contains(statement.state));
             if (LivyStatement.State.available.equals(statement.state)) {
                 if ("error".equals(statement.output.status)) {
                     throw new RuntimeException("Statement " + id + " failed with " + statement.output.ename + " : " + statement.output.evalue);
