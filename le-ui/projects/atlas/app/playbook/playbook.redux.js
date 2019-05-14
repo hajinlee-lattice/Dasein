@@ -98,22 +98,11 @@ export const actions = {
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
     },
-    savePlay: (opts) => {
-        deferred = deferred || { resolve: (data) => data }
-
-        var opts = opts || {};
-
-        let observer = new Observer(
-            response => {
-                httpService.unsubscribeObservable(observer);
-                store.dispatch({
-                    type: CONST.SAVE_PLAY,
-                    payload: response.data
-                });
-                return deferred.resolve(response.data);
-            }
-        );
-        httpService.post(`/pls/play/`, opts, observer, {});
+    savePlay: (play) => {
+        store.dispatch({
+            type: CONST.SAVE_PLAY,
+            payload: play
+        });
     },
     savePlayLaunch: (play_name, opts) => {
         var ClientSession = window.BrowserStorageUtility.getClientSession();
@@ -149,6 +138,15 @@ export const actions = {
                     store.dispatch({
                         type: CONST.SAVE_LAUNCH,
                         payload: response.data
+                    });
+
+                    let playstore = store.getState()['playbook'],
+                        play = playstore.play;
+
+                    play.launchHistory.mostRecentLaunch = response.data;
+                    store.dispatch({
+                        type: CONST.SAVE_PLAY,
+                        payload: play
                     });
                     if(cb && typeof cb === 'function') {
                         cb();

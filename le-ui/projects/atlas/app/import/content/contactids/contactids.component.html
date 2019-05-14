@@ -16,14 +16,22 @@
                         ng-init="vm.checkValidDelay(form)"
                         ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                         ng-required="!vm.entityMatchEnabled"
-                        ng-class="{'required': true}">
-                        <option value="" hidden disabled>-- Choose Unique Identifier --</option>
+                        ng-class="{'required': !vm.entityMatchEnabled}">
+                        <option ng-if="!vm.entityMatchEnabled" value="" hidden disabled>-- Choose Unique Identifier --</option>
+                        <option ng-if="vm.entityMatchEnabled" value="">-- Choose Unique Identifier --</option>
                         <option ng-repeat="AvailableField in vm.AvailableFields" value="{{AvailableField.userField}}" ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
                             {{AvailableField.userField}}
     				    </option>
                    </select>
                 </div>
             </div>
+        </div>
+        <div class="contactid-note" ng-if="vm.entityMatchEnabled && !vm.fieldMapping.contact">
+            <strong>Note:</strong> If a unique ID is not available, Lattice will automatically identify duplicates as follows
+            <ol>
+                <li>Email ID</li>
+                <li>First Name, Last Name & Phone (All three has to be available)</li>
+            </ol>
         </div>
 <!-- ENABLED_ENTITY_MATCH / PLS-12303 -->
 <!-- 

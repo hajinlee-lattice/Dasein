@@ -24,7 +24,6 @@ export default class OverviewSummaryContainer extends Component {
 
     componentDidMount() {
         let playstore = store.getState()['playbook'];
-        console.log(playstore.play);
         this.state.play = playstore.play;
         this.setState(this.state);
     }

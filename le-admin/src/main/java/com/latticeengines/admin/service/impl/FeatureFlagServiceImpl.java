@@ -139,6 +139,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.SCORE_EXTERNAL_FILE, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FILE_IMPORT, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, cg).setDefaultValue(true);

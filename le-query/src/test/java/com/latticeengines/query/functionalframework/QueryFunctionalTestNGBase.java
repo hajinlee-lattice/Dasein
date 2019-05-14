@@ -227,6 +227,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
 
     private void uploadTablesToHdfs(CustomerSpace customerSpace, int version) {
+        log.info("Uploading test avros to hdfs ...");
         String downloadsDir = "downloads";
         File downloadedFile = testArtifactService.downloadTestArtifact(ATTR_REPO_S3_DIR, //
                 String.valueOf(version), TABLES_S3_FILENAME);

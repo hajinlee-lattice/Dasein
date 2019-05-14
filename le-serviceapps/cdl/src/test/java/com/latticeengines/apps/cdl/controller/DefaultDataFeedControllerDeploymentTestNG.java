@@ -12,7 +12,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
@@ -31,7 +33,7 @@ public class DefaultDataFeedControllerDeploymentTestNG extends CDLDeploymentTest
     }
 
     @Test(groups = "deployment")
-    public void test() {
+    public void testUpdateNextInvokeTime() {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
         Assert.assertNull(dataFeed.getNextInvokeTime());
 
@@ -44,5 +46,32 @@ public class DefaultDataFeedControllerDeploymentTestNG extends CDLDeploymentTest
 
         dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
         Assert.assertNull(dataFeed.getNextInvokeTime());
+    }
+
+    @Test(groups = "deployment")
+    public void testUpdateScheduleTime() {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
+        Assert.assertFalse(dataFeed.isScheduleNow());
+        Assert.assertNull(dataFeed.getScheduleTime());
+
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setUserId("userId");
+        dataFeedProxy.updateDataFeedScheduleTime(mainCustomerSpace, true, request);
+
+        dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
+        Assert.assertTrue(dataFeed.isScheduleNow());
+        Assert.assertNotNull(dataFeed.getScheduleTime());
+        Assert.assertNotNull(dataFeed.getScheduleRequest());
+
+        request = JsonUtils.deserialize(dataFeed.getScheduleRequest(), ProcessAnalyzeRequest.class);
+        Assert.assertNotNull(request);
+        Assert.assertNotNull(request.getUserId());
+
+        dataFeedProxy.updateDataFeedScheduleTime(mainCustomerSpace, false, null);
+
+        dataFeed = dataFeedProxy.getDataFeed(mainCustomerSpace);
+        Assert.assertFalse(dataFeed.isScheduleNow());
+        Assert.assertNull(dataFeed.getScheduleTime());
+        Assert.assertNull(dataFeed.getScheduleRequest());
     }
 }

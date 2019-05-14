@@ -3,6 +3,7 @@ package com.latticeengines.apps.core.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
 
 public interface ActionService {
 
@@ -29,4 +30,6 @@ public interface ActionService {
     Action cancel(Long actionPid);
 
     List<Action> getActionsByJobPids(List<Long> jobPids);
+
+    List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus);
 }

@@ -379,6 +379,12 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
                 playName, channelId);
         log.info("url is " + url);
-        return post("updae play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
+        return put("updae play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
+    }
+
+    public PlayLaunchChannel launchAlwaysOn(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/launch-always-on", shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
+        return post("updae play launch channel", url, null, null);
     }
 }

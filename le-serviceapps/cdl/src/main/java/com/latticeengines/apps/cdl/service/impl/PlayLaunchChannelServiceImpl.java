@@ -87,7 +87,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channelList) {
         String configId = mapping.getId();
         for (PlayLaunchChannel channel : channelList) {
-            if (channel.getLookupIdMap().getId() == configId) {
+            if (channel.getLookupIdMap().getId().equals(configId)) {
                 return;
             }
         }

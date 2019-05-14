@@ -147,6 +147,19 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("next_invoke_time")
     private Date nextInvokeTime;
 
+    @Column(name = "SCHEDULE_NOW")
+    @JsonProperty("schedule_now")
+    private boolean scheduleNow = false;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "SCHEDULE_TIME", nullable = true)
+    @JsonProperty("schedule_time")
+    private Date scheduleTime;
+
+    @Column(name = "SCHEDULE_REQUEST", length = 4000, nullable = true)
+    @JsonProperty("schedule_request")
+    private String scheduleRequest;
+
     @Transient
     @JsonIgnore
     private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
@@ -350,6 +363,30 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setNextInvokeTime(Date nextInvokeTime) {
         this.nextInvokeTime = nextInvokeTime;
+    }
+
+    public boolean isScheduleNow() {
+        return scheduleNow;
+    }
+
+    public void setScheduleNow(boolean scheduleNow) {
+        this.scheduleNow = scheduleNow;
+    }
+
+    public Date getScheduleTime() {
+        return scheduleTime;
+    }
+
+    public void setScheduleTime(Date scheduleTime) {
+        this.scheduleTime = scheduleTime;
+    }
+
+    public String getScheduleRequest() {
+        return scheduleRequest;
+    }
+
+    public void setScheduleRequest(String scheduleRequest) {
+        this.scheduleRequest = scheduleRequest;
     }
 
     public enum Status {
