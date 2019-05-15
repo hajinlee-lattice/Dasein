@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
@@ -36,6 +37,7 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
 
@@ -53,6 +55,9 @@ public abstract class AbstractMatcher implements Matcher {
 
     @Inject
     protected List<MatchInputBuilder> matchInputBuilders;
+
+    @Autowired
+    protected EnrichmentMetadataCache enrichmentMetadataCache;
 
     @Inject
     protected ColumnMetadataProxy columnMetadataProxy;

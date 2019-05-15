@@ -152,10 +152,9 @@ public class SingleRecordMatcher extends AbstractMatcher {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = new ArrayList<>();
         List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = null;
         if (shouldReturnAllEnrichment) {
-            tempSelectedLeadEnrichmentAttributes = internalResourceRestApiProxy.getAllLeadEnrichmentAttributes();
+            tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache.getAllEnrichmentAttributesMetadata();
         } else {
-            tempSelectedLeadEnrichmentAttributes = internalResourceRestApiProxy.getLeadEnrichmentAttributes(space, null,
-                    null, true, true);
+            tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
         }
 
         for (LeadEnrichmentAttribute attr : tempSelectedLeadEnrichmentAttributes) {
