@@ -61,6 +61,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, //
                 LatticeFeatureFlag.DANTE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
+                LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
@@ -95,6 +96,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
+                LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, //
                 LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
                 LatticeFeatureFlag.IMPORT_WITHOUT_ID,
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
