@@ -144,6 +144,7 @@
                     <td class="text-ellipsis" title="{{vm.systemMap[launch.destinationOrgId].orgName}}">{{vm.systemMap[launch.destinationOrgId].orgName}}</td>
                     <td ng-if="!vm.allPlaysHistory" class="text-ellipsis" >
                         <span ng-if="launch.audienceName" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
+                        <span ng-if="vm.isS3Launch(launch) && !launch.audienceName" title="{{vm.getSourceFilePath(launch)}}"> {{vm.getSourceFilePath(launch)}} </span>
                     </td>
     				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
     				<td class="red-text">{{launch.stats.suppressed | number}}</td>

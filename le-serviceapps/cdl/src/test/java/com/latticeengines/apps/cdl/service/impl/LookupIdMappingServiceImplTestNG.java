@@ -7,10 +7,12 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -22,9 +24,18 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private LookupIdMappingService lookupIdMappingLaunchService;
 
+    @Inject
+    private DropBoxEntityMgr dropBoxEntityMgr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3CustomerBucket;
+
+    private String dropBox;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
+        dropBox = dropBoxEntityMgr.createDropBox(mainTestTenant, "us-east-1").getDropBox();
     }
 
     @Test(groups = "functional")
@@ -33,9 +44,15 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         // Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
         Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null,
                 true);
+
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertEquals(lookupIdsMapping.size(), 1, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
+        Assert.assertTrue(lookupIdsMapping.containsKey(CDLExternalSystemType.FILE_SYSTEM.name()));
+        Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).size(), 1);
+        Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).get(0).getExportFolder(),
+                String.format("s3n://%s/dropfolder/%s/export/campaigns", s3CustomerBucket, dropBox));
+        // "");
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
         String orgName = "n1234_1";

@@ -1,5 +1,7 @@
 package com.latticeengines.query.evaluator;
 
+import static com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor.SPARK_TEST_GROUP;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +71,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testIsEnabled = true;
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testStartsWithLookup(String sqlUser, String queryContext) {
         if (!testIsEnabled) {
             log.info("Test is not enabled.");
@@ -110,7 +112,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetCountAndAssert(sqlUser, query, getTotalAccountCount() - count2);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testStartsWithLookupContact(String sqlUser, String queryContext) {
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).eq(getAccountId()) //
@@ -135,7 +137,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetCountAndAssert(sqlUser, query, 13);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testTimeFilter(String sqlUser, String queryContext) {
         // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
@@ -150,7 +152,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetCountAndAssert(sqlUser, query, 108045);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testSelect(String sqlUser, String queryContext) {
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(getAccountId()) //
@@ -172,7 +174,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetDataAndAssert(sqlUser, query, 1, expectedResults);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testAccountWithSelectedContact(String sqlUser, String queryContext) {
         String alias = BusinessEntity.Account.name().concat(String.valueOf(new Date().getTime()));
         Query query = generateAccountWithSelectedContactQuery(alias);
@@ -181,7 +183,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetDataAndAssert(sqlUser, query, 1, null);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testExistsRestriction(String sqlUser, String queryContext) {
         Restriction inner = Restriction.builder() //
                 .let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Assistant Professor").build();
@@ -200,7 +202,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         testGetDataAndAssert(sqlUser, query, 2, null);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testRangeLookup(String sqlUser, String queryContext) {
         Restriction range1 = Restriction.builder().and(
                 Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A"),
@@ -238,7 +240,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertTrue(count <= count1 && count <= count2);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "bitEncodedData")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "bitEncodedData")
     public void testBitEncoded(String sqlUser, ComparisonType operator, String[] vals, long expectedCount) {
         // bucket
         RestrictionBuilder builder = Restriction.builder();
@@ -333,7 +335,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         };
     }
 
-    @Test(groups = { "functional", "spark" })
+    @Test(groups = { "functional" })
     public void testSortAndPage() {
         String sqlUser = SQL_USER;
         Restriction domainInRange = Restriction.builder() //
@@ -383,7 +385,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(totalRuns, (int) (Math.ceil(new Long(countInRedshift).doubleValue() / pageSize) + 1));
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts", enabled = false)
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts", enabled = false)
     public void testAggregation(String sqlUser, String queryContext) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME);
         AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaViewsPerUser");
@@ -415,7 +417,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(results.size(), 1);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testFreeTextSearch(String sqlUser, String queryContext) {
         Restriction nameInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A") //
@@ -446,7 +448,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         results = testGetDataAndAssert(sqlUser, query, count, null);
     }
 
-    @Test(groups = { "functional", "spark" }, dataProvider = "userContexts")
+    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
     public void testCaseLookup(String sqlUser, String queryContext) {
         TreeMap<String, Restriction> cases = new TreeMap<>();
         Restriction A = Restriction.builder().and(

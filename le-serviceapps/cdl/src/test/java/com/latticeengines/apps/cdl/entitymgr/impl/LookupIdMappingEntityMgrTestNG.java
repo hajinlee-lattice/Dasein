@@ -7,17 +7,18 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
+import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -30,9 +31,13 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
+    @Inject
+    private LookupIdMappingService lookupIdMappingService;
+
     private LookupIdMap lookupIdMap;
     private String configId;
     private String configIdWithAuth;
+    private String dropbox;
     private String orgId = "ABC_s";
     private String orgName = "n1234_1";
     private String accountId = "someAccId";
@@ -41,11 +46,10 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
-                true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         Assert.assertNotNull(lookupIdsMapping);
-        Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
-        Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
+        Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
+        Assert.assertTrue(CollectionUtils.isEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingEntityMgr.getLookupIdMap("some_bad_id"));
     }
 
@@ -75,9 +79,8 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
     public void testFind() {
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
-                true);
-        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(lookupIdsMapping));
 
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
         Assert.assertNotNull(extractedLookupIdMap);
@@ -90,6 +93,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(extractedLookupIdMap.getExternalSystemName(), CDLExternalSystemName.Salesforce);
         Assert.assertEquals(extractedLookupIdMap.getOrgId(), orgId);
         Assert.assertEquals(extractedLookupIdMap.getOrgName(), orgName);
+        Assert.assertTrue(StringUtils.isBlank(extractedLookupIdMap.getExportFolder()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testFind" })
@@ -183,7 +187,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         configIdWithAuth = lookupIdWithAuthCreated.getId();
     }
 
-    @Test(groups = "functional", dependsOnMethods = {"testCreateWithAuthentication"})
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithAuthentication" })
     public void testFindWithAuthentication() {
         LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
         validateLookupIdWithAuth(lookupIdWithAuth);
@@ -205,7 +209,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNull(externalAuthFromDB.getTrayWorkflowEnabled());
     }
 
-    @Test(groups = "functional", dependsOnMethods = {"testCreateWithAuthentication"})
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithAuthentication" })
     public void testUpdateWithAuthentication() {
         LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
         assertNotNull(lookupIdWithAuth);
@@ -232,7 +236,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertTrue(updatedExtAuth.getTrayWorkflowEnabled());
     }
 
-    @Test(groups = "functional", dependsOnMethods = {"testUpdateWithAuthentication"})
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateWithAuthentication" })
     public void testUpdateWithNull() {
         LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
         assertNotNull(lookupIdWithAuth);

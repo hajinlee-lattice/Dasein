@@ -6,13 +6,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
@@ -22,8 +26,11 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 @Component("lookupIdMappingService")
 public class LookupIdMappingServiceImpl implements LookupIdMappingService {
@@ -35,11 +42,25 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
+    @Inject
+    private DropBoxEntityMgr dropBoxEntityMgr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3CustomerBucket;
+
+    @Value("${aws.customer.export.s3.bucket}")
+    private String s3CustomerExportBucket;
+
     @Override
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending) {
-        Map<String, List<LookupIdMap>> toReturn = lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType,
-                sortby, descending);
+        List<LookupIdMap> configs = lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType, sortby, descending)
+                .stream().map(this::populateExportFolder)
+                .filter(c -> externalSystemType == null || c.getExternalSystemType() == externalSystemType)
+                .collect(Collectors.toList());
+
+        Map<String, List<LookupIdMap>> toReturn = LookupIdMapUtils.listToMap(configs);
+
         if ((externalSystemType == null || externalSystemType == CDLExternalSystemType.FILE_SYSTEM)
                 && !toReturn.containsKey(CDLExternalSystemType.FILE_SYSTEM.name())) {
             // Every tenant should have an AWS S3 connection, set one up if its missing for this tenant
@@ -51,6 +72,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             awsS3.setOrgId(CDLConstants.LATTICE_S3_ORG_ID);
             awsS3.setOrgName(CDLConstants.LATTICE_S3_ORG_NAME);
             awsS3 = lookupIdMappingEntityMgr.createExternalSystem(awsS3);
+            awsS3 = populateExportFolder(awsS3);
 
             toReturn.put(CDLExternalSystemType.FILE_SYSTEM.name(), Collections.singletonList(awsS3));
         }
@@ -62,12 +84,14 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
                 lookupIdsMap.getExternalSystemType());
         if (existingLookupIdMap == null) {
-            return lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
+            existingLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
         } else {
             existingLookupIdMap.setIsRegistered(true);
             existingLookupIdMap.setExternalAuthentication(lookupIdsMap.getExternalAuthentication());
-            return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
+            existingLookupIdMap = lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(),
+                    existingLookupIdMap);
         }
+        return populateExportFolder(existingLookupIdMap);
     }
 
     @Override
@@ -86,7 +110,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public LookupIdMap getLookupIdMap(String id) {
-        return lookupIdMappingEntityMgr.getLookupIdMap(id);
+        return populateExportFolder(lookupIdMappingEntityMgr.getLookupIdMap(id));
     }
 
     @Override
@@ -153,6 +177,24 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public LookupIdMap getLookupIdMapByOrgId(String orgId, CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingEntityMgr.getLookupIdMap(orgId, externalSystemType);
+        return populateExportFolder(lookupIdMappingEntityMgr.getLookupIdMap(orgId, externalSystemType));
+    }
+
+    private LookupIdMap populateExportFolder(LookupIdMap lookupIdMap) {
+        if (lookupIdMap != null) {
+            DropBox dropbox = dropBoxEntityMgr.getDropBox();
+            if (dropbox != null && StringUtils.isNotBlank(dropbox.getDropBox()))
+                switch (lookupIdMap.getExternalSystemType()) {
+                    case MAP:
+                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder()
+                                .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox()));
+                        break;
+                    case FILE_SYSTEM:
+                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket,
+                                dropbox.getDropBox()));
+                        break;
+                }
+        }
+        return lookupIdMap;
     }
 }

@@ -80,6 +80,16 @@ const GraphQLParser = {
     getUserDocument(user, accessToken) {
 
         return new UserDocument(user, accessToken);
+    },
+    /* Specific to Ephemeral API endpoints */
+    getErrorMessage(body) {
+        var errorMessage;
+        if (body.response && body.response.body && body.response.body.errors && body.response.body.errors.length > 0) {
+            errorMessage = body.response.body.errors[0].message;
+        } else if (body.response && body.response.statusCode != 200 && body.message) {
+            errorMessage = body.message;
+        }
+        return errorMessage || "";
     }
 };
 module.exports = GraphQLParser;

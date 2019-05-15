@@ -161,9 +161,7 @@ public class SourceFileServiceImpl implements SourceFileService {
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { fileProperty.getFileName() });
         }
         String outputHdfsPath = null;
-        String fileName = fileProperty.getFileName();
-        fileName = fileName.substring(0, fileName.lastIndexOf("."));
-        String outputFileName = fileName + DateTime.now().getMillis() + ".csv";
+        String outputFileName = "s3file_" + DateTime.now().getMillis() + ".csv";
         try {
             CustomerSpace space = CustomerSpace.parse(customerSpace);
             String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();

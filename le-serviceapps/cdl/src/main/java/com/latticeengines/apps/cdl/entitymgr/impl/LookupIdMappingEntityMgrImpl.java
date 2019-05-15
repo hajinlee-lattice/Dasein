@@ -1,15 +1,11 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -57,7 +53,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
+    public List<LookupIdMap> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending) {
         if (StringUtils.isNotEmpty(sortby)) {
             sortby = sortby.trim();
@@ -65,18 +61,8 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
             sortby = "updated";
         }
         Sort sort = new Sort(descending ? Direction.DESC : Direction.ASC, sortby);
-        List<LookupIdMap> configs = lookupIdMappingRepository.findAll(sort);
-        Map<String, List<LookupIdMap>> result = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(configs)) {
-            configs.stream() //
-                    .filter(c -> externalSystemType == null || c.getExternalSystemType() == externalSystemType)
-                    .forEach(c -> {
-                        CDLExternalSystemType type = c.getExternalSystemType();
-                        List<LookupIdMap> listForType = result.computeIfAbsent(type.name(), k -> new ArrayList<>());
-                        listForType.add(c);
-                    });
-        }
-        return result;
+        return lookupIdMappingRepository.findAll(sort);
+
     }
 
     @Override

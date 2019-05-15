@@ -346,16 +346,17 @@ class TrayRouter {
         /*
             EPHEMERAL API
         */
-
         this.router.get('/marketo/staticlists', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
             var programName = req.query.programName || '';
             let options = this.getEphemeralApiOptions(req, true);
             options.json = Queries.listMarketoStaticLists(authenticationId, programName);
-            console.log("static lists query: " + JSON.stringify(options.json));
             this.request(options, function(error, response, body){
-                if (error) {
-                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
+                var errorMessage = GraphQLParser.getErrorMessage(body);
+
+                if (errorMessage) {
+                    console.log("Couldn't retrieve static lists for authenticationId " + authenticationId + ": " + JSON.stringify(body));
+                    res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
                     return;
                 }
                 res.send(body);
@@ -367,8 +368,10 @@ class TrayRouter {
             let options = this.getEphemeralApiOptions(req, true);
             options.json = Queries.getMarketoPrograms(authenticationId);
             this.request(options, function(error, response, body){
-                if (body.response && body.response.body && body.response.body.errors.length > 0) {
-                    var errorMessage = body.response.body.errors[0].message;
+                var errorMessage = GraphQLParser.getErrorMessage(body);
+
+                if (errorMessage) {
+                    console.log("Couldn't retrieve program lists for authenticationId " + authenticationId + ": " + JSON.stringify(body));
                     res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
                     return;
                 }
