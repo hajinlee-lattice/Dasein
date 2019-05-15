@@ -12,6 +12,10 @@
     </context:component-scan>
 
     <import resource="classpath:query-context.xml"/>
+    <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:objectapi-aspects-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
+
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
 </beans>
