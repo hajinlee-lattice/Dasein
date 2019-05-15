@@ -4,22 +4,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class AccountQueryDecorator extends QueryDecorator {
+public class EntityMatchAccountQueryDecorator extends AccountQueryDecorator {
 
-    private final boolean dataQuery;
-
-    protected AccountQueryDecorator(boolean dataQuery) {
-        this.dataQuery = dataQuery;
-    }
-
-    @Override
-    public AttributeLookup getIdLookup() {
-        return new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
-    }
-
-    @Override
-    public BusinessEntity getFreeTextSearchEntity() {
-        return BusinessEntity.Account;
+    private EntityMatchAccountQueryDecorator(boolean dataQuery) {
+        super(dataQuery);
     }
 
     @Override
@@ -30,16 +18,11 @@ public class AccountQueryDecorator extends QueryDecorator {
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
         };
     }
 
-    @Override
-    public boolean isDataQuery() {
-        return dataQuery;
-    }
-
-    public static final AccountQueryDecorator DATA_QUERY = new AccountQueryDecorator(true);
-    public static final AccountQueryDecorator COUNT_QUERY = new AccountQueryDecorator(false);
+    public static final EntityMatchAccountQueryDecorator DATA_QUERY = new EntityMatchAccountQueryDecorator(true);
+    public static final EntityMatchAccountQueryDecorator COUNT_QUERY = new EntityMatchAccountQueryDecorator(false);
 
 }
