@@ -184,12 +184,15 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         if (lookupIdMap != null) {
             DropBox dropbox = dropBoxEntityMgr.getDropBox();
             if (dropbox != null && StringUtils.isNotBlank(dropbox.getDropBox()))
-                if (lookupIdMap.getExternalSystemType() == CDLExternalSystemType.MAP) {
-                    lookupIdMap.setExportFolder(new HdfsToS3PathBuilder()
-                            .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox()));
-                } else {
-                    lookupIdMap.setExportFolder(
-                            new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox()));
+                switch (lookupIdMap.getExternalSystemType()) {
+                    case MAP:
+                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder()
+                                .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox()));
+                        break;
+                    case FILE_SYSTEM:
+                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket,
+                                dropbox.getDropBox()));
+                        break;
                 }
         }
         return lookupIdMap;
