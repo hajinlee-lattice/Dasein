@@ -48,11 +48,11 @@ $font-size: 12px;
             pointer-events: none;
         }
         &.selected{
-            background-color: $saphire-two;
+            background-color: #114783;
             color: #fff;
         }
         &.selected:hover{
-            background-color: $saphire-two;
+            background-color: #114783;
             color: #fff;
         }
     }
@@ -77,7 +77,7 @@ $font-size: 12px;
     }
 
     .le-table-row:hover {
-        background-color: $blue-text;
+        background-color: #457eba;
         & > .le-table-cell {
             color: $pearl-white;
         }
