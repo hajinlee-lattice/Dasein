@@ -12,11 +12,11 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -34,9 +34,6 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private LookupIdMappingService lookupIdMappingService;
 
-    @Inject
-    private DropBoxEntityMgr dropBoxEntityMgr;
-
     private LookupIdMap lookupIdMap;
     private String configId;
     private String configIdWithAuth;
@@ -49,7 +46,6 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        dropbox = dropBoxEntityMgr.createDropBox(mainTestTenant, "us-east-1").getDropBox();
         List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
@@ -97,8 +93,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(extractedLookupIdMap.getExternalSystemName(), CDLExternalSystemName.Salesforce);
         Assert.assertEquals(extractedLookupIdMap.getOrgId(), orgId);
         Assert.assertEquals(extractedLookupIdMap.getOrgName(), orgName);
-        Assert.assertEquals(extractedLookupIdMap.getExportFolder(),
-                String.format("s3n://latticeengines-dev/dropfolder/%s/export/campaigns", dropbox));
+        Assert.assertTrue(StringUtils.isBlank(extractedLookupIdMap.getExportFolder()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testFind" })

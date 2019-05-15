@@ -158,8 +158,12 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         Map<String, DataIntegrationStatusMonitor> dataIntegrationStatusMap = dataIntegrationStatusMonitors.stream()
                 .collect(Collectors.toMap(DataIntegrationStatusMonitor::getEntityId, dism -> dism));
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
-        launchSummaries.forEach(ls -> ls.getIntegrationStatusMonitor().setS3Bucket(
-                ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket : s3CustomerBucket));
+        launchSummaries.forEach(ls -> {
+            if (ls.getIntegrationStatusMonitor() != null)
+                ls.getIntegrationStatusMonitor()
+                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
+                                : s3CustomerBucket);
+        });
     }
 
     @Override
