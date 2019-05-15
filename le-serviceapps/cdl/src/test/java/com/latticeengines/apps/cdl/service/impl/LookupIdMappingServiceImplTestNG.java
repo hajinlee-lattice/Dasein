@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,6 +26,9 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private DropBoxEntityMgr dropBoxEntityMgr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3CustomerBucket;
 
     private String dropBox;
 
@@ -47,7 +51,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(lookupIdsMapping.containsKey(CDLExternalSystemType.FILE_SYSTEM.name()));
         Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).size(), 1);
         Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).get(0).getExportFolder(),
-                String.format("s3n://latticeengines-dev/dropfolder/%s/export/campaigns", dropBox));
+                String.format("s3n://%s/dropfolder/%s/export/campaigns", s3CustomerBucket, dropBox));
         // "");
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
