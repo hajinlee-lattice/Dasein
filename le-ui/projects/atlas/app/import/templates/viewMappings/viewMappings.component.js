@@ -27,6 +27,8 @@ export default class ViewMappings extends Component {
             latticeMappings: [],
             customMappings: []
         };
+
+        console.log(props);
     }
 
     componentWillUnmount() {
@@ -35,6 +37,42 @@ export default class ViewMappings extends Component {
 
     componentDidMount() {
         this.unsubscribe = store.subscribe(this.handleChange);
+
+        let ImportWizardStore = this.ImportWizardStore;
+        let postBody = ImportWizardStore.getTemplateData();
+        let latticeMappings = [];
+        let customMappings = [];
+        httpService.post(
+            "/pls/cdl/s3import/template/preview",
+            postBody,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                        console.log(response);
+                        // state.latticeMappings = response;
+
+                        let data = response.data;
+                        latticeMappings = data.filter(field => field.field_category == "LatticeField");
+                        customMappings = data.filter(field => field.field_category == "CustomField");
+
+                        console.log(latticeMappings);
+                        console.log(customMappings);
+
+                        this.setState({
+                            forceReload: true,
+                            latticeMappings: latticeMappings,
+                            customMappings: customMappings
+                        }, function () {
+                            this.setState({ forceReload: false }); 
+                        });
+
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
     }
 
     handleChange = () => {
@@ -42,86 +80,52 @@ export default class ViewMappings extends Component {
         let entity = ImportWizardStore.getEntityType();
         let feedType = ImportWizardStore.getFeedType();
 
+        console.log(ImportWizardStore.getTemplateData());
+
         let state = Object.assign({}, this.state);
         state.forceReload = true;
         state.entity = entity;
-
-        // let postBody = {};
-        // httpService.post(
-        //     "/pls/cdl/s3import/template/preview?feedType=" + feedType,
-        //     postBody,
-        //     new Observer(
-        //         response => {
-        //             if (response.getStatus() === SUCCESS) {
-        //                 console.log(response);
-        //                 state.latticeMappings = response;
-        //             }
-        //         },
-        //         error => {
-        //             console.log("error");
-        //         }
-        //     )
-        // );
-
-        state.latticeMappings = [
-            {
-                "fileName": "Company Name",
-                "latticeField": "Company Name",
-                "dataType": "String"
-            },
-            {
-                "fileName": "Company Website",
-                "latticeField": "Company Website",
-                "dataType": "String"
-            }
-        ];
-        state.customMappings = [
-            {
-                "fileName": "Company Revenue",
-                "latticeField": "Company Revenue",
-                "dataType": "Numeric"
-            },
-            {
-                "fileName": "HQ Address 1",
-                "latticeField": "HQ Address 1",
-                "dataType": "String"
-            }
-        ];
         this.setState(state, function () {
             this.setState({ forceReload: false });    
         });
     }
     
     getLatticeFieldsConfig() {
+
         let config = {
-            name: "lattice-fields",
+            name: "lattice-mappings",
             selectable: false,
             header: [
                 {
-                    name: "fileName",
+                    name: "nameFromFile",
                     displayName: "Field Name From File",
                     sortable: false
                 },
                 {
-                    name: "latticeField",
+                    name: "name_in_template",
                     displayName: "Lattice Field",
                     sortable: false
                 },
                 {
-                    name: "dataType",
+                    name: "field_type",
                     displayName: "Data Type",
                     sortable: false
                 }
             ],
             columns: [
                 {
-                    colSpan: 4
+                    colSpan: 6,
+                    template: cell => {
+                        return (
+                            <span>{cell.props.rowData.name_from_file} <i className="fa fa-long-arrow-right pull-right" aria-hidden="true"></i></span>
+                        );
+                    }
                 },
                 {
-                    colSpan: 4
+                    colSpan: 5
                 },
                 {
-                    colSpan: 4
+                    colSpan: 1
                 }
             ]
         };
@@ -131,34 +135,39 @@ export default class ViewMappings extends Component {
 
     getCustomFieldsConfig() {
         let config = {
-            name: "custom-fields",
+            name: "custom-mappings",
             selectable: false,
             header: [
                 {
-                    name: "fileName",
+                    name: "nameFromFile",
                     displayName: "Field Name From File",
                     sortable: false
                 },
                 {
-                    name: "latticeField",
+                    name: "name_in_template",
                     displayName: "Lattice Field",
                     sortable: false
                 },
                 {
-                    name: "dataType",
+                    name: "field_type",
                     displayName: "Data Type",
                     sortable: false
                 }
             ],
             columns: [
                 {
-                    colSpan: 4
+                    colSpan: 6,
+                    template: cell => {
+                        return (
+                            <span>{cell.props.rowData.name_from_file} <i className="fa fa-long-arrow-right pull-right" aria-hidden="true"></i></span>
+                        );
+                    }
                 },
                 {
-                    colSpan: 4
+                    colSpan: 5
                 },
                 {
-                    colSpan: 4
+                    colSpan: 1
                 }
             ]
         };
@@ -177,7 +186,7 @@ export default class ViewMappings extends Component {
                             <div className="section-body view-mappings with-padding">
                                 <h5><i className="ico ico-lattice-dots-color"></i> Lattice Fields</h5>
                                 <LeTable
-                                    name="lattice-fields"
+                                    name="lattice-mappings"
                                     config={this.getLatticeFieldsConfig()}
                                     forceReload={this.state.forceReload}
                                     showLoading={this.state.showLoading}
@@ -187,7 +196,7 @@ export default class ViewMappings extends Component {
 
                                 <h5><i className="fa fa-cog"></i> Custom Fields</h5>
                                 <LeTable
-                                    name="custom-fields"
+                                    name="custom-mappings"
                                     config={this.getCustomFieldsConfig()}
                                     forceReload={this.state.forceReload}
                                     showLoading={this.state.showLoading}

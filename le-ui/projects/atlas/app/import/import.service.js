@@ -39,6 +39,7 @@ angular.module('lp.import')
         this.displayType = null;
         this.entityType = null;
         this.feedType = null;
+        this.templateData = null;
 
         this.nonCustomIds = [];
 
@@ -510,6 +511,13 @@ angular.module('lp.import')
     };
     this.getTemplateAction = function() {
         return this.templateAction;
+    };
+
+    this.setTemplateData = function(templateData) {
+        this.templateData = templateData;
+    };
+    this.getTemplateData = function() {
+        return this.templateData;
     };
 
     this.setDisplayType = function(displayType) {

@@ -44,11 +44,13 @@ export default class S3FileList extends Component {
         this.unsubscribe = store.subscribe(this.handleChange);
         let path = store.getState()['s3files'].path;
 
+        let ImportWizardStore = this.ImportWizardStore;
+        let entityType = ImportWizardStore.getEntityType();
         this.setState({
             showLoading: true,
             breadcrumbs: [
                 {
-                    label: 'Account Data'
+                    label: `${entityType} Data`
                 }
             ]
         });
@@ -154,11 +156,12 @@ export default class S3FileList extends Component {
     }
 
     getFilesFromFolder = (folder) => {
-
+        let ImportWizardStore = this.ImportWizardStore;
+        let entityType = ImportWizardStore.getEntityType();
         let state = Object.assign({}, this.state);
         state.breadcrumbs = [
             {
-                "label": 'Account Data'
+                "label": `${entityType} Data`
             },
             {
                 "label": folder
@@ -173,7 +176,7 @@ export default class S3FileList extends Component {
                     s3actions.fetchS3Files(path);
                     state.breadcrumbs = [
                         {
-                            "label": 'Account Data'
+                            "label": `${entityType} Data`
                         }
                     ];
                     break;
@@ -198,11 +201,15 @@ export default class S3FileList extends Component {
         let config = {
             name: "file-list",
             selectable: true,
+            sorting:{
+                initial: 'lastModified',
+                direction: 'desc'
+            },
             header: [
                 {
                     name: "fileName",
                     displayName: "File",
-                    sortable: false
+                    sortable: true
                 },
                 {
                     name: "file_type",
@@ -212,7 +219,7 @@ export default class S3FileList extends Component {
                 {
                     name: "file_size",
                     displayName: "File Size",
-                    sortable: false
+                    sortable: true
                 },
                 {
                     name: "lastModified",
@@ -248,21 +255,26 @@ export default class S3FileList extends Component {
                 {
                     colSpan: 3,
                     template: cell => {
-                        let date = new Date(cell.props.rowData.last_modified);
-                        let options = {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                        };
-                        let formatted = date.toLocaleDateString(
-                                            "en-US",
-                                            options
-                                        );
-                        return (
-                            <span>{formatted}</span>
-                        );
+
+                        if (cell.props.rowData.file_type != null) {
+                            let date = new Date(cell.props.rowData.last_modified);
+                            let options = {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            };
+                            let formatted = date.toLocaleDateString(
+                                                "en-US",
+                                                options
+                                            );
+                            return (
+                                <span>{formatted}</span>
+                            );
+                        } else {
+                            return null;
+                        }
                     }
                 }
             ]

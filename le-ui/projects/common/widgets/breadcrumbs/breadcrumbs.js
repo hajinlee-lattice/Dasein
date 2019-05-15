@@ -11,7 +11,6 @@ export default class Breadcrumbs extends Component {
     }
 
     clickHandler = (e, crumb) => {
-        console.log(e, crumb);
         this.props.onClick(crumb);
     }
 
@@ -19,10 +18,17 @@ export default class Breadcrumbs extends Component {
         if (this.props.breadcrumbs && this.props.breadcrumbs.length > 0) {
 
             let crumbsArray = this.props.breadcrumbs;
-            let crumbs = crumbsArray.map(function(crumb){
-                            return ( 
-                                <li onClick={(e) => {this.clickHandler(e, crumb)}}>{crumb.label}</li>
-                            );
+            let crumbs = crumbsArray.map(function(crumb, index){
+                            if (crumbsArray.length-1 != index) {
+                                return ( 
+                                    <li onClick={(e) => {this.clickHandler(e, crumb)}}>{crumb.label}</li>
+                                );
+                            } else {
+                                return (
+                                    <li>{crumb.label}</li>
+                                );
+                            }
+                            
                         }, this);
             return crumbs;
         } else {

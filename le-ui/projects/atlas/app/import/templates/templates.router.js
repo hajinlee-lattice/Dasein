@@ -50,9 +50,10 @@ angular
                 path: () => {
                     return 'fieldmappings';
                 },
-                ngservices: (ImportWizardStore) => {
+                ngservices: (ImportWizardStore, $stateParams) => {
                     let obj = {
-                        ImportWizardStore: ImportWizardStore
+                        ImportWizardStore: ImportWizardStore,
+                        params: $stateParams
                     }
                     return obj;
                 }

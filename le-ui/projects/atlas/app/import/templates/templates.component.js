@@ -99,12 +99,14 @@ export default class TemplatesComponent extends Component {
             
             // Wait until setState is completed and do some stuff.
             let action = response.action;
+            let data = response.data;
             let ImportWizardStore = this.ImportWizardStore;
             ImportWizardStore.setEntityType(this.state.entityType);
             ImportWizardStore.setFeedType(this.state.feedType);
             ImportWizardStore.setTemplateAction(action);
+            ImportWizardStore.setTemplateData(data);
             if (action == 'view-template') {
-                this.viewTemplate();
+                this.viewTemplate(response);
             } else {
                 this.createTemplate(response);
             }
@@ -124,8 +126,11 @@ export default class TemplatesComponent extends Component {
         NgState.getAngularState().go(goTo, params);
     }
 
-    viewTemplate() {
-        NgState.getAngularState().go('home.viewmappings', {});
+    viewTemplate(response) {
+        let params = {
+            data: response.data
+        }
+        NgState.getAngularState().go('home.viewmappings', params);
     }
 
     componentWillUnmount() {
