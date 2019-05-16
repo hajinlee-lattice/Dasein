@@ -178,6 +178,14 @@
       }
     }
   }
+  .le-header {
+    .container-flex {
+      & > label {
+        width: auto;
+        font-weight: bold;
+      }
+    }
+  }
   .container-flex {
     width: 100%;
     display: flex;
