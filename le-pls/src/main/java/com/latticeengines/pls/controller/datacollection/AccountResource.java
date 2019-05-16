@@ -108,17 +108,11 @@ public class AccountResource extends BaseFrontEndEntityResource {
     @Override
     protected void postProcessRecord(Map<String, Object> result) {
         overwriteCompanyName(result);
-        if (isEntityMatchEnabled() && result.containsKey(InterfaceName.CustomerAccountId.name())) {
-            result.put(InterfaceName.AccountId.name(), result.get(InterfaceName.CustomerAccountId.name()));
-            result.remove(InterfaceName.CustomerAccountId.name());
-        }
     }
 
     private boolean isEntityMatchEnabled() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        boolean enabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        log.info(customerSpace + " enabled entity match: " + enabled);
-        return true;
+        return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
     }
 
 }
