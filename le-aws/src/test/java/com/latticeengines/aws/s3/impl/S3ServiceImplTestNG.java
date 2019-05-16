@@ -1,8 +1,10 @@
 package com.latticeengines.aws.s3.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,6 +88,29 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void teardown() {
         s3Service.cleanupPrefix(testBucket, dropBoxDir);
         s3Client.deleteBucketPolicy(testBucket);
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void testUploadMultiPart() {
+        long MB = 1024 * 1024;
+
+        String destKey1 = "uploadMultipartStreamTest/1M.txt";
+        String destKey2 = "uploadMultipartStreamTest/20M.txt";
+
+        char[] allA = new char[(int)(MB)];
+        Arrays.fill(allA, 'a');
+        String oneM = new String(allA);
+        InputStream oneMStream = new ByteArrayInputStream(oneM.getBytes());
+        s3Service.uploadInputStreamMultiPart(testBucket, destKey1, oneMStream, MB);
+
+        char[] allB = new char[(int)(20 * MB)];
+        for (int i = 0; i < 20; i++) {
+            char x = (char)('a' + i);
+            Arrays.fill(allB, (int)(i * MB), (int)((i + 1) * MB - 1), x);
+        }
+        String twentyM = new String(allB);
+        InputStream twentyMStream = new ByteArrayInputStream(twentyM.getBytes());
+        s3Service.uploadInputStreamMultiPart(testBucket, destKey2, twentyMStream, 20 * MB);
     }
 
     @Test(groups = "functional")

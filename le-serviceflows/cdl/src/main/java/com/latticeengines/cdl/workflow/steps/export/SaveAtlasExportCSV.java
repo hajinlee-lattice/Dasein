@@ -309,8 +309,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
             throws IOException {
         log.info("Copy from " + hdfsPath + " to " + s3Path);
+        long fileSize = HdfsUtils.getFileSize(configuration, hdfsPath);
         try (InputStream stream = HdfsUtils.getInputStream(configuration, hdfsPath)) {
-            s3Service.uploadInputStream(s3Bucket, s3Path, stream, true);
+            s3Service.uploadInputStreamMultiPart(s3Bucket, s3Path, stream, fileSize);
             s3Service.addTagToObject(s3Bucket, s3Path, tag, tagValue);
         }
     }
