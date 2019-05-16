@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -114,7 +115,10 @@ public class AccountResource extends BaseFrontEndEntityResource {
     }
 
     private boolean isEntityMatchEnabled() {
-        return batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        boolean enabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        log.info(customerSpace + " enabled entity match: " + enabled);
+        return true;
     }
 
 }

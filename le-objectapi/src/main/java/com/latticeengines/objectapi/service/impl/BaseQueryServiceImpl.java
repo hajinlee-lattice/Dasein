@@ -18,6 +18,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -72,7 +73,13 @@ public abstract class BaseQueryServiceImpl {
     }
 
     private boolean isEntityMatchEnabled() {
-        return batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            log.warn("MultiTenant Context is empty!");
+            return false;
+        } else {
+            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        }
     }
 
     private Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,
