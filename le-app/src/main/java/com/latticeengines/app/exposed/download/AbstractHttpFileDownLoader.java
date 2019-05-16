@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -141,12 +139,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
     }
 
     private InputStream processInputStreamBasedOnMode(InputStream inputStream, DownloadMode mode,
-                                                      StringBuilder filenameBuilder) {
+            StringBuilder filenameBuilder) {
         switch (mode) {
         case TOP_PREDICTOR:
-            return processTopPredictorFile(inputStream);
+            return processTopPredictorFile(inputStream, filenameBuilder);
         case RF_MODEL:
-            return processRfModel(inputStream);
+            return processRfModel(inputStream, filenameBuilder);
         case DEFAULT:
         default:
             return processDates(inputStream, filenameBuilder);
@@ -158,7 +156,8 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return inputStream;
         }
 
-        // todo: hard-coded date format. Need to be replaced in date attribute in phase 2.
+        // todo: hard-coded date format. Need to be replaced in date attribute
+        // in phase 2.
         final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
 
         List<String> dateAttributes = getDateAttributes();
@@ -211,16 +210,20 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         return dateAttributes;
     }
 
-    @VisibleForTesting
-    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats,
-                              StringBuilder filenameBuilder) {
-        String tenant = MultiTenantContext.getShortTenantId();
-        log.info(String.format("dateToFormats=%s. Tenant=%s", JsonUtils.serialize(dateToFormats), tenant));
+    private String tempFolderName() {
         String tmpdir = System.getProperty("java.io.tmpdir");
         if (tmpdir.endsWith("/")) {
             tmpdir = tmpdir.substring(0, tmpdir.length() - 1);
         }
-        filenameBuilder.append(tmpdir).append(NamingUtils.uuid("/download"));
+        return new StringBuilder().append(tmpdir).append(NamingUtils.uuid("/download")).toString();
+    }
+
+    @VisibleForTesting
+    InputStream reformatDates(InputStream inputStream, Map<String, String> dateToFormats,
+            StringBuilder filenameBuilder) {
+        String tenant = MultiTenantContext.getShortTenantId();
+        log.info(String.format("dateToFormats=%s. Tenant=%s", JsonUtils.serialize(dateToFormats), tenant));
+        filenameBuilder.append(tempFolderName());
         String filename = filenameBuilder.toString();
         log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
         BufferedWriter bw;
@@ -256,7 +259,8 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     try {
                                         dateInString = formatter.format(new Date(Long.valueOf(columnValue)));
                                     } catch (NumberFormatException exc) {
-                                        // do nothing. Keep original date value as-is.
+                                        // do nothing. Keep original date value
+                                        // as-is.
                                         log.info(String.format("Skip reformatting date value %s for column %s",
                                                 columnValue, columnName));
                                     }
@@ -291,19 +295,24 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         }
     }
 
-    private InputStream processRfModel(InputStream inputStream) {
+    private InputStream processRfModel(InputStream inputStream, StringBuilder filenameBuilder) {
         Map<String, String> nameToDisplayNameMap = getCustomizedDisplayNames();
         if (MapUtils.isNotEmpty(nameToDisplayNameMap)) {
-            return fixRfModelDisplayName(inputStream, nameToDisplayNameMap);
+            return fixRfModelDisplayName(inputStream, nameToDisplayNameMap, filenameBuilder);
         }
         return inputStream;
     }
 
     @VisibleForTesting
-    InputStream fixRfModelDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap) {
-        StringBuilder sb = new StringBuilder();
+    InputStream fixRfModelDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap,
+            StringBuilder filenameBuilder) {
 
+        String tenant = MultiTenantContext.getShortTenantId();
         log.info("start to replace rf model edit name for " + MultiTenantContext.getShortTenantId());
+        filenameBuilder.append(tempFolderName());
+        String filename = filenameBuilder.toString();
+        log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
+
         try (InputStreamReader reader = new InputStreamReader(
                 new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                         ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
@@ -312,7 +321,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             CSVFormat format = LECSVFormat.format;
             try (CSVParser parser = new CSVParser(reader, format)) {
                 parser.getHeaderMap().keySet().toArray();
-                try (CSVPrinter printer = new CSVPrinter(sb,
+                try (CSVPrinter printer = new CSVPrinter(
+                        new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8)),
                         CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     for (CSVRecord record : parser) {
                         String attrName = record.get("Column Name");
@@ -322,7 +333,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                                     + nameToDisplayNameMap.get(attrName));
                             s[2] = nameToDisplayNameMap.get(attrName);
                             for (String val : s) {
-                                printer.print(val != null ? val: "");
+                                printer.print(val != null ? val : "");
                             }
                             printer.println();
                         } else {
@@ -337,7 +348,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return inputStream;
         }
 
-        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
+        try {
+            return new FileInputStream(filename);
+        } catch (FileNotFoundException exc) {
+            log.error(String.format("Error while reading temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+        }
     }
 
     private Map<String, String> getCustomizedDisplayNames() {
@@ -347,8 +363,8 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     .getCustomDisplayNames(MultiTenantContext.getShortTenantId());
             if (MapUtils.isNotEmpty(customDisplayNameAttrs)
                     && CollectionUtils.isNotEmpty(customDisplayNameAttrs.get(BusinessEntity.Account))) {
-                customDisplayNameAttrs.get(BusinessEntity.Account).forEach(config ->
-                        nameToDisplayNameMap.put(config.getAttrName(),
+                customDisplayNameAttrs.get(BusinessEntity.Account)
+                        .forEach(config -> nameToDisplayNameMap.put(config.getAttrName(),
                                 (String) config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue()));
             }
         } catch (LedpException e) {
@@ -357,17 +373,23 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         return nameToDisplayNameMap;
     }
 
-    private InputStream processTopPredictorFile(InputStream inputStream) {
+    private InputStream processTopPredictorFile(InputStream inputStream, StringBuilder filenameBuilder) {
         Map<String, String> nameToDisplayNameMap = getCustomizedDisplayNames();
         if (MapUtils.isNotEmpty(nameToDisplayNameMap)) {
-            return fixPredictorDisplayName(inputStream, nameToDisplayNameMap);
+            return fixPredictorDisplayName(inputStream, nameToDisplayNameMap, filenameBuilder);
         }
         return inputStream;
     }
 
     @VisibleForTesting
-    InputStream fixPredictorDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap) {
-        StringBuilder sb = new StringBuilder();
+    InputStream fixPredictorDisplayName(InputStream inputStream, Map<String, String> nameToDisplayNameMap,
+            StringBuilder filenameBuilder) {
+
+        String tenant = MultiTenantContext.getShortTenantId();
+        log.info("start to replace rf model edit name for " + MultiTenantContext.getShortTenantId());
+        filenameBuilder.append(tempFolderName());
+        String filename = filenameBuilder.toString();
+        log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
 
         log.info("start to replace top predictor edit name for " + MultiTenantContext.getShortTenantId());
         try (InputStreamReader reader = new InputStreamReader(
@@ -378,7 +400,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             CSVFormat format = LECSVFormat.format;
             try (CSVParser parser = new CSVParser(reader, format)) {
                 parser.getHeaderMap().keySet().toArray();
-                try (CSVPrinter printer = new CSVPrinter(sb,
+                try (CSVPrinter printer = new CSVPrinter(
+                        new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8)),
                         CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                     for (CSVRecord record : parser) {
                         String attrName = record.get("Original Column Name");
@@ -403,7 +427,12 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             return inputStream;
         }
 
-        return IOUtils.toInputStream(sb.toString(), Charset.defaultCharset());
+        try {
+            return new FileInputStream(filename);
+        } catch (FileNotFoundException exc) {
+            log.error(String.format("Error while reading temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+        }
     }
 
     private String[] toArray(CSVRecord rec) {

@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.esotericsoftware.minlog.Log;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 
 public class HdfsFileHttpDownloaderUnitTestNG {
@@ -36,10 +37,8 @@ public class HdfsFileHttpDownloaderUnitTestNG {
     private Map<String, String> dateMap;
 
     private final String DATE_FORMAT = "MM/dd/yyyy hh:mm:ss a z";
-    private final String[] EXPECTED_DATE_STRINGS = new String[] {
-            "11/06/2018 11:15:15 PM UTC",
-            "11/07/2018 04:20:20 AM UTC"
-    };
+    private final String[] EXPECTED_DATE_STRINGS = new String[] { "11/06/2018 11:15:15 PM UTC",
+            "11/07/2018 04:20:20 AM UTC" };
 
     @BeforeClass(groups = "unit")
     public void setup() {
@@ -58,7 +57,11 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     @Test(groups = "unit")
     public void testFixPredictorDisplayName() throws IOException {
-        InputStream stream = downloader.fixPredictorDisplayName(topPreictorInputStream, nameMap);
+        StringBuilder sb = new StringBuilder();
+        InputStream stream = downloader.fixPredictorDisplayName(topPreictorInputStream, nameMap, sb);
+        Assert.assertNotNull(sb);
+        Assert.assertTrue(StringUtils.isNotEmpty(sb.toString()));
+        Log.info(sb.toString());
         try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                 ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                 StandardCharsets.UTF_8)) {
@@ -81,7 +84,11 @@ public class HdfsFileHttpDownloaderUnitTestNG {
 
     @Test(groups = "unit")
     public void testFixRfModelDisplayName() throws IOException {
-        InputStream stream = downloader.fixRfModelDisplayName(rfModelInputStream, nameMap);
+        StringBuilder sb = new StringBuilder();
+        InputStream stream = downloader.fixRfModelDisplayName(rfModelInputStream, nameMap, sb);
+        Assert.assertNotNull(sb);
+        Assert.assertTrue(StringUtils.isNotEmpty(sb.toString()));
+        Log.info(sb.toString());
         try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
                 ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                 StandardCharsets.UTF_8)) {
