@@ -12,17 +12,16 @@ import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from 'atlas/react/router';
 import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
-import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { store } from 'store';
-import { LARGE_SIZE, MEDIUM_SIZE } from "../../../../../common/widgets/modal/le-modal.utils";
+import httpService from "common/app/http/http-service";
+import Observer from "common/app/http/observer";
 export default class SystemCreationComponent extends Component {
     constructor(props) {
         super(props);
         this.validate = this.validate.bind(this);
         this.systemsObj = [
-            { name: 'salesforce', img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Text' },
-            { name: 'eloqua', img: '/atlas/assets/images/eloqua.png', text: 'Text' },
-            { name: 'others', img: '/atlas/assets/images/logo_others.png', text: 'Text' }
+            { name: 'Salesforce', img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Text' },
+            { name: 'Eloqua', img: '/atlas/assets/images/eloqua.png', text: 'Text' },
+            { name: 'Others', img: '/atlas/assets/images/logo_others.png', text: 'Text' }
         ];
         this.state = { systemSelected: undefined, valid: false, newSystemName: '' };
     }
@@ -44,7 +43,7 @@ export default class SystemCreationComponent extends Component {
     getSystemSupported() {
         let systems = [];
         this.systemsObj.forEach(system => {
-            // console.log(this.state);
+            console.log(system);
             systems.push(
                 <LeCard classNames={`${'system-creation'} ${(this.state.systemSelected && this.state.systemSelected.name) == system.name ? 'selected' : ''}`} clickHandler={() => {
                     // console.log('CLIKC');
@@ -108,6 +107,16 @@ export default class SystemCreationComponent extends Component {
                             classNames: "blue-button"
                         }}
                         callback={() => {
+                            var observer = new Observer(
+                                response => {
+                                    httpService.unsubscribeObservable(observer);
+                                    ReactRouter.getStateService().go('templateslist');
+                                }
+                            );
+                            // pls/cdl/s3import/system?systemName={systemName}&systemType=
+                            // url, body, observer, headers
+                            let url = `${'/pls/cdl/s3import/system?systemName='}${this.state.newSystemName}${'&systemType='}${this.state.systemSelected.name}`;
+                            httpService.post(url, {}, observer, {});
                             // let config = {
                             //     callback: (action) => {
                             //         modalActions.closeModal(store);
