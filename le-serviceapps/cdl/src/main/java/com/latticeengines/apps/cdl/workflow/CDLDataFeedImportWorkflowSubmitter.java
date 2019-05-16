@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -57,14 +58,15 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     private BatonService batonService;
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
-                                CSVImportFileInfo csvImportFileInfo, boolean s3ImportEmail,
-                                S3ImportEmailInfo emailInfo, WorkflowPidWrapper pidWrapper) {
+                                CSVImportFileInfo csvImportFileInfo, PrepareImportConfiguration prepareImportConfig,
+                                boolean s3ImportEmail, S3ImportEmailInfo emailInfo, WorkflowPidWrapper pidWrapper) {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
-                connectorConfig, csvImportFileInfo, action.getPid(), s3ImportEmail, emailInfo, enableEntityMatch);
+                connectorConfig, csvImportFileInfo, prepareImportConfig, action.getPid(),
+                s3ImportEmail, emailInfo, enableEntityMatch);
 
         ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return appId;
@@ -134,16 +136,11 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo,
+            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo, PrepareImportConfiguration prepareImportConfig,
             @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo, boolean enableEntityMatch) {
         String filePath = "";
         if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
             filePath = csvImportFileInfo.getReportFilePath();
-        }
-
-        String warning = "";
-        if (StringUtils.isNotEmpty(csvImportFileInfo.getReportWarning())) {
-            warning = csvImportFileInfo.getReportWarning();
         }
 
         String emailInfoStr = "";
@@ -159,13 +156,13 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .fileValidation(entity, enableEntityMatch) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
+                .prepareImportConfig(prepareImportConfig)
                 .inputProperties(ImmutableMap.<String, String>builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, csvImportFileInfo.getReportFileName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
                                 csvImportFileInfo.getReportFileDisplayName()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH, filePath)
-                        .put(WorkflowContextConstants.Inputs.REPORT_WARNING, warning)
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG, String.valueOf(s3ImportEmail))//
                         .put(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_INFO, emailInfoStr)
