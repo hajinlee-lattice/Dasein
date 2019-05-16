@@ -130,8 +130,17 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(newResponse.getBucket());
         Assert.assertNotNull(newResponse.getDropBox());
         Assert.assertNotNull(newResponse.getRegion());
+        Assert.assertNotNull(newResponse.getSecretKey());
         BasicAWSCredentialsProvider newCreds = //
                 new BasicAWSCredentialsProvider(newResponse.getAccessKey(), newResponse.getSecretKey());
+        verifyAccessWithRetries(newCreds, false);
+
+        newResponse = dropboxService.getAccessKey();
+        Assert.assertNotNull(newResponse.getBucket());
+        Assert.assertNotNull(newResponse.getDropBox());
+        Assert.assertNotNull(newResponse.getRegion());
+        Assert.assertNotNull(newResponse.getSecretKey());
+        newCreds = new BasicAWSCredentialsProvider(newResponse.getAccessKey(), newResponse.getSecretKey());
         verifyAccessWithRetries(newCreds, false);
 
         dropboxService.revokeAccess();
@@ -186,8 +195,7 @@ public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
                 uploadFile(s3Client, bucket, prefix);
             }
             Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
-            List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace
-            , prefix, null);
+            List<FileProperty> result = dropboxService.getFileListForPath(mainCustomerSpace, prefix, null);
             log.info(JsonUtils.serialize(result));
             Assert.assertTrue(result.size() > 0);
             return true;

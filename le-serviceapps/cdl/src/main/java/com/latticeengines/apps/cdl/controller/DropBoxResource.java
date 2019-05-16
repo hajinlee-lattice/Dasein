@@ -48,7 +48,7 @@ public class DropBoxResource {
     @PutMapping("/access")
     @ApiOperation(value = "Grant external access to drop box")
     public GrantDropBoxAccessResponse grantAccess(@PathVariable String customerSpace,
-                                                  @RequestBody GrantDropBoxAccessRequest request) {
+            @RequestBody GrantDropBoxAccessRequest request) {
         return dropBoxService.grantAccess(request);
     }
 
@@ -65,6 +65,12 @@ public class DropBoxResource {
         return dropBoxService.refreshAccessKey();
     }
 
+    @GetMapping("/key")
+    @ApiOperation(value = "Refresh AWS access key to drop box, if the access was granted to a Lattice user")
+    public GrantDropBoxAccessResponse getAccessKey(@PathVariable String customerSpace) {
+        return dropBoxService.getAccessKey();
+    }
+
     @PostMapping("")
     @ApiOperation(value = "Create drop box. (only for fixing old tenants)")
     public DropBoxSummary createDropBox(@PathVariable String customerSpace) {
@@ -78,8 +84,7 @@ public class DropBoxResource {
     @PostMapping(value = "/folder/{objectName}")
     @ApiOperation(value = "Create template folder")
     public boolean createFolder(@PathVariable String customerSpace, @PathVariable String objectName,
-                                @RequestParam(required = false) String path,
-                                @RequestParam(required = false) String systemName) {
+            @RequestParam(required = false) String path, @RequestParam(required = false) String systemName) {
         dropBoxService.createFolder(customerSpace, systemName, objectName, path);
         return true;
     }
@@ -94,27 +99,23 @@ public class DropBoxResource {
     @GetMapping(value = "/folder")
     @ApiOperation(value = "Get all sub folders")
     public List<String> getAllSubFolders(@PathVariable String customerSpace,
-                                         @RequestParam(required = false) String systemName,
-                                         @RequestParam(required = false) String objectName,
-                                         @RequestParam(required = false) String path) {
+            @RequestParam(required = false) String systemName, @RequestParam(required = false) String objectName,
+            @RequestParam(required = false) String path) {
         return dropBoxService.getDropFolders(customerSpace, systemName, objectName, path);
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation("Import file to s3")
-    public boolean importFileToS3(@PathVariable String customerSpace,
-                                  @RequestParam("s3Path") String s3Path,
-                                  @RequestParam("hdfsPath") String hdfsPath,
-                                  @RequestParam("filename") String filename) {
+    public boolean importFileToS3(@PathVariable String customerSpace, @RequestParam("s3Path") String s3Path,
+            @RequestParam("hdfsPath") String hdfsPath, @RequestParam("filename") String filename) {
         return dropBoxService.uploadFileToS3(customerSpace, s3Path, filename, hdfsPath);
     }
 
     @GetMapping(value = "/fileList")
     @ApiOperation(value = "Get all files under path")
-    public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace,
-                                               @RequestParam String s3Path,
-                                               @RequestParam(required = false, defaultValue = "") String filter) {
+    public List<FileProperty> getAllSubFolders(@PathVariable String customerSpace, @RequestParam String s3Path,
+            @RequestParam(required = false, defaultValue = "") String filter) {
         return dropBoxService.getFileListForPath(customerSpace, s3Path, filter);
     }
 }

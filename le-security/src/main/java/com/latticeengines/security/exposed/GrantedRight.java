@@ -255,6 +255,12 @@ public enum GrantedRight implements GrantedAuthority {
             return "Generate_S3_Credential";
         }
     }, //
+    VIEW_S3_CREDENTIAL {
+        @Override
+        public String getAuthority() {
+            return "View_S3_Credential";
+        }
+    }, //
     EDIT_PLS_SSO_CONFIG {
         @Override
         public String getAuthority() {

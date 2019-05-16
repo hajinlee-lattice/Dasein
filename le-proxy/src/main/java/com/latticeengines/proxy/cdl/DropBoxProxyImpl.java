@@ -49,8 +49,15 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
     }
 
     @Override
+    public GrantDropBoxAccessResponse getAccessKey(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dropbox/key", //
+                shortenCustomerSpace(customerSpace));
+        return get("refresh dropbox access key", url, GrantDropBoxAccessResponse.class);
+    }
+
+    @Override
     public boolean createTemplateFolder(String customerSpace, String systemName, String objectName, String path) {
-        if (StringUtils.isEmpty(objectName)) {//create default folder under system
+        if (StringUtils.isEmpty(objectName)) {// create default folder under system
             String url = "/customerspaces/{customerSpace}/dropbox/folder/{systemName}";
             url = constructUrl(url, customerSpace, formatFolder(systemName));
             return get("create template folder", url, Boolean.class);
@@ -66,7 +73,7 @@ public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBo
         }
         url = constructUrl(url, customerSpace, formatFolder(objectName));
 
-        return post("create template folder", url,null, Boolean.class);
+        return post("create template folder", url, null, Boolean.class);
     }
 
     @Override

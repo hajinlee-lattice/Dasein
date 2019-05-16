@@ -148,7 +148,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
             }
             boolean hasS3Path = HdfsUtils.fileExists(distCpConfiguration, s3Path);
             if (!hasS3Path) {
-                log.warn(String.format("There's No hdfs success path=%s, and there's No S3 path=", hdfsPath, s3Path));
+                log.warn(String.format("There's No hdfs success path=%s, and there's No S3 path=%s", hdfsPath, s3Path));
                 return false;
             }
             return true;
