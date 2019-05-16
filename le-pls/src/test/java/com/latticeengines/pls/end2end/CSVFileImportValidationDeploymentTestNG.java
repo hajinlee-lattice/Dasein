@@ -2,20 +2,27 @@ package com.latticeengines.pls.end2end;
 
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.workflow.Report;
 
 public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
+    // one line with empty ID, two line with illegal char
     private static final String ACCOUNT_SOURCE_FILE = "Account_With_Invalid_Char.csv";
 
     private static final String CONTACT_SOURCE_FILE = "Contact_Insufficient_Info.csv";
@@ -38,7 +45,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                         .toString(),
                 SourceType.FILE.getName());
         startCDLImport(accountFile, ENTITY_ACCOUNT);
-        verifyAvroFileNumber(accountFile, 48, targetPath);
+        verifyAvroFileNumber(accountFile, 47, targetPath);
         SourceFile contactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
         String contactPath = String.format("%s/%s/DataFeed1/DataFeed1-Contact/Extracts",
                 PathBuilder
@@ -49,7 +56,16 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyAvroFileNumber(contactFile, 49, contactPath);
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
-
+        List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
+        List<Report> reports = JsonUtils.convertList(list, Report.class);
+        Collections.sort(reports, (one, two) -> one.getCreated().compareTo(two.getCreated()));
+        Assert.assertEquals(reports.size(), 3);
+        Report accountReport = reports.get(0);
+        Report contactReport = reports.get(1);
+        Report productReport = reports.get(2);
+        verifyReport(accountReport, 3L, 3L, 47L);
+        verifyReport(contactReport, 1L, 1L, 49L);
+        verifyReport(productReport, 1L, 1L, 5L);
     }
 
 }

@@ -17,7 +17,7 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
     @Autowired
     protected Configuration yarnConfiguration;
 
-    public abstract void validate(T inputFileValidationServiceConfiguration);
+    public abstract long validate(T inputFileValidationServiceConfiguration);
 
 
     public InputFileValidationService(String serviceName) {

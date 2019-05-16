@@ -41,13 +41,14 @@ public class ContactFileValidationService
     }
 
     @Override
-    public void validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration) {
+    public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration) {
         // first check entity match
         if (contactFileValidationServiceConfiguration.isEnableEntityMatch()) {
             log.info("skip check as entity match is true");
-            return;
+            return 0L;
         }
 
+        long errorLine = 0L;
         List<String> pathList = contactFileValidationServiceConfiguration.getPathList();
 
         CSVFormat format = LECSVFormat.format;
@@ -63,7 +64,6 @@ public class ContactFileValidationService
             log.info("Error when copying error file to local");
         }
 
-        boolean hasError = false;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             for (String path : pathList) {
                 try {
@@ -98,6 +98,7 @@ public class ContactFileValidationService
                                         String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
                                         csvFilePrinter.printRecord(lineId, "", message);
                                         fileError = true;
+                                        errorLine++;
                                         continue;
                                     }
                                     dataFileWriter.append(record);
@@ -111,7 +112,6 @@ public class ContactFileValidationService
                         // record error in error.csv if not empty, copy the
                         // new generated avro file to hdfs
                         if (fileError) {
-                            hasError = true;
                             if (HdfsUtils.fileExists(yarnConfiguration, avroFile)) {
                                 HdfsUtils.rmdir(yarnConfiguration, avroFile);
                             }
@@ -127,7 +127,7 @@ public class ContactFileValidationService
             log.info("Error when writing error message to error file");
         }
         // copy error file back to hdfs, remove local error.csv
-        if (hasError) {
+        if (errorLine != 0) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, errorFile);
@@ -138,6 +138,7 @@ public class ContactFileValidationService
                 log.info("Error when copying file to hdfs");
             }
         }
+        return errorLine;
     }
 
 }

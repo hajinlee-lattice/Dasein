@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.DeleteFileUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.OperationExecuteConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
         @Type(value = BaseDataFlowReportStepConfiguration.class, name = "BaseDataFlowReportStepConfiguration"),
         @Type(value = DeleteFileUploadStepConfiguration.class, name = "DeleteFileUploadStepConfiguration"),
-        @Type(value = ImportDataFeedTaskConfiguration.class, name = "ImportDataFeedTaskConfiguration"),
-        @Type(value = OperationExecuteConfiguration.class, name = "OperationExecuteConfiguration"), })
+        @Type(value = OperationExecuteConfiguration.class, name = "OperationExecuteConfiguration"),
+        @Type(value = InputFileValidatorConfiguration.class, name = "InputFileValidatorConfiguration"), })
 public class BaseReportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     @NotEmptyString

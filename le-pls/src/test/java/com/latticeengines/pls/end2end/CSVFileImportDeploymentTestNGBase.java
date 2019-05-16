@@ -11,8 +11,10 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.functionalframework.CDLDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -184,4 +187,13 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         assertEquals(completedStatus, JobStatus.FAILED);
     }
 
+    protected void verifyReport(Report report1, long ignored, long failed, long imported) {
+        Report report = restTemplate
+                .getForObject(getRestAPIHostPort() + String.format("/pls/reports/%s", report1.getName()), Report.class);
+        Assert.assertNotNull(report.getJson());
+        ObjectNode accountNode = JsonUtils.deserialize(report.getJson().getPayload(), ObjectNode.class);
+        Assert.assertEquals(accountNode.get("ignored_rows").longValue(), ignored);
+        Assert.assertEquals(accountNode.get("total_failed_rows").longValue(), failed);
+        Assert.assertEquals(accountNode.get("imported_rows").longValue(), imported);
+    }
 }

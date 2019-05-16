@@ -44,7 +44,7 @@ public class AccountFileValidationService
     }
 
     @Override
-    public void validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration) {
+    public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration) {
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -53,6 +53,7 @@ public class AccountFileValidationService
             interfaceName = InterfaceName.CustomerAccountId;
         }
 
+        long errorLine = 0L;
         List<String> pathList = accountFileValidationServiceConfiguration.getPathList();
         CSVFormat format = LECSVFormat.format;
         // copy error file if file exists
@@ -66,7 +67,6 @@ public class AccountFileValidationService
         } catch (IOException e) {
             log.info("Error when copying error file to local");
         }
-        boolean hasError = false;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
             for (String path : pathList) {
@@ -95,6 +95,7 @@ public class AccountFileValidationService
                                     }
                                     if (StringUtils.isEmpty(id)) {
                                         log.info("Empty id is found from avro file");
+                                        dataFileWriter.append(record);
                                         continue;
                                     }
                                     for (Character c : invalidChars) {
@@ -105,6 +106,7 @@ public class AccountFileValidationService
                                             csvFilePrinter.printRecord(lineId, "", message);
                                             rowError = true;
                                             fileError = true;
+                                            errorLine++;
                                             break;
                                         }
                                     }
@@ -121,7 +123,6 @@ public class AccountFileValidationService
                         // record error in error.csv if not empty, copy the
                         // new generated avro file to hdfs
                         if (fileError) {
-                            hasError = true;
                             if (HdfsUtils.fileExists(yarnConfiguration, avroFile)) {
                                 HdfsUtils.rmdir(yarnConfiguration, avroFile);
                             }
@@ -138,7 +139,7 @@ public class AccountFileValidationService
         }
 
         // copy error file back to hdfs, remove local error.csv
-        if (hasError) {
+        if (errorLine != 0L) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, errorFile);
@@ -149,5 +150,6 @@ public class AccountFileValidationService
                 log.info("Error when copying file to hdfs");
             }
         }
+        return errorLine;
     }
 }
