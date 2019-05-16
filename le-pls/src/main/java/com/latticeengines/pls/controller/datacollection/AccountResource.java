@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -107,14 +108,11 @@ public class AccountResource extends BaseFrontEndEntityResource {
     @Override
     protected void postProcessRecord(Map<String, Object> result) {
         overwriteCompanyName(result);
-        if (isEntityMatchEnabled() && result.containsKey(InterfaceName.CustomerAccountId.name())) {
-            result.put(InterfaceName.AccountId.name(), result.get(InterfaceName.CustomerAccountId.name()));
-            result.remove(InterfaceName.CustomerAccountId.name());
-        }
     }
 
     private boolean isEntityMatchEnabled() {
-        return batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
     }
 
 }

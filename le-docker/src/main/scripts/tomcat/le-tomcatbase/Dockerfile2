@@ -6,6 +6,9 @@ RUN rm -rf $CATALINA_HOME/webapps/ROOT \
     && mkdir -p $CATALINA_HOME/webapps/ROOT \
     && echo "<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><HTML><BODY><H1>It works!</H1></BODY></HTML>" > $CATALINA_HOME/webapps/ROOT/index.html
 
+RUN echo "admin lattice1" > ${CATALINA_HOME}/conf/jmxremote.password
+RUN echo "admin readwrite" > ${CATALINA_HOME}/conf/jmxremote.access
+
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml

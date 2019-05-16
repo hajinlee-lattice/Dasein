@@ -56,7 +56,7 @@ fi
 
 export LE_PROPDIR="/etc/ledp"
 
-export RMI_SERVER="127.0.0.1"
+export RMI_SERVER=${RMI_SERVER:0.0.0.0}
 if [[ -f "/etc/internaladdr.txt" ]]; then
     export QUARTZ_EXECUTION_HOST=`cat /etc/internaladdr.txt`
     echo "QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}"
@@ -82,9 +82,13 @@ export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.latticeengines.refreshScoreArtifact
 export CATALINA_OPTS="${CATALINA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
 
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authenticate=true"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.password.file=${CATALINA_HOME}/conf/jmxremote.password"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.access.file=${CATALINA_HOME}/conf/jmxremote.access"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
-export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.port=1099"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.rmi.port=1099"
 export CATALINA_OPTS="${CATALINA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
 if [[ "${DISABLE_JMXTRANS}" != "true" ]]; then
