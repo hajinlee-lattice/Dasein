@@ -27,9 +27,9 @@ public class S3ImportFolderServiceImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironmentWithDataCollection();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void test() {
-
+        // no longer move file in this service.
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
 
         String key = s3ImportFolderService.startImport(tenantId, "Account",

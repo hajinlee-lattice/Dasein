@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -11,13 +10,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Component("s3ImportFolderService")
 public class S3ImportFolderServiceImpl implements S3ImportFolderService {
@@ -78,7 +74,7 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     public Pair<String, String> startImport(String tenantId, String entity, String sourceBucket, String sourceKey) {
         initialize(tenantId);
         String date = dateFormat.format(new Date());
-        String prefix = String.valueOf(System.currentTimeMillis() / 1000L) + "-" + entity;
+        String prefix = System.currentTimeMillis() / 1000L + "-" + entity;
         String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
         String backupPath = tenantId + INPUT_ROOT + BACKUP + "/" + date + "/" + prefix + "/";
         if (!s3Service.objectExist(s3Bucket, path)) {
@@ -89,17 +85,6 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
         }
         String target = path + getFileName(sourceKey);
         String backupTarget = backupPath + getFileName(sourceKey);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                Collections.singleton(AmazonS3Exception.class), null);
-        retry.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s%s", //
-                        context.getRetryCount() + 1, sourceBucket, sourceKey, s3Bucket, target));
-            }
-            s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, target);
-            s3Service.copyObject(sourceBucket, sourceKey, s3Bucket, backupTarget);
-            return true;
-        });
         return Pair.of(target, backupTarget);
     }
 

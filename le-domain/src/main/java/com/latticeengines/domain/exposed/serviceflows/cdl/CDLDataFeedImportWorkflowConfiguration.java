@@ -5,6 +5,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
@@ -19,6 +20,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         private ImportDataFeedTaskConfiguration importDataFeedTaskConfiguration = new ImportDataFeedTaskConfiguration();
         private InputFileValidatorConfiguration inputFileValidatorConfiguration = new InputFileValidatorConfiguration();
         private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
+        private PrepareImportConfiguration prepareImportConfiguration = new PrepareImportConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
@@ -26,6 +28,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             importDataFeedTaskConfiguration.setCustomerSpace(customerSpace);
             exportToS3.setCustomerSpace(customerSpace);
             inputFileValidatorConfiguration.setCustomerSpace(customerSpace);
+            prepareImportConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -34,6 +37,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             importDataFeedTaskConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             exportToS3.setInternalResourceHostPort(internalResourceHostPort);
             inputFileValidatorConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            prepareImportConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -46,11 +50,27 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             importDataFeedTaskConfiguration.setMicroServiceHostPort(microServiceHostPort);
             exportToS3.setMicroServiceHostPort(microServiceHostPort);
             inputFileValidatorConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            prepareImportConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder importConfig(String importConfig) {
             importDataFeedTaskConfiguration.setImportConfig(importConfig);
+            return this;
+        }
+
+        public Builder prepareImportConfig(PrepareImportConfiguration prepareImportConfig) {
+            if (prepareImportConfig != null) {
+                prepareImportConfiguration.setSourceBucket(prepareImportConfig.getSourceBucket());
+                prepareImportConfiguration.setSourceKey(prepareImportConfig.getSourceKey());
+                prepareImportConfiguration.setDestBucket(prepareImportConfig.getDestBucket());
+                prepareImportConfiguration.setDestKey(prepareImportConfig.getDestKey());
+                prepareImportConfiguration.setBackupKey(prepareImportConfig.getBackupKey());
+                prepareImportConfiguration.setDataFeedTaskId(prepareImportConfig.getDataFeedTaskId());
+                prepareImportConfiguration.setEmailInfo(prepareImportConfig.getEmailInfo());
+            } else {
+                prepareImportConfiguration.setSkipStep(true);
+            }
             return this;
         }
 
@@ -65,6 +85,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         public CDLDataFeedImportWorkflowConfiguration build() {
+            configuration.add(prepareImportConfiguration);
             configuration.add(importDataFeedTaskConfiguration);
             configuration.add(exportToS3);
             configuration.add(inputFileValidatorConfiguration);

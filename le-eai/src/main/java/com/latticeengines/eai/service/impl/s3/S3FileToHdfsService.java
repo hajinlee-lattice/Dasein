@@ -14,9 +14,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -37,7 +39,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.proxy.exposed.cdl.CDLS3FolderProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -52,10 +53,13 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
     private Configuration yarnConfiguration;
 
     @Inject
-    private CDLS3FolderProxy cdls3FolderProxy;
+    private EMREnvService emrEnvService;
 
     @Inject
-    private EMREnvService emrEnvService;
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     private String hdfsFilePath;
 
@@ -66,7 +70,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             copyToHdfs(config);
             importFile(config);
         } catch (Exception e) {
-            cdls3FolderProxy.moveToFailed(config.getCustomerSpace().toString(), config.getS3FilePath());
+            s3Service.moveObject(s3Bucket, config.getS3FilePath(), s3Bucket, config.getFailedPath());
             throw e;
         }
     }
@@ -189,7 +193,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
                 importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
                 waitAndFinalizeJob(context, template.getName(), eaiJobDetailIds.get(0));
-                cdls3FolderProxy.moveToSucceed(customerSpace, config.getS3FilePath());
+                s3Service.moveObject(s3Bucket, config.getS3FilePath(), s3Bucket, config.getSucceedPath());
             }
         } catch (RuntimeException e) {
             updateJobDetailStatus(jobDetailId, ImportStatus.FAILED);

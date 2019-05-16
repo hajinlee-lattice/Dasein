@@ -20,6 +20,7 @@ public class WorkflowContextConstants {
         public static final String IMPACTED_BUSINESS_ENTITIES = "IMPACTED_BUSINESS_ENTITIES";
         public static final String DATAFEEDTASK_REGISTERED_TABLES = "DATAFEEDTASK_REGISTERED_TABLES";
         public static final String DATAFEEDTASK_IMPORT_ERROR_FILES = "DATAFEEDTASK_IMPORT_ERROR_FILES";
+        public static final String IMPORT_WARNING = "IMPORT_WARNING";
     }
 
     public static class Inputs {
@@ -31,7 +32,6 @@ public class WorkflowContextConstants {
         public static final String SOURCE_DISPLAY_NAME = "SOURCE_DISPLAY_NAME";
         public static final String SOURCE_FILE_NAME = "SOURCE_FILE_NAME";
         public static final String SOURCE_FILE_PATH = "SOURCE_FILE_PATH";
-        public static final String REPORT_WARNING = "REPORT_WARNING";
         public static final String JOB_TYPE = "JOB_TYPE";
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
         public static final String INITIAL_DATAFEED_STATUS = "INITIAL_DATAFEED_STATUS";

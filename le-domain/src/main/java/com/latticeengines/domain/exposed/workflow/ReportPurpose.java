@@ -39,6 +39,7 @@ public enum ReportPurpose {
      * Generic
      */
     IMPORT_DATA_SUMMARY("ImportDataSummary"), //
+    PREPARE_IMPORT_SUMMARY("PrepareImportSummary"),
     EVENT_TABLE_IMPORT_SUMMARY("EventTableImportSummary"), //
     PUBLISH_DATA_SUMMARY("PublishDataSummary"), //
     ENTITIES_SUMMARY("EntitiesSummary"), //
