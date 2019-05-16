@@ -77,19 +77,21 @@ angular.module('lp.import.wizard.accountids', [])
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
-            var key = i,
-                userField = mapping[key],
-                map = {
-                    userField: userField, 
-                    mappedField: vm.mappedFieldMap[key],
-                    // removing the following 3 lines makes it update instead of append
-                    originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
-                    originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
-                    append: false
-                };
-            mapped.push(map);
-            if(userField) {
-                vm.unavailableFields.push(userField);
+            if(mapping[i]) {
+                var key = i,
+                    userField = mapping[key],
+                    map = {
+                        userField: userField, 
+                        mappedField: vm.mappedFieldMap[key],
+                        // removing the following 3 lines makes it update instead of append
+                        originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
+                        originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
+                        append: false
+                    };
+                mapped.push(map);
+                if(userField) {
+                    vm.unavailableFields.push(userField);
+                }
             }
         }
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
