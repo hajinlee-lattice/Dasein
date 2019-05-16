@@ -3,7 +3,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
     .directive('chips', function () {
         return {
             restrict: 'E',
-            templateUrl: '/app/directives/chips.component.html',
+            templateUrl: '/components/chips/chips.component.html',
             scope: {
                 icon: '@',
                 placeholder: '@',

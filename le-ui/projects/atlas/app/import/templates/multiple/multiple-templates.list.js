@@ -132,7 +132,25 @@ export default class MultipleTemplatesList extends Component {
             ],
             columns: [
                 {
-                    colSpan: 1
+                    colSpan: 1,
+                    template: cell => {
+
+                        let rowData = cell.props.rowData;
+
+                        if (rowData.Exist) {
+                            return (
+                                <i 
+                                    className={"play-pause fa " + (rowData.ImportStatus == "Active" ? 'fa-pause' : 'fa-play')} 
+                                    aria-hidden="true" 
+                                    onClick={() => {
+                                        this.updateStatus(rowData)
+                                    }}>
+                                </i>
+                            );
+                        } else {
+                            return null;
+                        }
+                    }
                 },
                 {
                     colSpan: 2,
