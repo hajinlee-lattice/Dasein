@@ -15,21 +15,24 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("inputFileValidator")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfiguration> {
+public class InputFileValidator extends BaseReportStep<InputFileValidatorConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
-
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -66,11 +69,34 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
         boolean enableEntityMatch = configuration.isEnableEntityMatch();
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
                 String.valueOf(enableEntityMatch)));
+        // errorLine is used to count number of error found in this step
+        long errorLine;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList, enableEntityMatch);
-        InputFileValidationService fileValidationService = InputFileValidationService
-                .getValidationService(fileConfiguration.getClass().getSimpleName());
-        fileValidationService.validate(fileConfiguration);
-
+        if (fileConfiguration == null) {
+            log.info(String.format(
+                    "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
+                    entity));
+            errorLine = 0L;
+        } else {
+            InputFileValidationService fileValidationService = InputFileValidationService
+                    .getValidationService(fileConfiguration.getClass().getSimpleName());
+            errorLine = fileValidationService.validate(fileConfiguration);
+        }
+        // add report for this step and import data step
+        Long totalFailed = 0L;
+        totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
+        totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
+        totalFailed += errorLine;
+        getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords() - errorLine)
+                .put("total_rows", eaiImportJobDetail.getTotalRows())
+                .put("ignored_rows", eaiImportJobDetail.getIgnoredRows() + errorLine)
+                .put("imported_rows", eaiImportJobDetail.getProcessedRecords() - errorLine)
+                .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
+        super.execute();
+        // make sure report first, then throw exception if necessary
+        if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+        }
     }
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
@@ -95,7 +121,13 @@ public class InputFileValidator extends BaseWorkflowStep<InputFileValidatorConfi
             productConfig.setPathList(pathList);
             return productConfig;
         default:
-            throw new RuntimeException("File don't support validation");
+            return null;
         }
     }
+
+    @Override
+    protected ReportPurpose getPurpose() {
+        return ReportPurpose.IMPORT_DATA_SUMMARY;
+    }
+
 }

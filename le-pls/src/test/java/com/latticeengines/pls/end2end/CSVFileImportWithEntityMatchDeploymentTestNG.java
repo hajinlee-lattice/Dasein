@@ -1,7 +1,9 @@
 package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -12,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -20,9 +23,10 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.workflow.Report;
 
-public class CSVFileImportWithoutIdDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(CSVFileImportWithoutIdDeploymentTestNG.class);
+public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(CSVFileImportWithEntityMatchDeploymentTestNG.class);
 
     private static final String ACCOUNT_SOURCE_FILE = "Account_With_Invalid_Char.csv";
 
@@ -71,6 +75,17 @@ public class CSVFileImportWithoutIdDeploymentTestNG extends CSVFileImportDeploym
         verifyAvroFileNumber(contactFile, 50, contactPath);
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
+
+        List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
+        List<Report> reports = JsonUtils.convertList(list, Report.class);
+        Collections.sort(reports, (one, two) -> one.getCreated().compareTo(two.getCreated()));
+        Assert.assertEquals(reports.size(), 3);
+        Report accountReport = reports.get(0);
+        Report contactReport = reports.get(1);
+        Report productReport = reports.get(2);
+        verifyReport(accountReport, 2L, 2L, 48L);
+        verifyReport(contactReport, 0L, 0L, 50L);
+        verifyReport(productReport, 1L, 1L, 5L);
 
     }
 

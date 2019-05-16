@@ -30,8 +30,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -58,7 +56,7 @@ public class ProductFileValidationService
     protected DataCollectionProxy dataCollectionProxy;
 
     @Override
-    public void validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
+    public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
@@ -79,16 +77,16 @@ public class ProductFileValidationService
         }
 
      // append error message to error file
-        boolean hasError = false;
+        long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
-            hasError = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
+            errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
        
 
         // copy error file back to hdfs, remove local error.csv
-        if (hasError) {
+        if (errorLine != 0L) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, errorFile);
@@ -98,8 +96,8 @@ public class ProductFileValidationService
             } catch (IOException e) {
                 log.info("Error when copying file to hdfs");
             }
-            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
         }
+        return errorLine;
     }
 
     public static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
@@ -142,9 +140,9 @@ public class ProductFileValidationService
         return productMap;
     }
 
-    private boolean mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
+    private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
             CSVPrinter csvFilePrinter) throws IOException {
-        boolean hasError = false;
+        long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
         for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
@@ -181,12 +179,12 @@ public class ProductFileValidationService
                 try {
                     mergeHierarchyProduct(inputProduct, inputProductMap);
                 } catch (RuntimeException e) {
-                    hasError = true;
+                    errorLine++;
                     csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
                 }
             }
         }
-        return hasError;
+        return errorLine;
     }
 
     private Product mergeSpendingProduct(String id, String name, String categoryId, String familyId, String lineId,

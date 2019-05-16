@@ -71,15 +71,10 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             return configuration;
         }
 
-        // file with entity Account, Contact, Product
+        // special case for entity match
         public Builder fileValidation(BusinessEntity businessEntity, boolean enableEntityMatch) {
-            if (BusinessEntity.Account != businessEntity && BusinessEntity.Contact != businessEntity
-                    && BusinessEntity.Product != businessEntity) {
-                inputFileValidatorConfiguration.setSkipStep(true);
-            } else {
-                inputFileValidatorConfiguration.setEntity(businessEntity);
-                inputFileValidatorConfiguration.setEnableEntityMatch(enableEntityMatch);
-            }
+            inputFileValidatorConfiguration.setEntity(businessEntity);
+            inputFileValidatorConfiguration.setEnableEntityMatch(enableEntityMatch);
             return this;
         }
 
