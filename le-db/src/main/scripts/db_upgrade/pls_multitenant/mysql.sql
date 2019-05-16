@@ -55,21 +55,23 @@ CREATE PROCEDURE `UpdatePLSTables`()
     drop table if exists `METADATA_DATA_COLLECTION_STATUS_HISTORY`;
     create table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` (`PID` bigint not null auto_increment, `CREATION_TIME` datetime not null, `Detail` JSON, `TENANT_NAME` varchar(255) not null, `UPDATE_TIME` datetime not null, primary key (`PID`)) engine=InnoDB;
 
-   	
+
     ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` ADD COLUMN `FK_TENANT_ID` BIGINT NULL;
     UPDATE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` as MSG
 	INNER JOIN `PLS_MultiTenant`.`DATA_INTEG_STATUS_MONITORING` as MON ON MSG.`FK_DATA_INTEG_MONITORING_ID` = MON.`PID`
 	SET MSG.`FK_TENANT_ID` = MON.`FK_TENANT_ID`;
 	ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` MODIFY COLUMN `FK_TENANT_ID` BIGINT NOT NULL;
-	
+
     ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` ADD CONSTRAINT `FK_DATAINTEGSTATUSMESSAGE_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
-    
+
     ALTER TABLE `PLS_MultiTenant`.`DATA_INTEG_STATUS_MESSAGE` ADD COLUMN `EVENT_DETAIL` JSON;
     ALTER table PLS_MultiTenant.SOURCE_FILE add column FILE_ROWS bigint(20) DEFAULT NULL;
 
-alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add column `FK_TENANT_ID` bigint(20) not null 
-alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add constraint `FK_METADATADATACOLLECTIONSTATUSHISTORY_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade; 
-alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop column `TENANT_NAME` 
+    ALTER TABLE `PLS_MultiTenant`.`ATLAS_DROPBOX` ADD COLUMN `ENCRYPTED_SECRET_KEY` varchar(255) DEFAULT NULL;
+
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add column `FK_TENANT_ID` bigint(20) not null
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` add constraint `FK_METADATADATACOLLECTIONSTATUSHISTORY_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS_HISTORY` drop column `TENANT_NAME`
 
 alter table `PLS_MultiTenant`.`PLAY_LAUNCH` add column `CONTACTS_ERRORED` BIGINT;
 ALTER TABLE `PLS_MultiTenant`.`SOURCE_FILE`
@@ -80,22 +82,22 @@ ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_NOW` boolean NULL 
 ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_TIME` DATETIME DEFAULT NULL;
 ALTER TABLE `PLS_MultiTenant`.`DATAFEED` ADD COLUMN `SCHEDULE_REQUEST` VARCHAR(4000) DEFAULT NULL;
 
-create table `PLAY_LAUNCH_CHANNEL` 
+create table `PLAY_LAUNCH_CHANNEL`
   (
-    `PID` bigint not null auto_increment, 
-    `CREATED` datetime not null, 
-    `CREATED_BY` varchar(255) not null, 
-    `ID` varchar(255) not null, 
-    `ALWAYS_ON` bit, 
-    `TENANT_ID` bigint not null, 
-    `UPDATED` datetime not null, 
-    `UPDATED_BY` varchar(255) not null, 
-    `FK_LOOKUP_ID_MAP_ID` bigint not null, 
-    `FK_PLAY_ID` bigint not null, 
-    `FK_PLAY_LAUNCH_ID` bigint not null, 
-    `FK_TENANT_ID` bigint not null, 
+    `PID` bigint not null auto_increment,
+    `CREATED` datetime not null,
+    `CREATED_BY` varchar(255) not null,
+    `ID` varchar(255) not null,
+    `ALWAYS_ON` bit,
+    `TENANT_ID` bigint not null,
+    `UPDATED` datetime not null,
+    `UPDATED_BY` varchar(255) not null,
+    `FK_LOOKUP_ID_MAP_ID` bigint not null,
+    `FK_PLAY_ID` bigint not null,
+    `FK_PLAY_LAUNCH_ID` bigint not null,
+    `FK_TENANT_ID` bigint not null,
     primary key (`PID`)
-  ) 
+  )
 engine=InnoDB;
 
 alter table `PLAY_LAUNCH_CHANNEL` add constraint `FK_PLAYLAUNCHCHANNEL_FKLOOKUPIDMAPID_LOOKUPIDMAP` foreign key (`FK_LOOKUP_ID_MAP_ID`) references `LOOKUP_ID_MAP` (`PID`) on delete cascade;

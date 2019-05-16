@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.ColumnEncryptorDecryptor;
 
 @Entity
 @Table(name = "ATLAS_DROPBOX", uniqueConstraints = {
@@ -61,6 +63,10 @@ public class DropBox implements HasPid, HasTenant {
 
     @Column(name = "EXTERNAL_ACCOUNT", length = 20)
     private String externalAccount;
+
+    @Column(name = "ENCRYPTED_SECRET_KEY")
+    @Convert(converter = ColumnEncryptorDecryptor.class)
+    private String encryptedSecretKey;
 
     @Override
     public Long getPid() {
@@ -120,5 +126,13 @@ public class DropBox implements HasPid, HasTenant {
 
     public void setExternalAccount(String externalAccount) {
         this.externalAccount = externalAccount;
+    }
+
+    public String getEncryptedSecretKey() {
+        return encryptedSecretKey;
+    }
+
+    public void setEncryptedSecretKey(String encryptedSecretKey) {
+        this.encryptedSecretKey = encryptedSecretKey;
     }
 }

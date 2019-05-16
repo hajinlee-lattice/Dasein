@@ -10,11 +10,13 @@ import javax.inject.Inject;
 import org.apache.velocity.shaded.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -41,11 +43,20 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     private String CSV = "csv";
 
+    @Value("${cdl.atlas.export.dropfolder.tag}")
+    private String expire30dTag;
+
+    @Value("${cdl.atlas.export.dropfolder.tag.value}")
+    private String expire30dTagValue;
+
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
     private DataIntegrationMonitoringProxy dataIntegrationMonitoringProxy;
+
+    @Inject
+    private S3Service s3Service;
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
@@ -70,8 +81,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
             exportFiles.forEach(hdfsFilePath -> {
                 ImportExportRequest request = new ImportExportRequest();
                 request.srcPath = hdfsFilePath;
-                request.tgtPath = pathBuilder.convertS3CampaignExportDir(hdfsFilePath, s3Bucket, dropBoxSummary.getDropBox(),
-                        getConfiguration().getPlayName(), getConfiguration().getPlayDisplayName());
+                request.tgtPath = pathBuilder.convertS3CampaignExportDir(hdfsFilePath, s3Bucket,
+                        dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
+                        getConfiguration().getPlayDisplayName());
                 requests.add(request);
                 // Collect all S3 FilePaths
                 s3ExportFilePaths.add(request.tgtPath);
@@ -103,7 +115,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setEventType(DataIntegrationEventType.WorkflowSubmitted.toString());
         message.setEventTime(new Date());
         message.setMessageType(MessageType.Event.toString());
-        message.setMessage(String.format("Workflow Request Id has been launched to %s", workflowRequestId,
+        message.setMessage(String.format("Workflow Request Id %s has been launched to %s", workflowRequestId,
                 lookupIdMap.getOrgId()));
         message.setEventDetail(null);
         dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
@@ -115,7 +127,25 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     @Override
     public void execute() {
         super.execute();
+        tagCreatedS3Objects();
         registerAndPublishExportRequest();
+    }
+
+    private void tagCreatedS3Objects() {
+        log.info("Tagging the created s3 files to expire in 30 days");
+        s3ExportFilePaths.forEach(s3Path -> {
+            try {
+                s3Service.addTagToObject(s3Bucket, extractBucketLessPath(s3Path), expire30dTag, expire30dTagValue);
+                log.info(String.format("Tagged %s to expire in 30 days", extractBucketLessPath(s3Path)));
+            } catch (Exception e) {
+                log.error(String.format("Failed to tag %s to expire in 30 days", s3Path));
+            }
+        });
+    }
+
+    private String extractBucketLessPath(String s3Path) {
+        return s3Path.replace(pathBuilder.getProtocol() + pathBuilder.getProtocolSeparator()
+                + pathBuilder.getPathSeparator() + s3Bucket + pathBuilder.getPathSeparator(), "");
     }
 
     @VisibleForTesting

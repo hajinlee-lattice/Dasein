@@ -204,9 +204,11 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             log.info("Cloning the Sourcefile and Training table for the new iteration");
             CustomEventModelingConfig modelingConfig = (CustomEventModelingConfig) toCreate.getAdvancedModelingConfig();
             String sourceFileName = modelingConfig.getSourceFileName();
-            String trainingTableName = sourceFileProxy.findByName(customerSpace, modelingConfig.getSourceFileName())
-                    .getTableName();
-            Table clonedTable = metadataProxy.cloneTable(customerSpace, trainingTableName);
+            SourceFile originalSourceFile = sourceFileProxy.findByName(customerSpace,
+                    modelingConfig.getSourceFileName());
+            // Remove this below line and replace it with some code that creates a metadata table but does not copy the
+            // underlying data
+            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName());
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());
