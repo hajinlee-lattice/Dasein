@@ -486,7 +486,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             // version from test. Add previous version back after we release
             // 2.0.18
             prevAndCurrentApprovedVer
-                    .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 1));
+                    .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
         }
         Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
