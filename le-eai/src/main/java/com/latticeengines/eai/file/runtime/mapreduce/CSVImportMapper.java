@@ -215,9 +215,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     } catch (IllegalStateException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowError = true;
-                        errorMap.put(String.valueOf(lineNum), String.format(
-                                "%s, try to remove single quote \' or double quote \"  in the row and try again",
-                                ex.getMessage()).toString());
+                        errorMap.put(String.valueOf(lineNum),
+                                String.format("CSV parser can't parse this line due to %s", ex.getMessage())
+                                        .toString());
                         handleError(context, lineNum);
                     } catch (NoSuchElementException e) {
                         break;

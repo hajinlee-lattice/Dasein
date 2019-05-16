@@ -138,6 +138,16 @@ public class ConsolidateCollectionOrbFlow extends ConsolidateCollectionFlow {
         src = addUrlExistsField(src, "LinkedIn_Url");
         src = addUrlExistsField(src, "Twitter_Url");
 
-        return src;
+        if (parameters.getBaseTables().size() == 2) {
+
+            Node legacy = addSource(parameters.getBaseTables().get(1)).retain(src.getFieldNamesArray());
+
+            return findMostRecent(src.merge(legacy), parameters);
+
+        } else {
+
+            return src;
+
+        }
     }
 }

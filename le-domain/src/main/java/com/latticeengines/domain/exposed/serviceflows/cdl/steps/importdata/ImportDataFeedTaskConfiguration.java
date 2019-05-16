@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
-public class ImportDataFeedTaskConfiguration extends BaseReportStepConfiguration {
+public class ImportDataFeedTaskConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("data_feed_task_id")
     private String dataFeedTaskId;

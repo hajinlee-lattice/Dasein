@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
-import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfigurationFactory;
@@ -22,16 +21,14 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
-import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("importDataFeedTask")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfiguration> {
+public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportDataFeedTask.class);
 
@@ -41,9 +38,6 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
-    private EaiJobDetailProxy eaiJobDetailProxy;
-
     @Override
     public void execute() {
         log.info("Start import data feed task.");
@@ -51,7 +45,6 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(configuration.getCustomerSpace().toString(),
                 taskUniqueId);
         importTable(taskUniqueId, dataFeedTask);
-        super.execute();
     }
 
     private void importTable(String taskUniqueId, DataFeedTask dataFeedTask) {
@@ -62,14 +55,6 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
         saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         waitForAppId(applicationId);
-        EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
-        Long totalFailed = 0L;
-        totalFailed += jobDetail.getIgnoredRows() == null ? 0L : jobDetail.getIgnoredRows();
-        totalFailed += jobDetail.getDedupedRows() == null ? 0L : jobDetail.getDedupedRows();
-        getJson().put(dataFeedTask.getEntity(), jobDetail.getProcessedRecords())
-                .put("total_rows", jobDetail.getTotalRows()).put("ignored_rows", jobDetail.getIgnoredRows())
-                .put("imported_rows", jobDetail.getProcessedRecords()).put("deduped_rows", jobDetail.getDedupedRows())
-                .put("total_failed_rows", totalFailed);
     }
 
     private ImportConfiguration setupConfiguration(String taskUniqueId, DataFeedTask dataFeedTask) {
@@ -96,8 +81,4 @@ public class ImportDataFeedTask extends BaseReportStep<ImportDataFeedTaskConfigu
         return importConfig;
     }
 
-    @Override
-    protected ReportPurpose getPurpose() {
-        return ReportPurpose.IMPORT_DATA_SUMMARY;
-    }
 }
