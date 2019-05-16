@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.S3PathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCollectionAlexaFlow;
 import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCollectionBWFlow;
@@ -40,6 +41,7 @@ import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCo
 import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCollectionSemrushFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateCollectionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
@@ -63,11 +65,46 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     @Value("${datacloud.collection.ingestion.partion.period}")
     private long ingestionPeriod;//in seconds
 
+    @Value("${datacloud.consolidation.handling.bodc.legacy}")
+    private boolean handlingLegacyConsolidationResults;
+
+    @Value("${datacloud.consolidation.bodc.alexa.result}")
+    private String alexaLegacyConsolidationResult;
+
+    @Value("${datacloud.consolidation.bodc.bw.result}")
+    private String bwLegacyConsolidationResult;
+
+    @Value("${datacloud.consolidation.bodc.orb.result}")
+    private String orbLegacyConsolidationResult;
+
+    @Value("${datacloud.consolidation.bodc.semrush.result}")
+    private String semrushLegacyConsolidationResult;
+
+
     @Inject
     private VendorConfigMgr vendorConfigMgr;
+    @Inject
+    private HdfsPathBuilder hdfsPathBuilder;
 
     private Table inputTable;
+    private Table legacyTable;
     private VendorConfig vendorConfig;
+
+    private String getLegacyConsolidationResultFile(String vendor) {
+
+        switch (vendor) {
+            case VendorConfig.VENDOR_ALEXA:
+                return alexaLegacyConsolidationResult;
+            case VendorConfig.VENDOR_BUILTWITH:
+                return bwLegacyConsolidationResult;
+            case VendorConfig.VENDOR_ORBI_V2:
+                return orbLegacyConsolidationResult;
+            case VendorConfig.VENDOR_SEMRUSH:
+                return semrushLegacyConsolidationResult;
+        }
+
+        return null;
+    }
 
     @Override
     public String getName() {
@@ -126,7 +163,18 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
 
         String rawIngestion = configuration.getRawIngestion();
         inputTable = getInputTable(vendor, rawIngestion, workflowDir);
-        parameters.setBaseTables(Collections.singletonList("InputTable"));
+        legacyTable = getLegacyBODCTable(vendor);
+
+        if (legacyTable == null) {
+
+            parameters.setBaseTables(Collections.singletonList("InputTable"));
+
+        } else {
+
+            parameters.setBaseTables(Arrays.asList("InputTable", "LegacyTable"));
+
+        }
+
 
         // collect data from S3, save to a temp folder in workflowDir, use it as input of cascading dataflow
         System.out.println("Base tables: " + StringUtils.join(parameters.getBaseTables()));
@@ -144,7 +192,14 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     @Override
     protected Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
+
         sourceTables.put("InputTable", inputTable);
+        if (legacyTable != null) {
+
+            sourceTables.put("LegacyTable", legacyTable);
+
+        }
+
         return sourceTables;
     }
 
@@ -156,6 +211,52 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         String sortKey = vendorConfig.getSortBy();
         parameters.setGroupBy(groupBy);
         parameters.setSortBy(sortKey);
+    }
+
+    private Table getLegacyBODCTable(String vendor) {
+        //when there's no need to process bodc file
+        //set property file line to false
+        if (!handlingLegacyConsolidationResults) {
+
+            return null;
+
+        }
+
+        //dir/file path
+        Path targetDirPath = hdfsPathBuilder.constructBODCLegacyConsolidatonResultDir(vendor);
+        String legacyFile = getLegacyConsolidationResultFile(vendor);
+        Path targetFilePath = targetDirPath.append(legacyFile);
+        Path legacyFileS3Path = S3PathBuilder.constructLegacyBODCMostRecentDir().append(legacyFile);
+
+        try {
+
+            //copy when not existing
+            if (!HdfsUtils.fileExists(yarnConfiguration, targetFilePath.toString())) {
+
+                log.info("copy bodc legacy file to hdfs...");
+                String s3Key = legacyFileS3Path.toS3Key();
+                InputStream is = s3Service.readObjectAsStream(s3Bucket, s3Key);
+                HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, targetFilePath.toString());
+                log.info("copy done.");
+
+            }
+
+            //construct table
+            String tableName = NamingUtils.timestamp("Legacy");
+
+            Table legacyTable = MetadataConverter.getTable(yarnConfiguration, targetDirPath.toString());
+            legacyTable.setName(tableName);
+
+            return legacyTable;
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+
+        }
+
+
+        return null;
     }
 
     private Table getInputTable(String vendor, String rawIngestion, String workflowDir) {
@@ -187,7 +288,7 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         List<String> avrosToCopy = summaries.stream().map(summary -> {
             String key = summary.getKey();
             if (key.endsWith("_UTC.avro")) {
-                String fileName = key.substring(key.lastIndexOf("/") + 1);
+                String fileName = key.substring(key.lastIndexOf('/') + 1);
                 String dateStr = fileName.substring(0, fileName.length() - "_UTC.avro".length());
                 try {
 
@@ -195,7 +296,7 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
                     long millis = date.getTime();
                     if (millis >= begMillisAdjusted && millis < curMillis) {
 
-                        return fileName;
+                        return key;
 
                     }
                 } catch (Exception e) {
@@ -223,13 +324,14 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         List<Runnable> runnables = new ArrayList<>();
         avros.forEach(avro -> {
             Runnable runnable = () -> {
-                String key = s3Dir + "/" + avro;
+                String key = avro;
+                String name = key.substring(key.lastIndexOf('/') + 1);
                 InputStream s3Stream = s3Service.readObjectAsStream(s3Bucket, key);
                 try {
-                    log.info("Copying " + avro + " from s3 to hdfs.");
-                    HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, s3Stream, tgtDir + "/" + avro);
+                    log.info("Copying " + key + " from s3 to hdfs.");
+                    HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, s3Stream, tgtDir + "/" + name);
                 } catch (IOException e) {
-                    throw new RuntimeException("Failed to copy " + avro + " from s3 to hdfs", e);
+                    throw new RuntimeException("Failed to copy " + name + " from s3 to hdfs", e);
                 }
             };
             runnables.add(runnable);

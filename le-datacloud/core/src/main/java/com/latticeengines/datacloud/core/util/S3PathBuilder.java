@@ -78,4 +78,8 @@ public final class S3PathBuilder {
         String partialPath = constructPartialPath(ingestionName);
         return propDataDir().append(INGESTION).append(partialPath);
     }
+
+    public static Path constructLegacyBODCMostRecentDir() {
+        return propDataDir().append(INGESTION).append("Legacy_MostRecent_BODC");
+    }
 }

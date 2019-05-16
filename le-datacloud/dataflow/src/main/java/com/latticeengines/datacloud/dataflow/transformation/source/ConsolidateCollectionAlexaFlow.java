@@ -152,6 +152,20 @@ public class ConsolidateCollectionAlexaFlow extends ConsolidateCollectionFlow {
         Node joinRet = countryRanks.join(joinField, industries, joinField, JoinType.OUTER);
         joinRet = cleanInvalidRank(joinRet);
 
-        return retainFields(joinRet, srcFields);
+        Node retained = retainFields(joinRet, srcFields);
+
+        //combine legacy consolidation data
+        if (parameters.getBaseTables().size() == 2) {
+
+            Node legacy = addSource(parameters.getBaseTables().get(1)).retain(retained.getFieldNamesArray());
+
+            return findMostRecent(retained.merge(legacy), parameters);
+
+        } else {
+
+            return retained;
+
+        }
+
     }
 }
