@@ -54,6 +54,8 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.Tag;
+import com.amazonaws.services.s3.model.UploadPartRequest;
+import com.amazonaws.services.s3.model.UploadPartResult;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -70,6 +72,8 @@ public class S3ServiceImpl implements S3Service {
     private static final CannedAccessControlList ACL = CannedAccessControlList.BucketOwnerFullControl;
 
     private static final long SIZE_LIMIT = 5L * 1024L * 1024L * 1024L;
+
+    private static final long MB = 1024L * 1024L;
 
     private static ExecutorService workers;
 
@@ -267,6 +271,41 @@ public class S3ServiceImpl implements S3Service {
         key = sanitizePathToKey(key);
         PutObjectRequest request = new PutObjectRequest(bucket, key, inputStream, null).withCannedAcl(ACL);
         s3Client().putObject(request);
+    }
+
+    @Override
+    public void uploadInputStreamMultiPart(String bucket, String key, InputStream inputStream, long streamLength) {
+
+        long uploadPartSize = 16 * MB;
+        List<PartETag> partETags = new ArrayList<>();
+
+        // Initiate the multipart upload.
+        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucket, key);
+        InitiateMultipartUploadResult initResponse = s3Client.initiateMultipartUpload(initRequest);
+
+        // Upload parts.
+        long pos = 0;
+        for (int i = 1; pos < streamLength; i++) {
+
+            uploadPartSize = Math.min(uploadPartSize, (streamLength - pos));
+
+            // Create the request to upload a part.
+            UploadPartRequest uploadRequest = new UploadPartRequest()
+                    .withBucketName(bucket)
+                    .withKey(key)
+                    .withUploadId(initResponse.getUploadId())
+                    .withPartNumber(i)
+                    .withInputStream(inputStream)
+                    .withPartSize(uploadPartSize);
+            // Upload the part and add the response's ETag to list.
+            UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
+            partETags.add(uploadResult.getPartETag());
+            pos += uploadPartSize;
+        }
+        // Complete the multipart upload.
+        CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(bucket, key,
+                initResponse.getUploadId(), partETags);
+        s3Client.completeMultipartUpload(compRequest);
     }
 
     @Override

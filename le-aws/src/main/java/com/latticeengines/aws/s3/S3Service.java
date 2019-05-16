@@ -29,6 +29,8 @@ public interface S3Service {
 
     void uploadInputStream(String bucket, String key, InputStream inputStream, Boolean sync);
 
+    void uploadInputStreamMultiPart(String bucket, String key, InputStream inputStream, long streamLength);
+
     void createFolder(String bucketName, String folderName);
 
     void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception;
