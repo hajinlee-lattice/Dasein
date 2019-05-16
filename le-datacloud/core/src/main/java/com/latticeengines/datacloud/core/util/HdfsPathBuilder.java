@@ -56,6 +56,7 @@ public class HdfsPathBuilder {
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
+    private static final String LEGACY_BODC_CONSOLIDATION = "MostRecent_BODC";
 
     private static volatile String defaultPod = null;
 
@@ -345,6 +346,10 @@ public class HdfsPathBuilder {
 
     public Path constructCollectorWorkerDir(String vendor, String workerId) {
         return defaultPropDataDir().append(COLLECTORS).append(vendor).append(workerId);
+    }
+
+    public Path constructBODCLegacyConsolidatonResultDir(String vendor) {
+        return propDataDir().append(SOURCES).append(LEGACY_BODC_CONSOLIDATION).append(vendor);
     }
 
     @VisibleForTesting

@@ -26,7 +26,7 @@ public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<
 
     protected abstract Node postRecentTransform(Node src, ConsolidateCollectionParameters parameters);
 
-    private Node findMostRecent(Node src, ConsolidateCollectionParameters parameters)
+    protected Node findMostRecent(Node src, ConsolidateCollectionParameters parameters)
     {
         List<String> groupByKeys = parameters.getGroupBy();
         String sortByKey = parameters.getSortBy();
