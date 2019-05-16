@@ -17,7 +17,7 @@
     <Service name="Catalina">
 
         <Listener className="org.apache.catalina.mbeans.JmxRemoteLifecycleListener"
-                  rmiRegistryPortPlatform="1099" rmiServerPortPlatform="1098"/>
+                  rmiRegistryPortPlatform="1098" rmiServerPortPlatform="1099"/>
         <Executor name="tomcatThreadPool" namePrefix="catalina-exec-" maxThreads="256" minSpareThreads="4"/>
         <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true" useAsyncIO="true"
