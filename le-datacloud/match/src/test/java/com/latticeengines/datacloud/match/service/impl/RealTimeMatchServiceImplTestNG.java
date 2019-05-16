@@ -313,7 +313,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 // public domain with Valid Name : will be treated as public
                 // domain when matching and match to google entity(as name
                 // provided)
-                { 4, "facebook.com", "Google", null, true, true, "Google" }, //
+                { 4, "facebook.com", "Google", null, true, true, "Alphabet" }, //
                 // public domain with invalid name : will be treated as public
                 // domain and no match
                 { 5, "facebook.com", "Fake Name", null, true, false, null }, //

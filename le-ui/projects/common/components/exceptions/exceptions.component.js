@@ -60,7 +60,7 @@ angular
                         break;
 
                     case "banner":
-                        if(document.getElementById('read-main-panel')){
+                        if(document.getElementById('react-banner-container')){
                             //This method is added from the 
                             //ReactAngularMainComponent once it is mounted
                             this.BannerReact(response, options, callback);
