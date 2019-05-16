@@ -104,6 +104,7 @@ angular.module('lp.import.wizard.customfields', [])
             }
         }
         ImportWizardStore.setIgnore(ignoredFields);
+        vm.validate();
     }
 
     vm.changeType = function(fieldMappings, field) {
