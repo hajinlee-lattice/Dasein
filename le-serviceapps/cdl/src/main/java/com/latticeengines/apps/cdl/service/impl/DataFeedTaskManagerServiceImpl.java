@@ -1,16 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.cdl.CDLConstants.DEFAULT_S3_USER;
-import static java.util.stream.Collectors.groupingBy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -41,13 +29,11 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
-import com.latticeengines.apps.cdl.util.ValidateFileHeaderUtils;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -62,9 +48,6 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -79,6 +62,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -282,7 +266,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException("This source file %s can not auto import!");
         }
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo, false, null, new WorkflowPidWrapper(-1L));
+                csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -305,7 +289,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo, false, null, new WorkflowPidWrapper(-1L));
+                csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
         sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
         return appId.toString();
     }
@@ -362,15 +346,22 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         // startImport to generate unique path to resolve file overwrite issue
         Pair<String, String> targetPair = s3ImportFolderService.startImport(customerSpace.getTenantId(),
                 dataFeedTask.getEntity(), importConfig.getS3Bucket(), importConfig.getS3FilePath());
+        PrepareImportConfiguration prepareImportConfig = new PrepareImportConfiguration();
+        prepareImportConfig.setSourceBucket(importConfig.getS3Bucket());
+        prepareImportConfig.setSourceKey(importConfig.getS3FilePath());
+        prepareImportConfig.setDestBucket(s3ImportFolderService.getBucket());
+        prepareImportConfig.setDestKey(targetPair.getLeft());
+        prepareImportConfig.setBackupKey(targetPair.getRight());
+        prepareImportConfig.setDataFeedTaskId(dataFeedTask.getUniqueId());
+
         String filePath = targetPair.getLeft();
         String backupPath = targetPair.getRight();
         importConfig.setS3FilePath(filePath);
         importConfig.setS3Bucket(s3ImportFolderService.getBucket());
 
+
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(), importConfig.getS3FileName(),
                 dataFeedTask, new Date());
-        // validate
-        String warning = validateS3File(dataFeedTask, importConfig, customerSpace.toString(), emailInfo, backupPath);
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
@@ -378,10 +369,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFilePath(backupPath);
-        csvImportFileInfo.setReportWarning(warning);
+        prepareImportConfig.setEmailInfo(emailInfo);
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
-                JsonUtils.serialize(importConfig), csvImportFileInfo, true, emailInfo, new WorkflowPidWrapper(-1L));
+                JsonUtils.serialize(importConfig), csvImportFileInfo, prepareImportConfig,true, emailInfo,
+                new WorkflowPidWrapper(-1L));
         return appId.toString();
     }
 
@@ -439,142 +431,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
-    }
-
-    /**
-     * 
-     * @param dataFeedTask
-     * @param importConfig
-     * @param customerSpace
-     * @param emailInfo
-     * @param initialS3FilePath
-     *            initialS3FilePath is the key which user to upload file to S3
-     *            by aws command, add it for following workflow step as the
-     *            filePath in importConfig is dynamic which lead to wrong link
-     *            when downloading file
-     */
-    @VisibleForTesting
-    String validateS3File(DataFeedTask dataFeedTask, S3FileToHdfsConfiguration importConfig,
-            String customerSpace, S3ImportEmailInfo emailInfo, String initialS3FilePath) {
-        Table template = dataFeedTask.getImportTemplate();
-        String s3Bucket = importConfig.getS3Bucket();
-        String s3FilePath = importConfig.getS3FilePath();
-        boolean needUpdateTask = false;
-        List<String> warnings = new ArrayList<>();
-        String message = null;
-        try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
-            InputStreamReader reader = new InputStreamReader(
-                    new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                    StandardCharsets.UTF_8);
-
-            CSVFormat format = LECSVFormat.format;
-            CSVParser parser = new CSVParser(reader, format);
-            Set<String> headerFields = parser.getHeaderMap().keySet();
-            ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(importConfig.getS3FileName(),
-                    headerFields);
-            Map<String, Integer> longFieldMap = new HashMap<String, Integer>();
-            for (String field : headerFields) {
-                if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
-                    longFieldMap.put(field, StringUtils.length(field));
-                }
-            }
-            if (MapUtils.isNotEmpty(longFieldMap)) {
-                StringBuilder sb = new StringBuilder();
-                longFieldMap.entrySet().forEach(
-                        entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
-                throw new LedpException(LedpCode.LEDP_18188,
-                        new String[] { String.valueOf(MAX_HEADER_LENGTH), sb.toString() });
-            }
-            Map<String, String> headerCaseMapping = new HashMap<>();
-            for (String field : headerFields) {
-                if (headerCaseMapping.put(field.toLowerCase(), field) != null) {
-                    throw new LedpException(LedpCode.LEDP_40055);
-                }
-            }
-            Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
-                    .collect(groupingBy(Attribute::getDisplayName));
-            List<String> templateMissing = new ArrayList<>();
-            List<String> csvMissing = new ArrayList<>();
-            List<String> requiredMissing = new ArrayList<>();
-            for (String header : headerFields) {
-                if (!displayNameMap.containsKey(header)) {
-                    templateMissing.add(header);
-                }
-            }
-            for (Map.Entry<String, List<Attribute>> entry : displayNameMap.entrySet()) {
-                if (!headerFields.contains(entry.getKey())) {
-                    if (headerCaseMapping.containsKey(entry.getKey().toLowerCase())) { // case insensitive mapping.
-                        for (Attribute attr : entry.getValue()) {
-                            Set<String> possibleNames =
-                                    CollectionUtils.isEmpty(template.getAttribute(attr.getName()).getPossibleCSVNames()) ?
-                                            new HashSet<>() :
-                                            new HashSet<>(template.getAttribute(attr.getName()).getPossibleCSVNames());
-                            needUpdateTask = possibleNames.add(headerCaseMapping.get(entry.getKey().toLowerCase()));
-                            template.getAttribute(attr.getName()).setPossibleCSVNames(new ArrayList<>(possibleNames));
-                        }
-                    } else {
-                        csvMissing.add(entry.getKey());
-                        for (Attribute attr : entry.getValue()) {
-                            if (attr.getRequired()) {
-                                requiredMissing.add(entry.getKey());
-                            }
-                        }
-                    }
-                }
-            }
-            if (CollectionUtils.isNotEmpty(templateMissing)) {
-                String warningMsg = String.format("Template doesn't contains the following columns: %s",
-                        String.join(",", templateMissing));
-                log.warn(warningMsg);
-                warnings.add(warningMsg);
-            }
-            if (CollectionUtils.isNotEmpty(csvMissing)) {
-                String warningMsg = String.format("S3File doesn't contains the following columns: %s",
-                        String.join(",", csvMissing));
-                log.warn(warningMsg);
-                warnings.add(warningMsg);
-            }
-            if (CollectionUtils.isNotEmpty(requiredMissing)) {
-                throw new LedpException(LedpCode.LEDP_40043, new String[] { String.join(",", requiredMissing) });
-            }
-            parser.close();
-            if (needUpdateTask) {
-                dataFeedTask.setImportTemplate(template);
-                dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
-            }
-            message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
-            emailInfo.setErrorMsg(message);
-            sendS3ImportEmail(customerSpace, "In_Progress", emailInfo);
-        } catch (LedpException e) {
-            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, e.getErrorDetails(), initialS3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
-            throw e;
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
-            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, details, initialS3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
-            log.error(e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Exception when validate S3 import! " + e.toString());
-            s3ImportFolderService.moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            ErrorDetails details = new ErrorDetails(LedpCode.LEDP_00002, e.getMessage(), ExceptionUtils.getStackTrace(e));
-            cdlDataFeedImportWorkflowSubmitter.registerFailedAction(customerSpace, dataFeedTask.getUniqueId(),
-                    DEFAULT_S3_USER, importConfig, details, initialS3FilePath);
-            sendS3ImportEmail(customerSpace, "Failed", emailInfo);
-            throw e;
-        }
-        return message;
     }
 
     private List<DataFeedTask> getAllDataFeedTask(String customerSpaceStr, BusinessEntity entity) {

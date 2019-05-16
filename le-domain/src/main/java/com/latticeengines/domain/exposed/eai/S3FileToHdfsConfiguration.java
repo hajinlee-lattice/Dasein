@@ -7,6 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
 
+    private static final String INPUT_ROOT = "/atlas/rawinput";
+    private static final String IN_PROGRESS = "/inprogress";
+    private static final String COMPLETED = "/completed";
+    private static final String SUCCEEDED = "/succeeded";
+    private static final String FAILED = "/failed";
+
     // AKA: TemplateName
     @JsonProperty("feed_type")
     private String feedType;
@@ -47,6 +53,42 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
             return s3FilePath;
         }
         return s3FilePath.substring(s3FilePath.lastIndexOf('/') + 1);
+    }
+
+    @JsonIgnore
+    public String getFailedPath() {
+
+        if (!s3FilePath.contains(IN_PROGRESS)) {
+            return StringUtils.EMPTY;
+        }
+        String[] parts = getParts(s3FilePath);
+        return parts[0] + INPUT_ROOT + COMPLETED + FAILED + "/" + parts[4] + "/" + parts[5] + "/"  +
+                getFileName(s3FilePath);
+    }
+
+    @JsonIgnore
+    public String getSucceedPath() {
+        if (!s3FilePath.contains(IN_PROGRESS)) {
+            return StringUtils.EMPTY;
+        }
+        String[] parts = getParts(s3FilePath);
+        return parts[0] + INPUT_ROOT + COMPLETED + SUCCEEDED + "/" + parts[4] + "/" + parts[5] + "/"  +
+                getFileName(s3FilePath);
+    }
+
+    @JsonIgnore
+    private String getFileName(String key) {
+        if (StringUtils.isEmpty(key) || key.lastIndexOf('/') < 0) {
+            return key;
+        }
+        return key.substring(key.lastIndexOf('/') + 1);
+    }
+
+    private String[] getParts(String key) {
+        while (key.startsWith("/")) {
+            key = key.substring(1);
+        }
+        return key.split("/");
     }
 
 }
