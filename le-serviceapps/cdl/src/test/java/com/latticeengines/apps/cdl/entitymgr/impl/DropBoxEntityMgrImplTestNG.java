@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -39,6 +40,12 @@ public class DropBoxEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(dropbox1.getPid());
         Assert.assertNotNull(dropbox1.getRegion());
         Assert.assertEquals(dropbox1.getTenant().getId(), tenant1.getId());
+
+        Assert.assertTrue(StringUtils.isBlank(dropbox1.getEncryptedSecretKey()));
+        dropbox1.setEncryptedSecretKey("TestKey");
+        entityMgr.update(dropbox1);
+        dropbox1 = entityMgr.getDropBox();
+        Assert.assertTrue(StringUtils.isNotBlank(dropbox1.getEncryptedSecretKey()));
 
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant2.getId()));
         DropBox dropbox2 = entityMgr.createDropBox(region);

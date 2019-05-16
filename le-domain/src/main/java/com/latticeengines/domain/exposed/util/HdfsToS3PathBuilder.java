@@ -27,6 +27,7 @@ public class HdfsToS3PathBuilder {
     private String protocol = "s3n";
 
     private static final String PATH_SEPARATOR = "/";
+    private static final String PROTOCOL_SEPARATOR = ":/";
     private static final String FILE_NAME_SEPARATOR = "-";
 
     private String hdfsAnalyticsBaseDir = "/user/s-analytics/customers";
@@ -276,11 +277,9 @@ public class HdfsToS3PathBuilder {
 
     public String convertS3CampaignExportDir(String inputExportFile, String s3Bucket, String dropboxName, String playId,
             String playName) {
-        StringBuilder builder = new StringBuilder();
-        return builder.append(getS3CampaignExportDir(s3Bucket, dropboxName)).append(PATH_SEPARATOR).append(playName)
-                .append(FILE_NAME_SEPARATOR).append(playId).append(FILE_NAME_SEPARATOR).append(new Date().getTime())
-                .append(FilenameUtils.EXTENSION_SEPARATOR).append(FilenameUtils.getExtension(inputExportFile))
-                .toString();
+        return getS3CampaignExportDir(s3Bucket, dropboxName) + PATH_SEPARATOR + playName + FILE_NAME_SEPARATOR + playId
+                + FILE_NAME_SEPARATOR + new Date().getTime() + FilenameUtils.EXTENSION_SEPARATOR
+                + FilenameUtils.getExtension(inputExportFile);
     }
 
     public String convertAtlasMetadata(String inputFileDir, String pod, String tenantId, String s3Bucket) {
@@ -416,4 +415,11 @@ public class HdfsToS3PathBuilder {
         this.protocol = protocol;
     }
 
+    public String getPathSeparator() {
+        return PATH_SEPARATOR;
+    }
+
+    public String getProtocolSeparator() {
+        return PROTOCOL_SEPARATOR;
+    }
 }

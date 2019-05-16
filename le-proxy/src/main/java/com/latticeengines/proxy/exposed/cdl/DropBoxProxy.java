@@ -15,6 +15,8 @@ public interface DropBoxProxy {
 
     GrantDropBoxAccessResponse refreshAccessKey(String customerSpace);
 
+    GrantDropBoxAccessResponse getAccessKey(String customerSpace);
+
     boolean createTemplateFolder(String customerSpace, String systemName, String objectName, String path);
 
     List<String> getAllSubFolders(String customerSpace, String systemName, String objectName, String path);

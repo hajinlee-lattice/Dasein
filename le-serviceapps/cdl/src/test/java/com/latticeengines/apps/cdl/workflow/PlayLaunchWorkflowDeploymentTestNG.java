@@ -178,7 +178,6 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         JobStatus completedStatus = waitForWorkflowStatus(defaultPlayLaunch.getApplicationId(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        int i = 0;
     }
 
     @AfterClass(groups = "deployment-app")

@@ -37,7 +37,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
-            GrantedRight.EDIT_PLS_REFINE_CLONE //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
+            GrantedRight.VIEW_S3_CREDENTIAL //
     ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -66,6 +67,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.EDIT_PLS_CDL_DATA, //
             GrantedRight.GENERATE_S3_CREDENTIAL, //
+            GrantedRight.VIEW_S3_CREDENTIAL, //
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
             GrantedRight.CREATE_PLS_PLAYS, //

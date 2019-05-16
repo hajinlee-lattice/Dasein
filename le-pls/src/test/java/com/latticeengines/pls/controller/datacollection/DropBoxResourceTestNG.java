@@ -84,7 +84,7 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         dropBoxSummary.setAccessMode(DropBoxAccessMode.LatticeUser);
         UIAction uiAction = dropBoxResource.generateUIActionBasedOnDropBox(dropBoxSummary);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GET_DROPBOX_SUCCESS_TITLE);
+        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GENERATE_DROPBOX_SUCCESS_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Modal);
         Assert.assertEquals(uiAction.getStatus(), Status.Info);
         Assert.assertNotNull(uiAction.getMessage());

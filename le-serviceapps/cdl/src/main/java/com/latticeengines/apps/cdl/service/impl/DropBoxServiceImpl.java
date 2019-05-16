@@ -61,7 +61,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private static final String ARN_PREFIX = "arn:aws:s3:::";
     // naming convention for S3 bucket policy statement
     private static final String PUT_POLICY_ID = "RequirementsOnPut";
-    //Default Share folder
+    // Default Share folder
     private static final String PS_SHARE = "PS_SHARE";
     private static final String PS_SHARE_INBOX = "INBOX";
     private static final String PS_SHARE_OUTBOX = "OUTBOX";
@@ -165,12 +165,10 @@ public class DropBoxServiceImpl implements DropBoxService {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();
 
-        if (StringUtils.isNotEmpty(systemName)) {//new logic that every system all have five folder, can not be edit.
+        if (StringUtils.isNotEmpty(systemName)) {// new logic that every system all have five folder, can not be edit.
             createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, systemName);
-        } else {//the old logic without systemName
-            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null,
-                    formatPath(objectName),
-                    null));
+        } else {// the old logic without systemName
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, formatPath(objectName), null));
 
             if (StringUtils.isNotEmpty(path)) {
                 String[] folderList = path.split("/");
@@ -178,9 +176,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                 for (String folder : folderList) {
                     if (StringUtils.isNotEmpty(folder)) {
                         needCreateFolder += "/" + folder;
-                        s3Service.createFolder(dropBoxBucket,
-                                getFullPath(dropBoxPrefix, systemName, formatPath(objectName),
-                                        formatPath(needCreateFolder)));
+                        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName,
+                                formatPath(objectName), formatPath(needCreateFolder)));
                     }
                 }
             }
@@ -192,8 +189,8 @@ public class DropBoxServiceImpl implements DropBoxService {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();
         if (StringUtils.isEmpty(objectName) && StringUtils.isEmpty(path) && StringUtils.isEmpty(systemName)) {
-            //there has two situation: 1. this is old path: dropfolder/%s/Templates;
-            //2.this is new path need list all dropFolders under systemName
+            // there has two situation: 1. this is old path: dropfolder/%s/Templates;
+            // 2.this is new path need list all dropFolders under systemName
             Set<String> allSubFolders = new HashSet<>();
             List<String> rootSubFolders = s3Service.listSubFolders(dropBoxBucket, dropBoxPrefix);
             log.info("rootSubFolders is " + rootSubFolders.toString());
@@ -202,14 +199,12 @@ public class DropBoxServiceImpl implements DropBoxService {
                 for (String folderName : rootSubFolders) {
                     if (folderName.equals(TEMPLATES)) {
                         List<String> subFolders = s3Service.listSubFolders(dropBoxBucket,
-                                getFullPath(dropBoxPrefix, null, null,
-                                        null));
+                                getFullPath(dropBoxPrefix, null, null, null));
                         subFolders.remove(PS_SHARE);
                         allSubFolders.addAll(subFolders);
                     } else {
                         allSubFolders.addAll(formatFolderName(folderName, s3Service.listSubFolders(dropBoxBucket,
-                                getFullPath(dropBoxPrefix, folderName, null,
-                                        null))));
+                                getFullPath(dropBoxPrefix, folderName, null, null))));
                     }
                 }
                 return new ArrayList<>(allSubFolders);
@@ -242,7 +237,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         String suffix_name = filename.substring(dot + 1);
         String file_name = filename.substring(0, dot);
         while (s3Service.objectExist(bucketname, dest_key)) {
-            dest_key = originalkey + file_name + "_" + String.valueOf(suffix) + "." + suffix_name;
+            dest_key = originalkey + file_name + "_" + suffix + "." + suffix_name;
             suffix++;
         }
         return dest_key;
@@ -302,6 +297,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             case LatticeUser:
                 response = grantAccessToLatticeUser(request.getExistingUser());
                 dropbox.setLatticeUser(response.getLatticeUser());
+                dropbox.setEncryptedSecretKey(response.getSecretKey());
                 break;
             case ExternalAccount:
                 response = grantAccessToExternalAccount(request.getExternalAccountId());
@@ -334,7 +330,35 @@ public class DropBoxServiceImpl implements DropBoxService {
         AccessKey newKey = iamService.refreshCustomerKey(userName);
         response.setAccessKey(newKey.getAccessKeyId());
         response.setSecretKey(newKey.getSecretAccessKey());
+        dropbox.setEncryptedSecretKey(newKey.getSecretAccessKey());
+        dropBoxEntityMgr.update(dropbox);
         return response;
+    }
+
+    public GrantDropBoxAccessResponse getAccessKey() {
+        DropBox dropbox = dropBoxEntityMgr.getDropBox();
+        if (dropbox == null) {
+            throw new RuntimeException("Tenant " + MultiTenantContext.getShortTenantId() //
+                    + " does not have a dropbox.");
+        } else {
+            GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
+            response.setDropBox(dropbox.getDropBox());
+            response.setRegion(dropbox.getRegion());
+            response.setBucket(customersBucket);
+            if (dropbox.getAccessMode() != null) {
+                response.setAccessMode(DropBoxAccessMode.LatticeUser);
+                if (DropBoxAccessMode.LatticeUser.equals(dropbox.getAccessMode())) {
+                    response.setLatticeUser(dropbox.getLatticeUser());
+                    AccessKeyMetadata md = iamService.getCustomerKeyIfExists(dropbox.getLatticeUser());
+                    response.setSecretKey(dropbox.getEncryptedSecretKey());
+                    if (md != null) {
+                        response.setAccessKey(md.getAccessKeyId());
+                    }
+                }
+            }
+            return response;
+        }
+
     }
 
     @Override
@@ -399,7 +423,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Override
     public String getExportPath(String customerSpace, AtlasExportType exportType, String datePrefix,
-                                String optionalId) {
+            String optionalId) {
         String bucket = getDropBoxBucket();
         String prefix = getDropBoxPrefix();
         String exportPath = prefix + '/' + EXPORT + '/';
@@ -623,8 +647,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 .withId(accountId + "_" + dropBoxId + "_list") //
                 .withPrincipals(new Principal(accountId)) //
                 .withActions(S3Actions.ListObjects) //
-                .withResources(new Resource(ARN_PREFIX + bucketName))
-                .withConditions(new StringCondition(//
+                .withResources(new Resource(ARN_PREFIX + bucketName)).withConditions(new StringCondition(//
                         StringCondition.StringComparisonType.StringLike, //
                         "s3:prefix", //
                         DROP_FOLDER + SLASH + dropBoxId + STAR //
@@ -747,8 +770,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         }
         List<String> defaultFolders = EntityType.getDefaultFolders();
         for (String folderName : defaultFolders) {
-            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName,
-                    folderName, null));
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName, folderName, null));
         }
     }
 
