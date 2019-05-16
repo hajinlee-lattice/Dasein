@@ -18,10 +18,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.buckets = vm.buckets || [];
                 vm.loading = vm.buckets.length === 0;
                 vm.form = $scope.form || {};
+                vm.header = ['VALUE', 'RECORDS'];
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
-                    //setTimeout(() => { vm.initVariables() }, 0);
                     vm.initVariables();
                     vm.resetCmp();
                     console.log('[tree-edit] init', vm.item.ColumnId, vm.item.FundamentalType + '/' + vm.type, vm);
@@ -51,6 +51,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                                 initNumericalRange();
                                 break;
                         }
+                        vm.header[1] = vm.item.Entity + 's';
                         vm.vals = vm.tree.bucketRestriction.bkt.Vals;
                         vm.getBuckets();
                     }
@@ -110,9 +111,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.showChips = function () {
                     let equals = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
+                    let isPreset = vm.editMode == 'Preset';
                     let check = vm.showItem;
                     let cmp = equals.indexOf(vm.operation) > -1;
-                    return cmp && (check('Enum') || check('Numerical') || check('String'));
+                    return !isPreset && cmp && (check('Enum') || check('Numerical') || check('String'));
                 }
 
                 vm.updateChips = function (items) {
@@ -232,7 +234,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (value !== 'Custom') {
                         var bucket = vm.getCubeBktList()[0];
                         if (bucket) {
-                            vm.presetOperation = bucket.Lbl;
+                            vm.vm.editMode == 'Preset' == bucket.Lbl;
                         }
                         vm.changePreset(bucket);
                     } else {
