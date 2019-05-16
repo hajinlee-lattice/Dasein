@@ -20,7 +20,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
-@Inject
+    @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
     @Inject
@@ -86,6 +86,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
         PlayLaunchChannel newChannel = new PlayLaunchChannel();
         newChannel.setLookupIdMap(mapping);
+        channels.add(newChannel);
     }
 
 }
