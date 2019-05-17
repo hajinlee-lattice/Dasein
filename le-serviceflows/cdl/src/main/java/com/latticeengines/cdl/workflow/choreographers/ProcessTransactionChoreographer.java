@@ -199,8 +199,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected boolean shouldRebuild() {
-        boolean should = super.shouldRebuild();
+    protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean should = super.shouldRebuild(step);
 
         log.info(String.format(
                 "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, "
