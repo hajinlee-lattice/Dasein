@@ -53,10 +53,11 @@ angular
                 path: () => {
                     return 'connectorslist';
                 },
-                ngservices: (ConnectorsService, TemplatesStore) => {
+                ngservices: (ConnectorsService, TemplatesStore, FeatureFlagService) => {
                     let obj = {
                         ConnectorsService: ConnectorsService,
-                        TemplatesStore: TemplatesStore
+                        TemplatesStore: TemplatesStore,
+                        FeatureFlagService: FeatureFlagService
                     }
                     return obj;
                 }
