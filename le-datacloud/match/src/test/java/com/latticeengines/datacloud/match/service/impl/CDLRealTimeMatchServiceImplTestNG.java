@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -40,7 +41,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({ SimpleRetryListener.class })
 public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String ACCOUNT_ID = "10";
@@ -74,15 +78,13 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
 
     private static String[] accountAttrs = { "Website", "AlexaRank",
             "BmbrSurge_HumanResourceManagement_Intent" };
-    private static Object[] accountAttrVals = { "aboitiz.com", 575412, null };
+    private static Object[] accountAttrVals = { "aboitiz.com", 702905, null };
     private static String[] ratingAttrs = { "engine_mc7o9gwpq8gfw0wzkvekmw_score",
             "engine_zsujpzaatkoogxwx2zz8pa_score", "engine_mc7o9gwpq8gfw0wzkvekmw", "engine_zsujpzaatkoogxwx2zz8pa" };
     private static Object[] ratingAttrVals = { 5, 37, "D", "D" };
     private static String[] phAttrs = { "AM_650050C066EF46905EC469E9CC2921E0__EVER__HP",
             "AM_650050C066EF46905EC469E9CC2921E0__Q_1__Q_2_3__SC", "AM_650050C066EF46905EC469E9CC2921E0__Q_1__AS" };
     private static Object[] phAttrVals = { true, 397, 123400.0 };
-
-    private static final String DATACLOUD_VERSION = "2.0.15";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -119,7 +121,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         cdlColumnSelectionService.setDataCollectionProxy(dataCollectionProxy);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCDLLookupByAccountId() {
         Object[][] data = new Object[][] { { 123, ACCOUNT_ID } };
         MatchInput input = prepareMatchInput(data);
@@ -142,7 +144,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCDLLookupByAccountIdNoMatch() {
         Object[][] data = new Object[][] { { 123, "12345" } };
         MatchInput input = prepareMatchInput(data);
@@ -171,7 +173,7 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         columnSelection.setColumns(columns);
         input.setPredefinedSelection(null);
         input.setCustomSelection(columnSelection);
-        input.setDataCloudVersion(DATACLOUD_VERSION);
+        input.setDataCloudVersion(currentDataCloudVersion);
         input.setOperationalMode(OperationalMode.CDL_LOOKUP);
         return input;
     }
