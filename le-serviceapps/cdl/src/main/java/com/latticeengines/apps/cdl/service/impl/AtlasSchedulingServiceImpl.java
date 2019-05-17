@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,14 +20,17 @@ public class AtlasSchedulingServiceImpl implements AtlasSchedulingService {
 
     private static final Logger log = LoggerFactory.getLogger(AtlasSchedulingServiceImpl.class);
 
-    private static final String DEFAULT_CRON = "0 0 22 ? * SUN *";
+    private static final String DEFAULT_CRON = "0 0 0 31 DEC ? 2099";
 
     @Inject
     private AtlasSchedulingEntityMgr atlasSchedulingEntityMgr;
 
     @Override
     public void createOrUpdateExportScheduling(String customerSpace, String cronExpression) {
-        if (!CronUtils.isValidExpression(cronExpression)) {
+        if (StringUtils.isEmpty(cronExpression)) {
+            log.warn("Cron expression is empty, using default cron: " + DEFAULT_CRON);
+            cronExpression = DEFAULT_CRON;
+        } else if (!CronUtils.isValidExpression(cronExpression)) {
             log.error(String.format("Invalid cron expression: %s, Using default cron: %s", cronExpression,
                     DEFAULT_CRON));
             cronExpression = DEFAULT_CRON;
