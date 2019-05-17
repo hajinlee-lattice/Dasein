@@ -13,42 +13,42 @@ public class ProcessTransactionChoreographerUnitTestNG {
     @Test(groups = "unit")
     public void checkRebuildCausedByReset() {
         ProcessTransactionChoreographer choreographer = initProcessTransactionChoreographer();
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.reset = true;
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
     }
 
     @Test(groups = "unit")
     public void checkRebuildCausedByProducts() {
         ProcessTransactionChoreographer choreographer = initProcessTransactionChoreographer();
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(true);
         choreographer.setHasProductChange(false);
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(false);
         choreographer.setHasProducts(true);
         choreographer.setHasProductChange(true);
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(false);
         choreographer.setHasProductChange(true);
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(true);
         choreographer.setHasProductChange(true);
-        Assert.assertTrue(choreographer.shouldRebuild());
+        Assert.assertTrue(choreographer.shouldRebuild(null));
     }
 
     @Test(groups = "unit")
     public void checkRebuildCausedByBusinessCalendarChanged() {
         ProcessTransactionChoreographer choreographer = initProcessTransactionChoreographer();
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         AbstractStep<ProcessTransactionStepConfiguration> step =
                 new AbstractStep<ProcessTransactionStepConfiguration>() {
@@ -63,12 +63,12 @@ public class ProcessTransactionChoreographerUnitTestNG {
         context.setBusinessCalenderChanged(false);
         step.putObjectInContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY, context);
         choreographer.checkBusinessCalendarChanged(step);
-        Assert.assertFalse(choreographer.shouldRebuild());
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         context.setBusinessCalenderChanged(true);
         step.putObjectInContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY, context);
         choreographer.checkBusinessCalendarChanged(step);
-        Assert.assertTrue(choreographer.shouldRebuild());
+        Assert.assertTrue(choreographer.shouldRebuild(null));
     }
 
     private ProcessTransactionChoreographer initProcessTransactionChoreographer() {

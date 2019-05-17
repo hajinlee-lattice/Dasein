@@ -47,9 +47,20 @@ class SystemService {
                 return true;
         }
     }
+    canEditMapping(system) {
+        switch (system.externalSystemName) {
+            case 'Marketo':
+                return true;
 
-    getNewToken(){
-        
+            default:
+                return this.canHaveAccountId(system);
+        }
+        // return true;
+        // switch(system)
+    }
+
+    getNewToken() {
+
     }
 }
 

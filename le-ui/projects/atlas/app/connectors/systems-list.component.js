@@ -1,7 +1,7 @@
 import React, { Component } from "common/react-vendor";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
-
+import ReactRouter from '../react/router';
 
 import GridLayout from 'common/widgets/container/grid-layout.component';
 
@@ -12,27 +12,35 @@ import ConnectorService from './connectors.service';
 import LeVPanel from 'common/widgets/container/le-v-panel';
 import './systems-list.component.scss';
 import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
-import { actions, reducer } from './connections.redux';
-import { store, injectAsyncReducer } from 'store';
 
 export default class SystemsListComponent extends Component {
     constructor(props) {
         super(props);
         this.state = { connectors: [], loading: true, generatedAuthCode: false };
-
+        this.getConnectors = this.getConnectors.bind(this);
+        let FeatureFlagService = ReactRouter.getRouter().ngservices.FeatureFlagService;
+        this.alfaFeature = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALPHA_FEATURE);
+        console.log('FF ', this.alfaFeature);
     }
 
+    getConnectors(response) {
+        let connectors = [];
+        let CRMs = response.data.CRM || [];
+        let MAPs = response.data.MAP || [];
+        let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
+        if (this.alfaFeature) {
+            connectors = FILE_SYSTEM.concat(CRMs, MAPs);
+        } else {
+            connectors = CRMs.concat(MAPs);
+        }
+        return connectors;
+    }
     componentDidMount() {
-
-        this.setState({loading: true});
+        this.setState({ loading: true });
         httpService.get(
             "/pls/lookup-id-mapping",
             new Observer(response => {
-                console.log(response);
-                let CRMs = response.data.CRM || [];
-                let MAPs = response.data.MAP || [];
-                let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
-                let connectors = FILE_SYSTEM.concat(CRMs, MAPs);
+                let connectors = this.getConnectors(response);
                 SystemsService.cleanupLookupId(connectors);
                 this.setState({ loading: false, connectors: connectors, count: connectors.length });
             })
@@ -43,13 +51,13 @@ export default class SystemsListComponent extends Component {
         let ret = [];
         if (this.state.connectors && this.state.connectors.length > 0) {
             this.state.connectors.forEach(system => {
-                console.log(system.externalSystemName);
+                // console.log(system.externalSystemName);
                 ret.push((
-                <SystemComponent system={system} 
-                config={{
-                    img: ConnectorService.getImgByConnector(system.externalSystemName)
-                }}
-             />));
+                    <SystemComponent system={system}
+                        config={{
+                            img: ConnectorService.getImgByConnector(system.externalSystemName)
+                        }}
+                    />));
             });
 
         } else {
