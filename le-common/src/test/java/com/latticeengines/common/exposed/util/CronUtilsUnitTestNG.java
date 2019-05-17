@@ -20,6 +20,7 @@ public class CronUtilsUnitTestNG {
 
         Assert.assertEquals(nextWed.dayOfWeek().get(), DateTimeConstants.WEDNESDAY);
         Assert.assertTrue(nextWed.toDate().compareTo(now.toDate()) >= 0);
+        Assert.assertTrue(CronUtils.isValidExpression("0 0 0 31 DEC ? 2099"));
     }
 
 }
