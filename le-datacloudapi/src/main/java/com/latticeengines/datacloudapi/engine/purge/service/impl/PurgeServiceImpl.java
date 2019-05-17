@@ -54,6 +54,7 @@ public class PurgeServiceImpl implements PurgeService {
             add("LargeBusinessesFullLocation");
             add("LargeBusinessesNameAndStateAndCountry");
             add("MediumBusinesses");
+            add("MostRecent_Legacy");
             add("OrbGolden");
             add("OrbIntelligenceMostRecent");
             add("OrbIntelligenceV1");
