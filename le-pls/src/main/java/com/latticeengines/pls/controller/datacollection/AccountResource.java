@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -103,11 +102,6 @@ public class AccountResource extends BaseFrontEndEntityResource {
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
         }
-    }
-
-    @Override
-    protected void postProcessRecord(Map<String, Object> result) {
-        overwriteCompanyName(result);
     }
 
     private boolean isEntityMatchEnabled() {

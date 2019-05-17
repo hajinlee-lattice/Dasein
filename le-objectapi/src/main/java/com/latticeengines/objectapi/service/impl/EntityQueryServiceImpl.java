@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -24,7 +23,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
@@ -70,7 +68,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, true);
+            Query query = getQuery(attrRepo, frontEndQuery, sqlUser, true);
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -96,7 +94,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, isCountQuery);
+        Query query = getQuery(attrRepo, frontEndQuery, sqlUser, isCountQuery);
         try {
             return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -109,7 +107,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
     }
 
-    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, DataCollection.Version version,
+    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery,
             String sqlUser, boolean isCountQuery) {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
@@ -126,7 +124,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             if (CollectionUtils.isEmpty(query.getLookups())) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
             }
-            updateLookups(frontEndQuery.getMainEntity(), query);
         }
         return query;
     }
@@ -136,7 +133,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        Query query = getQuery(attrRepo, frontEndQuery, version, sqlUser, false);
+        Query query = getQuery(attrRepo, frontEndQuery, sqlUser, false);
         try {
             if (enforceTranslation) {
                 Map<String, Map<Long, String>> translationMapping = getDecodeMapping(attrRepo, query.getLookups());
@@ -247,33 +244,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         groupBy.setLookups(Collections.singletonList(ratingLookup));
         query.setGroupBy(groupBy);
         return query;
-    }
-
-    private void updateLookups(BusinessEntity entity, Query query) {
-        if (BusinessEntity.Contact == entity) {
-            List<Lookup> lookups = query.getLookups();
-            if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
-                List<Lookup> filtered = lookups.stream().filter(this::notContactCompanyNameLookup)
-                        .collect(Collectors.toList());
-                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()));
-                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()));
-                query.setLookups(filtered);
-            }
-        }
-    }
-
-    private boolean notContactCompanyNameLookup(Lookup lookup) {
-        return !isContactCompanyNameLookup(lookup);
-    }
-
-    private boolean isContactCompanyNameLookup(Lookup lookup) {
-        if (lookup instanceof AttributeLookup) {
-            AttributeLookup attrLookup = (AttributeLookup) lookup;
-            String attributeName = attrLookup.getAttribute();
-            return attributeName.equals(InterfaceName.CompanyName.toString())
-                    && BusinessEntity.Contact == attrLookup.getEntity();
-        }
-        return false;
     }
 
 }
