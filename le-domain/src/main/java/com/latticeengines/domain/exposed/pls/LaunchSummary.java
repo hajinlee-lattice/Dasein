@@ -48,6 +48,8 @@ public class LaunchSummary {
         stats.setContactErrors(getCount(launch.getContactsErrored()));
         stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
         stats.setSuppressed(getCount(launch.getAccountsSuppressed()));
+        stats.setAccountsDuplicated(getCount(launch.getAccountsDuplicated()));
+        stats.setContactsDuplicated(getCount(launch.getContactsDuplicated()));
 
         this.setStats(stats);
         this.setLaunchId(launch.getLaunchId());

@@ -266,7 +266,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         ProgressEventDetail eventDetail = new ProgressEventDetail();
         eventDetail.setFailed(1L);
         eventDetail.setProcessed(2L);
-        eventDetail.setTotalRecordsSubmitted(3L);
+        eventDetail.setTotalRecordsSubmitted(4L);
         updateStatusMonitorMessage.setEventDetail(eventDetail);
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
@@ -280,6 +280,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId());
         Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
         Assert.assertEquals(new Long(1), playLaunch.getContactsErrored());
+        Assert.assertEquals(new Long(1), playLaunch.getContactsDuplicated());
 
         updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);

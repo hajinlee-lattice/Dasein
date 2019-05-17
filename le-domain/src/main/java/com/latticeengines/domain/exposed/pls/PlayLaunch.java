@@ -147,6 +147,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "CONTACTS_ERRORED")
     private Long contactsErrored;
 
+    @JsonProperty("accountsDuplicated")
+    @Column(name = "ACCOUNTS_DUPLICATED")
+    private Long accountsDuplicated;
+
+    @JsonProperty("contactsDuplicated")
+    @Column(name = "CONTACTS_DUPLICATED")
+    private Long contactsDuplicated;
+
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
@@ -375,6 +383,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setContactsErrored(Long contactsErrored) {
         this.contactsErrored = contactsErrored;
+    }
+
+    public Long getAccountsDuplicated() {
+        return accountsDuplicated;
+    }
+
+    public void setAccountsDuplicated(Long accountsDuplicated) {
+        this.accountsDuplicated = accountsDuplicated;
+    }
+
+    public Long getContactsDuplicated() {
+        return contactsDuplicated;
+    }
+
+    public void setContactsDuplicated(Long contactsDuplicated) {
+        this.contactsDuplicated = contactsDuplicated;
     }
 
     public String getTableName() {
