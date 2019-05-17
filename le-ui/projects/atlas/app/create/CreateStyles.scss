@@ -34,10 +34,6 @@ section.container.setup-import {
             }
         }
     }
-    .placeholder {
-        color: #888;
-        text-transform: none;
-    }
     label {
         color: #000;
         span {
@@ -56,61 +52,6 @@ section.container.setup-import {
     textarea {
         overflow: hidden;
     }
-    .uploadContainer {
-        &.hasS3 {
-            margin-top: 0;
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            .button {
-                text-align: left;
-            }
-            & > div {
-                margin-top: 0;
-                &:last-of-type {
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: flex-end;
-                    .button {
-                        font-size: 10px;
-                        margin-left: 4px;
-                    }
-                }
-            }
-        }
-    }
-    .s3help {
-        text-align: right;
-        font-size: 11px;
-        color: #26639b;
-        display: block;
-    }
-    div.file-upload {
-        &.disabled,
-        &.disabled * {
-            pointer-events: none;
-            color: #ccc !important;
-            border-color: #ccc !important;
-
-            span.more-info {
-                display: none;
-            }
-        }
-        div.fileUpload {
-            position: relative;
-            border: #ddd solid 1px;
-            &:hover {
-                background: #fafafa;
-            }
-            input.upload {
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: #AFF;
-            }
-        }
-    }
     div.toggle-check {
         vertical-align: top;
         font-size: 1em;
@@ -126,81 +67,61 @@ section.container.setup-import {
             margin-top: 0.5em;
         }
     }
-    div.progress {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        border-radius: 0;
-        box-shadow: 1px 0 1px 0px #aaa;
-        transition: all 333ms linear;
-        &.processing {
-            background: #dddddd;
-        }
-        &.compressing {
-            transition: all 333ms linear;
-            background: #dfdfdf;
-        }
-        &.uploading {
-            background-color: #aaea6c;
-        }
-        &.uploading > span {
-            display: block;
-            -webkit-transition: width 4s;
-            transition: width 4s;
-            height: 100%;
+}
+
+
+.uploadContainer {
+    &.hasS3 {
+        margin-top: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        & > div, & > label, & > button {
             margin-top: 0;
-            left: 0;
-            right: 0;
-            position: relative;
-            overflow: hidden;
         }
-        &.animate > span > span {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background-image:
-               -webkit-gradient(linear, 0 0, 100% 100%,
-                  color-stop(.25, rgba(255, 255, 255, .2)),
-                  color-stop(.25, transparent), color-stop(.5, transparent),
-                  color-stop(.5, rgba(255, 255, 255, .2)),
-                  color-stop(.75, rgba(255, 255, 255, .2)),
-                  color-stop(.75, transparent), to(transparent)
-               );
-            background-image:
-                -moz-linear-gradient(
-                  -45deg,
-                  rgba(255, 255, 255, .2) 25%,
-                  transparent 25%,
-                  transparent 50%,
-                  rgba(255, 255, 255, .2) 50%,
-                  rgba(255, 255, 255, .2) 75%,
-                  transparent 75%,
-                  transparent
-               );
-            z-index: 1;
-            -webkit-background-size: 50px 50px;
-            -moz-background-size: 50px 50px;
-            background-size: 50px 50px;
-            -webkit-animation: move 2.5s linear infinite;
-            -moz-animation: move 2.5s linear infinite;
-            overflow: hidden;
+        & > label, & > button {
+            margin-left: 4px;
         }
-        &.uploading.finished {
-            background: #b2f274;
-            width: 100%;
+        label {
+            display: inline-block;
+            width: auto;
+        }
+        .button {
+            font-size: 10px;
         }
     }
-    .fileUpload.form-control i {
-        display: block;
+}
+.fileUpload {
+    position: relative;
+    border: #ddd solid 1px;
+    border-radius: 2px;
+    height: 30px;
+    width: 100%;
+    &:hover {
+        background: #fafafa;
+    }
+    .placeholder, .filename {
+        color: #888;
+        text-transform: none;
         position: absolute;
-        right: 0;
-        top: 0;
+        left: 10px;
+        top: 4px;
+        font-size: 14px;
+        z-index: 2;
+        width: 85%;
+    }
+    .filename {
+        color: #222;
+    }
+    i {
+        position: absolute;
+        right: 7px;
+        top: 7px;
         bottom: 0;
-        padding: 0.6em;
+        font-size: 14px;
+        z-index: 4;
         &.fa-close {
             color: #666;
-            z-index: 3;
         }
         &.fa-check {
             color: darkolivegreen;
@@ -216,6 +137,92 @@ section.container.setup-import {
             transition: none;
             animation: none;
         }
+    }
+    input {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: transparent;
+        opacity: 0;
+        z-index: 3;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+    .help-block, .uploader-message {
+        margin-top: 29px;
+        font-size: 11px;
+        color: #5a5a5a;
+    }
+}
+.progress-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: 0;
+    z-index: 1;
+    -webkit-border-radius: 0;
+    box-shadow: 1px 0 1px 0px #aaa;
+    transition: all 333ms linear;
+    &.processing {
+        background: #dddddd;
+    }
+    &.compressing {
+        transition: all 333ms linear;
+        background: #dfdfdf;
+    }
+    &.uploading {
+        background-color: #aaea6c;
+    }
+    &.uploading > span {
+        display: block;
+        -webkit-transition: width 4s;
+        transition: width 4s;
+        height: 100%;
+        margin-top: 0;
+        left: 0;
+        right: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    &.animate > span > span {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background-image:
+           -webkit-gradient(linear, 0 0, 100% 100%,
+              color-stop(.25, rgba(255, 255, 255, .2)),
+              color-stop(.25, transparent), color-stop(.5, transparent),
+              color-stop(.5, rgba(255, 255, 255, .2)),
+              color-stop(.75, rgba(255, 255, 255, .2)),
+              color-stop(.75, transparent), to(transparent)
+           );
+        background-image:
+            -moz-linear-gradient(
+              -45deg,
+              rgba(255, 255, 255, .2) 25%,
+              transparent 25%,
+              transparent 50%,
+              rgba(255, 255, 255, .2) 50%,
+              rgba(255, 255, 255, .2) 75%,
+              transparent 75%,
+              transparent
+           );
+        z-index: 1;
+        -webkit-background-size: 50px 50px;
+        -moz-background-size: 50px 50px;
+        background-size: 50px 50px;
+        -webkit-animation: move 2.5s linear infinite;
+        -moz-animation: move 2.5s linear infinite;
+        overflow: hidden;
+    }
+    &.uploading.finished {
+        background: #b2f274;
+        width: 100%;
     }
 }
 .animate > span:after {
@@ -237,6 +244,26 @@ section.container.setup-import {
        background-position: 50px 50px;
     }
 }
+.s3help {
+    text-align: right;
+    font-size: 11px;
+    color: #26639b;
+    display: block;
+}
+.file-upload {
+    &.disabled,
+    &.disabled * {
+        pointer-events: none;
+        color: #ccc !important;
+        border-color: #ccc !important;
+
+        span.more-info {
+            display: none;
+        }
+    }
+}
+
+
 
 
 

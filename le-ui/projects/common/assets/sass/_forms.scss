@@ -906,59 +906,59 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 
 /* Custom File Upload
 ===================================================================== */
-.file-upload {
-    label {
-        display: block;
-        position: relative;
-    }
-    & > .form-control {
-        color: #888;
-        text-align: left;
-        overflow: hidden;
-        white-space: nowrap;
-        padding-right: 3em;
-        height: 2.35em;
-        position: relative;
-        margin: 5px 0;
-        color: #222;
+// .file-upload {
+//     label {
+//         display: block;
+//         position: relative;
+//     }
+//     & > .form-control {
+//         color: #888;
+//         text-align: left;
+//         overflow: hidden;
+//         white-space: nowrap;
+//         padding-right: 3em;
+//         height: 2.35em;
+//         position: relative;
+//         margin: 5px 0;
+//         color: #222;
 
-        span {
-            display: block;
-            margin-top: 0px;
-            position: absolute;
-            right: 2em;
-            left: 0.4em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: normal;
-        }
-    }
-    div {
-        position: relative;
-        margin-top: -5px;
-        .template-section {
-            margin-top: 5px;
-        }
-        input.upload {
-            position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            bottom: 0;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            /*height: 42px;*/
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0;
-            filter: alpha(opacity=0);
-        }
-    }
-    .form-control[disabled] {
-        background: white;
-    }
-}
+//         span {
+//             display: block;
+//             margin-top: 0px;
+//             position: absolute;
+//             right: 2em;
+//             left: 0.4em;
+//             overflow: hidden;
+//             text-overflow: ellipsis;
+//             font-weight: normal;
+//         }
+//     }
+//     div {
+//         position: relative;
+//         margin-top: -5px;
+//         .template-section {
+//             margin-top: 5px;
+//         }
+//         input.upload {
+//             position: absolute;
+//             top: 0;
+//             right: 0;
+//             left: 0;
+//             bottom: 0;
+//             margin: 0;
+//             padding: 0;
+//             width: 100%;
+//             /*height: 42px;*/
+//             font-size: 20px;
+//             cursor: pointer;
+//             opacity: 0;
+//             filter: alpha(opacity=0);
+//         }
+//     }
+//     .form-control[disabled] {
+//         background: white;
+//     }
+// }
 
 /* Toggle Switch (http://www.cssflow.com/snippets/simple-toggle-switch/demo)
 ======================================================================== */

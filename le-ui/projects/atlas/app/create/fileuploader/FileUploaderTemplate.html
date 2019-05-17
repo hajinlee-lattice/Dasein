@@ -13,28 +13,34 @@
 
 </label>
 
-<div class="uploadContainer hasS3" ng-class="{ hasS3: vm_uploader.hasSthreeFiles == 'true' }">
-    <div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
+<div class="uploadContainer" ng-class="{ hasS3: vm_uploader.hasSthreeFiles == 'true' }">
+    
+    <div class="fileUpload" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
         <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
           {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}
         </span>
-        
+        <span ng-show="vm_uploader.showFileDisplayName()" class="filename text-ellipsis" title="{{vm_uploader.selectedFileDisplayName}}">
+          {{vm_uploader.selectedFileDisplayName}}
+        </span>
+
         <div 
-            class="progress processing" 
+            class="progress-bar processing" 
             ng-show="vm_uploader.showCompressingBar()" 
             ng-style="{ width: vm_uploader.compress_percent + '%' }">
           <span><span></span></span>
         </div>
         <div 
-            class="progress uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" 
+            class="progress-bar uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" 
             ng-show="vm_uploader.showUploadingBar()" 
             ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}">
           <span><span></span></span>
         </div>
-        <span ng-show="vm_uploader.showFileDisplayName()">
-          {{vm_uploader.selectedFileDisplayName}}
-        </span>
         
+        <i class="fa fa-file-text" ng-if="vm_uploader.showFileIcon()"></i>
+        <i class="fa fa-spinner fa-pulse" ng-if="vm_uploader.showSpinnerIcon()"></i>
+        <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCancelIcon()"></i>
+        <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
+
         <input 
             type="file"
             accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
@@ -47,24 +53,30 @@
             ng-required="{{vm_uploader.fileRequired}}"
             ng-disabled="vm_uploader.inputDisabled"
             file-uploader="vm_uploader.selectedFile" />
-        
-        <i class="fa fa-file-text" ng-if="vm_uploader.showFileIcon()"></i>
-        <i class="fa fa-spinner fa-pulse" ng-if="vm_uploader.showSpinnerIcon()"></i>
-        <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCancelIcon()"></i>
-        <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
+
+        <p class="help-block">
+          {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}
+        </p>
+        <p class="uploader-message">
+          {{vm_uploader.message}}
+          <span class="pull-right">
+            {{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}
+          </span>
+        </p>
     </div>
-    <div ng-if="vm_uploader.hasSthreeFiles == 'true'">
-        <label
-            for="{{ vm_uploader_container.inputName }}"
-            class="button white-button">
-            Browse My Computer
-        </label>
-        <button 
-            class="button white-button"
-            ng-click="vm_uploader_container.getS3Files()">
-            Browse S3
-        </button>
-    </div>
+    <label
+        for="{{ vm_uploader_container.inputName }}"
+        class="button white-button"
+        ng-if="vm_uploader.hasSthreeFiles == 'true'">
+        Browse My Computer
+    </label>
+    <button 
+        class="button white-button"
+        ng-click="vm_uploader_container.getS3Files()"
+        ng-if="vm_uploader.hasSthreeFiles == 'true'">
+        Browse S3
+    </button>
+
 </div>
 <a 
     class="s3help"
@@ -72,12 +84,3 @@
     ng-href="https://aws.amazon.com/s3/"
     target="_blank">What's S3?</a>
 
-<p class="help-block">
-  {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}
-</p>
-<p class="uploader-message">
-  {{vm_uploader.message}}
-  <span class="pull-right">
-    {{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}
-  </span>
-</p>
