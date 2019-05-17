@@ -955,14 +955,16 @@ angular
                     },
                     orgs: function ($q, SfdcStore, featureflags) {
                         var deferred = $q.defer();
-
                         SfdcStore.getOrgs().then(function (result) {
                             let orgs = [];
                             let keys = Object.keys(result);
                             if (keys) {
                                 keys.forEach((key) => {
-                                    let ret = result[key] || [];
-                                    orgs = orgs.concat(ret)
+                                    if(key !== 'FILE_SYSTEM' || (key == 'FILE_SYSTEM' && featureflags.AlphaFeature)){
+                                        let ret = result[key] || [];
+                                        orgs = orgs.concat(ret)
+                                    }
+                                    
                                 });
                             }
                             deferred.resolve(orgs);

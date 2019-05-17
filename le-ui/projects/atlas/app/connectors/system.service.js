@@ -48,7 +48,6 @@ class SystemService {
         }
     }
     canEditMapping(system) {
-        console.log(system);
         switch (system.externalSystemName) {
             case 'Marketo':
                 return true;
