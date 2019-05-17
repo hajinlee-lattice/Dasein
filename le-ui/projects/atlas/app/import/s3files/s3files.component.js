@@ -31,6 +31,7 @@ export default class S3FileList extends Component {
             data: [],
             path: '',
             angularGoTo: '',
+            angularBack: '',
             breadcrumbs: []
         };
     }
@@ -72,29 +73,36 @@ export default class S3FileList extends Component {
         let feedType = ImportWizardStore.getFeedType();
         
         let angularGoTo = '';
+        let angularBack = '';
         switch (feedType) {
-            case "AccountSchema": {
+            case "DefaultSystem_AccountData": {
                 angularGoTo = 'home.import.data.accounts.ids';
+                angularBack = 'home.import.entry.accounts';
                 break;
             }
-            case "ContactSchema": {
+            case "DefaultSystem_ContactData": {
                 angularGoTo = 'home.import.data.contacts.ids';
+                angularBack = 'home.import.entry.contacts';
                 break;
             }
-            case "TransactionSchema": {
+            case "DefaultSystem_TransactionData": {
                 angularGoTo = 'home.import.data.productpurchases.ids';
+                angularBack = 'home.import.entry.productpurchases';
                 break;
             }
-            case "BundleSchema": {
+            case "DefaultSystem_ProductBundle": {
                 angularGoTo = 'home.import.data.productbundles.ids';
+                angularBack = 'home.import.entry.productbundles';
                 break;
             }
-            case "HierarchySchema": {
+            case "DefaultSystem_ProductHierarchy": {
                 angularGoTo = 'home.import.data.producthierarchy.ids';
+                angularBack = 'home.import.entry.producthierarchy';
                 break;
             }
         }
 
+        state.angularBack = angularBack;
         state.angularGoTo = angularGoTo;
         this.setState(state);
         this.setState({ forceReload: false });
@@ -139,6 +147,11 @@ export default class S3FileList extends Component {
         );
     }
 
+    goBack = () => {
+        console.log(this.state.angularBack);
+        NgState.getAngularState().go(this.state.angularBack, {});
+    }
+
     selectFile = (fileObj) => {
         let file = Object.values(fileObj)[0];
         if (file.is_directory) {
@@ -170,23 +183,14 @@ export default class S3FileList extends Component {
 
         if (typeof folder == 'object'){
             let folderLabel = folder.label;
-            switch (folderLabel) {
-                case "Account Data": {
-                    let path = this.state.path;
-                    s3actions.fetchS3Files(path);
-                    state.breadcrumbs = [
-                        {
-                            "label": `${entityType} Data`
-                        }
-                    ];
-                    break;
+            let path = this.state.path;
+
+            s3actions.fetchS3Files(path);
+            state.breadcrumbs = [
+                {
+                    "label": `${entityType} Data`
                 }
-                default: {
-                    let path = this.state.path + folderLabel;
-                    s3actions.fetchS3Files(path);
-                    break;
-                }
-            }
+            ];
         } else {
             let newPath = this.state.path + folder;
             let folderData = s3actions.fetchS3Files(newPath);
@@ -323,7 +327,7 @@ export default class S3FileList extends Component {
                                             classNames: "white-button"
                                         }}
                                         callback={() => {
-                                            NgState.getAngularState().go('home.importtemplates', {});
+                                            this.goBack();
                                         }}
                                     />
                                 </div>
