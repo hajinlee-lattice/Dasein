@@ -39,7 +39,7 @@
                     <div class="le-cell le-col-start-6 le-col-span-2"> {{export.inputs['EXPORT_OBJECT_TYPE'] || '--'}} </div>
                     <div class="le-cell le-col-start-8 le-col-span-3">{{export.user}}</div>
                     <div class="le-cell le-col-start-11 le-col-span-2">
-                        <a ng-if="export.jobStatus == 'Completed' && !vm.isExpired(export)" href="javascript:void(0)" ng-click="vm.downloadSegmentExport(export.inputs['SEGMENT_EXPORT_ID'])" class="blue-text text-ellipsis">
+                        <a ng-if="export.jobStatus == 'Completed' && !vm.isExpired(export)" href="/files/datacollection/segments/export/{{export.inputs['SEGMENT_EXPORT_ID']}}/download?Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" class="blue-text text-ellipsis">
                             <span>Download</span>
                         </a>
                         <span ng-if="export.jobStatus != 'Completed' || vm.isExpired(export)"  >
