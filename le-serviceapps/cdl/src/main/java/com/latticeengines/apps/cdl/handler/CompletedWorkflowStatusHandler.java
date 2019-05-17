@@ -57,6 +57,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }
             playLaunch.setContactsErrored(recordsFailed);
+            playLaunch.setContactsDuplicated(totalRecords - recordsProcessed - recordsFailed);
             playLaunchService.update(playLaunch);
         }
 
