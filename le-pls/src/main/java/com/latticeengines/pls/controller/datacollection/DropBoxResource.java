@@ -155,7 +155,7 @@ public class DropBoxResource {
     @ResponseBody
     @ApiOperation(value = "Get access key to drop box, if the access was granted to a Lattice user")
     @PreAuthorize("hasRole('View_S3_Credential')")
-    public Map<String, UIAction> getAccessKey(@RequestBody GrantDropBoxAccessRequest request) {
+    public Map<String, UIAction> getAccessKey() {
         String customerSpace = MultiTenantContext.getShortTenantId();
         UIAction uiAction = new UIAction();
         GrantDropBoxAccessResponse response = dropBoxProxy.getAccessKey(customerSpace);
