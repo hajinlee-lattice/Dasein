@@ -201,6 +201,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
+        DataCollectionStatus inactiveStatus = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(customerSpace.toString(), inactiveVersion);
+        if (inactiveStatus != null && configuration.getDataCloudBuildNumber() != null) {
+            inactiveStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
+            dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), inactiveStatus,
+                    inactiveVersion);
+        }
+
     }
 
     @SuppressWarnings("unused")
