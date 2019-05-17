@@ -39,7 +39,7 @@
     },
     {
       "Node": "ExportCronExpression",
-      "Data": "0 0 22 ? * SUN *"
+      "Data": ""
     }
   ]
 }
