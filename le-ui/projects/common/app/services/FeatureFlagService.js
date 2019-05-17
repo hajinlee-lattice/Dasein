@@ -93,6 +93,7 @@ angular.module('common.services.featureflag', [
         ENABLE_EXTERNAL_INTEGRATION: 'EnableExternalIntegration',
         MIGRATION_TENANT: 'MigrationTenant',
         ENABLE_MULTI_TEMPLATE_IMPORT: 'EnableMultiTemplateImport',
+        ALPHA_FEATURE: 'AlphaFeature',
 
         //TODO: deprecated flags
         CAMPAIGNS_PAGE: 'EnableCampaignUI',
