@@ -221,7 +221,7 @@ export default class SystemComponent extends Component {
                 return (
                     <LeButton
                         name={`${"edit-mappings-"}${this.state.system.orgName}`}
-                        disabled={this.state.saving || !this.state.system.isRegistered}
+                        disabled={this.state.saving || !this.state.system.isRegistered || !SystemService.canEditMapping(this.state.system)}
                         config={{
                             label: "Edit Mappings",
                             classNames: "blue-button aptrinsic-connections-edit-mappings"
@@ -265,7 +265,7 @@ export default class SystemComponent extends Component {
                             <span className={`${'s-text'} ${this.getSystemStatusClass()}`}>{SystemService.getSystemStatus(this.state.system)}</span>
                         </GridLayout>
                     </LeTileBody>
-                    <LeTileFooter>
+                    <LeTileFooter classNames={"system-footer"}>
                         <LeHPanel hstretch={true} halignment={RIGHT} className="s-controls">
                             {this.getActionsButtons()}
                         </LeHPanel>

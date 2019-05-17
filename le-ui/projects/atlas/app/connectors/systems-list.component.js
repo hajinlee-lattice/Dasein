@@ -28,7 +28,7 @@ export default class SystemsListComponent extends Component {
         httpService.get(
             "/pls/lookup-id-mapping",
             new Observer(response => {
-                console.log(response);
+                // console.log(response);
                 let CRMs = response.data.CRM || [];
                 let MAPs = response.data.MAP || [];
                 let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
@@ -43,7 +43,7 @@ export default class SystemsListComponent extends Component {
         let ret = [];
         if (this.state.connectors && this.state.connectors.length > 0) {
             this.state.connectors.forEach(system => {
-                console.log(system.externalSystemName);
+                // console.log(system.externalSystemName);
                 ret.push((
                 <SystemComponent system={system} 
                 config={{
