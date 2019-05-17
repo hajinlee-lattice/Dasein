@@ -136,7 +136,7 @@ public class PurgeServiceImpl implements PurgeService {
                 }
             }
         } catch (Exception ex) {
-            log.error("Fail to scan DataCloud sources");
+            log.error("Fail to scan DataCloud sources", ex);
         }
         return sources;
     }
