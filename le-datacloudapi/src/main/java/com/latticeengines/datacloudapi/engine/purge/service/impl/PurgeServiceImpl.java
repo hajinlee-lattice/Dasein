@@ -54,6 +54,7 @@ public class PurgeServiceImpl implements PurgeService {
             add("LargeBusinessesFullLocation");
             add("LargeBusinessesNameAndStateAndCountry");
             add("MediumBusinesses");
+            add("MostRecent_Legacy");
             add("OrbGolden");
             add("OrbIntelligenceMostRecent");
             add("OrbIntelligenceV1");
@@ -135,7 +136,7 @@ public class PurgeServiceImpl implements PurgeService {
                 }
             }
         } catch (Exception ex) {
-            log.error("Fail to scan DataCloud sources");
+            log.error("Fail to scan DataCloud sources", ex);
         }
         return sources;
     }
