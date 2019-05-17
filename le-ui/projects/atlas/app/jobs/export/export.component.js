@@ -101,6 +101,10 @@ angular
             //     vm.loading = false;
             // });
 
+            var clientSession = BrowserStorageUtility.getClientSession();
+            vm.tenantId = clientSession.Tenant.Identifier;
+            vm.auth = BrowserStorageUtility.getTokenDocument();
+
             var filterStore = FilterService.getFilters("jobs.export.pagesize");
             if (filterStore) {
                 vm.pagesize = filterStore.pagesize;
@@ -129,6 +133,8 @@ angular
                         /filename="(.+)"/
                     )[1];
                     element.download = fileName;
+
+
                     var file = new Blob([result.data], {
                         type: "application/octect-stream"
                     });
