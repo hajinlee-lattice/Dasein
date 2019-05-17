@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -132,7 +131,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
-        return preProcess(frontEndQuery.getMainEntity(), query);
+        return query;
     }
 
     private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version,
@@ -142,8 +141,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser) //
-                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
+            return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
                     + " for tenant " + MultiTenantContext.getShortTenantId();
@@ -261,52 +259,6 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         } else {
             return null;
         }
-    }
-
-    private Query preProcess(BusinessEntity entity, Query query) {
-        if (BusinessEntity.Contact == entity) {
-            List<Lookup> lookups = query.getLookups();
-            if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
-                List<Lookup> filtered = lookups.stream().filter(this::notContactCompanyNameLookup)
-                        .collect(Collectors.toList());
-                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()));
-                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()));
-                query.setLookups(filtered);
-            }
-        }
-        return query;
-    }
-
-    private boolean notContactCompanyNameLookup(Lookup lookup) {
-        return !isContactCompanyNameLookup(lookup);
-    }
-
-    private boolean isContactCompanyNameLookup(Lookup lookup) {
-        if (lookup instanceof AttributeLookup) {
-            AttributeLookup attrLookup = (AttributeLookup) lookup;
-            String attributeName = attrLookup.getAttribute();
-            return attributeName.equals(InterfaceName.CompanyName.toString())
-                    && BusinessEntity.Contact == attrLookup.getEntity();
-        }
-        return false;
-    }
-
-    private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result) {
-        Map<String, Object> processed = result;
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-            if (result.containsKey(InterfaceName.CompanyName.toString())
-                    && result.containsKey(InterfaceName.LDC_Name.toString())) {
-                processed = new HashMap<>();
-                result.forEach(processed::put);
-                String companyName = (String) processed.get(InterfaceName.CompanyName.toString());
-                String ldcName = (String) processed.get(InterfaceName.LDC_Name.toString());
-                String consolidatedName = (ldcName != null) ? ldcName : companyName;
-                if (consolidatedName != null) {
-                    processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
-                }
-            }
-        }
-        return processed;
     }
 
     private static Map<String, String> ruleLabelReverseMapping(RatingRule ratingRule) {

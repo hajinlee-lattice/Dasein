@@ -124,9 +124,12 @@ public abstract class BaseFrontEndEntityResource {
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
         }
+        ArrayList<Lookup> lookups = new ArrayList<>(frontEndQuery.getLookups());
+        boolean companyNameExpanded = expandCompanyNameLookup(lookups);
+        frontEndQuery.setLookups(lookups);
         DataPage data = entityProxy.getData(tenantId, frontEndQuery);
         if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
-            data.getData().forEach(this::postProcessRecord);
+            data.getData().forEach(map -> postProcessRecord(map, companyNameExpanded));
         }
         return data;
     }
@@ -222,10 +225,13 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    protected void postProcessRecord(Map<String, Object> result) {
+    protected void postProcessRecord(Map<String, Object> result, boolean companyNameExpanded) {
+        if (companyNameExpanded) {
+            mergeCompanyName(result);
+        }
     }
 
-    void overwriteCompanyName(Map<String, Object> result) {
+    void mergeCompanyName(Map<String, Object> result) {
         if (result.containsKey(InterfaceName.CompanyName.toString())
                 && result.containsKey(InterfaceName.LDC_Name.toString())) {
             String companyName = (String) result.get(InterfaceName.CompanyName.toString());
@@ -234,11 +240,34 @@ public abstract class BaseFrontEndEntityResource {
             if (consolidatedName != null && !consolidatedName.equals(companyName)) {
                 result.put(InterfaceName.CompanyName.toString(), consolidatedName);
             }
+            result.remove(InterfaceName.LDC_Name.name());
         }
     }
 
     abstract BusinessEntity getMainEntity();
 
     abstract List<Lookup> getDataLookups();
+
+    private boolean expandCompanyNameLookup(ArrayList<Lookup> lookups) {
+        boolean hasCompanyName = false;
+        boolean hasLdcName = false;
+        for (Lookup lookup: lookups) {
+            if (lookup instanceof AttributeLookup) {
+                AttributeLookup attrLookup = (AttributeLookup) lookup;
+                if (InterfaceName.CompanyName.name().equalsIgnoreCase(attrLookup.getAttribute())) {
+                    hasCompanyName = true;
+                }
+                if (InterfaceName.LDC_Name.name().equalsIgnoreCase(((AttributeLookup) lookup).getAttribute())) {
+                    hasLdcName = true;
+                }
+            }
+        }
+        if (hasCompanyName && !hasLdcName) {
+            lookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.name()));
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }
