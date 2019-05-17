@@ -62,35 +62,38 @@ export default class TemplatesComponent extends Component {
 
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
+
+        console.log(response);
+
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
                 state.entityType = 'Account';
-                state.feedType = 'AccountSchema';
+                state.feedType = response.data.FeedType;
                 break;
             }
             case "Contacts": {
                 state.entity = "contacts";
                 state.entityType = 'Contact';
-                state.feedType = 'ContactSchema';
+                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Purchases": {
                 state.entity = "productpurchases";
                 state.entityType = 'Product';
-                state.feedType = 'TransactionSchema';
+                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Bundles": {
                 state.entity = "productbundles";
                 state.entityType = 'Product';
-                state.feedType = 'BundleSchema';
+                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Hierarchy": {
                 state.entity = "producthierarchy";
                 state.entityType = 'Product';
-                state.feedType = 'HierarchySchema';
+                state.feedType = response.data.FeedType;
                 break;
             }
         }
