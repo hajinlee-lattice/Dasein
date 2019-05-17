@@ -80,7 +80,7 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldRebuild() {
+    protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
             return false;

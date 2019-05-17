@@ -125,19 +125,21 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return super.shouldMerge(step)
-                || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
+        return super.shouldMerge(step) || hasEmbeddedAccounts(step);
     }
 
     @Override
-    protected boolean shouldRebuild() {
-        rebuildNotForDataCloudChange = super.shouldRebuild();
+    protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
+        rebuildNotForDataCloudChange = super.shouldRebuild(step);
         if (!rebuildNotForDataCloudChange) {
             if (shouldRematch) {
                 log.info("Should rebuild, because fully re-matched");
                 rebuildNotForDataCloudChange = true;
             } else if (hasAttrLifeCycleChange && !reset) {
                 log.info("Should rebuild, because detected attr life cycle change.");
+                rebuildNotForDataCloudChange = true;
+            } else if (hasEmbeddedAccounts(step) && !reset) {
+                log.info("Should rebuild, because detected embedded accounts from other entity");
                 rebuildNotForDataCloudChange = true;
             }
         }
@@ -146,6 +148,14 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             return true;
         }
         return rebuildNotForDataCloudChange;
+    }
+
+    @Override
+    protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (hasEmbeddedAccounts(step)) {
+            return false;
+        }
+        return super.shouldReset(step);
     }
 
     @Override
@@ -180,4 +190,13 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return rebuild || update;
     }
 
+    /*
+     * check whether we have embedded accounts created by matching other entities
+     */
+    private boolean hasEmbeddedAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (step == null) {
+            return false;
+        }
+        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
+    }
 }
