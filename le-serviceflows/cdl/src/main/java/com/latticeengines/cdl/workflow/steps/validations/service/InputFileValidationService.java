@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.validations.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
@@ -17,7 +18,7 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
     @Autowired
     protected Configuration yarnConfiguration;
 
-    public abstract long validate(T inputFileValidationServiceConfiguration);
+    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedLines);
 
 
     public InputFileValidationService(String serviceName) {

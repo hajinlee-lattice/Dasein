@@ -41,7 +41,8 @@ public class ContactFileValidationService
     }
 
     @Override
-    public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration) {
+    public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
+            List<String> processedRecords) {
         // first check entity match
         if (contactFileValidationServiceConfiguration.isEnableEntityMatch()) {
             log.info("skip check as entity match is true");
@@ -65,14 +66,15 @@ public class ContactFileValidationService
         }
 
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
-            for (String path : pathList) {
+            for (int i = 0; i < pathList.size(); i++) {
+                String path = getPath(pathList.get(i));
+                long errorInPath = 0L;
                 try {
-                    path = getPath(path);
                     log.info("begin dealing with path " + path);
                     List<String> avroFileList = HdfsUtils.getFilesByGlob(yarnConfiguration, path + "/*.avro");
 
-                    boolean fileError = false;
                     for (String avroFile : avroFileList) {
+                        boolean fileError = false;
                         String avrofileName = avroFile.substring(avroFile.lastIndexOf("/") + 1);
                         try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration,
                                 new Path(avroFile))) {
@@ -98,6 +100,7 @@ public class ContactFileValidationService
                                         String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
                                         csvFilePrinter.printRecord(lineId, "", message);
                                         fileError = true;
+                                        errorInPath++;
                                         errorLine++;
                                         continue;
                                     }
@@ -121,6 +124,11 @@ public class ContactFileValidationService
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
+                }
+                // modify processed records if necessary
+                if (errorInPath != 0L) {
+                    long processed = Long.parseLong(processedRecords.get(i)) - errorInPath;
+                    processedRecords.set(i, String.valueOf(processed));
                 }
             }
         } catch (IOException ex) {
