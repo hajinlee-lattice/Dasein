@@ -139,9 +139,9 @@ angular.module('login.update', [
                         //$rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
                     } else {
                         if (result.Status == 401) {
-                            vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
-                        } else {
                             vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_ERROR");
+                        } else {
+                            vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
                         }
 
                         Banner.error({
