@@ -44,7 +44,8 @@ public class AccountFileValidationService
     }
 
     @Override
-    public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration) {
+    public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
+            List<String> processedRecords) {
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -69,7 +70,9 @@ public class AccountFileValidationService
         }
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
-            for (String path : pathList) {
+            for (int i = 0; i < pathList.size(); i++) {
+                String path = pathList.get(i);
+                long errorInPath = 0L;
                 try {
                     path = getPath(path);
                     log.info("begin dealing with path " + path);
@@ -106,6 +109,7 @@ public class AccountFileValidationService
                                             csvFilePrinter.printRecord(lineId, "", message);
                                             rowError = true;
                                             fileError = true;
+                                            errorInPath++;
                                             errorLine++;
                                             break;
                                         }
@@ -133,7 +137,13 @@ public class AccountFileValidationService
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                // modify processed records if necessary
+                if (errorInPath != 0L) {
+                    long processed = Long.parseLong(processedRecords.get(i)) - errorInPath;
+                    processedRecords.set(i, String.valueOf(processed));
+                }
             }
+
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }

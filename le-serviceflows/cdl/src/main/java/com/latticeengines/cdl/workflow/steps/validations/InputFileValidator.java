@@ -55,12 +55,14 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             return;
         }
         List<String> pathList = eaiImportJobDetail.getPathDetail();
+        List<String> processedRecords = eaiImportJobDetail.getPRDetail();
         pathList = pathList == null ? null : pathList.stream().filter(StringUtils::isNotBlank).map(path -> {
             int index = path.indexOf("/Pods/");
             path = index > 0 ? path.substring(index) : path;
             return path;
         }).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(pathList)) {
+        if (CollectionUtils.isEmpty(pathList) || CollectionUtils.isEmpty(processedRecords)
+                || pathList.size() != processedRecords.size()) {
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
             return;
         }
@@ -80,17 +82,24 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
                     .getValidationService(fileConfiguration.getClass().getSimpleName());
-            errorLine = fileValidationService.validate(fileConfiguration);
+            errorLine = fileValidationService.validate(fileConfiguration, processedRecords);
         }
+        // update eaiJobDetail if found error in validations
+        if (errorLine != 0L) {
+            eaiImportJobDetail.setPRDetail(processedRecords);
+            eaiImportJobDetail.setIgnoredRows(eaiImportJobDetail.getIgnoredRows() + errorLine);
+            eaiImportJobDetail.setProcessedRecords(eaiImportJobDetail.getProcessedRecords() - (int) errorLine);
+            eaiJobDetailProxy.updateImportJobDetail(eaiImportJobDetail);
+        }
+
         // add report for this step and import data step
         Long totalFailed = 0L;
         totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
         totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
-        totalFailed += errorLine;
-        getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords() - errorLine)
+        getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
                 .put("total_rows", eaiImportJobDetail.getTotalRows())
-                .put("ignored_rows", eaiImportJobDetail.getIgnoredRows() + errorLine)
-                .put("imported_rows", eaiImportJobDetail.getProcessedRecords() - errorLine)
+                .put("ignored_rows", eaiImportJobDetail.getIgnoredRows())
+                .put("imported_rows", eaiImportJobDetail.getProcessedRecords())
                 .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
         super.execute();
         // make sure report first, then throw exception if necessary

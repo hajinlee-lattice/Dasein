@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,9 +17,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 
 public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
@@ -27,7 +31,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
     private static final String CONTACT_SOURCE_FILE = "Contact_Insufficient_Info.csv";
 
     private static final String PRODUCT_HIERARCHY_SOURCE_FILE = "Product_Without_Family_File.csv";
-
+    @Inject
+    private EaiJobDetailProxy eaiJobDetailProxy;
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -45,6 +50,12 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 SourceType.FILE.getName());
         startCDLImport(accountFile, ENTITY_ACCOUNT);
         verifyAvroFileNumber(accountFile, 47, targetPath);
+        getDataFeedTask(ENTITY_ACCOUNT);
+        String accountIdentifier = accountDataFeedTask.getUniqueId();
+        EaiImportJobDetail accountDetail = eaiJobDetailProxy
+                .getImportJobDetailByCollectionIdentifier(accountIdentifier);
+        verifyEaiJobDetail(accountDetail, 3L, 47);
+
         SourceFile contactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
         String contactPath = String.format("%s/%s/DataFeed1/DataFeed1-Contact/Extracts",
                 PathBuilder
@@ -53,6 +64,12 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 SourceType.FILE.getName());
         startCDLImport(contactFile, ENTITY_CONTACT);
         verifyAvroFileNumber(contactFile, 49, contactPath);
+        getDataFeedTask(ENTITY_CONTACT);
+        String contactIdentifier = contactDataFeedTask.getUniqueId();
+        EaiImportJobDetail contactDetail = eaiJobDetailProxy
+                .getImportJobDetailByCollectionIdentifier(contactIdentifier);
+        verifyEaiJobDetail(contactDetail, 1L, 49);
+
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
@@ -66,5 +83,6 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(contactReport, 1L, 1L, 49L);
         verifyReport(productReport, 1L, 1L, 5L);
     }
+
 
 }

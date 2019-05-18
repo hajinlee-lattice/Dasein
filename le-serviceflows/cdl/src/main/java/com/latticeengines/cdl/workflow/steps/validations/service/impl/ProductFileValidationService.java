@@ -56,7 +56,8 @@ public class ProductFileValidationService
     protected DataCollectionProxy dataCollectionProxy;
 
     @Override
-    public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
+    public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
+            List<String> processedRecords) {
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
