@@ -79,7 +79,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
             AvroUtils.convertAvroToCSV(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
-                    new RecommendationAvroToCsvTransformer());
+                    new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
+                            config.getContactDisplayNames()));
         }
 
         @Override
@@ -99,7 +100,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
             AvroUtils.convertAvroToJSON(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
-                    new RecommendationAvroToJsonFunction());
+                    new RecommendationAvroToJsonFunction(config.getAccountDisplayNames(),
+                            config.getContactDisplayNames()));
         }
 
         @Override
