@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -58,6 +57,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Value("${aws.customer.export.s3.bucket}")
     private String exportS3Bucket;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerS3Bucket;
 
     String randId = UUID.randomUUID().toString();
 
@@ -106,7 +108,6 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertNotNull(dropboxSummary.getDropBox());
 
         defaultPlay = testPlayCreationHelper.getPlay();
-        defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
     }
 
     @Test(groups = "deployment-app")
@@ -180,8 +181,48 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @AfterClass(groups = "deployment-app")
-    public void tearDown() throws Exception {
-    }
+    @Test(groups = "deployment-app", dependsOnMethods = "testS3LaunchWorkflow")
+    public void testVerifyAndCleanupS3UploadedS3File() {
+        String dropboxFolderName = dropboxSummary.getDropBox();
 
+        // Create PlayLaunchExportFilesGeneratorConfiguration Config
+        PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
+        config.setPlayName(defaultPlay.getName());
+        config.setPlayLaunchId(defaultPlayLaunch.getId());
+        config.setDestinationOrgId(s3PlayLaunchConfig.getDestinationSystemId());
+        config.setDestinationSysType(s3PlayLaunchConfig.getDestinationSystemType());
+        config.setDestinationSysName(s3PlayLaunchConfig.getDestinationSystemName());
+
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        String s3FolderPath = pathBuilder.getS3CampaignExportDir(customerS3Bucket, dropboxFolderName)
+                .replace(pathBuilder.getProtocol() + pathBuilder.getProtocolSeparator() + pathBuilder.getPathSeparator()
+                        + customerS3Bucket + pathBuilder.getPathSeparator(), "");
+        log.info("Verifying S3 Folder Path " + s3FolderPath);
+        // Get S3 Files for this PlayLaunch Config
+        List<S3ObjectSummary> s3Objects = s3Service.listObjects(customerS3Bucket, s3FolderPath);
+        assertNotNull(s3Objects);
+        assertEquals(s3Objects.size(), 2);
+        assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getDisplayName()));
+        assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getName()));
+
+        boolean csvFileExists = false, jsonFileExists = false;
+        for (S3ObjectSummary s3Obj : s3Objects) {
+            if (s3Obj.getKey().contains(".csv")) {
+                csvFileExists = true;
+            }
+            if (s3Obj.getKey().contains(".json")) {
+                jsonFileExists = true;
+            }
+        }
+        assertTrue(csvFileExists, "CSV file doesnot exists");
+        assertTrue(jsonFileExists, "JSON file doesnot exists");
+
+        log.info("Cleaning up S3 path " + s3FolderPath);
+        try {
+            s3Service.cleanupPrefix(customerS3Bucket, s3FolderPath);
+            s3Service.cleanupPrefix(customerS3Bucket, dropboxFolderName);
+        } catch (Exception ex) {
+            log.error("Error while cleaning up dropbox files ", ex);
+        }
+    }
 }

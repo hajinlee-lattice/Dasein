@@ -67,13 +67,15 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
                         .collect(Collectors.toList());
                 allAttrs.addAll(accountAttrs);
             }
-            List<ColumnMetadata> ratingAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.Rating);
+            List<ColumnMetadata> ratingAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Rating);
             if (CollectionUtils.isNotEmpty(ratingAttrs)) {
                 ratingAttrs = ratingAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
                         .collect(Collectors.toList());
                 allAttrs.addAll(ratingAttrs);
             }
-            List<ColumnMetadata> phAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace, BusinessEntity.PurchaseHistory);
+            List<ColumnMetadata> phAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.PurchaseHistory);
             if (CollectionUtils.isNotEmpty(phAttrs)) {
                 DataPage dataPage = entityProxy.getProducts(customerSpace);
                 Map<String, String> productNameMap = new HashMap<>();
@@ -83,21 +85,18 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
                             map.get(InterfaceName.ProductName.name()).toString() //
                     ));
                 }
-                phAttrs = phAttrs.stream()
-                        .filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
-                        .peek(cm -> {
-                            String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
-                            String productName = productNameMap.get(productId);
-                            cm.setDisplayName(productName + ": " + cm.getDisplayName());
-                        })
-                        .collect(Collectors.toList());
+                phAttrs = phAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).peek(cm -> {
+                    String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
+                    String productName = productNameMap.get(productId);
+                    cm.setDisplayName(productName + ": " + cm.getDisplayName());
+                }).collect(Collectors.toList());
                 allAttrs.addAll(phAttrs);
             }
             List<ColumnMetadata> curatedAccountAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
                     BusinessEntity.CuratedAccount);
             if (CollectionUtils.isNotEmpty(curatedAccountAttrs)) {
-                curatedAccountAttrs = curatedAccountAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
-                        .collect(Collectors.toList());
+                curatedAccountAttrs = curatedAccountAttrs.stream()
+                        .filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).collect(Collectors.toList());
                 allAttrs.addAll(curatedAccountAttrs);
             }
 
@@ -109,8 +108,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             // Account attributes
             return JsonUtils.convertList(allAttrs, ColumnMetadata.class).stream()
                     .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
-                            accountAttributePrefix + attr.getAttrName(),
-                            attr.getCategoryAsString()))
+                            accountAttributePrefix + attr.getAttrName(), attr.getCategoryAsString()))
                     .collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
@@ -122,7 +120,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     @SuppressWarnings("unchecked")
     @Override
     public List<TalkingPointAttribute> getRecommendationAttributes() {
-        String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";
+        String recomendationAttributesFilePath = "com/latticeengines/cdl/talkingpoints/metadata/RecommendationAttributes.json";
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             InputStream tableRegistryStream = classLoader.getResourceAsStream(recomendationAttributesFilePath);
@@ -130,14 +128,14 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
             return JsonUtils.convertList(raw, TalkingPointAttribute.class);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_10011, e, new String[] {recomendationAttributesFilePath});
+            throw new LedpException(LedpCode.LEDP_10011, e, new String[] { recomendationAttributesFilePath });
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public List<TalkingPointAttribute> getVariableAttributes() {
-        String variableAttributesFilePath = "com/latticeengines/dante/metadata/VariableAttributes.json";
+        String variableAttributesFilePath = "com/latticeengines/cdl/talkingpoints/metadata/VariableAttributes.json";
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             InputStream tableRegistryStream = classLoader.getResourceAsStream(variableAttributesFilePath);
@@ -145,7 +143,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
             List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
             return JsonUtils.convertList(raw, TalkingPointAttribute.class);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_10011, e, new String[] {variableAttributesFilePath});
+            throw new LedpException(LedpCode.LEDP_10011, e, new String[] { variableAttributesFilePath });
         }
     }
 
@@ -159,15 +157,15 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
         for (String notion : uniqueNotions) {
             if (TalkingPointAttributeNotion.isValidDanteNotion(notion)) {
                 switch (TalkingPointAttributeNotion.getDanteNotion(notion)) {
-                case Account:
-                    toReturn.addNotion(notion, getAccountAttributes());
-                    break;
-                case Recommendation:
-                    toReturn.addNotion(notion, getRecommendationAttributes());
-                    break;
-                case Variable:
-                    toReturn.addNotion(notion, getVariableAttributes());
-                    break;
+                    case Account:
+                        toReturn.addNotion(notion, getAccountAttributes());
+                        break;
+                    case Recommendation:
+                        toReturn.addNotion(notion, getRecommendationAttributes());
+                        break;
+                    case Variable:
+                        toReturn.addNotion(notion, getVariableAttributes());
+                        break;
                 }
             } else {
                 toReturn.addInvalidNotion(notion);
