@@ -1111,6 +1111,23 @@ angular
                     }],
                     Contacts: [function () {
                         return null;
+                    }],
+                    orgs: ['$q', 'SfdcStore', 'featureflags', function ($q, SfdcStore, featureflags) {
+                        var deferred = $q.defer();
+
+                        SfdcStore.getOrgs().then(function (result) {
+                            let orgs = [];
+                            let keys = Object.keys(result);
+                            if (keys) {
+                                keys.forEach((key) => {
+                                    let ret = result[key] || [];
+                                    orgs = orgs.concat(ret)
+                                });
+                            }
+                            deferred.resolve(orgs);
+                        });
+
+                        return deferred.promise;
                     }]
                 },
                 views: {
