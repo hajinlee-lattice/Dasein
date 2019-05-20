@@ -92,11 +92,17 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
         Table cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
         if (cleanupTable != null) {
             log.info("result table Name is " + cleanupTable.getName());
-            createDeleteReport(getTableDataLines(cleanupTable));
+            Long tableRows = getTableDataLines(cleanupTable);
+            createDeleteReport(tableRows);
             if (!batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
-                DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace);
-                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), cleanupTableName,
-                        batchStore, version);
+                if (tableRows > 0) {
+                    DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace);
+                    dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), cleanupTableName,
+                            batchStore, version);
+                } else {
+                    log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
+                    dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
+                }
             }
         }
     }
