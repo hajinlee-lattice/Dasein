@@ -5,7 +5,7 @@ angular.module('common.datacloud.query.results', [
     $q, $scope, $state, $stateParams, $filter, $rootScope, $timeout, 
     BrowserStorageUtility, NumberUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts,
-    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount
+    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount, orgs
 ) {
     var vm = this;
     angular.extend(vm, {
@@ -48,7 +48,10 @@ angular.module('common.datacloud.query.results', [
         tmpContacts: [],
         recommendationCounts: {},
         launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
-        bypassBuckets: false
+        bypassBuckets: false,
+        destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
+        orgs: orgs,
+        exportFolder: ''
     });
     vm.isEmpty = (obj) => {
         for(var key in obj) {
@@ -113,6 +116,7 @@ angular.module('common.datacloud.query.results', [
                     });
                     PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
                 }
+                vm.getExportFolder(vm.destinationOrgId, vm.orgs);
             } else if (vm.section === 'dashboard.targets') {
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                     if(data && data.ratingEngine && data.ratingEngine.bucketMetadata) {
@@ -496,6 +500,18 @@ angular.module('common.datacloud.query.results', [
         //reset topNcount on bucket click, issue with sync and faster update speed
         updatePage();
         vm.makeRecommendationCounts();
+    }
+
+    vm.getExportFolder = function(orgId, orgs) {
+        var folder = '';
+        if(orgId === 'Lattice_S3') {
+            folder = orgs.find(function(org) {
+                return org.orgId === orgId;
+            });
+        }
+        if(folder.exportFolder) {
+            vm.exportFolder = folder.exportFolder;
+        }
     }
 
     vm.launchUnscoredClick = function() {
