@@ -10,13 +10,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -157,13 +162,17 @@ public class AvroUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void convertRecommendationsAvroToJSON() throws IOException {
-        URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
+        URL avroUrl = ClassLoader
+                .getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
         File jsonFile = File.createTempFile("RecommendationsTest_", ".json");
-        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile, new RecommendationAvroToJsonFunction());
+        AvroUtils.convertAvroToJSON(avroUrl.getFile(), jsonFile,
+                new RecommendationAvroToJsonFunction(
+                        readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv")));
 
         log.info("Created JON File at: " + jsonFile.getAbsolutePath());
         ObjectMapper om = new ObjectMapper();
-        try(FileInputStream fis = new FileInputStream(jsonFile)) {
+        try (FileInputStream fis = new FileInputStream(jsonFile)) {
             JsonNode node = om.readTree(fis);
             Assert.assertEquals(node.getNodeType(), JsonNodeType.ARRAY);
             Assert.assertNotNull(node.get(0));
@@ -173,12 +182,30 @@ public class AvroUtilsUnitTestNG {
         }
     }
 
+    private Map<String, String> readCsvIntoMap(String filePath) throws IOException {
+        Map<String, String> map = new HashMap<>();
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
+        String attributeDiplayNames = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+        Scanner scanner = new Scanner(attributeDiplayNames);
+        while (scanner.hasNext()) {
+            String line = scanner.nextLine();
+            String[] values = line.split(",");
+            map.put(values[0], values[1]);
+        }
+        return map;
+    }
+
     @Test(groups = "unit")
     public void convertRecommendationsAvroToCSV() throws IOException {
-        URL avroUrl = ClassLoader.getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
+        URL avroUrl = ClassLoader
+                .getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
         File csvFile = File.createTempFile("RecommendationsTest_", ".csv");
 
-        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile, new RecommendationAvroToCsvTransformer());
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
+                new RecommendationAvroToCsvTransformer(
+                        readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv")));
 
         log.info("Created CSV File at: " + csvFile.getAbsolutePath());
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
@@ -195,8 +222,7 @@ public class AvroUtilsUnitTestNG {
 
     @DataProvider(name = "columnProvider")
     public Object[][] getColumnProvider() {
-        return new Object[][] {
-                { "", false }, //
+        return new Object[][] { { "", false }, //
                 { " ", false }, //
                 { "_", false }, //
                 { "^?", false }, //

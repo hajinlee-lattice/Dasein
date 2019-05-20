@@ -96,6 +96,16 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             return this;
         }
 
+        public Builder accountAttributeExportDiplayNames(Map<String, String> accountExportDisplayNames) {
+            exportFileGeneratorConf.setAccountDisplayNames(accountExportDisplayNames);
+            return this;
+        }
+
+        public Builder contactAttributeExportDiplayNames(Map<String, String> contactExportDisplayNames) {
+            exportFileGeneratorConf.setContactDisplayNames(contactExportDisplayNames);
+            return this;
+        }
+
         public PlayLaunchWorkflowConfiguration build() {
             configuration.add(initStepConf);
             configuration.add(exportFileGeneratorConf);

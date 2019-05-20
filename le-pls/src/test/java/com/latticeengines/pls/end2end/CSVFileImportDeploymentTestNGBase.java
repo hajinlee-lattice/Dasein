@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -195,5 +196,11 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         Assert.assertEquals(accountNode.get("ignored_rows").longValue(), ignored);
         Assert.assertEquals(accountNode.get("total_failed_rows").longValue(), failed);
         Assert.assertEquals(accountNode.get("imported_rows").longValue(), imported);
+    }
+
+    protected void verifyEaiJobDetail(EaiImportJobDetail detail, Long ignored, int processed) {
+        Assert.assertEquals(detail.getIgnoredRows(), ignored);
+        Assert.assertEquals(detail.getProcessedRecords(), processed);
+
     }
 }

@@ -56,7 +56,7 @@ public class HdfsPathBuilder {
     private static final String LATEST_FILE = "_LATEST_TIMESTAMP";
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
     private static final String COLLECTORS = "Collectors";
-    private static final String LEGACY_BODC_CONSOLIDATION = "MostRecent_BODC";
+    private static final String LEGACY_BODC_CONSOLIDATION = "MostRecent_Legacy";
 
     private static volatile String defaultPod = null;
 

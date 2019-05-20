@@ -13,6 +13,9 @@ public class FileProperty {
     @JsonProperty("file_size")
     private String fileSize;
 
+    @JsonProperty("byte_size")
+    private long byteSize;
+
     @JsonProperty("last_modified")
     private Date lastModified;
 
@@ -72,5 +75,13 @@ public class FileProperty {
     @JsonIgnore
     public void setDirectory(boolean directory) {
         isDirectory = directory;
+    }
+
+    public long getByteSize() {
+        return byteSize;
+    }
+
+    public void setByteSize(long byteSize) {
+        this.byteSize = byteSize;
     }
 }
