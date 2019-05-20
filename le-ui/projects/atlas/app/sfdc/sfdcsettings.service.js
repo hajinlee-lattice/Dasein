@@ -42,10 +42,14 @@ angular.module('lp.sfdc', [])
     this.getOrgs = function() {
         var deferred = $q.defer();
 
-        SfdcService.getOrgs().then(function(data) {
-            SfdcStore.setOrgs(data);
-            deferred.resolve(data);
-        });
+        if(this.orgs && this.orgs.length) {
+                deferred.resolve(this.orgs);
+        } else {
+            SfdcService.getOrgs().then(function(data) {
+                SfdcStore.setOrgs(data);
+                deferred.resolve(data);
+            });
+        }
 
         return deferred.promise;
     }
