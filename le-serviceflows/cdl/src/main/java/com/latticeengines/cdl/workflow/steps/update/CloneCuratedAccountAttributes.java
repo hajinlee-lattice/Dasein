@@ -12,8 +12,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 
-
-
 @Component("cloneCuratedAccountAttributes")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CloneCuratedAccountAttributes extends BaseCloneEntityStep<CuratedAccountAttributesStepConfiguration> {
@@ -21,7 +19,6 @@ public class CloneCuratedAccountAttributes extends BaseCloneEntityStep<CuratedAc
     @Override
     protected List<TableRoleInCollection> tablesToClone() {
         return Collections.emptyList();
-
     }
 
     @Override
