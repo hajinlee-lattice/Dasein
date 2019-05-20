@@ -36,7 +36,6 @@ public class AccountFileValidationService
         extends InputFileValidationService<AccountFileValidationConfiguration> {
 
 
-    private static final List<Character> invalidChars = Arrays.asList('/', '&');
     private static Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
 
     public AccountFileValidationService() {
