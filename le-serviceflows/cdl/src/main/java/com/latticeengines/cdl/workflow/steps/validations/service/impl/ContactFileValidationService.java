@@ -104,6 +104,7 @@ public class ContactFileValidationService
                                                 break;
                                             }
                                         }
+                                    }
                                     String email = getFieldValue(record, InterfaceName.Email.name());
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
                                     String lastName = getFieldValue(record, InterfaceName.LastName.name());
