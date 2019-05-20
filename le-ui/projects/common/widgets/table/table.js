@@ -73,6 +73,8 @@ export default class LeTable extends Component {
                     this.state.sortingName,
                     this.state.sortingDirection
                 );
+
+                console.log(newData);
                 this.setColumnsSorting();
                 this.setState({ data: newData, showLoading: false });
             }

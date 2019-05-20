@@ -226,7 +226,7 @@ export default class S3FileList extends Component {
                     sortable: true
                 },
                 {
-                    name: "lastModified",
+                    name: "last_modified",
                     displayName: "Time",
                     sortable: true
                 }
