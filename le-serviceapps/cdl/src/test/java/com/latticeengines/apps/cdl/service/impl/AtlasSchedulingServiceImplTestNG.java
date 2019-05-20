@@ -15,7 +15,7 @@ public class AtlasSchedulingServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private AtlasSchedulingService atlasSchedulingService;
 
-    private static final String DEFAULT_CRON = "0 0 22 ? * SUN *";
+    private static final String DEFAULT_CRON = "0 0 0 31 DEC ? 2099";
 
     @BeforeClass(groups = "functional")
     public void setup() {
