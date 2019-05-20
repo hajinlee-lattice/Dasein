@@ -66,7 +66,7 @@ public class DropBoxResource {
     }
 
     @GetMapping("/key")
-    @ApiOperation(value = "Refresh AWS access key to drop box, if the access was granted to a Lattice user")
+    @ApiOperation(value = "Get generated AWS access key to drop box, if the access was granted to a Lattice user")
     public GrantDropBoxAccessResponse getAccessKey(@PathVariable String customerSpace) {
         return dropBoxService.getAccessKey();
     }

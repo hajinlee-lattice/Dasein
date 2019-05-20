@@ -1,0 +1,10 @@
+Email,Contact Email
+Phone,Contact Phone No.
+Name,Contact Name
+Address,Contact address
+City,Contact City
+State,Contact State
+ZipCode,Contact Zip Code
+Country,Contact Country
+SfdcContactID,Contact SFDC ID
+ContactID,Contact ID
