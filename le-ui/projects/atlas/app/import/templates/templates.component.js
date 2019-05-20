@@ -29,7 +29,7 @@ import {
 import "./templates.scss";
 
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
+import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
 import messageService from "common/app/utilities/messaging-service";
 import Message, {
     NOTIFICATION
@@ -214,35 +214,63 @@ export default class TemplatesComponent extends Component {
             ImportStatus: newStatus,
             FeedType: dataItem.FeedType            
         }
+        let modalAction = newStatus == 'Pause' ? 'Pause' : 'Activate';
+        let modalTitle = newStatus == 'Pause' ? 'Pause Folder Syncing' : 'Activate Folder Syncing';
+        let modalBody = newStatus == 'Pause' ? 'Once you pause syncing, the data will STOP flow into the system.' : 'Once you activate syncing, the data will flow into the system automatically based on your current template mappings.';
+        let succesMessage = dataItem.ImportStatus == 'Pause' ? `Folder syncing is now activated for the ${dataItem.Object} template` : `Folder syncing is now paused for the ${dataItem.Object} template`;
 
-        httpService.put(
-            "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
-            postBody,
-            new Observer(
-                response => {
-                    if (response.getStatus() === SUCCESS) {
-                    
-                        let newTemplatesState = [...templates];
-                        let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
-                        updatedDataItem.ImportStatus = newStatus;
-                        this.setState({ data: newTemplatesState });
+        console.log(dataItem);
 
-                        messageService.sendMessage(
-                            new Message(
-                                null,
-                                NOTIFICATION,
-                                "success",
-                                "",
-                                "Status updated"
-                            )
-                        );
-                    }
-                },
-                error => {
-                    console.log("error");
-                }
-            )
-        );
+        let config = {
+            callback: (action) => {
+                httpService.put(
+                    "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
+                    postBody,
+                    new Observer(
+                        response => {
+                            if (response.getStatus() === SUCCESS) {
+                            
+                                modalActions.closeModal(store);
+
+                                messageService.sendMessage(
+                                    new Message(
+                                        null,
+                                        NOTIFICATION,
+                                        "success",
+                                        "",
+                                        succesMessage
+                                    )
+                                );
+
+                                let newTemplatesState = [...templates];
+                                let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
+                                updatedDataItem.ImportStatus = newStatus;
+                                this.setState({ data: newTemplatesState });
+
+                                
+                            }
+                        },
+                        error => {
+                            console.log("error");
+                        }
+                    )
+                );
+
+            },
+            template: () => {
+                return (<p>{modalBody}</p>)
+            },
+            title: () => {
+                return (<p>{modalTitle}</p>);
+            },
+            confirmLabel: modalAction,
+            oneButton: false,
+            hideFooter: false,
+            size: SMALL_SIZE
+        }
+        modalActions.info(store, config);
+
+        
     }
 
     getConfig() {
