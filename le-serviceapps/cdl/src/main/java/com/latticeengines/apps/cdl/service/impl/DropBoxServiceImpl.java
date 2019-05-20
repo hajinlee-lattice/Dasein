@@ -403,6 +403,7 @@ public class DropBoxServiceImpl implements DropBoxService {
             }
             FileProperty fileProperty = new FileProperty();
             fileProperty.setFileName(fileName);
+            fileProperty.setByteSize(summary.getSize());
             fileProperty.setFileSize(BitTransferUtils.formatSize(summary.getSize()));
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());
