@@ -70,32 +70,33 @@ export default class S3FileList extends Component {
         state.forceReload = true;
 
         let ImportWizardStore = this.ImportWizardStore;
-        let feedType = ImportWizardStore.getFeedType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
         
         let angularGoTo = '';
         let angularBack = '';
-        switch (feedType) {
-            case "DefaultSystem_AccountData": {
+        switch (templateType) {
+            case "Accounts": {
                 angularGoTo = 'home.import.data.accounts.ids';
                 angularBack = 'home.import.entry.accounts';
                 break;
             }
-            case "DefaultSystem_ContactData": {
+            case "Contacts": {
                 angularGoTo = 'home.import.data.contacts.ids';
                 angularBack = 'home.import.entry.contacts';
                 break;
             }
-            case "DefaultSystem_TransactionData": {
+            case "Product Purchases": {
                 angularGoTo = 'home.import.data.productpurchases.ids';
                 angularBack = 'home.import.entry.productpurchases';
                 break;
             }
-            case "DefaultSystem_ProductBundle": {
+            case "Product Bundles": {
                 angularGoTo = 'home.import.data.productbundles.ids';
                 angularBack = 'home.import.entry.productbundles';
                 break;
             }
-            case "DefaultSystem_ProductHierarchy": {
+            case "Product Hierarchy": {
                 angularGoTo = 'home.import.data.producthierarchy.ids';
                 angularBack = 'home.import.entry.producthierarchy';
                 break;
@@ -170,11 +171,13 @@ export default class S3FileList extends Component {
 
     getFilesFromFolder = (folder) => {
         let ImportWizardStore = this.ImportWizardStore;
-        let entityType = ImportWizardStore.getEntityType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
+
         let state = Object.assign({}, this.state);
         state.breadcrumbs = [
             {
-                "label": `${entityType} Data`
+                "label": `${templateType} Data`
             },
             {
                 "label": folder
@@ -188,7 +191,7 @@ export default class S3FileList extends Component {
             s3actions.fetchS3Files(path);
             state.breadcrumbs = [
                 {
-                    "label": `${entityType} Data`
+                    "label": `${templateType} Data`
                 }
             ];
         } else {
@@ -226,7 +229,7 @@ export default class S3FileList extends Component {
                     sortable: true
                 },
                 {
-                    name: "last_modified",
+                    name: "lastModified",
                     displayName: "Time",
                     sortable: true
                 }
