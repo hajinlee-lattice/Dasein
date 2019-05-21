@@ -85,6 +85,8 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
                     // Add to Global CSV Rows List
                     csvRowsForRecord.add(csvRow.toArray(new String[0]));
                 }
+            } else {
+                csvRowsForRecord.add(accountValues.toArray(new String[0]));
             }
             return csvRowsForRecord;
         };
