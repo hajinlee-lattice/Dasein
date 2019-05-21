@@ -191,13 +191,9 @@ public class PlayResource {
         if (playLaunchChannel == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch channel object is null" });
         }
-        if (playLaunchChannel.getPlayLaunch() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot create a Play launch Channel without play launch id" });
-        }
         if (playLaunchChannel.getLookupIdMap() == null) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot create a Play launch Channel without lookupIdMap id" });
+                    new String[] { "Cannot create a Play launch Channel without a lookupIdMap object" });
         }
         if (playLaunchChannelService.findByPlayNameAndLookupIdMapId(playName,
                 playLaunchChannel.getLookupIdMap().getId()) != null) {
@@ -208,7 +204,24 @@ public class PlayResource {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
+        PlayLaunch playLaunch = playLaunchChannel.getPlayLaunch();
+        if (playLaunch == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot create a Play launch Channel without a play launch object" });
+        }
+        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Play Launch within Channel needs Destination Org and Destination System" });
+        }
+
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
+        playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunch.setPlay(play);
+        playLaunchService.create(playLaunch);
+
         playLaunchChannel.setPlay(play);
+        playLaunchChannel.setPlayLaunch(playLaunch);
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         return playLaunchChannelService.create(playLaunchChannel);
@@ -240,7 +253,12 @@ public class PlayResource {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
+        PlayLaunch playLaunch = playLaunchChannel.getPlayLaunch();
+        playLaunch.setPlay(play);
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
         playLaunchChannel.setPlay(play);
+
         return playLaunchChannelService.update(playLaunchChannel);
     }
 
