@@ -30,7 +30,8 @@ public class ConsolidateCollectionSemrushFlow extends ConsolidateCollectionFlow 
 
     private Node removeUnusedField(Node node) {
         List<String> fields = node.getFieldNames();
-        fields.removeAll(Arrays.asList("LEInternalID", "LEParentInternalID", "Creation_Date", "Last_Modification_Date"));
+        fields.removeAll(Arrays.asList("LEInternalID", "LEParentInternalID", "WebPageUrl", "Creation_Date",
+                "Last_Modification_Date"));
 
         return node.retain(new FieldList(fields));
     }
@@ -43,8 +44,7 @@ public class ConsolidateCollectionSemrushFlow extends ConsolidateCollectionFlow 
         //combine legacy bw consolidated result
         if (parameters.getBaseTables().size() == 2) {
 
-            Node legacy = addSource(parameters.getBaseTables().get(1));
-            legacy = addWebPageUrlField(legacy).retain(input.getFieldNamesArray());
+            Node legacy = addSource(parameters.getBaseTables().get(1)).retain(input.getFieldNamesArray());
 
             input = input.merge(legacy);
 
