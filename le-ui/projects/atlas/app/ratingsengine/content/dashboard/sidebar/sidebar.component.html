@@ -7,6 +7,7 @@
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
         </a>
     </li>
+    
     <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
         <a ui-sref="home.ratingsengine.dashboard">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}">
