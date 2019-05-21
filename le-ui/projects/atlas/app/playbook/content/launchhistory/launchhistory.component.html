@@ -122,6 +122,9 @@
                                 'fa fa-sort-desc': vm.sortBy === 'accountsErrored' && vm.sortDesc, 
                                 'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
+                    <th ng-if="!vm.allPlaysHistory">
+                        Duplicates
+                   </th>
     				<th>
                         Accounts
                    </th>
@@ -152,6 +155,10 @@
                         <span ng-if="!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.errorFile"> {{vm.getErrors(launch) | number}} </span>
                         
                         <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'PartialSync' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile" style="color: #D0242F">{{vm.getErrors(launch) | number}}</a>
+                    </td>
+                    <td class="blue-text" ng-if="!vm.allPlaysHistory">
+                        <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.accountsDuplicated | number}} </span>
+                        <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactsDuplicated | number}}</span>
                     </td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
                     <td class="green-text">
