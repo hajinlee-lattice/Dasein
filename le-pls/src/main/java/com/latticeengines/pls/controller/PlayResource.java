@@ -216,7 +216,7 @@ public class PlayResource {
 
     @RequestMapping(value = "/{playName}/channels", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "For the given play, get a map between each system org and their most recent play launch")
+    @ApiOperation(value = "For the given play, get a list of play launch channels")
     public List<PlayLaunchChannel> getPlayLaunchChannels(@PathVariable("playName") String playName, //
             @RequestParam(value = "include-unlaunched-channels", required = false, defaultValue = "false") Boolean includeUnlaunchedChannels) {
         Tenant tenant = MultiTenantContext.getTenant();
