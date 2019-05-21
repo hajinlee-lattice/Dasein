@@ -13,53 +13,56 @@
 
 </label>
 
-<div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
-    <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
-      {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}
-    </span>
+<div class="uploadContainer">
     
-    <div 
-        class="progress processing" 
-        ng-show="vm_uploader.showCompressingBar()" 
-        ng-style="{ width: vm_uploader.compress_percent + '%' }">
-      <span><span></span></span>
+    <div class="fileUpload" ng-class="{ 'required': vm_uploader.fileRequired == 'true' }">
+        <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
+          {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}
+        </span>
+        <span ng-show="vm_uploader.showFileDisplayName()" class="filename text-ellipsis" title="{{vm_uploader.selectedFileDisplayName}}">
+          {{vm_uploader.selectedFileDisplayName}}
+        </span>
+
+        <div 
+            class="progress-bar processing" 
+            ng-show="vm_uploader.showCompressingBar()" 
+            ng-style="{ width: vm_uploader.compress_percent + '%' }">
+          <span><span></span></span>
+        </div>
+        <div 
+            class="progress-bar uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" 
+            ng-show="vm_uploader.showUploadingBar()" 
+            ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}">
+          <span><span></span></span>
+        </div>
+        
+        <i class="fa fa-file-text" ng-if="vm_uploader.showFileIcon()"></i>
+        <i class="fa fa-spinner fa-pulse" ng-if="vm_uploader.showSpinnerIcon()"></i>
+        <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCancelIcon()"></i>
+        <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
+
+        <input 
+            type="file"
+            accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
+            id="{{ vm_uploader_container.inputName }}"
+            name="{{ vm_uploader_container.inputName }}"
+            class="upload"
+            onclick="this.value = null"
+            ng-hide="vm_uploader.uploading"
+            ng-model="vm_uploader.selectedFileName"
+            ng-required="{{vm_uploader.fileRequired}}"
+            ng-disabled="vm_uploader.inputDisabled"
+            file-uploader="vm_uploader.selectedFile" />
+
+        <p class="help-block">
+          {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}
+        </p>
+        <p class="uploader-message">
+          {{vm_uploader.message}}
+          <span class="pull-right">
+            {{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}
+          </span>
+        </p>
     </div>
-    <div 
-        class="progress uploading {{vm_uploader.uploaded ? 'finished' : 'animate'}}" 
-        ng-show="vm_uploader.showUploadingBar()" 
-        ng-style="{width: (vm_uploader.uploaded ? '100' : vm_uploader.upload_percent) + '%'}">
-      <span><span></span></span>
-    </div>
-    
-    <span ng-show="vm_uploader.showFileDisplayName()">
-      {{vm_uploader.selectedFileDisplayName}}
-    </span>
-    
-    <input 
-        type="file"
-        accept="{{ vm_uploader.fileAccept ? vm_uploader.fileAccept : '.csv' }}"
-        id="uploadBtn"
-        name="{{ vm_uploader_container.inputName }}"
-        class="upload"
-        onclick="this.value = null"
-        ng-hide="vm_uploader.uploading"
-        ng-model="vm_uploader.selectedFileName"
-        ng-required="{{vm_uploader.fileRequired}}"
-        ng-disabled="vm_uploader.inputDisabled"
-        file-uploader="vm_uploader.selectedFile" />
-    
-    <i class="fa fa-file-text" ng-if="vm_uploader.showFileIcon()"></i>
-    <i class="fa fa-spinner fa-pulse" ng-if="vm_uploader.showSpinnerIcon()"></i>
-    <i class="fa fa-close" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCancelIcon()"></i>
-    <i class="fa fa-check" ng-click="vm_uploader.cancel()" ng-if="vm_uploader.showCheckIcon()"></i>
 </div>
 
-<p class="help-block">
-  {{ vm.ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE') }}
-</p>
-<p class="uploader-message">
-  {{vm_uploader.message}}
-  <span class="pull-right">
-    {{ vm_uploader.percentage ? vm_uploader.percentage + '%' : '' }}
-  </span>
-</p>

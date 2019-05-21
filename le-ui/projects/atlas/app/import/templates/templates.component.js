@@ -63,8 +63,7 @@ export default class TemplatesComponent extends Component {
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
 
-        console.log(response);
-
+        console.log(response.type);
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
@@ -219,42 +218,46 @@ export default class TemplatesComponent extends Component {
         let modalBody = newStatus == 'Pause' ? 'Once you pause syncing, the data will STOP flow into the system.' : 'Once you activate syncing, the data will flow into the system automatically based on your current template mappings.';
         let succesMessage = dataItem.ImportStatus == 'Pause' ? `Folder syncing is now activated for the ${dataItem.Object} template` : `Folder syncing is now paused for the ${dataItem.Object} template`;
 
-        console.log(dataItem);
-
         let config = {
             callback: (action) => {
-                httpService.put(
-                    "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
-                    postBody,
-                    new Observer(
-                        response => {
-                            if (response.getStatus() === SUCCESS) {
-                            
-                                modalActions.closeModal(store);
 
-                                messageService.sendMessage(
-                                    new Message(
-                                        null,
-                                        NOTIFICATION,
-                                        "success",
-                                        "",
-                                        succesMessage
-                                    )
-                                );
-
-                                let newTemplatesState = [...templates];
-                                let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
-                                updatedDataItem.ImportStatus = newStatus;
-                                this.setState({ data: newTemplatesState });
-
+                console.log(action);
+                if (action == 'close') {
+                    modalActions.closeModal(store);
+                } else {
+                    httpService.put(
+                        "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
+                        postBody,
+                        new Observer(
+                            response => {
+                                if (response.getStatus() === SUCCESS) {
                                 
+                                    modalActions.closeModal(store);
+
+                                    messageService.sendMessage(
+                                        new Message(
+                                            null,
+                                            NOTIFICATION,
+                                            "success",
+                                            "",
+                                            succesMessage
+                                        )
+                                    );
+
+                                    let newTemplatesState = [...templates];
+                                    let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
+                                    updatedDataItem.ImportStatus = newStatus;
+                                    this.setState({ data: newTemplatesState });
+
+                                    
+                                }
+                            },
+                            error => {
+                                console.log("error");
                             }
-                        },
-                        error => {
-                            console.log("error");
-                        }
-                    )
-                );
+                        )
+                    );
+                }
 
             },
             template: () => {
