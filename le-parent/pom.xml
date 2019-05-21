@@ -70,9 +70,9 @@
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.0</spark.version>
         <scala.version>2.11.12</scala.version>
-        <jackson.dataformat.version>2.9.6</jackson.dataformat.version>
-        <jackson.fasterxml.version>2.9.6</jackson.fasterxml.version>
-        <jackson.module.version>2.9.6</jackson.module.version>
+        <jackson.dataformat.version>2.9.8</jackson.dataformat.version>
+        <jackson.fasterxml.version>2.9.8</jackson.fasterxml.version>
+        <jackson.module.version>2.9.8</jackson.module.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibnerate.types52.version>2.0.0</hibnerate.types52.version>
         <hibernate.version>5.3.7.Final</hibernate.version>
