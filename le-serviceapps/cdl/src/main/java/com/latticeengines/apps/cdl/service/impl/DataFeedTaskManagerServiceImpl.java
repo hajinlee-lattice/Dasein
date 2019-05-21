@@ -263,7 +263,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
-            throw new RuntimeException("This source file %s can not auto import!");
+            throw new RuntimeException(String.format("This source file %s can not auto import!",
+                    csvImportFileInfo.getReportFileDisplayName()));
         }
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
