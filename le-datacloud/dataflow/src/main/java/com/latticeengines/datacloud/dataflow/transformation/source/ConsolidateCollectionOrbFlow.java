@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation.source;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,15 @@ public class ConsolidateCollectionOrbFlow extends ConsolidateCollectionFlow {
         return node.renameBooleanField(booleanField, BooleanType.Y_N);
     }
 
+    private Node removeUnusedFields(Node src) {
+
+        List<String> fields = src.getFieldNames();
+        fields.removeAll(Arrays.asList("LEInternalID", "LEParentInternalID"));
+
+        return src.retain(new FieldList(fields));
+
+    }
+
     @Override
     protected Node postRecentTransform(Node src, ConsolidateCollectionParameters parameters) {
         src = src.apply(
@@ -137,6 +147,8 @@ public class ConsolidateCollectionOrbFlow extends ConsolidateCollectionFlow {
         src = addUrlExistsField(src, "GooglePlus_Url");
         src = addUrlExistsField(src, "LinkedIn_Url");
         src = addUrlExistsField(src, "Twitter_Url");
+
+        src = removeUnusedFields(src);
 
         if (parameters.getBaseTables().size() == 2) {
 

@@ -1,17 +1,26 @@
 package com.latticeengines.datacloud.dataflow.transformation.source;
 
+import java.util.Arrays;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 
 @Component(ConsolidateCollectionBWFlow.BEAN_NAME)
 public class ConsolidateCollectionBWFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionBWFlow";
 
+    private Node renameTimestampField(Node node) {
+        return node.rename(new FieldList(Arrays.asList("CollectedAt")),
+                new FieldList(Arrays.asList("LE_Last_Upload_Date")));
+    }
+
     @Override
     public Node construct(ConsolidateCollectionParameters parameters) {
         Node input = addSource(parameters.getBaseTables().get(0));
+        input = renameTimestampField(input);
 
         //combine legacy bw consolidated result
         if (parameters.getBaseTables().size() == 2) {
