@@ -205,13 +205,25 @@ public class AvroUtilsUnitTestNG {
         AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
                 new RecommendationAvroToCsvTransformer(
                         readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
-                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv")));
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv"), true));
 
         log.info("Created CSV File at: " + csvFile.getAbsolutePath());
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             List<String[]> csvRows = reader.readAll();
             log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
             assertEquals(csvRows.size(), 15);
+        }
+
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
+                new RecommendationAvroToCsvTransformer(
+                        readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv"), false));
+
+        log.info("Created CSV File at: " + csvFile.getAbsolutePath());
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            assertEquals(csvRows.size(), 24);
         }
     }
 
