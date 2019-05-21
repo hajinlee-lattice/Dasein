@@ -3,7 +3,6 @@ package com.latticeengines.auth.exposed.dao.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Table;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
@@ -118,7 +117,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
     public Boolean deleteByUserId(Long userId) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
-        String sqlStr = String.format("delete from %s where User_ID = %d", entityClz.getAnnotation(Table.class).name(), userId);
+        String sqlStr = String.format("delete from %s where User_ID = %d", entityClz.getSimpleName(), userId);
         Query<?> query = session.createQuery(sqlStr);
         query.executeUpdate();
         return true;
