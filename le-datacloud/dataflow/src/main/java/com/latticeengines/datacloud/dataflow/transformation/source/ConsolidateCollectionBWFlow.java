@@ -13,19 +13,19 @@ public class ConsolidateCollectionBWFlow extends ConsolidateCollectionFlow {
     public static final String BEAN_NAME = "consolidateCollectionBWFlow";
 
     private Node renameTimestampField(Node node) {
-        return node.rename(new FieldList(Arrays.asList("CollectedAt")),
-                new FieldList(Arrays.asList("LE_Last_Upload_Date")));
+        return node.rename(new FieldList(Arrays.asList("LE_Last_Upload_Date")),
+                new FieldList(Arrays.asList("CollectedAt")));
     }
 
     @Override
     public Node construct(ConsolidateCollectionParameters parameters) {
         Node input = addSource(parameters.getBaseTables().get(0));
-        input = renameTimestampField(input);
 
         //combine legacy bw consolidated result
         if (parameters.getBaseTables().size() == 2) {
 
-            Node legacy = addSource(parameters.getBaseTables().get(1)).retain(input.getFieldNamesArray());
+            Node legacy = addSource(parameters.getBaseTables().get(1));
+            legacy = renameTimestampField(legacy).retain(input.getFieldNamesArray());
 
             input = input.merge(legacy);
 
