@@ -82,7 +82,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             exporters.add(exporter);
         });
 
-        int threadPoolSize = Math.min(4, configs.size());
+        int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
     }
