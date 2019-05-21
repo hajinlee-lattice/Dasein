@@ -85,9 +85,25 @@ public class ContactFileValidationService
                                 dataFileWriter.create(schema, new File(avrofileName));
                                 // iterate through record in avro file
                                 for (GenericRecord record : reader) {
+                                    boolean rowError = false;
                                     String id = getFieldValue(record, InterfaceName.ContactId.name());
                                     if (StringUtils.isBlank(id)) {
                                         id = getFieldValue(record, InterfaceName.Id.name());
+                                    } else {
+                                        for (Character c : invalidChars) {
+                                            if (id.indexOf(c) != -1) {
+                                                String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                                String message = String.format(
+                                                        "Invalid contact id is found due to %s in %s.", c.toString(),
+                                                        id);
+                                                csvFilePrinter.printRecord(lineId, "", message);
+                                                rowError = true;
+                                                fileError = true;
+                                                errorInPath++;
+                                                errorLine++;
+                                                break;
+                                            }
+                                        }
                                     }
                                     String email = getFieldValue(record, InterfaceName.Email.name());
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
@@ -99,12 +115,15 @@ public class ContactFileValidationService
                                         String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                         String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
                                         csvFilePrinter.printRecord(lineId, "", message);
+                                        rowError = true;
                                         fileError = true;
                                         errorInPath++;
                                         errorLine++;
                                         continue;
                                     }
-                                    dataFileWriter.append(record);
+                                    if (!rowError) {
+                                        dataFileWriter.append(record);
+                                    }
                                 }
                             }
 
