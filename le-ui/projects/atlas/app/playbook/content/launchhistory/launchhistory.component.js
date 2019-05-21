@@ -261,5 +261,18 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         return destinationSysName == AWS_S3;
     }
 
+    vm.isAccountBasedLaunch = function(launchSummary) {
+        var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
+        switch (destinationSysName) {
+            case MARKETO:
+            case AWS_S3:
+                return false;
+            case SALESFORCE:
+            case ELOQUA:
+            default: 
+                return true;
+        }
+    }
+
     vm.init();
 });
