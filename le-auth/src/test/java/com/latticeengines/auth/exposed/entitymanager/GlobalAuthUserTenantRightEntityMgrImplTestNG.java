@@ -53,11 +53,14 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
 
         rights = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
         Assert.assertEquals(rights.size(), 2);
-
-        gaUserEntityMgr.delete(user);
-        gaTenantEntityMgr.delete(tenant);
+        Boolean delete = globalAuthUserTenantRightEntityMgr.deleteByUserId(user.getPid());
+        Assert.assertTrue(delete);
         rights = globalAuthUserTenantRightEntityMgr.findByUserIdAndTenantId(user.getPid(), tenant.getPid());
         Assert.assertNull(rights);
+        gaUserEntityMgr.delete(user);
+        gaTenantEntityMgr.delete(tenant);
+
 
     }
+
 }
