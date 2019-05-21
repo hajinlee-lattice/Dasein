@@ -176,7 +176,7 @@ public class SourceFileServiceImpl implements SourceFileService {
             file.setPartialFile(true);
 
             long spendTime = System.currentTimeMillis();
-            long fileRows = HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream,
+            long fileRows = HdfsUtils.copyCSVStreamToHdfs(yarnConfiguration, inputStream,
                     outputPath + "/" + outputFileName, 100);
             log.info("Copy File time: " + (System.currentTimeMillis() - spendTime) / 1000f
                     + " second");

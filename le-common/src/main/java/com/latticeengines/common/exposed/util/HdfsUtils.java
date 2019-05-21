@@ -683,7 +683,7 @@ public class HdfsUtils {
         }
     }
 
-    public static long copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath,
+    public static long copyCSVStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath,
                                              long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
@@ -693,7 +693,7 @@ public class HdfsUtils {
                                 ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
                                 ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
                     try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
-                            CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
+                            LECSVFormat.format.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                         Iterator<CSVRecord> iterator = parser.iterator();
                         long rows = 0;
                         while (iterator.hasNext()) {
