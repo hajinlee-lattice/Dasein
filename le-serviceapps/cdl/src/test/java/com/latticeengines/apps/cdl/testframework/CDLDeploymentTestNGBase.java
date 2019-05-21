@@ -142,6 +142,20 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         checkpointService.setMainTestTenant(mainTestTenant);
     }
 
+    protected void setupTestEnvironmentWithTenantId(String tenantId) {
+        if (StringUtils.isEmpty(tenantId)) {
+            testBed.bootstrapForProduct(LatticeProduct.CG);
+        } else {
+            testBed.bootstrapForProduct(tenantId, LatticeProduct.CG);
+        }
+        mainTestTenant = testBed.getMainTestTenant();
+        mainCustomerSpace = mainTestTenant.getId();
+        MultiTenantContext.setTenant(mainTestTenant);
+        testBed.switchToSuperAdmin();
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        checkpointService.setMainTestTenant(mainTestTenant);
+    }
+
     protected void setupTestEnvironmentByFile(String jsonFileName) {
         if(!StringUtils.isEmpty(jsonFileName)) {
             testBed.bootstrapForProduct(LatticeProduct.CG, jsonFileName);

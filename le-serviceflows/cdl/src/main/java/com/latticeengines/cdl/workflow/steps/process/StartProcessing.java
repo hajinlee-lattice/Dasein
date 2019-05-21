@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,6 +144,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
+
+        String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
+        log.info("tenantName is :" + tenantName);
+        if (tenantName.equalsIgnoreCase("JoyTestWarning")) {
+            List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
+            if (CollectionUtils.isEmpty(warningMessages)) {
+                warningMessages = new LinkedList<>();
+            }
+            warningMessages.add("this warning message from tenant JoyTestWarning, just for testing.");
+            putObjectInContext(PROCESS_ANALYTICS_WARNING_KEY, warningMessages);
+        }
 
         if (!hasKeyInContext(FULL_REMATCH_PA)) {
             boolean fullRematch = Boolean.TRUE.equals(configuration.isFullRematch());
