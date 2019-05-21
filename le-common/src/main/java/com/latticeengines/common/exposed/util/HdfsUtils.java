@@ -10,8 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -21,6 +23,10 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
@@ -42,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
+
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 
 public class HdfsUtils {
 
@@ -671,6 +679,34 @@ public class HdfsUtils {
                         new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
                                 ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                         outputStream, totalRows);
+            }
+        }
+    }
+
+    public static long copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath,
+                                             long totalRows) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
+                try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
+                                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                                ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
+                    try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
+                            CSVFormat.DEFAULT.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
+                        Iterator<CSVRecord> iterator = parser.iterator();
+                        long rows = 0;
+                        while (iterator.hasNext()) {
+                            CSVRecord item = iterator.next();
+                            csvPrinter.printRecord(item);
+                            rows++;
+                            if (item.getRecordNumber() > totalRows) {
+                                break;
+                            }
+                        }
+                        return rows;
+                    }
+                }
             }
         }
     }

@@ -175,8 +175,12 @@ public class SourceFileServiceImpl implements SourceFileService {
             file.setDisplayName(fileProperty.getFileName());
             file.setPartialFile(true);
 
-            long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
+            long spendTime = System.currentTimeMillis();
+            long fileRows = HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream,
                     outputPath + "/" + outputFileName, 100);
+            log.info("Copy File time: " + (System.currentTimeMillis() - spendTime) / 1000f
+                    + " second");
+
             log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
             file.setFileRows(fileRows);
             sourceFileEntityMgr.create(file);
