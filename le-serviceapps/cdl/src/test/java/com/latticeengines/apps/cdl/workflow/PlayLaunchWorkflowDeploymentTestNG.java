@@ -146,6 +146,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertNotNull(s3Objects);
         assertEquals(s3Objects.size(), 2);
         assertTrue(s3Objects.get(0).getKey().contains("Recommendations"));
+        // 426 rows
 
         boolean csvFileExists = false, jsonFileExists = false;
         for (S3ObjectSummary s3Obj : s3Objects) {
@@ -204,7 +205,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertEquals(s3Objects.size(), 2);
         assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getDisplayName()));
         assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getName()));
-
+        // 392 rows
         boolean csvFileExists = false, jsonFileExists = false;
         for (S3ObjectSummary s3Obj : s3Objects) {
             if (s3Obj.getKey().contains(".csv")) {

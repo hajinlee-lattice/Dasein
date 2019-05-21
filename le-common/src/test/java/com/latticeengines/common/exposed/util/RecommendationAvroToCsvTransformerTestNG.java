@@ -41,7 +41,7 @@ public class RecommendationAvroToCsvTransformerTestNG {
     @Test(groups = "unit")
     public void testExportFields() {
         RecommendationAvroToCsvTransformer transformer = new RecommendationAvroToCsvTransformer(accountDisplayNames,
-                contactDisplayNames);
+                contactDisplayNames, false);
 
         List<String> fields = transformer.getFieldNames(schema);
         Assert.assertEquals(fields.size(), 26);

@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
@@ -80,7 +81,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
             AvroUtils.convertAvroToCSV(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
                     new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
-                            config.getContactDisplayNames()));
+                            config.getContactDisplayNames(),
+                            config.getDestinationSysType() == CDLExternalSystemType.MAP));
         }
 
         @Override
