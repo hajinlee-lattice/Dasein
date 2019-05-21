@@ -71,17 +71,20 @@ angular.module('lp.import.wizard.accountids', [])
                 }
             });
         }
+        vm.AvailableFields = vm.AvailableFields.filter(function(item) {
+            return (item.userField);
+        });
     };
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
-            if(mapping[i]) {
+            if(mapping[i] || mapping[i] === "") { // yes yes, don't worry about it
                 var key = i,
                     userField = mapping[key],
                     map = {
-                        userField: userField, 
+                        userField: userField, //(userField === 'unmapToNull' ? null : userField), 
                         mappedField: vm.mappedFieldMap[key],
                         // removing the following 3 lines makes it update instead of append
                         originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),

@@ -61,13 +61,16 @@ angular.module('lp.import.wizard.contactids', [])
                 }
             });
         }
+        vm.AvailableFields = vm.AvailableFields.filter(function(item) {
+            return (item.userField);
+        });
     };
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
-            if(mapping[i]) {
+            if(mapping[i] || mapping[i] === "") {
                 var key = i,
                     userField = mapping[key],
                     map = {

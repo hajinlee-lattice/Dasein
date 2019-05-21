@@ -250,7 +250,6 @@ angular
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
-                        console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -596,7 +595,7 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Email', displayName: '' },
+                        // { name: 'Email', displayName: '' },
                         { name: 'Website', displayName: '' },
                         { name: 'CompanyName', displayName: 'Company Name' },
                         { name: 'DUNS', displayName: '' },
