@@ -31,6 +31,8 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
     private Map<String, String> contactDisplayNames;
     private boolean ignoreAccountsWithoutContacts;
 
+    private final String defaultContactFieldPrefix = "CONTACT:";
+
     public RecommendationAvroToCsvTransformer(Map<String, String> accountDisplayNames,
             Map<String, String> contactDisplayNames, boolean ignoreAccountsWithoutContacts) {
         this.accountDisplayNames = MapUtils.isNotEmpty(accountDisplayNames) ? accountDisplayNames : new HashMap<>();
@@ -56,7 +58,7 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
                 .filter(f -> MapUtils.isEmpty(contactDisplayNames) || contactDisplayNames.containsKey(f))
                 .collect(Collectors.toList());
 
-        contactFields.forEach(f -> fieldNames.add(contactDisplayNames.getOrDefault(f, f)));
+        contactFields.forEach(f -> fieldNames.add(contactDisplayNames.getOrDefault(f, defaultContactFieldPrefix + f)));
 
         log.info("Fields: " + String.join(", ", fieldNames));
         return fieldNames;

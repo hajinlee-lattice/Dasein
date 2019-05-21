@@ -588,14 +588,14 @@ angular.module('lp.import')
         var formerState = state.substring(0, period);
         return formerState;
     }
-    this.saveDocumentFields = function(state){
-        // //console.log('Saved OBJ ', this.saveObjects);
+    this.saveDocumentFields = function(state) {
+        //console.log('Saved OBJ ', this.saveObjects);
         if(this.saveObjects[state]){
             var copy = this.getSavedDocumentCopy(getFormerState(state));// this.getFieldDocument(true).fieldMappings;
             copy = ImportUtils.updateDocumentMapping(ImportWizardStore.getEntityType(), this.saveObjects[state], copy);
             if(copy){
                 this.fieldDocumentSaved[state] = copy;
-                ////console.log('OBJECT SAVED ', copy);
+                //console.log('OBJECT SAVED (if)', copy);
             }
         }else{
             var period = state.lastIndexOf('.');
@@ -603,7 +603,7 @@ angular.module('lp.import')
             var copyDoc = this.getSavedDocumentCopy(formerState);
             if(copyDoc){
                 this.fieldDocumentSaved[state] = copyDoc;
-                ////console.log('OBJECT SAVED ', copyDoc);
+                //console.log('OBJECT SAVED (else)', copyDoc);
             }
         }
     };
