@@ -258,6 +258,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         errors.addAll(PatchBookUtils.validateDuplicateMatchKey(books));
         errors.addAll(validatePatchKeyItemAndStandardize(books, dataCloudVersion));
         errors.addAll(validateSourceAttribute(books, dataCloudVersion));
+        errors.addAll(validateConflictInPatchItems(books, dataCloudVersion));
         return errors;
     }
 
