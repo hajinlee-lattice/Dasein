@@ -177,7 +177,6 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         AMCleanerConfig conf = new AMCleanerConfig();
         String maxDataCloudVersion = srcAttrEntityMgr.getMaxDataCloudVersion(
                 AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME);
-        System.out.println("###max data cloud verson : " + maxDataCloudVersion);
         conf.setDataCloudVersion(maxDataCloudVersion);
         conf.setIsMini(true);
         return JsonUtils.serialize(conf);
