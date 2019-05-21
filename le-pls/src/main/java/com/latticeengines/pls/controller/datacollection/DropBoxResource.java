@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,6 +70,8 @@ public class DropBoxResource {
     private static final String GET_DROPBOX_WARNING_MSG = "<p>Credentials have already been granted.</p><p>Your Access Key is <strong>%s</strong></p><br>"
             + "<p>Are you sure you want to generate new credential? The existing key will expire immediately, and all admins will be notified.</p>";
 
+    private static final String UNAVAILABLE_SECRET_KEY_MESSAGE = "The secret key can be requested from your Administrator.";
+
     private ExecutorService tpForParallelStream = ThreadPoolUtils.getCachedThreadPool("dropbox-resource");
 
     @GetMapping("")
@@ -100,7 +103,9 @@ public class DropBoxResource {
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Info);
             uiAction.setMessage(String.format(GENERATE_DROPBOX_SUCCESS_MSG, response.getAccessKey(),
-                    response.getSecretKey(), response.getRegion(), response.getBucket(), response.getDropBox(),
+                    StringUtils.isBlank(response.getSecretKey()) ? UNAVAILABLE_SECRET_KEY_MESSAGE
+                            : response.getSecretKey(),
+                    response.getRegion(), response.getBucket(), response.getDropBox(),
                     MultiTenantContext.getShortTenantId(), MultiTenantContext.getEmailAddress()));
         } else {
             uiAction.setTitle(GET_DROPBOX_WARNING_TITLE);
@@ -146,7 +151,8 @@ public class DropBoxResource {
         uiAction.setView(View.Modal);
         uiAction.setStatus(Status.Info);
         uiAction.setMessage(String.format(GENERATE_DROPBOX_SUCCESS_MSG, response.getAccessKey(),
-                response.getSecretKey(), response.getRegion(), response.getBucket(), response.getDropBox(),
+                StringUtils.isBlank(response.getSecretKey()) ? UNAVAILABLE_SECRET_KEY_MESSAGE : response.getSecretKey(),
+                response.getRegion(), response.getBucket(), response.getDropBox(),
                 MultiTenantContext.getShortTenantId(), MultiTenantContext.getEmailAddress()));
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
@@ -163,7 +169,8 @@ public class DropBoxResource {
         uiAction.setTitle(GET_DROPBOX_SUCCESS_TITLE);
         uiAction.setView(View.Modal);
         uiAction.setStatus(Status.Info);
-        uiAction.setMessage(String.format(GET_DROPBOX_SUCCESS_MSG, response.getAccessKey(), response.getSecretKey(),
+        uiAction.setMessage(String.format(GET_DROPBOX_SUCCESS_MSG, response.getAccessKey(),
+                StringUtils.isBlank(response.getSecretKey()) ? UNAVAILABLE_SECRET_KEY_MESSAGE : response.getSecretKey(),
                 response.getRegion(), response.getBucket(), response.getDropBox(),
                 MultiTenantContext.getShortTenantId(), MultiTenantContext.getEmailAddress()));
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
