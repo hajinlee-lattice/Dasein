@@ -177,6 +177,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         AMCleanerConfig conf = new AMCleanerConfig();
         String maxDataCloudVersion = srcAttrEntityMgr.getMaxDataCloudVersion(
                 AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME);
+        System.out.println("###max data cloud verson : " + maxDataCloudVersion);
         conf.setDataCloudVersion(maxDataCloudVersion);
         conf.setIsMini(true);
         return JsonUtils.serialize(conf);
@@ -215,10 +216,45 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         Assert.assertEquals(rowNum, expectedData.length);
     }
 
-    private boolean verifyValueForAllRecords(Iterator<GenericRecord> records, Set<String> columns) {
+    private List<Object> verifySourceAttrs(GenericRecord record, List<Field> amfields,
+            Map<String, String> mapFieldType) {
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN,
+                AMCleaner.TRANSFORMER_NAME, "2.0.18", false);
+        int count = 0;
+        int countlatId = 0;
+        for (SourceAttribute srcAttr : srcAttrs) {
+            if (!srcAttr.getArguments().equals(("DROP"))) {
+                // counting total attributes retained
+                count++;
+                // verifying LatticeAccountId exists & verifying LatticeID exists
+                if (srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)
+                        || srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ID)) {
+                    countlatId++;
+                }
+
+                // verifying the presence of required attribute
+                if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
+                    Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
+                } else if (mapFieldType.containsKey(srcAttr.getAttribute())) {
+                    // verifying type of the argument
+                    Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
+                }
+            } else { // verifying columns which need to be dropped are really dropped
+                Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
+            }
+        }
+        List<Object> returnCount = new ArrayList<>();
+        returnCount.add(countlatId);
+        returnCount.add(count);
+        return returnCount;
+    }
+
+    private boolean verifyTargetSrcAvro(Iterator<GenericRecord> records, Set<String> columns) {
+        // check value of these attributes for all the records
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            // verifying LatticeAccountId exists with String type and value all populated
+            // verifying LatticeAccountId exists with String type and value all
+            // populated
             Object latticeAccId = record.get(DataCloudConstants.LATTICE_ACCOUNT_ID);
             Assert.assertTrue(latticeAccId instanceof String || latticeAccId instanceof Utf8);
             String strLatAccId = (latticeAccId == null) ? null : String.valueOf(latticeAccId);
@@ -259,34 +295,11 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             }
             mapFieldType.put(field.name(), schemaType);
         }
-        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN,
-                AMCleaner.TRANSFORMER_NAME, "2.0.18", false);
-        int count = 0;
-        int countlatId = 0;
-        for (SourceAttribute srcAttr : srcAttrs) {
-            if (!srcAttr.getArguments().equals(("DROP"))) {
-                // counting total attributes retained
-                count++;
-                // verifying LatticeAccountId exists & verifying LatticeID exists
-                if (srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)
-                        || srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ID)) {
-                    // check value of these attributes for all the records
-                    Assert.assertTrue(verifyValueForAllRecords(records, strAttrs));
-                    countlatId++;
-                }
-
-                // verifying the presence of required attribute
-                if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
-                    Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
-                } else if (mapFieldType.containsKey(srcAttr.getAttribute())) {
-                    // verifying type of the argument
-                    Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
-                }
-            } else { // verifying columns which need to be dropped are really dropped
-                Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
-            }
-        }
-        Assert.assertEquals(amfields.size(), count);
-        Assert.assertEquals(countlatId, 2); // verifying if both lattice account id and lattice id are present
+        // verifying srcAttrs field Data
+        List<Object> countVals = verifySourceAttrs(record, amfields, mapFieldType);
+        // verifying srcAttrs record Value Data
+        Assert.assertTrue(verifyTargetSrcAvro(records, strAttrs));
+        Assert.assertEquals(countVals.get(1), amfields.size());
+        Assert.assertEquals(countVals.get(0), 2); // verifying if both lattice account id and lattice id are present
     }
 }

@@ -54,8 +54,8 @@ public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public String getMaxDataCloudVersion(String sourceName, String stage,
-            String transformer) {
+    public String getMaxDataCloudVersion(String sourceName, String stage, String transformer) {
         return sourceAttributeDao.getMaxDataCloudVersion(sourceName, stage, transformer);
     }
+
 }

@@ -1,9 +1,6 @@
 package com.latticeengines.datacloud.core.dao.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -46,23 +43,26 @@ public class SourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
     }
 
     @Override
-    public String getMaxDataCloudVersion(String sourceName, String stage,
-            String transformer) {
+    public String getMaxDataCloudVersion(String sourceName, String stage, String transformer) {
         Session session = sessionFactory.getCurrentSession();
+        // 1. dataCloudVersion = "<majorVersion>.<minorVersion>"
+        // 2. SUBSTRING(dataCloudVersion, ...) to get minorVersion. Note that index start with 1 in HQL and we need to
+        //    increase one more to skip '.', so there is + 2 : we hard code it to 5 for now 
+        //    [E.g. : for 2.0.18 : (2.0) = 3 + 1 (.) + 1 (since index starts from 1)]
+        // 3. cast as int so that it is sorted correctly. E.g., 2.0.10 > 2.0.5
         String queryStr = String.format(
-                "from %s where Stage = :stage And Transformer = :transformer And Source = :source",
+                "select distinct dataCloudVersion from %s where Stage = :stage and Transformer = :transformer and Source = :source "
+                            + "order by CAST(SUBSTRING(dataCloudVersion, 5) as int) desc",
                 getEntityClass().getSimpleName());
-        Query<SourceAttribute> query = session.createQuery(queryStr, SourceAttribute.class);
+        Query<String> query = session.createQuery(queryStr, String.class);
         query.setParameter("stage", stage);
         query.setParameter("transformer", transformer);
         query.setParameter("source", sourceName);
-        Map<Integer, String> dataCloudVersions = new HashMap<>();
-        for (SourceAttribute srcAttr : (List<SourceAttribute>) query.list()) {
-            String dataCloudVersion = srcAttr.getDataCloudVersion();
-            dataCloudVersions.put(Integer.parseInt(dataCloudVersion.replace(".", "")),
-                    dataCloudVersion);
+        List<?> results = query.list();
+        if (results == null || results.isEmpty()) {
+            return null;
+        } else {
+            return (String) query.list().get(0);
         }
-        Integer maxVersionValue = Collections.max(dataCloudVersions.keySet());
-        return dataCloudVersions.get(maxVersionValue);
     }
 }

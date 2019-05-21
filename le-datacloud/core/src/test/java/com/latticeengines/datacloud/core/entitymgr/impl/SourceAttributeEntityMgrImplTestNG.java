@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,5 +31,14 @@ public class SourceAttributeEntityMgrImplTestNG extends DataCloudCoreFunctionalT
         saList = sourceAttributeEntityMgr.getAttributes("AMProfile", "SEGMENT", "SourceProfiler",
                 version.getVersion(), true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(saList));
+    }
+
+    @Test(groups = "functional")
+    public void testMaxDataCloudVersion() {
+        String maxDataCloudVersion = sourceAttributeEntityMgr.getMaxDataCloudVersion(
+                "AccountMaster", "CLEAN", "AMCleaner");
+        Assert.assertTrue(StringUtils.isNotEmpty(maxDataCloudVersion));
+        Assert.assertEquals(maxDataCloudVersion, "2.0.18");
+
     }
 }

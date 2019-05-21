@@ -11,6 +11,5 @@ public interface SourceAttributeDao extends BaseDao<SourceAttribute> {
 
     List<SourceAttribute> getAttributes(String sourceName, String stage, String transformer, String dataCloudVersion);
 
-    String getMaxDataCloudVersion(String sourceName, String stage,
-            String transformer);
+    String getMaxDataCloudVersion(String sourceName, String stage, String transformer);
 }
