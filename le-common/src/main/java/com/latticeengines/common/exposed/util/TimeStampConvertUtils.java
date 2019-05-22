@@ -521,23 +521,6 @@ public class TimeStampConvertUtils {
         return ZoneId.getAvailableZoneIds();
     }
 
-    /*
-     * using java 8, DateTimeFormatter wasn't working with 210 formats added,
-     * used SUPPORTED_DATE_TIME_FORMATTERS which is a list of formatters instead
-     */
-    public static LocalDate parseDateTime(String value) {
-        LocalDate dateTime = null;
-        for (java.time.format.DateTimeFormatter formatter : SUPPORTED_DATE_TIME_FORMATTERS) {
-            try {
-                dateTime = LocalDate.parse(value, formatter);
-            } catch (Exception e) {
-            }
-            if (dateTime != null) {
-                break;
-            }
-        }
-        return dateTime;
-    }
 
     public static String removeIso8601TandZFromDateTime(String dateTime) {
         Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);

@@ -580,18 +580,10 @@ public class MetadataResolver {
     @VisibleForTesting
     // Note that the returned data and time format are the user supported formats not the Java 8 formats.
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
-        for (String columnField : columnFields) {
-            if (StringUtils.isNotBlank(columnField)) {
-                TemporalAccessor dateTime = null;
-                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
-                dateTime = TimeStampConvertUtils.parseDateTime(columnField);
-                if (dateTime == null) {
-                    return false;
-                }
-            }
-        }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
-        if (result != null) {
+        if (result == null) {
+            return false;
+        } else {
             formatForDateAndTime.setLeft(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
             formatForDateAndTime.setRight(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
         }
@@ -603,10 +595,13 @@ public class MetadataResolver {
         List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
+        int nonConformingDate = 0;
         for (String columnField : columnFields) {
-            if (StringUtils.isNotBlank(columnField)) {
+            if (StringUtils.isBlank(columnField)) {
+                nonConformingDate++;
+            } else {
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
-
+                boolean isDate = false;
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;
@@ -617,7 +612,11 @@ public class MetadataResolver {
                     }
                     if (date != null) {
                         hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+                        isDate = true;
                     }
+                }
+                if (!isDate) {
+                    nonConformingDate++;
                 }
             }
         }
@@ -633,6 +632,11 @@ public class MetadataResolver {
                                 supportedDateTimeFormat.indexOf(entry2.getKey()))
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
+        int mostCommonDate = entries.get(0).getValue();
+        if (nonConformingDate > mostCommonDate) {
+            return null;
+        }
+
         // legal date time formats are delimited by space defined in
         // TimeStampConvertUtils
         int index = expectedFormat.indexOf(" ");
