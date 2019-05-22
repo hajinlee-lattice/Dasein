@@ -65,7 +65,7 @@ public class ConsolidateCollectionSemrushFlow extends ConsolidateCollectionFlow 
     @Override
     protected Node postRecentTransform(Node src, ConsolidateCollectionParameters parameters) {
         src = src.apply(
-                String.format("%s == 0 ? null : %s", FIELD_RANK, FIELD_RANK), new FieldList(
+                String.format("%s == null || %s == 0 ? null : %s", FIELD_RANK, FIELD_RANK, FIELD_RANK), new FieldList(
                         FIELD_RANK), new FieldMetadata(FIELD_RANK, Integer.class));
         return src;
     }
