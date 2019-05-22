@@ -683,7 +683,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         function getEnumValues(bucketRestriction) {
-            return bucketRestriction.bkt.Vals;
+            return bucketRestriction.bkt.Vals || [];
         }
 
         function getStringValue(bucketRestriction) {
