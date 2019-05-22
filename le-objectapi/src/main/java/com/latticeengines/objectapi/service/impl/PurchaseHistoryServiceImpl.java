@@ -188,9 +188,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             String query = MessageFormat.format(
                     "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
                             + "FROM {3} as ac " //
-                            + "WHERE ac.{0} IS NOT NULL and ac.{1} in" //
-                            + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?)" //
-                            + "GROUP BY ac.{0}" //
+                            + "WHERE ac.{0} IS NOT NULL and ac.{1} in " //
+                            + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?) " //
+                            + "GROUP BY ac.{0} " //
                             + "ORDER BY ac.{0}", //
                     InterfaceName.SpendAnalyticsSegment, // 0
                     InterfaceName.AccountId, // 1
