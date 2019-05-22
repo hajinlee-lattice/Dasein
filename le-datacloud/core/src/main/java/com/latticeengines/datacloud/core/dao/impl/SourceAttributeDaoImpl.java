@@ -43,7 +43,7 @@ public class SourceAttributeDaoImpl extends BaseDaoWithAssignedSessionFactoryImp
     }
 
     @Override
-    public String getMaxDataCloudVersion(String sourceName, String stage, String transformer) {
+    public String getLatestDataCloudVersion(String sourceName, String stage, String transformer) {
         Session session = sessionFactory.getCurrentSession();
         // 1. dataCloudVersion = "<majorVersion>.<minorVersion>"
         // 2. SUBSTRING(dataCloudVersion, ...) to get minorVersion. Note that index start with 1 in HQL and we need to

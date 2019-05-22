@@ -1,9 +1,12 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -34,11 +37,23 @@ public class SourceAttributeEntityMgrImplTestNG extends DataCloudCoreFunctionalT
     }
 
     @Test(groups = "functional")
-    public void testMaxDataCloudVersion() {
-        String maxDataCloudVersion = sourceAttributeEntityMgr.getMaxDataCloudVersion(
+    public void testLatestDataCloudVersion() {
+        // computing actual max datacloud version value
+        String maxDataCloudVersion = sourceAttributeEntityMgr.getLatestDataCloudVersion(
                 "AccountMaster", "CLEAN", "AMCleaner");
         Assert.assertTrue(StringUtils.isNotEmpty(maxDataCloudVersion));
-        Assert.assertEquals(maxDataCloudVersion, "2.0.18");
+        // computing the expected max datacloud version value
+        List<SourceAttribute> srcAttrVersions = sourceAttributeEntityMgr
+                .getAttributes("AccountMaster", "CLEAN", "AMCleaner", "2.0.18", false);
+        Map<Integer, String> dataCloudVersions = new HashMap<>();
+        for (SourceAttribute srcAttr : srcAttrVersions) {
+            String dataCloudVersion = srcAttr.getDataCloudVersion();
+            dataCloudVersions.put(Integer.parseInt(dataCloudVersion.replace(".", "")),
+                    dataCloudVersion);
+        }
+        Integer maxVersionValue = Collections.max(dataCloudVersions.keySet());
+        // verifying actual and expected values computed above
+        Assert.assertEquals(maxDataCloudVersion, dataCloudVersions.get(maxVersionValue));
 
     }
 }
