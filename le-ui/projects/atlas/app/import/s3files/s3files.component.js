@@ -32,7 +32,8 @@ export default class S3FileList extends Component {
             path: '',
             angularGoTo: '',
             angularBack: '',
-            breadcrumbs: []
+            breadcrumbs: [],
+            loadingButton: false
         };
     }
 
@@ -110,6 +111,11 @@ export default class S3FileList extends Component {
     }
 
     nextStep = () => {
+
+        let state = Object.assign({}, this.state);
+        state.enableButton = false;
+        state.loadingButton = true;
+        this.setState(state);
 
         // Get feedtype from selection on template list (AccountSchema, ContactSchema, etc.)
         let ImportWizardStore = this.ImportWizardStore;
@@ -290,6 +296,14 @@ export default class S3FileList extends Component {
         return config;
     }
 
+    getLoadingIcon() {
+        if (this.state.loadingButton) {
+            return <i className="fa fa-spinner fa-pulse fa-fw"></i>;
+        } else {
+            return null;
+        }
+    }
+
     render() {
         return (
             <ReactMainContainer>
@@ -335,18 +349,18 @@ export default class S3FileList extends Component {
                                     />
                                 </div>
                                 <div className="pull-right">
+                                    {this.getLoadingIcon()}
                                     <LeButton
                                         name="add"
                                         disabled={!this.state.enableButton}
                                         config={{
                                             label: "Select",
-                                            classNames: "blue-button"
+                                            classNames: "blue-button",
+                                            icon: "fa fa-spinner fa-pulse fa-fw",
+                                            iconside: "LEFT"
                                         }}
                                         callback={() => {
-
                                             this.nextStep();
-
-                                            // Same functionality as Next, Field mappings 
                                         }}
                                     />
                                 </div>

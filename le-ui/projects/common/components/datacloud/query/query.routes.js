@@ -173,7 +173,8 @@ angular.module('common.datacloud.query')
                 // for the Playbook wizard Targets tab
                 NoSFIdsCount: [function() { return null; }],
                 AccountsCoverage: [function() { return null; }],
-                Config: [function() { return null; }]
+                Config: [function() { return null; }],
+                orgs: [function() { return null; }]
             },
             views: {
                 "main@": {
@@ -216,7 +217,8 @@ angular.module('common.datacloud.query')
                 // for the Playbook wizard Targets tab
                 NoSFIdsCount: [function() { return null; }],
                 AccountsCoverage: [function() { return null; }],
-                Config: [function() { return null; }]
+                Config: [function() { return null; }],
+                orgs: [function() { return null; }]
             },
             views: {
                 "main@": {
