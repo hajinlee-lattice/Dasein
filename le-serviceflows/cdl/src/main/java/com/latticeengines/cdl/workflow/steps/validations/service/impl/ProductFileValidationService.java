@@ -151,6 +151,14 @@ public class ProductFileValidationService
             if (inputProduct.getProductId() == null) {
                 continue;
             }
+            if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null
+                    && inputProduct.getProductName() == null) {
+                errorLine++;
+                csvFilePrinter.printRecord(entry.getKey(), "",
+                        String.format(
+                                "Product name, category, bundle can't be all empty for product with productId =%s",
+                                inputProduct.getProductId()));
+            }
             if (inputProduct.getProductCategory() != null) {
                 String category = inputProduct.getProductCategory();
                 String family = inputProduct.getProductFamily();
