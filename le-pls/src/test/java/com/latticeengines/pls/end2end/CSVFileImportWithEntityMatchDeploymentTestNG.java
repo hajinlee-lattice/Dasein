@@ -85,7 +85,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
         Report productReport = reports.get(2);
         verifyReport(accountReport, 2L, 2L, 48L);
         verifyReport(contactReport, 0L, 0L, 50L);
-        verifyReport(productReport, 1L, 1L, 5L);
+        verifyReport(productReport, 2L, 2L, 4L);
 
     }
 
