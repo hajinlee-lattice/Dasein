@@ -15,4 +15,4 @@ CONSOLIDATION_PERIOD, LAST_CONSOLIDATED, VENDOR) values
 (4, 15552000, '', '', 1, '', '', -1, null, 'FEATURE'),
 (5, 15552000, '', '', 1, '', '', -1, null, 'HPA_NEW'),
 (6, 77762000, 'orb_num', 'domain', 1, 'Domain', 'LE_Last_Upload_Date', 31536000, null, 'ORBINTELLIGENCEV2'),
-(7, 2592000, 'Rank', 'Domain', 1, 'Domain', 'Last_Modification_Date', 63072000, null, 'SEMRUSH');
+(7, 2592000, 'Rank', 'Domain', 1, 'Domain', 'LE_Last_Upload_Date', 63072000, null, 'SEMRUSH');
