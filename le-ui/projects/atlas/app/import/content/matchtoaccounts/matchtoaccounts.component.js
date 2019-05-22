@@ -82,6 +82,9 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
                 }
             });
         }
+        vm.AvailableFields = vm.AvailableFields.filter(function(item) {
+            return (item.userField);
+        });
     };
 
     vm.changeLatticeField = function(mapping, form) {
