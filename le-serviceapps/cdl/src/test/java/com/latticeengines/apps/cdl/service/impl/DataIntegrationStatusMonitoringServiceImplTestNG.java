@@ -219,13 +219,11 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         DataIntegrationStatusMonitorMessage updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
-        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.Initiated.toString());
+        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.ExportStart.toString());
         updateStatusMonitorMessage.setEventTime(new Date());
         updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
         updateStatusMonitorMessage.setMessage("test");
-        InitiatedEventDetail initiatedEventDetail = new InitiatedEventDetail();
-        initiatedEventDetail.setBatchId(BATCH_ID);
-        updateStatusMonitorMessage.setEventDetail(initiatedEventDetail);
+        updateStatusMonitorMessage.setEventDetail(null);
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
@@ -234,7 +232,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor.getTenant());
         Assert.assertNotNull(statusMonitor.getEventStartedTime());
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
-        Assert.assertEquals(DataIntegrationEventType.Initiated.toString(), statusMonitor.getStatus());
+        Assert.assertEquals(DataIntegrationEventType.ExportStart.toString(), statusMonitor.getStatus());
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch1.getId());
         Assert.assertEquals(LaunchState.Syncing, playLaunch.getLaunchState());
@@ -294,7 +292,6 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         Assert.assertNotNull(statusMonitor);
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
-        Assert.assertNotNull(statusMonitor.getEventStartedTime());
         Assert.assertNotNull(statusMonitor.getEventCompletedTime());
         Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
 
