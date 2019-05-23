@@ -94,7 +94,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             vm.operation = 'NOT_IN_COLLECTION';
                             break;
                         default:
-                            vm.vals.length = 0;
+                            if(vm.vals != ''){
+                                vm.vals.length = 0;
+                            }
+                            // vm.vals.length = 0;
                     }
 
                     if (vm.chipsOperations.indexOf(_operation) < 0 && vm.chipsOperations.indexOf(vm.operation) > -1) {
