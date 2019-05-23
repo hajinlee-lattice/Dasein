@@ -182,7 +182,13 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             emailInfo.setErrorMsg(e.getMessage());
             sendS3ImportEmail("Failed", emailInfo);
             log.error(e.getMessage());
-            throw e;
+            // PLS-13589 duplicate error will be threw by csv parser 491
+            String errorMessage = e.getMessage();
+            if (errorMessage.startsWith("The header contains a duplicate name:")) {
+                throw new IllegalArgumentException(errorMessage.substring(0, errorMessage.indexOf(" in ")));
+            } else {
+                throw e;
+            }
         } catch (Exception e) {
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             moveFromInProgressToFailed(s3FilePath);
