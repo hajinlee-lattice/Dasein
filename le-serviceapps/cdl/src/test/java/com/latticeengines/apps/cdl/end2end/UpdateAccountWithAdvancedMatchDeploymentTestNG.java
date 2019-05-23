@@ -157,6 +157,14 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     }
 
     @Override
+    protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ENTITY_MATCH_ACCOUNT_3, //
+                TableRoleInCollection.AccountExport, ENTITY_MATCH_ACCOUNT_3 //
+        );
+    }
+
+    @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_3, //

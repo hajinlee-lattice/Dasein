@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -59,6 +60,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
         verifyServingStore(getExpectedServingStoreCounts());
+        verifyExtraTableRoles(getExtraTableRoeCounts());
 
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
         Map<BusinessEntity, Long> segment3Counts = getSegmentCounts(SEGMENT_NAME_3);
@@ -139,6 +141,13 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         map.put(BusinessEntity.Transaction, TRANSACTION_1);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;
+    }
+
+    protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ACCOUNT_3, //
+                TableRoleInCollection.AccountExport, ACCOUNT_3 //
+        );
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {

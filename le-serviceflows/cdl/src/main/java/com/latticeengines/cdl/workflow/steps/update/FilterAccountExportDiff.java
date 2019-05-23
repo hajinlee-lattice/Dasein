@@ -32,14 +32,14 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.CopyJob;
 
 
-@Component(FilterAccountFeatureDiff.BEAN_NAME)
+@Component(FilterAccountExportDiff.BEAN_NAME)
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
+public class FilterAccountExportDiff extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
 
-    private static final Logger log = LoggerFactory.getLogger(FilterAccountFeatureDiff.class);
+    private static final Logger log = LoggerFactory.getLogger(FilterAccountExportDiff.class);
 
-    static final String BEAN_NAME = "filterAccountFeatureDiff";
+    static final String BEAN_NAME = "filterAccountExportDiff";
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -79,7 +79,7 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
 
         Map<TableRoleInCollection, String> processedTableNames = getMapObjectFromContext(PROCESSED_DIFF_TABLES, //
                 TableRoleInCollection.class, String.class);
-        processedTableNames.put(TableRoleInCollection.AccountFeatures, filteredTableName);
+        processedTableNames.put(TableRoleInCollection.AccountExport, filteredTableName);
         putObjectInContext(PROCESSED_DIFF_TABLES, processedTableNames);
         addToListInContext(TEMPORARY_CDL_TABLES, filteredTableName, String.class);
     }
@@ -87,7 +87,7 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
     private List<String> getRetrainAttrs() {
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         activeFeaturesTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                TableRoleInCollection.AccountFeatures, active);
+                TableRoleInCollection.AccountExport, active);
         List<String> retainAttrNames = new ArrayList<>(Arrays.asList(activeFeaturesTable.getAttributeNames()));
         log.info(String.format("retainAttrNames from servingStore: %d", retainAttrNames.size()));
         return retainAttrNames;

@@ -13,52 +13,78 @@ private[spark] object MergeUtils {
   private val rhsMarker = "__merge_marker_rhs__"
 
   def merge2(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], overwriteByNull: Boolean): DataFrame = {
-    val outputSchema = getOutputSchema(lhs, rhs, joinKeys)
-    val join = joinWithMarkders(lhs, rhs, joinKeys)
-    val (lhsColPos, rhsColPos) = getColPosOnBothSides(join)
-
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
     val uniqueColsFromLhs = lhs.columns.diff(joinKeys.union(intersectCols))
     val uniqueColsFromRhs = rhs.columns.diff(joinKeys.union(intersectCols))
 
-    join.map(row => {
-      val inLhs = row.getAs(lhsMarker) != null
-      val inRhs = row.getAs(rhsMarker) != null
-      val vals: Seq[Any] = outputSchema.fieldNames map (attr => {
-        if (joinKeys.contains(attr)) {
-          row.get(lhsColPos(attr))
-        } else if (uniqueColsFromLhs.contains(attr)) {
-          row.get(lhsColPos(attr))
-        } else if (uniqueColsFromRhs.contains(attr)) {
-          row.get(rhsColPos(attr))
-        } else if (!inLhs) {
-          row.get(rhsColPos(attr))
-        } else if (!inRhs) {
-          row.get(lhsColPos(attr))
+    if (overwriteByNull && uniqueColsFromLhs.isEmpty && uniqueColsFromRhs.isEmpty) {
+      // no need for per row operation
+
+      if (colsFromLhs.isEmpty) {
+        overwrite(lhs, rhs, joinKeys)
+      } else {
+        val cols1 = lhs.columns.intersect(joinKeys.union(colsFromLhs.toSeq)) map col
+        val lhs1 = if (cols1.length != lhs.columns.length) lhs.select(cols1: _*) else lhs
+        val rhs1 = if (cols1.length != rhs.columns.length) rhs.select(cols1: _*) else rhs
+        val merged1 = overwrite(rhs1, lhs1, joinKeys)
+        val cols2 = lhs.columns.diff(colsFromLhs.toSeq) map col
+        if (cols2.isEmpty) {
+          merged1
         } else {
-          val (firstVal, secondVal) =
-            if (colsFromLhs.contains(attr)) {
-              (row.get(lhsColPos(attr)), row.get(rhsColPos(attr)))
-            } else {
-              (row.get(rhsColPos(attr)), row.get(lhsColPos(attr)))
-            }
-          if (InterfaceName.AccountId.name().equals(attr) && DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(firstVal)) {
-            if (secondVal == null) {
-              firstVal
-            } else {
-              secondVal
-            }
+          val lhs2 = lhs.select(cols2: _*)
+          val rhs2 = rhs.select(cols2: _*)
+          val merged2 = overwrite(lhs2, rhs2, joinKeys)
+          merged2.join(merged1, joinKeys)
+        }
+      }
+
+    } else {
+      // need to compute row by row
+
+      val outputSchema = getOutputSchema(lhs, rhs, joinKeys)
+      val join = joinWithMarkders(lhs, rhs, joinKeys)
+      val (lhsColPos, rhsColPos) = getColPosOnBothSides(join)
+      join.map(row => {
+        val inLhs = row.getAs(lhsMarker) != null
+        val inRhs = row.getAs(rhsMarker) != null
+        val vals: Seq[Any] = outputSchema.fieldNames map (attr => {
+          if (joinKeys.contains(attr)) {
+            row.get(lhsColPos(attr))
+          } else if (uniqueColsFromLhs.contains(attr)) {
+            row.get(lhsColPos(attr))
+          } else if (uniqueColsFromRhs.contains(attr)) {
+            row.get(rhsColPos(attr))
+          } else if (!inLhs) {
+            row.get(rhsColPos(attr))
+          } else if (!inRhs) {
+            row.get(lhsColPos(attr))
           } else {
-            if (overwriteByNull || firstVal != null) {
-              firstVal
+            val (firstVal, secondVal) =
+              if (colsFromLhs.contains(attr)) {
+                (row.get(lhsColPos(attr)), row.get(rhsColPos(attr)))
+              } else {
+                (row.get(rhsColPos(attr)), row.get(lhsColPos(attr)))
+              }
+            if (InterfaceName.AccountId.name().equals(attr) //
+              && DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(firstVal)) {
+              if (secondVal == null) {
+                firstVal
+              } else {
+                secondVal
+              }
             } else {
-              secondVal
+              if (overwriteByNull || firstVal != null) {
+                firstVal
+              } else {
+                secondVal
+              }
             }
           }
-        }
-      })
-      Row.fromSeq(vals)
-    })(RowEncoder(outputSchema))
+        })
+        Row.fromSeq(vals)
+      })(RowEncoder(outputSchema))
+
+    }
   }
 
   def concat2(lhs: DataFrame, rhs: DataFrame): DataFrame = {
@@ -70,6 +96,17 @@ private[spark] object MergeUtils {
     } else {
       lhs.union(rhs)
     }
+  }
+
+  /**
+    * when lhs and rhs have the same schema,
+    * and completely use rhs for overlapping rows
+    */
+  def overwrite(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
+    val rhsIds = rhs.select(joinKeys map col: _*).withColumn(rhsMarker, lit(true))
+    val lhsAppend = lhs.join(rhsIds, joinKeys, "left") //
+      .filter(col(rhsMarker).isNull).select(rhs.columns map col: _*)
+    rhs union lhsAppend
   }
 
   private def getOutputSchema(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): StructType = {

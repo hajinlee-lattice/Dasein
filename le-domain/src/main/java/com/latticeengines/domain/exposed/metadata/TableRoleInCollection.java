@@ -37,6 +37,7 @@ public enum TableRoleInCollection {
     AnalyticPurchaseState, //
 
     AccountFeatures, //
+    AccountExport, //
     AccountDiffSlim, //
     AccountBatchSlim, //
 
@@ -87,6 +88,7 @@ public enum TableRoleInCollection {
         PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AccountFeatures.primaryKey = ConsolidatedAccount.primaryKey;
+        AccountExport.primaryKey = ConsolidatedAccount.primaryKey;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }

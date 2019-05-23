@@ -1365,6 +1365,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         });
     }
 
+    void verifyExtraTableRoles(Map<TableRoleInCollection, Long> expectedTableCount) {
+        if (MapUtils.isEmpty(expectedTableCount)) {
+            return;
+        }
+        expectedTableCount.forEach((key, value) -> //
+                Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
+    }
+
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
