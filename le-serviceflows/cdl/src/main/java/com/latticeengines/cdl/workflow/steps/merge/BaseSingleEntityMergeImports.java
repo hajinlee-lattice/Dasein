@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
@@ -82,10 +83,11 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (!CollectionUtils.isEmpty(extracts)) {
                 Long dataCount = 0L;
                 Long dataQuota = 0L;
+                DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
                 switch (configuration.getMainEntity()) {
-                    case Account: dataQuota = getLongValueFromContext(ACCOUNT_DATAQUOTA_LIMIT);break;
-                    case Contact: dataQuota = getLongValueFromContext(CONTACT_DATAQUOTA_LIMIT);break;
-                    case Transaction: dataQuota = getLongValueFromContext(TRANSACTION_DATAQUOTA_LIMIT);break;
+                    case Account: dataQuota = dataLimit.getAccountDataQuotaLimit();break;
+                    case Contact: dataQuota = dataLimit.getContactDataQuotaLimit();break;
+                    case Transaction: dataQuota = dataLimit.getTransactionDataQuotaLimit();break;
                     default:break;
                 }
                 for (Extract extract : extracts) {

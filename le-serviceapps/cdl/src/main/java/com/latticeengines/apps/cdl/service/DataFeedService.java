@@ -2,9 +2,9 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -70,5 +70,5 @@ public interface DataFeedService {
 
     void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request);
 
-    Map<String, Long> getDataQuotaLimitMap(CustomerSpace customerSpace);
+    DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace);
 }

@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,6 +32,7 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -515,28 +515,28 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public Map<String, Long> getDataQuotaLimitMap(CustomerSpace customerSpace) {
+    public DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace) {
         String componentName = CDLComponent.componentName;
-        Map<String, Long> dataQuotaLimitMap = new HashMap<>();
+        DataLimit dataLimit = new DataLimit();
         Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
                 componentName, BusinessEntity.Account);
         defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
-        dataQuotaLimitMap.put("ACCOUNT_DATAQUOTA_LIMIT", defaultAccountQuotaLimit);
+        dataLimit.setAccountDataQuotaLimit(defaultAccountQuotaLimit);
         Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
         defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        dataQuotaLimitMap.put("CONTACT_DATAQUOTA_LIMIT", defaultContactQuotaLimit);
+        dataLimit.setContactDataQuotaLimit(defaultContactQuotaLimit);
         Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Analytic);
         defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
-        dataQuotaLimitMap.put("PRODUCT_BUNDLES_DATAQUOTA_LIMIT", defaultProductBundlesQuotaLimit);
+        dataLimit.setProductBundleDataQuotaLimit(defaultProductBundlesQuotaLimit);
         Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Spending);
         defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
-        dataQuotaLimitMap.put("PRODUCT_SKU_DATAQUOTA_LIMIT", defaultProductSkuQuotaLimit);
+        dataLimit.setProductSkuDataQuotaLimit(defaultProductSkuQuotaLimit);
         Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 BusinessEntity.Transaction);
         defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
-        dataQuotaLimitMap.put("TRANSACTION_DATAQUOTA_LIMIT", defaultTransactionQuotaLimit);
-        return dataQuotaLimitMap;
+        dataLimit.setTransactionDataQuotaLimit(defaultTransactionQuotaLimit);
+        return dataLimit;
     }
 }

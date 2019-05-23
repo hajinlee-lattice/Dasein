@@ -4,7 +4,6 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -290,13 +290,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return post("rebuildTransaction", url, null, DataFeed.class);
     }
 
-public Map<String, Long> getDataQuotaLimitMap(CustomerSpace customerSpace) {
-        log.info(customerSpace.toString());
-        String tenantId = customerSpace.getTenantId();
-    String url = constructUrl(String.format("/datafeed/internal/dataQuotaLimitMap?customerSpace=%s"
-            , tenantId));
-    Map dataQuotaLimitMap = get("get all data quota limit list", url, Map.class);
-    return JsonUtils.convertMap(dataQuotaLimitMap, String.class, Long.class);
-}
+    public DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace) {
+            log.info(customerSpace.toString());
+            String tenantId = customerSpace.getTenantId();
+        String url = constructUrl(String.format("/datafeed/internal/dataQuotaLimitMap?customerSpace=%s"
+                , tenantId));
+        return get("get all data quota limit list", url, DataLimit.class);
+    }
 
 }

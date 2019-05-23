@@ -30,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
@@ -551,13 +552,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setDataQuotaLimit() {
-        Map<String, Long> dataQuotaLimitMap = dataFeedProxy.getDataQuotaLimitMap(customerSpace);
-        if (dataQuotaLimitMap == null) {
+        DataLimit dataLimit = dataFeedProxy.getDataQuotaLimitMap(customerSpace);
+        if (dataLimit == null) {
             throw new IllegalArgumentException("Data Quota Limit Can not find.");
         }
-        for (String key : dataQuotaLimitMap.keySet()) {
-            putLongValueInContext(key, dataQuotaLimitMap.get(key));
-        }
+        putObjectInContext(DATAQUOTA_LIMIT, dataLimit);
     }
 
     /*

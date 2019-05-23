@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
@@ -56,7 +56,7 @@ public class DataFeedInternalResource {
     @ResponseBody
     @NoCustomerSpace
     @ApiOperation(value = "get all data quota limit list.")
-    public Map<String, Long> getDataQuotaLimitMap(
+    public DataLimit getDataQuotaLimitMap(
             @RequestParam(value = "customerSpace")String customerSpace) {
         CustomerSpace customerSpace1 = CustomerSpace.parse(customerSpace);
         return dataFeedService.getDataQuotaLimitMap(customerSpace1);
