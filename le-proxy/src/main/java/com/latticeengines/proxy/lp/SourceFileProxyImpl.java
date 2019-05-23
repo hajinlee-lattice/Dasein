@@ -2,8 +2,14 @@ package com.latticeengines.proxy.lp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -13,6 +19,7 @@ import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 @Component
 public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements SourceFileProxy {
 
+    private static final Logger log = LoggerFactory.getLogger(SourceFileProxyImpl.class);
     private static final String URL_PRERIX = "/customerspaces/{customerSpace}/sourcefiles";
 
     protected SourceFileProxyImpl() {
@@ -80,7 +87,17 @@ public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements Sou
     public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,  String entity) {
         String url = URL_PRERIX + "/fromS3?entity={entity}";
         url = constructUrl(url, shortenCustomerSpace(customerSpace), entity);
-        return post("create SourceFile by s#", url, fileProperty, SourceFile.class);
+        ResponseDocument responseDocument = post("create SourceFile by s#", url, fileProperty, ResponseDocument.class);
+        if (responseDocument == null) {
+            return null;
+        }
+        if (responseDocument.isSuccess()) {
+            return JsonUtils.convertValue(responseDocument.getResult(), SourceFile.class);
+        }else {
+            log.error(JsonUtils.serialize(responseDocument.getErrors()));
+            throw new LedpException(LedpCode.LEDP_18053,
+                    new String[] {JsonUtils.serialize(responseDocument.getErrors())});
+        }
     }
 
 }
