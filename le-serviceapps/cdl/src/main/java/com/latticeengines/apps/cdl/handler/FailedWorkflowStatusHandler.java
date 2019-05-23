@@ -4,10 +4,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -19,7 +22,10 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 @Component
 public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(FailedWorkflowStatusHandler.class);
+
     private String URL = "url";
+    private String MSG = "message";
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -53,6 +59,12 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
                 statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
             }
         } else if (MessageType.Event.equals(MessageType.valueOf(messageType))) {
+            Map<String, Object> errorMap = eventDetail.getError();
+            if (errorMap != null && errorMap.containsKey(MSG)) {
+                statusMonitor.setErrorMessage(JsonUtils.serialize(errorMap.get(MSG)));
+            }
+            log.info(String.format("WorkflowRequestId %s failed with message: %s", statusMonitor.getWorkflowRequestId(),
+                    JsonUtils.serialize(eventDetail)));
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
             playLaunch.setLaunchState(LaunchState.SyncFailed);
             playLaunchService.update(playLaunch);
