@@ -521,22 +521,22 @@ public class DataFeedServiceImpl implements DataFeedService {
         Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
                 componentName, BusinessEntity.Account);
         defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
-        dataQuotaLimitMap.put("defaultAccountQuotaLimit", defaultAccountQuotaLimit);
+        dataQuotaLimitMap.put("ACCOUNT_DATAQUOTA_LIMIT", defaultAccountQuotaLimit);
         Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
         defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        dataQuotaLimitMap.put("defaultContactQuotaLimit", defaultContactQuotaLimit);
+        dataQuotaLimitMap.put("CONTACT_DATAQUOTA_LIMIT", defaultContactQuotaLimit);
         Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Analytic);
         defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
-        dataQuotaLimitMap.put("defaultProductBundlesQuotaLimit", defaultProductBundlesQuotaLimit);
+        dataQuotaLimitMap.put("PRODUCT_BUNDLES_DATAQUOTA_LIMIT", defaultProductBundlesQuotaLimit);
         Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Spending);
         defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
-        dataQuotaLimitMap.put("defaultProductSkuQuotaLimit", defaultProductSkuQuotaLimit);
+        dataQuotaLimitMap.put("PRODUCT_SKU_DATAQUOTA_LIMIT", defaultProductSkuQuotaLimit);
         Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 BusinessEntity.Transaction);
         defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
-        dataQuotaLimitMap.put("defaultTransactionQuotaLimit", defaultTransactionQuotaLimit);
+        dataQuotaLimitMap.put("TRANSACTION_DATAQUOTA_LIMIT", defaultTransactionQuotaLimit);
         return dataQuotaLimitMap;
     }
 }

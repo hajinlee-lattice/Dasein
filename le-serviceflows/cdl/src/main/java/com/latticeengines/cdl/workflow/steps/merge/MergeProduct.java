@@ -94,12 +94,12 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         }
 
         productCounts = countProducts(productList);
-        Long productBundlesQuotaLimit = getLongValueFromContext("defaultProductBundlesQuotaLimit");
+        Long productBundlesQuotaLimit = getLongValueFromContext(PRODUCT_BUNDLES_DATAQUOTA_LIMIT);
         if ( productBundlesQuotaLimit < productCounts.get("nProductAnalytics"))
             throw new IllegalStateException(
                     "the Analytics Product data quota limit is " + productBundlesQuotaLimit
                             + ", The data you uploaded has exceeded the limit.");
-        Long productSkuQuotaLimit = getObjectFromContext("defaultProductSkuQuotaLimit", Long.class);
+        Long productSkuQuotaLimit = getLongValueFromContext(PRODUCT_SKU_DATAQUOTA_LIMIT);
         if (productSkuQuotaLimit < productCounts.get("nProductSpendings"))
             throw new IllegalStateException(
                     "the Spending Product data quota limit is " + productSkuQuotaLimit

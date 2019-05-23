@@ -401,7 +401,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         List<Extract> extracts = table.getExtracts();
         if (!CollectionUtils.isEmpty(extracts)) {
             Long dataCount = 0L;
-            Long transactionDataQuotaLimit = getLongValueFromContext("defaultTransactionQuotaLimit");
+            Long transactionDataQuotaLimit = getLongValueFromContext(TRANSACTION_DATAQUOTA_LIMIT);
             for (Extract extract : extracts) {
                 dataCount = dataCount + extract.getProcessedRecords();
                 log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);

@@ -186,6 +186,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String PROCESS_ANALYTICS_DECISIONS_KEY = "PROCESS_ANALYTICS_DECISIONS_KEY";
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
 
+    public static final String ACCOUNT_DATAQUOTA_LIMIT = "ACCOUNT_DATAQUOTA_LIMIT";
+    public static final String CONTACT_DATAQUOTA_LIMIT = "CONTACT_DATAQUOTA_LIMIT";
+    public static final String TRANSACTION_DATAQUOTA_LIMIT = "TRANSACTION_DATAQUOTA_LIMIT";
+    public static final String PRODUCT_BUNDLES_DATAQUOTA_LIMIT = "PRODUCT_BUNDLES_DATAQUOTA_LIMIT";
+    public static final String PRODUCT_SKU_DATAQUOTA_LIMIT = "PRODUCT_SKU_DATAQUOTA_LIMIT";
+
     @Autowired
     protected Configuration yarnConfiguration;
 

@@ -83,9 +83,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 Long dataCount = 0L;
                 Long dataQuota = 0L;
                 switch (configuration.getMainEntity()) {
-                    case Account: dataQuota = getLongValueFromContext("defaultAccountQuotaLimit");break;
-                    case Contact: dataQuota = getLongValueFromContext("defaultContactQuotaLimit");break;
-                    case Transaction: dataQuota = getLongValueFromContext("defaultTransactionQuotaLimit");break;
+                    case Account: dataQuota = getLongValueFromContext(ACCOUNT_DATAQUOTA_LIMIT);break;
+                    case Contact: dataQuota = getLongValueFromContext(CONTACT_DATAQUOTA_LIMIT);break;
+                    case Transaction: dataQuota = getLongValueFromContext(TRANSACTION_DATAQUOTA_LIMIT);break;
                     default:break;
                 }
                 for (Extract extract : extracts) {
