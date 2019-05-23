@@ -492,9 +492,11 @@ angular
                     // ContactsCount: [function(){
                     //     return null;
                     // }],
+
                     Config: [function () {
                         return null;
                     }],
+                    orgs: [function() { return null; }]
                 },
                 views: {
                     "summary@": {
