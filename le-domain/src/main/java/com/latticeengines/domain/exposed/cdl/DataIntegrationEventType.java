@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Set;
 
 public enum DataIntegrationEventType {
-    WorkflowSubmitted, Initiated, InProgress, Completed, Failed, Progress, AudienceCreation;
+    WorkflowSubmitted, ExportStart, Initiated, InProgress, Completed, Failed, Progress, AudienceCreation;
 
     private static Map<DataIntegrationEventType, Collection<DataIntegrationEventType>> transitionMap = new HashMap<>();
 
     static {
         Set<DataIntegrationEventType> statesAfterSubmitted = new HashSet<>();
+        statesAfterSubmitted.add(ExportStart);
         statesAfterSubmitted.add(Initiated);
         statesAfterSubmitted.add(InProgress);
         statesAfterSubmitted.add(Failed);
@@ -20,6 +21,15 @@ public enum DataIntegrationEventType {
         statesAfterSubmitted.add(Progress);
         statesAfterSubmitted.add(AudienceCreation);
         transitionMap.put(WorkflowSubmitted, statesAfterSubmitted);
+
+        Set<DataIntegrationEventType> statesAfterExportStarted = new HashSet<>();
+        statesAfterExportStarted.add(Initiated);
+        statesAfterExportStarted.add(InProgress);
+        statesAfterExportStarted.add(Failed);
+        statesAfterExportStarted.add(Completed);
+        statesAfterExportStarted.add(Progress);
+        statesAfterExportStarted.add(AudienceCreation);
+        transitionMap.put(ExportStart, statesAfterExportStarted);
 
         Set<DataIntegrationEventType> statesAfterInitiated = new HashSet<>();
         statesAfterInitiated.add(InProgress);
