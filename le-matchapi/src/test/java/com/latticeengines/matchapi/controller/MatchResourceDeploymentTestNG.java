@@ -14,6 +14,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -400,10 +401,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 version, appId.toString(), expectedTotal);
 
         // mimic one block failed
-        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(5000L);
-            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        }
+        command = waitForMatchBlockCreated(command, appId);
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
         // Kill one block and expect it will be retried automatically
         jobService.killJob(ApplicationId.fromString(blockAppId));
@@ -431,10 +429,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         log.info("Test failing multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
                 appId.toString());
         Set<String> killedAppIds = new HashSet<>();
-        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(5000L);
-            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        }
+        command = waitForMatchBlockCreated(command, appId);
         while (killedAppIds.size() < 2) {
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
             blockAppId = command.getMatchBlocks().get(0).getApplicationId();
@@ -536,6 +531,26 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         matchInput.setInputBuffer(inputBuffer);
         matchInput.setDataCloudVersion(dataCloudVersion);
         return matchInput;
+    }
+
+    /*
+     * Wait for match block to be created and return the updated match command. Fail
+     * if application terminates before block is created.
+     */
+    private MatchCommand waitForMatchBlockCreated(MatchCommand command, ApplicationId appId)
+            throws InterruptedException {
+        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
+            Thread.sleep(5000L);
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+
+            ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
+            Assert.assertNotNull(report, String.format("ApplicationReport for application ID %s should exist", appId));
+            boolean jobTerminated = YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState());
+            Assert.assertFalse(jobTerminated,
+                    String.format("Application %s should not be terminated already. State=%s, FinalStatus=%s", appId,
+                            report.getYarnApplicationState(), report.getFinalApplicationStatus()));
+        }
+        return command;
     }
 
     private void uploadTestAVro(String avroDir, String fileName) {
