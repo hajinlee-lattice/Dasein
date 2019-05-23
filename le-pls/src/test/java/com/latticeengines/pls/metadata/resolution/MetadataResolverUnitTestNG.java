@@ -44,11 +44,11 @@ public class MetadataResolverUnitTestNG {
 
         // case 2: malformed date time value, expected false
         Assert.assertFalse(
-                metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "12/q@ax/2018", "1q2/q@ax/2019"),
+                metadataResolver.isDateTypeColumn(Arrays.asList("11/41/2016", "12/q@ax/2018", "1q2/q@ax/2019"),
                         formatForDateAndTime));
 
         // case 3: 55 not in appropriate range of month and date, expected false
-        Assert.assertFalse(metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016", "12/55/2018", "42/05/2018"),
+        Assert.assertFalse(metadataResolver.isDateTypeColumn(Arrays.asList("11/55/2016", "12/55/2018", "42/05/2018"),
                 formatForDateAndTime));
 
         // case 4: M-d-yyyy and M-d-yyyy have same occurrence times, hit M/d/yyyy => MM/DD/YYYY.
@@ -80,7 +80,7 @@ public class MetadataResolverUnitTestNG {
 
         // case 8: add some timezone, no match pattern, false
         Assert.assertFalse(metadataResolver.isDateTypeColumn(
-                Arrays.asList("11/4/2016", "02/01/2019 3:20:55 PM+0800", "04/01/2019 3:20:55 PM+0000"),
+                Arrays.asList("11/4/2016 PM+0800", "02/01/2019 3:20:55 PM+0800", "04/01/2019 3:20:55 PM+0000"),
                 formatForDateAndTime));
 
         // case 9: for unified date time format M/d/yyyy H:m:s => MM/DD/YYYY 00:00:00 24H
@@ -155,10 +155,18 @@ public class MetadataResolverUnitTestNG {
         // case 19: verify existing illegal date type while still be detected as
         // date
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
-                Arrays.asList("11/Apr/2016", "15/Mar/1218", null, "1/Jan/01", "13%/Feb/17", "21/May/2019",
-                        "21/Jun/2019", "20/Jun/2019", "19/Jun/2019", "1/Jun/2019", "2/Jun/2019"),
+                Arrays.asList("11/Apr/2016", "125/Mar/1218", null, "1$/Jan/01", "13%/Feb/17", "2%/May/2019",
+                        "21#/Jun/2019", "20%/Jun/2019", "19%/Jun/2019", "1%/Jun/2019"),
                 formatForDateAndTime));
         Assert.assertEquals(formatForDateAndTime.getLeft(), "DD/MMM/YYYY");
         Assert.assertEquals(formatForDateAndTime.getRight(), null);
+
+        // case 20: verify existing legal date type while not more than 10%
+        // which can't be detected as date
+        Assert.assertFalse(
+                metadataResolver.isDateTypeColumn(
+                        Arrays.asList("11/Apr/2016", "125/Mar/1218", null, null, "1$/Jan/01", "13%/Feb/17",
+                                "2%/May/2019", "21#/Jun/2019", "20%/Jun/2019", "19%/Jun/2019", "1%/Jun/2019"),
+                        formatForDateAndTime));
     }
 }
