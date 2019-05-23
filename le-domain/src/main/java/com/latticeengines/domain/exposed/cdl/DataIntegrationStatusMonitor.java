@@ -118,6 +118,10 @@ public class DataIntegrationStatusMonitor
     @Temporal(TemporalType.TIMESTAMP)
     private Date eventCompletedTime;
 
+    @JsonProperty("errorMessage")
+    @Column(name = "ERROR_MESSAGE", nullable = true, length = 1024)
+    private String errorMessage;
+
     @JsonProperty("createdDate")
     @Column(name = "CREATED_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -248,6 +252,14 @@ public class DataIntegrationStatusMonitor
 
     public void setEventCompletedTime(Date eventCompletedTime) {
         this.eventCompletedTime = eventCompletedTime;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     @Override
