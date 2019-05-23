@@ -9,8 +9,6 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     @JsonProperty("actionIds")
     private List<Long> actionIds;
-    @JsonProperty("data_qupta_limit")
-    private Long dataQuotaLimit;
 
     @Override
     public BusinessEntity getMainEntity() {
@@ -23,13 +21,5 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     public void setActionIds(List<Long> actionIds) {
         this.actionIds = actionIds;
-    }
-
-    public Long getDataQuotaLimit() {
-        return dataQuotaLimit;
-    }
-
-    public void setDataQuotaLimit(Long dataQuotaLimit) {
-        this.dataQuotaLimit = dataQuotaLimit;
     }
 }

@@ -167,6 +167,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setupInactiveVersion();
         setGrapherContext();
         resetEntityMatchFlagsForRetry();
+        setDataQuotaLimit();
 //        bumpEntityMatchVersion();
     }
 
@@ -546,6 +547,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (!completed) {
             // need to rerun entity match steps
             removeObjectFromContext(NEW_ENTITY_MATCH_ENVS);
+        }
+    }
+
+    private void setDataQuotaLimit() {
+        Map<String, Long> dataQuotaLimitMap = dataFeedProxy.getDataQuotaLimitMap(customerSpace);
+        if (dataQuotaLimitMap == null) {
+            throw new IllegalArgumentException("Data Quota Limit Can not find.");
+        }
+        for (String key : dataQuotaLimitMap.keySet()) {
+            putLongValueInContext(key, dataQuotaLimitMap.get(key));
         }
     }
 

@@ -81,16 +81,23 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             List<Extract> extracts = table.getExtracts();
             if (!CollectionUtils.isEmpty(extracts)) {
                 Long dataCount = 0L;
+                Long dataQuota = 0L;
+                switch (configuration.getMainEntity()) {
+                    case Account: dataQuota = getLongValueFromContext("defaultAccountQuotaLimit");break;
+                    case Contact: dataQuota = getLongValueFromContext("defaultContactQuotaLimit");break;
+                    case Transaction: dataQuota = getLongValueFromContext("defaultTransactionQuotaLimit");break;
+                    default:break;
+                }
                 for (Extract extract : extracts) {
                     dataCount = dataCount + extract.getProcessedRecords();
                     log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
-                    if (configuration.getDataQuotaLimit() < dataCount)
+                    if (dataQuota < dataCount)
                         throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is "
-                                + configuration.getDataQuotaLimit()
+                                + dataQuota
                                 + ", The data you uploaded has exceeded the limit.");
                 }
                 log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is "
-                        + configuration.getDataQuotaLimit());
+                        + dataQuota);
             }
         }
     }

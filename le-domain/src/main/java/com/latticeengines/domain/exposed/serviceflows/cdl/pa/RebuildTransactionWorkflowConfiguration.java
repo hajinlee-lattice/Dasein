@@ -58,11 +58,6 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processTransactionStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public RebuildTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

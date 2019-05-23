@@ -47,13 +47,11 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -82,21 +80,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
-
-    @Value("${cdl.account.dataquota.limit}")
-    private Long defaultAccountQuotaLimit;
-
-    @Value("${cdl.contact.dataquota.limit}")
-    private Long defaultContactQuotaLimit;
-
-    @Value("${cdl.product.dataquota.limit}")
-    private Long defaultProductBundlesQuotaLimit;
-
-    @Value("${cdl.productsku.dataquota.limit}")
-    private Long defaultProductSkuQuotaLimit;
-
-    @Value("${cdl.transaction.dataquota.limit}")
-    private Long defaultTransactionQuotaLimit;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -457,7 +440,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
-        getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName());
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow");
@@ -486,12 +468,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .entityMatchEnabled(entityMatchEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
-                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)// put dataQuotaLimit into
-                // stepConfiguration
-                .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
-                .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)
-                .dataQuotaLimit(defaultProductSkuQuotaLimit, ProductType.Spending)
-                .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
@@ -543,23 +519,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
-    }
-
-    private void getDataQuotaLimit(CustomerSpace customerSpace, String componentName) {
-        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
-                componentName, BusinessEntity.Account);
-        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
-        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
-        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                ProductType.Analytic);
-        defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
-        Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                ProductType.Spending);
-        defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
-        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                BusinessEntity.Transaction);
-        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
     }
 
 }

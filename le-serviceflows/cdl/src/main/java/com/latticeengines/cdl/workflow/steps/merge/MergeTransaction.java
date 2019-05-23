@@ -401,14 +401,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         List<Extract> extracts = table.getExtracts();
         if (!CollectionUtils.isEmpty(extracts)) {
             Long dataCount = 0L;
+            Long transactionDataQuotaLimit = getLongValueFromContext("defaultTransactionQuotaLimit");
             for (Extract extract : extracts) {
                 dataCount = dataCount + extract.getProcessedRecords();
                 log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
-                if (configuration.getDataQuotaLimit() < dataCount)
-                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+                if (transactionDataQuotaLimit < dataCount)
+                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + transactionDataQuotaLimit +
                             ", The data you uploaded has exceeded the limit.");
             }
-            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + transactionDataQuotaLimit);
         }
     }
 

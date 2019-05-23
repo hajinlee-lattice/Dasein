@@ -47,11 +47,6 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processAccountStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public RebuildAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
