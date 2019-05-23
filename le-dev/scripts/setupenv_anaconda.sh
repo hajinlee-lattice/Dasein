@@ -65,6 +65,6 @@ source ${ANACONDA_HOME}/bin/deactivate
 
 source ${ANACONDA_HOME}/bin/activate leds
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/sparkkernel
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/pysparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/leds/lib/python3.7/site-packages/sparkmagic/kernels/sparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/leds/lib/python3.7/site-packages/sparkmagic/kernels/pysparkkernel
 source ${ANACONDA_HOME}/bin/deactivate
