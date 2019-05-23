@@ -184,8 +184,18 @@
                     <td ng-if="launch.launchState === 'PartialSync' || launch.launchState === 'SyncFailed'">
                         <span class="fa fa-exclamation-triangle orange-text" ng-if="launch.launchState === 'PartialSync'"></span>
                         <span ng-if="launch.launchState === 'PartialSync'">Partially Synced</span>
-                        
-                        <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
+
+
+                        <span class="show-tooltip top delay" ng-if="launch.launchState === 'SyncFailed'">
+                            <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
+                            <div class="tooltip_ small" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.errorMessage">
+                                <div class="cover">
+                                    <p class="white">
+                                        Error: {{launch.integrationStatusMonitor.errorMessage}}
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
                         <span ng-if="launch.launchState === 'SyncFailed'">Sync Failed</span>
                     </td>
     			</tr>
