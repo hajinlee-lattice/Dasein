@@ -270,13 +270,13 @@ public class TimeStampConvertUtils {
             java.lang.IllegalStateException
              */
 
-            log.warn("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
-            log.warn(e.toString());
+            log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
+            log.debug(e.toString());
             // Uncomment the three lines below if needed for debugging.
             //StringWriter sw = new StringWriter();
             //e.printStackTrace(new PrintWriter(sw));
-            //log.warn("Stack Trace is:\n" + sw.toString());
-            log.warn("Attempting to use Natty Date Parser to process the date/time.");
+            //log.debug("Stack Trace is:\n" + sw.toString());
+            log.debug("Attempting to use Natty Date Parser to process the date/time.");
 
             // DO NOT trust natty parser with any month letters in date string!
             if (date.chars().filter(Character::isLetter).count() >= 3) {
@@ -372,10 +372,10 @@ public class TimeStampConvertUtils {
                                 // as a backup plan.  Strip off extra characters from the date/time which represent the
                                 // unparsable time component of the date/time.  Note that this will not work if there is
                                 // white space inside the date format, but this is just a heuristic backup plan.
-                                log.warn("Could not parse date/time from: " + dateTime
+                                log.debug("Could not parse date/time from: " + dateTime
                                         + ".  Trying to strip time component and parse only date.");
                                 String dateWithTimeStripped = dateTime.replaceFirst("(\\s+.+)", "");
-                                log.warn("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                                log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
                                 try {
                                     localDateTime = LocalDate.parse(dateWithTimeStripped,
                                             java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
@@ -385,7 +385,7 @@ public class TimeStampConvertUtils {
                                 // When parsing date and time doesn't work, try just parsing out a date from the value
                                 // as a backup plan.
                                 try {
-                                    log.warn("Could not parse date/time from: " + dateTime
+                                    log.debug("Could not parse date/time from: " + dateTime
                                             + ".  Trying to parse only date");
                                     localDateTime = LocalDate.parse(dateTime,
                                             java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
@@ -417,9 +417,9 @@ public class TimeStampConvertUtils {
                             // When parsing a date doesn't work, try cutting off extra characters from the date/time
                             // string which might represent a time.  Note that this will not work if there is white
                             // space inside the date format, but this is just a heuristic backup plan.
-                            log.warn("Could not parse date from: " + dateTime + ".  Trying to strip time component");
+                            log.debug("Could not parse date from: " + dateTime + ".  Trying to strip time component");
                             String dateWithTimeStripped = dateTime.replaceFirst("(\\s+.+)", "");
-                            log.warn("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                            log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
                             try {
                                 localDateTime = LocalDate.parse(dateWithTimeStripped,
                                         java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
