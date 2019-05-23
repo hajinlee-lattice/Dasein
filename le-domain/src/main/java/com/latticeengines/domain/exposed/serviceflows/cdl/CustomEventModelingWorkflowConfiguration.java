@@ -427,11 +427,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder idColumnName(String idColumnName) {
+        public Builder idColumnName(String idColumnName, boolean isLPI) {
             modelWorkflowBuilder.idColumnName(idColumnName);
             customEventMatchWorkflowConfigurationBuilder.matchGroupId(idColumnName);
             generateAIRating.matchGroupId(idColumnName);
-            generateAIRating.matchJoinInternalId(true);
+            generateAIRating.matchJoinInternalId(isLPI ? true : false);
             return this;
         }
 
