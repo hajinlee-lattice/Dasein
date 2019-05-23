@@ -543,11 +543,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     // Extract the matched state of this record.
     private String extractMatchedState(MatchTraveler traveler, String entity, String entityId) {
         String matched;
-        if (entityId.equals(ENTITY_ANONYMOUS_ID)) {
+        if (ENTITY_ANONYMOUS_ID.equals(entityId)) {
             matched = "ANONYMOUS";
-        } else if (MapUtils.isNotEmpty(traveler.getNewEntityIds()) &&
-                traveler.getNewEntityIds().containsKey(entity)) {
-            // TODO(slin): Is this the correct way to determine no match?
+        } else if (entityId == null || (MapUtils.isNotEmpty(traveler.getNewEntityIds())
+                && traveler.getNewEntityIds().containsKey(entity))) {
             matched = "NO MATCH";
         } else {
             matched = "MATCHED";
