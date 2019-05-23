@@ -679,7 +679,10 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         function getNumericalValue(bucketRestriction, position) {
-            return bucketRestriction.bkt.Vals[position];
+            // console.log('NV ', bucketRestriction.bkt.Vals, position);
+            if(bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0){
+                return bucketRestriction.bkt.Vals[position];
+            }
         }
 
         function getEnumValues(bucketRestriction) {
