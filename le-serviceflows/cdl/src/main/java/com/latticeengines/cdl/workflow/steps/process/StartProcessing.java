@@ -147,12 +147,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         log.info("tenantName is :" + tenantName);
-        if (tenantName.equalsIgnoreCase("JoyTestWarning")) {
+        if (tenantName.equalsIgnoreCase("QA_Atlas_Auto_Refresh_2")) {
             List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
             if (CollectionUtils.isEmpty(warningMessages)) {
                 warningMessages = new LinkedList<>();
             }
-            warningMessages.add("this warning message from tenant JoyTestWarning, just for testing.");
+            warningMessages.add("this warning message from tenant QA_Atlas_Auto_Refresh_2, just for testing.");
             putObjectInContext(PROCESS_ANALYTICS_WARNING_KEY, warningMessages);
         }
 
