@@ -41,7 +41,7 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     @Value("${scoringapi.enrichment.all.fixedDelay.seconds:2}")
     private int fixedDelaySeconds;
 
-    @Value("${scoringapi.enrichment.all.fixedRate.seconds:600}")
+    @Value("${scoringapi.enrichment.all.fixedRate.seconds:6000}")
     private int fixedRateSeconds;
 
     private ReadWriteLock readWriteLock;

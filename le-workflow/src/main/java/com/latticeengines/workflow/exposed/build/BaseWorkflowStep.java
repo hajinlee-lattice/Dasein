@@ -184,6 +184,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String INPUT_SKIPPED_ATTRIBUTES_KEY = "INPUT_SKIPPED_ATTRIBUTES_KEY";
 
     public static final String PROCESS_ANALYTICS_DECISIONS_KEY = "PROCESS_ANALYTICS_DECISIONS_KEY";
+    public static final String PROCESS_ANALYTICS_WARNING_KEY = "PROCESS_ANALYTICS_WARNING_KEY";
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
 
     public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";

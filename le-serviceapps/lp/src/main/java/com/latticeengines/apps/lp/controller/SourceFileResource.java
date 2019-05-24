@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.lp.service.SourceFileService;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -83,9 +84,14 @@ public class SourceFileResource {
 
     @PostMapping(value = "/fromS3")
     @ApiOperation(value = "Get file inputStream from s3")
-    public SourceFile createSourceFileFromS3(@PathVariable String customerSpace,
-                                             @RequestParam(value = "entity") String entity,
-                                             @RequestBody FileProperty fileProperty) {
-        return sourceFileService.createSourceFileFromS3(customerSpace, fileProperty, entity);
+    public ResponseDocument<SourceFile> createSourceFileFromS3(@PathVariable String customerSpace,
+                                                              @RequestParam(value = "entity") String entity,
+                                                              @RequestBody FileProperty fileProperty) {
+        try {
+            SourceFile sourceFile = sourceFileService.createSourceFileFromS3(customerSpace, fileProperty, entity);
+            return ResponseDocument.successResponse(sourceFile);
+        }catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
 }
