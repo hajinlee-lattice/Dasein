@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +19,10 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTe
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
@@ -53,6 +57,10 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         }
 
         if (matchKeyTuple.getName() != null) {
+
+            // $JAW$
+            traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
+                    EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
             return true;
         }
 
@@ -104,6 +112,12 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
+
+            // $JAW$ Match Report
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_LTD",
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(traveler.getLatticeAccountId()))));
+
         }
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());

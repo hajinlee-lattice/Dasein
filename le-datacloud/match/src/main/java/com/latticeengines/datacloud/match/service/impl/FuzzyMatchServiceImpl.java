@@ -442,6 +442,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 lookupResultList, inputHasDuns));
         if (history.getMatchType() == null) {
             return null;
+        } else if (EntityMatchType.LDC_MATCH.name().equals(history.getMatchType())) {
+            Pair<EntityMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
+            if (typeTuplePair == null) {
+                return null;
+            }
+            history.setMatchType(typeTuplePair.getLeft());
+            history.setMatchedMatchKeyTuple(typeTuplePair.getRight());
         }
 
         // Add LeadToAccount Matching Results for Contacts.
@@ -480,6 +487,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     lookupResultList, inputHasDuns));
             if (history.getL2aMatchType() == null) {
                 return null;
+            } else if (EntityMatchType.LDC_MATCH.name().equals(history.getL2aMatchType())) {
+                Pair<EntityMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
+                if (typeTuplePair == null) {
+                    return null;
+                }
+                history.setL2aMatchType(typeTuplePair.getLeft());
+                history.setL2aMatchedMatchKeyTuple(typeTuplePair.getRight());
             }
         }
 
@@ -624,12 +638,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                         log.error("MatchedMatchKeyTuple has value but null key for Business Entity: " + entity);
                         return null;
                     }
-                    log.debug("MatchedMatchKeyTuple: " + pair.getKey().toString());
                     return pair.getKey();
                 }
             }
         }
-        log.debug("MatchedMatchKeyTuple: null");
         return null;
     }
 
@@ -714,8 +726,56 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             }
         }
 
-        log.debug("MatchType is: " + type);
+        // Log the match type and matched MatchKeyTuple here for non-LDC matches.  LDC matches require additional
+        // processing.
+        if (!EntityMatchType.LDC_MATCH.equals(type)) {
+            log.debug("MatchType is: " + type);
+            log.debug("MatchedMatchKeyTuple: " + tuple);
+        } else if (!BusinessEntity.Account.name().equals(entity)) {
+            log.error("Found LDC Match type for entity " + entity + " which should not be possible");
+            return null;
+        }
         return type;
+    }
+
+    private Pair<EntityMatchType, MatchKeyTuple> extractLdcMatchTypeAndTuple(MatchTraveler traveler) {
+        EntityMatchType type;
+        MatchKeyTuple tuple;
+
+        if (CollectionUtils.isEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
+            log.error("MatchType is LDC_MATCH but Type to Tuple list is empty or null");
+            return null;
+        }
+        type = traveler.getEntityLdcMatchTypeToTupleList().get(0).getLeft();
+        tuple = traveler.getEntityLdcMatchTypeToTupleList().get(0).getRight();
+
+        if (tuple == null) {
+            log.error("EntityLdcMatchTypeToTupleList's first entry has null MatchKeyTuple for type: " + type);
+            return null;
+        }
+        // If the MatchKeyTuple has a DUNS fields and the EntityMatchType is not LDC DUNS or DUNS plus Domain, then the
+        // LDC Match has stuck a DUNS value in the matched MatchKeyTuple that wasn't actually part of the input match
+        // tuple used for matching.  In this case, a copy of the MatchKeyTuple without the DUNS field needs to be
+        // created and returned.
+        if (tuple.hasDuns() &&
+                !EntityMatchType.LDC_DUNS.equals(type) && !EntityMatchType.LDC_DUNS_DOMAIN.equals(type)) {
+            MatchKeyTuple fixedTuple = new MatchKeyTuple();
+            fixedTuple.setDomain(tuple.getDomain());
+            fixedTuple.setName(tuple.getName());
+            fixedTuple.setCity(tuple.getCity());
+            fixedTuple.setState(tuple.getState());
+            fixedTuple.setCountry(tuple.getCountry());
+            fixedTuple.setCountryCode(tuple.getCountryCode());
+            fixedTuple.setZipcode(tuple.getZipcode());
+            fixedTuple.setPhoneNumber(tuple.getPhoneNumber());
+            fixedTuple.setEmail(tuple.getEmail());
+            fixedTuple.setSystemIds(tuple.getSystemIds());
+            tuple = fixedTuple;
+        }
+        log.debug("MatchType is: " + type);
+        log.debug("MatchedMatchKeyTuple: " + tuple);
+
+        return Pair.of(type, tuple);
     }
 
     // Assumes traveler.getEntityIds(), traveler.getEntityMatchKeyTuples(), and traveler.getEntityMatchLookupResults()
@@ -744,10 +804,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             log.debug("    MatchKeyTuple: " + entry.getValue().toString());
         }
 
-        boolean foundResult = false;
         log.debug("Iterate through EntityMatchLookupResults:");
         for (Map.Entry<String, List<Pair<MatchKeyTuple, List<String>>>> entry :
                 traveler.getEntityMatchLookupResults().entrySet()) {
+            boolean foundResult = false;
             log.debug("   MatchKeyTuple Lookup Results for " + entry.getKey());
             for (Pair<MatchKeyTuple, List<String>> pair : entry.getValue()) {
                 if (pair.getKey() == null) {
@@ -773,6 +833,16 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 log.debug("    Results: " + resultList);
             }
         }
+
+        if (CollectionUtils.isNotEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
+            log.debug("Iterate through EntityLdcMatchTypeToTupleList:");
+            for (Pair<EntityMatchType, MatchKeyTuple> pair : traveler.getEntityLdcMatchTypeToTupleList()) {
+                log.debug("    MatchType: " + pair.getLeft() + "  MatchKeyTuple: " + pair.getRight());
+            }
+        } else {
+            log.debug("EntityLdcMatchTypeToTupleList is empty");
+        }
+
         //log.debug("------------------------ END Entity Match History Extra Debug Logs ------------------------");
     }
 

@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /*
  * Base actor that contains the DUNS redirection logic and delegate the post processing of the match result from
@@ -42,6 +45,7 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
 
     @Override
     protected boolean accept(MatchTraveler traveler) {
+        log.error("In BaseDunsGuideValidateMicroEngineActor.accept");
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         // have duns (from location-based actor) and a name/location based match
         // key partition
@@ -51,6 +55,8 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
 
     @Override
     protected void process(Response response) {
+        log.error("In BaseDunsGuideValidateMicroEngineActor.process");
+
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
 
@@ -62,6 +68,12 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
             tuple.setDuns(null);
             return;
         }
+
+
+        // $JAW$ Match Report
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_BDGV",
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(traveler.getLatticeAccountId()))));
 
         /* redirect (only when match result is valid and DUNS is in AM) */
 

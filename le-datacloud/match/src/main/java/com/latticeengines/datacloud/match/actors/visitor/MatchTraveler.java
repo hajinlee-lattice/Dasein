@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -65,10 +66,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final Map<String, MatchKeyTuple> entityMatchKeyTuples = new HashMap<>();
 
     // Entity -> (List of Pairs (MatchKeyTuple, List of LookupResults))
-    // A map from each eneity in the match process to an ordered list of MatchKeyTuples used for lookup and the list
+    // A map from each entity in the match process to an ordered list of MatchKeyTuples used for lookup and the list
     // of lookup results.  The lookup results is a list of strings, rather than one result, because SystemId may
     // contain multiple IDs for lookup, giving multiple results.
     private Map<String, List<Pair<MatchKeyTuple, List<String>>>> entityMatchLookupResults = new HashMap<>();
+
+    // A list of pairs of EntityMatchType enums and corresponding MatchKeyTuples, used to track the progress through
+    // the Lattice Data Cloud decision graph.
+    private List<Pair<EntityMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
 
     // Entity match errors
     private List<String> entityMatchErrors;
@@ -355,6 +360,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void addEntityMatchLookupResults(String entity, List<Pair<MatchKeyTuple, List<String>>> lookupResult) {
         entityMatchLookupResults.put(entity, lookupResult);
+    }
+
+    public List<Pair<EntityMatchType, MatchKeyTuple>> getEntityLdcMatchTypeToTupleList() {
+        return entityLdcMatchTypeToTupleList;
+    }
+
+    public void addEntityLdcMatchTypeToTupleList(Pair<EntityMatchType, MatchKeyTuple> pair) {
+        entityLdcMatchTypeToTupleList.add(pair);
     }
 
     public List<String> getEntityMatchErrors() {
