@@ -150,6 +150,9 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunch.getLaunchState() != null) {
             existingPlayLaunch.setLaunchState(playLaunch.getLaunchState());
         }
+        if (playLaunch.getUpdatedBy() != null) {
+            existingPlayLaunch.setUpdatedBy(playLaunch.getUpdatedBy());
+        }
         return existingPlayLaunch;
     }
 
