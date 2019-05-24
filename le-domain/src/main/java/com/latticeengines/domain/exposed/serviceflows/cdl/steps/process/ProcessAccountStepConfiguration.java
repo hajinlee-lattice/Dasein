@@ -9,8 +9,6 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
     private String dataCloudVersion;
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
-    @JsonProperty("data_qupta_limit")
-    private Long dataQuotaLimit;
 
     @Override
     public BusinessEntity getMainEntity() {
@@ -31,13 +29,5 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
-    }
-
-    public Long getDataQuotaLimit() {
-        return dataQuotaLimit;
-    }
-
-    public void setDataQuotaLimit(Long dataQuotaLimit) {
-        this.dataQuotaLimit = dataQuotaLimit;
     }
 }

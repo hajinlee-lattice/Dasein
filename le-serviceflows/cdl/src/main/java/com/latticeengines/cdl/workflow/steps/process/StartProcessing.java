@@ -30,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
@@ -167,6 +168,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setupInactiveVersion();
         setGrapherContext();
         resetEntityMatchFlagsForRetry();
+        setDataQuotaLimit();
 //        bumpEntityMatchVersion();
     }
 
@@ -547,6 +549,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             // need to rerun entity match steps
             removeObjectFromContext(NEW_ENTITY_MATCH_ENVS);
         }
+    }
+
+    private void setDataQuotaLimit() {
+        DataLimit dataLimit = dataFeedProxy.getDataQuotaLimitMap(customerSpace);
+        if (dataLimit == null) {
+            throw new IllegalArgumentException("Data Quota Limit Can not find.");
+        }
+        putObjectInContext(DATAQUOTA_LIMIT, dataLimit);
     }
 
     /*

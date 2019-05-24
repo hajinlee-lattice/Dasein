@@ -67,13 +67,6 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processAccountStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            updateAccountWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            rebuildAccountWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public ProcessAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

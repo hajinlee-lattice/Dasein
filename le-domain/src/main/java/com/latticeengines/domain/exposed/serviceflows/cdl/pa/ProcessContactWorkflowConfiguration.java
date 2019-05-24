@@ -66,13 +66,6 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            updateContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            rebuildContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public ProcessContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
