@@ -217,6 +217,8 @@ public class PlayResource {
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
         playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(play);
         playLaunchService.create(playLaunch);
 
@@ -257,6 +259,8 @@ public class PlayResource {
         playLaunch.setPlay(play);
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
+        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunchChannel.setPlay(play);
 
         return playLaunchChannelService.update(playLaunchChannel);
@@ -266,13 +270,28 @@ public class PlayResource {
     @ResponseBody
     @ApiOperation(value = "Launch every play launch marked as always on")
     public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
+        Boolean isPlayLaunched = false;
         List<PlayLaunchChannel> channels = playLaunchChannelService.findByIsAlwaysOnTrue();
         for (PlayLaunchChannel channel : channels) {
             // refractor logic to service layer?
-            PlayLaunch playLaunch = channel.getPlayLaunch();
-            if (playLaunch == null) {
+            PlayLaunch existingPlayLaunch = channel.getPlayLaunch();
+            if (existingPlayLaunch == null) {
                 throw new LedpException(LedpCode.LEDP_32000, new String[] { "No play launch found" });
             }
+            PlayLaunch playLaunch = new PlayLaunch();
+            playLaunch.setTenant(MultiTenantContext.getTenant());
+            playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
+            playLaunch.setCreatedBy(existingPlayLaunch.getCreatedBy());
+            playLaunch.setUpdatedBy(existingPlayLaunch.getUpdatedBy());
+            playLaunch.setExcludeItemsWithoutSalesforceId(existingPlayLaunch.getExcludeItemsWithoutSalesforceId());
+            playLaunch.setTopNCount(existingPlayLaunch.getTopNCount());
+            playLaunch.setBucketsToLaunch(existingPlayLaunch.getBucketsToLaunch());
+            playLaunch.setLaunchUnscored(existingPlayLaunch.isLaunchUnscored());
+            playLaunch.setLaunchState(existingPlayLaunch.getLaunchState());
+            playLaunch.setDestinationAccountId(existingPlayLaunch.getDestinationAccountId());
+            playLaunch.setDestinationOrgId(existingPlayLaunch.getDestinationOrgId());
+            playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
+            playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
             Play play = channel.getPlay();
             // are these validations necessary?
             playLaunch.setPlay(play);
@@ -281,6 +300,8 @@ public class PlayResource {
                 validateNonEmptyTargetsForLaunch(customerSpace, play, play.getName(), playLaunch, //
                         playLaunch.getDestinationAccountId());
             }
+            playLaunchService.create(playLaunch);
+            channel.setPlayLaunch(playLaunch);
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
             playLaunch.setApplicationId(appId);
 
@@ -296,8 +317,9 @@ public class PlayResource {
             playLaunch.setAccountsLaunched(0L);
             playLaunch.setContactsLaunched(0L);
             playLaunchService.update(playLaunch);
+            isPlayLaunched = true;
         }
-        return false;
+        return isPlayLaunched;
     }
 
     // -------------
