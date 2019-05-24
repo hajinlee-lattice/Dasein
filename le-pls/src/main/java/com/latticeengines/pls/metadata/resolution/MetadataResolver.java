@@ -578,17 +578,30 @@ public class MetadataResolver {
     }
 
     @VisibleForTesting
-    // Note that the returned data and time format are the user supported formats not the Java 8 formats.
+    /*
+     * Note that the returned data and time format are the user supported
+     * formats not the Java 8 formats. if number of column value can be parsed
+     * is more than 10% of size of columnFields, regard it as date, pick the
+     * most occurrence format as result
+     */
     boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
+        int conformingDateCount = 0;
+        double dateThreshold = 0.1 * columnFields.size();
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
-                if (dateTime == null) {
-                    return false;
+                if (dateTime != null) {
+                    conformingDateCount++;
+                    if (conformingDateCount >= dateThreshold) {
+                        break;
+                    }
                 }
             }
+        }
+        if (conformingDateCount < dateThreshold) {
+            return false;
         }
         MutablePair<String, String> result = distinguishDateAndTime(columnFields);
         if (result != null) {
@@ -606,7 +619,6 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
-
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;
@@ -633,6 +645,7 @@ public class MetadataResolver {
                                 supportedDateTimeFormat.indexOf(entry2.getKey()))
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
+
         // legal date time formats are delimited by space defined in
         // TimeStampConvertUtils
         int index = expectedFormat.indexOf(" ");
