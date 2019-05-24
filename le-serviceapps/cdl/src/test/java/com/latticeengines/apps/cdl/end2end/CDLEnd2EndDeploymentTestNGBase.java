@@ -350,25 +350,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
-    protected void setupEnd2EndTestEnvironmentWithExistingTenant(String tenantId) throws Exception {
-        log.info("Bootstrapping test tenants using tenant console ...");
-
-        if (StringUtils.isEmpty(tenantId)) {
-            setupTestEnvironment();
-        } else {
-            setupTestEnvironmentWithTenantId(tenantId);
-        }
-        mainTestTenant = testBed.getMainTestTenant();
-
-        log.info("Test environment setup finished.");
-        createDataFeed();
-        setupBusinessCalendar();
-        setupPurchaseHistoryMetrics();
-        setDefaultAPSRollupPeriod();
-
-        attachProtectedProxy(fileUploadProxy);
-        attachProtectedProxy(testMetadataSegmentProxy);
-    }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
         log.info("Bootstrapping test tenants using tenant console ...");
