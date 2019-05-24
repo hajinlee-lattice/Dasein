@@ -53,11 +53,6 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-    public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            return this;
-    }
-
         public RebuildContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

@@ -186,6 +186,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String PROCESS_ANALYTICS_DECISIONS_KEY = "PROCESS_ANALYTICS_DECISIONS_KEY";
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
 
+    public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
+
     @Autowired
     protected Configuration yarnConfiguration;
 

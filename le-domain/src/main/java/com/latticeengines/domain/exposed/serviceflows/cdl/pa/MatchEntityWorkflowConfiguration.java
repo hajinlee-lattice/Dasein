@@ -44,12 +44,6 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processAccountStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public MatchEntityWorkflowConfiguration build() {
             configuration.setContainerConfiguration("matchEntityWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
