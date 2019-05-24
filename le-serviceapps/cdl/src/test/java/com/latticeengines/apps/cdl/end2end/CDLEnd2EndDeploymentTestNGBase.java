@@ -350,7 +350,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
-
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
         log.info("Bootstrapping test tenants using tenant console ...");
 
