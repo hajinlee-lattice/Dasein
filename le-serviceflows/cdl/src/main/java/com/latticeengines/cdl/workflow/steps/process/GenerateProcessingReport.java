@@ -136,11 +136,27 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode.class);
         updateSystemActionsReport(jsonReport);
         updateDecisionsReport(jsonReport);
+        updateWarningReport(jsonReport);
         updateReportEntitiesSummaryReport(jsonReport);
         Report report = createReport(jsonReport.toString(), ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY,
                 UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
         log.info("Registered report: " + jsonReport.toString());
+    }
+
+    private void updateWarningReport(ObjectNode report) {
+        List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
+        if (CollectionUtils.isNotEmpty(warningMessages)) {
+            ArrayNode warningMessageNode =
+                    (ArrayNode) report.get(ReportPurpose.PROCESS_ANALYZE_WARNING_SUMMARY.getKey());
+            if (warningMessageNode == null) {
+                log.info("No warningMessage summary reports found. Create it.");
+                warningMessageNode = report.putArray(ReportPurpose.PROCESS_ANALYZE_WARNING_SUMMARY.getKey());
+            }
+
+            warningMessages.forEach(warningMessageNode::add);
+            log.info("PA warning message is " + JsonUtils.serialize(warningMessageNode));
+        }
     }
 
     private void updateDecisionsReport(ObjectNode report) {
