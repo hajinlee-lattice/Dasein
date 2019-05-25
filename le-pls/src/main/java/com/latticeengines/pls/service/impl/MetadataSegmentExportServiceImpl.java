@@ -152,6 +152,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             try {
                 String filePath = getExportedFilePath(metadataSegmentExport);
                 response.setHeader("Content-Encoding", "gzip");
+                response.setHeader("Content-Disposition",
+                        String.format("attachment; filename=\"%s\"", "segment_export" + ".csv"));
                 CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
                         MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
                 downloader.setShouldReformatDate(true);
