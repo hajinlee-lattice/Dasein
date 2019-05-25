@@ -48,6 +48,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     });
 
     vm.init = function() {
+        console.log('AvailableFields 1', angular.copy(vm.AvailableFields));
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
@@ -83,8 +84,9 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             });
         }
         vm.AvailableFields = vm.AvailableFields.filter(function(item) {
-            return (item.userField);
+            return (item.userField && typeof item.userField !== 'object');
         });
+        console.log('AvailableFields 2', angular.copy(vm.AvailableFields));
     };
 
     vm.changeLatticeField = function(mapping, form) {

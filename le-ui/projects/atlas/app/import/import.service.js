@@ -35,26 +35,34 @@ angular.module('lp.import')
             map: []
         };
 
+        this.nonCustomIds = [];
+
+        this.calendar = null;
+
+        this.entityMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_ENTITY_MATCH);
+    }
+
+    // These don't get cleared during normal .clear
+    this.initTemplates = function() {
         this.templateAction = 'create-template';
         this.displayType = null;
         this.entityType = null;
         this.feedType = null;
         this.templateData = null;
-
-        this.nonCustomIds = [];
-
-        this.calendar = null;
-
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
-        this.entityMatchEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_ENTITY_MATCH);
     }
 
     this.init();
+    this.initTemplates();
 
     this.clear = function() {
         this.init();
+    }
+
+    this.clearTemplates = function() {
+        this.initTemplates();
     }
 
     this.wizardProgressItems = {
