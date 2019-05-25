@@ -287,7 +287,7 @@ public class PlayResource {
             playLaunch.setTopNCount(existingPlayLaunch.getTopNCount());
             playLaunch.setBucketsToLaunch(existingPlayLaunch.getBucketsToLaunch());
             playLaunch.setLaunchUnscored(existingPlayLaunch.isLaunchUnscored());
-            playLaunch.setLaunchState(existingPlayLaunch.getLaunchState());
+            playLaunch.setLaunchState(LaunchState.UnLaunched);
             playLaunch.setDestinationAccountId(existingPlayLaunch.getDestinationAccountId());
             playLaunch.setDestinationOrgId(existingPlayLaunch.getDestinationOrgId());
             playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
@@ -295,13 +295,14 @@ public class PlayResource {
             Play play = channel.getPlay();
             // are these validations necessary?
             playLaunch.setPlay(play);
+            channel.setPlayLaunch(playLaunch);
+            playLaunchChannelService.update(channel);
+            playLaunch = channel.getPlayLaunch();
             PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
             if (play.getRatingEngine() != null) {
                 validateNonEmptyTargetsForLaunch(customerSpace, play, play.getName(), playLaunch, //
                         playLaunch.getDestinationAccountId());
             }
-            playLaunchService.create(playLaunch);
-            channel.setPlayLaunch(playLaunch);
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
             playLaunch.setApplicationId(appId);
 
