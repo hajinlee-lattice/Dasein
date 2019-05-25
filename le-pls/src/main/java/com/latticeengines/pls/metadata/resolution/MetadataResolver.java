@@ -493,19 +493,20 @@ public class MetadataResolver {
     private String getFundamentalTypeFromFieldType(String fieldType) {
         String fundamentalType = null;
         switch (fieldType.toUpperCase()) {
-        case "BOOLEAN":
-            fundamentalType = ModelingMetadata.FT_BOOLEAN;
-            break;
-        case "DOUBLE":
-            fundamentalType = ModelingMetadata.FT_NUMERIC;
-            break;
-        case "LONG":
-            fundamentalType = ModelingMetadata.FT_YEAR;
-            break;
-        case "STRING":
-        default:
-            fundamentalType = ModelingMetadata.FT_ALPHA;
-            break;
+            case "BOOLEAN":
+                fundamentalType = ModelingMetadata.FT_BOOLEAN;
+                break;
+            case "DOUBLE":
+            case "INT":
+                fundamentalType = ModelingMetadata.FT_NUMERIC;
+                break;
+            case "LONG":
+                fundamentalType = ModelingMetadata.FT_YEAR;
+                break;
+            case "STRING":
+            default:
+                fundamentalType = ModelingMetadata.FT_ALPHA;
+                break;
         }
         return fundamentalType;
     }
