@@ -846,7 +846,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         updateExportAppIdMap();
         List<AtlasScheduling> atlasSchedulingList =
                 atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
-        log.info(JsonUtils.serialize(atlasSchedulingList));
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
             log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
