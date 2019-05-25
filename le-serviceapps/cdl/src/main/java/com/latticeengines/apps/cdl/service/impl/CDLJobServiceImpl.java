@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -465,40 +466,44 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
 
             List<String> notStartRunningHithTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : highMap.entrySet()) {
+            Iterator<Map.Entry<String, List<Object>>> highMapIterator = highMap.entrySet().iterator();
+            while(highMapIterator.hasNext()) {
+                Map.Entry<String, List<Object>> entry = highMapIterator.next();
                 if (runningJobAppId.contains(entry.getKey())) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        highMap.remove(entry.getKey());
+                        highMapIterator.remove();
                     } else {
                         notStartRunningHithTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
                     }
                 }
                 if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    highMap.remove(entry.getKey());
+                    highMapIterator.remove();
                 }
             }
 
             List<String> notStartRunningLowTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : lowMap.entrySet()) {
+            Iterator<Map.Entry<String, List<Object>>> lowMapMapIterator = lowMap.entrySet().iterator();
+            while(lowMapMapIterator.hasNext()) {
+                Map.Entry<String, List<Object>> entry = lowMapMapIterator.next();
                 if (runningJobAppId.contains(entry.getKey())) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        lowMap.remove(entry.getKey());
+                        lowMapMapIterator.remove();
                     } else {
                         notStartRunningLowTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
                     }
                 }
                 if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    lowMap.remove(entry.getKey());
+                    lowMapMapIterator.remove();
                 }
             }
 
