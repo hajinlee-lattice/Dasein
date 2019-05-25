@@ -37,8 +37,7 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
                             + getClass().getSimpleName()
                             + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
 
-            // $JAW$ Match Report
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_AML",
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                     Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
                             Collections.singletonList(traveler.getLatticeAccountId()))));
             if (lookupEntry != null) {

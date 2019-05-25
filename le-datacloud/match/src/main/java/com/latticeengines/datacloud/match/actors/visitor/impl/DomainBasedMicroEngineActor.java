@@ -26,9 +26,6 @@ public class DomainBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     @Override
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-        //return matchKeyTuple.getDomain() != null;
-
-        // $JAW$
         if (matchKeyTuple.getDomain() != null) {
             traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                     EntityMatchType.LDC_DOMAIN, prepareInputData(traveler.getMatchKeyTuple())));

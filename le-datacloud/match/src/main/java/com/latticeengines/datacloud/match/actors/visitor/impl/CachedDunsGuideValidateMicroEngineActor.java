@@ -37,10 +37,7 @@ public class CachedDunsGuideValidateMicroEngineActor extends BaseDunsGuideValida
     @Override
     protected boolean postProcessDnBMatchResult(@NotNull MatchTraveler traveler, boolean isDunsInAM) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-
-        // $JAW$
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(EntityMatchType.LDC_CACHED_DUNS_GUIDE_VALIDATE, tuple));
-
         MatchInput input = traveler.getMatchInput();
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         DnBMatchContext cacheContext = DnBMatchUtils.getCacheResult(traveler);

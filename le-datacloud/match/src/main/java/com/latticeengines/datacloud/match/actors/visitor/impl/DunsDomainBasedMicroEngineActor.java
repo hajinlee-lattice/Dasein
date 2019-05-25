@@ -31,9 +31,6 @@ public class DunsDomainBasedMicroEngineActor extends AMLookupMicroEngineTemplate
     @Override
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-        //return (matchKeyTuple.getDomain() != null && matchKeyTuple.getDuns() != null);
-
-        // $JAW$
         if (matchKeyTuple.getDomain() != null && matchKeyTuple.getDuns() != null) {
             traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                     EntityMatchType.LDC_DUNS_DOMAIN, prepareInputData(traveler.getMatchKeyTuple())));

@@ -57,8 +57,6 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         }
 
         if (matchKeyTuple.getName() != null) {
-
-            // $JAW$
             traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                     EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
             return true;
@@ -91,7 +89,8 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         DnBMatchContext res = (DnBMatchContext) response.getResult();
         traveler.debug(REMOTE_API);
         String logMessage = String.format(
-                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
+                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, " +
+                        "City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
                 res.getDuns(), getClass().getSimpleName(),
                 (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
                 (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
@@ -112,9 +111,7 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
-
-            // $JAW$ Match Report
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_LTD",
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                     Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
                             Collections.singletonList(traveler.getLatticeAccountId()))));
 

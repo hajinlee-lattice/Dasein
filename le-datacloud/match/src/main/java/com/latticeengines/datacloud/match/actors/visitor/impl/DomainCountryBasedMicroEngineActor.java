@@ -28,9 +28,6 @@ public class DomainCountryBasedMicroEngineActor extends AMLookupMicroEngineTempl
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         if (matchKeyTuple.getState() != null || matchKeyTuple.getZipcode() != null) {
-            //return (matchKeyTuple.getDomain() != null);
-
-            // $JAW$
             if (matchKeyTuple.getDomain() != null) {
                 traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                         EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));
@@ -39,9 +36,6 @@ public class DomainCountryBasedMicroEngineActor extends AMLookupMicroEngineTempl
                 return false;
             }
         } else {
-            //return (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null);
-
-            // $JAW$
             if (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null) {
                 traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                         EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));

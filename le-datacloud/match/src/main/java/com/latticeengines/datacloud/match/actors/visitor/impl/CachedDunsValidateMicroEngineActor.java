@@ -64,10 +64,7 @@ public class CachedDunsValidateMicroEngineActor extends DataSourceMicroEngineTem
     protected void process(Response response) {
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-
-        // $JAW$
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(EntityMatchType.LDC_CACHED_DUNS_VALIDATE, tuple));
-
         DnBMatchContext context = DnBMatchUtils.getCacheResult(traveler);
 
         // indicate that we already validate DnBMatchContext

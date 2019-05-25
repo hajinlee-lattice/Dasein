@@ -37,10 +37,7 @@ public class DunsGuideValidateMicroEngineActor extends BaseDunsGuideValidateMicr
     @Override
     protected boolean postProcessDnBMatchResult(@NotNull MatchTraveler traveler, boolean isDunsInAM) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-
-        // $JAW$
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(EntityMatchType.LDC_DUNS_VALIDATE, tuple));
-
         MatchInput input = traveler.getMatchInput();
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         DnBMatchContext remoteContext = DnBMatchUtils.getRemoteResult(traveler);

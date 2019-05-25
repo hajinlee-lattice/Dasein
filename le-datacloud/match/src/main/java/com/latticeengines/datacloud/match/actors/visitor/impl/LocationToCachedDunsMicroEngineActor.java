@@ -59,8 +59,6 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         }
 
         if (matchKeyTuple.getName() != null) {
-
-            // $JAW$
             traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
                     EntityMatchType.LDC_LOCATION_CACHED_DUNS, traveler.getMatchKeyTuple()));
             return true;
@@ -118,9 +116,7 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
-
-            // $JAW$ Match Report
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_LTCD",
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                     Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
                             Collections.singletonList(traveler.getLatticeAccountId()))));
         }

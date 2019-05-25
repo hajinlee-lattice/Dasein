@@ -64,10 +64,7 @@ public class DunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<
     protected void process(Response response) {
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-
-        // $JAW$
         traveler.addEntityLdcMatchTypeToTupleList(Pair.of(EntityMatchType.LDC_DUNS_VALIDATE, tuple));
-
         DnBMatchContext context = DnBMatchUtils.getRemoteResult(traveler);
 
         // indicate that we already validate DnBMatchContext

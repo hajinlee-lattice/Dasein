@@ -45,7 +45,6 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
 
     @Override
     protected boolean accept(MatchTraveler traveler) {
-        log.error("In BaseDunsGuideValidateMicroEngineActor.accept");
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         // have duns (from location-based actor) and a name/location based match
         // key partition
@@ -55,8 +54,6 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
 
     @Override
     protected void process(Response response) {
-        log.error("In BaseDunsGuideValidateMicroEngineActor.process");
-
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
 
@@ -69,9 +66,7 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
             return;
         }
 
-
-        // $JAW$ Match Report
-        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name() + "_BDGV",
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                 Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
                         Collections.singletonList(traveler.getLatticeAccountId()))));
 
