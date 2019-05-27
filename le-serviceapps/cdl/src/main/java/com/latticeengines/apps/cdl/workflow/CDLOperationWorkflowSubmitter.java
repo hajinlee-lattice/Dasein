@@ -74,8 +74,6 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
 
-    private String executionId;
-
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration, WorkflowPidWrapper pidWrapper) {
@@ -91,13 +89,15 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
 
         Long var = dataFeedService.lockExecution(customerSpace.toString(), "",
                 DataFeedExecutionJobType.CDLOperation);
+        String executionId;
         if (var != null) {
             executionId = var.toString();
+            log.info("executionId = " + executionId);
         } else {
-            executionId = null;
+            executionId = "";
+            log.info("executionId is null ");
         }
 
-        log.info("executionId = " + executionId);
         if (StringUtils.isEmpty(executionId)) {
             String errorMessage;
             if (DataFeed.Status.ProcessAnalyzing.equals(dataFeedStatus)) {
@@ -117,7 +117,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         Action action = registerAction(customerSpace, maintenanceOperationConfiguration, pidWrapper.getPid());
         log.info(String.format("Action=%s", action));
         CDLOperationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
-                maintenanceOperationConfiguration, action.getPid(), initialStatus);
+                maintenanceOperationConfiguration, action.getPid(), initialStatus, executionId);
         log.info(String.format("Submitting CDL operation workflow for customer %s", customerSpace));
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
@@ -168,7 +168,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
 
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid,
-            DataFeed.Status status) {
+            DataFeed.Status status, String executionId) {
         boolean isCleanupByUpload = false;
         BusinessEntity businessEntity = null;
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
