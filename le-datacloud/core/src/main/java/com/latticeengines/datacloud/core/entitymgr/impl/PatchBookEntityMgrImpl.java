@@ -83,12 +83,6 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
         super.delete(entity);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteById(String id, boolean hardDelete) {
-        getDao().deleteById(id, hardDelete);
-    }
-
     /* methods to set a value to a field for all PatchBooks in the given list */
 
     @Override

@@ -105,9 +105,4 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      * @param version version string to set, can be {@literal null}
      */
     void setExpireAfterVersion(@NotNull List<Long> pIds, String version);
-
-    /*
-     * Delete from PatchBook table by Id
-     */
-    void deleteById(String id, boolean hardDelete);
 }
