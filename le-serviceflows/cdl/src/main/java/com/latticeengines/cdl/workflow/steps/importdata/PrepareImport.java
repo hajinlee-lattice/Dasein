@@ -39,10 +39,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
@@ -64,6 +66,9 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     @Inject
     private DataFeedProxy dataFeedProxy;
 
+    @Inject
+    private TenantService tenantService;
+
     @Override
     public void execute() {
         copyToSystemFolder();
@@ -77,6 +82,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     private void validateFile() {
         String customerSpace = configuration.getCustomerSpace().toString();
+        Tenant currentTenant = tenantService.findByTenantId(customerSpace);
+        int notificationState = currentTenant == null? 0 : currentTenant.getNotificationState();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, configuration.getDataFeedTaskId());
         S3ImportEmailInfo emailInfo = configuration.getEmailInfo();
         Table template = dataFeedTask.getImportTemplate();
@@ -166,21 +173,29 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             }
             String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
             putOutputValue(WorkflowContextConstants.Outputs.IMPORT_WARNING, message);
-            emailInfo.setErrorMsg(message);
-            sendS3ImportEmail("In_Progress", emailInfo);
+            if ((notificationState & 4) == 4) {
+                emailInfo.setErrorMsg(message);
+                sendS3ImportEmail("In_Progress", emailInfo);
+            }
         } catch (LedpException e) {
             moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if ((notificationState & 1) == 1) {
+                emailInfo.setErrorMsg(e.getMessage());
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw e;
         } catch (IOException e) {
             log.error(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if ((notificationState & 1) == 1) {
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw new RuntimeException("IO error! " + e.getMessage());
         } catch (IllegalArgumentException e) {
             moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if ((notificationState & 1) == 1) {
+                emailInfo.setErrorMsg(e.getMessage());
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             log.error(e.getMessage());
             // PLS-13589 duplicate error will be threw by csv parser 491
             String errorMessage = e.getMessage();
@@ -192,8 +207,10 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         } catch (Exception e) {
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             moveFromInProgressToFailed(s3FilePath);
-            emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if ((notificationState & 1) == 1) {
+                emailInfo.setErrorMsg(e.getMessage());
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw e;
         }
     }

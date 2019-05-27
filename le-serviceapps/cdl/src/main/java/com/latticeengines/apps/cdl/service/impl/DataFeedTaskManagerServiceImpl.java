@@ -291,7 +291,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
-        sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
+        if ((tenant.getNotificationState() & 4) == 4) {//1XX & 100 = 100 0XX & 100 = 0
+            sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
+        }
         return appId.toString();
     }
 
