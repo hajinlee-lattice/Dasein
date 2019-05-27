@@ -60,12 +60,12 @@ public class GlobalAuthenticationServiceImplTestNG extends SecurityFunctionalTes
         Assert.assertTrue(expectEx);
         //reset invalid count;
         globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
                 globalAuthenticationService.authenticateUser(adminUsername, passwd);
             } catch (Exception e) {
                 assertTrue(e instanceof LedpException);
-                if (i < 5) {
+                if (i < 4) {
                     assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18001);
                 } else {
                     assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_19015);

@@ -34,13 +34,13 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
 
     private static final String TESTING_USER_FIRST_NAME = "Lattice";
     private static final String TESTING_USER_LAST_NAME = "Tester";
-    private static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
-    private static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
-    private static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@test.lattice-engines.com";
-    private static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
-    private static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
-    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
-    private static final String THIRD_PARTY_USER_USERNAME = "pls-third-party-user-tester@test.lattice-engines.ext";
+    private static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@lattice-engines.com";
+    private static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@lattice-engines.com";
+    private static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@lattice-engines.com";
+    private static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@lattice-engines.com";
+    private static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@lattice-engines.com";
+    private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@lattice-engines.com";
+    private static final String THIRD_PARTY_USER_USERNAME = "pls-third-party-user-tester@lattice-engines.com";
 
     private static final Long NINETY_DAYS_IN_MILLISECONDS = 90 * 24 * 60 * 60 * 1000L;
 
