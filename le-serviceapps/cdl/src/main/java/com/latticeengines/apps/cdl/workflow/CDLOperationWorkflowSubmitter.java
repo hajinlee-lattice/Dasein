@@ -21,6 +21,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
@@ -47,7 +49,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowCo
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -59,7 +60,10 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     private TenantService tenantService;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
+
+    @Inject
+    private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private ActionService actionService;
@@ -80,12 +84,12 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         }
         log.info(String.format("CDLOperation WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace.toString());
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
         checkDeleteAndImport(customerSpace, maintenanceOperationConfiguration);
 
-        Long var = dataFeedProxy.lockExecution(customerSpace.toString(),
+        Long var = dataFeedService.lockExecution(customerSpace.toString(), "",
                 DataFeedExecutionJobType.CDLOperation);
         if (var != null) {
             executionId = var.toString();
@@ -293,7 +297,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                     ImportActionConfiguration importActionConfiguration =
                             (ImportActionConfiguration) action.getActionConfiguration();
 
-                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                    DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(),
                             importActionConfiguration.getDataFeedTaskId());
                     if (cleanupEntities.contains(dataFeedTask.getEntity())) {
                         throw new RuntimeException("You can not submit delete ALL job while import job is running");
