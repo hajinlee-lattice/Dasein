@@ -108,7 +108,11 @@ public class CDLResource {
         request.setUserId(MultiTenantContext.getEmailAddress());
         try {
             ApplicationId result = cdlService.processAnalyze(customerSpace.toString(), request);
-            return ResponseDocument.successResponse(result.toString());
+            if (result == null) {
+                return ResponseDocument.successResponse(null);
+            } else {
+                return ResponseDocument.successResponse(result.toString());
+            }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit processAnalyze job: %s", e.getMessage()));
             if (e instanceof UIActionException) {
