@@ -211,6 +211,7 @@ public class PatchResource {
     }
 
     private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type) {
+        // adding pagination parameters
         if (mode == PatchMode.Normal) {
             return patchBookEntityMgr.findByType(type);
         } else {
