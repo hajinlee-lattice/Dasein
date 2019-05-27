@@ -89,6 +89,8 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 DataFeedExecutionJobType.CDLOperation);
         if (var != null) {
             executionId = var.toString();
+        } else {
+            executionId = null;
         }
 
         log.info("executionId = " + executionId);
