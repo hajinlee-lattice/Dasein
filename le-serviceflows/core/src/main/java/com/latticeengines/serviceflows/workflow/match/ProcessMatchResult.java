@@ -81,7 +81,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
     @Override
     protected void postJobExecution(SparkJobResult result) {
         String customer = configuration.getCustomer();
-        String eventTableName = NamingUtils.timestamp("MatchDataCloud");
+        String eventTableName = NamingUtils.timestampWithRandom("MatchDataCloud");
         Table eventTable = toTable(eventTableName, result.getTargets().get(0));
         overlayMetadata(eventTable);
         metadataProxy.createTable(customer, eventTableName, eventTable);
