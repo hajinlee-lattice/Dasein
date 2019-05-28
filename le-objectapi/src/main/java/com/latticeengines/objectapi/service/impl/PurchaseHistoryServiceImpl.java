@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -174,38 +175,46 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         Tenant tenant = MultiTenantContext.getTenant();
         // SpendAnalyticsSegment is optional in Account data. Check to see if
         // this column exists. If not, return empty result
-        try {
-            String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
-                    BusinessEntity.PeriodTransaction);
-            String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
-            log.info(String.format("Get Period Transaction Table %s, Account Table %s for %s ",
-                    periodTransactionTableName, accountTableName, tenant.getId()));
+        List<ColumnMetadata> acctCMList = servingStoreProxy.getDecoratedMetadataFromCache(
+                MultiTenantContext.getCustomerSpace().toString(), BusinessEntity.Account);
 
-            String query = MessageFormat.format(
-                    "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
-                            + "FROM {3} as ac " //
-                            + "WHERE ac.{0} IS NOT NULL and ac.{1} in " //
-                            + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?) " //
-                            + "GROUP BY ac.{0} " //
-                            + "ORDER BY ac.{0}", //
-                    InterfaceName.SpendAnalyticsSegment, // 0
-                    InterfaceName.AccountId, // 1
-                    InterfaceName.RepresentativeAccounts, // 2
-                    accountTableName, // 3
-                    periodTransactionTableName, // 4
-                    InterfaceName.ProductType); // 5
-            log.info("query for getAllSpendAnalyticsSegments " + query);
-            List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, ProductType.Spending.name());
-            return new DataPage(retList);
-        } catch (Exception e) {
-            if (e instanceof java.sql.SQLException
-                    && ExceptionUtils.getStackTrace(e).contains("ac.spendanalyticssegment does not exist")) {
-                log.warn("spendanalyticssegment column does not exist");
-                return new DataPage(Collections.emptyList());
-            } else {
-                throw e;
+        if (acctCMList.stream()
+                .anyMatch(cm -> cm.getAttrName().equalsIgnoreCase(InterfaceName.SpendAnalyticsSegment.name()))) {
+            try {
+                String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
+                        BusinessEntity.PeriodTransaction);
+                String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
+                log.info(String.format("Get Period Transaction Table %s, Account Table %s for %s ",
+                        periodTransactionTableName, accountTableName, tenant.getId()));
+
+                String query = MessageFormat.format(
+                        "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
+                                + "FROM {3} as ac " //
+                                + "WHERE ac.{0} IS NOT NULL and ac.{1} in " //
+                                + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?) " //
+                                + "GROUP BY ac.{0} " //
+                                + "ORDER BY ac.{0}", //
+                        InterfaceName.SpendAnalyticsSegment, // 0
+                        InterfaceName.AccountId, // 1
+                        InterfaceName.RepresentativeAccounts, // 2
+                        accountTableName, // 3
+                        periodTransactionTableName, // 4
+                        InterfaceName.ProductType); // 5
+                log.info("query for getAllSpendAnalyticsSegments " + query);
+                List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query,
+                        ProductType.Spending.name());
+                return new DataPage(retList);
+            } catch (Exception e) {
+                if (e instanceof java.sql.SQLException
+                        && ExceptionUtils.getStackTrace(e).contains("ac.spendanalyticssegment does not exist")) {
+                    log.warn("spendanalyticssegment column does not exist");
+                    return new DataPage(Collections.emptyList());
+                } else {
+                    throw e;
+                }
             }
         }
+        return new DataPage(Collections.emptyList());
     }
 
     private String getAndValidateServingStoreTableName(String customerSpace, BusinessEntity businessEntity) {
