@@ -10,8 +10,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +22,12 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.spark.InputStreamSparkScript;
@@ -39,6 +44,9 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 public class SparkSQLServiceImpl implements SparkSQLService {
 
     private static final Logger log = LoggerFactory.getLogger(SparkSQLServiceImpl.class);
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Inject
     private LivySessionService livySessionService;
@@ -143,10 +151,38 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         params.put("TABLE_MAP", hdfsPathMap);
+        params.put("TABLE_FORMAT", getTableFormat(hdfsPathMap));
         params.put("PERSIST_RAW_TABLES", persist);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         log.info("Output: " + result.getOutput());
+    }
+
+    private Map<String, DataUnit.DataFormat> getTableFormat(Map<String, String> hdfsPathMap) {
+        Map<String, DataUnit.DataFormat> fmtMap = new HashMap<>();
+        hdfsPathMap.forEach((tbl, path) -> {
+            if (isParquet(path)) {
+                fmtMap.put(tbl, DataUnit.DataFormat.PARQUET);
+            } else {
+                fmtMap.put(tbl, DataUnit.DataFormat.AVRO);
+            }
+        });
+        return fmtMap;
+    }
+
+    private boolean isParquet(String path) {
+        if (path.endsWith(".parquet")) {
+            return true;
+        } else if (path.endsWith(".avro")) {
+            return false;
+        } else {
+            String parquetGlob = PathUtils.toParquetGlob(path);
+            try {
+                return CollectionUtils.isNotEmpty(HdfsUtils.getFilesByGlob(yarnConfiguration, parquetGlob));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to expand glob " + parquetGlob);
+            }
+        }
     }
 
     private InputStreamSparkScript getAttrRepoScript() {

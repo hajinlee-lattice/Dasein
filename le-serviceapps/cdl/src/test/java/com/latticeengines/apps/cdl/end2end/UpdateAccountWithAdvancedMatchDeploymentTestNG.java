@@ -186,7 +186,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
                 TableRoleInCollection.ConsolidatedAccount);
         String hdfsPath = consolidatedAccount.getExtracts().get(0).getPath();
         log.info("Account batch store {} location: {}", consolidatedAccount.getName(), hdfsPath);
-        AvroFilesIterator iter = AvroUtils.avroFileIterator(yarnConfiguration, hdfsPath);
+        AvroFilesIterator iter = AvroUtils.iterateAvroFiles(yarnConfiguration, hdfsPath);
         // Currently use AccountId as record identifier
         Set<String> recordIdsNoEntityId = new HashSet<>();
         int total = 0;

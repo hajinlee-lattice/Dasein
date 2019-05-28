@@ -1452,7 +1452,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String dailyFileContainingTargetDay = dailyFiles.stream()
                 .filter(f -> f.contains(String.valueOf(dayPeriod))).findFirst().orElse(null);
         Assert.assertNotNull(dailyFileContainingTargetDay);
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, dailyFileContainingTargetDay);
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
         while (iter.hasNext()) {
             GenericRecord record = iter.next();

@@ -32,7 +32,7 @@ def commonOpts():
     return args
 
 def testOpts(args):
-    testPattern = '-Dtest=%s' % args.test if args.test[-6:] == 'TestNG' else '-Dtest=*%s*' % args.test
+    testPattern = '-Dtest=%s' % args.test if (args.test[-6:] == 'TestNG') or ('#' in args.test) else '-Dtest=*%s*' % args.test
     profile_opts = ['-P%s' % p for p in args.profiles.split(',')]
     group_opts = [] if args.groups is None else ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups]
     extra_opts = []

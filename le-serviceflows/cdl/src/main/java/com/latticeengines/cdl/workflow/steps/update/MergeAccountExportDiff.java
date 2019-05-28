@@ -29,4 +29,9 @@ public class MergeAccountExportDiff extends BaseMergeTableRoleDiff<ProcessAccoun
         return InterfaceName.AccountId.name();
     }
 
+    @Override
+    protected boolean saveParquet() {
+        return true;
+    }
+
 }

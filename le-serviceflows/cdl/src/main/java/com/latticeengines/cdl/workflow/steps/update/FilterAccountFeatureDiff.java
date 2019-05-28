@@ -69,7 +69,7 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String filteredTableName = NamingUtils.timestamp("FilterAccountFeatures");
+        String filteredTableName = NamingUtils.timestamp("AccountFeaturesDiff");
         Table filteredTable = toTable(filteredTableName, InterfaceName.AccountId.name(), result.getTargets().get(0));
 
         Map<String, Attribute> attributeMap = new HashMap<>();

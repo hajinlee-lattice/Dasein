@@ -46,7 +46,7 @@ import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -311,10 +311,8 @@ public class CheckpointService {
             log.info("countRole " + role.name() + " Table " + table.getName() + " Path "
                     + table.getExtracts().get(0).getPath());
             String path = table.getExtracts().get(0).getPath();
-            if (!path.endsWith(".avro")) {
-                path += path.endsWith("/") ? "*.avro" : "/*.avro";
-            }
-            return AvroUtils.count(yarnConfiguration, path);
+            String globPath = AvroParquetUtils.toParquetOrAvroGlob(yarnConfiguration, path);
+            return AvroParquetUtils.countParquetOrAvro(yarnConfiguration, globPath);
         }).sum();
     }
 

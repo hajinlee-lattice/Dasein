@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
@@ -87,6 +88,7 @@ public class FilterAccountExport extends RunSparkJob<ProcessAccountStepConfigura
         CopyConfig config = new CopyConfig();
         config.setInput(Collections.singletonList(fullAccountTable.toHdfsDataUnit("FullAccount")));
         config.setSelectAttrs(getRetrainAttrNames());
+        config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
         return config;
     }
 
