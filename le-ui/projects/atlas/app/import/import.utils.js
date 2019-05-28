@@ -4,7 +4,7 @@
  * ]
  */
 angular.module('lp.import.utils', ['mainApp.core.redux'])
-.service('ImportUtils', function(ReduxService){
+.service('ImportUtils', function($state){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
     ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId'}};
@@ -105,10 +105,10 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         return inschema;
     };
 
-    this.remapTypes = function(fieldsMapped, newTypesObj){
+    this.remapTypes = function(fieldsMapped, newTypesObj, entity){
         var userFields = Object.keys(newTypesObj);
         userFields.forEach(function(userFieldName){
-            updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName]);
+            updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName], entity);
         });
     };
     this.updateLatticeDateField = (fieldMapped, dateObject) => {
@@ -119,26 +119,69 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         // console.log(fieldMapped);
     };
 
-    function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj){
+    function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj, entity){
         fieldsMapped.forEach(function(fieldMapped){
             if(fieldMapped.userField == userFieldName){
                 fieldMapped.fieldType = newTypeObj.type;
-                updateFieldDate(fieldMapped, newTypeObj);
+                updateFieldDate(fieldMapped, newTypeObj, entity);
                 return;
             }
         });
     }
 
-    function updateFieldDate(fieldMapped, newTypeObj) {
-        if(fieldMapped.fieldType !== 'DATE'){
-            delete fieldMapped.dateFormatString;
-            delete fieldMapped.timeFormatString;
-            delete fieldMapped.timezone;
+    function updateFieldDate(fieldMapped, newTypeObj, entity) {
+        // console.log('UPDATING ', fieldMapped, 'NEW TYPE ==> ',newTypeObj);
+        // let redux = $state.get('home.import').data.redux;
+
+                // console.log('REDUX AAA', data);
+        // console.log('RX SERVICE ', ReduxService);
+        if(newTypeObj.type){
+            if(newTypeObj.type !== 'DATE'){
+                delete fieldMapped.dateFormatString;
+                delete fieldMapped.timeFormatString;
+                delete fieldMapped.timezone;
+            }else{
+                fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+                fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+                fieldMapped.timezone = newTypeObj.timezone;
+            }
         }else{
-            fieldMapped.dateFormatString = newTypeObj.dateFormatString;
-            fieldMapped.timeFormatString = newTypeObj.timeFormatString;
-            fieldMapped.timezone = newTypeObj.timezone;
+            
+            let newMapped = newTypeObj.mappedField;
+            if(!newMapped){
+                return;
+            }
+            let toLattice = fieldMapped.mappedToLatticeField;
+            if(toLattice){
+                let field = ImportUtils.getFieldFromLaticeSchema(entity, newMapped);
+                fieldMapped.fieldType = field.fieldType;
+                fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+                fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+                fieldMapped.timezone = newTypeObj.timezone;
+            }else{
+                let redux = $state.get('home.import').data.redux;
+                let field = redux.store.fieldMappings.map[newMapped]
+                if(field){
+                    fieldMapped.fieldType = field.fieldType;
+                    fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+                    fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+                    fieldMapped.timezone = newTypeObj.timezone;
+                }
+                // console.log('REDUX AAA', redux);
+                // console.log(ReduxService);
+                
+            }
         }
+        // console.log(fieldMapped, newTypeObj, entity);
+        // if(fieldMapped.fieldType !== 'DATE'){
+        //     delete fieldMapped.dateFormatString;
+        //     delete fieldMapped.timeFormatString;
+        //     delete fieldMapped.timezone;
+        // }else{
+            // fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+            // fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+            // fieldMapped.timezone = newTypeObj.timezone;
+        // }
     }
     
     function removeUniqueIdsMapped( entity, fieldsMapped){
@@ -170,7 +213,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 if(savedObj.cdlExternalSystemType){
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
-                updateFieldDate(fieldsMapped[mapped], savedObj);
+                updateFieldDate(fieldsMapped[mapped], savedObj, entity);
             }
             
         });

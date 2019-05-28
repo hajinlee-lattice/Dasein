@@ -117,7 +117,7 @@ angular.module('lp.import.wizard.customfields', [])
     }
     vm.changeSingleType = function(fieldMapping){
         let userField = fieldMapping.userField;
-        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone});
+        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone}, ImportWizardStore.getEntityType());
         ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
         vm.validate();
     }
