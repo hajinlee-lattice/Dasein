@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.EmailNotificationValidateUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -82,8 +83,6 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     private void validateFile() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Tenant currentTenant = tenantService.findByTenantId(customerSpace);
-        int notificationState = currentTenant == null? 0 : currentTenant.getNotificationState();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, configuration.getDataFeedTaskId());
         S3ImportEmailInfo emailInfo = configuration.getEmailInfo();
         Table template = dataFeedTask.getImportTemplate();
@@ -173,29 +172,21 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             }
             String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
             putOutputValue(WorkflowContextConstants.Outputs.IMPORT_WARNING, message);
-            if ((notificationState & 4) == 4) {
-                emailInfo.setErrorMsg(message);
-                sendS3ImportEmail("In_Progress", emailInfo);
-            }
+            emailInfo.setErrorMsg(message);
+            sendS3ImportEmail("In_Progress", emailInfo);
         } catch (LedpException e) {
             moveFromInProgressToFailed(s3FilePath);
-            if ((notificationState & 1) == 1) {
-                emailInfo.setErrorMsg(e.getMessage());
-                sendS3ImportEmail("Failed", emailInfo);
-            }
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail("Failed", emailInfo);
             throw e;
         } catch (IOException e) {
             log.error(e.getMessage());
-            if ((notificationState & 1) == 1) {
-                sendS3ImportEmail("Failed", emailInfo);
-            }
+            sendS3ImportEmail("Failed", emailInfo);
             throw new RuntimeException("IO error! " + e.getMessage());
         } catch (IllegalArgumentException e) {
             moveFromInProgressToFailed(s3FilePath);
-            if ((notificationState & 1) == 1) {
-                emailInfo.setErrorMsg(e.getMessage());
-                sendS3ImportEmail("Failed", emailInfo);
-            }
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail("Failed", emailInfo);
             log.error(e.getMessage());
             // PLS-13589 duplicate error will be threw by csv parser 491
             String errorMessage = e.getMessage();
@@ -207,19 +198,22 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         } catch (Exception e) {
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             moveFromInProgressToFailed(s3FilePath);
-            if ((notificationState & 1) == 1) {
-                emailInfo.setErrorMsg(e.getMessage());
-                sendS3ImportEmail("Failed", emailInfo);
-            }
+            emailInfo.setErrorMsg(e.getMessage());
+            sendS3ImportEmail("Failed", emailInfo);
             throw e;
         }
     }
 
     private void sendS3ImportEmail(String result, S3ImportEmailInfo emailInfo) {
         try {
-            InternalResourceRestApiProxy proxy = getInternalResourceProxy();
             String tenantId = configuration.getCustomerSpace().toString();
-            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            Tenant tenant = tenantService.findByTenantId(tenantId);
+            int notificationState = tenant == null ? 0 : tenant.getNotificationState();
+            InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+            if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
+                    notificationState)) {
+                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }

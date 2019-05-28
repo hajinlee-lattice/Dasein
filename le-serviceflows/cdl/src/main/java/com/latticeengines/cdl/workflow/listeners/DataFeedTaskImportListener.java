@@ -19,6 +19,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.EmailNotificationValidateUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -82,6 +83,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         Boolean sendS3ImportEmail = Boolean.valueOf(
                 job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
+        int notificationState = job.getTenant().getNotificationState();
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", applicationId));
@@ -105,9 +107,11 @@ public class DataFeedTaskImportListener extends LEJobListener {
         }
 
         if (jobExecution.getStatus().isUnsuccessful()) {
-            if (sendS3ImportEmail) {
+            String result = "Failed";
+            if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
+                    (emailInfo != null), notificationState)) {
                 String message = "Failed to import s3 file, please contact Lattice admin.";
-                sendS3ImportEmail(hostPort, customerSpace, "Failed",
+                sendS3ImportEmail(hostPort, customerSpace, result,
                         importJobIdentifier, emailInfo, message);
             }
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
@@ -173,8 +177,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     vdbLoadTableStatus.setMessage("Load table complete!");
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
                 }
-                if (sendS3ImportEmail) {
-                    sendS3ImportEmail(hostPort, customerSpace, "Success",
+                String result = "Success";
+                if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
+                        (emailInfo != null), notificationState)) {
+                    sendS3ImportEmail(hostPort, customerSpace, result,
                             importJobIdentifier, emailInfo, null);
                 }
             } catch (Exception e) {
@@ -185,8 +191,10 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     vdbLoadTableStatus.setMessage(String.format("Load table failed with exception: %s", e.toString()));
                     dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
                 }
-                if (sendS3ImportEmail) {
-                    sendS3ImportEmail(hostPort, customerSpace, "Failed",
+                String result = "Failed";
+                if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
+                        (emailInfo != null), notificationState)) {
+                    sendS3ImportEmail(hostPort, customerSpace, result,
                             importJobIdentifier, emailInfo, e.getMessage());
                 }
             }
