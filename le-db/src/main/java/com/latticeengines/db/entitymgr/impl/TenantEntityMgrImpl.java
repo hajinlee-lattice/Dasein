@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import com.latticeengines.domain.exposed.security.TenantType;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Long> implements TenantEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(TenantEntityMgrImpl.class);
 
     private final TenantRepository tenantRepository;
 
@@ -78,6 +82,18 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Tenant> findAllByType(TenantType type) {
         return tenantRepository.findAllByTenantType(type);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void setNotificationStateByTenantId(String tenantId, int status) {
+        Tenant tenant1 = findByTenantId(tenantId);
+        if (tenant1 == null) {
+            log.error("can not find the tenant using tenantId " + tenantId);
+        } else {
+            tenant1.setNotificationState(status);
+            super.update(tenant1);
+        }
     }
 
     @Override
