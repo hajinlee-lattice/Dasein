@@ -23,7 +23,7 @@ public class MatchCdlSplitWithoutAccountIdStep extends RunDataFlow<MatchCdlSplit
     @Override
     public void onConfigurationInitialized() {
         MatchCdlSplitConfiguration configuration = getConfiguration();
-        String targetTableName = NamingUtils.timestamp("MatchCdlSplitWithoutAccontIdTable");
+        String targetTableName = NamingUtils.timestampWithRandom("MatchCdlSplitWithoutAccontIdTable");
         configuration.setTargetTableName(targetTableName);
         log.info("Target table name: " + targetTableName);
         configuration.setDataFlowParams(createDataFlowParameters());
