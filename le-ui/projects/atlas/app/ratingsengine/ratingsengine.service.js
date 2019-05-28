@@ -1162,14 +1162,9 @@ angular.module('lp.ratingsengine')
     }
 
     this.getIterationFromDashboard = function(ratingEngineDashboard, iterationId) {
-
-        // console.log(ratingEngineDashboard.iterations);
-
         let dashboardIterations = ratingEngineDashboard.iterations;
         let validIterations = dashboardIterations.filter(iteration => iteration.modelingJobStatus == 'Completed');        
         let filterValid = $filter('filter')(validIterations, {id:iterationId});
-
-        console.log(filterValid);
 
         if (validIterations.length == 0) {
             return null;
@@ -1179,12 +1174,6 @@ angular.module('lp.ratingsengine')
         } else {
             return filterValid[0];
         }
-
-        // var iterations = $filter('filter')(ratingEngineDashboard.iterations, {id:iterationId});
-
-        // console.log(iterations);
-
-        // return iterations && iterations.length != 1 ? null : iterations[0];
     }
 
 })
