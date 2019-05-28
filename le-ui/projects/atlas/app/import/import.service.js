@@ -97,7 +97,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     // ImportWizardStore.saveDocument(nextState, function(){
                     //     ImportWizardStore.setValidation('jobstatus', true); 
                     // });
@@ -162,7 +162,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     // ImportWizardStore.saveDocument(nextState, function(){
                     //     ImportWizardStore.setValidation('jobstatus', true); 
                     // });
@@ -884,7 +884,6 @@ angular.module('lp.import')
                         let redux = $state.get('home.import').data.redux;
                         redux.setInitialMapping(ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings));
                     }
-                    // ImportUtils.getOriginalMapping(entity, data.Result.fieldMappings);
 	            }
 
 	            deferred.resolve(result);

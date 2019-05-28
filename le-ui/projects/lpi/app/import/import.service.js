@@ -88,7 +88,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     ImportWizardStore.saveDocument(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true); 
                     });
@@ -144,7 +144,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType);
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     ImportWizardStore.saveDocument(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true); 
                     });
