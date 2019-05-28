@@ -318,7 +318,8 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     vm.ignoreFormats = (field) => {
-        return field.fromExistingTemplate;
+        return false;
+        // return field.fromExistingTemplate;
     }
 
     vm.updateDateFormats = (field) => {
