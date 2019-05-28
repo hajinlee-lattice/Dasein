@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,7 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -174,11 +174,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         Tenant tenant = MultiTenantContext.getTenant();
         // SpendAnalyticsSegment is optional in Account data. Check to see if
         // this column exists. If not, return empty result
-        List<ColumnMetadata> acctCMList = servingStoreProxy.getDecoratedMetadataFromCache(
-                MultiTenantContext.getCustomerSpace().toString(), BusinessEntity.Account);
-
-        if (acctCMList.stream()
-                .anyMatch(cm -> cm.getAttrName().equalsIgnoreCase(InterfaceName.SpendAnalyticsSegment.name()))) {
+        try {
             String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                     BusinessEntity.PeriodTransaction);
             String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
@@ -201,8 +197,15 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             log.info("query for getAllSpendAnalyticsSegments " + query);
             List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, ProductType.Spending.name());
             return new DataPage(retList);
+        } catch (Exception e) {
+            if (e instanceof java.sql.SQLException
+                    && ExceptionUtils.getStackTrace(e).contains("ac.spendanalyticssegment does not exist")) {
+                log.warn("spendanalyticssegment column does not exist");
+                return new DataPage(Collections.emptyList());
+            } else {
+                throw e;
+            }
         }
-        return new DataPage(Collections.emptyList());
     }
 
     private String getAndValidateServingStoreTableName(String customerSpace, BusinessEntity businessEntity) {
