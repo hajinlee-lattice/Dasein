@@ -53,7 +53,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     public void onConfigurationInitialized() {
         CreateCdlEventTableConfiguration configuration = getConfiguration();
         if (StringUtils.isBlank(configuration.getTargetTableName())) {
-            String targetTableName = NamingUtils.timestamp("CdlEventTable");
+            String targetTableName = NamingUtils.timestampWithRandom("CdlEventTable");
             configuration.setTargetTableName(targetTableName);
             log.info("Generated a new target table name: " + targetTableName);
         }

@@ -4,6 +4,7 @@ import static java.time.ZoneOffset.UTC;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 public final class NamingUtils {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("_yyyy_MM_dd_HH_mm_ss_z");
+    private static final SimpleDateFormat DATE_FORMAT_MILLS = new SimpleDateFormat("_yyyy_MM_dd_HH_mm_ss_SSS_z");
 
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(UTC));
@@ -19,6 +21,10 @@ public final class NamingUtils {
 
     public static String timestamp(String original) {
         return timestamp(original, new Date());
+    }
+
+    public static String timestampWithRandom(String original) {
+        return original + DATE_FORMAT_MILLS.format(new Date()) + "_" + new Random().nextInt(100_000);
     }
 
     public static String timestamp(String original, Date date) {

@@ -37,7 +37,7 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         MatchCdlAccountConfiguration configuration = getConfiguration();
         String targetTableName = configuration.getTargetTableName();
         if (StringUtils.isEmpty(targetTableName)) {
-            targetTableName = NamingUtils.timestamp("MatchCdlWithAccontIdTable");
+            targetTableName = NamingUtils.timestampWithRandom("MatchCdlWithAccontIdTable");
             configuration.setTargetTableName(targetTableName);
         }
         log.info("Target table name: " + targetTableName);
