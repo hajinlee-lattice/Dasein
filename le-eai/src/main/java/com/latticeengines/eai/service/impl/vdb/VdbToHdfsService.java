@@ -215,7 +215,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 Thread.sleep(TimeUnit.MINUTES.toMillis(3));
                 dataFeed = dataFeedProxy.getDataFeed(customerSpace);
                 if (++idleCounter > 60) {
-                    throw new RuntimeException("Cannot stlart cleanup job! Please try again later.");
+                    throw new RuntimeException("Cannot start cleanup job! Please try again later.");
                 }
             }
         } catch (InterruptedException e) {

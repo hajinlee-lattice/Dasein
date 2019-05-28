@@ -73,7 +73,7 @@ public class ScoringMapperPredictUtilTestNG {
 
         Configuration config = new Configuration();
         config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(), "LeadID");
-        ScoringMapperPredictUtil.processScoreFiles(config, modelAndLeadInfo, models, 1000, 1);
+        ScoringMapperPredictUtil.processScoreFiles(uuid, config, modelAndLeadInfo, models, 1000, 1);
 
         List<ScoreOutput> resultList = AvroUtils.readFromLocalFile(uuid + "-1.avro").stream()
                 .map(r -> new ScoreOutput(((Utf8) r.get(0)).toString(), ((Utf8) r.get(1)).toString(), (Double) r.get(2),

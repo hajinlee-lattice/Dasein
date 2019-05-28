@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -234,14 +235,14 @@ public class CDLJobServiceImpl implements CDLJobService {
                     }
                 }
             } catch (Exception e) {
-                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
+                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed", e);
                 throw e;
             }
         } else if (cdlJobType == CDLJobType.EXPORT) {
             try {
                 exportScheduleJob();
             } catch (Exception e) {
-                log.error("schedule CDLJobType.EXPORT failed" + e);
+                log.error("schedule CDLJobType.EXPORT failed" + e.getMessage());
                 throw e;
             }
         }
@@ -465,40 +466,46 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
 
             List<String> notStartRunningHithTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : highMap.entrySet()) {
+            Iterator<Map.Entry<String, List<Object>>> highMapIterator = highMap.entrySet().iterator();
+            while(highMapIterator.hasNext()) {
+                Map.Entry<String, List<Object>> entry = highMapIterator.next();
                 if (runningJobAppId.contains(entry.getKey())) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        highMap.remove(entry.getKey());
+                        highMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningHithTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
                     }
                 }
                 if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    highMap.remove(entry.getKey());
+                    highMapIterator.remove();
                 }
             }
 
             List<String> notStartRunningLowTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : lowMap.entrySet()) {
+            Iterator<Map.Entry<String, List<Object>>> lowMapMapIterator = lowMap.entrySet().iterator();
+            while(lowMapMapIterator.hasNext()) {
+                Map.Entry<String, List<Object>> entry = lowMapMapIterator.next();
                 if (runningJobAppId.contains(entry.getKey())) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        lowMap.remove(entry.getKey());
+                        lowMapMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningLowTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
                     }
                 }
                 if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    lowMap.remove(entry.getKey());
+                    lowMapMapIterator.remove();
                 }
             }
 
@@ -536,25 +543,42 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info(String.format("Need to schedule low priority tenant is : %s.", needScheduleTenantFromLowPriority));
 
-        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority) && list.containsKey(needScheduleTenantFromHighPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < maximumHighPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < minimumHighPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromHighPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromHighPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromHighPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, true, getImportActions(actions))) {
+                List<Object> objects = list.get(needScheduleTenantFromHighPriority);
+                SimpleDataFeed dataFeed = null;
+                CDLJobDetail cdlJobDetail = null;
+                List<Action> actions = null;
+                switch(objects.size()) {
+                    case 3: actions = (List<Action>) objects.get(2);
+                    case 2: cdlJobDetail = (CDLJobDetail) objects.get(1);
+                    case 1: dataFeed = (SimpleDataFeed) objects.get(0);
+                    default:break;
+                }
+
+                if (dataFeed != null && submitProcessAnalyzeJob(dataFeed, cdlJobDetail, true,
+                        getImportActions(actions))) {
                     log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromHighPriority));
                     runningPAJobsCount++;
                 }
             }
         }
-        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority) && list.containsKey(needScheduleTenantFromLowPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < maximumLowPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < minimumLowPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromLowPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromLowPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromLowPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, false, getImportActions(actions))) {
+                List<Object> objects = list.get(needScheduleTenantFromLowPriority);
+                SimpleDataFeed dataFeed = null;
+                CDLJobDetail cdlJobDetail = null;
+                List<Action> actions = null;
+                switch(objects.size()) {
+                    case 3: actions = (List<Action>) objects.get(2);
+                    case 2: cdlJobDetail = (CDLJobDetail) objects.get(1);
+                    case 1: dataFeed = (SimpleDataFeed) objects.get(0);
+                    default:break;
+                }
+                if (dataFeed != null && submitProcessAnalyzeJob(dataFeed, cdlJobDetail, false,
+                        getImportActions(actions))) {
                     log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromLowPriority));
                 }
             }
@@ -846,7 +870,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         updateExportAppIdMap();
         List<AtlasScheduling> atlasSchedulingList =
                 atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
-        log.info(JsonUtils.serialize(atlasSchedulingList));
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
             log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {

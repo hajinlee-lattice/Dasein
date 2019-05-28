@@ -5,28 +5,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,52 +31,55 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration.ScoringInputType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
-import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
+import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
 public class ScoringMapperTransformUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringMapperTransformUtil.class);
 
     private static Charset charSet = Charset.forName("UTF-8");
 
-    public static Map<String, JsonNode> processLocalizedFiles(URI[] uris) throws IOException {
-        // key: uuid, value: model contents
-        // Note that not every model in the map might be used.
-        Map<String, JsonNode> models = new HashMap<String, JsonNode>();
+    public static Map<String, URI> getModelUris(URI[] uris) throws IOException {
+        Map<String, URI> modelUris = new HashMap<>();
         boolean scoringScriptProvided = false;
-
         for (URI uri : uris) {
             String fragment = uri.getFragment();
             log.info("file: " + uri);
             log.info(fragment);
-
             if (uri.getPath().endsWith("scoring.py")) {
                 scoringScriptProvided = true;
             } else if (uri.getPath().endsWith("pythonlauncher.sh")) {
             } else if (!uri.getPath().endsWith(".jar") && fragment != null && !fragment.endsWith("_scorederivation")) {
                 String uuid = fragment;
-                JsonNode modelJsonObj = parseFileContentToJsonNode(uri);
-                // use the uuid to identify a model. It is a contact that when
-                // mapper localizes the model, it changes its name to be the
-                // uuid
-                decodeSupportedFilesToFile(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
-                writeScoringScript(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
-                log.info("modelName is " + modelJsonObj.get(ScoringDaemonService.MODEL_NAME));
-                models.put(uuid, modelJsonObj);
+                modelUris.put(uuid, uri);
             }
         }
+        ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, modelUris);
+        return modelUris;
+    }
 
-        log.info("Has localized in total " + models.size() + " models.");
-        ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, models);
-
+    public static Map<String, JsonNode> processLocalizedFiles(URI uri) throws IOException {
+        // key: uuid, value: model contents
+        // Note that not every model in the map might be used.
+        Map<String, JsonNode> models = new HashMap<String, JsonNode>();
+        String fragment = uri.getFragment();
+        String uuid = fragment;
+        JsonNode modelJsonObj = parseFileContentToJsonNode(uri);
+        // use the uuid to identify a model. It is a contact that when
+        // mapper localizes the model, it changes its name to be the
+        // uuid
+        decodeSupportedFilesToFile(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
+        writeScoringScript(uuid, modelJsonObj.get(ScoringDaemonService.MODEL));
+        log.info("modelName is " + modelJsonObj.get(ScoringDaemonService.MODEL_NAME));
+        models.put(uuid, modelJsonObj);
+        log.info("Has localized " + models.size() + " models.");
         return models;
+
     }
 
     @VisibleForTesting
@@ -123,143 +120,92 @@ public class ScoringMapperTransformUtil {
         }
     }
 
-    public static ModelAndRecordInfo prepareRecordsForScoring(
-            Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, JsonNode dataType,
-            Map<String, JsonNode> models, long leadFileThreshold) throws IOException, InterruptedException {
-
-        Configuration config = context.getConfiguration();
-        ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
-        // key: uuid, value: model information containing modelId and record
-        // number associated with that model
-        Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
-
-        // key: recordFileName, value: the bufferwriter the file connecting
-        Map<String, BufferedWriter> recordFileBufferMap = new HashMap<String, BufferedWriter>();
-
-        int recordNumber = 0;
-        Collection<String> modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
-        ObjectMapper mapper = new ObjectMapper();
-        String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
-        OutputStream out = null;
-        DataFileWriter<GenericRecord> writer = null;
-        DataFileWriter<GenericRecord> creator = null;
-        String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
-        boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
-                true);
-        while (context.nextKeyValue()) {
-            Record record = context.getCurrentKey().datum();
-            JsonNode jsonNode = mapper.readTree(record.toString());
-
-            if (type.equals(ScoringInputType.Json.name())) {
-                if (readModelIdFromRecord) {
-                    recordNumber++;
-                    String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                    transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
-                            leadFileThreshold, modelGuid, uniqueKeyColumn);
-                } else {
-                    for (String m : modelGuids) {
-                        try {
-                            recordNumber++;
-                            transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
-                                    leadFileThreshold, m, uniqueKeyColumn);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
+    public static void prepareRecordsForScoring(String uuid, ScoreContext context, JsonNode dataType,
+            Map<String, JsonNode> models, List<Record> records) throws IOException, InterruptedException {
+        for (Record record : records) {
+            if (context.type.equals(ScoringInputType.Json.name())) {
+                writeToJson(uuid, record, context, dataType, models);
             } else {
-                
-                modelGuids.forEach(m -> {
-                    modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 0L));
-                });
-                if (readModelIdFromRecord) {
-                    recordNumber++;
-                    String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                    String uuid = UuidUtils.extractUuid(modelGuid);
-                    modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
-                } else {
-                    for (String m : modelGuids) {
-                        String uuid = UuidUtils.extractUuid(m);
-                        modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
-                        recordNumber++;
-                    }
-                }
-                if (out == null) {
-                    out = new FileOutputStream("input.avro");
-                    writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
-                    creator = writer.create(record.getSchema(), out);
-                }
-                creator.append(record);
+                writeToAvro(uuid, record, context);
             }
         }
-        if (out != null) {
-            creator.close();
-            writer.close();
-        }
-        Set<String> keySet = recordFileBufferMap.keySet();
-        for (String key : keySet) {
-            recordFileBufferMap.get(key).close();
-        }
-        modelAndLeadInfo.setModelInfoMap(modelInfoMap);
-        modelAndLeadInfo.setTotalRecordCountr(recordNumber);
-        ScoringMapperValidateUtil.validateTransformation(modelAndLeadInfo);
-        return modelAndLeadInfo;
+    }
 
+    private static void writeToAvro(String uuid, Record record, ScoreContext context) throws IOException {
+        context.recordNumber++;
+        context.modelInfoMap.putIfAbsent(uuid, new ModelAndRecordInfo.ModelInfo(context.uuidToModeId.get(uuid), 0L));
+        context.modelInfoMap.get(uuid).setRecordCount(context.modelInfoMap.get(uuid).getRecordCount() + 1L);
+        if (context.out == null) {
+            context.out = new FileOutputStream(uuid + "-input.avro");
+            context.writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+            context.creator = context.writer.create(record.getSchema(), context.out);
+        }
+        context.creator.append(record);
+    }
+
+    private static void writeToJson(String uuid, Record record, ScoreContext context, JsonNode dataType,
+            Map<String, JsonNode> models) throws IOException {
+        try {
+            context.recordNumber++;
+            JsonNode jsonNode = context.mapper.readTree(record.toString());
+            transformAndWriteRecord(uuid, context, jsonNode, dataType, models);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @VisibleForTesting
-    static void transformAndWriteRecord(JsonNode jsonNode, JsonNode dataType,
-            Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap, Map<String, BufferedWriter> recordFilebufferMap,
-            Map<String, JsonNode> models, long recordFileThreshold, String modelGuid, String uniqueKeyColumn)
-            throws IOException {
+    static void transformAndWriteRecord(String uuid, ScoreContext context, JsonNode jsonNode, JsonNode dataType,
+            Map<String, JsonNode> models) throws IOException {
+        String modelGuid = context.uuidToModeId.get(uuid);
         // first step validation, to see whether the leadId is provided.
-        if (!jsonNode.has(uniqueKeyColumn) || jsonNode.get(uniqueKeyColumn).isNull()) {
-            throw new LedpException(LedpCode.LEDP_20003, new String[] { uniqueKeyColumn });
+        if (!jsonNode.has(context.uniqueKeyColumn) || jsonNode.get(context.uniqueKeyColumn).isNull()) {
+            throw new LedpException(LedpCode.LEDP_20003, new String[] { context.uniqueKeyColumn });
         }
 
-        String uuid = UuidUtils.extractUuid(modelGuid);
         JsonNode modelContents = models.get(uuid);
         String recordFileName = "";
         BufferedWriter bw = null;
 
         // second step validation, to see if the metadata is valid
-        if (!modelInfoMap.containsKey(uuid)) { // this model is new, and
-                                               // needs to be validated
+        if (!context.modelInfoMap.containsKey(uuid)) { // this model is new, and
+            // needs to be validated
             ScoringMapperValidateUtil.validateDatatype(dataType, modelContents, modelGuid);
             // if the validation passes, update the modelIdMap
             ModelAndRecordInfo.ModelInfo modelInfo = new ModelAndRecordInfo.ModelInfo(modelGuid, 1L);
-            modelInfoMap.put(uuid, modelInfo);
+            context.modelInfoMap.put(uuid, modelInfo);
 
             recordFileName = uuid + "-0";
             bw = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), charSet));
-            recordFilebufferMap.put(recordFileName, bw);
+            context.recordFileBufferMap.put(recordFileName, bw);
         } else {
-            long currentLeadNum = modelInfoMap.get(uuid).getRecordCount() + 1;
-            modelInfoMap.get(uuid).setRecordCount(currentLeadNum);
-            long indexOfFile = currentLeadNum / recordFileThreshold;
+            long currentLeadNum = context.modelInfoMap.get(uuid).getRecordCount() + 1;
+            context.modelInfoMap.get(uuid).setRecordCount(currentLeadNum);
+            long indexOfFile = currentLeadNum / context.recordFileThreshold;
             StringBuilder leadFileBuilder = new StringBuilder();
             leadFileBuilder.append(uuid).append('-').append(indexOfFile);
             recordFileName = leadFileBuilder.toString();
-            if (!recordFilebufferMap.containsKey(recordFileName)) {
+            if (!context.recordFileBufferMap.containsKey(recordFileName)) {
                 // create new stream
                 bw = new BufferedWriter(
                         new OutputStreamWriter(new FileOutputStream(new File(recordFileName), true), charSet));
-                recordFilebufferMap.put(recordFileName, bw);
+                context.recordFileBufferMap.put(recordFileName, bw);
                 // close the previous stream
                 StringBuilder formerLeadFileBuilder = new StringBuilder();
                 formerLeadFileBuilder.append(uuid).append('-').append(indexOfFile - 1);
                 String formerLeadFileName = formerLeadFileBuilder.toString();
-                if (recordFilebufferMap.containsKey(formerLeadFileName)) {
-                    BufferedWriter formerLeadFileBw = recordFilebufferMap.get(formerLeadFileName);
+                if (context.recordFileBufferMap.containsKey(formerLeadFileName)) {
+                    BufferedWriter formerLeadFileBw = context.recordFileBufferMap.get(formerLeadFileName);
                     formerLeadFileBw.close();
+                    context.recordFileBufferMap.remove(formerLeadFileName);
                 }
             } else {
-                bw = recordFilebufferMap.get(recordFileName);
+                bw = context.recordFileBufferMap.get(recordFileName);
             }
         }
 
-        String transformedRecord = transformRecord(jsonNode, modelContents, uniqueKeyColumn);
+        String transformedRecord = transformRecord(jsonNode, modelContents, context.uniqueKeyColumn);
         writeRecordToFile(transformedRecord, bw);
 
     }
@@ -330,14 +276,18 @@ public class ScoringMapperTransformUtil {
 
     }
 
-    public static Map<String, ScoreDerivation> deserializeLocalScoreDerivationFiles(URI[] uris) throws IOException {
+    public static Map<String, ScoreDerivation> deserializeLocalScoreDerivationFiles(String uuid, URI[] uris)
+            throws IOException {
         Map<String, ScoreDerivation> scoreDerivations = new HashMap<>();
         for (URI uri : uris) {
             if (uri.getFragment() != null && uri.getFragment().endsWith("_scorederivation")) {
-                String content = FileUtils.readFileToString(new File(uri.getFragment()), Charset.forName("UTF-8"));
-                String uuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(uri.getFragment(),
+                String curUuid = org.apache.commons.lang3.StringUtils.substringBeforeLast(uri.getFragment(),
                         "_scorederivation");
-                scoreDerivations.put(uuid, JsonUtils.deserialize(content, ScoreDerivation.class));
+                if (uuid.equals(curUuid)) {
+                    String content = FileUtils.readFileToString(new File(uri.getFragment()), Charset.forName("UTF-8"));
+                    scoreDerivations.put(uuid, JsonUtils.deserialize(content, ScoreDerivation.class));
+                    break;
+                }
             }
         }
         if (scoreDerivations.isEmpty()) {

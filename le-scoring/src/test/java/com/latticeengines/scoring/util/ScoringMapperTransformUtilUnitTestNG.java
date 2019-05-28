@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
 public class ScoringMapperTransformUtilUnitTestNG {
 
@@ -72,8 +73,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     @Test(groups = "unit")
     public void testProcessLocalizedFiles() throws IOException {
 
-        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new URI[localFilePaths.size()]));
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(modelPath);
         Assert.assertNotNull(models);
         Assert.assertEquals(models.size(), 1);
         Assert.assertNotNull(models.get(UUID));
@@ -147,16 +147,19 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new URI[localFilePaths.size()]));
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(modelPath);
         JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
-        ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
-                10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
+        ScoreContext scoreContext = new ScoreContext();
+        scoreContext.recordFileBufferMap = leadFileBufferMap;
+        scoreContext.modelInfoMap = modelInfoMap;
+        scoreContext.recordFileThreshold = 10000;
+        scoreContext.uniqueKeyColumn = ScoringDaemonService.UNIQUE_KEY_COLUMN;
+        scoreContext.uuidToModeId.put(UUID, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
+        ScoringMapperTransformUtil.transformAndWriteRecord(UUID, scoreContext, jsonNode, dataType, models);
 
         Assert.assertNotNull(modelInfoMap);
         Assert.assertEquals(modelInfoMap.size(), 1);
-        Assert.assertEquals(modelInfoMap.get(UUID).getModelGuid(),
-                "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
+        Assert.assertEquals(modelInfoMap.get(UUID).getModelGuid(), "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI");
         Assert.assertEquals(modelInfoMap.get(UUID).getRecordCount(), 1);
         Assert.assertNotNull(leadFileBufferMap);
         Assert.assertEquals(leadFileBufferMap.size(), 1);
@@ -173,7 +176,8 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Assert.assertTrue(expectedFile.delete());
     }
 
-    private boolean transformedLeadIsCorrect(String transformedString) throws JsonProcessingException, IOException, DecoderException {
+    private boolean transformedLeadIsCorrect(String transformedString)
+            throws JsonProcessingException, IOException, DecoderException {
 
         JsonNode j = new ObjectMapper().readTree(transformedString);
         String recordId = new String(Hex.decodeHex(j.get("key").asText().toCharArray()), "UTF8");
@@ -234,14 +238,16 @@ public class ScoringMapperTransformUtilUnitTestNG {
     public void testTransformAndWriteLeadWithNegativeCases() throws IOException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
-
-        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
-                .toArray(new URI[localFilePaths.size()]));
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(modelPath);
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID);
-            ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
-                    10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
+            ScoreContext scoreContext = new ScoreContext();
+            scoreContext.modelInfoMap = modelInfoMap;
+            scoreContext.recordFileBufferMap = leadFileBufferMap;
+            scoreContext.recordFileThreshold = 10000;
+            scoreContext.uniqueKeyColumn = ScoringDaemonService.UNIQUE_KEY_COLUMN;
+            ScoringMapperTransformUtil.transformAndWriteRecord(UUID, scoreContext, jsonNode, dataType, models);
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20003);

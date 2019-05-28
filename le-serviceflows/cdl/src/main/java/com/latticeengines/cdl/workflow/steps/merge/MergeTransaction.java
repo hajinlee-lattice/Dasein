@@ -24,6 +24,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodCollectorConfig;
@@ -401,14 +402,16 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         List<Extract> extracts = table.getExtracts();
         if (!CollectionUtils.isEmpty(extracts)) {
             Long dataCount = 0L;
+            DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+            Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
             for (Extract extract : extracts) {
                 dataCount = dataCount + extract.getProcessedRecords();
                 log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
-                if (configuration.getDataQuotaLimit() < dataCount)
-                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + configuration.getDataQuotaLimit() +
+                if (transactionDataQuotaLimit < dataCount)
+                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + transactionDataQuotaLimit +
                             ", The data you uploaded has exceeded the limit.");
             }
-            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + configuration.getDataQuotaLimit());
+            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + transactionDataQuotaLimit);
         }
     }
 

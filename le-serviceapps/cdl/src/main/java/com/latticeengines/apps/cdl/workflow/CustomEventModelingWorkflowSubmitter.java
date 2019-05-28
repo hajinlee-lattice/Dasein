@@ -226,7 +226,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .setUseScorederivation(false) //
                 .setModelIdFromRecord(false) //
                 .saveBucketMetadata() //
-                .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0)) //
+                .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0), isLPI) //
                 .cdlMultiModel(!isLPI) //
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //

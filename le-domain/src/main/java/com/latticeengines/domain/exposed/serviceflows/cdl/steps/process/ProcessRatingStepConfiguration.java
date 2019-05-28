@@ -13,11 +13,6 @@ public class ProcessRatingStepConfiguration extends BaseProcessEntityStepConfigu
         return BusinessEntity.Rating;
     }
 
-    @Override
-    public Long getDataQuotaLimit() {
-        return null;
-    }
-
     public int getMaxIteration() {
         return maxIteration;
     }

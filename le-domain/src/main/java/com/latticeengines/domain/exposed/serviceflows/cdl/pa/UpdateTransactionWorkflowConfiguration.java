@@ -62,11 +62,6 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processTransactionStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            return this;
-        }
-
         public UpdateTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

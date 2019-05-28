@@ -87,6 +87,10 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXPIRED_TIME")
     private Long expiredTime;
 
+    @JsonProperty("notification_state")
+    @Column(name = "NOTIFICATION_STATE")
+    private int notificationState;
+
     public Tenant() {
     }
 
@@ -213,4 +217,11 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
             return id.equals(other.id);
     }
 
+    public int getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(int notificationState) {
+        this.notificationState = notificationState;
+    }
 }

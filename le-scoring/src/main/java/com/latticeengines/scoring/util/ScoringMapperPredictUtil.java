@@ -49,23 +49,22 @@ import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class ScoringMapperPredictUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringMapperPredictUtil.class);
 
-    public static void evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
-            Set<String> uuidSet) throws IOException, InterruptedException {
+    public static void evaluate(String uuid, ScoreContext scoreContext,
+            MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context)
+            throws IOException, InterruptedException {
 
         Configuration config = context.getConfiguration();
-        String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
+        String type = scoreContext.type;
         StringBuilder sb = new StringBuilder();
-        for (String modelGuid : uuidSet) {
-            sb.append(modelGuid + " ");
-        }
+        sb.append(uuid);
         String condaEnv = config.get(ScoringProperty.CONDA_ENV.name());
         if (StringUtils.isBlank(condaEnv)) {
             condaEnv = "lattice";
@@ -111,10 +110,9 @@ public class ScoringMapperPredictUtil {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void processScoreFiles(Configuration config, ModelAndRecordInfo modelAndRecordInfo,
+    public static void processScoreFiles(String uuid, Configuration config, ModelAndRecordInfo modelAndRecordInfo,
             Map<String, JsonNode> models, long recordFileThreshold, int taskId) throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
-        Set<String> uuidSet = modelInfoMap.keySet();
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
         String outputPath = config.get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
@@ -122,62 +120,61 @@ public class ScoringMapperPredictUtil {
         // List<ScoreOutput> resultList = new ArrayList<ScoreOutput>();
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
 
-        for (String uuid : uuidSet) {
-            log.info("uuid is " + uuid);
-            String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
-            // key: leadID, value: list of raw scores for that lead
-            Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
-            Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
-            long value = modelInfoMap.get(uuid).getRecordCount();
-            JsonNode model = models.get(uuid);
-            long remain = value / recordFileThreshold;
-            for (int i = 0; i <= remain; i++) {
-                readScoreFile(uuid, i, scores, revenues, type);
-            }
-            boolean hasRevenue = revenues.size() > 0;
+        log.info("uuid is " + uuid);
+        String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        // key: leadID, value: list of raw scores for that lead
+        Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
+        Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
+        long value = modelInfoMap.get(uuid).getRecordCount();
+        JsonNode model = models.get(uuid);
+        long remain = value / recordFileThreshold;
+        for (int i = 0; i <= remain; i++) {
+            readScoreFile(uuid, i, scores, revenues, type);
+        }
+        boolean hasRevenue = revenues.size() > 0;
 
-            File outputFile = new File(fileName);
-            DatumWriter userDatumWriter = null;
-            DataFileWriter dataFileWriter = null;
-            Schema schema = null;
-            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
-                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+        File outputFile = new File(fileName);
+        DatumWriter userDatumWriter = null;
+        DataFileWriter dataFileWriter = null;
+        Schema schema = null;
+        boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
+                || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
+        boolean cdl = false;
+        if (hasUniqueKey) {
+            userDatumWriter = new GenericDatumWriter<GenericRecord>();
+            dataFileWriter = new DataFileWriter(userDatumWriter);
+            cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
                     || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
-            boolean cdl = false;
-            if (hasUniqueKey) {
-                userDatumWriter = new GenericDatumWriter<GenericRecord>();
-                dataFileWriter = new DataFileWriter(userDatumWriter);
-                cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
-                        || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
-                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, true, cdl);
-                schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
-            } else {
-                userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
-                dataFileWriter = new DataFileWriter(userDatumWriter);
-                schema = ScoreOutput.getClassSchema();
-            }
-            dataFileWriter.create(schema, outputFile);
+            Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, true, cdl);
+            schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
+        } else {
+            userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
+            dataFileWriter = new DataFileWriter(userDatumWriter);
+            schema = ScoreOutput.getClassSchema();
+        }
+        dataFileWriter.create(schema, outputFile);
 
-            ScoreNormalizer normalizer = NormalizationUtils.getScoreNormalizer(hasRevenue, cdl, model);
-            Set<String> keySet = scores.keySet();
-            for (String key : keySet) {
-                List<Double> rawScoreList = scores.get(key);
-                for (int i = 0; i < rawScoreList.size(); i++) {
-                    Double rawScore = rawScoreList.get(i);
-                    ScoreOutput result = getResult(modelInfoMap.get(uuid).getModelGuid(), key, model, rawScore);
-                    if (hasUniqueKey) {
-                        GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, cdl, revenues,
-                                hasRevenue, schema, key, result, i, model, normalizer);
-                        builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
-                        dataFileWriter.append(builder.build());
-                    } else {
-                        dataFileWriter.append(result);
-                    }
+        ScoreNormalizer normalizer = NormalizationUtils.getScoreNormalizer(hasRevenue, cdl, model);
+        Set<String> keySet = scores.keySet();
+        for (String key : keySet) {
+            List<Double> rawScoreList = scores.get(key);
+            for (int i = 0; i < rawScoreList.size(); i++) {
+                Double rawScore = rawScoreList.get(i);
+                ScoreOutput result = getResult(modelInfoMap.get(uuid).getModelGuid(), key, model, rawScore);
+                if (hasUniqueKey) {
+                    GenericRecordBuilder builder = createRecordWithUniqueKey(uniqueKeyColumn, cdl, revenues, hasRevenue,
+                            schema, key, result, i, model, normalizer);
+                    builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
+                    dataFileWriter.append(builder.build());
+                } else {
+                    dataFileWriter.append(result);
                 }
             }
-            dataFileWriter.close();
-            HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
         }
+        dataFileWriter.close();
+        HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
+        log.info("Moved file from:" + fileName + " to:" + outputPath + "/" + fileName);
     }
 
     private static GenericRecordBuilder createRecordWithUniqueKey(String uniqueKeyColumn, boolean cdl,
@@ -219,83 +216,80 @@ public class ScoringMapperPredictUtil {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void processScoreFilesUsingScoreDerivation(Configuration config,
+    public static void processScoreFilesUsingScoreDerivation(String uuid, Configuration config,
             ModelAndRecordInfo modelAndRecordInfo, Map<String, ScoreDerivation> scoreDerivationMap,
             long recordFileThreshold, int taskId) throws IOException, DecoderException {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = modelAndRecordInfo.getModelInfoMap();
-        Set<String> uuidSet = modelInfoMap.keySet();
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
         String outputPath = config.get(MapReduceProperty.OUTPUT.name());
         log.info("outputDir: " + outputPath);
 
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
 
-        for (String uuid : uuidSet) {
-            log.info("uuid is " + uuid);
-            // key: leadID, value: list of raw scores for that lead
-            Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
-            Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
-            long value = modelInfoMap.get(uuid).getRecordCount();
-            long remain = value / recordFileThreshold;
-            int totalRawScoreNumber = 0;
-            for (int i = 0; i <= remain; i++) {
-                totalRawScoreNumber += readScoreFile(uuid, i, scores, revenues, type);
-            }
-            boolean hasRevenue = revenues.size() > 0;
+        log.info("uuid is " + uuid);
+        // key: leadID, value: list of raw scores for that lead
+        Map<String, List<Double>> scores = new HashMap<String, List<Double>>();
+        Map<String, List<Double>> revenues = new HashMap<String, List<Double>>();
+        long value = modelInfoMap.get(uuid).getRecordCount();
+        long remain = value / recordFileThreshold;
+        int totalRawScoreNumber = 0;
+        for (int i = 0; i <= remain; i++) {
+            totalRawScoreNumber += readScoreFile(uuid, i, scores, revenues, type);
+        }
+        boolean hasRevenue = revenues.size() > 0;
 
-            String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
+        String fileName = uuid + "-" + taskId + ScoringDaemonService.AVRO_FILE_SUFFIX;
 
-            File outputFile = new File(fileName);
-            DatumWriter userDatumWriter = null;
-            DataFileWriter dataFileWriter = null;
-            Schema schema = null;
-            boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
-                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
-                    || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
-            if (hasUniqueKey) {
-                userDatumWriter = new GenericDatumWriter<GenericRecord>();
-                dataFileWriter = new DataFileWriter(userDatumWriter);
-                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue, false);
-                schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
-            } else {
-                userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
-                dataFileWriter = new DataFileWriter(userDatumWriter);
-                schema = ScoreOutput.getClassSchema();
-            }
-            dataFileWriter.create(schema, outputFile);
+        File outputFile = new File(fileName);
+        DatumWriter userDatumWriter = null;
+        DataFileWriter dataFileWriter = null;
+        Schema schema = null;
+        boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.InternalId.name())
+                || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
+        if (hasUniqueKey) {
+            userDatumWriter = new GenericDatumWriter<GenericRecord>();
+            dataFileWriter = new DataFileWriter(userDatumWriter);
+            Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue, false);
+            schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
+        } else {
+            userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
+            dataFileWriter = new DataFileWriter(userDatumWriter);
+            schema = ScoreOutput.getClassSchema();
+        }
+        dataFileWriter.create(schema, outputFile);
 
-            List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, uuid);
-            if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
-                String message = String.format("The duplicate leads for model %s are: %s\n", uuid,
-                        Arrays.toString(duplicateLeadIdList.toArray()));
-                log.warn(message);
-            }
-            Set<String> keySet = scores.keySet();
-            for (String key : keySet) {
-                List<Double> rawScoreList = scores.get(key);
-                for (Double rawScore : rawScoreList) {
-                    ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid),
-                            modelInfoMap.get(uuid).getModelGuid(), key, rawScore);
-                    if (hasUniqueKey) {
-                        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)
-                                || InterfaceName.InternalId.name().equals(uniqueKeyColumn)) {
-                            builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
-                        } else {
-                            builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
-                        }
-                        builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
-                        builder.set(ScoreResultField.Percentile.displayName, result.getPercentile());
-                        builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
-                        dataFileWriter.append(builder.build());
+        List<String> duplicateLeadIdList = checkForDuplicateLeads(scores, totalRawScoreNumber, uuid);
+        if (!CollectionUtils.isEmpty(duplicateLeadIdList)) {
+            String message = String.format("The duplicate leads for model %s are: %s\n", uuid,
+                    Arrays.toString(duplicateLeadIdList.toArray()));
+            log.warn(message);
+        }
+        Set<String> keySet = scores.keySet();
+        for (String key : keySet) {
+            List<Double> rawScoreList = scores.get(key);
+            for (Double rawScore : rawScoreList) {
+                ScoreOutput result = calculateResult(scoreDerivationMap.get(uuid),
+                        modelInfoMap.get(uuid).getModelGuid(), key, rawScore);
+                if (hasUniqueKey) {
+                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                    if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)
+                            || InterfaceName.InternalId.name().equals(uniqueKeyColumn)) {
+                        builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
                     } else {
-                        dataFileWriter.append(result);
+                        builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
                     }
+                    builder.set(ScoreResultField.ModelId.displayName, modelInfoMap.get(uuid).getModelGuid());
+                    builder.set(ScoreResultField.Percentile.displayName, result.getPercentile());
+                    builder.set(ScoreResultField.RawScore.name(), result.getRawScore());
+                    dataFileWriter.append(builder.build());
+                } else {
+                    dataFileWriter.append(result);
                 }
             }
-            dataFileWriter.close();
-            HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
         }
+        dataFileWriter.close();
+        HdfsUtils.copyLocalToHdfs(config, fileName, outputPath + "/" + fileName);
     }
 
     @VisibleForTesting

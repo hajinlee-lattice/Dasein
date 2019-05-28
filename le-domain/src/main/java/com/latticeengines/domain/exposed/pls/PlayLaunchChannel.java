@@ -13,6 +13,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
         @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@NamedEntityGraph(name = "PlayLaunchChannel.play", attributeNodes = { @NamedAttributeNode("play") })
 public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
 
     private static final String PLAY_LAUNCH_CHANNEL_NAME_PREFIX = "channel";

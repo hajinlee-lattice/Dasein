@@ -27,15 +27,6 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
 
-LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2015.csv' INTO TABLE `AccountMasterColumn`
-CHARACTER SET UTF8
-FIELDS TERMINATED BY '\t'
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense)
-SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
-
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2016.csv' INTO TABLE `AccountMasterColumn`
 CHARACTER SET UTF8
 FIELDS TERMINATED BY '\t'
@@ -197,7 +188,6 @@ INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, Mode, Meta
 VALUES
   ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.15', '2018-10-27', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.18', '2019-05-03', '2.0', 'APPROVED', 'FULL', NOW(), '0');
@@ -218,13 +208,6 @@ SET
   `EnrichmentStatsVersion`   = '2018-09-15_00-00-00_UTC',
   `DynamoTableSignature_DunsGuideBook` = '20180918'
 WHERE `Version` = '2.0.14';
-
-UPDATE `DataCloudVersion`
-SET
-  `AccountMasterHdfsVersion` = '2018-10-23_00-00-00_UTC',
-  `AccountLookupHdfsVersion` = '2018-10-23_00-00-00_UTC',
-  `EnrichmentStatsVersion`   = '2018-10-23_00-00-00_UTC'
-WHERE `Version` = '2.0.15';
 
 UPDATE `DataCloudVersion`
 SET

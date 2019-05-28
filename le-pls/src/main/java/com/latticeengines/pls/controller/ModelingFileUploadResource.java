@@ -292,7 +292,7 @@ public class ModelingFileUploadResource {
             return fileUploadService.createSourceFileFromS3(csvFile, entity);
         } catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
-                    Status.Error, ledp.getCode().getMessage());
+                    Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
         }
     }

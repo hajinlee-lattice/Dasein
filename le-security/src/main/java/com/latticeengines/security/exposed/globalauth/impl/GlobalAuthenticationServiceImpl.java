@@ -61,7 +61,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });
+            throw new LedpException(LedpCode.LEDP_18001, e, new String[]{user});
         }
 
     }
@@ -77,7 +77,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             throw new Exception("The user is inactive!");
         }
         int invalidLogin = user.getInvalidLoginAttempts();
-        if (invalidLogin >= MAX_INVALID_LOGIN_ATTEMPTS) {
+        if (invalidLogin + 1 >= MAX_INVALID_LOGIN_ATTEMPTS) {
             throw new LedpException(LedpCode.LEDP_19015);
         }
 
@@ -120,11 +120,11 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         ticketData.setUserId(user.getPid());
         ticketData.setTicket(ticket.getData());
         ticketData.setLastAccessDate(new Date(System.currentTimeMillis()));
-        
+
         attachValidTenantsToTicket(user, ticket);
-        
+
         gaTicketEntityMgr.create(ticketData);
-        
+
         return ticket;
     }
 
@@ -145,7 +145,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
                     }
                 }
             }
-            
+
             List<Tenant> tenants = new ArrayList<Tenant>();
             for (Entry<String, GlobalAuthTenant> tenantData : distinctTenants.entrySet()) {
                 Tenant tenant = new Tenant();
@@ -157,14 +157,14 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         }
     }
 
-    
+
     @Override
     public synchronized Ticket externallyAuthenticated(String emailAddress) {
         try {
             log.info(String.format("Retrieving ticket for already authenticated user %s", emailAddress));
             return globalAuthExternallyAuthenticated(emailAddress);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18001, new String[] { emailAddress });
+            throw new LedpException(LedpCode.LEDP_18001, new String[]{emailAddress});
         }
     }
 
@@ -200,7 +200,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
             return globalDiscard(ticket);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18009, e, new String[] { ticket.toString() });
+            throw new LedpException(LedpCode.LEDP_18009, e, new String[]{ticket.toString()});
         }
 
     }

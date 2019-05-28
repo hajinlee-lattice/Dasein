@@ -125,7 +125,7 @@ public class CreateScoringTargetTable
 
     @Override
     protected String getTargetTableName() {
-        return NamingUtils.timestamp("ScoringTarget");
+        return NamingUtils.timestampWithRandom("ScoringTarget");
     }
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,7 +32,6 @@ import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
     private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
-    private static final long DEFAULT_LEAD_FILE_THRESHOLD = 10000L;
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
@@ -39,44 +39,37 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         Configuration config = context.getConfiguration();
         Schema schema = AvroJob.getInputKeySchema(config);
         URI[] uris = context.getCacheFiles();
-        long recordFileThreshold = config.getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(),
-                DEFAULT_LEAD_FILE_THRESHOLD);
 
         try {
-            // Store localized files
-            Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(uris);
-            long transformStartTime = System.currentTimeMillis();
             JsonNode dataType = ScoringJobUtil.generateDataTypeSchema(schema);
-            log.info("DataType :" + dataType.asText());
-            ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
-                    dataType, models, recordFileThreshold);
-
-            if (modelAndRecordInfo.getTotalRecordCount() == 0) {
-                return;
+            log.info("DataType :" + dataType.asText() + " task Id :" + taskId);
+            ScoreContext scoreContext = new ScoreContext(context);
+            Map<String, List<Record>> recordsMap = scoreContext.buildRecords(context);
+            Map<String, URI> uuidURIMap = ScoringMapperTransformUtil.getModelUris(uris);
+            long scoringStartTime = System.currentTimeMillis();
+            for (String uuid : scoreContext.uuidToModeId.keySet()) {
+                URI uri = uuidURIMap.get(uuid);
+                Map<String, JsonNode> models = transformRecords(dataType, scoreContext, recordsMap, uuid, uri);
+                ScoringMapperPredictUtil.evaluate(uuid, scoreContext, context);
+                if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(), false)) {
+                    log.info("Using score derivation to generate percentile score.");
+                    Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
+                            .deserializeLocalScoreDerivationFiles(uuid, uris);
+                    ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(uuid, config,
+                            scoreContext.modelAndRecordInfo, scoreDerivationMap, scoreContext.recordFileThreshold,
+                            taskId);
+                } else {
+                    ScoringMapperPredictUtil.processScoreFiles(uuid, config, scoreContext.modelAndRecordInfo, models,
+                            scoreContext.recordFileThreshold, taskId);
+                }
             }
-            long transformEndTime = System.currentTimeMillis();
-            long transformationTotalTime = transformEndTime - transformStartTime;
-            log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
 
+            ModelAndRecordInfo modelAndRecordInfo = scoreContext.verify();
             long totalRecordCount = modelAndRecordInfo.getTotalRecordCount();
-            log.info("The mapper has transformed: " + totalRecordCount + "records.");
-
-            ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
-            // List<ScoreOutput> resultList = new ArrayList<>();
-            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),false)) {
-                log.info("Using score derivation to generate percentile score.");
-                Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
-                        .deserializeLocalScoreDerivationFiles(uris);
-                ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(config, modelAndRecordInfo,
-                        scoreDerivationMap, recordFileThreshold, taskId);
-
-            } else {
-                ScoringMapperPredictUtil.processScoreFiles(config, modelAndRecordInfo, models, recordFileThreshold,
-                        taskId);
-            }
+            log.info("The mapper has scored: " + totalRecordCount + " records.");
 
             long scoringEndTime = System.currentTimeMillis();
-            long scoringTotalTime = scoringEndTime - transformEndTime;
+            long scoringTotalTime = scoringEndTime - scoringStartTime;
             log.info("The scoring takes " + (scoringTotalTime * 1.66667e-5) + " mins");
 
         } catch (Exception e) {
@@ -91,4 +84,18 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             throw new LedpException(LedpCode.LEDP_20014, e);
         }
     }
+
+    private Map<String, JsonNode> transformRecords(JsonNode dataType, ScoreContext scoreContext,
+            Map<String, List<Record>> recordsMap, String uuid, URI uri) throws IOException, InterruptedException {
+        long transformStartTime = System.currentTimeMillis();
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(uri);
+        ScoringMapperTransformUtil.prepareRecordsForScoring(uuid, scoreContext, dataType, models, recordsMap.get(uuid));
+        scoreContext.closeFiles(uuid);
+        long transformEndTime = System.currentTimeMillis();
+        long transformationTotalTime = transformEndTime - transformStartTime;
+        log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins for model Id:"
+                + scoreContext.uuidToModeId.get(uuid));
+        return models;
+    }
+
 }

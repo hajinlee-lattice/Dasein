@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +23,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -39,6 +44,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -64,6 +71,24 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Inject
     private DataFeedTaskService datafeedTaskService;
+
+    @Inject
+    private ZKConfigService zkConfigService;
+
+    @Value("${cdl.account.dataquota.limit}")
+    private Long defaultAccountQuotaLimit;
+
+    @Value("${cdl.contact.dataquota.limit}")
+    private Long defaultContactQuotaLimit;
+
+    @Value("${cdl.product.dataquota.limit}")
+    private Long defaultProductBundlesQuotaLimit;
+
+    @Value("${cdl.productsku.dataquota.limit}")
+    private Long defaultProductSkuQuotaLimit;
+
+    @Value("${cdl.transaction.dataquota.limit}")
+    private Long defaultTransactionQuotaLimit;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -487,5 +512,31 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
 
         return false;
+    }
+
+    @Override
+    public DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace) {
+        String componentName = CDLComponent.componentName;
+        DataLimit dataLimit = new DataLimit();
+        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
+                componentName, BusinessEntity.Account);
+        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
+        dataLimit.setAccountDataQuotaLimit(defaultAccountQuotaLimit);
+        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
+        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
+        dataLimit.setContactDataQuotaLimit(defaultContactQuotaLimit);
+        Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                ProductType.Analytic);
+        defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
+        dataLimit.setProductBundleDataQuotaLimit(defaultProductBundlesQuotaLimit);
+        Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                ProductType.Spending);
+        defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
+        dataLimit.setProductSkuDataQuotaLimit(defaultProductSkuQuotaLimit);
+        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                BusinessEntity.Transaction);
+        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
+        dataLimit.setTransactionDataQuotaLimit(defaultTransactionQuotaLimit);
+        return dataLimit;
     }
 }

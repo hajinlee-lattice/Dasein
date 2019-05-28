@@ -59,8 +59,8 @@ angular.module('lp.import.entry', [
         vm.displayType = $stateParams.type ? $stateParams.type : ImportWizardStore.getDisplayType();
         ImportWizardStore.setDisplayType(vm.displayType);        
 
-        // ImportWizardStore.clear();
-        ImportWizardStore.setThirdpartyidFields([], []); // we don't clear all the stores but we should clear thirdparty ids
+        ImportWizardStore.clear();
+        //ImportWizardStore.setThirdpartyidFields([], []); // we don't clear all the stores but we should clear thirdparty ids
 
         if ($stateParams.data){
             ImportWizardStore.setPostBody($stateParams.data);

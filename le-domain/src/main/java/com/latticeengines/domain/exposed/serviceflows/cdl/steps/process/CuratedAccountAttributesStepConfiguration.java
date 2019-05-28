@@ -8,9 +8,4 @@ public class CuratedAccountAttributesStepConfiguration extends BaseProcessEntity
     public BusinessEntity getMainEntity() {
         return BusinessEntity.CuratedAccount;
     }
-
-    @Override
-    public Long getDataQuotaLimit() {
-        return null;
-    }
 }
