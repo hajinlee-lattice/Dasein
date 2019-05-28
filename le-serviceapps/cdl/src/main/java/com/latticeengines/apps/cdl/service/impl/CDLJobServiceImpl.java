@@ -476,6 +476,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
                         highMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningHithTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
@@ -497,6 +498,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
                         lowMapMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningLowTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
