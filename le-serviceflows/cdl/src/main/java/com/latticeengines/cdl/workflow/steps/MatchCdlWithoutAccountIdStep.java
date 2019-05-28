@@ -32,7 +32,7 @@ public class MatchCdlWithoutAccountIdStep extends RunDataFlow<MatchCdlAccountCon
     @Override
     public void onConfigurationInitialized() {
         MatchCdlAccountConfiguration configuration = getConfiguration();
-        String targetTableName = NamingUtils.timestamp("MatchCdlWithoutAccontIdTable");
+        String targetTableName = NamingUtils.timestampWithRandom("MatchCdlWithoutAccontIdTable");
         configuration.setTargetTableName(targetTableName);
         log.info("Target table name: " + targetTableName);
         configuration.setDataFlowParams(createDataFlowParameters());
