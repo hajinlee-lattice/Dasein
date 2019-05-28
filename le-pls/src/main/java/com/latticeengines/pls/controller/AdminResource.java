@@ -193,4 +193,12 @@ public class AdminResource extends InternalResourceBase {
         return user != null;
     }
 
+    @RequestMapping(value = "/setSendImportEmailState", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "set S3Import Email Notification state")
+    public void setImportNotifictionStatus(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
+            "state") int state) {
+        tenantService.setNotificationStateByTenantId(tenantId, state);
+    }
+
 }

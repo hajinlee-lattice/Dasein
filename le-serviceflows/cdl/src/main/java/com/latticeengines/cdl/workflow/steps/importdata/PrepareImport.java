@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.EmailNotificationValidateUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -39,10 +40,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
@@ -63,6 +66,9 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private TenantService tenantService;
 
     @Override
     public void execute() {
@@ -200,9 +206,14 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     private void sendS3ImportEmail(String result, S3ImportEmailInfo emailInfo) {
         try {
-            InternalResourceRestApiProxy proxy = getInternalResourceProxy();
             String tenantId = configuration.getCustomerSpace().toString();
-            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            Tenant tenant = tenantService.findByTenantId(tenantId);
+            int notificationState = tenant == null ? 0 : tenant.getNotificationState();
+            InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+            if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
+                    notificationState)) {
+                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
