@@ -476,6 +476,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
                         highMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningHithTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
@@ -497,6 +498,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } else {
                     if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
                         lowMapMapIterator.remove();
+                        continue;
                     } else {
                         notStartRunningLowTenants.add((String)entry.getValue().get(0));
                         runningPAJobsCount++;
@@ -541,25 +543,42 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info(String.format("Need to schedule low priority tenant is : %s.", needScheduleTenantFromLowPriority));
 
-        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority) && list.containsKey(needScheduleTenantFromHighPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < maximumHighPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < minimumHighPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromHighPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromHighPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromHighPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, true, getImportActions(actions))) {
+                List<Object> objects = list.get(needScheduleTenantFromHighPriority);
+                SimpleDataFeed dataFeed = null;
+                CDLJobDetail cdlJobDetail = null;
+                List<Action> actions = null;
+                switch(objects.size()) {
+                    case 3: actions = (List<Action>) objects.get(2);
+                    case 2: cdlJobDetail = (CDLJobDetail) objects.get(1);
+                    case 1: dataFeed = (SimpleDataFeed) objects.get(0);
+                    default:break;
+                }
+
+                if (dataFeed != null && submitProcessAnalyzeJob(dataFeed, cdlJobDetail, true,
+                        getImportActions(actions))) {
                     log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromHighPriority));
                     runningPAJobsCount++;
                 }
             }
         }
-        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority) && list.containsKey(needScheduleTenantFromLowPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < maximumLowPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < minimumLowPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromLowPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromLowPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromLowPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, false, getImportActions(actions))) {
+                List<Object> objects = list.get(needScheduleTenantFromLowPriority);
+                SimpleDataFeed dataFeed = null;
+                CDLJobDetail cdlJobDetail = null;
+                List<Action> actions = null;
+                switch(objects.size()) {
+                    case 3: actions = (List<Action>) objects.get(2);
+                    case 2: cdlJobDetail = (CDLJobDetail) objects.get(1);
+                    case 1: dataFeed = (SimpleDataFeed) objects.get(0);
+                    default:break;
+                }
+                if (dataFeed != null && submitProcessAnalyzeJob(dataFeed, cdlJobDetail, false,
+                        getImportActions(actions))) {
                     log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromLowPriority));
                 }
             }
