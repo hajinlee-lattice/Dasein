@@ -9,7 +9,7 @@
                 <h3> Your download has expired. </h3>
             </div>
             <div class="text-center" data-ng-show="!loading">
-				<a style="margin-top: 50px" class="button icon-button orange-button" ng-class="{'disabled': vm.disableDownload}" ng-click="!vm.disableDownload ? vm.downloadSegmentExport() : '' " ng-disabled="vm.disableDownload">
+				<a style="margin-top: 50px" class="button icon-button orange-button" ng-class="{'disabled': vm.disableDownload}" href="/files/datacollection/segments/export/{{vm.exportId}}/download?Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-disabled="vm.disableDownload">
 				    Download Your Exported Segment
 				</a>
             </div>
