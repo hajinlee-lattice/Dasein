@@ -47,12 +47,13 @@ export default class S3FileList extends Component {
         let path = store.getState()['s3files'].path;
 
         let ImportWizardStore = this.ImportWizardStore;
-        let entityType = ImportWizardStore.getEntityType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
         this.setState({
             showLoading: true,
             breadcrumbs: [
                 {
-                    label: `${entityType} Data`
+                    label: `${templateType} Data`
                 }
             ]
         });
@@ -155,7 +156,6 @@ export default class S3FileList extends Component {
     }
 
     goBack = () => {
-        console.log(this.state.angularBack);
         NgState.getAngularState().go(this.state.angularBack, {});
     }
 
@@ -215,7 +215,7 @@ export default class S3FileList extends Component {
             name: "file-list",
             selectable: true,
             sorting:{
-                initial: 'lastModified',
+                initial: 'last_modified',
                 direction: 'desc'
             },
             header: [
@@ -230,12 +230,12 @@ export default class S3FileList extends Component {
                     sortable: false
                 },
                 {
-                    name: "file_size",
+                    name: "byte_size",
                     displayName: "File Size",
                     sortable: true
                 },
                 {
-                    name: "lastModified",
+                    name: "last_modified",
                     displayName: "Time",
                     sortable: true
                 }
@@ -263,10 +263,17 @@ export default class S3FileList extends Component {
                     colSpan: 1
                 },
                 {
-                    colSpan: 1
+                    colSpan: 1,
+                    onlyTemplate: true,
+                    template: cell => {
+                        return (
+                            <span>{cell.props.rowData.file_size}</span>
+                        );
+                    }
                 },
                 {
                     colSpan: 3,
+                    onlyTemplate: true,
                     template: cell => {
 
                         if (cell.props.rowData.file_type != null) {

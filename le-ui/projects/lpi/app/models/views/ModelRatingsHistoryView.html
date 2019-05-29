@@ -2,70 +2,22 @@
 
     <div class="row">
         <div class="ten columns offset-one">
-
             <ul class="tabs_">
                 <li ui-sref="home.model.ratings({ modelId: '{{ vm.modelId | escape }}' })" ui-sref-opts="{reload: true}">Rating Setup</li>
                 <li class="active">History</li>
             </ul>
-
-            <div
-            	ng-if="vm.cdlIsEnabled"
-            	class="iteration-selection-header">
-
-                <menu-filter-by config="vm.header.filter" current="vm.currentPage"></menu-filter-by>
-                <menu-sort-by config="vm.header.sort"></menu-sort-by>
-            </div>
             <ul 
-                class="history-list"
-                ng-if="vm.cdlIsEnabled">
-            	<li ng-repeat="
-                    configuration in vm.scoringHistory | 
-                    filter: vm.header.filter.value : true | 
-                    orderBy: vm.header.sort.order + vm.header.sort.property |
-                    startFrom: (vm.currentPage - 1) * vm.pageSize |
-                    limitTo: vm.pageSize">
-
-		            <div class="chart-header">
-		                <div class="list-data clearfix">
-
-                            <span class="pull-left">
-                                <a 
-                                    ui-sref="home.model.attributes({ 
-                                        rating_id: vm.rating_id, 
-                                        modelId: configuration.modelSummaryId,
-                                        viewingIteration: true
-                                    })">
-                                    Iteration {{ configuration.iteration }}</a><span ng-if="configuration.publishedBy">, published by {{ configuration.publishedBy }}</span>
-                            </span>
-
-                            <span class="pull-right">{{ configuration.publishedTimestamp | date : 'MMM d, y h:mm:ss a'}} </span>
-
-                        </div>
-		            </div><!-- End .chart-header -->
-		            <ul class="bucket-tiles published buckets-{{configuration.publishedMetadata.length}}">
-		            	<li ng-repeat="bucket in configuration.publishedMetadata">
-		                    <div class="bucket-label">{{ bucket.bucket_name }}</div>
-		                    <dl>
-		                        <dt>Lift</dt>
-		                        <dd class="lift">{{vm.math.max(bucket.lift).toFixed(1);}}x</dd>
-		                        <dt>Score Range</dt>
-		                        <dd>{{bucket.left_bound_score}}-{{bucket.right_bound_score}}</dd>
-		                    </dl>
-		                </li>
-		            </ul><!-- End .bucket-tiles -->
-		        </li>
-		    </ul><!-- End .history -->
-
-            <ul 
-                class="history-list"
-                ng-if="!vm.cdlIsEnabled">
-                <li ng-repeat="configuration in vm.scoringHistory">
+                class="history-list">
+                <li ng-repeat="
+                    configuration in vm.scoringHistoryArray | 
+                    orderBy: -timestamp
+                    ">
                     <div class="chart-header clearfix">
-                        <div class="list-data pull-left"><span ng-if="configuration[0].last_modified_by_user">Created by: {{configuration[0].last_modified_by_user}}</span></div>
-                        <div class="list-data pull-right">Published on: {{configuration[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
+                        <div class="list-data pull-left"><span ng-if="configuration.buckets[0].last_modified_by_user">Created by: {{configuration.buckets[0].last_modified_by_user}}</span></div>
+                        <div class="list-data pull-right">Published on: {{configuration.buckets[0].creation_timestamp | date : 'MMM d, y h:mm:ss a'}}</div>
                     </div><!-- End .chart-header -->
-                    <ul class="bucket-tiles published buckets-{{configuration.length}}">
-                        <li ng-repeat="bucket in configuration">
+                    <ul class="bucket-tiles published buckets-{{configuration.buckets.length}}">
+                        <li ng-repeat="bucket in configuration.buckets">
                             <div class="bucket-label">{{bucket.bucket_name}}</div>
                             <dl>
                                 <dt>Lift</dt>
@@ -76,22 +28,9 @@
                         </li>
                     </ul><!-- End .bucket-tiles -->
                 </li>
-                <h4 ng-if="!vm.cdlIsEnabled">Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
+                <h4>Your ratings are available through <a ui-sref="home.model.jobs">file scoring</a> or API.</h4>
             </ul><!-- End .history -->
-
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->
-    <div 
-        class="row"
-        ng-show="max > 1"
-        ng-if="vm.cdlIsEnabled">
-        <div class="ten columns offset-one">
-            <pd-pagination-controls 
-                class="pull-right"
-                current="vm.currentPage" 
-                max="max = (vm.header.filter.filtered).length / vm.pageSize">
-            </pd-pagination-controls>
-        </div>
-    </div>
 
 </section>

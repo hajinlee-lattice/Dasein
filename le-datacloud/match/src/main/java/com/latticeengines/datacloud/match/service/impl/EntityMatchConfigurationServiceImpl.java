@@ -17,6 +17,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodbv2.model.InternalServerErrorException;
 import com.amazonaws.services.dynamodbv2.model.ItemCollectionSizeLimitExceededException;
 import com.amazonaws.services.dynamodbv2.model.LimitExceededException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
@@ -50,6 +51,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
         RETRY_EXCEPTIONS.put(LimitExceededException.class, true);
         RETRY_EXCEPTIONS.put(ProvisionedThroughputExceededException.class, true);
         RETRY_EXCEPTIONS.put(ItemCollectionSizeLimitExceededException.class, true);
+        RETRY_EXCEPTIONS.put(InternalServerErrorException.class, true);
         // exceptions that cannot be retried
         RETRY_EXCEPTIONS.put(ResourceInUseException.class, false);
         RETRY_EXCEPTIONS.put(ResourceNotFoundException.class, false);

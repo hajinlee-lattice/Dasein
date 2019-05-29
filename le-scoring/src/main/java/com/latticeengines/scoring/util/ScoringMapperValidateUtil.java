@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.util;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,12 +16,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 import com.latticeengines.scoring.util.ModelAndRecordInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringMapperValidateUtil.class);
 
     public enum MetadataPurpose {
         FEATURE(3), TARGET(4);
@@ -50,12 +50,11 @@ public class ScoringMapperValidateUtil {
     }
 
     public static void validateLocalizedFiles(boolean scoringScriptProvided,
-            Map<String, JsonNode> models) {
+            Map<String, URI> models) {
 
         if (!scoringScriptProvided) {
             throw new LedpException(LedpCode.LEDP_20002);
         }
-
         // check whether if model(s) is(are) localized
         if (models.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_20020);

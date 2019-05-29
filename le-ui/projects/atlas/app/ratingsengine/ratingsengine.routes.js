@@ -162,7 +162,15 @@ angular
                     Model: function($q, $stateParams, ModelStore, RatingEngine, RatingsEngineStore, Dashboard) {
                         var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
                         var deferred = $q.defer(),
-                            id = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            id = '';
+
+                        if ($stateParams.modelId) {
+                            id = $stateParams.modelId;
+                        } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                            id = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId;
+                        } else {
+                            id = '';
+                        }
 
                         if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
@@ -293,7 +301,14 @@ angular
                             } else {
                                 var iterationId = Dashboard.summary.latestIterationId;
                             }
-                            $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            // $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            if ($stateParams.modelId) {
+                                $scope.modelId = $stateParams.modelId;
+                            } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                                $scope.modelId = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId;
+                            } else {
+                                $scope.modelId = '';
+                            }
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;

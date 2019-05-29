@@ -28,6 +28,8 @@ def main(argv):
             if len(leadFiles) == 0:
                 raise "leadFile is null"
             for leadFile in leadFiles:
+                if not leadFile.start(modelID):
+                    continue
                 modelEvaluateAvro(modelID, leadFile, type, argv[2])
             # delete the supported files for the next round of scoring
             deleteFiles(scoringSupportedFiles)

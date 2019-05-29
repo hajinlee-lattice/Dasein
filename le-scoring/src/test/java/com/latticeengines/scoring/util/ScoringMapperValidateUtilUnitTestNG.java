@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,17 +48,15 @@ public class ScoringMapperValidateUtilUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testValidateLocalizedFiles() {
-        Map<String, JsonNode> mockModels = new HashMap<>();
-
+    public void testValidateLocalizedFiles() throws URISyntaxException {
+        Map<String, URI> mockModels = new HashMap<>();
         try {
             ScoringMapperValidateUtil.validateLocalizedFiles(true, mockModels);
             Assert.fail("should have thrown exception.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20020);
         }
-
-        JsonNode obj = new ObjectMapper().createObjectNode();
+        URI obj = new URI("");
         mockModels.put(MODEL_ID, obj);
 
         try {

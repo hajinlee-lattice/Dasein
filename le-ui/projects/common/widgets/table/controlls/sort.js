@@ -21,8 +21,8 @@ const compare = (a, b) => {
         sortCheckLessThan = (((a[sortingName])+'').toLowerCase() > ((b[sortingName])+'').toLowerCase());
       }
       case 'number': {
-        sortCheckGreater = ((a, b) => a - b);
-        sortCheckLessThan = ((a, b) => b - a);
+        sortCheckGreater = ((a, b) => a[sortingName] - b[sortingName]);
+        sortCheckLessThan = ((a, b) => b[sortingName] - a[sortingName]);
       }
     }
 
