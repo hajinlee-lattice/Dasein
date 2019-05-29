@@ -11,6 +11,8 @@ import com.latticeengines.security.exposed.AccessLevel;
 
 public interface GlobalUserManagementService {
 
+    Boolean existExpireDateChanged(String username, String tenant, String right, Long expirationDate);
+
     Boolean registerUser(String userName, User user, Credentials creds);
 
     Boolean registerExternalIntegrationUser(String userName, User user);

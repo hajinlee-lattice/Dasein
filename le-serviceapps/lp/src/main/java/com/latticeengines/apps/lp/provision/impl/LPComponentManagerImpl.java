@@ -118,7 +118,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
     }
 
     private void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
-                                List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
+                                 List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
         if (tenantService.hasTenantId(tenant.getId())) {
             log.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
@@ -172,7 +172,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null, false);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);
