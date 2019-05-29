@@ -250,7 +250,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
      * test FindByTypeAndHoFixWithPagination : [filter by field value + sort +
      * pagination] functionality by Type and Hotfix with Pagination
      */
-    @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfix")
+    @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfix", dependsOnMethods = {
+            "createPatchBooks" })
     private void testFindByTypeAndHoFixWithPagin(int offset, int limit, String sortByField, int expectedSize,
             Object... fieldAndValues) throws Exception {
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset,
@@ -282,7 +283,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
      * test FindByTypeWithPagination : [filter by field value + sort +
      * pagination] functionality by Type with Pagination
      */
-    @Test(groups = "functional", dataProvider = "patchBookPaginationWithType")
+    @Test(groups = "functional", dataProvider = "patchBookPaginationWithType", dependsOnMethods = {
+            "createPatchBooks" })
     private void testFindByTypeWithPagin(int offset, int limit, String sortByField,
             int expectedSize, Object... fieldAndValues) throws Exception {
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeWithPagination(offset, limit,
