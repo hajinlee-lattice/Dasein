@@ -148,8 +148,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public void setNotificationStateByTenantId(String tenantId, int status) {
-        tenantEntityMgr.setNotificationStateByTenantId(tenantId, status);
+    public void setNotificationStateByTenantId(String tenantId, String notificationLevel) {
+        tenantEntityMgr.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
 }

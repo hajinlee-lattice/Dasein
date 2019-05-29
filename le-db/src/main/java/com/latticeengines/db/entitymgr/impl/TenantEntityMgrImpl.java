@@ -87,12 +87,12 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void setNotificationStateByTenantId(String tenantId, int status) {
+    public void setNotificationStateByTenantId(String tenantId, String notificationLevel) {
         Tenant tenant1 = findByTenantId(tenantId);
         if (tenant1 == null) {
             log.error("can not find the tenant using tenantId " + tenantId);
         } else {
-            tenant1.setNotificationLevel(TenantEmailNotificationLevel.getNameByNum(status));
+            tenant1.setNotificationLevel(TenantEmailNotificationLevel.getByName(notificationLevel));
             super.update(tenant1);
         }
     }

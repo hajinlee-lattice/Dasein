@@ -197,8 +197,8 @@ public class AdminResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "set S3Import Email Notification state")
     public void setImportNotifictionStatus(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
-            "state") int state) {
-        tenantService.setNotificationStateByTenantId(tenantId, state);
+            "notificationLevel") String notificationLevel) {
+        tenantService.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
 }
