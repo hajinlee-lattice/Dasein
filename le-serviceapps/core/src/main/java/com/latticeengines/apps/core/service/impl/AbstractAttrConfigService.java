@@ -108,7 +108,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public List<AttrConfig> getRenderedList(String propertyName, Boolean enabled) {
         log.info("propertyNames are " + propertyName + ", enabled " + enabled);
         List<Category> categories = Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
-                        .collect(Collectors.toList());
+                .collect(Collectors.toList());
         final Tenant tenant = MultiTenantContext.getTenant();
         boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
@@ -745,7 +745,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             AttrState state = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
             if (AttrState.Inactive.equals(state)) {
                 attrConfig.getAttrProps().forEach((key, value) -> {
-                    if (!key.equals(ColumnMetadataKey.State))
+                    // PLS-13636 Modeling usage customization not
+                    // impacted by State
+                    if (!key.equals(ColumnMetadataKey.State) && !key.equals(ColumnSelection.Predefined.Model.name()))
                         value.setAllowCustomization(false);
                 });
             }
