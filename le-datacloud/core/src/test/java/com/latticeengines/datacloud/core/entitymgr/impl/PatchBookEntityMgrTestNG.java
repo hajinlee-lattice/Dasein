@@ -13,8 +13,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -49,12 +49,10 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private PatchBookEntityMgr patchBookEntityMgr;
 
-    @AfterClass(groups = "functional")
-    public void deleteTestData() {
-        // Delete created test patch books
-        for (PatchBook patchBook : patchBookWithPagination) {
-            patchBookEntityMgr.delete(patchBook);
-        }
+    @BeforeClass(groups = "functional")
+    public void deleteAllData() {
+        // Delete Data if already existing any
+        patchBookEntityMgr.deleteAll();
     }
 
     @AfterMethod(groups = "functional")
@@ -221,7 +219,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "createPatchBooks")
     private Object[][] providePatchBookData() {
         return new Object[][] {
-                // Type, Domain, Duns, CompanyName, Cleanup, HotFix
+                // Type, Domain, Duns, CompanyName, HotFix, Cleanup
                 // type = Attribute
                 { PatchBook.Type.Attribute, "google.com", "347827482", "Test_Google", true, true },
                 { PatchBook.Type.Attribute, "citrix.com", "323993299", "Test_Citrix", false, false },
@@ -266,12 +264,18 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "patchBookPaginationWithTypeAndHotfix")
     private Object[][] patchBookPaginDataWithTypeAndHotfix() {
         return new Object[][] {
+                // hotfix flag = true
                 { 0, 4, PatchBook.COLUMN_DUNS, 4, PatchBook.Type.Attribute, true },
-                { 0, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, false },
                 { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, true },
-                { 2, 1, PatchBook.COLUMN_DUNS, 1, PatchBook.Type.Attribute, false },
+                // limit = total number of items
                 { 0, 5, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, true },
-                { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Lookup, false } };
+                // hotfix flag = false
+                { 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Attribute, false },
+                { 2, 1, PatchBook.COLUMN_DUNS, 1, PatchBook.Type.Attribute, false },
+                { 0, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, false },
+                { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Lookup, false },
+                // limit > total number of items
+                { 0, 30, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, false } };
     }
 
     /*
@@ -294,7 +298,12 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
                 { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute },
                 { 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Attribute },
                 { 0, 5, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup },
-                { 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Lookup } };
+                { 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Lookup },
+                // limit = total number of items
+                { 0, 10, PatchBook.COLUMN_DUNS, 10, PatchBook.Type.Attribute },
+                // limit > total number of items
+                { 0, 30, PatchBook.COLUMN_DUNS, 10, PatchBook.Type.Lookup }
+        };
     }
 
     private PatchBook clone(@NotNull PatchBook book) {

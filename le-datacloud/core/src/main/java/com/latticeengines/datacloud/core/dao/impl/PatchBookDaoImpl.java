@@ -41,32 +41,4 @@ public class PatchBookDaoImpl
                 PatchBook.class.getSimpleName(), fieldName, fieldName, PatchBook.COLUMN_PID, PID_LIST_PARAMETER_NAME);
     }
 
-    /*
-     * return list of patch books applied :
-     * 1. Sort by : DUNS
-     * 2. Filter based on PatchBook.Type & hotFix flag
-     * 3. Apply Pagination : offset and limit
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<PatchBook> findAllByField(@NotNull int offset, @NotNull int limit,
-            @NotNull String sortByField, Object... fieldsAndValues) {
-        Session session = getCurrentSession();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
-            if (i > 0) {
-                sb.append(" and ");
-            }
-            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
-        }
-        String queryStr = String.format("from %s where %s order by %s",
-                getEntityClass().getSimpleName(), sb.toString(), sortByField);
-        Query<PatchBook> query = session.createQuery(queryStr);
-        query.setMaxResults(limit);
-        query.setFirstResult(offset);
-        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
-            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
-        }
-        return query.list();
-    }
 }

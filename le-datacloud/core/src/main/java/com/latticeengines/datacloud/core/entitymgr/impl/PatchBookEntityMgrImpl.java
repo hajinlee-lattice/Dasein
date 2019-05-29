@@ -45,15 +45,15 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
     public List<PatchBook> findByTypeWithPagination(@NotNull int offset, @NotNull int limit,
             @NotNull String sortByField, PatchBook.Type type) {
-        return getDao().findAllByField(offset, limit, sortByField, PatchBook.COLUMN_TYPE,
-                type.name());
+        return getDao().findAllSortedByFieldWithPagination(offset, limit, sortByField,
+                PatchBook.COLUMN_TYPE, type.name());
     }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
     public List<PatchBook> findByTypeAndHotFixWithPagination(@NotNull int offset, @NotNull int limit,
             @NotNull String sortByField, PatchBook.Type type, boolean hotfix) {
-        return getDao().findAllByField(offset, limit, sortByField, PatchBook.COLUMN_TYPE,
+        return getDao().findAllSortedByFieldWithPagination(offset, limit, sortByField, PatchBook.COLUMN_TYPE,
                 type.name(), PatchBook.COLUMN_HOTFIX, hotfix);
     }
 
@@ -81,6 +81,12 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public void delete(PatchBook entity) {
         super.delete(entity);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    public void deleteAll() {
+        super.deleteAll();
     }
 
     /* methods to set a value to a field for all PatchBooks in the given list */
