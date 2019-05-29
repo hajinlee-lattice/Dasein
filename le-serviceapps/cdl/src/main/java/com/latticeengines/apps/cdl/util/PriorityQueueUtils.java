@@ -233,15 +233,12 @@ public class PriorityQueueUtils {
     }
 
     private static boolean isValid(ActivityObject activityObject) {
-        if ((activityObject.getScheduleNow() == null && activityObject.getDataCloudRefresh() == null && activityObject.getInvokeTime() == null) ||
-                (activityObject.getScheduleNow() != null && !activityObject.getScheduleNow() &&
-                        activityObject.getDataCloudRefresh() != null && !activityObject.getDataCloudRefresh() && activityObject.getInvokeTime() == null)) {
-            return false;
+        if (activityObject.getScheduleNow() != null && activityObject.getScheduleNow()) {
+            return true;
         }
-        if (activityObject.getScheduleNow() != null && !activityObject.getScheduleNow()) {
-            if (activityObject.getActions() == null) {
-                return false;
-            } else {
+        if ((activityObject.getDataCloudRefresh() != null && activityObject.getDataCloudRefresh()) || activityObject.getInvokeTime() != null) {
+            List<Action> actionList = activityObject.getActions();
+            if (actionList != null && actionList.size() > 0) {
                 long lastActionTime = 0L;
                 for (Action action : activityObject.getActions()) {
                     if (action.getCreated().getTime() > lastActionTime) {
@@ -253,7 +250,7 @@ public class PriorityQueueUtils {
                 return lastActionTime != 0L && minute >= 10;
             }
         }
-        return true;
+        return false;
     }
 
 }

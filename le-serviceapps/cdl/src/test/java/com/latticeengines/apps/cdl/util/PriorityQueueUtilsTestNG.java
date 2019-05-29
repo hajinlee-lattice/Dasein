@@ -244,12 +244,30 @@ public class PriorityQueueUtilsTestNG {
         actions3.add(action8);
         activityObject6.setActions(actions3);
 
+        ActivityObject activityObject7 = new ActivityObject();
+        Tenant tenant7 = new Tenant();
+        tenant7.setTenantType(type);
+        tenant7.setName("testTenant77");
+        activityObject7.setTenant(tenant7);
+        activityObject7.setScheduleNow(false);
+        Action action10 = new Action();
+        action10.setCreated(DateTimeUtils.convertToDateUTCISO8601("2018-02-01T00:30:00+0000"));
+        action10.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        Action action9 = new Action();
+        action9.setCreated(DateTimeUtils.convertToDateUTCISO8601("2018-01-01T09:30:00+0000"));
+        action9.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        List<Action> actions4  = new LinkedList<>();
+        actions4.add(action10);
+        actions4.add(action9);
+        activityObject7.setActions(actions4);
+
         activityObjects.add(activityObject1);
         activityObjects.add(activityObject2);
         activityObjects.add(activityObject3);
         activityObjects.add(activityObject4);
         activityObjects.add(activityObject5);
         activityObjects.add(activityObject6);
+        activityObjects.add(activityObject7);
         return activityObjects;
     }
 }
