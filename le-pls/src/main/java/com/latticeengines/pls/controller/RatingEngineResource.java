@@ -200,7 +200,8 @@ public class RatingEngineResource {
         String user = MultiTenantContext.getEmailAddress();
         RatingEngine res;
         try {
-            cleanupBucketsInRules(ratingEngine);
+            // revert change due to PLS-13661
+            // cleanupBucketsInRules(ratingEngine);
             res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
                     createAction);
         } catch (Exception ex) {
@@ -315,7 +316,8 @@ public class RatingEngineResource {
         String user = MultiTenantContext.getEmailAddress();
         RatingModel res;
         try {
-            cleanupBucketsInRules(ratingModel);
+            // revert change due to PLS-13661
+            // cleanupBucketsInRules(ratingModel);
             res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
