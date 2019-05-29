@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
@@ -83,7 +84,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         Boolean sendS3ImportEmail = Boolean.valueOf(
                 job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
-        int notificationState = job.getTenant().getNotificationState();
+        int notificationState = TenantEmailNotificationLevel.getNotificationState(job.getTenant().getNotificationLevel());
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", applicationId));
