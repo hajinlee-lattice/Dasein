@@ -62,6 +62,7 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
@@ -292,9 +293,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
-        if ((tenant.getNotificationState() & 4) == 4) {//1XX & 100 = 100 0XX & 100 = 0
-            sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
-        }
+        sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
         return appId.toString();
     }
 
@@ -404,7 +403,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
             String tenantId = CustomerSpace.parse(customerSpace).toString();
             Tenant tenant = tenantService.findByTenantId(tenantId);
-            int notificationState = tenant == null ? 0 : tenant.getNotificationState();
+            int notificationState = tenant == null ? 0 :
+                    TenantEmailNotificationLevel.getNotificationState(tenant.getNotificationLevel());
             if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
                     notificationState)) {
                 proxy.sendS3ImportEmail(result, tenantId, emailInfo);

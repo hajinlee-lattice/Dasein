@@ -87,9 +87,9 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Column(name = "EXPIRED_TIME")
     private Long expiredTime;
 
-    @JsonProperty("notification_state")
-    @Column(name = "NOTIFICATION_STATE")
-    private int notificationState;
+    @JsonProperty("notification_level")
+    @Column(name = "NOTIFICATION_LEVEL")
+    private TenantEmailNotificationLevel notificationLevel = TenantEmailNotificationLevel.ERROR;
 
     public Tenant() {
     }
@@ -217,11 +217,11 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
             return id.equals(other.id);
     }
 
-    public int getNotificationState() {
-        return notificationState;
+    public TenantEmailNotificationLevel getNotificationLevel() {
+        return notificationLevel;
     }
 
-    public void setNotificationState(int notificationState) {
-        this.notificationState = notificationState;
+    public void setNotificationLevel(TenantEmailNotificationLevel notificationLevel) {
+        this.notificationLevel = notificationLevel;
     }
 }
