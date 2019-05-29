@@ -76,9 +76,15 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             try {
                 startLivySession(getHdfsPaths(attrRepo));
                 configuration.getExportEntities().forEach(exportEntity -> {
-                    FrontEndQuery frontEndQuery = getFrontEndQueryCopy();
-                    HdfsDataUnit entityResult = exportOneEntity(exportEntity, frontEndQuery);
-                    if (entityResult != null) {
+                    BusinessEntity mainEntity = null;
+                    if (ExportEntity.Account.equals(exportEntity)) {
+                        mainEntity = BusinessEntity.Account;
+                    } else if (ExportEntity.Contact.equals(exportEntity)) {
+                        mainEntity = BusinessEntity.Contact;
+                    }
+                    if (isEntityValid(mainEntity)) {
+                        FrontEndQuery frontEndQuery = getFrontEndQueryCopy();
+                        HdfsDataUnit entityResult = exportOneEntity(exportEntity, frontEndQuery);
                         resultForCurrentAttempt.put(exportEntity, entityResult);
                     }
                 });
@@ -158,14 +164,13 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         log.info("Going to export " + lookups.size() + " columns for " + exportEntity);
         frontEndQuery.setLookups(lookups);
-        if (isEntityValid(frontEndQuery.getMainEntity())) {
-            return getEntityQueryData(frontEndQuery);
-        } else {
-            return null;
-        }
+        return getEntityQueryData(frontEndQuery);
     }
 
     private boolean isEntityValid(BusinessEntity mainEntity) {
+        if (mainEntity == null) {
+            return false;
+        }
         TableRoleInCollection tableRole = mainEntity.getServingStore();
         if (tableRole == null) {
             log.warn("Cannot find a serving store for " + mainEntity);
