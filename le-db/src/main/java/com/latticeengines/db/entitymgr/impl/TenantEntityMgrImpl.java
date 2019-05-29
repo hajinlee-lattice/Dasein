@@ -109,6 +109,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
             tenant.setExpiredTime(expiredTime);
         }
+        if(tenant.getNotificationLevel() == null) {
+            tenant.setNotificationLevel(TenantEmailNotificationLevel.ERROR);
+        }
         super.create(tenant);
     }
 
