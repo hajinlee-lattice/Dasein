@@ -13,4 +13,6 @@ public interface SourceAttributeEntityMgr {
             boolean isCustomer);
 
     String getLatestDataCloudVersion(String sourceName, String stage, String transform);
+
+    List<String> getAllDataCloudVersions(String source, String stage, String transformer);
 }

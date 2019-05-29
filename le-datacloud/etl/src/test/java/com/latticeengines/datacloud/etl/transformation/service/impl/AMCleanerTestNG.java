@@ -12,8 +12,10 @@ import java.util.Set;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     private GeneralSource baseSourceAccMaster2 = new GeneralSource("AccountMasterVerify");
     private GeneralSource source = new GeneralSource("AccountMasterVerifySource");
     private static final String DATA_CLOUD_VERSION = "2.0.6";
+    private static final int LDC_ATTRS = 10;
+    private static final int TECH_IND = 0;
 
     @Autowired
     private SourceAttributeEntityMgr srcAttrEntityMgr;
@@ -216,13 +220,12 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         Assert.assertEquals(rowNum, expectedData.length);
     }
 
-    private List<Object> verifySourceAttrs(GenericRecord record, List<Field> amfields,
-            Map<String, String> mapFieldType, Set<String> mustPresentItems) {
-        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN,
-                AMCleaner.TRANSFORMER_NAME, "2.0.18", false);
+    private void verifySourceAttrs(GenericRecord record, List<Field> amfields,
+            Map<String, String> mapFieldType, Set<String> mustPresentItems)
+            throws JsonProcessingException, JSONException {
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AMCleaner.ACCOUNT_MASTER,
+                AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME, new JSONObject(getAMCleanerConfigStep2()).getString("DataCloudVersion"), false); // extracting datacloudversion from config step
         int count = 0;
-        int countlatId = 0;
-        int mustPresentColCnt = 0;
         int techInd = 0;
         int ldcAttr = 0;
         for (SourceAttribute srcAttr : srcAttrs) {
@@ -230,9 +233,11 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             if (!srcAttr.getArguments().equals(("DROP"))) {
                 // counting total attributes retained
                 count++;
-                // verifying these 5 mustPresentList attributes are present :
-                if (mustPresentItems.contains(attrName)) {
-                    mustPresentColCnt++;
+                // verifying all the mustPresentList attributes are present
+                if (mustPresentItems.contains(attrName)
+                        || (srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)
+                                || srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ID))) {
+                    mustPresentItems.remove(srcAttr.getAttribute());
                 }
                 // verifying there are no attributes named as TechIndicator_*
                 if (attrName.startsWith("TechIndicator_")) {
@@ -242,12 +247,6 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                 if (attrName.startsWith("LDC_")) {
                     ldcAttr++;
                 }
-                // verifying LatticeAccountId exists & verifying LatticeID exists
-                if (srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)
-                        || srcAttr.getAttribute().equals(DataCloudConstants.LATTICE_ID)) {
-                    countlatId++;
-                }
-
                 // verifying the presence of required attribute
                 if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
                     Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
@@ -259,8 +258,10 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                 Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
             }
         }
-        List<Object> returnCount = Arrays.asList(countlatId, count, mustPresentColCnt, techInd, ldcAttr);
-        return returnCount;
+        Assert.assertEquals(count, amfields.size());
+        Assert.assertEquals(techInd, TECH_IND); // Don’t have attributes named as TechIndicator_*
+        Assert.assertEquals(ldcAttr, LDC_ATTRS); // Have 10 attributes named as LDC_*
+        Assert.assertTrue(mustPresentItems.isEmpty()); // verify all mustPresentItem list is all covered
     }
 
     private void verifyTargetSrcAvro(Iterator<GenericRecord> records, List<String> strAttrs) {
@@ -291,8 +292,8 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         GenericRecord record = records.next();
-        Set<String> mustPresentItems = new HashSet<>(Arrays.asList("BmbrSurge_BucketCode",
-                "BmbrSurge_CompositeScore", "BuiltWith_TechIndicators",
+        Set<String> mustPresentItems = new HashSet<>(Arrays.asList("LatticeAccountId", "LatticeID",
+                "BmbrSurge_BucketCode", "BmbrSurge_CompositeScore", "BuiltWith_TechIndicators",
                 "HGData_SupplierTechIndicators", "HGData_SegmentTechIndicators"));
         List<Field> amfields = record.getSchema().getFields();
         // set of field and its type
@@ -308,16 +309,12 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             }
             mapFieldType.put(field.name(), schemaType);
         }
-        // verifying srcAttrs field Data
-        List<Object> countVals = verifySourceAttrs(record, amfields, mapFieldType,
-                mustPresentItems);
+        try {
+            verifySourceAttrs(record, amfields, mapFieldType, mustPresentItems);
+        } catch (JsonProcessingException | JSONException e) {
+            log.info("Exception : " + e);
+        }
         // verifying srcAttrs record Value Data
         verifyTargetSrcAvro(records, strAttrs);
-        Assert.assertEquals(countVals.get(0), 2); // verifying if both lattice account id and lattice id are present
-        Assert.assertEquals(countVals.get(1), amfields.size());
-        Assert.assertEquals(countVals.get(2), mustPresentItems.size()); // These 6 attributes exist: BmbrSurge_BucketCode, BmbrSurge_CompositeScore,
-                                                                        // BuiltWith_TechIndicators, HGData_SupplierTechIndicators, HGData_SegmentTechIndicators
-        Assert.assertEquals(countVals.get(3), 0); // Don’t have attributes named as TechIndicator_*
-        Assert.assertEquals(countVals.get(4), 10); // Have 10 attributes named as LDC_*
     }
 }

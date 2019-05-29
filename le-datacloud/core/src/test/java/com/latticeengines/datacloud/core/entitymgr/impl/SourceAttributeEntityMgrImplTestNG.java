@@ -43,13 +43,11 @@ public class SourceAttributeEntityMgrImplTestNG extends DataCloudCoreFunctionalT
                 "AccountMaster", "CLEAN", "AMCleaner");
         Assert.assertTrue(StringUtils.isNotEmpty(maxDataCloudVersion));
         // computing the expected max datacloud version value
-        List<SourceAttribute> srcAttrVersions = sourceAttributeEntityMgr
-                .getAttributes("AccountMaster", "CLEAN", "AMCleaner", "2.0.18", false);
+        List<String> versions = sourceAttributeEntityMgr
+                .getAllDataCloudVersions("AccountMaster", "CLEAN", "AMCleaner");
         Map<Integer, String> dataCloudVersions = new HashMap<>();
-        for (SourceAttribute srcAttr : srcAttrVersions) {
-            String dataCloudVersion = srcAttr.getDataCloudVersion();
-            dataCloudVersions.put(Integer.parseInt(dataCloudVersion.replace(".", "")),
-                    dataCloudVersion);
+        for (String version : versions) {
+            dataCloudVersions.put(Integer.parseInt(version.replace(".", "")), version);
         }
         Integer maxVersionValue = Collections.max(dataCloudVersions.keySet());
         // verifying actual and expected values computed above
