@@ -1,19 +1,23 @@
 package com.latticeengines.datacloud.match.util;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -83,6 +87,51 @@ public class EntityMatchUtils {
     }
 
     /**
+     * Merge a change seed into a base seed, excluding a set of known lookup entries
+     * that will cause conflict.
+     *
+     * @param base
+     *            target seed that we want to update
+     * @param change
+     *            seed that contains all match keys used to update base seed
+     * @param conflictEntries
+     *            set of entries that will NOT be merged into base seed
+     * @return merged seed, will not be {@literal null}
+     */
+    public static EntityRawSeed mergeSeed(@NotNull EntityRawSeed base, EntityRawSeed change,
+            Set<EntityLookupEntry> conflictEntries) {
+        Preconditions.checkNotNull(base, "Base seed to be updated should not be null");
+        if (change == null) {
+            return base;
+        }
+
+        Map<String, String> attrs = new HashMap<>(base.getAttributes());
+        Set<EntityLookupEntry> entries = new HashSet<>(base.getLookupEntries());
+        // NOTE: assumption here is that the number of match keys will not be large, so
+        // using iteration to check conflict is better than having separate map/set
+        change.getLookupEntries().forEach(entry -> {
+            if (CollectionUtils.isNotEmpty(conflictEntries) && conflictEntries.contains(entry)) {
+                // conflict known prior to update, no need to merge
+                return;
+            }
+            // if many to many, just update as equals() in lookup entry will handle the
+            // dedup. otherwise, only update if there is no conflict.
+            if (entry.getType().mapping == MANY_TO_MANY || !hasConflictInSeed(base, entry)) {
+                entries.add(entry);
+            }
+        });
+        change.getAttributes().forEach((attrName, attrVal) -> {
+            if (shouldOverrideAttribute(base.getEntity(), attrName)) {
+                attrs.put(attrName, attrVal);
+            } else {
+                attrs.putIfAbsent(attrName, attrVal);
+            }
+        });
+        return new EntityRawSeed(base.getId(), base.getEntity(), base.isNewlyAllocated(), base.getVersion(),
+                new ArrayList<>(entries), attrs);
+    }
+
+    /**
      * Check if input entry has conflict with target seed (same serialized key, different value). Only evaluate entries
      * with X to one mapping.
      *
@@ -93,7 +142,7 @@ public class EntityMatchUtils {
     public static boolean hasConflictInSeed(@NotNull EntityRawSeed seed, @NotNull EntityLookupEntry entry) {
         Preconditions.checkNotNull(seed);
         Preconditions.checkNotNull(entry);
-        if (entry.getType().mapping == EntityLookupEntry.Mapping.MANY_TO_MANY) {
+        if (entry.getType().mapping == MANY_TO_MANY) {
             // only consider x to one
             return false;
         }
