@@ -34,7 +34,6 @@ import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.util.EmailNotificationValidateUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -293,7 +292,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
-        sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
+        TenantEmailNotificationLevel notificationLevel = tenant.getNotificationLevel();
+        if (notificationLevel.compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+            sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
+        }
         return appId.toString();
     }
 
@@ -402,13 +404,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
 
             String tenantId = CustomerSpace.parse(customerSpace).toString();
-            Tenant tenant = tenantService.findByTenantId(tenantId);
-            int notificationState = tenant == null ? 0 :
-                    TenantEmailNotificationLevel.getNotificationState(tenant.getNotificationLevel());
-            if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
-                    notificationState)) {
-                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
-            }
+            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
