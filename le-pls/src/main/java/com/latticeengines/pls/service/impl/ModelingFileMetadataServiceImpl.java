@@ -223,7 +223,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
-        resolveMetadata(sourceFile, fieldMappingDocument, table, false);
+        resolveMetadata(sourceFile, fieldMappingDocument, table, false, null);
     }
 
     @Override
@@ -231,19 +231,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        Table table;
+        Table table, schemaTable;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (dataFeedTask == null) {
-            boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
             table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
         } else {
             table = dataFeedTask.getImportTemplate();
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
         }
-        resolveMetadata(sourceFile, fieldMappingDocument, table, true);
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable);
     }
 
     @Override
@@ -401,8 +402,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
-            boolean cdlResolve) {
-        MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, cdlResolve);
+            boolean cdlResolve, Table schemaTable) {
+        MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, cdlResolve, schemaTable);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
@@ -560,6 +561,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
             boolean cdlResolve) {
-        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve);
+        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, null);
+    }
+
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
+                                                 boolean cdlResolve, Table schemaTable) {
+        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, schemaTable);
     }
 }
