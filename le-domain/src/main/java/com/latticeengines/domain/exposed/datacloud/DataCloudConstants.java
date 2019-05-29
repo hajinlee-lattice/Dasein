@@ -124,6 +124,7 @@ public final class DataCloudConstants {
 
 
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
+    public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
     public static final String TRANSFORMER_BUCKETER = "sourceBucketer";
     public static final String TRANSFORMER_BUCKETED_FILTER = "bucketedFilter";
