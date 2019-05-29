@@ -20,6 +20,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.repository.TenantRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 
@@ -91,7 +92,7 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
         if (tenant1 == null) {
             log.error("can not find the tenant using tenantId " + tenantId);
         } else {
-            tenant1.setNotificationState(status);
+            tenant1.setNotificationLevel(TenantEmailNotificationLevel.getNameByNum(status));
             super.update(tenant1);
         }
     }
@@ -107,6 +108,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
             // expired date = registered + 90
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
             tenant.setExpiredTime(expiredTime);
+        }
+        if(tenant.getNotificationLevel() == null) {
+            tenant.setNotificationLevel(TenantEmailNotificationLevel.ERROR);
         }
         super.create(tenant);
     }
