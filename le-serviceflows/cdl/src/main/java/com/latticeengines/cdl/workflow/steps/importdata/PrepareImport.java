@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
-import com.latticeengines.common.exposed.util.EmailNotificationValidateUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -41,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -83,6 +83,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     private void validateFile() {
         String customerSpace = configuration.getCustomerSpace().toString();
+        Tenant tenant = tenantService.findByTenantId(customerSpace);
+        TenantEmailNotificationLevel notificationLevel = tenant.getNotificationLevel();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, configuration.getDataFeedTaskId());
         S3ImportEmailInfo emailInfo = configuration.getEmailInfo();
         Table template = dataFeedTask.getImportTemplate();
@@ -173,20 +175,29 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             String message = CollectionUtils.isNotEmpty(warnings) ? String.join("\n", warnings) : null;
             putOutputValue(WorkflowContextConstants.Outputs.IMPORT_WARNING, message);
             emailInfo.setErrorMsg(message);
-            sendS3ImportEmail("In_Progress", emailInfo);
+            if ((notificationLevel.compareTo(TenantEmailNotificationLevel.INFO) >= 0 && StringUtils.isEmpty(message)) ||
+                    (notificationLevel.compareTo(TenantEmailNotificationLevel.WARNING) >= 0 && StringUtils.isNotEmpty(message))) {
+                sendS3ImportEmail("In_Progress", emailInfo);
+            }
         } catch (LedpException e) {
             moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if (notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw e;
         } catch (IOException e) {
             log.error(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if (notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw new RuntimeException("IO error! " + e.getMessage());
         } catch (IllegalArgumentException e) {
             moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if (notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             log.error(e.getMessage());
             // PLS-13589 duplicate error will be threw by csv parser 491
             String errorMessage = e.getMessage();
@@ -199,7 +210,9 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             log.error("Unknown Exception when validate S3 import! " + e.toString());
             moveFromInProgressToFailed(s3FilePath);
             emailInfo.setErrorMsg(e.getMessage());
-            sendS3ImportEmail("Failed", emailInfo);
+            if (notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                sendS3ImportEmail("Failed", emailInfo);
+            }
             throw e;
         }
     }
@@ -207,14 +220,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     private void sendS3ImportEmail(String result, S3ImportEmailInfo emailInfo) {
         try {
             String tenantId = configuration.getCustomerSpace().toString();
-            Tenant tenant = tenantService.findByTenantId(tenantId);
-            String notificationLevel = tenant == null ? "" :
-                    tenant.getNotificationLevel().name();
             InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-            if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
-                    notificationLevel)) {
-                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
-            }
+            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
