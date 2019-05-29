@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.datacloud.match.util.EntityMatchUtils.mergeSeed;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
 import static java.util.stream.Collectors.groupingBy;
@@ -9,6 +10,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -308,15 +310,16 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             log.debug("No lookup entry for request (ID={}), attributes={}, tenant (ID={})," +
                     " entity={}, target entity ID={}", requestId, request.getExtraAttributes(),
                     tenantId, request.getEntity(), targetEntitySeed.getId());
+            EntityRawSeed seedToUpdate = null;
             if (hasExtraAttributes(targetEntitySeed, request.getExtraAttributes())) {
-                EntityRawSeed seedToUpdate = new EntityRawSeed(
+                seedToUpdate = new EntityRawSeed(
                         targetEntitySeed.getId(), targetEntitySeed.getEntity(),
                         Collections.emptyList(), request.getExtraAttributes());
                 // ignore result as attribute update won't fail
                 entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false);
             }
             return getResponse(request, targetEntitySeed.getId(), targetEntitySeed.isNewlyAllocated(),
-                    targetEntitySeed);
+                    mergeSeed(targetEntitySeed, seedToUpdate, null));
         }
 
 
@@ -377,7 +380,12 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     " seed conflict entries = {}, requestId = {}",
                     result, mappingConflictEntries, seedConflictEntries, requestId);
             return getResponse(
-                    request, targetEntitySeed.getId(), targetEntitySeed, targetEntitySeed.isNewlyAllocated(),
+                    request, targetEntitySeed.getId(),
+                    // generate updated seed
+                    mergeSeed(targetEntitySeed, seedToUpdate,
+                            getConflictEntries(mappingConflictEntries, seedConflictEntries, result.getMiddle(),
+                                    result.getRight())),
+                    targetEntitySeed.isNewlyAllocated(),
                     getConflictMessages(targetEntitySeed.getId(), request, result, mappingConflictEntries,
                             seedConflictEntries));
         }
@@ -390,6 +398,40 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 request, targetEntitySeed.getId(), targetEntitySeed, targetEntitySeed.isNewlyAllocated(),
                 getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
                         seedConflictEntries));
+    }
+
+    /*
+     * helper to merge highest priority match key given known conflict match keys
+     */
+    private EntityRawSeed merge(@NotNull EntityRawSeed target, @NotNull EntityLookupEntry maxPriorityEntry,
+            List<Pair<EntityLookupEntry, String>> mappingConflicts, Set<EntityLookupEntry> seedConflicts) {
+        return mergeSeed(
+                target, new EntityRawSeed(target.getId(), target.getEntity(),
+                        Collections.singletonList(maxPriorityEntry), null),
+                getConflictEntries(mappingConflicts, seedConflicts, null, null));
+    }
+
+    /*
+     * helper to combine all conflict match keys (known conflicts before update and
+     * conflicts occurs during update)
+     */
+    private Set<EntityLookupEntry> getConflictEntries(List<Pair<EntityLookupEntry, String>> mappingConflicts,
+            Set<EntityLookupEntry> seedConflicts, List<EntityLookupEntry> seedUpdateConflicts,
+            List<EntityLookupEntry> mappingUpdateConflicts) {
+        Set<EntityLookupEntry> entries = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(mappingConflicts)) {
+            mappingConflicts.forEach(pair -> entries.add(pair.getLeft()));
+        }
+        if (CollectionUtils.isNotEmpty(seedConflicts)) {
+            entries.addAll(seedConflicts);
+        }
+        if (CollectionUtils.isNotEmpty(seedUpdateConflicts)) {
+            entries.addAll(seedUpdateConflicts);
+        }
+        if (CollectionUtils.isNotEmpty(mappingUpdateConflicts)) {
+            entries.addAll(mappingUpdateConflicts);
+        }
+        return entries;
     }
 
     private Set<EntityLookupEntry> getSeedConflictEntries(
