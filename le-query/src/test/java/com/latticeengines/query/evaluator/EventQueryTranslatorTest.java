@@ -17,10 +17,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Query;
@@ -35,9 +37,11 @@ import com.querydsl.sql.SQLQuery;
 public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     private static Logger log = LoggerFactory.getLogger(EventQueryTranslatorTest.class);
-    
-    //private static final String PROD_ID1 = "3872223C9BA06C649D68E415E23A9446";
-    //private static final String PROD_ID2 = "A78DF03BAC196BE9A08508FFDB433A31";
+
+    // private static final String PROD_ID1 =
+    // "3872223C9BA06C649D68E415E23A9446";
+    // private static final String PROD_ID2 =
+    // "A78DF03BAC196BE9A08508FFDB433A31";
     private static final String PROD_ID1 = "A3B7BABBB51AD145639DD583D91826AD";
     private static final String PROD_ID2 = "563750D5B351FA4439BF5FB2A1C26DD2";
 
@@ -63,9 +67,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     @DataProvider(name = "userContexts", parallel = false)
     private Object[][] provideSqlUserContexts() {
-        return new Object[][] {
-                { SQL_USER, "Redshift" }
-        };
+        return new Object[][] { { SQL_USER, "Redshift" } };
     }
 
     @BeforeMethod(groups = "functional")
@@ -93,8 +95,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -119,8 +121,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -130,8 +132,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(7));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(7));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -140,8 +142,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -150,8 +152,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(6));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(6));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -161,8 +163,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(40));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(40));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -172,8 +174,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(40));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(40));
         txRestriction.setTimeFilter(timeFilter);
         txRestriction.setNegate(true);
         return txRestriction;
@@ -183,13 +185,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Collections.singletonList(1000000.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+                ComparisonType.LESS_THAN, Collections.singletonList(1000000.0), true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -198,13 +195,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Collections.singletonList(1000000.0),
-            false
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+                ComparisonType.LESS_THAN, Collections.singletonList(1000000.0), false);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -213,12 +205,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_OR_EQUAL,
-                Collections.singletonList(10.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(10.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -228,12 +216,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         txRestriction.setProductId(getProductId2());
         txRestriction.setTargetProductId(getProductId2());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.SUM,
-                ComparisonType.GREATER_THAN,
-                Collections.singletonList(5000)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+                ComparisonType.GREATER_THAN, Collections.singletonList(5000));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -242,8 +226,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(7));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(7));
         txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
@@ -274,13 +258,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         // 3872223C9BA06C649D68E415E23A9446
         txRestriction.setProductId(getProductId2());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(20),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
+                ComparisonType.LESS_THAN, Arrays.asList(20), true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -289,12 +268,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(3000)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Arrays.asList(3000));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -303,15 +278,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(1000)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Arrays.asList(1000));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -320,16 +291,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.EACH,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(100),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
+                ComparisonType.LESS_THAN, Arrays.asList(100), true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -338,12 +304,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
+                ComparisonType.GREATER_THAN, Arrays.asList(0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -352,15 +314,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.EACH,
+                ComparisonType.GREATER_THAN, Arrays.asList(0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -369,12 +327,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId1());
         txRestriction.setTimeFilter(TimeFilter.ever());
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(1.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
+                ComparisonType.GREATER_OR_EQUAL, Arrays.asList(1.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -383,15 +337,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(100.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AVG,
+                ComparisonType.GREATER_OR_EQUAL, Arrays.asList(100.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -401,15 +351,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         txRestriction.setProductId(getProductId2());
         txRestriction.setTargetProductId(getProductId1());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.SUM,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(5000.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+                ComparisonType.GREATER_THAN, Arrays.asList(5000.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -418,15 +364,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.SPENT,
-                AggregationType.AVG,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(1000.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AVG,
+                ComparisonType.GREATER_THAN, Arrays.asList(1000.0));
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -435,16 +377,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(7, 30));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.SPENT,
-            AggregationType.AVG,
-            ComparisonType.LESS_OR_EQUAL,
-            Arrays.asList(10),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.SPENT, AggregationType.AVG,
+                ComparisonType.LESS_OR_EQUAL, Arrays.asList(10), true);
         txRestriction.setSpentFilter(aggFilter);
         return txRestriction;
     }
@@ -453,15 +390,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(0));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(0));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(10.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.EACH,
+                ComparisonType.GREATER_THAN, Arrays.asList(10.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -470,16 +403,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.AVG,
-            ComparisonType.LESS_OR_EQUAL,
-            Arrays.asList(10.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
+                ComparisonType.LESS_OR_EQUAL, Arrays.asList(10.0), true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -488,16 +416,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.SUM,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(100.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
+                ComparisonType.LESS_THAN, Arrays.asList(100.0), true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -506,15 +429,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(5, 10));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(5, 10));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(50.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_THAN, Arrays.asList(50.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -523,15 +442,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.AT_LEAST_ONCE,
-                ComparisonType.GREATER_OR_EQUAL,
-                Arrays.asList(100.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AT_LEAST_ONCE,
+                ComparisonType.GREATER_OR_EQUAL, Arrays.asList(100.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -540,15 +455,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.WITHIN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Collections.singletonList(5));
+                PeriodStrategy.Template.Month.name(), //
+                Collections.singletonList(5));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-                AggregationSelector.UNIT,
-                AggregationType.EACH,
-                ComparisonType.GREATER_THAN,
-                Arrays.asList(0.0)
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.EACH,
+                ComparisonType.GREATER_THAN, Arrays.asList(0.0));
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -557,16 +468,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(getProductId2());
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //
-                                               PeriodStrategy.Template.Month.name(),  //
-                                               Arrays.asList(7, 30));
+                PeriodStrategy.Template.Month.name(), //
+                Arrays.asList(7, 30));
         txRestriction.setTimeFilter(timeFilter);
-        AggregationFilter aggFilter = new AggregationFilter(
-            AggregationSelector.UNIT,
-            AggregationType.AVG,
-            ComparisonType.LESS_THAN,
-            Arrays.asList(1.0),
-            true
-        );
+        AggregationFilter aggFilter = new AggregationFilter(AggregationSelector.UNIT, AggregationType.AVG,
+                ComparisonType.LESS_THAN, Arrays.asList(1.0), true);
         txRestriction.setUnitFilter(aggFilter);
         return txRestriction;
     }
@@ -609,7 +515,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l = Restriction.builder().or(txRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -620,7 +526,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l = Restriction.builder().and(txRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -632,7 +538,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l1 = Restriction.builder().and(t1, t2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -647,7 +553,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l2 = Restriction.builder().and(t3, t4, l1).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l2, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -663,7 +569,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l3 = Restriction.builder().and(l1, l2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l3, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -675,7 +581,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l1 = Restriction.builder().or(t1, t2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(),
-                                                          Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -686,7 +592,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasEngaged();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 115);
@@ -697,7 +603,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasNotEngagedProd1();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1216);
@@ -708,10 +614,23 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasEngaged();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForTraining(queryFactory, attrRepo, txRestriction,
-                                                           getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1857);
+    }
+
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testGetDistinctCount(String sqlUser, String queryContext) {
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Transaction, "ProductId").eq(PROD_ID1) //
+                .build();
+        Query query = Query.builder()
+                .select(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name())).distinct(true)
+                .from(BusinessEntity.Transaction).where(restriction).build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+        logQuery(sqlUser, sqlQuery);
+        testGetCountAndAssert(sqlUser, query, 52);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -721,8 +640,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
-                                                        getDefaultEventFrontEndQuery(),
-                                                        Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 52);
@@ -735,8 +653,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
-                                                        getDefaultEventFrontEndQuery(),
-                                                        Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 318);
@@ -749,14 +666,14 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
-                                                        getEventFrontEndQueryWithProductRevenue(),
-                                                        Query.builder(), sqlUser).build();
+                getEventFrontEndQueryWithProductRevenue(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         verifyHasEngaedForEventWithRevenue(query, sqlUser, 318);
     }
 
-    protected long verifyHasEngaedForEventWithRevenue(Query query, String sqlUser, long expectedCount) throws SQLException {
+    protected long verifyHasEngaedForEventWithRevenue(Query query, String sqlUser, long expectedCount)
+            throws SQLException {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         ResultSet result = sqlQuery.getResults();
         ResultSetMetaData metaData = result.getMetaData();
@@ -776,7 +693,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasEngagedPriorToFive();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 50);
@@ -787,7 +704,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getEngagedInCurrentPeriod();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 18);
@@ -798,7 +715,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasNotPurchasedWithin();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1265);
@@ -809,7 +726,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasNotPurchasedWithinOverMaxPeriod();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -820,7 +737,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getHasNotPurchasedPriorOnlyOverMaxPeriod();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -833,7 +750,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction l1 = Restriction.builder().and(t1, t2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForTraining(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(),
-                                                           Query.builder(), sqlUser).build();
+                Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 9);
@@ -849,20 +766,20 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Restriction t2 = Restriction.builder().and(sumRestriction, sumNextRestriction).build();
         Restriction l1 = Restriction.builder().and(t1, t2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(),
-                                                        Query.builder(), sqlUser).build();
+        Query query = eventTranslator
+                .translateForEvent(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(), Query.builder(), sqlUser)
+                .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1);
     }
-
 
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testTotalAmountLessThan1M(String sqlUser, String queryContext) {
         TransactionRestriction txRestriction = getTotalAmountLessThan1M();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1331);
@@ -874,7 +791,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getTotalAmountLessThan1MWithPurchase();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 115);
@@ -885,7 +802,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getTotalQuantityGTE10Once();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 42);
@@ -896,7 +813,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getSumQuantity();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -907,7 +824,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
     }
@@ -918,7 +835,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 7);
@@ -930,7 +847,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -942,7 +859,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 2);
@@ -954,7 +871,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 16);
@@ -966,7 +883,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 15);
@@ -978,7 +895,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForTraining(queryFactory, attrRepo, txRestriction,
-                                                           getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 21);
@@ -992,7 +909,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
-                                                        getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -1004,7 +921,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1);
@@ -1016,7 +933,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -1030,7 +947,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, logicalRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1277);
@@ -1042,7 +959,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1180);
@@ -1054,7 +971,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 5);
@@ -1066,7 +983,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1326);
@@ -1078,7 +995,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1290);
@@ -1090,7 +1007,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1);
@@ -1102,7 +1019,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 0);
@@ -1114,7 +1031,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 2);
@@ -1126,7 +1043,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1219);
@@ -1138,8 +1055,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForTraining(queryFactory, attrRepo, txRestriction,
-                                                           getEventFrontEndQueryWithLimitedPeriodCount(),
-                                                           Query.builder(), sqlUser).build();
+                getEventFrontEndQueryWithLimitedPeriodCount(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 11216);
@@ -1151,7 +1067,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 42);
@@ -1164,7 +1080,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction txRestriction = getPriorSevenEngaged();
         txRestriction.setNegate(true);
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1289);
@@ -1173,7 +1089,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         TransactionRestriction within = getEngagedWithinSeven();
         Restriction logicalRestriction = Restriction.builder().or(hasNotEngaged, within).build();
         Query query1 = eventTranslator.translateForScoring(queryFactory, attrRepo, logicalRestriction,
-                                                           getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery1 = queryEvaluator.evaluate(attrRepo, query1, sqlUser);
         logQuery(sqlUser, sqlQuery1);
         testGetCountAndAssert(sqlUser, query1, 1289);
@@ -1184,12 +1100,12 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     public void testPriorOnlyTwoLevel(String sqlUser, String queryContext) {
         TransactionRestriction priorOnlyRestriction = getPriorSevenEngaged();
         TransactionRestriction sumAmountRestriction = getSumAmount();
-        Restriction priorAndSumRestriction =
-                Restriction.builder().or(sumAmountRestriction, priorOnlyRestriction).build();
+        Restriction priorAndSumRestriction = Restriction.builder().or(sumAmountRestriction, priorOnlyRestriction)
+                .build();
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, priorAndSumRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 50);
@@ -1198,26 +1114,29 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testSimpleAccountQuery(String sqlUser, String queryContext) {
-        Restriction acctRestriction = Restriction.builder()
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(getAccountId1()).build();
+        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq(getAccountId1()).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, acctRestriction,
-                                                          getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
-        //SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-        //logQuery(sqlUser, sqlQuery);
+                getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
+        // SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query,
+        // sqlUser);
+        // logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 1);
 
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testAccountEventQuery(String sqlUser, String queryContext) {
-        Restriction acctRestriction = Restriction.builder()
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(getAccountId2()).build();
+        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq(getAccountId2()).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, acctRestriction,
-                                                        getEventFrontEndQueryWithProductRevenue(), Query.builder(), sqlUser).build();
-        /*SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-        logQuery(sqlUser, sqlQuery);*/
+                getEventFrontEndQueryWithProductRevenue(), Query.builder(), sqlUser).build();
+        /*
+         * SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query,
+         * sqlUser); logQuery(sqlUser, sqlQuery);
+         */
         testGetCountAndAssert(sqlUser, query, 26);
     }
 
