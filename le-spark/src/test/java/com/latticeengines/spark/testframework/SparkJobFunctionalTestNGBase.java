@@ -33,6 +33,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ParquetUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -275,7 +277,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         String path = target.getPath();
         try {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
-            return AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+            if (DataUnit.DataFormat.PARQUET.equals(target.getDataFormat())) {
+                log.info("Read parquet files in " + path + " as avro records.");
+                return ParquetUtils.iteratorParquetFiles(yarnConfiguration, PathUtils.toParquetGlob(path));
+            } else {
+                return AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(path));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

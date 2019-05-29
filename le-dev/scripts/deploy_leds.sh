@@ -6,6 +6,11 @@ function upload_artifact() {
     MD5SUM="${ARTIFACT_DIR}/${ARTIFACT}.md5"
     TO_UPLOAD="false"
 
+    if [[ "${ARTIFACT}" == "dpconda" ]] && [[ -z `${ANACONDA_HOME}/bin/conda env list | grep "lattice "` ]]; then
+        echo "Did not find lattice conda env, creating one"
+        return 1
+    fi
+
     if [[ "${ARTIFACT}" == "spark"* ]]; then
         S3_DIR=${S3_DIR_1}
     else

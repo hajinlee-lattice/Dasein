@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -222,6 +223,14 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         map.put(BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1);
         map.put(BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1);
         return map;
+    }
+
+    @Override
+    protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ENTITY_MATCH_ACCOUNT_1, //
+                TableRoleInCollection.AccountExport, ENTITY_MATCH_ACCOUNT_1 //
+        );
     }
 
     @Override

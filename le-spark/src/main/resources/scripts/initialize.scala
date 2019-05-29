@@ -24,14 +24,16 @@ val rawInput = mapper.readValue[List[JsonNode]]("""{{INPUT}}""")
 
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
   var path = unit.get("Path").asText()
-  if (!path.endsWith(".avro")) {
+  val fmt = if (unit.get("DataFormat") != null) unit.get("DataFormat").asText.toLowerCase else "avro"
+  val suffix = "." + fmt
+  if (!path.endsWith(suffix)) {
     if (path.endsWith("/")) {
-      path += "*.avro"
+      path += "*" + suffix
     } else {
-      path += "/*.avro"
+      path += "/*" + suffix
     }
   }
-  spark.read.format("avro").load("hdfs://" + path)
+  spark.read.format(fmt).load("hdfs://" + path)
 }
 
 val scriptInput = rawInput map { input => {

@@ -157,6 +157,14 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     }
 
     @Override
+    protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ENTITY_MATCH_ACCOUNT_3, //
+                TableRoleInCollection.AccountExport, ENTITY_MATCH_ACCOUNT_3 //
+        );
+    }
+
+    @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_3, //
@@ -178,7 +186,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
                 TableRoleInCollection.ConsolidatedAccount);
         String hdfsPath = consolidatedAccount.getExtracts().get(0).getPath();
         log.info("Account batch store {} location: {}", consolidatedAccount.getName(), hdfsPath);
-        AvroFilesIterator iter = AvroUtils.avroFileIterator(yarnConfiguration, hdfsPath);
+        AvroFilesIterator iter = AvroUtils.iterateAvroFiles(yarnConfiguration, hdfsPath);
         // Currently use AccountId as record identifier
         Set<String> recordIdsNoEntityId = new HashSet<>();
         int total = 0;

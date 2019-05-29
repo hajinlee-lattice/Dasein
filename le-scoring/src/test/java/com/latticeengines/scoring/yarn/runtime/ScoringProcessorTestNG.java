@@ -105,7 +105,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), anotherFilePath);
 
         int count = 0;
-        try (AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, dir + "/*.avro")) {
+        try (AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, dir + "/*.avro")) {
             while (iterator.hasNext()) {
                 count++;
                 iterator.next();

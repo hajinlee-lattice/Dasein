@@ -113,7 +113,7 @@ public class SparkSQLQueryTestNG extends QueryServiceImplTestNGBase {
 
         Assert.assertEquals(sparkResult.getCount(), Long.valueOf(10)); // spark result has count
         String avroPath = sparkResult.getPath();
-        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath + "/*.avro");
         iterator.forEachRemaining(record -> {
             System.out.println(record);
 //            Assert.assertNotNull(record.get(QueryEvaluator.SCORE));

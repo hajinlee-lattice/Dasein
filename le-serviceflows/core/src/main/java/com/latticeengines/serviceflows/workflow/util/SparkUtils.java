@@ -2,19 +2,29 @@ package com.latticeengines.serviceflows.workflow.util;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 
 public final class SparkUtils {
+
+    public static HdfsDataUnit tableToHdfsUnit(Table table, String alias, Configuration yarnConfiguration) {
+        HdfsDataUnit dataUnit = table.toHdfsDataUnit(alias);
+        String globPath = AvroParquetUtils.toParquetOrAvroGlob(yarnConfiguration, dataUnit.getPath());
+        dataUnit.setPath(globPath);
+        if (globPath.endsWith(".parquet")) {
+            dataUnit.setDataFormat(DataUnit.DataFormat.PARQUET);
+        }
+        return dataUnit;
+    }
 
     public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
                                         Configuration yarnConfiguration, //
@@ -27,19 +37,17 @@ public final class SparkUtils {
             throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);
         }
 
-        Table table = MetadataConverter.getTable(yarnConfiguration, tgtPath, //
-                null, null, true);
+        Table table;
+        if (DataUnit.DataFormat.PARQUET.equals(hdfsDataUnit.getDataFormat())) {
+            table = MetadataConverter.getParquetTable(yarnConfiguration, tgtPath, //
+                    primaryKey, null, true);
+        } else {
+            table = MetadataConverter.getTable(yarnConfiguration, tgtPath, //
+                    primaryKey, null, true);
+        }
         table.setName(tableName);
         if (hdfsDataUnit.getCount() != null) {
             table.getExtracts().get(0).setProcessedRecords(hdfsDataUnit.getCount());
-        }
-
-        if (StringUtils.isNotBlank(primaryKey) && table.getAttribute(primaryKey) != null) {
-            PrimaryKey pk = new PrimaryKey();
-            pk.setName(primaryKey);
-            pk.setDisplayName(primaryKey);
-            pk.addAttribute(primaryKey);
-            table.setPrimaryKey(pk);
         }
 
         return table;

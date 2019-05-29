@@ -4,8 +4,9 @@ if len(lattice.targets) != len(lattice.output):
 
 for tgt, df in zip(lattice.targets, lattice.output):
     df = df
-    df.write.format("avro").save(tgt['Path'])
-    df2 = spark.read.format("avro").load(tgt['Path'])
+    fmt = tgt['DataFormat'].lower() if 'DataFormat' in tgt else "avro"
+    df.write.format(fmt).save(tgt['Path'])
+    df2 = spark.read.format(fmt).load(tgt['Path'])
     tgt['StorageType'] = 'Hdfs'
     tgt['Count'] = df2.count()
 

@@ -84,7 +84,7 @@ public class ProductFileValidationService
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
-       
+
 
         // copy error file back to hdfs, remove local error.csv
         if (errorLine != 0L) {
@@ -107,7 +107,7 @@ public class ProductFileValidationService
         log.info("Load products from " + filePath + "/*.avro");
         Map<String, Product> productMap = new HashMap<>();
 
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             Product product = new Product();

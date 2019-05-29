@@ -556,6 +556,18 @@ public class HdfsUtils {
         }
     }
 
+    public static List<String> getAllMatchedFiles(Configuration configuration, String... globPaths) {
+        List<String> matchedFiles = new ArrayList<>();
+        for (String path : globPaths) {
+            try {
+                matchedFiles.addAll(HdfsUtils.getFilesByGlob(configuration, path));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to resolve glob path " + path);
+            }
+        }
+        return matchedFiles;
+    }
+
     public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException {
         if (inDifferentEncryptionZone(configuration, src, dst)) {
             log.info("Using copy instead of move.");

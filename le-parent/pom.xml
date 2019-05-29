@@ -66,6 +66,7 @@
         <hdp.guava.version>20.0</hdp.guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
+        <parquet.version>1.10.1</parquet.version>
         <aws.version>1.11.519</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.0</spark.version>
@@ -1553,6 +1554,17 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-avro</artifactId>
+                <version>${parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-hadoop</artifactId>
+                <version>${parquet.version}</version>
+            </dependency>
+
 
             <!-- AWS dependencies -->
             <dependency>

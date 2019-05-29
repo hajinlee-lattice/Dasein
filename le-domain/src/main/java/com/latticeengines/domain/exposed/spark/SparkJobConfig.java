@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.spark;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -50,10 +52,31 @@ public abstract class SparkJobConfig {
     @JsonProperty("Workspace")
     private String workspace;
 
+    @JsonProperty("SpecialTargets")
+    private Map<Integer, DataUnit.DataFormat> specialTargets;
+
     public abstract String getName();
 
     public int getNumTargets() {
         return 1;
+    }
+
+    public void setSpecialTargets(Map<Integer, DataUnit.DataFormat> specialTargets) {
+        this.specialTargets = new HashMap<>(specialTargets);
+    }
+
+    public Map<Integer, DataUnit.DataFormat> getSpecialTargets() {
+        return specialTargets;
+    }
+
+    public void setSpecialTarget(int idx, DataUnit.DataFormat dataFormat) {
+        if (dataFormat == null) {
+            return;
+        }
+        if (specialTargets == null) {
+            specialTargets = new HashMap<>();
+        }
+        specialTargets.put(idx, dataFormat);
     }
 
     public String getWorkspace() {
@@ -75,15 +98,20 @@ public abstract class SparkJobConfig {
     @JsonIgnore
     public List<HdfsDataUnit> getTargets() {
         if (getNumTargets() > 0) {
+            Map<Integer, DataUnit.DataFormat> specialFmts = getSpecialTargets();
             String root;
             if (workspace.endsWith("/")) {
                 root = workspace.substring(0, workspace.lastIndexOf("/"));
             } else {
                 root = workspace;
             }
-            return Flux.range(1, getNumTargets()).map(idx -> //
-                    HdfsDataUnit.fromPath(root + "/Output" + idx) //
-            ).collectList().block();
+            return Flux.range(0, getNumTargets()).map(idx -> {
+                HdfsDataUnit dataUnit = HdfsDataUnit.fromPath(root + "/Output" + (idx + 1));
+                if (specialFmts != null && specialFmts.containsKey(idx)) {
+                    dataUnit.setDataFormat(specialFmts.get(idx));
+                }
+                return dataUnit;
+            }).collectList().block();
         } else {
             return Collections.emptyList();
         }
