@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -331,22 +331,24 @@ public class MetadataResolver {
                         && StringUtils.isEmpty(attribute.getTimeFormatString())) {
                     if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
                         List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
-                        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                        MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
                         if (result != null) {
                             knownColumn
-                                    .setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+                                    .setDateFormatString(
+                                            TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                             knownColumn
-                                    .setTimeFormatString(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                                    .setTimeFormatString(
+                                            TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
+                            knownColumn.setTimezone(TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
                             knownColumn.setMappedToDateBefore(false);
                         }
                     }
                 } else {
                     knownColumn.setDateFormatString(attribute.getDateFormatString());
                     knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                    knownColumn.setTimezone(attribute.getTimezone());
                     knownColumn.setMappedToDateBefore(true);
                 }
-                knownColumn.setTimezone(attribute.getTimezone());
-
                 result.fieldMappings.add(knownColumn);
                 headerFields.remove(attribute.getDisplayName());
             } else {
@@ -366,21 +368,24 @@ public class MetadataResolver {
                                 && StringUtils.isEmpty(attribute.getTimeFormatString())) {
                             if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
                                 List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
-                                MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                                MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
                                 if (result != null) {
                                     knownColumn.setDateFormatString(
                                             TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                                     knownColumn.setTimeFormatString(
-                                            TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                                            TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
+                                    knownColumn.setTimezone(
+                                            TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
                                     knownColumn.setMappedToDateBefore(false);
                                 }
                             }
                         } else {
                             knownColumn.setDateFormatString(attribute.getDateFormatString());
                             knownColumn.setTimeFormatString(attribute.getTimeFormatString());
+                            knownColumn.setTimezone(attribute.getTimezone());
                             knownColumn.setMappedToDateBefore(true);
                         }
-                        knownColumn.setTimezone(attribute.getTimezone());
+
                         result.fieldMappings.add(knownColumn);
                         break;
                     }
@@ -432,11 +437,13 @@ public class MetadataResolver {
                     knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     if (UserDefinedType.DATE.equals(knownColumn.getFieldType())) {
                         List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
-                        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+                        MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
                         if (result != null) {
-                            knownColumn.setDateFormatString(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
+                            knownColumn.setDateFormatString(
+                                    TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
                             knownColumn.setTimeFormatString(
-                                    TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+                                    TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
+                            knownColumn.setTimezone(TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
                             knownColumn.setMappedToDateBefore(false);
                         }
                     }
@@ -641,7 +648,7 @@ public class MetadataResolver {
         UserDefinedType fundamentalType = null;
 
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
-        MutablePair<String, String> formatForDateAndTime = new MutablePair<>();
+        MutableTriple<String, String, String> formatForDateAndTime = new MutableTriple<>();
         if (columnFields.isEmpty()) {
             fundamentalType = UserDefinedType.TEXT;
         } else if (isBooleanTypeColumn(columnFields)) {
@@ -653,7 +660,8 @@ public class MetadataResolver {
         } else if (isDateTypeColumn(columnFields, formatForDateAndTime)) {
             fundamentalType = UserDefinedType.DATE;
             fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
-            fieldMapping.setTimeFormatString(formatForDateAndTime.getRight());
+            fieldMapping.setTimeFormatString(formatForDateAndTime.getMiddle());
+            fieldMapping.setTimezone(formatForDateAndTime.getRight());
             fieldMapping.setMappedToDateBefore(false);
         } else {
             fundamentalType = UserDefinedType.TEXT;
@@ -662,20 +670,19 @@ public class MetadataResolver {
         return fundamentalType;
     }
 
-    @VisibleForTesting
     /*
      * Note that the returned data and time format are the user supported
      * formats not the Java 8 formats. if number of column value can be parsed
      * is more than 10% of size of columnFields, regard it as date, pick the
      * most occurrence format as result
      */
-    boolean isDateTypeColumn(List<String> columnFields, MutablePair<String, String> formatForDateAndTime) {
+    @VisibleForTesting
+    boolean isDateTypeColumn(List<String> columnFields, MutableTriple<String, String, String> formatForDateAndTime) {
         int conformingDateCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
-                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime != null) {
                     conformingDateCount++;
@@ -688,22 +695,22 @@ public class MetadataResolver {
         if (conformingDateCount < dateThreshold) {
             return false;
         }
-        MutablePair<String, String> result = distinguishDateAndTime(columnFields);
+        MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
         if (result != null) {
             formatForDateAndTime.setLeft(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
-            formatForDateAndTime.setRight(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getRight()));
+            formatForDateAndTime.setMiddle(TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
+            formatForDateAndTime.setRight(TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
         }
         return true;
     }
 
     @VisibleForTesting
-    MutablePair<String, String> distinguishDateAndTime(List<String> columnFields) {
+    MutableTriple<String, String, String> distinguishDateAndTime(List<String> columnFields) {
         List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
-                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;
@@ -731,14 +738,20 @@ public class MetadataResolver {
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
 
-        // legal date time formats are delimited by space defined in
-        // TimeStampConvertUtils
+        // legal date time formats are delimited by space or literal T defined
+        // in TimeStampConvertUtils
         int index = expectedFormat.indexOf(" ");
         if (index == -1) {
-            return new MutablePair<String, String>(expectedFormat, null);
+            index = expectedFormat.indexOf("'T'");
+            if (index == -1) {
+                return new MutableTriple<String, String, String>(expectedFormat, null, null);
+            } else {
+                return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
+                        expectedFormat.substring(index + 3, expectedFormat.indexOf("Z")), "ISO 8601");
+            }
         } else {
-            return new MutablePair<String, String>(expectedFormat.substring(0, index),
-                    expectedFormat.substring(index + 1));
+            return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
+                    expectedFormat.substring(index + 1), null);
         }
     }
 

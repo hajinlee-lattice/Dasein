@@ -54,10 +54,12 @@ public class TimeStampConvertUtils {
     // Mapping from user exposed time zone format to Java 8 supported time zones.
     private static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
 
-    // Reverse mapping from Java 8 date/time library date format to user exposed format.
+    // Reverse mapping from Java 8 date library date format to user exposed format.
     private static final Map<String, String> javaToUserDateFormatMap = new LinkedHashMap<>();
-    // Reverse mapping from Java 8 date/time library time format to user exposed format.
+    // Reverse mapping from Java 8 time library time format to user exposed format.
     private static final Map<String, String> javaToUserTimeFormatMap = new LinkedHashMap<>();
+    // Reverse mapping from Java 8 timezone format to user exposed format.
+    private static final Map<String, String> javaToUserTimeZoneMap = new LinkedHashMap<>();
 
     // List of all supported java date + time and date only formats.
     public static final List<String> SUPPORTED_JAVA_DATE_TIME_FORMATS = new ArrayList<>();
@@ -106,6 +108,8 @@ public class TimeStampConvertUtils {
 
         userToJavaTimeFormatMap.put("00:00:00 12H", "h:m:s a");
         userToJavaTimeFormatMap.put("00:00:00 24H", "H:m:s");
+        userToJavaTimeFormatMap.put("00:00:00.000 12H", "h:m:s.SSS a");
+        userToJavaTimeFormatMap.put("00:00:00.000 24H", "H:m:s.SSS");
         userToJavaTimeFormatMap.put("00-00-00 12H", "h-m-s a");
         userToJavaTimeFormatMap.put("00-00-00 24H", "H-m-s");
         userToJavaTimeFormatMap.put("00 00 00 12H", "h m s a");
@@ -123,6 +127,7 @@ public class TimeStampConvertUtils {
     static {
         //                         User Time Zone             Java Time Zone             UTC Offset when in Standard
         //                                                                               (Non-Daylight Savings) Time
+        userToJavaTimeZoneMap.put("ISO 8601", "ISO 8601");//
         userToJavaTimeZoneMap.put("UTC",                     "UTC");                     // UTC
         userToJavaTimeZoneMap.put("Africa/Accra",            "Africa/Accra");            // UTC
         userToJavaTimeZoneMap.put("Africa/Cairo",            "Africa/Cairo");            // UTC+2
@@ -196,10 +201,16 @@ public class TimeStampConvertUtils {
             javaToUserTimeFormatMap.put(userJavaTimeFormat.getValue(), userJavaTimeFormat.getKey());
         }
 
+        for (Map.Entry<String, String> userjavaTimeZoneFormat : userToJavaTimeZoneMap.entrySet()) {
+            javaToUserTimeZoneMap.put(userjavaTimeZoneFormat.getKey(), userjavaTimeZoneFormat.getValue());
+        }
+
         // Construct all supported java date + time formats (included date only formats).
         for (String dateFormat : userToJavaDateFormatMap.values()) {
             for (String timeFormat : userToJavaTimeFormatMap.values()) {
                 SUPPORTED_JAVA_DATE_TIME_FORMATS.add(String.format("%s %s", dateFormat, timeFormat));
+                SUPPORTED_JAVA_DATE_TIME_FORMATS.add(String.format("%s'T'%sZ", dateFormat, timeFormat));
+                SUPPORTED_JAVA_DATE_TIME_FORMATS.add(String.format("%s'T'%sZZZZZ", dateFormat, timeFormat));
             }
         }
         SUPPORTED_JAVA_DATE_TIME_FORMATS.addAll(userToJavaDateFormatMap.values());
@@ -258,6 +269,10 @@ public class TimeStampConvertUtils {
 
     public static String mapJavaToUserTimeFormat(String javaTimeFormat) {
         return javaToUserTimeFormatMap.get(javaTimeFormat);
+    }
+
+    public static String mapJavaToUserTimeZone(String javaTimeZone) {
+        return javaToUserTimeZoneMap.get(javaTimeZone);
     }
 
     // Simple method for date conversion which assumes one of five basic date only formats.
@@ -440,6 +455,9 @@ public class TimeStampConvertUtils {
                         if (userToJavaTimeZoneMap.containsKey(userTimeZoneStr)) {
                             log.debug("Found user defined time zone: " + userTimeZoneStr);
                             String javaTimeZoneStr = userToJavaTimeZoneMap.get(userTimeZoneStr);
+                            if (javaTimeZoneStr.equals("ISO 8601")) {
+                                javaTimeZoneStr = "UTC";
+                            }
                             log.debug("Java time zone string is: " + javaTimeZoneStr);
                             zoneId = TimeZone.getTimeZone(javaTimeZoneStr).toZoneId();
                         } else {
