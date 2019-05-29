@@ -12,6 +12,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -128,7 +129,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String username = userRegistration.getUser().getUsername();
-        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, null);
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username, createdByUser, null, true);
 
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
@@ -221,7 +222,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate) {
+                                     Long expirationDate, boolean createUser) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -229,8 +230,24 @@ public class UserServiceImpl implements UserService {
         if (!AccessLevel.getInternalAccessLevel().contains(accessLevel)) {
             expirationDate = null;
         }
+
+        // if loginUser is not super admin
+
         // remove comparing user with same access level to tenant in different
         // update times as user with same access level can be expiration date
+
+        List<String> rights = globalUserManagementService.getRights(createdByUser, tenantId);
+        if (!rights.contains(AccessLevel.SUPER_ADMIN.name())) {
+            // only super admin user can add expire after data when creating user, other wise expire after data should be null
+            if (createUser) {
+                expirationDate = null;
+            } else {
+                if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(), expirationDate)) {
+
+                    throw new AccessDeniedException("Access denied.");
+                }
+            }
+        }
         if (resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser,
@@ -390,7 +407,7 @@ public class UserServiceImpl implements UserService {
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
-                    user.getExpirationDate());
+                    user.getExpirationDate(), true);
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());

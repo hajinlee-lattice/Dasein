@@ -230,7 +230,7 @@ public class PLSComponentManager {
                 updatePasswordBasedOnUsername(user);
             }
             try {
-                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null);
+                userService.assignAccessLevel(accessLevel, tenantId, email, userName, null, false);
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);

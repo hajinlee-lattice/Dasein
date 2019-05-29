@@ -30,7 +30,7 @@ public interface UserService {
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate);
+                              Long expirationDate, boolean createUser);
 
     boolean resignAccessLevel(String tenantId, String username);
 
@@ -58,7 +58,7 @@ public interface UserService {
 
     boolean deleteUserByEmail(String email);
 
-    String addUserAccessLevel(String userName,String emails, AccessLevel level);
+    String addUserAccessLevel(String userName, String emails, AccessLevel level);
 
     RegistrationResult registerUserWithNoTenant(UserRegistration userReg);
 
