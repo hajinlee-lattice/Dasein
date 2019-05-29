@@ -53,6 +53,7 @@ public class MetadataResolver {
     private FieldMappingDocument fieldMappingDocument;
     private Configuration yarnConfiguration;
     private boolean cdlResolve = false;
+    private Table schemaTable = null;
 
     private static class Result {
         public List<FieldMapping> fieldMappings;
@@ -66,12 +67,13 @@ public class MetadataResolver {
     }
 
     public MetadataResolver(String csvPath, Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument,
-            boolean cdlResolve) {
+            boolean cdlResolve, Table schemaTable) {
         this.csvPath = csvPath;
         this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
         this.result = new Result();
         this.cdlResolve = cdlResolve;
+        this.schemaTable = schemaTable;
     }
 
     public MetadataResolver(String csvPath, Configuration yarnConfiguration,
@@ -108,7 +110,7 @@ public class MetadataResolver {
         log.info("Current metadata attribute list: " + table.getAttributes());
         Set<String> headerFields = getHeaderFields();
         log.info("Current header list: " + headerFields);
-        List<Attribute> attrs = headerFields.stream().map(h -> table.getAttributeFromDisplayName(h))
+        List<Attribute> attrs = headerFields.stream().map(table::getAttributeFromDisplayName)
                 .filter(Objects::nonNull).collect(Collectors.toList());
         List<Attribute> remaining = table.getAttributes().stream() //
                 .filter(attr -> !attrs.contains(attr)) //
@@ -156,10 +158,43 @@ public class MetadataResolver {
                 }
             }
         }
-
+        Set<String> currentAttrs = attributes.stream().map(Attribute::getName).collect(Collectors.toSet());
+        Map<String, Attribute> standardAttrs;
+        if (schemaTable == null || CollectionUtils.isEmpty(schemaTable.getAttributes())) {
+            standardAttrs = Collections.emptyMap();
+        } else {
+            standardAttrs = schemaTable.getAttributes().stream()
+                    .collect(Collectors.toMap(Attribute::getName, attr -> attr));
+        }
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
-                attributes.add(getAttributeFromFieldName(fieldMapping));
+                if (cdlResolve) {
+                    String attrName =
+                            ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField());
+                    if (currentAttrs.contains(attrName)) {
+                        attributes.add(getAttributeFromFieldName(fieldMapping));
+                    } else {
+                        if (standardAttrs.containsKey(attrName)) {
+                            Attribute attribute = standardAttrs.get(attrName);
+                            attribute.setDisplayName(fieldMapping.getUserField());
+                            attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
+                            if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
+                                attribute.setDateFormatString(fieldMapping.getDateFormatString());
+                            }
+                            if (StringUtils.isNotEmpty(fieldMapping.getTimeFormatString())) {
+                                attribute.setTimeFormatString(fieldMapping.getTimeFormatString());
+                            }
+                            if (StringUtils.isNotEmpty(fieldMapping.getTimezone())) {
+                                attribute.setTimezone(fieldMapping.getTimezone());
+                            }
+                            attributes.add(attribute);
+                        } else {
+                            attributes.add(getAttributeFromFieldName(fieldMapping));
+                        }
+                    }
+                } else {
+                    attributes.add(getAttributeFromFieldName(fieldMapping));
+                }
             }
         }
 
@@ -514,18 +549,13 @@ public class MetadataResolver {
     private String getStatisticalTypeFromFieldType(String fieldType) {
         String statisticalType = null;
         switch (fieldType.toUpperCase()) {
-        case "BOOLEAN":
-            statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
-            break;
-        case "DOUBLE":
-            statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
-            break;
-        case "STRING":
-            statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
-            break;
-        default:
-            statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
-            break;
+            case "BOOLEAN":
+            case "STRING":
+                statisticalType = ModelingMetadata.NOMINAL_STAT_TYPE;
+                break;
+            default:
+                statisticalType = ModelingMetadata.RATIO_STAT_TYPE;
+                break;
         }
         log.debug(String.format("The statistical type is %s", statisticalType));
         return statisticalType;
