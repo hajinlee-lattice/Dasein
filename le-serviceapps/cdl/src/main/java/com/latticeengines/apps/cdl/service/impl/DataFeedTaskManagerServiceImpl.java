@@ -62,7 +62,6 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
@@ -403,10 +402,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
             String tenantId = CustomerSpace.parse(customerSpace).toString();
             Tenant tenant = tenantService.findByTenantId(tenantId);
-            int notificationState = tenant == null ? 0 :
-                    TenantEmailNotificationLevel.getNotificationState(tenant.getNotificationLevel());
+            String notificationLevel = tenant == null ? "" :
+                    tenant.getNotificationLevel().name();
             if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
-                    notificationState)) {
+                    notificationLevel)) {
                 proxy.sendS3ImportEmail(result, tenantId, emailInfo);
             }
         } catch (Exception e) {

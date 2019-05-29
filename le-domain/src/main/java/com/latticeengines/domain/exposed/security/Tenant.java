@@ -88,7 +88,8 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     private Long expiredTime;
 
     @JsonProperty("notification_level")
-    @Column(name = "NOTIFICATION_LEVEL")
+    @Column(name = "NOTIFICATION_LEVEL", length = 20)
+    @Enumerated(EnumType.STRING)
     private TenantEmailNotificationLevel notificationLevel = TenantEmailNotificationLevel.ERROR;
 
     public Tenant() {

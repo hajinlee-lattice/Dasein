@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
-import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
@@ -84,7 +83,8 @@ public class DataFeedTaskImportListener extends LEJobListener {
         Boolean sendS3ImportEmail = Boolean.valueOf(
                 job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
-        int notificationState = TenantEmailNotificationLevel.getNotificationState(job.getTenant().getNotificationLevel());
+        String notificationLevel =
+                job.getTenant().getNotificationLevel().name();
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", applicationId));
@@ -110,7 +110,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         if (jobExecution.getStatus().isUnsuccessful()) {
             String result = "Failed";
             if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
-                    (emailInfo != null), notificationState)) {
+                    (emailInfo != null), notificationLevel)) {
                 String message = "Failed to import s3 file, please contact Lattice admin.";
                 sendS3ImportEmail(hostPort, customerSpace, result,
                         importJobIdentifier, emailInfo, message);
@@ -180,7 +180,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 String result = "Success";
                 if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
-                        (emailInfo != null), notificationState)) {
+                        (emailInfo != null), notificationLevel)) {
                     sendS3ImportEmail(hostPort, customerSpace, result,
                             importJobIdentifier, emailInfo, null);
                 }
@@ -194,7 +194,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 String result = "Failed";
                 if (sendS3ImportEmail && EmailNotificationValidateUtils.validNotificationStateForS3Import(result,
-                        (emailInfo != null), notificationState)) {
+                        (emailInfo != null), notificationLevel)) {
                     sendS3ImportEmail(hostPort, customerSpace, result,
                             importJobIdentifier, emailInfo, e.getMessage());
                 }

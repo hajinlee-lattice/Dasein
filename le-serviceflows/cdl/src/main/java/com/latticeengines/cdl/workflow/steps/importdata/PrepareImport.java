@@ -41,7 +41,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -209,10 +208,11 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         try {
             String tenantId = configuration.getCustomerSpace().toString();
             Tenant tenant = tenantService.findByTenantId(tenantId);
-            int notificationState = tenant == null ? 0 : TenantEmailNotificationLevel.getNotificationState(tenant.getNotificationLevel());
+            String notificationLevel = tenant == null ? "" :
+                    tenant.getNotificationLevel().name();
             InternalResourceRestApiProxy proxy = getInternalResourceProxy();
             if (EmailNotificationValidateUtils.validNotificationStateForS3Import(result, (emailInfo != null),
-                    notificationState)) {
+                    notificationLevel)) {
                 proxy.sendS3ImportEmail(result, tenantId, emailInfo);
             }
         } catch (Exception e) {
