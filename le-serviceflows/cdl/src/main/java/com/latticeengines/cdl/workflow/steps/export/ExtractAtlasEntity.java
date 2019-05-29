@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -77,7 +78,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 configuration.getExportEntities().forEach(exportEntity -> {
                     FrontEndQuery frontEndQuery = getFrontEndQueryCopy();
                     HdfsDataUnit entityResult = exportOneEntity(exportEntity, frontEndQuery);
-                    resultForCurrentAttempt.put(exportEntity, entityResult);
+                    if (entityResult != null) {
+                        resultForCurrentAttempt.put(exportEntity, entityResult);
+                    }
                 });
             } finally {
                 stopLivySession();
@@ -155,7 +158,25 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         log.info("Going to export " + lookups.size() + " columns for " + exportEntity);
         frontEndQuery.setLookups(lookups);
-        return getEntityQueryData(frontEndQuery);
+        if (isEntityValid(frontEndQuery.getMainEntity())) {
+            return getEntityQueryData(frontEndQuery);
+        } else {
+            return null;
+        }
+    }
+
+    private boolean isEntityValid(BusinessEntity mainEntity) {
+        TableRoleInCollection tableRole = mainEntity.getServingStore();
+        if (tableRole == null) {
+            log.warn("Cannot find a serving store for " + mainEntity);
+            return false;
+        }
+        String tableName = attrRepo.getTableName(tableRole);
+        if (tableName == null) {
+            log.warn("Cannot find table of role " + tableRole + " in the repository.");
+            return false;
+        }
+        return true;
     }
 
     private Map<BusinessEntity, List<ColumnMetadata>> getExportSchema() {
