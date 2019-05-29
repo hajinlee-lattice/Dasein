@@ -480,7 +480,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             flags[4] = false;
             flags[6] = false;
             flags[8] = false;
-            flags[10] = false;
         }
         return state;
     }

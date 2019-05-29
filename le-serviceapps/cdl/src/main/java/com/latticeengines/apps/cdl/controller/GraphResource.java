@@ -28,8 +28,8 @@ public class GraphResource {
 
     @RequestMapping(value = "/populate-graph", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all full plays for a tenant")
-    public void getPlays( //
+    @ApiOperation(value = "Populate graph for a tenant")
+    public void populateGraph( //
             @PathVariable String customerSpace) throws Exception {
         graphVisitor.populateTenantGraph(MultiTenantContext.getTenant());
     }
