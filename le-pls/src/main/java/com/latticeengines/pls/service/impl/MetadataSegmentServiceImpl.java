@@ -100,10 +100,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
         MetadataSegment translatedSegment = translateForBackend(segment);
+        /* temporarily revert this change due to PLS-13661
         translatedSegment.setAccountRestriction( //
                 RestrictionUtils.cleanupBucketsInRestriction(translatedSegment.getAccountRestriction()));
         translatedSegment.setContactRestriction( //
                 RestrictionUtils.cleanupBucketsInRestriction(translatedSegment.getContactRestriction()));
+        */
         MetadataSegment metadataSegment;
         try {
             metadataSegment = segmentProxy.createOrUpdateSegment(customerSpace, translatedSegment,
