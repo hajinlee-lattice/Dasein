@@ -25,13 +25,20 @@ public class PathUtils {
         if (path.endsWith(".avro")) {
             return path;
         } else {
-            String glob = path.endsWith("/") ? path.substring(0, path.lastIndexOf("/")) : path;
-            return glob + "/*.avro";
+            return toParquetOrAvroDir(path) + "/*.avro";
         }
     }
 
-    public static String toAvroDir(String path) {
-        if (path.endsWith(".avro") || path.endsWith("/")) {
+    public static String toParquetGlob(String path) {
+        if (path.endsWith(".parquet")) {
+            return path;
+        } else {
+            return toParquetOrAvroDir(path) + "/*.parquet";
+        }
+    }
+
+    public static String toParquetOrAvroDir(String path) {
+        if (path.endsWith(".avro") || path.endsWith(".parquet") || path.endsWith("/")) {
             return path.substring(0, path.lastIndexOf("/"));
         } else {
             return path;

@@ -37,10 +37,7 @@ public class ImportExtractEntityFromS3 extends BaseImportExportS3<ImportExportS3
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        AttributeRepository attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), //
-                configuration.getVersion());
-        insertPurchaseHistory(attrRepo, customerSpace, configuration.getVersion());
-        WorkflowStaticContext.putObject(ATTRIBUTE_REPO, attrRepo);
+        AttributeRepository attrRepo = buildAttrRepo(customerSpace);
         attrRepo.getTableNames().forEach(tblName -> {
             Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
             if (table == null) {
@@ -50,6 +47,27 @@ public class ImportExtractEntityFromS3 extends BaseImportExportS3<ImportExportS3
             }
             addTableToRequestForImport(table, requests);
         });
+    }
+
+    private AttributeRepository buildAttrRepo(CustomerSpace customerSpace) {
+        AttributeRepository attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), //
+                configuration.getVersion());
+        insertAccountExport(attrRepo, customerSpace, configuration.getVersion());
+        insertPurchaseHistory(attrRepo, customerSpace, configuration.getVersion());
+        WorkflowStaticContext.putObject(ATTRIBUTE_REPO, attrRepo);
+        return attrRepo;
+    }
+
+    private void insertAccountExport(AttributeRepository attrRepo,
+                                     CustomerSpace customerSpace, DataCollection.Version version) {
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), //
+                TableRoleInCollection.AccountExport, version);
+        if (table != null) {
+            log.info("Insert account export table into attribute repository.");
+            attrRepo.appendServingStore(BusinessEntity.Account, table);
+        } else {
+            log.warn("Did not find account export table in version " + version);
+        }
     }
 
     private void insertPurchaseHistory(AttributeRepository attrRepo,

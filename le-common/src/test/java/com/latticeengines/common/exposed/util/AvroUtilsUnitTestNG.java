@@ -64,15 +64,6 @@ public class AvroUtilsUnitTestNG {
         assertEquals("abc,abc,xyz", uuids);
     }
 
-    @Test(groups = "unit", dataProvider = "avscFileProvider")
-    public void generateHiveCreateTableStatement(String avscFileName) {
-        URL url = ClassLoader.getSystemResource(
-                String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
-        File avscFile = new File(url.getFile());
-        String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", avscFile.getPath());
-        System.out.println(hiveTableDDL);
-    }
-
     @Test(groups = "unit")
     public void testAlignFields() {
         Schema schema1 = new Schema.Parser()

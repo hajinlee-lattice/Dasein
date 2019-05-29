@@ -17,13 +17,15 @@ def load_data_unit(unit):
 
 def load_hdfs_unit(unit):
     path = unit['Path']
-    if path[-5:] != ".avro":
+    fmt = unit['DataFormat'] if 'DataFormat' in unit else "avro"
+    suffix = "." + fmt
+    if path[-len(suffix):] != suffix:
         if path[-1] == "/":
-            path += "*.avro"
+            path += "*" + suffix
         else:
-            path += "/*.avro"
+            path += "/*" + suffix
     path = "hdfs://%s" % path
-    return spark.read.format("avro").load(path)
+    return spark.read.format(fmt).load(path)
 
 checkpoint_dir = '''{{CHECKPOINT_DIR}}'''
 if checkpoint_dir != "":

@@ -157,7 +157,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             paths.add(extract.getPath());
         }
         log.info("Checking for result file: " + StringUtils.join(paths, ", "));
-        try (AvroFilesIterator records = AvroUtils.avroFileIterator(yarnConfiguration, paths)) {
+        try (AvroFilesIterator records = AvroUtils.iterateAvroFiles(yarnConfiguration, paths.toArray(new String[]{}))) {
             StatsCube statsCube = StatsCubeUtils.parseAvro(records);
             if (BusinessEntity.PurchaseHistory.equals(entity)) {
                 processPHCube(statsCube);

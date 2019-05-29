@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.EnrichAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.FilterAccountExport;
 import com.latticeengines.cdl.workflow.steps.rebuild.FilterAccountFeature;
 import com.latticeengines.cdl.workflow.steps.rebuild.GenerateBucketedAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccountWrapper;
@@ -31,6 +32,9 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
     private FilterAccountFeature filterAccountFeature;
 
     @Inject
+    private FilterAccountExport filterAccountExport;
+
+    @Inject
     private GenerateBucketedAccountWrapper generateBucketedAccount;
 
     @Override
@@ -39,6 +43,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
                 .next(enrichAccount) //
                 .next(profileAccount) //
                 .next(filterAccountFeature) //
+                .next(filterAccountExport) //
                 .next(generateBucketedAccount) //
                 .build();
     }

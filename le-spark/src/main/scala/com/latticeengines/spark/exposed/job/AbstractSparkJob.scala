@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -44,7 +43,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
         "/spark-checkpoints"
     spark.sparkContext.setCheckpointDir(checkpointDir)
     val stageInput: List[DataFrame] = if (CollectionUtils.isEmpty(jobConfig.getInput)) {
-      Nil
+      List()
     } else {
       jobConfig.getInput.asScala.map(dataUnit => {
         val storage = dataUnit.getStorageType
@@ -55,7 +54,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       }).toList
     }
     val stageTargets: List[HdfsDataUnit] = if (CollectionUtils.isEmpty(jobConfig.getTargets)) {
-      Nil
+      List()
     } else {
       jobConfig.getTargets.asScala.toList
     }
@@ -65,14 +64,16 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
 
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
     var path = unit.getPath
-    if (!path.endsWith(".avro")) {
+    val fmt = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
+    val suffix = "." + fmt
+    if (!path.endsWith(suffix)) {
       if (path.endsWith("/")) {
-        path += "*.avro"
+        path += "*" + suffix
       } else {
-        path += "/*.avro"
+        path += "/*" + suffix
       }
     }
-    spark.read.format("avro").load("hdfs://" + path)
+    spark.read.format(fmt).load("hdfs://" + path)
   }
 
   def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {
@@ -86,8 +87,9 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val tgt = t._1
       val df = t._2
       val path = tgt.getPath
-      df.write.format("avro").save(path)
-      val df2 = spark.read.format("avro").load(path)
+      val fmt = if (tgt.getDataFormat != null) tgt.getDataFormat.name.toLowerCase else "avro"
+      df.write.format(fmt).save(path)
+      val df2 = spark.read.format(fmt).load(path)
       tgt.setCount(df2.count())
       tgt
     }

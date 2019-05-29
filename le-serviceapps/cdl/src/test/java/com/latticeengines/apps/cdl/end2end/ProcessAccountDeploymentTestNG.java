@@ -152,6 +152,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyStats(getEntitiesInStats());
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
+        verifyExtraTableRoles(getExtraTableRoeCounts());
         verifyRedshift(getExpectedRedshiftCounts());
     }
 
@@ -227,6 +228,13 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
         return map;
+    }
+
+    protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ACCOUNT_1, //
+                TableRoleInCollection.AccountExport, ACCOUNT_1 //
+        );
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {

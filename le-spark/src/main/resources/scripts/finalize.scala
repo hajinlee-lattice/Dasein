@@ -21,12 +21,16 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val tgt = t._1
   val df = t._2
   val path = tgt.get("Path").asText()
-  df.write.format("avro").save(path)
-  val df2 = spark.read.format("avro").load(path)
+  val fmt = if (tgt.get("DataFormat") != null) tgt.get("DataFormat").asText().toLowerCase() else "avro"
+  df.write.format(fmt).save(path)
+  val df2 = spark.read.format(fmt).load(path)
   val json = mapper.createObjectNode()
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
   json.put("Count", df2.count())
+  if (!"avro".equals(fmt)) {
+    json.put("DataFormat", tgt.get("DataFormat"))
+  }
   json
 }
 

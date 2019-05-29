@@ -65,7 +65,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
             if (table == null) {
                 throw new RuntimeException("Table " + tblName + " for customer " + customer + " does not exits.");
             }
-            String path = PathUtils.toAvroDir(table.getExtracts().get(0).getPath());
+            String path = PathUtils.toParquetOrAvroDir(table.getExtracts().get(0).getPath());
             pathMap.put(tblName, path);
         });
         return pathMap;

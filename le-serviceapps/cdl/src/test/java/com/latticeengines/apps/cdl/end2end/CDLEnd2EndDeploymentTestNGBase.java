@@ -1365,6 +1365,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         });
     }
 
+    void verifyExtraTableRoles(Map<TableRoleInCollection, Long> expectedTableCount) {
+        if (MapUtils.isEmpty(expectedTableCount)) {
+            return;
+        }
+        expectedTableCount.forEach((key, value) -> //
+                Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
+    }
+
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
@@ -1444,7 +1452,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String dailyFileContainingTargetDay = dailyFiles.stream()
                 .filter(f -> f.contains(String.valueOf(dayPeriod))).findFirst().orElse(null);
         Assert.assertNotNull(dailyFileContainingTargetDay);
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, dailyFileContainingTargetDay);
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
         while (iter.hasNext()) {
             GenericRecord record = iter.next();

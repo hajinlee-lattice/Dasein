@@ -168,6 +168,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 schemaMap.put(entity, cms);
             }
             log.info("Found " + CollectionUtils.size(cms) + " attrs to export for " + entity);
+            cms.forEach(cm -> {
+                log.info("Attribute Name: " + cm.getAttrName());
+            });
         }
         return schemaMap;
     }
