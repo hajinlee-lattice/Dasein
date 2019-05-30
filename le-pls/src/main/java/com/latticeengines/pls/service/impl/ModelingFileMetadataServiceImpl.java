@@ -261,74 +261,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
     }
 
-//    private void setCDLExternalSystems(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
-//        if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
-//                || fieldMappingDocument.getFieldMappings().size() == 0) {
-//            return;
-//        }
-//        List<String> crmIds = new ArrayList<>();
-//        List<String> mapIds = new ArrayList<>();
-//        List<String> erpIds = new ArrayList<>();
-//        List<String> otherIds = new ArrayList<>();
-//        List<Pair<String, String>> idMappings = new ArrayList<>();
-//        boolean hasExternalId = false;
-//        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-//            if (fieldMapping.getCdlExternalSystemType() != null
-//                    && StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
-//                String displayName = fieldMapping.getMappedField();
-//                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
-//                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
-//                }
-//                fieldMapping.setMappedField(
-//                        ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
-//                String attrName = fieldMapping.getMappedField();
-//                idMappings.add(Pair.of(attrName, displayName));
-//                switch (fieldMapping.getCdlExternalSystemType()) {
-//                case CRM:
-//                    crmIds.add(fieldMapping.getMappedField());
-//                    hasExternalId = true;
-//                    break;
-//                case MAP:
-//                    mapIds.add(fieldMapping.getMappedField());
-//                    hasExternalId = true;
-//                    break;
-//                case ERP:
-//                    erpIds.add(fieldMapping.getMappedField());
-//                    hasExternalId = true;
-//                    break;
-//                case OTHER:
-//                    otherIds.add(fieldMapping.getMappedField());
-//                    hasExternalId = true;
-//                    break;
-//                }
-//            }
-//        }
-//        if (hasExternalId) {
-//            CDLExternalSystem originalSystem = cdlExternalSystemProxy
-//                    .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity.name());
-//            if (originalSystem == null) {
-//                CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-//                cdlExternalSystem.setCRMIdList(crmIds);
-//                cdlExternalSystem.setMAPIdList(mapIds);
-//                cdlExternalSystem.setERPIdList(erpIds);
-//                cdlExternalSystem.setOtherIdList(otherIds);
-//                cdlExternalSystem.setIdMapping(idMappings);
-//                cdlExternalSystem.setEntity(entity);
-//                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-//                        cdlExternalSystem);
-//            } else {
-//                originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), crmIds));
-//                originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
-//                originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
-//                originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
-//                originalSystem.addIdMapping(idMappings);
-//                originalSystem.setEntity(originalSystem.getEntity());
-//                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-//                        originalSystem);
-//            }
-//        }
-//    }
-
     private List<String> mergeList(List<String> list1, List<String> list2) {
         if (CollectionUtils.isEmpty(list1)) {
             return list2;
@@ -352,10 +284,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
         }
-        // 1.set external system column name
-//        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-//            setCDLExternalSystems(fieldMappingDocument, entity);
-//        }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
