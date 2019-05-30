@@ -45,6 +45,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             case 'alpha':
                                 vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
                                 break;
+                            case 'numeric':
                             case 'enum':
                                 vm.operation = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
                                 vm.string_operations = QueryTreeService.numerical_operations;
