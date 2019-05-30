@@ -689,8 +689,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             while (index < encodeBits && availableBits.get(index).size() == 0) {
                 index++;
             }
-            String encodedAttr = null;
-            List<ProfileParameters.Attribute> attachedAttrs = null;
+            String encodedAttr;
+            List<ProfileParameters.Attribute> attachedAttrs;
             if (index == encodeBits) { // No available encode attr to add this
                                        // attr. Add a new encode attr
                 encodedAttr = createEncodeAttrName(encAttrPrefix, encodedSeq);
@@ -851,7 +851,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (NUM_TYPES.contains(type)) {
                 // Skip numerical attributes that are actually Date timestamps since they are processed separately.
                 if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
-                    return true;
+                    return false;
                 }
                 switch (config.getStage()) {
                 case DataCloudConstants.PROFILE_STAGE_SEGMENT:
@@ -926,6 +926,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (DATE_TYPES.contains(type)) {
                 // Check that the field has Logical Type "Date" set.
                 if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
+                    log.debug(String.format("Date bucketed attr %s (type %s unencode)", field.name(), type.getName()));
                     dateAttrs.add(new ProfileParameters.Attribute(
                             field.name(), null, null,
                             new DateBucket(config.getEvaluationDateAsTimestamp())));
