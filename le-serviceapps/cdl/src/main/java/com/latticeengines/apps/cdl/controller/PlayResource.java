@@ -298,11 +298,12 @@ public class PlayResource {
             channel.setPlayLaunch(playLaunch);
             playLaunchChannelService.update(channel);
             playLaunch = channel.getPlayLaunch();
-            PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
-            if (play.getRatingEngine() != null) {
-                validateNonEmptyTargetsForLaunch(customerSpace, play, play.getName(), playLaunch, //
-                        playLaunch.getDestinationAccountId());
-            }
+            // PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
+            // if (play.getRatingEngine() != null) {
+            // validateNonEmptyTargetsForLaunch(customerSpace, play,
+            // play.getName(), playLaunch, //
+            // playLaunch.getDestinationAccountId());
+            // }
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
             playLaunch.setApplicationId(appId);
 
