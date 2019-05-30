@@ -111,6 +111,11 @@ if [[ "${ENABLE_JACOCO}" == "true" ]]; then
     fi
 fi
 
+if [[ "${LE_RASP}" == "true" ]] && [[ -f "/etc/ledp/contrast.jar" ]] && [[ -f "/etc/ledp/contrast_security.yaml" ]] ; then
+    export CONTRAST_CONFIG_PATH="/etc/ledp/contrast_security.yaml"
+    export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/etc/ledp/contrast.jar"
+fi
+
 echo ${CATALINA_OPTS}
 
 mkdir /var/log/ledp
