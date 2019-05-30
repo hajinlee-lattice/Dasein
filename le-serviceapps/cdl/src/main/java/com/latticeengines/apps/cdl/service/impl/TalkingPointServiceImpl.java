@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("talkingPointService")
@@ -188,8 +189,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         try {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
-                    .sorted(Comparator.comparingInt(TalkingPoint::getOffset))
-                    .map(DanteTalkingPointValue::new).collect(Collectors.toList());
+                    .sorted(Comparator.comparingInt(TalkingPoint::getOffset)).map(DanteTalkingPointValue::new)
+                    .collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });
@@ -214,6 +215,14 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         }
 
         return findAllByPlayName(playName);
+    }
+
+    public List<TalkingPointDTO> findAllPublishedByTenant(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        if (tenant != null && tenant.getPid() != null && tenant.getPid() > 0) {
+            return publishedTalkingPointEntityMgr.findAllByTenantPid(tenant.getPid());
+        }
+        throw new LedpException(LedpCode.LEDP_38009, new String[] { customerSpace });
     }
 
     @Override
