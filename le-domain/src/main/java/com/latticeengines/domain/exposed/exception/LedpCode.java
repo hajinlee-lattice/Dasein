@@ -345,6 +345,7 @@ public enum LedpCode {
     LEDP_18218("Failed to get template preview {0}"),
     LEDP_18219("Unable to update PlayLaunchChannel due to {0}"),
     LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"),
+    LEDP_18221("User not found"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
