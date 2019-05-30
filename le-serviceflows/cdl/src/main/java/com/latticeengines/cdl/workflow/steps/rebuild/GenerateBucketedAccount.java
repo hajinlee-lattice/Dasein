@@ -146,7 +146,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         TransformationStepConfig step = new TransformationStepConfig();
         addBaseTables(step, fullAccountTableName);
         step.setTransformer(TRANSFORMER_COPIER);
-
         CopierConfig conf = new CopierConfig();
         conf.setRetainAttrs(getRetrainAttrNames());
         String confStr = appendEngineConf(conf, heavyEngineConfig());
