@@ -65,12 +65,12 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                         .toString(),
                 SourceType.FILE.getName());
         startCDLImport(contactFile, ENTITY_CONTACT);
-        verifyAvroFileNumber(contactFile, 48, contactPath);
+        verifyAvroFileNumber(contactFile, 47, contactPath);
         getDataFeedTask(ENTITY_CONTACT);
         String contactIdentifier = contactDataFeedTask.getUniqueId();
         EaiImportJobDetail contactDetail = eaiJobDetailProxy
                 .getImportJobDetailByCollectionIdentifier(contactIdentifier);
-        verifyEaiJobDetail(contactDetail, 2L, 48);
+        verifyEaiJobDetail(contactDetail, 3L, 47);
 
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
@@ -82,7 +82,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Report contactReport = reports.get(1);
         Report productReport = reports.get(2);
         verifyReport(accountReport, 3L, 3L, 47L);
-        verifyReport(contactReport, 2L, 2L, 48L);
+        verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 2L, 2L, 4L);
     }
 
