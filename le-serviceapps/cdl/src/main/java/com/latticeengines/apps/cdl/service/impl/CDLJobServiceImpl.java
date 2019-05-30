@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -464,12 +465,12 @@ public class CDLJobServiceImpl implements CDLJobService {
             List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types, jobStatuses);
             runningPAJobsCount = runningPAJobs.size();
 
-            List<String> runningJobAppId = new ArrayList<>();
+            Set<String> runningJobAppId = new HashSet<>();
             for (WorkflowJob job : runningPAJobs) {
                 runningJobAppId.add(job.getApplicationId());
             }
 
-            List<String> notStartRunningHithTenants = new ArrayList<>();
+            Set<String> notStartRunningHithTenants = new HashSet<>();
             Iterator<Map.Entry<String, List<Object>>> highMapIterator = highMap.entrySet().iterator();
             while(highMapIterator.hasNext()) {
                 Map.Entry<String, List<Object>> entry = highMapIterator.next();
@@ -492,7 +493,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
 
-            List<String> notStartRunningLowTenants = new ArrayList<>();
+            Set<String> notStartRunningLowTenants = new HashSet<>();
             Iterator<Map.Entry<String, List<Object>>> lowMapMapIterator = lowMap.entrySet().iterator();
             while(lowMapMapIterator.hasNext()) {
                 Map.Entry<String, List<Object>> entry = lowMapMapIterator.next();
