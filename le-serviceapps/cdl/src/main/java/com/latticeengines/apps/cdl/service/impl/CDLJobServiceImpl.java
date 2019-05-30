@@ -10,8 +10,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
@@ -65,6 +68,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
@@ -410,7 +414,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 MultiTenantContext.setTenant(tenant);
                 CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
                 CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                List<Action> actions = actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE);
+                List<Action> actions = getActions();
 
                 List<Object> objects = new ArrayList<>();
                 objects.add(dataFeed);
@@ -469,7 +473,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             Iterator<Map.Entry<String, List<Object>>> highMapIterator = highMap.entrySet().iterator();
             while(highMapIterator.hasNext()) {
                 Map.Entry<String, List<Object>> entry = highMapIterator.next();
-                if (runningJobAppId.contains(entry.getKey())) {
+                List<Object> values = entry.getValue();
+                if (runningJobAppId.contains(values.get(0))) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
@@ -478,7 +483,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         highMapIterator.remove();
                         continue;
                     } else {
-                        notStartRunningHithTenants.add((String)entry.getValue().get(0));
+                        notStartRunningHithTenants.add(entry.getKey());
                         runningPAJobsCount++;
                     }
                 }
@@ -491,7 +496,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             Iterator<Map.Entry<String, List<Object>>> lowMapMapIterator = lowMap.entrySet().iterator();
             while(lowMapMapIterator.hasNext()) {
                 Map.Entry<String, List<Object>> entry = lowMapMapIterator.next();
-                if (runningJobAppId.contains(entry.getKey())) {
+                List<Object> values = entry.getValue();
+                if (runningJobAppId.contains(values.get(0))) {
                     if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
                         entry.getValue().set(1, JobStatus.RUNNING);
                     }
@@ -500,7 +506,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         lowMapMapIterator.remove();
                         continue;
                     } else {
-                        notStartRunningLowTenants.add((String)entry.getValue().get(0));
+                        notStartRunningLowTenants.add(entry.getKey());
                         runningPAJobsCount++;
                     }
                 }
@@ -534,8 +540,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         log.info(String.format("Need to schedule high priority tenant is : %s.", needScheduleTenantFromHighPriority));
 
         String needScheduleTenantFromLowPriority = PriorityQueueUtils.pickFirstFromLowPriority();
-        while (needScheduleTenantFromLowPriority != null &&
-                (needScheduleTenantFromHighPriority.equals(needScheduleTenantFromLowPriority) ||
+        while (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority) &&
+                ((StringUtils.isNotEmpty(needScheduleTenantFromHighPriority) && needScheduleTenantFromHighPriority.equals(needScheduleTenantFromLowPriority)) ||
                         highMap.containsKey(needScheduleTenantFromLowPriority) ||
                         lowMap.containsKey(needScheduleTenantFromLowPriority))) {
             PriorityQueueUtils.pollFirstFromLowPriority();
@@ -784,15 +790,14 @@ public class CDLJobServiceImpl implements CDLJobService {
                 applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
             }
             List<Object> list = new ArrayList<>();
-            list.add(tenant.getName());
+            list.add(applicationId.toString());
             list.add(JobStatus.PENDING);
             list.add(System.currentTimeMillis());
-            list.add(actions);
 
             if (setHighMap) {
-                highMap.put(applicationId.toString(), list);
+                highMap.put(tenant.getName(), list);
             } else {
-                lowMap.put(applicationId.toString(), list);
+                lowMap.put(tenant.getName(), list);
             }
             cdlJobDetail.setApplicationId(applicationId.toString());
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
@@ -864,6 +869,73 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         return false;
+    }
+
+    private List<Action> getActions() {
+        String customerSpace = MultiTenantContext.getShortTenantId();
+        List<Action> actions = actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE);
+        Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
+                ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
+                ActionType.CDL_OPERATION_WORKFLOW);
+        List<String> importAndDeleteJobPidStrs = actions.stream()
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null)
+                .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
+        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
+                customerSpace);
+        List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
+                ? Collections.emptyList()
+                : importAndDeleteJobs.stream().filter(
+                job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                .map(Job::getPid).collect(Collectors.toList());
+
+        List<Action> completedActions = actions.stream()
+                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobPids))
+                .collect(Collectors.toList());
+
+        List<Action> attrManagementActions = actions.stream()
+                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(attrManagementActions)) {
+            completedActions.addAll(attrManagementActions);
+        }
+
+        List<Action> businessCalendarChangeActions = actions.stream()
+                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(businessCalendarChangeActions)) {
+            completedActions.addAll(businessCalendarChangeActions);
+        }
+
+        List<Action> ratingEngineActions = actions.stream()
+                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(ratingEngineActions)) {
+            completedActions.addAll(ratingEngineActions);
+        }
+        return completedActions;
+    }
+
+    private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
+                                     List<Long> completedImportAndDeleteJobPids) {
+        boolean isComplete = true; // by default every action is valid
+        if (selectedTypes.contains(action.getType())) {
+            // special check if is selected type
+            isComplete = false;
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                isComplete = true;
+            } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                        .getActionConfiguration();
+                if (importActionConfiguration == null) {
+                    log.error("Import action configuration is null!");
+                    return false;
+                }
+                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    isComplete = true;
+                }
+            }
+        }
+        return isComplete;
     }
 
     private void exportScheduleJob() {
