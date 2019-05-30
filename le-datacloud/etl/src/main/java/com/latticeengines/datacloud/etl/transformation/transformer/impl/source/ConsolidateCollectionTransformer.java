@@ -86,6 +86,7 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
+    private String tmpInputPath;
     private Table inputTable;
     private Table legacyTable;
     private VendorConfig vendorConfig;
@@ -187,6 +188,22 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         //udpate the last consolidation time stamp
         vendorConfig.setLastConsolidated(new Timestamp(System.currentTimeMillis()));
         vendorConfigMgr.update(vendorConfig);
+
+        //clean
+        try {
+
+            if (tmpInputPath != null) {
+
+                HdfsUtils.rmdir(yarnConfiguration, tmpInputPath);
+
+            }
+
+        } catch (Exception e) {
+
+            log.warn(e.getMessage(), e);
+
+        }
+
     }
 
     @Override
@@ -312,10 +329,12 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
 
         String tableName = NamingUtils.timestamp("Input");
         String tgtDir = "/tmp/" + tableName;
+        tmpInputPath = tgtDir;
         copyAvrosFromS3(tgtDir, ingestionDir, avrosToCopy);
 
         Table inputTable = MetadataConverter.getTable(yarnConfiguration, tgtDir);
         inputTable.setName(tableName);
+
         return inputTable;
     }
 
