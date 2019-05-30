@@ -26,4 +26,6 @@ public interface TalkingPointService {
     List<TalkingPointDTO> revertToLastPublished(String playName);
 
     List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName);
+
+    List<TalkingPointDTO> findAllPublishedByTenant(String customerSpace);
 }
