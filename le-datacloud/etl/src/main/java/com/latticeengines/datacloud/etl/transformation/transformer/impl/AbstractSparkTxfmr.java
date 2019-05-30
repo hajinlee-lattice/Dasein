@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -246,7 +247,35 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     }
 
     protected Schema getTargetSchema(HdfsDataUnit result, S sparkJobConfig, T configuration, List<Schema> baseSchemas) {
-        return null;
+        if (CollectionUtils.isNotEmpty(baseSchemas)) {
+            String avroGlob = PathUtils.toAvroGlob(result.getPath());
+            Map<String, Schema.Field> inputFields = new HashMap<>();
+            baseSchemas.forEach(schema -> {
+                if (schema != null) {
+                    schema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
+                }
+            });
+            Schema resultSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+            List<Schema.Field> fields = resultSchema.getFields().stream() //
+                    .map(field -> {
+                        Schema.Field srcField = inputFields.getOrDefault(field.name(), field);
+                        return new Schema.Field(
+                                srcField.name(),
+                                srcField.schema(),
+                                srcField.doc(),
+                                srcField.defaultVal()
+                        );
+                    }) //
+                    .collect(Collectors.toList());
+            return Schema.createRecord(
+                    resultSchema.getName(),
+                    resultSchema.getDoc(),
+                    resultSchema.getNamespace(),
+                    false,
+                    fields);
+        } else {
+            return null;
+        }
     }
 
     private LivySession createLivySession(TransformStep step, TransformationProgress progress, //

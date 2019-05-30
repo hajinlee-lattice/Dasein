@@ -90,8 +90,6 @@ public class RestrictionUtils {
 
     private static void cleanupBucketRestriction(BucketRestriction bucketRestriction) {
         Bucket bkt = bucketRestriction.getBkt();
-        bkt.setId(null);
-        bkt.setLabel(null);
         if (isValueFreeOperator(bkt.getComparisonType())) {
             bkt.setValues(null);
         }
