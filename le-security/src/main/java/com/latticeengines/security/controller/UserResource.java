@@ -72,7 +72,7 @@ public class UserResource {
 
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
-
+        checkUser(loginUser);
         UserFilter filter;
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
@@ -98,7 +98,7 @@ public class UserResource {
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg,
-            HttpServletRequest request, HttpServletResponse httpResponse) {
+                                                         HttpServletRequest request, HttpServletResponse httpResponse) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         response.setSuccess(false);
 
@@ -110,6 +110,7 @@ public class UserResource {
         User user = userReg.getUser();
 
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(loginUser);
         String loginUsername = loginUser.getUsername();
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         AccessLevel targetLevel = AccessLevel.EXTERNAL_USER;
@@ -155,12 +156,13 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
-            HttpServletRequest request) {
+                                                   HttpServletRequest request) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             User user = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+            checkUser(user);
             if (!user.getUsername().equals(username)) {
-                throw new LedpException(LedpCode.LEDP_18001, new String[] { username });
+                throw new LedpException(LedpCode.LEDP_18001, new String[]{username});
             }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -176,6 +178,7 @@ public class UserResource {
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@RequestBody UserUpdateData data, HttpServletRequest request) {
         User user = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(user);
         if (userService.updateCredentials(user, data)) {
             return SimpleBooleanResponse.successResponse();
         } else {
@@ -188,12 +191,13 @@ public class UserResource {
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data,
-            HttpServletRequest request, HttpServletResponse response) {
+                                        HttpServletRequest request, HttpServletResponse response) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
 
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(loginUser);
         String loginUsername = loginUser.getUsername();
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
 
@@ -237,11 +241,12 @@ public class UserResource {
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request,
-            HttpServletResponse response) {
+                                            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
 
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(loginUser);
         String loginUsername = loginUser.getUsername();
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
 
@@ -260,6 +265,12 @@ public class UserResource {
         } else {
             return SimpleBooleanResponse.failedResponse(
                     Collections.singletonList("Could not delete a user that is not in the current tenant"));
+        }
+    }
+
+    private void checkUser(User user) {
+        if (user == null) {
+            throw new LedpException(LedpCode.LEDP_18221);
         }
     }
 }

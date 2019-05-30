@@ -26,6 +26,9 @@ public final class SecurityUtils {
         Session session = getSessionFromRequest(request, sessionService);
         String email = session.getEmailAddress();
         User user = userService.findByEmail(email);
+        if (user == null) {
+            return null;
+        }
         user.setAccessLevel(session.getAccessLevel());
         return user;
     }
