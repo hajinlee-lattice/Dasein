@@ -91,6 +91,10 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
 
         props.setProperty("eai.export.displayname",
                 ctx.getProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.class));
+        if (ctx.getProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS, String.class) != null) {
+            props.setProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS,
+                    ctx.getProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS, String.class));
+        }
 
         List<String> cacheFiles = new ArrayList<>();
         try {
