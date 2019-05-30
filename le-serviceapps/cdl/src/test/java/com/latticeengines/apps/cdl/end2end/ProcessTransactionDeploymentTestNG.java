@@ -6,13 +6,18 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;

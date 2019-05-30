@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -695,6 +696,28 @@ public class AvroUtils {
             assembler = constructFieldWithType(assembler, fieldBuilder, getType(field));
         }
         return assembler.endRecord();
+    }
+
+    public static Schema overwriteFields(Schema schema, Map<String, Schema.Field> fields) {
+        List<Schema.Field> newFields = schema.getFields().stream() //
+                .map(field -> {
+                    Schema.Field srcField = fields.getOrDefault(field.name(), field);
+                    Schema.Field newField = new Schema.Field( //
+                            field.name(), //
+                            srcField.schema(), //
+                            srcField.doc(), //
+                            srcField.defaultVal() //
+                    );
+                    srcField.getObjectProps().forEach(newField::addProp);
+                    return newField;
+                }) //
+                .collect(Collectors.toList());
+        return Schema.createRecord(
+                schema.getName(),
+                schema.getDoc(),
+                schema.getNamespace(),
+                false,
+                newFields);
     }
 
     public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)

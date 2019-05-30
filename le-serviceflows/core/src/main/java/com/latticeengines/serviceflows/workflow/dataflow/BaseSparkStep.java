@@ -8,6 +8,8 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -27,6 +29,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends BaseWorkflowStep<S> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseSparkStep.class);
 
     @Inject
     private LivySessionManager livySessionManager;

@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -15,16 +14,6 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 
 public final class SparkUtils {
-
-    public static HdfsDataUnit tableToHdfsUnit(Table table, String alias, Configuration yarnConfiguration) {
-        HdfsDataUnit dataUnit = table.toHdfsDataUnit(alias);
-        String globPath = AvroParquetUtils.toParquetOrAvroGlob(yarnConfiguration, dataUnit.getPath());
-        dataUnit.setPath(globPath);
-        if (globPath.endsWith(".parquet")) {
-            dataUnit.setDataFormat(DataUnit.DataFormat.PARQUET);
-        }
-        return dataUnit;
-    }
 
     public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
                                         Configuration yarnConfiguration, //
