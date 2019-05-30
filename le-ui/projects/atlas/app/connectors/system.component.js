@@ -140,6 +140,7 @@ export default class SystemComponent extends Component {
                 modalActions.closeModal(store);
                 break;
             case 'ok':
+                this.setState({saving: true});
                 modalActions.closeModal(store);
                 break;
         }
