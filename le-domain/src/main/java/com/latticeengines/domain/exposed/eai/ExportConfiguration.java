@@ -23,6 +23,7 @@ public class ExportConfiguration extends EaiJobConfiguration {
     @NotEmptyString
     private String exportTargetPath;
     private boolean exportUsingDisplayName = Boolean.TRUE;
+    private String exclusionColumns;
 
     @JsonProperty("export_format")
     public ExportFormat getExportFormat() {
@@ -83,4 +84,15 @@ public class ExportConfiguration extends EaiJobConfiguration {
     public void setUsingDisplayName(boolean exportUsingDisplayName) {
         this.exportUsingDisplayName = exportUsingDisplayName;
     }
+
+    @JsonProperty("exclusion_columns")
+    public String getExclusionColumns() {
+        return exclusionColumns;
+    }
+
+    @JsonProperty("exclusion_columns")
+    public void setExclusionColumns(String exclusionColumns) {
+        this.exclusionColumns = exclusionColumns;
+    }
+
 }

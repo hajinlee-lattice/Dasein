@@ -6,7 +6,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -27,6 +30,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -49,6 +53,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     private String splitName;
 
     private Table table;
+    private Set<String> exclusionColumns = new HashSet<>();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -63,6 +68,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             throws IOException {
         table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
         boolean exportUsingDisplayName = config.getBoolean("eai.export.displayname", true);
+        getExclusionColumns();
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
@@ -84,11 +90,22 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                     header = field.name();
                 }
                 headers.add(header);
+            } else {
+                log.info("Ignore field:" + field.name());
             }
         }
         csvFilePrinter = new CSVPrinter(new BufferedWriter(new FileWriter(OUTPUT_FILE), 8192 * 2),
                 LECSVFormat.format.withHeader(headers.toArray(new String[] {})));
         return this;
+    }
+
+    private void getExclusionColumns() {
+        String columns = config.get(ExportProperty.EXPORT_EXCLUSION_COLUMNS);
+        if (columns == null || columns.length() == 0) {
+            return;
+        }
+        String[] tokens = columns.split(";");
+        exclusionColumns.addAll(Arrays.asList(tokens));
     }
 
     @Override
@@ -115,7 +132,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 fieldValue = "";
             } else if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                 Class<?> javaType = AvroUtils.getJavaType(AvroUtils.getType(field));
-                if (Long.class.equals(javaType) || Integer.class.equals(javaType)){
+                if (Long.class.equals(javaType) || Integer.class.equals(javaType)) {
                     fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
                 }
             }
@@ -132,10 +149,11 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         csvFilePrinter.println();
     }
 
-    private static boolean outputField(Field field) {
+    private boolean outputField(Field field) {
         return field.name() != null //
                 && !field.name().equals(InterfaceName.InternalId.toString()) //
                 && !field.name().equals(ScoreResultField.RawScore.displayName) //
-                && !field.name().endsWith(INT_LDC_DEDUPE_ID);
+                && !field.name().endsWith(INT_LDC_DEDUPE_ID) //
+                && !exclusionColumns.contains(field.name());
     }
 }

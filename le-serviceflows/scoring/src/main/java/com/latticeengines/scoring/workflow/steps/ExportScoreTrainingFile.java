@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.BaseExportData;
 
@@ -32,6 +33,10 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
     protected String getExportOutputPath() {
         String outputPath = getStringValueFromContext(EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH);
         return StringUtils.isNotBlank(outputPath) ? outputPath : null;
+    }
+
+    protected String getExclusionColumns() {
+        return ScoreResultField.Probability.displayName + ";" + ScoreResultField.NormalizedScore.displayName;
     }
 
 }
