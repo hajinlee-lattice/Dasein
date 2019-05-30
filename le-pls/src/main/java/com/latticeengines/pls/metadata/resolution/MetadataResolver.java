@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -58,6 +60,7 @@ public class MetadataResolver {
     private static class Result {
         public List<FieldMapping> fieldMappings;
         public Table metadata;
+        public CDLExternalSystem cdlExternalSystem;
     }
 
     private Result result;
@@ -127,6 +130,12 @@ public class MetadataResolver {
 
     private void calculateBasedOnMetadta() {
         result.fieldMappings = new ArrayList<>();
+        result.cdlExternalSystem = new CDLExternalSystem();
+        List<String> crmIds = new ArrayList<>();
+        List<String> mapIds = new ArrayList<>();
+        List<String> erpIds = new ArrayList<>();
+        List<String> otherIds = new ArrayList<>();
+        List<Pair<String, String>> idMappings = new ArrayList<>();
 
         List<Attribute> attributes = result.metadata.getAttributes();
         Iterator<Attribute> attrIterator = attributes.iterator();
@@ -169,10 +178,24 @@ public class MetadataResolver {
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
                 if (cdlResolve) {
+                    // external system
+                    boolean hasExternalId = false;
+                    String externalDisplayName = fieldMapping.getMappedField();
+                    if (fieldMapping.getCdlExternalSystemType() != null
+                            && StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
+                        if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
+                            fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
+                        }
+                        hasExternalId = true;
+                    }
+
                     String attrName =
                             ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField());
+                    String externalAttrName;
                     if (currentAttrs.contains(attrName)) {
-                        attributes.add(getAttributeFromFieldName(fieldMapping));
+                        Attribute attribute = getAttributeFromFieldName(fieldMapping);
+                        externalAttrName = attribute.getName();
+                        attributes.add(attribute);
                     } else {
                         if (standardAttrs.containsKey(attrName)) {
                             Attribute attribute = standardAttrs.get(attrName);
@@ -187,9 +210,29 @@ public class MetadataResolver {
                             if (StringUtils.isNotEmpty(fieldMapping.getTimezone())) {
                                 attribute.setTimezone(fieldMapping.getTimezone());
                             }
+                            externalAttrName = attribute.getName();
                             attributes.add(attribute);
                         } else {
-                            attributes.add(getAttributeFromFieldName(fieldMapping));
+                            Attribute attribute = getAttributeFromFieldName(fieldMapping);
+                            externalAttrName = attribute.getName();
+                            attributes.add(attribute);
+                        }
+                    }
+                    if (hasExternalId) {
+                        idMappings.add(Pair.of(externalAttrName, externalDisplayName));
+                        switch (fieldMapping.getCdlExternalSystemType()) {
+                            case CRM:
+                                crmIds.add(externalAttrName);
+                                break;
+                            case MAP:
+                                mapIds.add(externalAttrName);
+                                break;
+                            case ERP:
+                                erpIds.add(externalAttrName);
+                                break;
+                            case OTHER:
+                                otherIds.add(externalAttrName);
+                                break;
                         }
                     }
                 } else {
@@ -197,7 +240,11 @@ public class MetadataResolver {
                 }
             }
         }
-
+        result.cdlExternalSystem.setCRMIdList(crmIds);
+        result.cdlExternalSystem.setMAPIdList(mapIds);
+        result.cdlExternalSystem.setERPIdList(erpIds);
+        result.cdlExternalSystem.setOtherIdList(otherIds);
+        result.cdlExternalSystem.setIdMapping(idMappings);
         if (fieldMappingDocument.getIgnoredFields() != null) {
             attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getDisplayName()));
         }
@@ -254,6 +301,13 @@ public class MetadataResolver {
             throw new RuntimeException("Metadata is not fully defined");
         }
         return result.metadata;
+    }
+
+    public CDLExternalSystem getExternalSystem() {
+        if (result == null) {
+            return null;
+        }
+        return result.cdlExternalSystem;
     }
 
     public void setFieldMappingDocument(FieldMappingDocument fieldMappingDocument) {

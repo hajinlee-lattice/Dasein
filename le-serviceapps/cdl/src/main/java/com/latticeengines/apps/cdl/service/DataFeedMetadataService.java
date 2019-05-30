@@ -106,44 +106,28 @@ public abstract class DataFeedMetadataService {
                 if (CollectionUtils.isNotEmpty(cdlExternalSystem.getCRMIdList())) {
                     List<String> newCRMIdList = new ArrayList<>();
                     cdlExternalSystem.getCRMIdList().forEach(id -> {
-                        if (nameMap.containsKey(id)) {
-                            newCRMIdList.add(nameMap.get(id));
-                        } else {
-                            newCRMIdList.add(id);
-                        }
+                        newCRMIdList.add(nameMap.getOrDefault(id, id));
                     });
                     cdlExternalSystem.setCRMIdList(newCRMIdList);
                 }
                 if (CollectionUtils.isNotEmpty(cdlExternalSystem.getERPIdList())) {
                     List<String> newERPIdList = new ArrayList<>();
                     cdlExternalSystem.getERPIdList().forEach(id -> {
-                        if (nameMap.containsKey(id)) {
-                            newERPIdList.add(nameMap.get(id));
-                        } else {
-                            newERPIdList.add(id);
-                        }
+                        newERPIdList.add(nameMap.getOrDefault(id, id));
                     });
                     cdlExternalSystem.setERPIdList(newERPIdList);
                 }
                 if (CollectionUtils.isNotEmpty(cdlExternalSystem.getMAPIdList())) {
                     List<String> newMAPIdList = new ArrayList<>();
                     cdlExternalSystem.getMAPIdList().forEach(id -> {
-                        if (nameMap.containsKey(id)) {
-                            newMAPIdList.add(nameMap.get(id));
-                        } else {
-                            newMAPIdList.add(id);
-                        }
+                        newMAPIdList.add(nameMap.getOrDefault(id, id));
                     });
                     cdlExternalSystem.setMAPIdList(newMAPIdList);
                 }
                 if (CollectionUtils.isNotEmpty(cdlExternalSystem.getOtherIdList())) {
                     List<String> newOtherIdList = new ArrayList<>();
                     cdlExternalSystem.getOtherIdList().forEach(id -> {
-                        if (nameMap.containsKey(id)) {
-                            newOtherIdList.add(nameMap.get(id));
-                        } else {
-                            newOtherIdList.add(id);
-                        }
+                        newOtherIdList.add(nameMap.getOrDefault(id, id));
                     });
                     cdlExternalSystem.setOtherIdList(newOtherIdList);
                 }

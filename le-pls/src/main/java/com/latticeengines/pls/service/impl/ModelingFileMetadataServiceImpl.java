@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -223,7 +222,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
-        resolveMetadata(sourceFile, fieldMappingDocument, table, false, null);
+        resolveMetadata(sourceFile, fieldMappingDocument, table, false, null, null);
     }
 
     @Override
@@ -244,7 +243,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
-        resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable);
+        resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
     }
 
     @Override
@@ -259,74 +258,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             fieldMapping.setUserField(StringEscapeUtils.unescapeHtml4(fieldMapping.getUserField()));
-        }
-    }
-
-    private void setCDLExternalSystems(FieldMappingDocument fieldMappingDocument, BusinessEntity entity) {
-        if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
-                || fieldMappingDocument.getFieldMappings().size() == 0) {
-            return;
-        }
-        List<String> crmIds = new ArrayList<>();
-        List<String> mapIds = new ArrayList<>();
-        List<String> erpIds = new ArrayList<>();
-        List<String> otherIds = new ArrayList<>();
-        List<Pair<String, String>> idMappings = new ArrayList<>();
-        boolean hasExternalId = false;
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getCdlExternalSystemType() != null
-                    && StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
-                String displayName = fieldMapping.getMappedField();
-                if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
-                    fieldMapping.setMappedField(fieldMapping.getMappedField() + "_ID");
-                }
-                fieldMapping.setMappedField(
-                        ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
-                String attrName = fieldMapping.getMappedField();
-                idMappings.add(Pair.of(attrName, displayName));
-                switch (fieldMapping.getCdlExternalSystemType()) {
-                case CRM:
-                    crmIds.add(fieldMapping.getMappedField());
-                    hasExternalId = true;
-                    break;
-                case MAP:
-                    mapIds.add(fieldMapping.getMappedField());
-                    hasExternalId = true;
-                    break;
-                case ERP:
-                    erpIds.add(fieldMapping.getMappedField());
-                    hasExternalId = true;
-                    break;
-                case OTHER:
-                    otherIds.add(fieldMapping.getMappedField());
-                    hasExternalId = true;
-                    break;
-                }
-            }
-        }
-        if (hasExternalId) {
-            CDLExternalSystem originalSystem = cdlExternalSystemProxy
-                    .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity.name());
-            if (originalSystem == null) {
-                CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
-                cdlExternalSystem.setCRMIdList(crmIds);
-                cdlExternalSystem.setMAPIdList(mapIds);
-                cdlExternalSystem.setERPIdList(erpIds);
-                cdlExternalSystem.setOtherIdList(otherIds);
-                cdlExternalSystem.setIdMapping(idMappings);
-                cdlExternalSystem.setEntity(entity);
-                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-                        cdlExternalSystem);
-            } else {
-                originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), crmIds));
-                originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), mapIds));
-                originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), erpIds));
-                originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), otherIds));
-                originalSystem.addIdMapping(idMappings);
-                originalSystem.setEntity(originalSystem.getEntity());
-                cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
-                        originalSystem);
-            }
         }
     }
 
@@ -352,10 +283,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
-        }
-        // 1.set external system column name
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
-            setCDLExternalSystems(fieldMappingDocument, entity);
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
@@ -402,7 +329,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
-            boolean cdlResolve, Table schemaTable) {
+            boolean cdlResolve, Table schemaTable, BusinessEntity entity) {
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, cdlResolve, schemaTable);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
@@ -423,6 +350,42 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
+        // Set external system column name
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            setCDLExternalSystem(resolver.getExternalSystem(), entity);
+        }
+    }
+
+    private void setCDLExternalSystem(CDLExternalSystem newExternalSystem, BusinessEntity entity) {
+        if (newExternalSystem == null ||
+                (CollectionUtils.isEmpty(newExternalSystem.getCRMIdList())
+                        && CollectionUtils.isEmpty(newExternalSystem.getERPIdList())
+                        && CollectionUtils.isEmpty(newExternalSystem.getMAPIdList())
+                        && CollectionUtils.isEmpty(newExternalSystem.getOtherIdList()))) {
+            return;
+        }
+        CDLExternalSystem originalSystem = cdlExternalSystemProxy
+                .getCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), entity.name());
+        if (originalSystem == null) {
+            CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
+            cdlExternalSystem.setCRMIdList(newExternalSystem.getCRMIdList());
+            cdlExternalSystem.setMAPIdList(newExternalSystem.getMAPIdList());
+            cdlExternalSystem.setERPIdList(newExternalSystem.getERPIdList());
+            cdlExternalSystem.setOtherIdList(newExternalSystem.getOtherIdList());
+            cdlExternalSystem.setIdMapping(newExternalSystem.getIdMapping());
+            cdlExternalSystem.setEntity(entity);
+            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                    cdlExternalSystem);
+        } else {
+            originalSystem.setCRMIdList(mergeList(originalSystem.getCRMIdList(), newExternalSystem.getCRMIdList()));
+            originalSystem.setMAPIdList(mergeList(originalSystem.getMAPIdList(), newExternalSystem.getMAPIdList()));
+            originalSystem.setERPIdList(mergeList(originalSystem.getERPIdList(), newExternalSystem.getERPIdList()));
+            originalSystem.setOtherIdList(mergeList(originalSystem.getOtherIdList(), newExternalSystem.getOtherIdList()));
+            originalSystem.addIdMapping(newExternalSystem.getIdMappingList());
+            originalSystem.setEntity(originalSystem.getEntity());
+            cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                    originalSystem);
+        }
     }
 
     @Override

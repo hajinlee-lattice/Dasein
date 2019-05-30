@@ -87,24 +87,27 @@ public class ContactFileValidationService
                                 for (GenericRecord record : reader) {
                                     boolean rowError = false;
                                     String id = getFieldValue(record, InterfaceName.ContactId.name());
+                                    String accountId = getFieldValue(record, InterfaceName.AccountId.name());
                                     if (StringUtils.isBlank(id)) {
                                         id = getFieldValue(record, InterfaceName.Id.name());
-                                    } else {
-                                        for (Character c : invalidChars) {
-                                            if (id.indexOf(c) != -1) {
-                                                String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                                String message = String.format(
-                                                        "Invalid contact id is found due to %s in %s.", c.toString(),
-                                                        id);
-                                                csvFilePrinter.printRecord(lineId, "", message);
-                                                rowError = true;
-                                                fileError = true;
-                                                errorInPath++;
-                                                errorLine++;
-                                                break;
-                                            }
+                                    }
+                                    // account id and contact id is non-null
+                                    for (Character c : invalidChars) {
+                                        if ((StringUtils.isNotBlank(id) && id.indexOf(c) != -1)
+                                                || (StringUtils.isNotBlank(accountId) && accountId.indexOf(c) != -1)) {
+                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                            String message = String.format(
+                                                    "Invalid account id or contact id is found due to %s in %s.",
+                                                    c.toString(), id);
+                                            csvFilePrinter.printRecord(lineId, "", message);
+                                            rowError = true;
+                                            fileError = true;
+                                            errorInPath++;
+                                            errorLine++;
+                                            break;
                                         }
                                     }
+
                                     String email = getFieldValue(record, InterfaceName.Email.name());
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
                                     String lastName = getFieldValue(record, InterfaceName.LastName.name());
