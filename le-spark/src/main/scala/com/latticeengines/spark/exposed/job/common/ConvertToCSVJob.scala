@@ -68,6 +68,8 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     var writer = df.coalesce(1).write
       .format("csv")
       .option("header", value = true)
+      .option("quote", "\"")
+      .option("escape", "\"")
     if (compress) {
       writer = writer.option("compression", "gzip")
     }
