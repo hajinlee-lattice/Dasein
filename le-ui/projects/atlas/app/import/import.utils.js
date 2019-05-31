@@ -147,21 +147,18 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             if(!newMapped){
                 return;
             }
+            fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+            fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+            fieldMapped.timezone = newTypeObj.timezone;
             let toLattice = fieldMapped.mappedToLatticeField;
             if(toLattice){
                 let field = ImportUtils.getFieldFromLaticeSchema(entity, newMapped);
                 fieldMapped.fieldType = field.fieldType;
-                fieldMapped.dateFormatString = newTypeObj.dateFormatString;
-                fieldMapped.timeFormatString = newTypeObj.timeFormatString;
-                fieldMapped.timezone = newTypeObj.timezone;
             }else{
                 let redux = $state.get('home.import').data.redux;
                 let field = redux.store.fieldMappings.map[newMapped]
                 if(field){
                     fieldMapped.fieldType = field.fieldType;
-                    fieldMapped.dateFormatString = newTypeObj.dateFormatString;
-                    fieldMapped.timeFormatString = newTypeObj.timeFormatString;
-                    fieldMapped.timezone = newTypeObj.timezone;
                 }
             }
         }
