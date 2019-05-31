@@ -3,14 +3,17 @@ package com.latticeengines.domain.exposed.metadata.standardschemas;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Amount;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRevenue;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AnnualRevenueCurrency;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.City;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Cost;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CreatedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomTrxField;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerParentAccountID;
@@ -29,11 +32,17 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadStatu
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Longitude;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfEmployees;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OrderId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PostalCode;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Quantity;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SpendAnalyticsSegment;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Title;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionTime;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Type;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 
@@ -67,7 +76,7 @@ public class SchemaRepositoryUnitTestNG {
             Address_Street_1, Address_Street_2);
 
     private static final List<InterfaceName> ACCOUNT_ENTITY_MATCH_ATTRS = ACCOUNT_ATTRS.stream()
-            .map(attr -> ENTITY_MATCH_ATTR_MAP.containsKey(attr) ? ENTITY_MATCH_ATTR_MAP.get(attr) : attr)
+            .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr))
             .collect(Collectors.toList());
 
     private static final List<InterfaceName> CONTACT_ATTRS = Arrays.asList(ContactId, ContactName, FirstName, LastName,
@@ -76,7 +85,15 @@ public class SchemaRepositoryUnitTestNG {
             City, State, Country, PostalCode, PhoneNumber, DUNS);
 
     private static final List<InterfaceName> CONTACT_ENTITY_MATCH_ATTRS = CONTACT_ATTRS.stream()
-            .map(attr -> ENTITY_MATCH_ATTR_MAP.containsKey(attr) ? ENTITY_MATCH_ATTR_MAP.get(attr) : attr)
+            .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr))
+            .collect(Collectors.toList());
+
+    private static final List<InterfaceName> TRANSACTION_ATTRS = Arrays.asList(TransactionId, AccountId, ContactId,
+            ProductId, OrderId, LastModifiedDate, Quantity, Amount, Cost, TransactionTime, TransactionType,
+            CustomTrxField);
+
+    private static final List<InterfaceName> TRANSACTION_ENTITY_MATCH_ATTRS = TRANSACTION_ATTRS.stream() //
+            .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr)) //
             .collect(Collectors.toList());
 
     /**
@@ -93,9 +110,7 @@ public class SchemaRepositoryUnitTestNG {
         Table table = sr.getSchema(schema, false, false, enableEntityMatch);
         String[] attrArray = table.getAttributeNames();
         Arrays.sort(attrArray);
-        String[] expectedAttrArray = expectedAttrs.stream().map(attr -> attr.name()).collect(Collectors.toList())
-                .toArray(new String[0]);
-        Arrays.sort(expectedAttrArray);
+        String[] expectedAttrArray = expectedAttrs.stream().map(Enum::name).sorted().toArray(String[]::new);
         Assert.assertEquals(attrArray, expectedAttrArray);
         if (expectedPrimaryKey == null) {
             Assert.assertNull(table.getPrimaryKey());
@@ -150,6 +165,8 @@ public class SchemaRepositoryUnitTestNG {
                 { SchemaInterpretation.Account, false, ACCOUNT_ATTRS, AccountId }, //
                 { SchemaInterpretation.Contact, true, CONTACT_ENTITY_MATCH_ATTRS, null }, //
                 { SchemaInterpretation.Contact, false, CONTACT_ATTRS, ContactId }, //
+                { SchemaInterpretation.Transaction, true, TRANSACTION_ENTITY_MATCH_ATTRS, null }, //
+                { SchemaInterpretation.Transaction, false, TRANSACTION_ATTRS, null }, //
         };
     }
 }

@@ -211,6 +211,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder apsImputationEnabled(boolean apsImputationEnabled) {
+            apsGenerationStepConfiguration.setApsImputationEnabled(apsImputationEnabled);
+            return this;
+        }
+
+        
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);

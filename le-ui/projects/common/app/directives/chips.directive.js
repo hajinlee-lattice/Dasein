@@ -24,6 +24,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 altlabel: '@',
                 context: '=',
                 name: '@',
+                header: '<',
+                nosort: '<',
                 sortid: '@',
                 sortreverse: '@',
                 showloading: '='
@@ -40,7 +42,10 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 scope.blur = true;
                 scope.showQueryList = false;
                 scope.id = scope.id || scope.displayname;
-                scope.sortreverse = scope.sortreverse || 'false';
+                scope.showHeader = scope.header != undefined;
+                scope.header = scope.header || [];
+                scope.nosort = scope.nosort || false;
+                scope.sortreverse = scope.sortreverse || false;
                 scope.displayName = scope.displayname || scope.id;
                 scope.sortId = scope.sortid || scope.id;
                 scope.queryScope = scope.queryscope || scope.displayname;
@@ -50,13 +55,24 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 scope.customVals = scope.allowcustomvalues ? scope.allowcustomvalues : false;
                 scope.removeRow = !scope.enableremoverow ? false : scope.enableremoverow;
 
+                scope.sort = function (sortid) {
+                    if (sortid == scope.sortId) {
+                        scope.sortreverse = !scope.sortreverse;
+                    }
+
+                    scope.sortId = sortid;
+                    scope.queryItems = scope.queryItems.sort(scope.sortList);
+
+                    console.log('[chips] sorting', scope.sortId, !scope.nosort)
+                    if (scope.sortreverse) {
+                        scope.queryItems.reverse();
+                    }
+                }
+
                 scope.init = function () {
-                    console.log('[chips] init', scope.queryItems, scope.sortdata)
-                    if (scope.queryItems && scope.queryItems.length > 0 && scope.sortdata !== false) {
-                        scope.queryItems = scope.queryItems.sort(scope.sortList);
-                        if (scope.sortreverse) {
-                            scope.queryItems.reverse();
-                        }
+                    console.log('[chips] init', scope);
+                    if (scope.queryItems && scope.queryItems.length > 0 && !scope.nosort) {
+                        scope.sort(scope.sortId);
                     }
 
                     if (scope.initialvalue != undefined || scope.initialvalue != null) {

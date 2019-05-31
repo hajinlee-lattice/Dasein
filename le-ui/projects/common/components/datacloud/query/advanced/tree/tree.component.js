@@ -154,9 +154,9 @@ angular
                     $event.preventDefault();
                     $event.stopPropagation();
 
-                    $timeout(function () {
-                        vm.records_updating = false;
-                    }, 250);
+                    // $timeout(function () {
+                    //     vm.records_updating = false;
+                    // }, 250);
                     console.log('[tree] setBucket()', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction)
                 }
 
