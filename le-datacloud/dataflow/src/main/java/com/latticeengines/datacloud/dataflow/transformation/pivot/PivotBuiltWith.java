@@ -24,7 +24,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithRecentTec
 import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithTopAttrBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotBuiltWithConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -33,7 +33,7 @@ import cascading.operation.Buffer;
 import cascading.tuple.Fields;
 
 @Component(PivotBuiltWith.BEAN_NAME)
-public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {
+public class PivotBuiltWith extends ConfigurableFlowBase<PivotTransformerConfig> {
 
     public static final String BEAN_NAME = "pivotBuiltWith";
 
@@ -47,7 +47,7 @@ public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return PivotBuiltWithConfig.class;
+        return PivotTransformerConfig.class;
     }
 
     @Override
@@ -57,12 +57,12 @@ public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {
 
     @Override
     public String getTransformerName() {
-        return "pivotBuiltWithTransformer";
+        return "pivotTransformer";
     }
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        PivotBuiltWithConfig config = getTransformerConfig(parameters);
+        PivotTransformerConfig config = getTransformerConfig(parameters);
         domainField = config.getJoinFields()[0];
 
         Node source = addSource(parameters.getBaseTables().get(0));
@@ -70,8 +70,8 @@ public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {
         sourceMap.put(parameters.getBaseTables().get(0), source);
 
         Node oneMonth = source.filter(
-                "Technology_Last_Detected + " + ONE_MONTH + "L >= LE_Last_Upload_Date",
-                new FieldList("Technology_Last_Detected", "LE_Last_Upload_Date"));
+                "Technology_Last_Detected + " + ONE_MONTH + "L >= CollectedAt",
+                new FieldList("Technology_Last_Detected", "CollectedAt"));
         oneMonth = oneMonth.renamePipe("one-month");
         sourceMap.put(parameters.getBaseTables().get(0) + "_LastMonth", oneMonth);
 
@@ -99,8 +99,8 @@ public class PivotBuiltWith extends ConfigurableFlowBase<PivotBuiltWithConfig> {
 
     private Node pivotRecentTechTag(Node source) {
         Node threeMonth = source.filter(
-                "Technology_First_Detected + " + ONE_MONTH * 3 + "L >= LE_Last_Upload_Date",
-                new FieldList("Technology_First_Detected", "LE_Last_Upload_Date"));
+                "Technology_First_Detected + " + ONE_MONTH * 3 + "L >= CollectedAt",
+                new FieldList("Technology_First_Detected", "CollectedAt"));
         threeMonth = threeMonth.renamePipe("recent-tech");
 
         Buffer<?> buffer = new BuiltWithRecentTechBuffer(

@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotBuiltWithConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotTransformerConfig;
 
 public class PivotBuiltWithTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
@@ -26,7 +26,7 @@ public class PivotBuiltWithTestNG extends DataCloudDataFlowFunctionalTestNGBase 
     }
 
     private TransformationFlowParameters prepareInput() {
-        PivotBuiltWithConfig config = new PivotBuiltWithConfig();
+        PivotTransformerConfig config = new PivotTransformerConfig();
         TransformationFlowParameters params = new TransformationFlowParameters();
         params.setConfJson(JsonUtils.serialize(config));
         params.setBaseTables(Collections.singletonList("ConsolidatedBuiltWith"));
