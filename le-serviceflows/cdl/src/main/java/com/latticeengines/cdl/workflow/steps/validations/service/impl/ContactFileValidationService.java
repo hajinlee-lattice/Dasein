@@ -97,8 +97,8 @@ public class ContactFileValidationService
                                                 || (StringUtils.isNotBlank(accountId) && accountId.indexOf(c) != -1)) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             String message = String.format(
-                                                    "Invalid account id or contact id is found due to %s in %s.",
-                                                    c.toString(), id);
+                                                    "Invalid account id is found due to %s in %s or invalid contact id is found due to %s in %s.",
+                                                    c.toString(), accountId, c.toString(), id);
                                             csvFilePrinter.printRecord(lineId, "", message);
                                             rowError = true;
                                             fileError = true;
