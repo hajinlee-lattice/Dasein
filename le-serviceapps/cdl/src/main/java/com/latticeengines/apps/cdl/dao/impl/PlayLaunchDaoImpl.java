@@ -254,13 +254,20 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         String totalAccountsSuppressed = "totalAccountsSuppressed";
         String totalAccountsErrored = "totalAccountsErrored";
         String totalContactsLaunched = "totalContactsLaunched";
+        String totalContactsSelected = "totalContactsSelected";
+        String totalContactsSuppressed = "totalContactsSuppressed";
+        String totalContactsErrored = "totalContactsErrored";
 
         String queryStr = "SELECT new map " + "( " //
                 + " SUM(COALESCE(accountsSelected)) AS " + totalAccountsSelected + ", " //
                 + " SUM(COALESCE(accountsLaunched)) AS " + totalAccountsLaunched + ", " //
                 + " SUM(COALESCE(accountsSuppressed)) AS " + totalAccountsSuppressed + ", " //
                 + " SUM(COALESCE(accountsErrored)) AS " + totalAccountsErrored + ", " //
-                + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
+                + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + ", " //
+                + " SUM(COALESCE(contactsSelected)) AS " + totalContactsSelected + ", " //
+                + " SUM(COALESCE(contactsSuppressed)) AS " + totalContactsSuppressed + ", " //
+                + " SUM(COALESCE(contactsErrored)) AS " + totalContactsErrored + " " //
+                + ") ";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
                 session, entityClz, queryStr, false, orgId, externalSysType);
@@ -269,9 +276,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         Stats totalCounts = new Stats();
         Map<String, Object> res = queryResult.get(0);
         totalCounts.setSelectedTargets(getVal(res, totalAccountsSelected));
+        totalCounts.setSelectedContacts(getVal(res, totalContactsSelected));
         totalCounts.setRecommendationsLaunched(getVal(res, totalAccountsLaunched));
-        totalCounts.setSuppressed(getVal(res, totalAccountsSuppressed));
+        totalCounts.setAccountsSuppressed(getVal(res, totalAccountsSuppressed));
         totalCounts.setAccountErrors(getVal(res, totalAccountsErrored));
+        totalCounts.setContactsSuppressed(getVal(res, totalContactsSuppressed));
+        totalCounts.setContactErrors(getVal(res, totalContactsErrored));
         totalCounts.setContactsWithinRecommendations(getVal(res, totalContactsLaunched));
 
         return totalCounts;

@@ -43,11 +43,13 @@ public class LaunchSummary {
     public LaunchSummary(PlayLaunch launch) {
         Stats stats = new Stats();
         stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
+        stats.setSelectedContacts(getCount(launch.getContactsSelected()));
         stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
         stats.setAccountErrors(getCount(launch.getAccountsErrored()));
         stats.setContactErrors(getCount(launch.getContactsErrored()));
         stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
-        stats.setSuppressed(getCount(launch.getAccountsSuppressed()));
+        stats.setAccountsSuppressed(getCount(launch.getAccountsSuppressed()));
+        stats.setContactsSuppressed(getCount(launch.getContactsSuppressed()));
         stats.setAccountsDuplicated(getCount(launch.getAccountsDuplicated()));
         stats.setContactsDuplicated(getCount(launch.getContactsDuplicated()));
 

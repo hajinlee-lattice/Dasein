@@ -3,9 +3,10 @@ import { MARKETO, SALESFORCE, ELOQUA, AWS_S3 } from 'atlas/connectors/connectors
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
     $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  BrowserStorageUtility,
-    ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
+    ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData, FeatureFlagService
 ) {
-    var vm = this;
+    var vm = this,
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         stored: PlaybookWizardStore.settings_form,
@@ -32,7 +33,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 items: FilterData
             }
         },
-        systemMap: {}
+        systemMap: {},
+        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION)
     });
 
     vm.init = function() {
@@ -241,6 +243,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
         if (filePath) {
             return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
+        } else {
+            return '';
         }
     }
 
@@ -265,8 +269,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
         switch (destinationSysName) {
             case MARKETO:
-            case AWS_S3:
                 return false;
+            case AWS_S3:
             case SALESFORCE:
             case ELOQUA:
             default: 

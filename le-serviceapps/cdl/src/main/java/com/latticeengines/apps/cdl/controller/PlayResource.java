@@ -445,12 +445,16 @@ public class PlayResource {
         playLaunch.setTableName(createTable(playLaunch));
 
         Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+        Long totalAvailableContacts = play.getTargetSegment().getContacts();
 
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
         playLaunch.setAccountsSuppressed(0L);
         playLaunch.setAccountsErrored(0L);
         playLaunch.setAccountsLaunched(0L);
+        playLaunch.setContactsSelected(totalAvailableContacts);
         playLaunch.setContactsLaunched(0L);
+        playLaunch.setContactsSuppressed(0L);
+        playLaunch.setContactsErrored(0L);
         return playLaunchService.update(playLaunch);
     }
 
