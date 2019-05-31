@@ -1,3 +1,4 @@
+import  { underscore } from 'common/vendor.index';
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
@@ -130,11 +131,6 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     }
 
     function updateFieldDate(fieldMapped, newTypeObj, entity) {
-        // console.log('UPDATING ', fieldMapped, 'NEW TYPE ==> ',newTypeObj);
-        // let redux = $state.get('home.import').data.redux;
-
-                // console.log('REDUX AAA', data);
-        // console.log('RX SERVICE ', ReduxService);
         if(newTypeObj.type){
             if(newTypeObj.type !== 'DATE'){
                 delete fieldMapped.dateFormatString;
@@ -167,21 +163,8 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                     fieldMapped.timeFormatString = newTypeObj.timeFormatString;
                     fieldMapped.timezone = newTypeObj.timezone;
                 }
-                // console.log('REDUX AAA', redux);
-                // console.log(ReduxService);
-                
             }
         }
-        // console.log(fieldMapped, newTypeObj, entity);
-        // if(fieldMapped.fieldType !== 'DATE'){
-        //     delete fieldMapped.dateFormatString;
-        //     delete fieldMapped.timeFormatString;
-        //     delete fieldMapped.timezone;
-        // }else{
-            // fieldMapped.dateFormatString = newTypeObj.dateFormatString;
-            // fieldMapped.timeFormatString = newTypeObj.timeFormatString;
-            // fieldMapped.timezone = newTypeObj.timezone;
-        // }
     }
     
     function removeUniqueIdsMapped( entity, fieldsMapped){
@@ -219,21 +202,37 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
     }
     
-    function updateUniqueIdMapping(uniqueIdsList, obj){
-        uniqueIdsList.forEach(uniqueId => {
-            if(uniqueId.mappedField == obj.mappedField){
-                uniqueId.userField = obj.userField;
-                return;
-            }
-        });
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap){
+        if(uniqueId && fieldName){
+            Object.keys(fieldsMapping).forEach(index => {
+                let field = fieldsMapping[index];
+                if(field.userField == fieldName){
+                    switch(unmap){
+                        case true:
+                            if(field.mappedField == uniqueId){
+                                field.mappedToLatticeField = false;
+                                delete field.mappedField;
+                            }
+                            break;
+                        case false:
+                            if(!field.fieldMapped){
+                                field.mappedToLatticeField = true;
+                                field.mappedField = uniqueId;
+                            }
+                            break;
+                    }
+                }
+            });
+        }
     }
-    function updateUniqueIdsMapping(entity, savedObj, uniquiIdslist){
+    function updateUniqueIdsMapping(entity, fieldsMapping, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
-            if(ImportUtils.uniqueIds[entity] && ImportUtils.uniqueIds[entity][savedObj[index].mappedField]){
-                updateUniqueIdMapping(uniquiIdslist, savedObj[index]);
+            let saved = savedObj[index];
+            if(saved.originalUserField && saved.append != true){
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false);
             }
         });
-
     }
     function isUniqueIdAlreadyAdded(uniqueIdsList, mappedField, userField){
         let already = false;
@@ -261,13 +260,12 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);
+            updateUniqueIdsMapping(entity, fieldsMapping, savedObj);
             let copyUniqueIds = removeUniqueIdsMapped(entity, fieldsMapping);
-            updateUniqueIdsMapping(entity,savedObj,copyUniqueIds);
             keysSaved.forEach(function(keySaved){
                 setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
             let ret =  fieldsMapping.concat(copyUniqueIds);
-            // console.log(ret);
             return ret;
         }else{
             return fieldsMapping;
