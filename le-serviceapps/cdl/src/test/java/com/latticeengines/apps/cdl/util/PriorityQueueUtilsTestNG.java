@@ -53,6 +53,8 @@ public class PriorityQueueUtilsTestNG {
         Assert.assertEquals(PriorityQueueUtils.getLowPriorityQueueSize(), 4);
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant6");
         Assert.assertEquals(PriorityQueueUtils.pollFirstFromLowPriority(), "testTenant66");
+        PriorityQueueUtils.removeActivityFromQueue("testTenant5");
+        Assert.assertEquals(PriorityQueueUtils.getHighPriorityQueueSize(), 2);
     }
 
     private List<ActivityObject> dataProvider(TenantType type) {
