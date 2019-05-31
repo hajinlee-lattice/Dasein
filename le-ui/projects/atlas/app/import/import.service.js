@@ -412,7 +412,6 @@ angular.module('lp.import')
                             _newItem = angular.copy(newItem);
 
                             var __newItem = angular.extend(_newItem, item);
-
                             append.push(__newItem);
                         } 
                         // This part is done in this.saveDocumentFields that is called as soon as the next button is pressed in the wizard
@@ -445,8 +444,18 @@ angular.module('lp.import')
                 segmentedTmpFieldMappings['appended'] = append;
             }
 
+            
             if(opts.append) {
-                tmpFieldMappings = tmpFieldMappings.concat(append); // append
+                let copyAppend = [];
+                Object.keys(append).forEach( index => {
+                    let userFieldName = append[index].userField;
+                    let mappedFieldName = append[index].mappedField;
+                    let found = underscore.findWhere(tmpFieldMappings, {userField: userFieldName, mappedField: mappedFieldName });
+                    if(!found){
+                        copyAppend.push(append[index]);
+                    }
+                });
+                tmpFieldMappings = tmpFieldMappings.concat(copyAppend); // append
             }
 
             if(opts.save) {
