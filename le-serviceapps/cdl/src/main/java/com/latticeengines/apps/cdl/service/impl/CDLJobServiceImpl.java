@@ -408,7 +408,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<>();
 
         List<ActivityObject> activityObjects = new ArrayList<>();
-        Map<String, JobParameter> jobParameterList = new HashMap<>();
+        Map<String, JobParameter> jobParameterMap = new HashMap<>();
 
         for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
@@ -425,7 +425,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 jobParameter.setDataFeed(dataFeed);
                 jobParameter.setCdlJobDetail(cdlJobDetail);
                 jobParameter.setActions(actions);
-                jobParameterList.put(tenant.getName(), jobParameter);
+                jobParameterMap.put(tenant.getName(), jobParameter);
 
                 ActivityObject activityObject = new ActivityObject();
                 activityObject.setTenant(tenant);
@@ -554,10 +554,10 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info(String.format("Need to schedule low priority tenant is : %s.", needScheduleTenantFromLowPriority));
 
-        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority) && jobParameterList.containsKey(needScheduleTenantFromHighPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority) && jobParameterMap.containsKey(needScheduleTenantFromHighPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < maximumHighPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < minimumHighPriorityScheduledJobCount) {
-                JobParameter jobParameter =jobParameterList.get(needScheduleTenantFromHighPriority);
+                JobParameter jobParameter =jobParameterMap.get(needScheduleTenantFromHighPriority);
                 if (jobParameter.getDataFeed() != null && submitProcessAnalyzeJob(jobParameter.getDataFeed(),
                         jobParameter.getCdlJobDetail(), true,
                         getImportActions(jobParameter.getActions()))) {
@@ -566,10 +566,10 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
-        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority) && jobParameterList.containsKey(needScheduleTenantFromLowPriority)) {
+        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority) && jobParameterMap.containsKey(needScheduleTenantFromLowPriority)) {
             if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < maximumLowPriorityScheduledJobCount) ||
                     runningPAJobsCount >= concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < minimumLowPriorityScheduledJobCount) {
-                JobParameter jobParameter =jobParameterList.get(needScheduleTenantFromLowPriority);
+                JobParameter jobParameter =jobParameterMap.get(needScheduleTenantFromLowPriority);
                 if (jobParameter.getDataFeed() != null && submitProcessAnalyzeJob(jobParameter.getDataFeed(),
                         jobParameter.getCdlJobDetail(),
                         false,
@@ -1059,11 +1059,13 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     static class JobProperty {
-        @JsonProperty("applicationid")
+        @JsonProperty
         private String applicationId;
-        @JsonProperty("jobstatus")
+
+        @JsonProperty
         private JobStatus jobStatus;
-        @JsonProperty("starttime")
+
+        @JsonProperty
         private long startTime;
 
         public String getApplicationId() {
@@ -1097,11 +1099,13 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     class JobParameter {
-        @JsonProperty("datafeed")
+        @JsonProperty
         private SimpleDataFeed dataFeed;
-        @JsonProperty("cdljobdetail")
+
+        @JsonProperty
         private CDLJobDetail cdlJobDetail;
-        @JsonProperty("actions")
+
+        @JsonProperty
         private List<Action> actions;
 
         public SimpleDataFeed getDataFeed() {

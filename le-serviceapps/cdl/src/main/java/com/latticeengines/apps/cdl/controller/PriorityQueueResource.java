@@ -38,7 +38,7 @@ public class PriorityQueueResource {
         return PriorityQueueUtils.getAllMemberWithSortFromLowPriorityQueue();
     }
 
-    @RequestMapping(value = "/removeActivity", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/removeActivity", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "remove Activity From Queue")
     public void removeActivityFromQueue(@RequestParam String tenantName) {
         PriorityQueueUtils.removeActivityFromQueue(tenantName);
