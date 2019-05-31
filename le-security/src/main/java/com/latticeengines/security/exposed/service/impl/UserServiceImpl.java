@@ -486,7 +486,12 @@ public class UserServiceImpl implements UserService {
             result.setErrMsg("Not a valid email address");
             return result;
         }
-
+        long currentTime = System.currentTimeMillis();
+        if (newUser.getExpirationDate() != null && newUser.getExpirationDate() <= currentTime) {
+            result.setValid(false);
+            result.setErrMsg("Not a valid expire after");
+            return result;
+        }
         if (oldUser != null) {
             result.setValid(false);
             if (!inTenant(tenantId, oldUser.getUsername())) {
