@@ -700,16 +700,11 @@ public class AvroUtils {
 
     public static Schema overwriteFields(Schema schema, Map<String, Schema.Field> fields) {
         List<Schema.Field> newFields = schema.getFields().stream() //
-                .map(field -> {
-                    Schema.Field srcField = fields.getOrDefault(field.name(), field);
-                    Schema.Field newField = new Schema.Field( //
-                            field.name(), //
-                            srcField.schema(), //
-                            srcField.doc(), //
-                            srcField.defaultVal() //
-                    );
-                    srcField.getObjectProps().forEach(newField::addProp);
-                    return newField;
+                .peek(field -> {
+                    if (fields.containsKey(field.name())) {
+                        Schema.Field srcField = fields.getOrDefault(field.name(), field);
+                        srcField.getObjectProps().forEach(field::addProp);
+                    }
                 }) //
                 .collect(Collectors.toList());
         return Schema.createRecord(
