@@ -127,6 +127,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "ACCOUNTS_SELECTED")
     private Long accountsSelected;
 
+    @JsonProperty("contactsSelected")
+    @Column(name = "CONTACTS_SELECTED")
+    private Long contactsSelected;
+
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
@@ -138,6 +142,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("accountsSuppressed")
     @Column(name = "ACCOUNTS_SUPPRESSED")
     private Long accountsSuppressed;
+
+    @JsonProperty("contactsSuppressed")
+    @Column(name = "CONTACTS_SUPPRESSED")
+    private Long contactsSuppressed;
 
     @JsonProperty("accountsErrored")
     @Column(name = "ACCOUNTS_ERRORED")
@@ -375,6 +383,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAccountsErrored(Long accountsErrored) {
         this.accountsErrored = accountsErrored;
+    }
+
+    public Long getContactsSelected() {
+        return contactsSelected;
+    }
+
+    public void setContactsSelected(Long contactsSelected) {
+        this.contactsSelected = contactsSelected;
+    }
+
+    public Long getContactsSuppressed() {
+        return contactsSuppressed;
+    }
+
+    public void setContactsSuppressed(Long contactsSuppressed) {
+        this.contactsSuppressed = contactsSuppressed;
     }
 
     public Long getContactsErrored() {

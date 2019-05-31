@@ -52,6 +52,12 @@ class RecommendationCreator {
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
                                 playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
+                                Object accountId = checkAndGet(account, InterfaceName.AccountId.name());
+                                playLaunchContext.getCounter().getContactErrored()
+                                        .addAndGet(accountId != null
+                                                && mapForAccountAndContactList.containsKey(accountId.toString())
+                                                ? mapForAccountAndContactList.get(accountId.toString()).size()
+                                                : 0);
                                 return null;
                             }
                         }) //
