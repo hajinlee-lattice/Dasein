@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -28,7 +28,6 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
 
     private static final int NUM_PATCH_BOOKS = 10;
     private static final PatchBook TEST_PATCH_BOOK = new PatchBook();
-    private List<PatchBook> patchBookWithPagination = new ArrayList<>();
 
     static {
         // init test patch book
@@ -50,7 +49,13 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     private PatchBookEntityMgr patchBookEntityMgr;
 
     @BeforeClass(groups = "functional")
-    public void deleteAllData() {
+    public void deleteAllDataBefore() {
+        // Delete Data if already existing any
+        patchBookEntityMgr.deleteAll();
+    }
+
+    @AfterClass(groups = "functional")
+    public void deleteAllDataAfter() {
         // Delete Data if already existing any
         patchBookEntityMgr.deleteAll();
     }
@@ -213,7 +218,6 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         testPatchBook.setCleanup(cleanup);
         testPatchBook.setHotFix(hotfix);
         patchBookEntityMgr.create(testPatchBook);
-        patchBookWithPagination.add(testPatchBook);
     }
 
     @DataProvider(name = "createPatchBooks")
@@ -252,7 +256,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
      */
     @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfix", dependsOnMethods = {
             "createPatchBooks" })
-    private void testFindByTypeAndHoFixWithPagin(int offset, int limit, String sortByField, int expectedSize,
+    private void testFindByTypeAndHotFixWithPagin(int offset, int limit, String sortByField,
+            int expectedSize,
             Object... fieldAndValues) throws Exception {
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset,
                 limit, sortByField, (PatchBook.Type) fieldAndValues[0],
