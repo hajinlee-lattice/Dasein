@@ -79,7 +79,8 @@ public class PatchResource {
         checkAndSetDataCloudVersion(request);
 
         PatchBook.Type type = getPatchBookType(patchBookType);
-        List<PatchBook> books = load(request.getMode(), type);
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
+                request.getLimit(), request.getSortByField());
         patchBookEntityMgr.findByTypeWithPagination(request.getOffset(), request.getLimit(),
                 request.getSortByField(), type);
         return validate(books, type, request);
@@ -95,7 +96,8 @@ public class PatchResource {
         LookupPatchResponse response = prepareResponse(request);
 
         PatchBook.Type type = PatchBook.Type.Lookup;
-        List<PatchBook> books = load(request.getMode(), type);
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
+                request.getLimit(), request.getSortByField());
 
         // validate
         PatchValidationResponse validationResponse = validate(books, type, request);
@@ -204,13 +206,14 @@ public class PatchResource {
         return response;
     }
 
-    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type) {
+    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset, int limit, String sortByField) {
         // adding pagination parameters
         if (mode == PatchMode.Normal) {
-            return patchBookEntityMgr.findByType(type);
+            return patchBookEntityMgr.findByTypeWithPagination(offset, limit, sortByField, type);
         } else {
             // hot fix mode
-            return patchBookEntityMgr.findByTypeAndHotFix(type, true);
+            return patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, limit, sortByField,
+                    type, true);
         }
     }
 
