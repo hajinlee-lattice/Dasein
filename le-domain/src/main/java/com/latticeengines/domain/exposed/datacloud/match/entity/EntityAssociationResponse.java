@@ -15,17 +15,21 @@ public class EntityAssociationResponse {
     private final String entity;
     private final boolean isNewlyAllocated; // should be false if associatedEntityId is null
     private final String associatedEntityId;
-    private final EntityRawSeed associatedSeed;
+    // snapshot of target seed before update
+    private final EntityRawSeed seedBeforeAssociation;
+    // state of target seed after update
+    private final EntityRawSeed seedAfterAssociation;
     private final List<String> associationErrors;
 
     public EntityAssociationResponse(@NotNull Tenant tenant, @NotNull String entity, String associatedEntityId,
-            EntityRawSeed associatedSeed,
+            EntityRawSeed seedBeforeAssociation, EntityRawSeed seedAfterAssociation,
             boolean isNewlyAllocated) {
-        this(tenant, entity, isNewlyAllocated, associatedEntityId, associatedSeed, Collections.emptyList());
+        this(tenant, entity, isNewlyAllocated, associatedEntityId, seedBeforeAssociation, seedAfterAssociation,
+                Collections.emptyList());
     }
 
     public EntityAssociationResponse(Tenant tenant, String entity, boolean isNewlyAllocated, String associatedEntityId,
-            EntityRawSeed associatedSeed,
+            EntityRawSeed seedBeforeAssociation, EntityRawSeed seedAfterAssociation,
             List<String> associationErrors) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
@@ -34,7 +38,8 @@ public class EntityAssociationResponse {
         this.entity = entity;
         this.isNewlyAllocated = isNewlyAllocated;
         this.associatedEntityId = associatedEntityId;
-        this.associatedSeed = associatedSeed;
+        this.seedBeforeAssociation = seedBeforeAssociation;
+        this.seedAfterAssociation = seedAfterAssociation;
         this.associationErrors = associationErrors;
     }
 
@@ -54,8 +59,12 @@ public class EntityAssociationResponse {
         return associatedEntityId;
     }
 
-    public EntityRawSeed getAssociatedSeed() {
-        return associatedSeed;
+    public EntityRawSeed getSeedBeforeAssociation() {
+        return seedBeforeAssociation;
+    }
+
+    public EntityRawSeed getSeedAfterAssociation() {
+        return seedAfterAssociation;
     }
 
     public List<String> getAssociationErrors() {

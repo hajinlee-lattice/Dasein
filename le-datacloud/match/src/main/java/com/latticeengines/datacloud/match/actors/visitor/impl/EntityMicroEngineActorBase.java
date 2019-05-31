@@ -270,12 +270,13 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             // only save account entity ID as seed attrs in contact match
             return;
         }
-        if (response.getAssociatedSeed() == null || !EntityMatchUtils.hasEmailAccountInfoOnly(traveler)) {
+        if (response.getSeedBeforeAssociation() == null || !EntityMatchUtils.hasEmailAccountInfoOnly(traveler)) {
             // not update if it is not email only
             return;
         }
 
-        String accountEntityIdInSeed = response.getAssociatedSeed().getAttributes().get(InterfaceName.AccountId.name());
+        String accountEntityIdInSeed = response.getSeedBeforeAssociation().getAttributes()
+                .get(InterfaceName.AccountId.name());
         if (StringUtils.isNotBlank(accountEntityIdInSeed)) {
             traveler.getEntityIds().put(BusinessEntity.Account.name(), accountEntityIdInSeed);
         }
