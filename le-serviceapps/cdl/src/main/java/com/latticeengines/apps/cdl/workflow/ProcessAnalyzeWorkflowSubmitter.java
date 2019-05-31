@@ -434,6 +434,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
         }
+        boolean apsImputationEnabled = FeatureFlagUtils.isApsImputationEnabled(flags);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
@@ -467,6 +468,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dynamoSignature(signature) //
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
+                .apsImputationEnabled(apsImputationEnabled) //
                 .entityMatchEnabled(entityMatchEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //

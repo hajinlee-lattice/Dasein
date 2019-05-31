@@ -40,7 +40,6 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkScript;
 
-
 @Component("apsGeneration")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration> {
@@ -100,6 +99,7 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         params.put("AmountKey", "TotalAmount");
         params.put("QuantityKey", "TotalQuantity");
         params.put("ProductTypeKey", "ProductType");
+        params.put("ApsImputationEnabledKey", getConfiguration().isApsImputationEnabled() + "");
         return JsonUtils.convertValue(params, JsonNode.class);
     }
 
