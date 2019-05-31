@@ -115,7 +115,6 @@ public class AttrConfigResource {
     }
 
     // Deprecated before M23
-    @Deprecated
     @PostMapping(value = "/validate")
     @ResponseBody
     @ApiOperation("put cdl attribute config request")

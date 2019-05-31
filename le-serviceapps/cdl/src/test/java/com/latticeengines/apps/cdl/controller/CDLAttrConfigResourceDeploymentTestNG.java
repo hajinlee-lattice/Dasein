@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -18,6 +19,12 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -30,6 +37,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -55,6 +63,9 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
 
     @Inject
     private SegmentProxy segmentProxy;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -232,4 +243,20 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         return ratingEngine;
     }
 
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCleanupAttrConfigForTenant" })
+    public void testAttrLimit() throws Exception {
+        // write HG limit to -100, run PA, will throw exception
+        Path configPathForHG = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(mainCustomerSpace), "PLS")
+                .append(new Path("/DataCloudLicense").append(new Path("/HG")));
+        Camille camille = CamilleEnvironment.getCamille();
+        camille.upsert(configPathForHG, DocumentUtils.toRawDocument(-100), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        log.info("Start processing and analyzing ...");
+        try {
+            cdlProxy.processAnalyze(mainTestTenant.getId(), null);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof RuntimeException);
+            Assert.assertTrue(e.getMessage().endsWith("User activate or enable more allowed attribute."));
+        }
+    }
 }

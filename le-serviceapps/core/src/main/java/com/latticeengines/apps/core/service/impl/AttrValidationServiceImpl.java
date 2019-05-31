@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 
 @Component("attrValidationService")
 public class AttrValidationServiceImpl implements AttrValidationService {
@@ -22,6 +23,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
     private List<String> activationValidatorList = new ArrayList<>();
     private List<String> usageValidatorList = new ArrayList<>();
     private List<String> nameValidatorList = new ArrayList<>();
+    private List<String> limitValidatorList = new ArrayList<>();
     private List<String> allValidatorList = new ArrayList<>();
 
     @PostConstruct
@@ -37,6 +39,8 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         usageValidatorList.add(UsageLimitValidator.VALIDATOR_NAME);
 
         nameValidatorList.add(GenericValidator.VALIDATOR_NAME);
+
+        limitValidatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
 
         allValidatorList.add(GenericValidator.VALIDATOR_NAME);
         allValidatorList.add(LifecycleValidator.VALIDATOR_NAME);
@@ -61,27 +65,35 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         case Name:
             validatorList = nameValidatorList;
             break;
+        case Limit:
+            validatorList = limitValidatorList;
+            break;
         case ALL:
         default:
             validatorList = allValidatorList;
         }
 
+        // this validation object is no related to attr config
+        AttrValidation validation = new AttrValidation();
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
             try (PerformanceTimer timer = new PerformanceTimer()) {
                 if (validator != null) {
-                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs);
+                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs, validation);
                 }
                 String msg = String.format("Validator %s for tenant %s", validatorName,
                         MultiTenantContext.getShortTenantId());
                 timer.setTimerMessage(msg);
             }
         }
-        return generateReport(userProvidedAttrConfigs);
+        return generateReport(userProvidedAttrConfigs, validation);
     }
 
-    private ValidationDetails generateReport(List<AttrConfig> attrConfigs) {
+    private ValidationDetails generateReport(List<AttrConfig> attrConfigs, AttrValidation limitValidation) {
         ValidationDetails details = new ValidationDetails();
+        if (limitValidation.getValidationErrors() != null) {
+            details.addValidation(limitValidation);
+        }
         try (PerformanceTimer timer = new PerformanceTimer()) {
             for (AttrConfig attrConfig : attrConfigs) {
                 if (attrConfig.getImpactWarnings() != null || attrConfig.getValidationErrors() != null) {

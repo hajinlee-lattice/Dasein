@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 
 public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTestNGBase {
@@ -49,7 +50,8 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
         ReflectionTestUtils.setField(cdlImpactValidator, "cdlDependenciesProxy", cdlDependenciesProxy);
         AttrConfig lDCNonPremium = AttrConfigTestUtils.getLDCNonPremiumAttr(Category.INTENT, true);
         lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.TalkingPoint.name(), Boolean.class).setCustomValue(false);
-        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCNonPremium));
+        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCNonPremium),
+                new AttrValidation());
 
         Assert.assertNotNull(lDCNonPremium.getImpactWarnings());
         Assert.assertEquals(
@@ -57,7 +59,7 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
 
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
         lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), Boolean.class).setCustomValue(false);
-        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCPremium));
+        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCPremium), new AttrValidation());
 
         Assert.assertNotNull(lDCPremium.getImpactWarnings());
         Assert.assertEquals(
