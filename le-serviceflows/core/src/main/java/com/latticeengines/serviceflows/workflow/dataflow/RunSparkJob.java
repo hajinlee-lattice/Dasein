@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -24,6 +26,8 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class RunSparkJob<S extends BaseStepConfiguration, //
         C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
+
+    private static final Logger log = LoggerFactory.getLogger(RunSparkJob.class);
 
     @Inject
     protected SparkJobService sparkJobService;

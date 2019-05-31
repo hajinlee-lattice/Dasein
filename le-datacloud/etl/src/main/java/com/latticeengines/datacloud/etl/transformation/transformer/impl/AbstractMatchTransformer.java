@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,7 +9,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -80,21 +77,24 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
             String tableName = table.getName();
             CustomerSpace customerSpace = tableSource.getCustomerSpace();
 
-            Schema schema = null;
-            try {
-                String avscPath = hdfsPathBuilder //
-                        .constructTableSchemaFilePath(tableName, customerSpace, "").toString();
-                InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
-                schema = new Schema.Parser().parse(is);
-            } catch (IOException e) {
-                log.warn("Failed to get schema from avsc", e);
-            }
+            // M29: in PA, the provided table avsc might not be updated.
+            // because we often update table schema after the transformation pipeline
+//            Schema schema = null;
+//            try {
+//                String avscPath = hdfsPathBuilder //
+//                        .constructTableSchemaFilePath(tableName, customerSpace, "").toString();
+//                InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
+//                schema = new Schema.Parser().parse(is);
+//            } catch (IOException e) {
+//                log.warn("Failed to get schema from avsc", e);
+//            }
+//            if (schema == null) {
+//                table = metadataProxy.getTable(customerSpace.toString(), tableName);
+//                schema = TableUtils.createSchema("input", table);
+//            }
 
-            if (schema == null) {
-                table = metadataProxy.getTable(customerSpace.toString(), tableName);
-                schema = TableUtils.createSchema("input", table);
-            }
-
+            table = metadataProxy.getTable(customerSpace.toString(), tableName);
+            Schema schema = TableUtils.createSchema("input", table);
             matchCommand = match(avroDir, schema, workflowDir, transformerConfig);
         }
         if (matchCommand == null) {

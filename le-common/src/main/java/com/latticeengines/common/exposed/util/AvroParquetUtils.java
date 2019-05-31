@@ -3,10 +3,20 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 
 public class AvroParquetUtils {
+
+    public static Schema parseAvroSchema(Configuration configuration, String globPath) {
+        globPath = toParquetOrAvroGlob(configuration, globPath);
+        if (globPath.endsWith(".parquet")) {
+            return ParquetUtils.getAvroSchema(configuration, globPath);
+        } else {
+            return AvroUtils.getSchemaFromGlob(configuration, globPath);
+        }
+    }
 
     public static long countParquetOrAvro(Configuration configuration, String... globPaths) {
         if (isParquet(configuration, globPaths)) {

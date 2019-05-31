@@ -29,6 +29,7 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -281,7 +282,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             Schema.Parser parser = new Schema.Parser();
             try {
                 InputStream is = HdfsUtils.getInputStream(yarnConfiguration, path);
-                return parser.parse(is);
+                Schema parsed = parser.parse(is);
+                log.info("Parsed avsc schema in " + path);
+                return parsed;
             } catch (Exception e) {
                 log.error("Failed to extract schema from avsc file " + path, e);
                 return null;
@@ -307,13 +310,28 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         CustomerSpace customerSpace = tableSource.getCustomerSpace();
         Table table;
         String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
+        String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
         if (expandBucketed) {
-            String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
             table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avroDir, avscPath,
                     tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
         } else {
             table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
                     tableSource.getLastModifiedKey());
+            try {
+                boolean avscExists = HdfsUtils.fileExists(yarnConfiguration, avscPath);
+                if (avscExists) {
+                    List<Extract> extracts = table.getExtracts();
+                    InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
+                    Schema schema = new Schema.Parser().parse(is);
+                    Table table2 = MetadataConverter.getTable(schema, extracts, tableSource.getSinglePrimaryKey(), //
+                            tableSource.getLastModifiedKey(), false);
+                    table.setAttributes(table2.getAttributes());
+                    log.info("Overwrite table schema by provided avsc at " + avscPath);
+                }
+            } catch (IOException e) {
+                log.warn("Failed to overwrite table schema by provided avsc.");
+            }
+
         }
         table.setName(tableName);
         if (count != null) {

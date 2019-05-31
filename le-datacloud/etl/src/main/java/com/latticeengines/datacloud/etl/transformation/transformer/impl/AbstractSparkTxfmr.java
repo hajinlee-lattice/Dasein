@@ -25,9 +25,9 @@ import org.springframework.retry.support.RetryTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
@@ -234,45 +234,30 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         for (int i = 0; i < baseSources.length; i++) {
             Source source = baseSources[i];
             String version = baseSourceVersions.get(i);
+            Schema schema;
             if (source instanceof TableSource) {
                 Table table = hdfsSourceEntityMgr.getTableAtVersion(source, version);
-                Schema schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
-                schemas.add(schema);
+                schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
+                log.info("Created schema from table for " + table.getName());
             } else {
-                Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
-                schemas.add(schema);
+                schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
+                log.info("Read avsc schema for source " + source.getSourceName());
             }
+            schemas.add(schema);
         }
         return schemas;
     }
 
     protected Schema getTargetSchema(HdfsDataUnit result, S sparkJobConfig, T configuration, List<Schema> baseSchemas) {
         if (CollectionUtils.isNotEmpty(baseSchemas)) {
-            String avroGlob = PathUtils.toAvroGlob(result.getPath());
             Map<String, Schema.Field> inputFields = new HashMap<>();
             baseSchemas.forEach(schema -> {
                 if (schema != null) {
                     schema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
                 }
             });
-            Schema resultSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
-            List<Schema.Field> fields = resultSchema.getFields().stream() //
-                    .map(field -> {
-                        Schema.Field srcField = inputFields.getOrDefault(field.name(), field);
-                        return new Schema.Field(
-                                srcField.name(),
-                                srcField.schema(),
-                                srcField.doc(),
-                                srcField.defaultVal()
-                        );
-                    }) //
-                    .collect(Collectors.toList());
-            return Schema.createRecord(
-                    resultSchema.getName(),
-                    resultSchema.getDoc(),
-                    resultSchema.getNamespace(),
-                    false,
-                    fields);
+            Schema resultSchema = AvroParquetUtils.parseAvroSchema(yarnConfiguration, result.getPath());
+            return AvroUtils.overwriteFields(resultSchema, inputFields);
         } else {
             return null;
         }

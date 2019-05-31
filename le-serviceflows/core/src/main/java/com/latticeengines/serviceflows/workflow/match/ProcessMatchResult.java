@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,8 @@ import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, //
         ParseMatchResultJobConfig, ParseMatchResultJob> {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
 
     @Inject
     private MetadataProxy metadataProxy;

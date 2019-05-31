@@ -7,6 +7,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +28,8 @@ import com.latticeengines.domain.exposed.spark.SparkScript;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> extends BaseSparkStep<S> {
+
+    private static final Logger log = LoggerFactory.getLogger(RunSparkScript.class);
 
     @Inject
     private SparkJobService sparkJobService;

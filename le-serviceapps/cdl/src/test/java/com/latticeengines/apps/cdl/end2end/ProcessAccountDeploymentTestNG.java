@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -18,9 +20,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -167,6 +173,23 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Attribute attribute = table.getAttribute("user_Test_Date");
         Assert.assertNotNull(attribute);
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getLastDataRefresh()), JsonUtils.serialize(attribute));
+
+        StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());
+        Assert.assertNotNull(container);
+        Map<String, StatsCube> cubes = container.getStatsCubes();
+        Assert.assertTrue(MapUtils.isNotEmpty(cubes));
+        Assert.assertTrue(cubes.containsKey(BusinessEntity.Account.name()));
+        StatsCube cube = cubes.get(BusinessEntity.Account.name());
+        Map<String, AttributeStats> attrStats = cube.getStatistics();
+        Assert.assertTrue(MapUtils.isNotEmpty(attrStats));
+        Assert.assertTrue(attrStats.containsKey("user_Test_Date"));
+        AttributeStats attrStat = attrStats.get("user_Test_Date");
+        Assert.assertNotNull(attrStat.getBuckets());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(attrStat.getBuckets().getBucketList()));
+        Bucket bucket = attrStat.getBuckets().getBucketList().get(0);
+        Assert.assertTrue("Ever".equals(bucket.getLabel()) || //
+                (bucket.getLabel().contains("Last") && bucket.getLabel().contains("Days")), //
+                JsonUtils.serialize(attrStat));
     }
 
     private void verifyNumAttrsInAccount() {
