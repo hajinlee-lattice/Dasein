@@ -134,9 +134,12 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         }
 
         if (importingEntity.equals(BusinessEntity.Transaction)) {
-            importData(BusinessEntity.Transaction, "Transaction_1_25K.csv", "DefaultSystem_TransactionData");
-            importData(BusinessEntity.Transaction, "Transaction_25K_50K.csv", "DefaultSystem_TransactionData");
-            importData(BusinessEntity.Transaction, "Transaction_46K_60K.csv", "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "EntityMatch_Transaction_1_25K.csv",
+                    "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "EntityMatch_Transaction_25K_50K.csv",
+                    "DefaultSystem_TransactionData");
+            importData(BusinessEntity.Transaction, "EntityMatch_Transaction_46K_60K.csv",
+                    "DefaultSystem_TransactionData");
         }
     }
 

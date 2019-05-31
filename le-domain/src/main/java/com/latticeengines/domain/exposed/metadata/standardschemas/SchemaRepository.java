@@ -156,7 +156,7 @@ public class SchemaRepository {
             table = getProductSchema();
             break;
         case Transaction:
-            table = getTransactionSchema();
+            table = getTransactionSchema(enableEntityMatch);
             break;
         case PeriodTransaction:
             table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false);
@@ -212,7 +212,7 @@ public class SchemaRepository {
             table = getCategorySchema();
             break;
         case Transaction:
-            table = getTransactionSchema();
+            table = getTransactionSchema(enableEntityMatch);
             break;
         case TransactionRaw:
             table = getRawTransactionSchema(includeCdlTimestamps);
@@ -912,7 +912,7 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getTransactionSchema() {
+    private Table getTransactionSchema(boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.Transaction);
 
         table.addAttribute(attr(InterfaceName.TransactionId.name()) //
@@ -923,22 +923,28 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+        // use Customer{Account/Contact}Id column when entity match is enabled, use
+        // {Account/Contact}Id column if not. accountId is required even if entity
+        // match is enabled because currently there are no other account field
+        InterfaceName accountId = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
+        InterfaceName contactId = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
+        table.addAttribute(attr(accountId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //
-                .interfaceName(InterfaceName.AccountId) //
+                .interfaceName(accountId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+        table.addAttribute(attr(contactId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .type(Schema.Type.STRING) //
-                .defaultValueStr("").interfaceName(InterfaceName.ContactId) //
+                .defaultValueStr("") //
+                .interfaceName(contactId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
