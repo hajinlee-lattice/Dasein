@@ -429,6 +429,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
+        boolean alwaysOnCampain = FeatureFlagUtils.isAlwaysOnCampaign(flags);
         log.info("Entity Match Enabled=" + entityMatchEnabled);
         if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
@@ -444,6 +445,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName());
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS, String.valueOf(alwaysOnCampain));
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
