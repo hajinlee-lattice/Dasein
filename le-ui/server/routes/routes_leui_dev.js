@@ -4,18 +4,17 @@ module.exports = [{
     redirect: {
         '/': '/login'
     }
-},{
+}, {
     path: '/projects/common',
     folders: {
         '/app': '/app',
         '/components': '/components',
         '/lib': '/lib',
         '/assets': '/assets',
-        '/common/assets': '/assets',
         '/fonts': '/assets/fonts',
         '/images': '/assets/images'
     }
-},{
+}, {
     path: '/projects/ng2/dist',
     html5mode: true,
     pages: {
@@ -24,13 +23,13 @@ module.exports = [{
     folders: {
         '/ng2/lib': '/src/assets/lib'
     }
-},{
+}, {
     path: '/projects/login',
     html5mode: true,
     xframe_options: 'deny',
     pages: {
-        '/login':'/dist/indexwp.html',
-        '/login/form':'/dist/indexwp.html',
+        '/login': '/dist/indexwp.html',
+        '/login/form': '/dist/indexwp.html',
         '/login/old': 'index.html',
         '/login/old/index': 'index.html'
     },
@@ -42,7 +41,7 @@ module.exports = [{
         '/login/lib': '/lib',
         '/login/help': '/help'
     }
-},{
+}, {
     path: '/projects/prospectdiscovery',
     pages: {
         '/pd/': 'index.html',
@@ -53,7 +52,7 @@ module.exports = [{
         '/pd/assets': '/assets',
         '/pd/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/atlas',
     html5mode: true,
     pages: {
@@ -61,13 +60,13 @@ module.exports = [{
         '/atlas/index': '/dist/indexwp.html'
     },
     folders: {
-        '/atlas' : '/dist',
+        '/atlas': '/dist',
         '/dist': '/dist',
         '/atlas/app': '/app',
         '/atlas/assets': '/assets',
         '/atlas/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/lpi',
     html5mode: true,
     pages: {
@@ -75,13 +74,13 @@ module.exports = [{
         '/lpi/index': '/dist/indexwp.html'
     },
     folders: {
-        '/lpi' : '/dist',
+        '/lpi': '/dist',
         '/dist': '/dist',
         '/lpi/app': '/app',
         '/lpi/assets': '/assets',
         '/lpi/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/insights',
     html5mode: true,
     xframe_allow: [
@@ -105,7 +104,7 @@ module.exports = [{
         '/insights/assets': '/assets',
         '/insights/lib': '/lib'
     }
-},{    
+}, {
     path: '/projects/lp2',
     pages: {
         '/lp2/': 'index.html',
@@ -116,7 +115,7 @@ module.exports = [{
         '/lp2/assets': '/assets',
         '/lp2/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/demo',
     pages: {
         '/demo/': 'index.html',
@@ -137,7 +136,7 @@ module.exports = [{
         '/demo/img': '/img',
         '/demo/fonts': '/fonts'
     }
-},{
+}, {
     path: '/projects/websocket',
     html5mode: true,
     pages: {
@@ -149,7 +148,7 @@ module.exports = [{
         '/websocket/assets': '/assets',
         '/websocket/lib': '/lib',
     }
-},{
+}, {
     path: '/projects/dante',
     pages: {
         '/dante/': 'assets/index.html',
@@ -162,7 +161,7 @@ module.exports = [{
         '/dante/styles': '/assets/styles',
         '/dante/images': '/assets/images'
     }
-},{    
+}, {
     path: '/projects/uicomponents',
     html5mode: true,
     pages: {
@@ -170,6 +169,6 @@ module.exports = [{
         '/uicomponents/index': '/storybook-static/index.html'
     },
     folders: {
-        '/uicomponents' : '/storybook-static'
+        '/uicomponents': '/storybook-static'
     }
 }];

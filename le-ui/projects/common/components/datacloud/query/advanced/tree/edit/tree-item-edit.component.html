@@ -13,7 +13,7 @@
                             ng-trim="false" ng-if="vm.showInput(vm.operation) && !vm.showChips()">
 
                         <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
-                            initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true"
+                            initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true" nosort=true
                             single-selection="false" allowcustomvalues="true" dontrandomizeid="true" icon="fa fa-plus"
                             ng-show="vm.showChips()">
                         </chips>
@@ -33,11 +33,11 @@
                             changed="vm.callbackChangedNumericalValue(type, position, value)">
                         </numerical-range-directive>
 
-                        <chips placeholder="Search for attributes" datasource="vm.buckets" context="vm"
-                            sortreverse="true" callback-function="vm.updateChips(args)" initialvalue="vm.vals"
-                            displayname="Lbl" ng-model="vm.vals" showicon="true" delayinit="true"
-                            single-selection="false" sortid="Cnt" icon="fa fa-search" ng-show="vm.showChips()"
-                            altlabel="Cnt" name="ChipsController" showloading="vm.loading">
+                        <chips placeholder="Search for attributes" datasource="vm.buckets" context="vm" sortreverse=true
+                            callback-function="vm.updateChips(args)" initialvalue="vm.vals" displayname="Lbl"
+                            ng-model="vm.vals" showicon="true" delayinit="true" nosort=true single-selection="false"
+                            sortid="Cnt" icon="fa fa-search" ng-show="vm.showChips()" altlabel="Cnt"
+                            name="ChipsController" showloading="vm.loading" header="vm.header">
                         </chips>
                     </span>
 
@@ -90,7 +90,7 @@
                             <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
                                 initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true"
                                 single-selection="false" allowcustomvalues="true" dontrandomizeid="true"
-                                icon="fa fa-plus" ng-show="vm.showChips()">
+                                icon="fa fa-plus" ng-show="vm.showChips()" nosort=true>
                             </chips>
 
                             <span ng-if="vm.editMode == 'Preset'">

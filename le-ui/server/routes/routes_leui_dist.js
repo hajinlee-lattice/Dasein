@@ -4,23 +4,23 @@ module.exports = [{
     redirect: {
         '/': '/login'
     }
-},{
+}, {
     path: '/projects/common',
     folders: {
-        '/app/modules/': '/app/modules/',
+        '/app': '/app',
         '/components': '/components',
-        '/assets': '/assets',
         '/lib': '/lib',
+        '/assets': '/assets',
         '/fonts': '/assets/fonts',
         '/images': '/assets/images'
     }
-},{
+}, {
     path: '/projects/login',
     html5mode: true,
     xframe_options: 'deny',
     pages: {
-        '/login':'/dist/indexwp.html',
-        '/login/form':'/dist/indexwp.html',
+        '/login': '/dist/indexwp.html',
+        '/login/form': '/dist/indexwp.html',
         '/login/old': 'index.html',
         '/login/old/index': 'index.html'
     },
@@ -32,7 +32,7 @@ module.exports = [{
         '/login/lib': '/lib',
         '/login/help': '/help'
     }
-},{
+}, {
     path: '/projects/atlas',
     pages: {
         '/pd/': 'index.html',
@@ -43,7 +43,7 @@ module.exports = [{
         '/pd/assets': '/assets',
         '/pd/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/atlas',
     html5mode: true,
     pages: {
@@ -53,7 +53,7 @@ module.exports = [{
         '/atlas/old/index': 'assets/index.html'
     },
     folders: {
-        '/atlas' : '/dist',
+        '/atlas': '/dist',
         '/dist': '/dist',
         '/atlas/app': '/app',
         '/atlas/assets': '/assets',
@@ -61,7 +61,7 @@ module.exports = [{
         '/atlas/assets': '/assets',
         '/atlas/lib/js': '/lib/js',
     }
-},{
+}, {
     path: '/projects/lpi',
     html5mode: true,
     pages: {
@@ -71,7 +71,7 @@ module.exports = [{
         '/lpi/old/index': 'assets/index.html'
     },
     folders: {
-        '/lpi' : '/dist',
+        '/lpi': '/dist',
         '/dist': '/dist',
         '/lpi/app': '/app',
         '/lpi/assets': '/assets',
@@ -79,7 +79,7 @@ module.exports = [{
         '/lpi/assets': '/assets',
         '/lpi/lib/js': '/lib/js',
     }
-},{
+}, {
     path: '/projects/insights',
     html5mode: true,
     xframe_allow: [
@@ -101,7 +101,7 @@ module.exports = [{
         '/dist': '/dist',
         '/insights': '/dist',
     }
-},{
+}, {
     path: '/projects/dante',
     pages: {
         '/dante/': 'assets/index.html',
@@ -114,12 +114,12 @@ module.exports = [{
         '/dante/styles': '/assets/styles',
         '/dante/images': '/assets/images'
     }
-},{  
+}, {
     path: '/projects/demo',
     folders: {
         '/demo/js': '/js'
     }
-},{
+}, {
     path: '/projects/lp2',
     pages: {
         '/lp2/': 'index.html',
@@ -130,7 +130,7 @@ module.exports = [{
         '/lp2/assets': '/assets',
         '/lp2/lib': '/lib'
     }
-},{
+}, {
     path: '/projects/websocket',
     pages: {
         '/websocket/': 'index.html',
@@ -141,7 +141,7 @@ module.exports = [{
         '/websocket/assets': '/assets',
         '/websocket/lib': '/lib',
     }
-},{    
+}, {
     path: '/projects/uicomponents',
     html5mode: true,
     pages: {
@@ -149,6 +149,6 @@ module.exports = [{
         '/uicomponents/index': '/storybook-static/index.html'
     },
     folders: {
-        '/uicomponents' : '/storybook-static'
+        '/uicomponents': '/storybook-static'
     }
 }];
