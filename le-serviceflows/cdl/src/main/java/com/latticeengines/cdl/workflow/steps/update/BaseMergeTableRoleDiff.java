@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,10 +27,11 @@ import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
 public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConfiguration> extends RunSparkJob<T, UpsertConfig, UpsertJob> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseMergeTableRoleDiff.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -72,7 +75,7 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
                     "Failed to find diff " + getTableRole() + " table in customer " + customerSpace);
         }
         UpsertConfig jobConfig = UpsertConfig.joinBy(getJoinKey());
-        HdfsDataUnit input1 = SparkUtils.tableToHdfsUnit(masterTable, "Master", yarnConfiguration);
+        HdfsDataUnit input1 = masterTable.toHdfsDataUnit("Master");
         HdfsDataUnit input2 = diffTable.toHdfsDataUnit("Diff");
         jobConfig.setInput(Arrays.asList(input1, input2));
         if (saveParquet()) {

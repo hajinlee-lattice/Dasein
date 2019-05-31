@@ -395,8 +395,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
         if (schema != null) {
             verifySchemaCorrectness(parsedSchema, schema);
+            log.info("Saving provided schema at " + avscPath);
             HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
         } else {
+            log.info("Saving parsed schema at " + avscPath);
             HdfsUtils.writeToFile(yarnConfiguration, avscPath, parsedSchema.toString());
         }
     }
