@@ -67,6 +67,7 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                 {2, "2", null, now}, //
                 {3, null, now, now}, //
                 {4, "4", now, null}, //
+                {5, "Hello world, \"Aloha\", yeah?", now, now}, //
         };
         uploadHdfsDataUnit(data, fields);
     }
@@ -135,6 +136,12 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                         Assert.assertEquals(val1, "4");
                         Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
                         Assert.assertEquals(val3, "");
+                        break;
+                    case 5:
+                        Assert.assertEquals(id, "5");
+                        Assert.assertEquals(val1, "Hello world, \"Aloha\", yeah?");
+                        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+                        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
                         break;
                     default:
                         Assert.fail("Should not have this line: " + record);
