@@ -3,9 +3,11 @@ package com.latticeengines.apps.cdl.util;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +35,6 @@ public class PriorityQueueUtils {
         if (CollectionUtils.isEmpty(activityObjects)) {
             return;
         }
-
         for (ActivityObject activityObject : activityObjects) {
             push(activityObject);
         }
@@ -251,6 +252,19 @@ public class PriorityQueueUtils {
             }
         }
         return false;
+    }
+
+    public static void removeActivityFromQueue(String tenantName) {
+        if (highPriorityMap.containsKey(tenantName)) {
+            PriorityObject priorityObject = highPriorityMap.get(tenantName);
+            highPriorityQueue.remove(priorityObject);
+            highPriorityMap.remove(tenantName, priorityObject);
+        }
+        if (lowPriorityMap.containsKey(tenantName)) {
+            PriorityObject priorityObject = lowPriorityMap.get(tenantName);
+            lowPriorityQueue.remove(priorityObject);
+            lowPriorityMap.remove(tenantName, priorityObject);
+        }
     }
 
 }
