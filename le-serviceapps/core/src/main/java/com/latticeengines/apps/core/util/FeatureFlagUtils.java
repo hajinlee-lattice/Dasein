@@ -41,6 +41,16 @@ public class FeatureFlagUtils {
         }
     }
 
+    public static boolean isAlwaysOnCampaign(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName() + " feature flag!", e);
+            return false;
+        }
+    }
+
     @SuppressWarnings("deprecation")
     public static boolean isFuzzyMatchEnabled(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())
