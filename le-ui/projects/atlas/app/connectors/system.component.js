@@ -112,7 +112,7 @@ export default class SystemComponent extends Component {
 
     getPopupUrl(solutionInstanceId, authorizationCode) {
         let partnerId = 'LatticeEngines';
-        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2`;
+        return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2&customValidation=true`;
     }
 
     mappingClosed(system) {

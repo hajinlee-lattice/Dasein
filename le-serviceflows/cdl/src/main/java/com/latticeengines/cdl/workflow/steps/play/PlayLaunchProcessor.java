@@ -140,6 +140,7 @@ public class PlayLaunchProcessor {
 
         try {
             long totalAccountsAvailableForLaunch = playLaunch.getAccountsSelected();
+            long totalContactsAvailableForLaunch = playLaunch.getContactsSelected();
             log.info(String.format("Total available accounts available for Launch: %d",
                     totalAccountsAvailableForLaunch));
 
@@ -188,6 +189,9 @@ public class PlayLaunchProcessor {
                 long suppressedAccounts = (totalAccountsAvailableForLaunch - playLaunch.getAccountsLaunched()
                         - playLaunch.getAccountsErrored());
                 playLaunch.setAccountsSuppressed(suppressedAccounts);
+                long suppressedContacts = (totalContactsAvailableForLaunch - playLaunch.getContactsLaunched()
+                        - playLaunch.getContactsErrored());
+                playLaunch.setContactsSuppressed(suppressedContacts);
                 updateLaunchProgress(playLaunchContext);
                 log.info(String.format("Total launched accounts count: %d", playLaunch.getAccountsLaunched()));
                 log.info(String.format("Total errored accounts count: %d", playLaunch.getAccountsErrored()));
@@ -495,7 +499,8 @@ public class PlayLaunchProcessor {
             playProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace().toString(), //
                     playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
                     playLaunch.getAccountsLaunched(), playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
-                    playLaunch.getAccountsSuppressed());
+                    playLaunch.getAccountsSuppressed(), playLaunch.getContactsSuppressed(),
+                    playLaunch.getContactsErrored());
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
         }

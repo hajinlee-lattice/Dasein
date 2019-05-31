@@ -318,11 +318,13 @@ public class PlayLaunchContext {
         private AtomicLong accountLaunched;
         private AtomicLong contactLaunched;
         private AtomicLong accountErrored;
+        private AtomicLong contactErrored;
 
         public Counter() {
             accountLaunched = new AtomicLong();
             contactLaunched = new AtomicLong();
             accountErrored = new AtomicLong();
+            contactErrored = new AtomicLong();
         }
 
         public AtomicLong getAccountLaunched() {
@@ -335,6 +337,10 @@ public class PlayLaunchContext {
 
         public AtomicLong getAccountErrored() {
             return accountErrored;
+        }
+
+        public AtomicLong getContactErrored() {
+            return contactErrored;
         }
     }
 }

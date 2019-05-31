@@ -242,7 +242,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
 
     public PlayLaunch updatePlayLaunchProgress(String customerSpace, String playName, String launchId,
             Double launchCompletionPercent, Long accountsLaunched, Long contactsLaunched, Long accountsErrored,
-            Long accountsSuppressed) {
+            Long accountsSuppressed, Long contactsSuppressed, Long contactsErrored) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}", shortenCustomerSpace(customerSpace),
                 playName, launchId);
         List<String> params = new ArrayList<>();
@@ -260,6 +260,12 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         }
         if (accountsSuppressed != null) {
             params.add("accountsSuppressed=" + accountsSuppressed);
+        }
+        if (contactsSuppressed != null) {
+            params.add("contactsSuppressed=" + contactsSuppressed);
+        }
+        if (contactsErrored != null) {
+            params.add("contactsErrored=" + contactsErrored);
         }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
