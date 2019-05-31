@@ -33,7 +33,6 @@ public class PriorityQueueUtils {
         if (CollectionUtils.isEmpty(activityObjects)) {
             return;
         }
-
         for (ActivityObject activityObject : activityObjects) {
             push(activityObject);
         }
@@ -251,6 +250,19 @@ public class PriorityQueueUtils {
             }
         }
         return false;
+    }
+
+    public static void removeActivityFromQueue(String tenantName) {
+        if (highPriorityMap.containsKey(tenantName)) {
+            PriorityObject priorityObject = highPriorityMap.get(tenantName);
+            highPriorityQueue.remove(priorityObject);
+            highPriorityMap.remove(tenantName, priorityObject);
+        }
+        if (lowPriorityMap.containsKey(tenantName)) {
+            PriorityObject priorityObject = lowPriorityMap.get(tenantName);
+            lowPriorityQueue.remove(priorityObject);
+            lowPriorityMap.remove(tenantName, priorityObject);
+        }
     }
 
 }

@@ -9,7 +9,6 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.collections4.MapUtils
 import org.apache.spark.sql.functions.{col, udf, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -66,14 +65,13 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
 
   private def saveToCsv(df: DataFrame, path: String, compress: Boolean): Unit = {
     var writer = df.coalesce(1).write
-      .format("csv")
       .option("header", value = true)
       .option("quote", "\"")
       .option("escape", "\"")
     if (compress) {
       writer = writer.option("compression", "gzip")
     }
-    writer.save(path)
+    writer.csv(path)
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[ConvertToCSVConfig]): List[HdfsDataUnit] = {
@@ -88,10 +86,15 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     }
     targets.zip(output).map { t =>
       val tgt = t._1
-      val df = t._2.persist(StorageLevel.DISK_ONLY).toDF()
+      val df = t._2
       saveToCsv(df, tgt.getPath, compress=compress)
-      tgt.setCount(df.count())
-      df.unpersist(blocking = false)
+      val suffix = if (compress) ".csv.gz" else ".csv"
+      val df2 = spark.read.format("csv")
+        .option("maxColumns", 40000)
+        .option("header", "true")
+        .option("compression", "gzip")
+        .load(tgt.getPath + "/*" + suffix)
+      tgt.setCount(df2.count())
       tgt
     }
   }

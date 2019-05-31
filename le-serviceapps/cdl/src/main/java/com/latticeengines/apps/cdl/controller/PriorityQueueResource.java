@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +36,12 @@ public class PriorityQueueResource {
     @NoCustomerSpace
     public List<String> getLowPriorityQueue() {
         return PriorityQueueUtils.getAllMemberWithSortFromLowPriorityQueue();
+    }
+
+    @RequestMapping(value = "/removeActivity", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ApiOperation(value = "remove Activity From Queue")
+    public void removeActivityFromQueue(@RequestParam String tenantName) {
+        PriorityQueueUtils.removeActivityFromQueue(tenantName);
     }
 
 }
