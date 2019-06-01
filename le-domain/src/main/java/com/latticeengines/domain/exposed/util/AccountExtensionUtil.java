@@ -230,11 +230,11 @@ public class AccountExtensionUtil {
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("Didn't find any match from lattice data cloud. "
+                            log.debug("Didn't find any match from lattice data cloud. "
                                     + "Still continue to process the result as we may "
                                     + "have found partial match in my data table.");
                         } else {
-                            log.info("Found full match from lattice data cloud as well as from my data table.");
+                            log.debug("Found full match from lattice data cloud as well as from my data table.");
                         }
 
                         final Map<String, Object> tempDataRef = new HashMap<>();
