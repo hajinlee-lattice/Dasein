@@ -456,8 +456,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 3L, 3L,
                 org2, externalSystemType.name());
 
-        throw new Exception();
-
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCumulativeStatsDashboard" })
