@@ -71,6 +71,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.transformer.AvroToCsvTransformer;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -700,11 +701,21 @@ public class AvroUtils {
 
     public static Schema overwriteFields(Schema schema, Map<String, Schema.Field> fields) {
         List<Schema.Field> newFields = schema.getFields().stream() //
-                .peek(field -> {
-                    if (fields.containsKey(field.name())) {
-                        Schema.Field srcField = fields.getOrDefault(field.name(), field);
-                        srcField.getObjectProps().forEach(field::addProp);
-                    }
+                .map(field -> {
+                    Schema.Field srcField = fields.getOrDefault(field.name(), field);
+                    Schema.Field newField = new Schema.Field( //
+                            field.name(), //
+                            field.schema(), //
+                            field.doc(), //
+                            field.defaultVal() //
+                    );
+                    Set<String> reserveKeys = Sets.newHashSet("name", "type", "default");
+                    srcField.getObjectProps().forEach((k, v) -> {
+                        if (!reserveKeys.contains(k)) {
+                            newField.addProp(k, v);
+                        }
+                    });
+                    return newField;
                 }) //
                 .collect(Collectors.toList());
         return Schema.createRecord(
