@@ -113,11 +113,20 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
 
     public AppSubmission restartWorkflowExecution(String workflowId, String customerSpace, Integer memory) {
         checkCustomerSpace(customerSpace);
+        return restartWorkflowExecution(workflowId, customerSpace, memory, null);
+    }
+
+    public AppSubmission restartWorkflowExecution(String workflowId, String customerSpace, Integer memory,
+                                                  Boolean autoRetry) {
+        checkCustomerSpace(customerSpace);
 
         String baseUrl = "/job/{workflowId}/restart";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         if (memory != null) {
             url += "&memory=" + memory;
+        }
+        if (autoRetry != null) {
+            url += "&autoRetry=" + autoRetry;
         }
         url = constructUrl(url, workflowId);
         return post("restartWorkflowExecution", url, null, AppSubmission.class);
