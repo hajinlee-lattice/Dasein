@@ -274,7 +274,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
-    private List<GlobalAuthUserTenantRight> globalAuthGetRights2(String email, String tenantId) {
+    private List<GlobalAuthUserTenantRight> globalAuthGetRightsDetail(String email, String tenantId) {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             return new ArrayList<>();
@@ -889,7 +889,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Override
     public boolean userExpireIntenant(String email, String tenantId) {
         log.info(String.format("Check  user expire in this tenant %s with email %s.", tenantId, email));
-        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRights2(email, tenantId);
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRightsDetail(email, tenantId);
         long currentTime = System.currentTimeMillis();
         for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
             if (globalAuthUserTenantRight.getExpirationDate() != null && currentTime >= globalAuthUserTenantRight.getExpirationDate()) {
