@@ -683,6 +683,7 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
+                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime != null) {
                     conformingDateCount++;
@@ -708,19 +709,25 @@ public class MetadataResolver {
     MutableTriple<String, String, String> distinguishDateAndTime(List<String> columnFields) {
         List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<String, Integer>();
+        boolean useTimeZone = false;
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+                    String trimedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                     TemporalAccessor date = null;
                     try {
-                        date = dtf.parse(columnField.trim());
+                        date = dtf.parse(trimedColumnField.trim());
                     } catch (DateTimeParseException e) {
                         log.debug("Found columnField unparsable as date/time: " + columnField);
                     }
                     if (date != null) {
                         hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
+                    }
+                    // if input field contains T&Z, will detect format with Time zone
+                    if (!useTimeZone && !trimedColumnField.equals(columnField)) {
+                        useTimeZone = true;
                     }
                 }
             }
@@ -728,8 +735,7 @@ public class MetadataResolver {
         if (MapUtils.isEmpty(hitMap)) {
             return null;
         }
-        // sort according to the occurrence times, then priority order defined
-        // in supported data time list
+        // sort according to the occurrence times, then priority order defined in supported data time list
         List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(hitMap.entrySet());
         Collections.sort(entries,
                 (entry1, entry2) -> entry1.getValue().equals(entry2.getValue())
@@ -738,20 +744,18 @@ public class MetadataResolver {
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
 
-        // legal date time formats are delimited by space or literal T defined
-        // in TimeStampConvertUtils
+        // legal date time formats are delimited by space in TimeStampConvertUtils
         int index = expectedFormat.indexOf(" ");
         if (index == -1) {
-            index = expectedFormat.indexOf("'T'");
-            if (index == -1) {
-                return new MutableTriple<String, String, String>(expectedFormat, null, null);
+            return new MutableTriple<String, String, String>(expectedFormat, null, null);
+        } else {
+            if (useTimeZone) {
+                return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
+                        expectedFormat.substring(index + 1), TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE);
             } else {
                 return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
-                        expectedFormat.substring(index + 3, expectedFormat.indexOf("Z")), "ISO 8601");
-            }
-        } else {
-            return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
                     expectedFormat.substring(index + 1), null);
+            }
         }
     }
 

@@ -27,13 +27,21 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test that all the supported Java time zones are valid Java time zones.
         Set<String> timeZoneIds = new LinkedHashSet<>(Arrays.asList(getAvailableTimeZoneIDs()));
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertFalse(timeZoneIds.contains(javaTimeZones));
+            } else {
+                Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            }
         }
 
         // Test that when processed, the Java time zones return the correct string.  This test is needed because
         // if Java fails to convert a TimeZone to a ZoneId, it silently fails and returns "GMT" as the ZoneId.
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), "GMT");
+            } else {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
+            }
             log.info("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
                     + TimeZone.getTimeZone(javaTimeZones).toZoneId());
         }
