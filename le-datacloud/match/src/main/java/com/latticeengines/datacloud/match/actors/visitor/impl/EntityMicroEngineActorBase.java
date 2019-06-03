@@ -61,6 +61,11 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
      */
     protected abstract boolean shouldProcess(@NotNull MatchTraveler traveler);
 
+
+    // Entity Match doesn't need to use this method.
+    protected void recordActorAndTuple(MatchTraveler traveler) {}
+
+
     // For entity lookup actors. EntityIdAssociateActor and EntityIdResolveActor
     // both override this method
     @Override
