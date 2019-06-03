@@ -4,7 +4,6 @@ import java.util.AbstractMap;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;

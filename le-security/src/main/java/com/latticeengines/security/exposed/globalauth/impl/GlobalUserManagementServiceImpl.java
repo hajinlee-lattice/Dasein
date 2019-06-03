@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
-import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
