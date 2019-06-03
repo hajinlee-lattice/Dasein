@@ -6,6 +6,7 @@ angular
     QueryTreeDateAttributeService
   ) {
     var QueryTreeDateAttributeStore = this;
+    QueryTreeDateAttributeStore.periodsMap = {};
     QueryTreeDateAttributeStore.periods = [];
     this.dateAttributeMap = {
       EVER: "Ever",
@@ -87,10 +88,13 @@ angular
       if (QueryTreeDateAttributeStore.periods.length == 0) {
         QueryTreeDateAttributeService.getPeriods().then(function(result) {
           result.forEach(function(element) {
-            QueryTreeDateAttributeStore.periods.push({
-              name: element,
-              displayName: element + "(s)"
-            });
+            if(!QueryTreeDateAttributeStore.periodsMap[element]){
+              QueryTreeDateAttributeStore.periods.push({
+                name: element,
+                displayName: element + "(s)"
+              });
+              QueryTreeDateAttributeStore.periodsMap[element] = element + "(s)";
+            }
           });
         });
       }
