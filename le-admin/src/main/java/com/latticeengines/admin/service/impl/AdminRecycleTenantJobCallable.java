@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.UserService;
+
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(120);
@@ -39,6 +40,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     private com.latticeengines.security.exposed.service.TenantService tenantService;
     private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
     private static final Logger log = LoggerFactory.getLogger(AdminRecycleTenantJobCallable.class);
+
     public AdminRecycleTenantJobCallable(Builder builder) {
         this.jobArguments = builder.jobArguments;
         this.emailService = builder.emailService;
@@ -118,7 +120,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     user.setFirstName(userData.getFirstName());
                     user.setEmail(userData.getEmail());
                     emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
-                } else if (currentTime > expiredTime) {
+                } else if (currentTime >= expiredTime) {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
                     log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
@@ -140,6 +142,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         public Builder() {
 
         }
+
         public Builder jobArguments(String jobArguments) {
             this.jobArguments = jobArguments;
             return this;

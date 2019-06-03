@@ -53,4 +53,6 @@ public interface GlobalUserManagementService {
 
     String addUserAccessLevel(String userName, String emails, AccessLevel level);
 
+    boolean userExpireIntenant(String email, String tenantId);
+
 }
