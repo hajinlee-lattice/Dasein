@@ -736,7 +736,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
         try {
             if (retry) {
-                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
+                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId(), Boolean.TRUE);
             } else {
                 ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
@@ -777,7 +777,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
         try {
             if (retry) {
-                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
+                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId(), Boolean.TRUE);
             } else {
                 ProcessAnalyzeRequest request;
                 if (StringUtils.isNotEmpty(dataFeed.getScheduleRequest())) {

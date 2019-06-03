@@ -478,7 +478,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .build();
     }
 
-    public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {
+    public ApplicationId retryLatestFailed(String customerSpace, Integer memory, Boolean autoRetry) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
@@ -486,7 +486,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             log.info(String.format("restarted execution with workflowId=%s", workflowId));
-            ApplicationId appId = workflowJobService.restart(workflowId, customerSpace, memory);
+            ApplicationId appId = workflowJobService.restart(workflowId, customerSpace, memory, autoRetry);
             if (appId != null && CollectionUtils.isNotEmpty(lastFailedActions)) {
                 Job retryJob = workflowProxy.getWorkflowJobFromApplicationId(appId.toString());
                 // get IDs before we clear them

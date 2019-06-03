@@ -81,9 +81,10 @@ public class DataFeedController {
     @ApiOperation(value = "Restart a previous failed processanalyze execution")
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
                                             @ApiParam(value = "Memory in MB", required = false)
-                                            @RequestParam(value = "memory", required = false) Integer memory) {
+                                            @RequestParam(value = "memory", required = false) Integer memory,
+                                            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry) {
         customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory);
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry);
         return ResponseDocument.successResponse(appId.toString());
     }
 
