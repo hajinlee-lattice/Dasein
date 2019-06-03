@@ -492,7 +492,11 @@ public class UserServiceImpl implements UserService {
             result.setErrMsg("Not a valid expire after");
             return result;
         }
+
         if (oldUser != null) {
+            if (globalUserManagementService.userExpireIntenant(oldUser.getEmail(), tenantId)) {
+                deleteUser(tenantId, oldUser.getUsername());
+            }
             result.setValid(false);
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);

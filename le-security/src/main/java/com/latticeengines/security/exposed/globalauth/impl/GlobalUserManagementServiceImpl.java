@@ -274,6 +274,26 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    private List<GlobalAuthUserTenantRight> globalAuthGetRightsDetail(String email, String tenantId) {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (tenantData == null) {
+            return new ArrayList<>();
+        }
+        GlobalAuthUser userData = gaUserEntityMgr.findByEmailJoinAuthentication(email);
+        if (userData == null) {
+            return new ArrayList<>();
+        }
+        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantId(userData.getPid(),
+                        tenantData.getPid());
+        if (rightsData != null) {
+            return rightsData;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
     private List<String> globalAuthGetRights(String tenantId, String username) throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
@@ -864,6 +884,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             }
         }
         return filterEmails.toString();
+    }
+
+    @Override
+    public boolean userExpireIntenant(String email, String tenantId) {
+        log.info(String.format("Check  user expire in this tenant %s with email %s.", tenantId, email));
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRightsDetail(email, tenantId);
+        long currentTime = System.currentTimeMillis();
+        for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+            if (globalAuthUserTenantRight.getExpirationDate() != null && currentTime >= globalAuthUserTenantRight.getExpirationDate()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isZendeskEnabled(String email) {
