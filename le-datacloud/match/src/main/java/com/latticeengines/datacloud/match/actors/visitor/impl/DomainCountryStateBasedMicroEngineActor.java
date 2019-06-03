@@ -27,14 +27,13 @@ public class DomainCountryStateBasedMicroEngineActor extends AMLookupMicroEngine
     @Override
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-        if (matchKeyTuple.getDomain() != null && matchKeyTuple.getState() != null) {
-            traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                    EntityMatchType.LDC_DOMAIN_COUNTRY_STATE, prepareInputData(traveler.getMatchKeyTuple())));
-            return true;
-        } else {
-            return false;
-        }
+        return (matchKeyTuple.getDomain() != null && matchKeyTuple.getState() != null);
+    }
 
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_DOMAIN_COUNTRY_STATE, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override

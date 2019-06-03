@@ -739,20 +739,58 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private Pair<EntityMatchType, MatchKeyTuple> extractLdcMatchTypeAndTuple(MatchTraveler traveler) {
-        EntityMatchType type;
-        MatchKeyTuple tuple;
-
         if (CollectionUtils.isEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
-            log.error("MatchType is LDC_MATCH but Type to Tuple list is empty or null");
+            log.error("MatchType is LDC_MATCH but Type to Tuple list is null or empty");
             return null;
         }
-        type = traveler.getEntityLdcMatchTypeToTupleList().get(0).getLeft();
-        tuple = traveler.getEntityLdcMatchTypeToTupleList().get(0).getRight();
 
-        if (tuple == null) {
-            log.error("EntityLdcMatchTypeToTupleList's first entry has null MatchKeyTuple for type: " + type);
+        List<Pair<MatchKeyTuple, List<String>>> ldcMatchLookupResultList = traveler.getEntityMatchLookupResult(
+                BusinessEntity.LatticeAccount.name());
+        if (CollectionUtils.isEmpty(ldcMatchLookupResultList)) {
+            log.error("MatchType is LDC_MATCH but LDC Match Lookup Results is null or empty");
             return null;
         }
+
+        // Iterate through the lists of LDC Match Lookup Results and LDC Match Type / MatchKeyTuple pairs, to find the
+        // the first successful result.  The record the corresponding LDC Match Type and MatchKeyTuple of that result.
+        if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
+            log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
+                    + " and EntityLdcMatchTypeToTupleList are not the same length: "
+                    + ldcMatchLookupResultList.size() + " vs " + traveler.getEntityLdcMatchTypeToTupleList().size());
+        }
+
+        EntityMatchType type = null;
+        MatchKeyTuple tuple = null;
+        int i;
+        boolean foundResult = false;
+        for (i = 0; i < ldcMatchLookupResultList.size() && !foundResult; i++) {
+            if (CollectionUtils.isEmpty(ldcMatchLookupResultList.get(i).getValue())) {
+                log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
+                        + " has list entry composed of a Pair with null value and key MatchKeyTuple: "
+                        + ldcMatchLookupResultList.get(i).getKey());
+                return null;
+            }
+            for (String result : ldcMatchLookupResultList.get(i).getValue()) {
+                if (result != null) {
+                    type = traveler.getEntityLdcMatchTypeToTupleList().get(i).getLeft();
+                    tuple = traveler.getEntityLdcMatchTypeToTupleList().get(i).getRight();
+                    foundResult = true;
+                    break;
+                }
+            }
+        }
+
+        if (!foundResult) {
+            log.error("MatchType is LDC_MATCH but LDC Match Lookup Results has no entry with non-null result");
+            return null;
+        } else if (type == null) {
+            log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null EntityMatchType");
+            return null;
+        } else if (tuple == null) {
+            log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null MatchKeyTuple for type: " + type);
+            return null;
+        }
+
         // If the MatchKeyTuple has a DUNS fields and the EntityMatchType is not LDC DUNS or DUNS plus Domain, then the
         // LDC Match has stuck a DUNS value in the matched MatchKeyTuple that wasn't actually part of the input match
         // tuple used for matching.  In this case, a copy of the MatchKeyTuple without the DUNS field needs to be
@@ -769,7 +807,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             fixedTuple.setZipcode(tuple.getZipcode());
             fixedTuple.setPhoneNumber(tuple.getPhoneNumber());
             fixedTuple.setEmail(tuple.getEmail());
-            fixedTuple.setSystemIds(tuple.getSystemIds());
+            // Don't set System ID since it is not used in LDC match even if it is set.
             tuple = fixedTuple;
         }
         log.debug("MatchType is: " + type);

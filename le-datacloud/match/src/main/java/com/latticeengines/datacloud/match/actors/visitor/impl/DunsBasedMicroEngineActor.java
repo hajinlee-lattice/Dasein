@@ -26,13 +26,13 @@ public class DunsBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     @Override
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-        if (matchKeyTuple.getDuns() != null) {
-            traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                    EntityMatchType.LDC_DUNS, prepareInputData(traveler.getMatchKeyTuple())));
-            return true;
-        } else {
-            return false;
-        }
+        return matchKeyTuple.getDuns() != null;
+    }
+
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_DUNS, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override

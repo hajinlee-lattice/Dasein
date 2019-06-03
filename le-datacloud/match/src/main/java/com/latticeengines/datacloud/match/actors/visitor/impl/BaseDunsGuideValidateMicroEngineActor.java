@@ -63,12 +63,12 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
         if (!isDunsInAM || !isMatchResultValid) {
             // clear duns
             tuple.setDuns(null);
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
 
-        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                        Collections.singletonList(traveler.getLatticeAccountId()))));
 
         /* redirect (only when match result is valid and DUNS is in AM) */
 
@@ -90,6 +90,9 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
             tuple.setDuns(duns);
             updateDunsOriginMap(traveler, duns);
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(duns))));
     }
 
     /**

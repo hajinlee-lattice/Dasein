@@ -48,6 +48,9 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
                 traveler.debug(logMessage);
             }
         } else {
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             traveler.debug("Did not get any luck at " + getClass().getSimpleName() + " with "
                     + usedKeys(traveler.getMatchKeyTuple()));
         }

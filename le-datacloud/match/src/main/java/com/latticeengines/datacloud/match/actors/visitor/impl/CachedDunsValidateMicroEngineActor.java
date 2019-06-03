@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /*
  * validate cached DnB match result and perform post processing on the result (including checking if matched DUNS
@@ -61,10 +63,15 @@ public class CachedDunsValidateMicroEngineActor extends DataSourceMicroEngineTem
     }
 
     @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_CACHED_DUNS_VALIDATE, traveler.getMatchKeyTuple()));
+    }
+
+    @Override
     protected void process(Response response) {
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(EntityMatchType.LDC_CACHED_DUNS_VALIDATE, tuple));
         DnBMatchContext context = DnBMatchUtils.getCacheResult(traveler);
 
         // indicate that we already validate DnBMatchContext
@@ -80,6 +87,9 @@ public class CachedDunsValidateMicroEngineActor extends DataSourceMicroEngineTem
                             context.getCacheId(), tuple.getDuns(), context.getDnbCodeAsString(), isDunsInAM));
             tuple.setDuns(null);
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(tuple.getDuns()))));
     }
 
     private boolean alreadyValidated(@NotNull MatchTraveler traveler) {

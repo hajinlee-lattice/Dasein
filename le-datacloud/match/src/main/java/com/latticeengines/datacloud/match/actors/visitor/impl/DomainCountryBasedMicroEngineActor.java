@@ -28,22 +28,16 @@ public class DomainCountryBasedMicroEngineActor extends AMLookupMicroEngineTempl
     protected boolean accept(MatchTraveler traveler) {
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         if (matchKeyTuple.getState() != null || matchKeyTuple.getZipcode() != null) {
-            if (matchKeyTuple.getDomain() != null) {
-                traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                        EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));
-                return true;
-            } else {
-                return false;
-            }
+            return (matchKeyTuple.getDomain() != null);
         } else {
-            if (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null) {
-                traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                        EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));
-                return true;
-            } else {
-                return false;
-            }
+            return (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null);
         }
+    }
+
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
+    private static final Logger log = LoggerFactory.getLogger(MatchTraveler.class);
 
     /*************************
      * Bound to whole travel
@@ -358,8 +361,16 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return entityMatchLookupResults.get(entity);
     }
 
-    public void addEntityMatchLookupResults(String entity, List<Pair<MatchKeyTuple, List<String>>> lookupResult) {
-        entityMatchLookupResults.put(entity, lookupResult);
+    public void addEntityMatchLookupResults(String entity, List<Pair<MatchKeyTuple, List<String>>> lookupResultList) {
+        if (entityMatchLookupResults.containsKey(entity)) {
+            List<Pair<MatchKeyTuple, List<String>>> curLookupResultList = entityMatchLookupResults.get(entity);
+            if (CollectionUtils.isNotEmpty(curLookupResultList)) {
+                curLookupResultList.addAll(lookupResultList);
+                return;
+            }
+            log.error("EntityMatchLookupResults key " + entity + " maps to null or empty list");
+        }
+        entityMatchLookupResults.put(entity, new ArrayList<>(lookupResultList));
     }
 
     public List<Pair<EntityMatchType, MatchKeyTuple>> getEntityLdcMatchTypeToTupleList() {

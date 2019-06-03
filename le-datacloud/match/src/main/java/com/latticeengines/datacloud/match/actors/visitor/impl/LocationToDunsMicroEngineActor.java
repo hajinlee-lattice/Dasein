@@ -56,13 +56,13 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        if (matchKeyTuple.getName() != null) {
-            traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                    EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
-            return true;
-        }
+        return matchKeyTuple.getName() != null;
+    }
 
-        return false;
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromLocation(MatchTraveler traveler) {
@@ -83,6 +83,9 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         if (response.getResult() == null) {
             traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", getClass().getSimpleName(),
                     "Result in response is empty"));
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
@@ -116,6 +119,9 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
                             Collections.singletonList(traveler.getLatticeAccountId()))));
 
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(res.getDuns()))));
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);

@@ -58,13 +58,13 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
             return false;
         }
 
-        if (matchKeyTuple.getName() != null) {
-            traveler.addEntityLdcMatchTypeToTupleList(Pair.of(
-                    EntityMatchType.LDC_LOCATION_CACHED_DUNS, traveler.getMatchKeyTuple()));
-            return true;
-        }
+        return matchKeyTuple.getName() != null;
+    }
 
-        return false;
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_LOCATION_CACHED_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromLocation(MatchTraveler traveler) {
@@ -85,6 +85,9 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         if (response.getResult() == null) {
             traveler.debug(String.format("Encountered an issue with DUNS cache lookup at %s: %s.",
                     getClass().getSimpleName(), "Result in response is empty"));
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
@@ -92,6 +95,9 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
                 : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
         if (!res.getHitWhiteCache() && !res.getHitBlackCache()) {
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         String logMessage = String.format(
@@ -116,10 +122,10 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                            Collections.singletonList(traveler.getLatticeAccountId()))));
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(res.getDuns()))));
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);
