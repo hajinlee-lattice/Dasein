@@ -151,9 +151,10 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
             fieldMapped.timeFormatString = newTypeObj.timeFormatString;
             fieldMapped.timezone = newTypeObj.timezone;
             let toLattice = fieldMapped.mappedToLatticeField;
-            if(toLattice){
+            if(toLattice == true){
                 let field = ImportUtils.getFieldFromLaticeSchema(entity, newMapped);
                 fieldMapped.fieldType = field.fieldType;
+                return;
             }else{
                 let redux = $state.get('home.import').data.redux;
                 let field = redux.store.fieldMappings.map[newMapped]
