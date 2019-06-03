@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +19,10 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTe
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
@@ -52,11 +56,13 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
             return false;
         }
 
-        if (matchKeyTuple.getName() != null) {
-            return true;
-        }
+        return matchKeyTuple.getName() != null;
+    }
 
-        return false;
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromLocation(MatchTraveler traveler) {
@@ -77,13 +83,17 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
         if (response.getResult() == null) {
             traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", getClass().getSimpleName(),
                     "Result in response is empty"));
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
         DnBMatchContext res = (DnBMatchContext) response.getResult();
         traveler.debug(REMOTE_API);
         String logMessage = String.format(
-                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
+                "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, " +
+                        "City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s, OutOfBusiness = %s.",
                 res.getDuns(), getClass().getSimpleName(),
                 (res.getConfidenceCode() == null ? null : res.getConfidenceCode().toString()),
                 (res.getMatchGrade() == null ? null : res.getMatchGrade().getRawCode()),
@@ -104,7 +114,14 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(traveler.getLatticeAccountId()))));
+
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(res.getDuns()))));
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);

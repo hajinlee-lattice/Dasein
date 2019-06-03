@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +19,10 @@ import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.DnBMatchPostProcessor;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /*
  * validate remote DnB match result and perform post processing on the result (including checking if matched DUNS
@@ -59,6 +63,12 @@ public class DunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<
     }
 
     @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_DUNS_VALIDATE, traveler.getMatchKeyTuple()));
+    }
+
+    @Override
     protected void process(Response response) {
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
@@ -76,6 +86,9 @@ public class DunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<
                     tuple.getDuns(), context.getDnbCodeAsString(), isDunsInAM));
             tuple.setDuns(null);
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(tuple.getDuns()))));
     }
 
     private boolean alreadyValidated(@NotNull MatchTraveler traveler) {

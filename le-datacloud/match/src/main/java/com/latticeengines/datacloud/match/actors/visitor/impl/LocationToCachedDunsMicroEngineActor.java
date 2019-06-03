@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +19,10 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTe
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("locationCacheBasedMicroEngineActor")
 @Scope("prototype")
@@ -54,11 +58,13 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
             return false;
         }
 
-        if (matchKeyTuple.getName() != null) {
-            return true;
-        }
+        return matchKeyTuple.getName() != null;
+    }
 
-        return false;
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_LOCATION_CACHED_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromLocation(MatchTraveler traveler) {
@@ -79,6 +85,9 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         if (response.getResult() == null) {
             traveler.debug(String.format("Encountered an issue with DUNS cache lookup at %s: %s.",
                     getClass().getSimpleName(), "Result in response is empty"));
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
@@ -86,6 +95,9 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
                 : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
         if (!res.getHitWhiteCache() && !res.getHitBlackCache()) {
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
         String logMessage = String.format(
@@ -111,6 +123,9 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
         } else {
             matchKeyTuple.setDuns(res.getDuns());
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(res.getDuns()))));
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
         traveler.getDnBMatchContexts().add(res);
