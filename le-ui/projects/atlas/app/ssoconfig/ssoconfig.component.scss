@@ -202,22 +202,13 @@ section.container.system-admin-container {
             animation: none;
         }
     }
-    .form-group.file-upload {
-        display: flex;
-        width: 60%;
-        margin-bottom: 0px;
-    }
 
     .upload-container {
-        display:flex;
         margin-bottom: 1em;
     }
 
     .upload-title {
-        display: flex;
-        align-items: center;
         margin-top: 0.15em;
-        margin-right: 1em;
         &.touched {
             margin-top: -0.15em;
         }
