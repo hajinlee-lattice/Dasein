@@ -67,10 +67,17 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    @SuppressWarnings("unchecked")
     public ApplicationId restartProcessAnalyze(String customerSpace) {
+        return restartProcessAnalyze(customerSpace, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId restartProcessAnalyze(String customerSpace, Boolean autoRetry) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze/restart",
                 shortenCustomerSpace(customerSpace));
+        if (autoRetry != null) {
+            url += "?autoRetry=" + autoRetry;
+        }
         ResponseDocument<String> responseDoc = post("restart process and analyze", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
