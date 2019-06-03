@@ -493,11 +493,15 @@ public class UserServiceImpl implements UserService {
             return result;
         }
         if (oldUser != null) {
-            result.setValid(false);
-            if (!inTenant(tenantId, oldUser.getUsername())) {
-                result.setConflictingUser(oldUser);
+            if (globalUserManagementService.userExpireIntenant(oldUser.getEmail(), tenantId)) {
+                deleteUser(tenantId, oldUser.getUsername());
+            } else {
+                result.setValid(false);
+                if (!inTenant(tenantId, oldUser.getUsername())) {
+                    result.setConflictingUser(oldUser);
+                }
+                return result;
             }
-            return result;
         }
 
         String username = newUser.getUsername();

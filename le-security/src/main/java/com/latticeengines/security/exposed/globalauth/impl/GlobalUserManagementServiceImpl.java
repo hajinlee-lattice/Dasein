@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
@@ -272,6 +273,26 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new LedpException(LedpCode.LEDP_18000,
                     "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
         }
+    }
+
+    private List<GlobalAuthUserTenantRight> globalAuthGetRights2(String email, String tenantId) {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (tenantData == null) {
+            return new ArrayList<>();
+        }
+        GlobalAuthUser userData = gaUserEntityMgr.findByEmailJoinAuthentication(email);
+        if (userData == null) {
+            return new ArrayList<>();
+        }
+        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantId(userData.getPid(),
+                        tenantData.getPid());
+        if (rightsData != null) {
+            return rightsData;
+        } else {
+            return new ArrayList<>();
+        }
+
     }
 
     private List<String> globalAuthGetRights(String tenantId, String username) throws Exception {
@@ -864,6 +885,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             }
         }
         return filterEmails.toString();
+    }
+
+    @Override
+    public boolean userExpireIntenant(String email, String tenantId) {
+        log.info(String.format("Check  user expire in this tenant %s with email %s.", tenantId, email));
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRights2(email, tenantId);
+        long currentTime = System.currentTimeMillis();
+        for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+            if (globalAuthUserTenantRight.getExpirationDate() != null && currentTime >= globalAuthUserTenantRight.getExpirationDate()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isZendeskEnabled(String email) {
