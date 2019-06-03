@@ -179,17 +179,12 @@ angular.module('lp.import.wizard.latticefields', [])
             }
 
             if(field){
-                // console.log('IN FIELD', field, map);
-                if(updateFormats !== false && !field.fromExistingTemplate) {
+                if(updateFormats !== false && map.mappedField == field.name) {
                     vm.updateDateFormat(field, map);
-                }
-                if(map.mappedField == field.name && !field.fromExistingTemplate){
+                    vm.setFormatFromAnalysis(map);
                     map.dateFormatString =  field.dateFormatString;
                     map.timeFormatString = field.timeFormatString;
                     map.timezone = field.timezone;
-                }
-                else if(updateFormats !== false && !field.fromExistingTemplate){
-                    vm.setFormatFromAnalysis(map);
                 }
             }
            
@@ -199,7 +194,7 @@ angular.module('lp.import.wizard.latticefields', [])
             vm.ignoredFieldLabel = noFieldLabel;
         }
         
-        ImportWizardStore.setSaveObjects(_mapping);
+        ImportWizardStore.updateSavedObjects(_mapping);
         // console.log('MAPPING &&&&&&&&&&&& ',_mapping);
         vm.checkValidDelay(form);
         
@@ -240,7 +235,7 @@ angular.module('lp.import.wizard.latticefields', [])
         });
     }
     vm.updateDateFormat = (field, map) => {
-        if(map.unmap == true && !field.fromExistingTemplate){
+        if(map.unmap == true){
             field.dateFormatString = null;
             field.timeFormatString = null;
             field.timezone = null;
@@ -265,6 +260,7 @@ angular.module('lp.import.wizard.latticefields', [])
     }
 
     vm.updateFormats = (formats) => {
+        // console.log(formats);
         formats.field.dateFormatString = formats.dateformat;
         formats.field.timeFormatString = formats.timeformat;
         formats.field.timezone = formats.timezone;

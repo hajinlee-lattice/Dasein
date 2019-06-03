@@ -584,15 +584,35 @@ angular.module('lp.import')
     this.updateSavedObjects = (object) => {
         let name = $state.current.name;
         let saved = this.saveObjects[name];
-        Object.keys(saved).forEach(num => {
-            if(saved[num].mappedField === object.name){
-                ImportUtils.updateLatticeDateField(saved[num], object);
+        if(saved){
+            Object.keys(object).forEach(index => {
+                let element = object[index];
+                let alreadyAdded = ImportWizardStore.isAlreadySave(saved, element.userField);//underscore.findWhere(saved, {userField: element.userField});
+                if(alreadyAdded != undefined && alreadyAdded.mappedField != element.mappedField){
+                    alreadyAdded.mappedField = element.mappedField;
+                    alreadyAdded.dateFormatString = element.dateFormatString ? element.dateFormatString : null;
+                    alreadyAdded.timeFormatString = element.timeFormatString ? element.timeFormatString : null;
+                    alreadyAdded.timezone = element.timezone ? element.timezone : null;
+                }else if(alreadyAdded == undefined){
+                    saved.push(element);
+                }
+            });
+        }else{
+            this.setSaveObjects(object, name);
+        }
+         
+    }
+    
+    this.isAlreadySave = (savedObj, userFieldName) => {
+        let found;
+        Object.keys(savedObj).forEach(index => {
+            // let alreadyAdded = underscore.findWhere(savedObj[index], {userField: userFieldName});
+            if(savedObj[index].userField == userFieldName){
+                found = savedObj[index];
                 return;
             }
         });
-        this.setSaveObjects(saved);
-        // //console.log(this.saveObjects);
-         
+        return found;
     }
 
     this.setSaveObjects = function(object, key) {
