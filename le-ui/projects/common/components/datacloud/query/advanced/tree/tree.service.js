@@ -680,7 +680,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
         function getNumericalValue(bucketRestriction, position) {
             // console.log('NV ', bucketRestriction.bkt.Vals, position);
-            if(bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0){
+            if (bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0) {
                 return bucketRestriction.bkt.Vals[position];
             }
         }
@@ -693,7 +693,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (bucketRestriction.bkt.Cmp == 'IS_NULL' || bucketRestriction.bkt.Cmp == 'IS_NOT_NULL') {
                 return '';
             }
-            return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0 ? bucketRestriction.bkt.Vals : 'any (*)';
+            return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals.length > 0 ? bucketRestriction.bkt.Vals : ['any (*)'];
         }
         function getDateValue(bucketRestriction) {
             if (bucketRestriction.bkt.Fltr.Cmp == 'IS_NULL' || bucketRestriction.bkt.Fltr.Cmp == 'IS_NOT_NULL') {
