@@ -74,8 +74,8 @@ alias dkps='docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"'
 alias dkpull='bash $WSHOME/le-dev/scripts/docker_pull.sh'
 alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
 
-alias conda-on='source $ANACONDA_HOME/bin/activate lattice'
-alias conda-off='source $ANACONDA_HOME/bin/deactivate'
+alias conda-on='source $ANACONDA_HOME/bin/activate leds'
+alias conda-off='conda $ANACONDA_HOME/bin/deactivate'
 
 alias dbdiff-qa='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh qa && popd'
 alias dbdiff-prod='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh prod && popd'
