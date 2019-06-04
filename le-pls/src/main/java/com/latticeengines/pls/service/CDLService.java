@@ -19,7 +19,7 @@ public interface CDLService {
     ApplicationId processAnalyze(String string, ProcessAnalyzeRequest request);
 
     ApplicationId submitCSVImport(String customerSpace, String templateFileName,
-            String dataFileName, String source, String entity, String feedType);
+                                  String dataFileName, String source, String entity, String feedType);
 
     String createS3Template(String customerSpace, String templateFileName, String source,
                             String entity, String feedType, String subType, String displayName);
@@ -31,10 +31,10 @@ public interface CDLService {
     void importFileToS3(String customerSpace, String templateFileName, String s3Path);
 
     UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
-                          CleanupOperationType cleanupOperationType);
+                     CleanupOperationType cleanupOperationType);
 
     ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
-            SchemaInterpretation schemaInterpretation);
+                                     SchemaInterpretation schemaInterpretation);
 
     ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation);
 
@@ -49,4 +49,6 @@ public interface CDLService {
     List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable);
 
     boolean autoImport(String templateFileName);
+
+    String getTemplateMappingContent(Table templateTable, Table standardTable);
 }
