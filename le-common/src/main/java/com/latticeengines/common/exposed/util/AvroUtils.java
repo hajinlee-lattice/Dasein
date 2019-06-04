@@ -255,16 +255,24 @@ public class AvroUtils {
             return countOneFile(configuration, matches.get(0));
         }
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
+
         List<Callable<Long>> counters = new ArrayList<>();
-        for (final String match : matches) {
+        long count = 0L;
+        for (int i = 0; i < matches.size(); i++) {
+            String match = matches.get(i);
             counters.add(() -> countOneFile(configuration, match));
+            if (counters.size() >= 256 || i == matches.size() - 1) {
+                List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
+                count += partialCounts.stream().mapToLong(c -> c).sum();
+                counters.clear();
+            }
         }
-        List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
-        Long count = partialCounts.stream().mapToLong(c -> c).sum();
+
         executorService.shutdown();
         log.info(String.format("Totally %d records in %s", count, StringUtils.join(globs, ",")));
         return count;
     }
+
 
     private static Long countOneFile(Configuration configuration, String path) {
         // log.info("Counting number of records in " + path);
