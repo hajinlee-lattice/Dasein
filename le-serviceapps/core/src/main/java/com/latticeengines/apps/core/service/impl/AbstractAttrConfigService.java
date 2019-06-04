@@ -328,7 +328,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return renderedList;
     }
 
-    @Deprecated
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -337,37 +336,34 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
                     new ArrayList<>(), entityMatchEnabled);
-            if (MapUtils.isNotEmpty(attrConfigGrpsForTrim)) {
-                List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        return list.stream();
-                    } else {
-                        return Stream.empty();
-                    }
-                }).collect(Collectors.toList());
-                request.setAttrConfigs(renderedList);
-                // Render the system metadata decorated by existing custom data
-                List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
+            List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
+                if (CollectionUtils.isNotEmpty(list)) {
+                    return list.stream();
+                } else {
+                    return Stream.empty();
+                }
+            }).collect(Collectors.toList());
+            request.setAttrConfigs(renderedList);
+            // Render the system metadata decorated by existing custom data
+            List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
 
-                final Tenant tenant = MultiTenantContext.getTenant();
-                List<Runnable> runnables = new ArrayList<>();
-                BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
-                    Runnable runnable = () -> {
-                        MultiTenantContext.setTenant(tenant);
-                        List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
-                        List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
-                                entity);
-                        existingAttrConfigs
-                                .addAll(render(systemMetadataCols, existingCustomConfig, entityMatchEnabled));
-                    };
-                    runnables.add(runnable);
-                });
-                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+            final Tenant tenant = MultiTenantContext.getTenant();
+            List<Runnable> runnables = new ArrayList<>();
+            BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
+                Runnable runnable = () -> {
+                    MultiTenantContext.setTenant(tenant);
+                    List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
+                    List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
+                            entity);
+                    existingAttrConfigs.addAll(render(systemMetadataCols, existingCustomConfig, entityMatchEnabled));
+                };
+                runnables.add(runnable);
+            });
+            ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
 
-                ValidationDetails details = attrValidationService.validate(existingAttrConfigs,
-                        request.getAttrConfigs(), mode);
-                request.setDetails(details);
-            }
+            ValidationDetails details = attrValidationService.validate(existingAttrConfigs, request.getAttrConfigs(),
+                    mode);
+            request.setDetails(details);
             int count = CollectionUtils.isNotEmpty(request.getAttrConfigs()) ? request.getAttrConfigs().size() : 0;
             String msg = String.format("Validate %d attr configs", count);
             timer.setTimerMessage(msg);
@@ -460,6 +456,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             List<AttrConfigEntity> toDeleteEntities, boolean entityMatchEnabled) {
         // split by entity
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
+        if (CollectionUtils.isEmpty(attrConfigs)) {
+            return attrConfigGrps;
+        }
         attrConfigs.forEach(attrConfig -> {
             BusinessEntity entity = attrConfig.getEntity();
             if (!attrConfigGrps.containsKey(entity)) {

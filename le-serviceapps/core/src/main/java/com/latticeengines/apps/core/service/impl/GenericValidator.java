@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -31,7 +32,8 @@ public class GenericValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            AttrValidation validation) {
         log.info(String.format("start to validate Generic for tenant %s", MultiTenantContext.getShortTenantId()));
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkInvalidPropChange(attrConfig);
