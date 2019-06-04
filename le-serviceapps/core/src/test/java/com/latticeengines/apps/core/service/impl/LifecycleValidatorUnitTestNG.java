@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
 public class LifecycleValidatorUnitTestNG {
@@ -41,7 +42,7 @@ public class LifecycleValidatorUnitTestNG {
                 .setSystemValue(AttrState.Deprecated);
         List<AttrConfig> attrList = Arrays.asList(lDCPremium);
 
-        lifecycleValidator.validate(new ArrayList<>(), attrList);
+        lifecycleValidator.validate(new ArrayList<>(), attrList, new AttrValidation());
         ValidationErrors error = lDCPremium.getValidationErrors();
         Assert.assertNotNull(lDCPremium.getValidationErrors());
         Assert.assertEquals(error.getErrors().keySet().contains(ValidationErrors.Type.INVALID_ACTIVATION), true);
@@ -51,7 +52,7 @@ public class LifecycleValidatorUnitTestNG {
         AttrConfig cDLAccount = AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, false);
         AttrConfig cDLContact = AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, false);
         attrList = Arrays.asList(lDCPremium, lDCNonPremium, cDLAccount, cDLContact);
-        lifecycleValidator.validate(new ArrayList<>(), attrList);
+        lifecycleValidator.validate(new ArrayList<>(), attrList, new AttrValidation());
         Assert.assertNotNull(lDCPremium.getImpactWarnings());
         Assert.assertEquals(lDCPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.USAGE_ENABLED),
                 true);
@@ -70,7 +71,7 @@ public class LifecycleValidatorUnitTestNG {
         cDLAccount = AttrConfigTestUtils.getCDLAccountExtensionAttr(Category.INTENT, true);
         cDLContact = AttrConfigTestUtils.getCDLContactExtensionAttr(Category.INTENT, true);
         attrList = Arrays.asList(lDCPremium, lDCNonPremium, cDLAccount, cDLContact);
-        lifecycleValidator.validate(new ArrayList<>(), attrList);
+        lifecycleValidator.validate(new ArrayList<>(), attrList, new AttrValidation());
         Assert.assertNull(lDCPremium.getImpactWarnings());
         Assert.assertNull(lDCNonPremium.getImpactWarnings());
         Assert.assertNull(cDLAccount.getImpactWarnings());

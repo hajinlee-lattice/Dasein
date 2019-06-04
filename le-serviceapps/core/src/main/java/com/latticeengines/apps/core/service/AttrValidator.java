@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
 public abstract class AttrValidator {
@@ -21,7 +22,8 @@ public abstract class AttrValidator {
         return validators.get(name);
     }
 
-    public abstract void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs);
+    public abstract void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            AttrValidation validation);
 
     public void addErrorMsg(ValidationErrors.Type errorType, String message, AttrConfig attrConfig) {
         ValidationErrors error = attrConfig.getValidationErrors();

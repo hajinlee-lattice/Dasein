@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 
 public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctionalTestNGBase {
 
@@ -58,7 +59,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
             config.putProperty(ColumnMetadataKey.State, prop);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
 
         AttrConfig attrConfig = new AttrConfig();
@@ -66,7 +67,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         attrConfig.setDataLicense("HG");
         attrConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(attrConfig);
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
@@ -79,7 +80,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the inactive config should not have error message
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
@@ -101,7 +102,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
             config.putProperty(ColumnMetadataKey.State, stateProp);
             attrConfigs.add(config);
         }
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
 
         AttrConfig activeConfig = new AttrConfig();
@@ -110,7 +111,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         activeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
         activeConfig.putProperty(ColumnMetadataKey.State, stateProp);
         attrConfigs.add(activeConfig);
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
@@ -124,7 +125,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         inactiveProp.setCustomValue(AttrState.Inactive);
         inactiveConfig.putProperty(ColumnMetadataKey.State, inactiveProp);
         attrConfigs.add(inactiveConfig);
-        limitationValidator.validate(new ArrayList<>(), attrConfigs);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the new config should not have error message
         assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
