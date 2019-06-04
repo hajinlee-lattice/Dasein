@@ -25,11 +25,14 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalableTargetsResult;
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalingPoliciesResult;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.common.exposed.aws.DynamoOperation;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
@@ -270,6 +273,36 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
 
         @Override
         public TableDescription describeTable(String tableName) {
+            return null;
+        }
+
+        // FIXME(ZDD)
+        @Override
+        public void disableTableAutoScaling(String tableName, DynamoOperation operation) {
+            // TODO Auto-generated method stub
+
+        }
+
+        // FIXME(ZDD)
+        @Override
+        public void enableTableAutoScaling(String tableName, DynamoOperation operation, int minCapacityUnits,
+                int maxCapacityUnits, double utilizedTargetPct) {
+            // TODO Auto-generated method stub
+
+        }
+
+        // FIXME(ZDD)
+        @Override
+        public DescribeScalingPoliciesResult describeAutoScalingPolicy(String tableName, DynamoOperation operation) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        // FIXME(ZDD)
+        @Override
+        public DescribeScalableTargetsResult describeScalableTargetsResult(String tableName,
+                DynamoOperation operation) {
+            // TODO Auto-generated method stub
             return null;
         }
     }

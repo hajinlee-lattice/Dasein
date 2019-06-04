@@ -97,6 +97,11 @@
             <artifactId>aws-java-sdk-kinesis</artifactId>
             <version>${aws.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-applicationautoscaling</artifactId>
+            <version>${aws.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

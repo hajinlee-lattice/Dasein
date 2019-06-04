@@ -16,6 +16,23 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.applicationautoscaling.AWSApplicationAutoScalingClient;
+import com.amazonaws.services.applicationautoscaling.AWSApplicationAutoScalingClientBuilder;
+import com.amazonaws.services.applicationautoscaling.model.DeleteScalingPolicyRequest;
+import com.amazonaws.services.applicationautoscaling.model.DeregisterScalableTargetRequest;
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalableTargetsRequest;
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalableTargetsResult;
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalingPoliciesRequest;
+import com.amazonaws.services.applicationautoscaling.model.DescribeScalingPoliciesResult;
+import com.amazonaws.services.applicationautoscaling.model.MetricType;
+import com.amazonaws.services.applicationautoscaling.model.ObjectNotFoundException;
+import com.amazonaws.services.applicationautoscaling.model.PolicyType;
+import com.amazonaws.services.applicationautoscaling.model.PredefinedMetricSpecification;
+import com.amazonaws.services.applicationautoscaling.model.PutScalingPolicyRequest;
+import com.amazonaws.services.applicationautoscaling.model.RegisterScalableTargetRequest;
+import com.amazonaws.services.applicationautoscaling.model.ScalableDimension;
+import com.amazonaws.services.applicationautoscaling.model.ServiceNamespace;
+import com.amazonaws.services.applicationautoscaling.model.TargetTrackingScalingPolicyConfiguration;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -34,6 +51,7 @@ import com.amazonaws.services.dynamodbv2.model.TagResourceRequest;
 import com.amazonaws.services.dynamodbv2.model.TagResourceResult;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.common.exposed.aws.DynamoOperation;
 import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Component("dynamoService")
@@ -45,6 +63,7 @@ public class DynamoServiceImpl implements DynamoService {
     private AmazonDynamoDB client;
     private AmazonDynamoDB remoteClient;
     private AmazonDynamoDB localClient;
+    private AWSApplicationAutoScalingClient autoScaleClient;
 
     @Autowired
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
@@ -62,6 +81,7 @@ public class DynamoServiceImpl implements DynamoService {
         }
         client = remoteClient;
         dynamoDB = new DynamoDB(client);
+        autoScaleClient = (AWSApplicationAutoScalingClient) AWSApplicationAutoScalingClientBuilder.standard().build();
     }
 
     public DynamoServiceImpl(AmazonDynamoDB client) {
@@ -211,6 +231,141 @@ public class DynamoServiceImpl implements DynamoService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void enableTableAutoScaling(String tableName, DynamoOperation operation, int minCapacityUnits,
+            int maxCapacityUnits, double utilizedTargetPct) {
+        ServiceNamespace ns = ServiceNamespace.Dynamodb;
+        ScalableDimension dimension = operation == DynamoOperation.Read
+                ? ScalableDimension.DynamodbTableReadCapacityUnits
+                : ScalableDimension.DynamodbTableWriteCapacityUnits;
+        String resourceID = buildTableResourceID(tableName);
+        String tableArn = client.describeTable(tableName).getTable().getTableArn();
+        String policyName = buildScalingPolicyName(tableName);
+
+        // Define scalable target
+        RegisterScalableTargetRequest rstRequest = new RegisterScalableTargetRequest() //
+                .withServiceNamespace(ns) //
+                .withResourceId(resourceID) //
+                .withScalableDimension(dimension) //
+                .withMinCapacity(minCapacityUnits) //
+                .withMaxCapacity(maxCapacityUnits) //
+                .withRoleARN(tableArn);
+        try {
+            autoScaleClient.registerScalableTarget(rstRequest);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to enable autoscaling on table " + tableName, e);
+        }
+
+        // Configure a scaling policy
+        TargetTrackingScalingPolicyConfiguration scalingPolicyConfig = new TargetTrackingScalingPolicyConfiguration() //
+                .withPredefinedMetricSpecification(new PredefinedMetricSpecification() //
+                        .withPredefinedMetricType(
+                                operation == DynamoOperation.Read ? MetricType.DynamoDBReadCapacityUtilization
+                                        : MetricType.DynamoDBWriteCapacityUtilization)) //
+                .withTargetValue(utilizedTargetPct);
+
+        // Create the scaling policy, based on your configuration
+        PutScalingPolicyRequest pspRequest = new PutScalingPolicyRequest() //
+                .withServiceNamespace(ns) //
+                .withScalableDimension(dimension) //
+                .withResourceId(resourceID) //
+                .withPolicyName(policyName) //
+                .withPolicyType(PolicyType.TargetTrackingScaling) //
+                .withTargetTrackingScalingPolicyConfiguration(scalingPolicyConfig);
+
+        try {
+            autoScaleClient.putScalingPolicy(pspRequest);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to configure autoscaling on table " + tableName, e);
+        }
+    }
+
+    @Override
+    public void disableTableAutoScaling(String tableName, DynamoOperation operation) {
+        ServiceNamespace ns = ServiceNamespace.Dynamodb;
+        ScalableDimension dimension = operation == DynamoOperation.Read
+                ? ScalableDimension.DynamodbTableReadCapacityUnits
+                : ScalableDimension.DynamodbTableWriteCapacityUnits;
+        String resourceID = buildTableResourceID(tableName);
+        String policyName = buildScalingPolicyName(tableName);
+
+        // Delete the scaling policy
+        DeleteScalingPolicyRequest delSPRequest = new DeleteScalingPolicyRequest() //
+                .withServiceNamespace(ns) //
+                .withScalableDimension(dimension) //
+                .withResourceId(resourceID) //
+                .withPolicyName(policyName);
+
+        try {
+            autoScaleClient.deleteScalingPolicy(delSPRequest);
+        } catch (ObjectNotFoundException e) {
+            log.warn("Scaling policy doesn't exist on table " + tableName);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to delete scaling policy for table " + tableName, e);
+        }
+
+        // Delete the scalable target
+        DeregisterScalableTargetRequest delSTRequest = new DeregisterScalableTargetRequest() //
+                .withServiceNamespace(ns) //
+                .withScalableDimension(dimension) //
+                .withResourceId(resourceID);
+
+        try {
+            autoScaleClient.deregisterScalableTarget(delSTRequest);
+        } catch (ObjectNotFoundException e) {
+            log.warn("Scalable target doesn't exist on table " + tableName);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to delete scalable target on table " + tableName, e);
+        }
+    }
+
+    @Override
+    public DescribeScalableTargetsResult describeScalableTargetsResult(String tableName, DynamoOperation operation) {
+        ServiceNamespace ns = ServiceNamespace.Dynamodb;
+        ScalableDimension dimension = operation == DynamoOperation.Read
+                ? ScalableDimension.DynamodbTableReadCapacityUnits
+                : ScalableDimension.DynamodbTableWriteCapacityUnits;
+        String resourceID = buildTableResourceID(tableName);
+
+        DescribeScalableTargetsRequest dscRequest = new DescribeScalableTargetsRequest() //
+                .withServiceNamespace(ns) //
+                .withScalableDimension(dimension) //
+                .withResourceIds(resourceID);
+
+        try {
+            return autoScaleClient.describeScalableTargets(dscRequest);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to describe scalable target on table " + tableName, e);
+        }
+    }
+
+    @Override
+    public DescribeScalingPoliciesResult describeAutoScalingPolicy(String tableName, DynamoOperation operation) {
+        ServiceNamespace ns = ServiceNamespace.Dynamodb;
+        ScalableDimension dimension = operation == DynamoOperation.Read
+                ? ScalableDimension.DynamodbTableReadCapacityUnits
+                : ScalableDimension.DynamodbTableWriteCapacityUnits;
+        String resourceID = buildTableResourceID(tableName);
+
+        DescribeScalingPoliciesRequest dspRequest = new DescribeScalingPoliciesRequest().withServiceNamespace(ns)
+                .withScalableDimension(dimension).withResourceId(resourceID);
+
+        try {
+            DescribeScalingPoliciesResult dspResult = autoScaleClient.describeScalingPolicies(dspRequest);
+            return dspResult;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to describe autoscaling policy on table " + tableName, e);
+        }
+    }
+
+    private static String buildTableResourceID(String tableName) {
+        return "table/" + tableName;
+    }
+
+    private static String buildScalingPolicyName(String tableName) {
+        return "ScalingPolicy_" + tableName;
     }
 
 }
