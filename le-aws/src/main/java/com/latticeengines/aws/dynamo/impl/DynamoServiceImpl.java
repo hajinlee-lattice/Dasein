@@ -240,8 +240,9 @@ public class DynamoServiceImpl implements DynamoService {
         ScalableDimension dimension = operation == DynamoOperation.Read
                 ? ScalableDimension.DynamodbTableReadCapacityUnits
                 : ScalableDimension.DynamodbTableWriteCapacityUnits;
-        String resourceID = "table/" + tableName;
+        String resourceID = buildTableResourceID(tableName);
         String tableArn = client.describeTable(tableName).getTable().getTableArn();
+        String policyName = buildScalingPolicyName(tableName);
 
         // Define scalable target
         RegisterScalableTargetRequest rstRequest = new RegisterScalableTargetRequest() //
@@ -270,7 +271,7 @@ public class DynamoServiceImpl implements DynamoService {
                 .withServiceNamespace(ns) //
                 .withScalableDimension(dimension) //
                 .withResourceId(resourceID) //
-                .withPolicyName("ScalingPolicy_" + tableName) //
+                .withPolicyName(policyName) //
                 .withPolicyType(PolicyType.TargetTrackingScaling) //
                 .withTargetTrackingScalingPolicyConfiguration(scalingPolicyConfig);
 
@@ -287,14 +288,15 @@ public class DynamoServiceImpl implements DynamoService {
         ScalableDimension dimension = operation == DynamoOperation.Read
                 ? ScalableDimension.DynamodbTableReadCapacityUnits
                 : ScalableDimension.DynamodbTableWriteCapacityUnits;
-        String resourceID = "table/" + tableName;
+        String resourceID = buildTableResourceID(tableName);
+        String policyName = buildScalingPolicyName(tableName);
 
         // Delete the scaling policy
         DeleteScalingPolicyRequest delSPRequest = new DeleteScalingPolicyRequest() //
                 .withServiceNamespace(ns) //
                 .withScalableDimension(dimension) //
                 .withResourceId(resourceID) //
-                .withPolicyName("ScalingPolicy_" + tableName);
+                .withPolicyName(policyName);
 
         try {
             autoScaleClient.deleteScalingPolicy(delSPRequest);
@@ -325,7 +327,7 @@ public class DynamoServiceImpl implements DynamoService {
         ScalableDimension dimension = operation == DynamoOperation.Read
                 ? ScalableDimension.DynamodbTableReadCapacityUnits
                 : ScalableDimension.DynamodbTableWriteCapacityUnits;
-        String resourceID = "table/" + tableName;
+        String resourceID = buildTableResourceID(tableName);
 
         DescribeScalableTargetsRequest dscRequest = new DescribeScalableTargetsRequest() //
                 .withServiceNamespace(ns) //
@@ -345,7 +347,7 @@ public class DynamoServiceImpl implements DynamoService {
         ScalableDimension dimension = operation == DynamoOperation.Read
                 ? ScalableDimension.DynamodbTableReadCapacityUnits
                 : ScalableDimension.DynamodbTableWriteCapacityUnits;
-        String resourceID = "table/" + tableName;
+        String resourceID = buildTableResourceID(tableName);
 
         DescribeScalingPoliciesRequest dspRequest = new DescribeScalingPoliciesRequest().withServiceNamespace(ns)
                 .withScalableDimension(dimension).withResourceId(resourceID);
@@ -356,6 +358,14 @@ public class DynamoServiceImpl implements DynamoService {
         } catch (Exception e) {
             throw new RuntimeException("Unable to describe autoscaling policy on table " + tableName, e);
         }
+    }
+
+    private static String buildTableResourceID(String tableName) {
+        return "table/" + tableName;
+    }
+
+    private static String buildScalingPolicyName(String tableName) {
+        return "ScalingPolicy_" + tableName;
     }
 
 }
