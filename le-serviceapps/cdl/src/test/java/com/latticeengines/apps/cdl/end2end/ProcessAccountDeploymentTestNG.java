@@ -49,7 +49,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
-
+        initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
