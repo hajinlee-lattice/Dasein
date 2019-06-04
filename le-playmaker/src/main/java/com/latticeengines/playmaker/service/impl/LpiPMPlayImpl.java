@@ -74,6 +74,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         // be worth the effort as it is fast enough. Therefore handling
         // pagination in application layer itself
         List<Play> plays;
+        List<Play> playsAfterStart = new ArrayList<>();
         List<LaunchState> launchstates = new ArrayList<>();
         launchstates.add(LaunchState.Launched);
         if (start < 90000000000L) { // if request using second level timestamp
@@ -82,21 +83,27 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         PlayLaunchDashboard dashboard;
         if (orgInfo == null) {
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, null, null);
+                    launchstates, 0L, 0L, 1000L, null, null, null, null, null);
         } else {
             Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
             dashboard = playProxy.getPlayLaunchDashboard(MultiTenantContext.getCustomerSpace().toString(), null,
-                    launchstates, start, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
+                    launchstates, 0L, 0L, 1000L, null, null, null, effectiveOrgInfo.getLeft(),
                     effectiveOrgInfo.getRight());
         }
         plays = dashboard.getUniquePlaysWithLaunches();
-        return plays;
+        for (Play play : plays) {
+            if (play.getUpdated().getTime() >= start) {
+                playsAfterStart.add(play);
+            }
+        }
+        return playsAfterStart;
     }
 
     @Override
     public List<String> getLaunchIdsFromDashboard(boolean latest, long start, List<String> playIds, int syncDestination,
             Map<String, String> orgInfo) {
-        List<LaunchSummary> summaries = getLaunchSummariesFromDashboard(latest, start, playIds, syncDestination, orgInfo);
+        List<LaunchSummary> summaries = getLaunchSummariesFromDashboard(latest, start, playIds, syncDestination,
+                orgInfo);
         if (CollectionUtils.isEmpty(summaries)) {
             return Collections.EMPTY_LIST;
         }
@@ -216,7 +223,8 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         playMap.put(PlaymakerConstants.Description, play.getDescription());
         playMap.put(PlaymakerConstants.AverageProbability, null);
         playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
-        playMap.put(PlaymakerConstants.PlayGroups, play.getPlayGroups().stream().map(PlayGroup::getDisplayName).collect(Collectors.toList()));
+        playMap.put(PlaymakerConstants.PlayGroups,
+                play.getPlayGroups().stream().map(PlayGroup::getDisplayName).collect(Collectors.toList()));
         if (play.getRatingEngine() != null) {
             RatingEngine ratingEngine = ratingEngineProxy
                     .getRatingEngine(MultiTenantContext.getCustomerSpace().toString(), play.getRatingEngine().getId());
