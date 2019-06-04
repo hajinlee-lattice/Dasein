@@ -11,8 +11,8 @@
     li {
         display: inline-block;
         &:not(:last-child) {
-            color: #457EBA;
             &:hover {
+                color: #457EBA;
                 cursor: pointer;
             }
         }
