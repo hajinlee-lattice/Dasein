@@ -155,8 +155,14 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(status);
         datafeedExecutionEntityMgr.update(execution);
+        Status originStatus = datafeed.getStatus();
         datafeed.setStatus(datafeedStatus);
         if (DataFeedExecution.Status.Completed == status && Status.Active == datafeedStatus) {
+            if (originStatus == Status.ProcessAnalyzing && datafeed.isScheduleNow()) {//PA success, runNow complete.
+                datafeed.setScheduleNow(false);
+                datafeed.setScheduleTime(null);
+                datafeed.setScheduleRequest(null);
+            }
             datafeed.setLastPublished(new Date());
         }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName,
