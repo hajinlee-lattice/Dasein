@@ -22,6 +22,7 @@ angular.module('common.datacloud')
             this.enrichments = null;
             this.enrichmentsMap = {};
             this.categories = null;
+            this.presentCategories = null;
             this.subcategories = {};
             this.count = null;
             this.selectedCount = null;
@@ -182,6 +183,14 @@ angular.module('common.datacloud')
         this.setCategories = function (item) {
             this.categories = item;
         };
+
+        this.setPresentCategories = function (categories) {
+            this.presentCategories = categories;
+        }
+
+        this.getPresentCategories = function () {
+            return this.presentCategories;
+        }
 
         this.getSubcategories = function (category) {
             var deferred = $q.defer();
