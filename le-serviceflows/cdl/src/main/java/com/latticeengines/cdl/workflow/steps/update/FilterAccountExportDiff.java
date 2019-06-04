@@ -47,7 +47,7 @@ public class FilterAccountExportDiff extends RunSparkJob<ProcessAccountStepConfi
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    private Table activeFeaturesTable;
+    private Table activeExportTable;
 
     @Override
     protected Class<CopyJob> getJobClz() {
@@ -56,6 +56,14 @@ public class FilterAccountExportDiff extends RunSparkJob<ProcessAccountStepConfi
 
     @Override
     protected CopyConfig configureJob(ProcessAccountStepConfiguration stepConfiguration) {
+        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        activeExportTable = dataCollectionProxy.getTable(customerSpace.toString(), //
+                TableRoleInCollection.AccountExport, active);
+        if (activeExportTable == null) {
+            log.warn("Cannot find active AccountExport table, skip filtering the diff table.");
+            return null;
+        }
+
         CopyConfig config = new CopyConfig();
 
         String enrichedDiffTableName = getStringValueFromContext(ENRICHED_ACCOUNT_DIFF_TABLE_NAME);
@@ -73,7 +81,7 @@ public class FilterAccountExportDiff extends RunSparkJob<ProcessAccountStepConfi
         Table filteredTable = toTable(filteredTableName, InterfaceName.AccountId.name(), result.getTargets().get(0));
 
         Map<String, Attribute> attributeMap = new HashMap<>();
-        activeFeaturesTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        activeExportTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
         overlayTableSchema(filteredTable, attributeMap);
         metadataProxy.createTable(customerSpace.toString(), filteredTableName, filteredTable);
 
@@ -85,10 +93,7 @@ public class FilterAccountExportDiff extends RunSparkJob<ProcessAccountStepConfi
     }
 
     private List<String> getRetrainAttrs() {
-        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        activeFeaturesTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                TableRoleInCollection.AccountExport, active);
-        List<String> retainAttrNames = new ArrayList<>(Arrays.asList(activeFeaturesTable.getAttributeNames()));
+        List<String> retainAttrNames = new ArrayList<>(Arrays.asList(activeExportTable.getAttributeNames()));
         log.info(String.format("retainAttrNames from servingStore: %d", retainAttrNames.size()));
         return retainAttrNames;
     }
