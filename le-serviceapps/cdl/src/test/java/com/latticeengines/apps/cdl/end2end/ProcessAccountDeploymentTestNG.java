@@ -174,7 +174,8 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Assert.assertNotNull(attribute);
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getLastDataRefresh()), JsonUtils.serialize(attribute));
 
-        StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, activeVersion);
         Assert.assertNotNull(container);
         Map<String, StatsCube> cubes = container.getStatsCubes();
         Assert.assertTrue(MapUtils.isNotEmpty(cubes));
