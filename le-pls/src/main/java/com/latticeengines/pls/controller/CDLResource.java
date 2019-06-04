@@ -1,9 +1,14 @@
 package com.latticeengines.pls.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -44,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SystemStatusService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -120,16 +126,16 @@ public class CDLResource {
                 throw e;
             }
             return ResponseDocument.failedResponse(
-                    new LedpException(LedpCode.LEDP_18182, new String[] { "ProcessAnalyze", e.getMessage() }));
+                    new LedpException(LedpCode.LEDP_18182, new String[]{"ProcessAnalyze", e.getMessage()}));
         }
     }
 
     @RequestMapping(value = "/import/csv", method = RequestMethod.POST)
     @ApiOperation(value = "Start import job")
     public ResponseDocument<String> startImportCSV(@RequestParam(value = "templateFileName") String templateFileName,
-            @RequestParam(value = "dataFileName") String dataFileName, @RequestParam(value = "source") String source, //
-            @RequestParam(value = "entity") String entity, //
-            @RequestParam(value = "feedType") String feedType) {
+                                                   @RequestParam(value = "dataFileName") String dataFileName, @RequestParam(value = "source") String source, //
+                                                   @RequestParam(value = "entity") String entity, //
+                                                   @RequestParam(value = "feedType") String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
@@ -137,7 +143,7 @@ public class CDLResource {
             return ResponseDocument.successResponse(applicationId.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit import job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "ImportFile", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"ImportFile", e.getMessage()});
         }
     }
 
@@ -181,16 +187,16 @@ public class CDLResource {
             }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to create template for S3 import: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "S3CreateTemplateAndImport", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"S3CreateTemplateAndImport", e.getMessage()});
         }
     }
 
     @RequestMapping(value = "/s3/template/import", method = RequestMethod.POST)
     @ApiOperation(value = "Start s3 import job")
     public Map<String, UIAction> importS3Template(@RequestParam(value = "templateFileName") String templateFileName,
-            @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
-            @RequestParam(value = "subType", required = false) String subType,
-            @RequestBody S3ImportTemplateDisplay templateDisplay) {
+                                                  @RequestParam(value = "source", required = false, defaultValue = "File") String source, //
+                                                  @RequestParam(value = "subType", required = false) String subType,
+                                                  @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
@@ -204,7 +210,7 @@ public class CDLResource {
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "S3ImportFile", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"S3ImportFile", e.getMessage()});
         }
     }
 
@@ -225,7 +231,7 @@ public class CDLResource {
             return ResponseDocument.successResponse(dataFeedTask.getUniqueId());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit S3 import: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "UpdateTemplateName", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"UpdateTemplateName", e.getMessage()});
         }
     }
 
@@ -249,15 +255,15 @@ public class CDLResource {
             return ResponseDocument.successResponse(dataFeedTask.getUniqueId());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to update S3 import status: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "UpdateS3ImportStatus", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"UpdateS3ImportStatus", e.getMessage()});
         }
     }
 
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> cleanup(@RequestParam(value = "fileName") String fileName,
-            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
-            @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
+                                         @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation,
+                                         @RequestParam(value = "cleanupOperationType") CleanupOperationType type) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         UIAction uiAction = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
@@ -266,8 +272,8 @@ public class CDLResource {
     @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")
     public ResponseDocument<String> cleanupByRange(@RequestParam(value = "startTime") String startTime,
-            @RequestParam(value = "endTime") String endTime,
-            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
+                                                   @RequestParam(value = "endTime") String endTime,
+                                                   @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
             ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime,
@@ -275,7 +281,7 @@ public class CDLResource {
             return ResponseDocument.successResponse(applicationId.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit cleanup by range job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "Cleanup", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"Cleanup", e.getMessage()});
         }
     }
 
@@ -289,7 +295,7 @@ public class CDLResource {
             return ResponseDocument.successResponse(applicationId.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
-            throw new LedpException(LedpCode.LEDP_18182, new String[] { "Cleanup", e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"Cleanup", e.getMessage()});
         }
     }
 
@@ -313,7 +319,7 @@ public class CDLResource {
     @ResponseBody
     @ApiOperation("create new S3 Import system")
     public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemName,
-                                                   @RequestParam S3ImportSystem.SystemType systemType) {
+                                                      @RequestParam S3ImportSystem.SystemType systemType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
@@ -325,7 +331,7 @@ public class CDLResource {
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_18216,  new String[] {systemName});
+            throw new LedpException(LedpCode.LEDP_18216, new String[]{systemName});
         }
     }
 
@@ -351,11 +357,7 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
-                    templateDisplay.getFeedType());
-            if (dataFeedTask == null) {
-                throw new RuntimeException("Cannot find template for S3 import!");
-            }
+            DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
             boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
             Table standardTable = SchemaRepository.instance().getSchema(
                     BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
@@ -363,7 +365,47 @@ public class CDLResource {
                     dataFeedTask.getImportTemplate(), standardTable);
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_18218, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
+        }
+    }
+
+    private DataFeedTask getDataFeedTask(CustomerSpace customerSpace, String source, S3ImportTemplateDisplay templateDisplay) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source,
+                templateDisplay.getFeedType());
+        if (dataFeedTask == null) {
+            throw new RuntimeException("Cannot find template for S3 import!");
+        }
+        return dataFeedTask;
+    }
+
+    @RequestMapping(value = "s3import/template/downloadcsv", headers = "Accept=application/json", method =
+            RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation("Download template csv file")
+    public void downloadTemplateCSV(HttpServletRequest request, HttpServletResponse response,
+                                    @RequestParam(value = "source", required = false, defaultValue = "File") String source,
+                                    @RequestBody S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
+            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            Table standardTable = SchemaRepository.instance().getSchema(
+                    BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
+            DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+            String dateString = dateFormat.format(new Date());
+            // generate file name with feed type and date
+            String fileName = String.format("template_%s_%s.csv", templateDisplay.getFeedType(), dateString);
+            TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder builder = new TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder();
+            builder.setMimeType("application/csv").setFileName(fileName).setFileContent(fileContent).setBatonService(batonService);
+            TemplateFileHttpDownloader downloader = new TemplateFileHttpDownloader(builder);
+            downloader.downloadFile(request, response);
+        } catch (RuntimeException e) {
+            log.error("Download template csv Failed: " + e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
         }
     }
 }
