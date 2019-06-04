@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -83,9 +82,6 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private WorkflowProxy workflowProxy;
-
-    @Inject
-    private BatonService batonService;
 
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
