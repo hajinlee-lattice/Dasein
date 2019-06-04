@@ -67,7 +67,7 @@ public class ActivationLimitValidator extends AttrValidator {
         checkSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs, validation);
     }
 
-    private void checkDataLicense(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
+    private void checkDataLicense(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs, AttrValidation validation) {
         String tenantId = MultiTenantContext.getShortTenantId();
         Type type = ValidationErrors.Type.EXCEED_DATA_LICENSE;
@@ -75,10 +75,10 @@ public class ActivationLimitValidator extends AttrValidator {
         for (DataLicense license : DataLicense.values()) {
             int limit = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId,
                     license.getDataLicense());
-            List<AttrConfig> premiumActiveConfigs = configs.stream()
+            List<AttrConfig> premiumActiveConfigs = activeConfigs.stream()
                     .filter(entity -> (license.getDataLicense().equals(entity.getDataLicense())))
                     .collect(Collectors.toList());
-            List<AttrConfig> premiumInactiveConfigs = userSelectedInactiveConfigs.stream()
+            List<AttrConfig> premiumInactiveConfigs = inactiveConfigs.stream()
                     .filter(entity -> (license.getDataLicense().equals(entity.getDataLicense())))
                     .collect(Collectors.toList());
 
@@ -98,20 +98,20 @@ public class ActivationLimitValidator extends AttrValidator {
     }
 
     // check category limit
-    private void checkSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
+    private void checkSystemLimit(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs, AttrValidation validation) {
-        checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
+        checkDetailSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs,
                 Category.ACCOUNT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT, validation);
-        checkDetailSystemLimit(configs, userSelectedInactiveConfigs, userSelectedActiveConfigs,
+        checkDetailSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs,
                 Category.CONTACT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT, validation);
     }
 
-    private void checkDetailSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedInactiveConfigs,
+    private void checkDetailSystemLimit(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
             List<AttrConfig> userSelectedActiveConfigs, Category category, int limit, AttrValidation validation) {
-        List<AttrConfig> list = configs.stream()
+        List<AttrConfig> list = activeConfigs.stream()
                 .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
-        List<AttrConfig> inactiveList = userSelectedInactiveConfigs.stream()
+        List<AttrConfig> inactiveList = inactiveConfigs.stream()
                 .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
                 .collect(Collectors.toList());
         int number = list.size() - inactiveList.size();
@@ -131,17 +131,19 @@ public class ActivationLimitValidator extends AttrValidator {
             int number,
             String name, int limit, AttrValidation validation) {
         if (CollectionUtils.isEmpty(userSelectedActiveConfigs)) {
-            ValidationErrors errors = new ValidationErrors();
-            errors.getErrors().put(type, new ArrayList<>());
-            errors.getErrors().get(type).add(String.format(pattern, number, name, limit));
-            validation.setValidationErrors(errors);
-        } else {
-            ValidationErrors errors = validation.getValidationErrors();
-            if (errors.getErrors().containsKey(type)) {
-                errors.getErrors().get(type).add(String.format(pattern, number, name, limit));
-            } else {
+            if (validation.getValidationErrors() == null) {
+                ValidationErrors errors = new ValidationErrors();
                 errors.getErrors().put(type, new ArrayList<>());
                 errors.getErrors().get(type).add(String.format(pattern, number, name, limit));
+                validation.setValidationErrors(errors);
+            } else {
+                ValidationErrors errors = validation.getValidationErrors();
+                if (errors.getErrors().containsKey(type)) {
+                    errors.getErrors().get(type).add(String.format(pattern, number, name, limit));
+                } else {
+                    errors.getErrors().put(type, new ArrayList<>());
+                    errors.getErrors().get(type).add(String.format(pattern, number, name, limit));
+                }
             }
         }
 
