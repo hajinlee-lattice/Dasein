@@ -1,8 +1,10 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,6 +89,12 @@ public class CDLServiceImpl implements CDLService {
     @Value("${cdl.activity.based.pa}")
     boolean isActivityBasedPA;
 
+    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name", "Data Type");
+
+    private static final String CUSTOM = "Custom";
+    private static final String STANDARD = "Standard";
+    private static final String UNMAPPED = "unmapped";
+
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         checkPALimit(customerSpace, request);
@@ -99,7 +107,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId submitCSVImport(String customerSpace, String templateFileName, String dataFileName,
-            String source, String entity, String feedType) {
+                                         String source, String entity, String feedType) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, dataFileName, email);
@@ -112,14 +120,14 @@ public class CDLServiceImpl implements CDLService {
         }
         String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, "", metaData);
         if (StringUtils.isEmpty(taskId)) {
-            throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
+            throw new LedpException(LedpCode.LEDP_18162, new String[]{entity, source, feedType});
         }
         return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
     }
 
     @Override
     public String createS3Template(String customerSpace, String templateFileName, String source, String entity,
-            String feedType, String subType, String displayName) {
+                                   String feedType, String subType, String displayName) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
@@ -159,26 +167,26 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
-            CleanupOperationType cleanupOperationType) {
+                            CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
         switch (schemaInterpretation) {
-        case DeleteAccountTemplate:
-            entity = BusinessEntity.Account;
-            break;
-        case DeleteContactTemplate:
-            entity = BusinessEntity.Contact;
-            break;
-        case DeleteTransactionTemplate:
-            entity = BusinessEntity.Transaction;
-            break;
-        default:
-            uiAction.setTitle(DELETE_FAIL_TITLE);
-            uiAction.setView(View.Modal);
-            uiAction.setStatus(Status.Error);
-            uiAction.setMessage(generateDeleteResultMsg(String
-                    .format("<p>Cleanup operation does not support schema: %s </p>", schemaInterpretation.name())));
-            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+            case DeleteAccountTemplate:
+                entity = BusinessEntity.Account;
+                break;
+            case DeleteContactTemplate:
+                entity = BusinessEntity.Contact;
+                break;
+            case DeleteTransactionTemplate:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                uiAction.setTitle(DELETE_FAIL_TITLE);
+                uiAction.setView(View.Modal);
+                uiAction.setStatus(Status.Error);
+                uiAction.setMessage(generateDeleteResultMsg(String
+                        .format("<p>Cleanup operation does not support schema: %s </p>", schemaInterpretation.name())));
+                throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile == null) {
@@ -223,14 +231,14 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
-            SchemaInterpretation schemaInterpretation) {
+                                            SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-        case Transaction:
-            entity = BusinessEntity.Transaction;
-            break;
-        default:
-            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+            case Transaction:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         try {
@@ -244,17 +252,17 @@ public class CDLServiceImpl implements CDLService {
     public ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-        case Account:
-            entity = BusinessEntity.Account;
-            break;
-        case Contact:
-            entity = BusinessEntity.Contact;
-            break;
-        case Transaction:
-            entity = BusinessEntity.Transaction;
-            break;
-        default:
-            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+            case Account:
+                entity = BusinessEntity.Account;
+                break;
+            case Contact:
+                entity = BusinessEntity.Contact;
+                break;
+            case Transaction:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         return cdlProxy.cleanupAllData(customerSpace, entity, email);
@@ -262,7 +270,7 @@ public class CDLServiceImpl implements CDLService {
 
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
-            String email) {
+                                         String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile templateSourceFile = getSourceFile(templateFileName);
         SourceFile dataSourceFile = getSourceFile(dataFileName);
@@ -418,6 +426,74 @@ public class CDLServiceImpl implements CDLService {
             return true;
         }
         return false;
+    }
+
+    private void appendTemplateMapptingValue(StringBuffer fileContent, String value) {
+        fileContent.append(value);
+        fileContent.append(",");
+    }
+
+    // append field type for the file
+    private void appendFieldType(StringBuffer fileContent, Attribute attribute) {
+        UserDefinedType userDefinedType =
+                MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType());
+        if (userDefinedType.equals(UserDefinedType.DATE)) {
+            StringBuffer formatStr = new StringBuffer();
+            if (!StringUtils.isBlank(attribute.getDateFormatString())) {
+                formatStr.append(attribute.getDateFormatString());
+                formatStr.append(" ");
+            }
+            if (!StringUtils.isBlank(attribute.getTimeFormatString())) {
+                formatStr.append(attribute.getTimeFormatString());
+                formatStr.append(" ");
+            }
+            if (!StringUtils.isBlank(attribute.getTimezone())) {
+                formatStr.append(attribute.getTimezone());
+            }
+            if (StringUtils.isBlank(formatStr.toString())) {
+                fileContent.append(userDefinedType);
+            } else {
+                fileContent.append(formatStr.toString().trim());
+            }
+        } else {
+            fileContent.append(userDefinedType);
+        }
+    }
+
+    // get both mapped and unmapped field mappings
+    @Override
+    public String getTemplateMappingContent(Table templateTable, Table standardTable) {
+        StringBuffer fileContent = new StringBuffer();
+        for (String templateMappingHeader : templateMappingHeaders) {
+            appendTemplateMapptingValue(fileContent, templateMappingHeader);
+        }
+        fileContent.deleteCharAt(fileContent.length() - 1);
+        fileContent.append("\n");
+        Map<String, Attribute> standardAttrMap =
+                standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, Attribute -> Attribute));
+        for (Attribute attribute : templateTable.getAttributes()) {
+            if (standardAttrMap.containsKey(attribute.getName())) {
+                standardAttrMap.remove(attribute.getName());
+                appendTemplateMapptingValue(fileContent, STANDARD);
+            } else {
+                appendTemplateMapptingValue(fileContent, CUSTOM);
+            }
+            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
+            appendTemplateMapptingValue(fileContent, attribute.getName());
+            appendFieldType(fileContent, attribute);
+            fileContent.append("\n");
+        }
+        Set<Map.Entry<String, Attribute>> unmappedAttributes = standardAttrMap.entrySet();
+        for (Map.Entry<String, Attribute> entry : unmappedAttributes) {
+            Attribute attribute = entry.getValue();
+            appendTemplateMapptingValue(fileContent, STANDARD);
+            appendTemplateMapptingValue(fileContent, UNMAPPED);
+            appendTemplateMapptingValue(fileContent, attribute.getName());
+            appendFieldType(fileContent, attribute);
+            fileContent.append("\n");
+        }
+        fileContent.deleteCharAt(fileContent.length() - 1);
+        return fileContent.toString();
     }
 
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {
