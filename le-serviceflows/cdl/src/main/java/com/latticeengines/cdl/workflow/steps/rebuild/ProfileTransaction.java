@@ -454,7 +454,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         String sortingKey = InterfaceName.AccountId.name();
         config.setSortingField(sortingKey);
         config.setCompressResult(true);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, extraHeavyEngineConfig()));
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
