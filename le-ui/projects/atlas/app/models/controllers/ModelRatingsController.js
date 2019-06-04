@@ -86,8 +86,6 @@ angular.module('lp.models.ratings', [
 
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
 
-                console.log(vm.workingBuckets);
-
                 // Update UI data if user got to the UI from either the "Activate" button 
                 // or used the Iteration select menu from within the UI.
                 var id = $stateParams.modelId;
@@ -148,9 +146,12 @@ angular.module('lp.models.ratings', [
 
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
-
+        
         // Give the above code time to catch up before rendering the chart
         $timeout(function() {
+
+
+
             renderChart();
         }, 500);
     }
@@ -267,7 +268,6 @@ angular.module('lp.models.ratings', [
                 // secondVal += (score.num_leads * score.num_leads);
                 
             }
-
             bucket.conversionRate = (bucketConverted / bucketLeads) * 100;
             // bucket.conversionRate = (firstVal / secondVal) * 100;
             bucket.bucket_name = vm.bucketNames[i];

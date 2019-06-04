@@ -32,7 +32,7 @@ angular.module('lp.ratingsengine.wizard.summary', [])
 
         RatingsEngineStore.getCoverageMap(RatingsEngineModels, CurrentRatingEngine.segment.name).then(function(result) {
             var CoverageMap = vm.initCoverageMap(result);
-            console.log('[AQB] CoverageMap:', CoverageMap);
+            // console.log('[AQB] CoverageMap:', CoverageMap);
         }); 
 
         vm.getRuleRecordCounts();
