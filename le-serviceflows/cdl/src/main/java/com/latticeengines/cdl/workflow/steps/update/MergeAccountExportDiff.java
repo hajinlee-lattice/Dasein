@@ -34,4 +34,9 @@ public class MergeAccountExportDiff extends BaseMergeTableRoleDiff<ProcessAccoun
         return true;
     }
 
+    @Override
+    protected boolean failOnMissingMasterTable() {
+        return false;
+    }
+
 }
