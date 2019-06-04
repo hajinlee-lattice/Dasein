@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -713,9 +714,9 @@ public class MetadataResolver {
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
+                String trimedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
-                    String trimedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                     TemporalAccessor date = null;
                     try {
                         date = dtf.parse(trimedColumnField.trim());
@@ -725,12 +726,13 @@ public class MetadataResolver {
                     if (date != null) {
                         hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
                     }
-                    // if input field contains T&Z, will detect format with Time zone
-                    if (!useTimeZone && !trimedColumnField.equals(columnField)) {
-                        useTimeZone = true;
-                    }
+                }
+                // if input field contains T&Z, will detect format with Time zone
+                if (!useTimeZone && !trimedColumnField.equals(columnField)) {
+                    useTimeZone = true;
                 }
             }
+            
         }
         if (MapUtils.isEmpty(hitMap)) {
             return null;

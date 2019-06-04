@@ -198,10 +198,26 @@ public class MetadataResolverUnitTestNG {
 
         // case 23: date time with fraction of second
         Assert.assertTrue(metadataResolver.isDateTypeColumn(
-                Arrays.asList("2019-05-27T12:23:45.111Z", "2019-05-27T12:23:45.222+0800", "2019-05-27.444T10:23:45Z"),
+                Arrays.asList("2019-05-27T12:23:45.111Z", "2019-05-27T12:23:45.222+0800", "2019-05-27T10:23:45Z"),
                 formatForDateAndTime));
         Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
         Assert.assertEquals(formatForDateAndTime.getMiddle(), "00:00:00.000 24H");
         Assert.assertEquals(formatForDateAndTime.getRight(), TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+
+        // case 24: date time with milliseconds with T&Z
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("2019-06-04T12 23 45.111Z", "2019-04-27T12 23 45.222+0800", "2019-05-27T10 23 45Z"),
+                formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
+        Assert.assertEquals(formatForDateAndTime.getMiddle(), "00 00 00.000 24H");
+        Assert.assertEquals(formatForDateAndTime.getRight(), TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+
+        // case 25: date time with milliseconds without T&Z
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("2019-06-04 12-23-45.111", "2019-04-27 12-23-45.222", "2019-05-27 10-23-45"),
+                formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
+        Assert.assertEquals(formatForDateAndTime.getMiddle(), "00-00-00.000 24H");
+        Assert.assertNull(formatForDateAndTime.getRight());
     }
 }

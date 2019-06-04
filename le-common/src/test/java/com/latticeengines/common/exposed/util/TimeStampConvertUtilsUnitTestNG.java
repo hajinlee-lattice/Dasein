@@ -266,6 +266,26 @@ public class TimeStampConvertUtilsUnitTestNG {
         // From https://solutions.lattice-engines.com/browse/DP-10017
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z", "", "", "");
         Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 23: Test case where time is in ISO 8601 with time, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 24: Test case where time is in ISO 8601 with time, milliseconds, date
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 25: Test case where time is not in ISO 8601 with time, ms, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31:04.123", "YYYY/MM/DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 26: Test case where time is not in ISO 8601 with time, ms, date,
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23-31-04.123", "YYYY/MM/DD", "00-00-00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
     }
 
     // Test stripping out T and Z from dates in ISO 8601 format.

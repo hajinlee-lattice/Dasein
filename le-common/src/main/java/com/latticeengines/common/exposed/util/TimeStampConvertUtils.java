@@ -135,8 +135,8 @@ public class TimeStampConvertUtils {
     static {
         //                         User Time Zone               Java Time Zone             UTC Offset when in Standard
         //                                                                               (Non-Daylight Savings) Time
-        userToJavaTimeZoneMap.put("Time Zone is Part of Value", "ISO 8601");                // User Time Zone for ISO 8601
         userToJavaTimeZoneMap.put("UTC",                        "UTC");                     // UTC
+        userToJavaTimeZoneMap.put(SYSTEM_USER_TIME_ZONE,        SYSTEM_JAVA_TIME_ZONE);     // User Time Zone for ISO 8601
         userToJavaTimeZoneMap.put("Africa/Accra",               "Africa/Accra");            // UTC
         userToJavaTimeZoneMap.put("Africa/Cairo",               "Africa/Cairo");            // UTC+2
         userToJavaTimeZoneMap.put("Africa/Lagos",               "Africa/Lagos");            // UTC+1
@@ -461,7 +461,7 @@ public class TimeStampConvertUtils {
                         if (userToJavaTimeZoneMap.containsKey(userTimeZoneStr)) {
                             log.debug("Found user defined time zone: " + userTimeZoneStr);
                             String javaTimeZoneStr = userToJavaTimeZoneMap.get(userTimeZoneStr);
-                            if (javaTimeZoneStr.equals("ISO 8601")) {
+                            if (javaTimeZoneStr.equals(SYSTEM_USER_TIME_ZONE)) {
                                 javaTimeZoneStr = "UTC";
                             }
                             log.debug("Java time zone string is: " + javaTimeZoneStr);
