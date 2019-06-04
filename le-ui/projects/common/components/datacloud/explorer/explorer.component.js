@@ -935,13 +935,14 @@ export default function (
                 ret.push(category);
             }
         });
+        DataCloudStore.setPresentCategories(ret);
         return ret;
     }
 
     vm.processCategories = function () {
-        //console.log(EnrichmentTopAttributes);
-        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+        // console.log(EnrichmentTopAttributes);
 
+        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
             DataCloudStore.topCategories.forEach(function (category, index) {
                 if (vm.categories.indexOf(category) >= 0) {

@@ -4,7 +4,7 @@ angular
         $state, $rootScope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
         SegmentStore, HealthService, QueryTreeService, ModelStore,
-        TopPredictorService, RatingsEngineStore, Banner
+        TopPredictorService, RatingsEngineStore, Banner, EnrichmentTopAttributes
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -79,6 +79,7 @@ angular
             DataCloudStore.getEnrichments().then((result) => {
                 vm.enrichments = result;
             });
+
         };
 
         vm.getPickerItem = function () {
@@ -98,16 +99,30 @@ angular
                         return item.HasWarnings;
                     }).length;
                 case 'disabled':
-                    return vm.enrichments.filter((item) => {
+
+                    var disabled = vm.enrichments.filter((item) => {
                         return item.ApprovedUsage[0] == 'None';
-                    }).length;
+                    });                    
+                    // console.log( disabled.length );
+                    // console.log( disabled );
+
+                    return disabled.length;
+                    // return vm.enrichments.filter((item) => {
+                    //     return item.ApprovedUsage[0] == 'None';
+                    // }).length;
             };
 
             return 0;
         }
 
-        vm.clickIterationFilter = function (type) {
+        vm.clickIterationFilter = function (type) {            
             DataCloudStore.ratingIterationFilter = type;
+            if (vm.section == 're.model_iteration') {
+                var presentCategories = DataCloudStore.getPresentCategories();
+                if (presentCategories.length > 0) {
+                    DataCloudStore.setMetadata('category', presentCategories[0]);
+                }
+            }
         }
 
         vm.checkIterationFilter = function (type) {
