@@ -40,14 +40,16 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
     protected MetadataProxy metadataProxy;
 
     private Table masterTable;
-    private Table diffTable;
-
-    String mergedTableName;
+    private String mergedTableName;
 
     protected abstract TableRoleInCollection getTableRole();
 
     protected boolean saveParquet() {
         return false;
+    }
+
+    protected boolean failOnMissingMasterTable() {
+        return true;
     }
 
     @Override
@@ -65,11 +67,17 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), getTableRole(), active);
         if (masterTable == null || CollectionUtils.isEmpty(masterTable.getExtracts())) {
-            throw new RuntimeException("There is no " + getTableRole() + " master table! " +
-                    "Please rebuild the serving store first.");
+            String msg = "There is no " + getTableRole() + " master table! Please rebuild the serving store first.";
+            if (failOnMissingMasterTable()) {
+                throw new RuntimeException(msg);
+            } else {
+                log.warn(msg);
+                return null;
+            }
         }
+
         log.info("Set masterTable=" + masterTable.getName());
-        diffTable = getDiffTable();
+        Table diffTable = getDiffTable();
         if (diffTable == null) {
             throw new RuntimeException(
                     "Failed to find diff " + getTableRole() + " table in customer " + customerSpace);
