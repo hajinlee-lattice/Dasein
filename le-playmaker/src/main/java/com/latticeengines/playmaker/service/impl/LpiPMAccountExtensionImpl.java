@@ -125,7 +125,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             for (int page = 0; page < pagesRequired; page++) {
                 long currentOffset = offset + (page * MAX_ROWS);
                 internalAccountIds.addAll(getInternalAccountsIdViaObjectApi(customerSpace, accountIds, lookupIdColumn,
-                        start, currentOffset, Math.min(maximum, maximum - currentOffset)));
+                        start, currentOffset, Math.min(MAX_ROWS, maximum - (page * MAX_ROWS))));
             }
         }
 
