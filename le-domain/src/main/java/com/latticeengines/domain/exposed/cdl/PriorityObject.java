@@ -22,30 +22,37 @@ public class PriorityObject implements Comparable<PriorityObject> {
     @JsonProperty("invoke_time")
     private Long invokeTime;
 
+    @JsonProperty("retry")
+    private int retry;
+
     @Override
     public int compareTo(PriorityObject o) {
         long middleResult = o.getScheduleNow() - this.scheduleNow;
+        long retryResult = o.getRetry() - this.retry;
         if (middleResult != 0) {
-            return middleResult > 0? 1 : -1;
+            return middleResult > 0 ? 1 : -1;
         } else {
+            if (retryResult != 0) {
+                return retryResult > 0 ? 1 : -1;
+            }
             if (scheduleNow == 1) {
                 middleResult = this.scheduleTime - o.getScheduleTime();
-                return middleResult < 0? -1 : 1;
+                return middleResult < 0 ? -1 : 1;
             } else {
                 middleResult = this.invokeTime - o.getInvokeTime();
                 if (middleResult != 0) {
-                    return middleResult < 0? -1 : 1;
+                    return middleResult < 0 ? -1 : 1;
                 } else {
                     if (this.invokeTime != 0) {
                         middleResult = this.firstActionTime - o.getFirstActionTime();
-                        return middleResult < 0? -1 : 1;
+                        return middleResult < 0 ? -1 : 1;
                     } else {//no scheduleNow, no invokeTime, judge dataCloudRefresh
                         middleResult = o.getDataCloudRefresh() - this.dataCloudRefresh;
                         if (middleResult != 0) {
-                            return middleResult < 0? -1 : 1;
+                            return middleResult < 0 ? -1 : 1;
                         } else {//judge the firstActionTime
                             middleResult = this.firstActionTime - o.getFirstActionTime();
-                            return middleResult < 0? -1 : 1;
+                            return middleResult < 0 ? -1 : 1;
                         }
                     }
                 }
@@ -60,7 +67,8 @@ public class PriorityObject implements Comparable<PriorityObject> {
                             this.scheduleNow - o.getScheduleNow() +
                             this.scheduleTime - o.getScheduleTime() +
                             this.invokeTime - o.getInvokeTime() +
-                            this.dataCloudRefresh - o.getDataCloudRefresh();
+                            this.dataCloudRefresh - o.getDataCloudRefresh() +
+                            this.retry - o.getRetry();
             return result == 0L;
         }
         return false;
@@ -72,6 +80,7 @@ public class PriorityObject implements Comparable<PriorityObject> {
         this.scheduleTime = o.getScheduleTime();
         this.scheduleNow = o.getScheduleNow();
         this.firstActionTime = o.getFirstActionTime();
+        this.retry = o.getRetry();
     }
 
     public int getDataCloudRefresh() {
@@ -122,4 +131,11 @@ public class PriorityObject implements Comparable<PriorityObject> {
         return tenantName;
     }
 
+    public int getRetry() {
+        return retry;
+    }
+
+    public void setRetry(int retry) {
+        this.retry = retry;
+    }
 }
