@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.orchestration.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,8 @@ import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationPro
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
+import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
@@ -52,6 +55,9 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
         if (orch.getConfig() instanceof PredefinedScheduleConfig) {
             PredefinedScheduleConfig config = (PredefinedScheduleConfig) orch.getConfig();
             if (StringUtils.isBlank(config.getCronExpression())) {
+                return false;
+            }
+            if (hasJobInProgress(orch)) {// OrchestrationProgressService.
                 return false;
             } else {
                 Date latestScheduledTime = CronUtils.getPreviousFireTimeByCron(config.getCronExpression());
@@ -96,5 +102,24 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
     private boolean isDuplicateVersion(String orchName, String version) {
         return orchestrationProgressEntityMgr.isDuplicateVersion(orchName, version);
     }
+
+    private boolean hasJobInProgress(Orchestration orch) {
+        Map<String, Object> field1 = new HashMap<String, Object>();
+        Map<String, Object> field2 = new HashMap<String, Object>();
+        field1.put("name", orch.getName());
+        field2.put("name", orch.getName());
+        field1.put("ProgressStatus", ProgressStatus.PROCESSING);
+        field2.put("ProgressStatus", ProgressStatus.NEW);
+        List<String> orderFields = new ArrayList<>();
+        List<OrchestrationProgress> progresses = new ArrayList<>();
+        List<OrchestrationProgress> progress1 = orchestrationProgressEntityMgr.findProgressesByField(field1,
+                orderFields);
+        List<OrchestrationProgress> progress2 = orchestrationProgressEntityMgr.findProgressesByField(field2,
+                orderFields);
+        progresses.addAll(progress1);
+        progresses.addAll(progress2);
+        return progresses.isEmpty();
+    }
+
 
 }

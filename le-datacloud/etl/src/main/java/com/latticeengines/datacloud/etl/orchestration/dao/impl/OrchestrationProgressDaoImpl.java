@@ -28,33 +28,32 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
 
     /*
      * Map Fields: ColumnName -> Value Requires to pass in column name in table,
-     * not variable name in OrchestrationProgress entity class
+     * not variable name in OrchestrationProgress entity class, also foreign key
+     * not working using column name
      */
+
     @SuppressWarnings("unchecked")
     @Override
+
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
-        StringBuilder sb = new StringBuilder();
-        for (String column : fields.keySet()) {
-            sb.append(column + " = :" + column + " and ");
-        }
         String orderStr = "";
         if (CollectionUtils.isNotEmpty(orderFields)) {
             orderStr = "order by " + String.join(", ", orderFields);
         }
-        String queryStr = String.format("from %s where %s %s", entityClz.getSimpleName(),
-                sb.substring(0, sb.length() - 4), orderStr);
+        String queryStr = String.format(
+                "from %s p where p.orchestration.name = :name and p.status = :ProgressStatus %s",
+                entityClz.getSimpleName(), orderStr);
         Query<OrchestrationProgress> query = session.createQuery(queryStr);
+
         for (String column : fields.keySet()) {
-            if (fields.get(column).getClass().isEnum()) {
-                query.setParameter(column, fields.get(column).toString());
-            } else {
                 query.setParameter(column, fields.get(column));
-            }
         }
+
         return query.list();
     }
+
 
     @Override
     public boolean isDuplicateVersion(String orchName, String version) {
