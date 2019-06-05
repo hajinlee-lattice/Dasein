@@ -247,15 +247,16 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18219,
                     new String[] { "ChannelId is not the same for the Play launch channel being updated" });
         }
+        PlayLaunch playLaunch = null;
         if (playLaunchChannel.getPlayLaunch() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot update a Play launch Channel without play launch id" });
+            playLaunch = new PlayLaunch();
+        } else {
+            playLaunch = playLaunchChannel.getPlayLaunch();
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
-        PlayLaunch playLaunch = playLaunchChannel.getPlayLaunch();
         playLaunch.setPlay(play);
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
