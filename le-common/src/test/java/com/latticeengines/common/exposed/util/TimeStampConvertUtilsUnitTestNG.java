@@ -27,13 +27,21 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test that all the supported Java time zones are valid Java time zones.
         Set<String> timeZoneIds = new LinkedHashSet<>(Arrays.asList(getAvailableTimeZoneIDs()));
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertFalse(timeZoneIds.contains(javaTimeZones));
+            } else {
+                Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            }
         }
 
         // Test that when processed, the Java time zones return the correct string.  This test is needed because
         // if Java fails to convert a TimeZone to a ZoneId, it silently fails and returns "GMT" as the ZoneId.
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), "GMT");
+            } else {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
+            }
             log.info("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
                     + TimeZone.getTimeZone(javaTimeZones).toZoneId());
         }
@@ -258,6 +266,26 @@ public class TimeStampConvertUtilsUnitTestNG {
         // From https://solutions.lattice-engines.com/browse/DP-10017
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z", "", "", "");
         Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 23: Test case where time is in ISO 8601 with time, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 24: Test case where time is in ISO 8601 with time, milliseconds, date
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 25: Test case where time is not in ISO 8601 with time, ms, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31:04.123", "YYYY/MM/DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 26: Test case where time is not in ISO 8601 with time, ms, date,
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23-31-04.123", "YYYY/MM/DD", "00-00-00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
     }
 
     // Test stripping out T and Z from dates in ISO 8601 format.

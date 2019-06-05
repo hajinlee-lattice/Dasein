@@ -34,11 +34,15 @@ public class TimeStampConvertUtils {
 
     private static final Pattern MONTH = Pattern.compile("([a-zA-Z])([a-zA-Z]{2,})");
 
+    public static final String SYSTEM_JAVA_TIME_ZONE = "ISO 8601";
+
+    public static final String SYSTEM_USER_TIME_ZONE = "Time Zone is Part of Value";
+
     // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
     // and optional "Z" at the end.
     public static final Pattern TZ_DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
-                    + "(\\d{1,2}((:\\d{1,2}){1,2}|(-\\d{1,2}){1,2}|( \\d{1,2}){1,2})(\\s+[aApP][mM])?)[Zz]?");
+                    + "(\\d{1,2}((:\\d{1,2}(:\\d{1,2}(\\.\\d{3})?)?)|(-\\d{1,2}(-\\d{1,2}(\\.\\d{3})?)?)|( \\d{1,2}( \\d{1,2}(\\.\\d{3})?)?))(\\s+[aApP][mM])?)[Zz]?");
 
     // Regular expression pattern to match all current date/time formats.
     private static final Pattern DATE_TIME = Pattern.compile(
@@ -54,10 +58,12 @@ public class TimeStampConvertUtils {
     // Mapping from user exposed time zone format to Java 8 supported time zones.
     private static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
 
-    // Reverse mapping from Java 8 date/time library date format to user exposed format.
+    // Reverse mapping from Java 8 date library date format to user exposed format.
     private static final Map<String, String> javaToUserDateFormatMap = new LinkedHashMap<>();
-    // Reverse mapping from Java 8 date/time library time format to user exposed format.
+    // Reverse mapping from Java 8 time library time format to user exposed format.
     private static final Map<String, String> javaToUserTimeFormatMap = new LinkedHashMap<>();
+    // Reverse mapping from Java 8 timezone format to user exposed format.
+    private static final Map<String, String> javaToUserTimeZoneMap = new LinkedHashMap<>();
 
     // List of all supported java date + time and date only formats.
     public static final List<String> SUPPORTED_JAVA_DATE_TIME_FORMATS = new ArrayList<>();
@@ -106,10 +112,16 @@ public class TimeStampConvertUtils {
 
         userToJavaTimeFormatMap.put("00:00:00 12H", "h:m:s a");
         userToJavaTimeFormatMap.put("00:00:00 24H", "H:m:s");
+        userToJavaTimeFormatMap.put("00:00:00.000 12H", "h:m:s.SSS a");
+        userToJavaTimeFormatMap.put("00:00:00.000 24H", "H:m:s.SSS");
         userToJavaTimeFormatMap.put("00-00-00 12H", "h-m-s a");
         userToJavaTimeFormatMap.put("00-00-00 24H", "H-m-s");
+        userToJavaTimeFormatMap.put("00-00-00.000 12H", "h-m-s.SSS a");
+        userToJavaTimeFormatMap.put("00-00-00.000 24H", "H-m-s.SSS");
         userToJavaTimeFormatMap.put("00 00 00 12H", "h m s a");
         userToJavaTimeFormatMap.put("00 00 00 24H", "H m s");
+        userToJavaTimeFormatMap.put("00 00 00.000 12H", "h m s.SSS a");
+        userToJavaTimeFormatMap.put("00 00 00.000 24H", "H m s.SSS");
 
         userToJavaTimeFormatMap.put("00:00 12H", "h:m a");
         userToJavaTimeFormatMap.put("00:00 24H", "H:m");
@@ -121,69 +133,70 @@ public class TimeStampConvertUtils {
 
     // Set up static mappings for user exposed time zone format to Java 8 format.
     static {
-        //                         User Time Zone             Java Time Zone             UTC Offset when in Standard
+        //                         User Time Zone               Java Time Zone             UTC Offset when in Standard
         //                                                                               (Non-Daylight Savings) Time
-        userToJavaTimeZoneMap.put("UTC",                     "UTC");                     // UTC
-        userToJavaTimeZoneMap.put("Africa/Accra",            "Africa/Accra");            // UTC
-        userToJavaTimeZoneMap.put("Africa/Cairo",            "Africa/Cairo");            // UTC+2
-        userToJavaTimeZoneMap.put("Africa/Lagos",            "Africa/Lagos");            // UTC+1
-        userToJavaTimeZoneMap.put("America/Anchorage",       "America/Anchorage");       // UTC-9
-        userToJavaTimeZoneMap.put("America/Buenos_Aires",    "America/Buenos_Aires");    // UTC-3
-        userToJavaTimeZoneMap.put("America/Chicago",         "America/Chicago");         // UTC-6
-        userToJavaTimeZoneMap.put("America/Halifax",         "America/Halifax");         // UTC-4
-        userToJavaTimeZoneMap.put("America/Lima",            "America/Lima");            // UTC-5
-        userToJavaTimeZoneMap.put("America/Los_Angeles",     "America/Los_Angeles");     // UTC-8
-        userToJavaTimeZoneMap.put("America/Mexico_City",     "America/Mexico_City");     // UTC-6
-        userToJavaTimeZoneMap.put("America/New_York",        "America/New_York");        // UTC-5
-        userToJavaTimeZoneMap.put("America/Phoenix",         "America/Phoenix");         // UTC-7
-        userToJavaTimeZoneMap.put("America/Santiago",        "America/Santiago");        // UTC-4
-        userToJavaTimeZoneMap.put("America/Sao_Paulo",       "America/Sao_Paulo");       // UTC-3
-        userToJavaTimeZoneMap.put("America/St_Johns",        "America/St_Johns");        // UTC-3:30
-        userToJavaTimeZoneMap.put("Asia/Almaty",             "Asia/Almaty");             // UTC+6
-        userToJavaTimeZoneMap.put("Asia/Baku",               "Asia/Baku");               // UTC+4
-        userToJavaTimeZoneMap.put("Asia/Bangkok",            "Asia/Bangkok");            // UTC+7
-        userToJavaTimeZoneMap.put("Asia/Colombo",            "Asia/Colombo");            // UTC+5:30
-        userToJavaTimeZoneMap.put("Asia/Dhaka",              "Asia/Dhaka");              // UTC+6
-        userToJavaTimeZoneMap.put("Asia/Dubai",              "Asia/Dubai");              // UTC+4
-        userToJavaTimeZoneMap.put("Asia/Istanbul",           "Asia/Istanbul");           // UTC+3
-        userToJavaTimeZoneMap.put("Asia/Jakarta",            "Asia/Jakarta");            // UTC+7
-        userToJavaTimeZoneMap.put("Asia/Kabul",              "Asia/Kabul");              // UTC+4:30
-        userToJavaTimeZoneMap.put("Asia/Kamchatka",          "Asia/Kamchatka");          // UTC+12
-        userToJavaTimeZoneMap.put("Asia/Karachi",            "Asia/Karachi");            // UTC+5
-        userToJavaTimeZoneMap.put("Asia/Kathmandu",          "Asia/Kathmandu");          // UTC+5:45
-        userToJavaTimeZoneMap.put("Asia/Kolkata",            "Asia/Kolkata");            // UTC+5:30
-        userToJavaTimeZoneMap.put("Asia/Sakhalin",           "Asia/Sakhalin");           // UTC+11
-        userToJavaTimeZoneMap.put("Asia/Seoul",              "Asia/Seoul");              // UTC+9
-        userToJavaTimeZoneMap.put("Asia/Shanghai",           "Asia/Shanghai");           // UTC+8
-        userToJavaTimeZoneMap.put("Asia/Tashkent",           "Asia/Tashkent");           // UTC+5
-        userToJavaTimeZoneMap.put("Asia/Tehran",             "Asia/Tehran");             // UTC+3:30
-        userToJavaTimeZoneMap.put("Asia/Tokyo",              "Asia/Tokyo");              // UTC+9
-        userToJavaTimeZoneMap.put("Asia/Yangon",             "Asia/Yangon");             // UTC+6:30
-        userToJavaTimeZoneMap.put("Atlantic/Azores",         "Atlantic/Azores");         // UTC-1
-        userToJavaTimeZoneMap.put("Atlantic/Cape_Verde",     "Atlantic/Cape_Verde");     // UTC-1
-        userToJavaTimeZoneMap.put("Atlantic/South_Georgia",  "Atlantic/South_Georgia");  // UTC-2
-        userToJavaTimeZoneMap.put("Australia/Adelaide",      "Australia/Adelaide");      // UTC+9:30
-        userToJavaTimeZoneMap.put("Australia/Eucla",         "Australia/Eucla");         // UTC+8:45
-        userToJavaTimeZoneMap.put("Australia/Lord_Howe",     "Australia/Lord_Howe");     // UTC+10:30
-        userToJavaTimeZoneMap.put("Australia/Perth",         "Australia/Perth");         // UTC+8
-        userToJavaTimeZoneMap.put("Australia/Sydney",        "Australia/Sydney");        // UTC+10
-        userToJavaTimeZoneMap.put("Brazil/DeNoronha",        "Brazil/DeNoronha");        // UTC-2
-        userToJavaTimeZoneMap.put("Europe/Berlin",           "Europe/Berlin");           // UTC+1
-        userToJavaTimeZoneMap.put("Europe/Kiev",             "Europe/Kiev");             // UTC+2
-        userToJavaTimeZoneMap.put("Europe/London",           "Europe/London");           // UTC
-        userToJavaTimeZoneMap.put("Europe/Moscow",           "Europe/Moscow");           // UTC+3
-        userToJavaTimeZoneMap.put("Indian/Cocos",            "Indian/Cocos");            // UTC+6:30
-        userToJavaTimeZoneMap.put("Military/Yankee",         "Etc/GMT+12");              // UTC-12
-        userToJavaTimeZoneMap.put("Pacific/Apia",            "Pacific/Apia");            // UTC+13
-        userToJavaTimeZoneMap.put("Pacific/Auckland",        "Pacific/Auckland");        // UTC+12
-        userToJavaTimeZoneMap.put("Pacific/Guam",            "Pacific/Guam");            // UTC+10
-        userToJavaTimeZoneMap.put("Pacific/Noumea",          "Pacific/Noumea");          // UTC+11
-        userToJavaTimeZoneMap.put("Pacific/Chatham",         "Pacific/Chatham");         // UTC+12:45
-        userToJavaTimeZoneMap.put("Pacific/Honolulu",        "Pacific/Honolulu");        // UTC-10
-        userToJavaTimeZoneMap.put("Pacific/Kiritimati",      "Pacific/Kiritimati");      // UTC+14
-        userToJavaTimeZoneMap.put("Pacific/Marquesas",       "Pacific/Marquesas");       // UTC-9:30
-        userToJavaTimeZoneMap.put("Pacific/Pago_Pago",       "Pacific/Pago_Pago");       // UTC-11
-        userToJavaTimeZoneMap.put("Pacific/Tongatapu",       "Pacific/Tongatapu");       // UTC+13
+        userToJavaTimeZoneMap.put("UTC",                        "UTC");                     // UTC
+        userToJavaTimeZoneMap.put(SYSTEM_USER_TIME_ZONE,        SYSTEM_JAVA_TIME_ZONE);     // User Time Zone for ISO 8601
+        userToJavaTimeZoneMap.put("Africa/Accra",               "Africa/Accra");            // UTC
+        userToJavaTimeZoneMap.put("Africa/Cairo",               "Africa/Cairo");            // UTC+2
+        userToJavaTimeZoneMap.put("Africa/Lagos",               "Africa/Lagos");            // UTC+1
+        userToJavaTimeZoneMap.put("America/Anchorage",          "America/Anchorage");       // UTC-9
+        userToJavaTimeZoneMap.put("America/Buenos_Aires",       "America/Buenos_Aires");    // UTC-3
+        userToJavaTimeZoneMap.put("America/Chicago",            "America/Chicago");         // UTC-6
+        userToJavaTimeZoneMap.put("America/Halifax",            "America/Halifax");         // UTC-4
+        userToJavaTimeZoneMap.put("America/Lima",               "America/Lima");            // UTC-5
+        userToJavaTimeZoneMap.put("America/Los_Angeles",        "America/Los_Angeles");     // UTC-8
+        userToJavaTimeZoneMap.put("America/Mexico_City",        "America/Mexico_City");     // UTC-6
+        userToJavaTimeZoneMap.put("America/New_York",           "America/New_York");        // UTC-5
+        userToJavaTimeZoneMap.put("America/Phoenix",            "America/Phoenix");         // UTC-7
+        userToJavaTimeZoneMap.put("America/Santiago",           "America/Santiago");        // UTC-4
+        userToJavaTimeZoneMap.put("America/Sao_Paulo",          "America/Sao_Paulo");       // UTC-3
+        userToJavaTimeZoneMap.put("America/St_Johns",           "America/St_Johns");        // UTC-3:30
+        userToJavaTimeZoneMap.put("Asia/Almaty",                "Asia/Almaty");             // UTC+6
+        userToJavaTimeZoneMap.put("Asia/Baku",                  "Asia/Baku");               // UTC+4
+        userToJavaTimeZoneMap.put("Asia/Bangkok",               "Asia/Bangkok");            // UTC+7
+        userToJavaTimeZoneMap.put("Asia/Colombo",               "Asia/Colombo");            // UTC+5:30
+        userToJavaTimeZoneMap.put("Asia/Dhaka",                 "Asia/Dhaka");              // UTC+6
+        userToJavaTimeZoneMap.put("Asia/Dubai",                 "Asia/Dubai");              // UTC+4
+        userToJavaTimeZoneMap.put("Asia/Istanbul",              "Asia/Istanbul");           // UTC+3
+        userToJavaTimeZoneMap.put("Asia/Jakarta",               "Asia/Jakarta");            // UTC+7
+        userToJavaTimeZoneMap.put("Asia/Kabul",                 "Asia/Kabul");              // UTC+4:30
+        userToJavaTimeZoneMap.put("Asia/Kamchatka",             "Asia/Kamchatka");          // UTC+12
+        userToJavaTimeZoneMap.put("Asia/Karachi",               "Asia/Karachi");            // UTC+5
+        userToJavaTimeZoneMap.put("Asia/Kathmandu",             "Asia/Kathmandu");          // UTC+5:45
+        userToJavaTimeZoneMap.put("Asia/Kolkata",               "Asia/Kolkata");            // UTC+5:30
+        userToJavaTimeZoneMap.put("Asia/Sakhalin",              "Asia/Sakhalin");           // UTC+11
+        userToJavaTimeZoneMap.put("Asia/Seoul",                 "Asia/Seoul");              // UTC+9
+        userToJavaTimeZoneMap.put("Asia/Shanghai",              "Asia/Shanghai");           // UTC+8
+        userToJavaTimeZoneMap.put("Asia/Tashkent",              "Asia/Tashkent");           // UTC+5
+        userToJavaTimeZoneMap.put("Asia/Tehran",                "Asia/Tehran");             // UTC+3:30
+        userToJavaTimeZoneMap.put("Asia/Tokyo",                 "Asia/Tokyo");              // UTC+9
+        userToJavaTimeZoneMap.put("Asia/Yangon",                "Asia/Yangon");             // UTC+6:30
+        userToJavaTimeZoneMap.put("Atlantic/Azores",            "Atlantic/Azores");         // UTC-1
+        userToJavaTimeZoneMap.put("Atlantic/Cape_Verde",        "Atlantic/Cape_Verde");     // UTC-1
+        userToJavaTimeZoneMap.put("Atlantic/South_Georgia",     "Atlantic/South_Georgia");  // UTC-2
+        userToJavaTimeZoneMap.put("Australia/Adelaide",         "Australia/Adelaide");      // UTC+9:30
+        userToJavaTimeZoneMap.put("Australia/Eucla",            "Australia/Eucla");         // UTC+8:45
+        userToJavaTimeZoneMap.put("Australia/Lord_Howe",        "Australia/Lord_Howe");     // UTC+10:30
+        userToJavaTimeZoneMap.put("Australia/Perth",            "Australia/Perth");         // UTC+8
+        userToJavaTimeZoneMap.put("Australia/Sydney",           "Australia/Sydney");        // UTC+10
+        userToJavaTimeZoneMap.put("Brazil/DeNoronha",           "Brazil/DeNoronha");        // UTC-2
+        userToJavaTimeZoneMap.put("Europe/Berlin",              "Europe/Berlin");           // UTC+1
+        userToJavaTimeZoneMap.put("Europe/Kiev",                "Europe/Kiev");             // UTC+2
+        userToJavaTimeZoneMap.put("Europe/London",              "Europe/London");           // UTC
+        userToJavaTimeZoneMap.put("Europe/Moscow",              "Europe/Moscow");           // UTC+3
+        userToJavaTimeZoneMap.put("Indian/Cocos",               "Indian/Cocos");            // UTC+6:30
+        userToJavaTimeZoneMap.put("Military/Yankee",            "Etc/GMT+12");              // UTC-12
+        userToJavaTimeZoneMap.put("Pacific/Apia",               "Pacific/Apia");            // UTC+13
+        userToJavaTimeZoneMap.put("Pacific/Auckland",           "Pacific/Auckland");        // UTC+12
+        userToJavaTimeZoneMap.put("Pacific/Guam",               "Pacific/Guam");            // UTC+10
+        userToJavaTimeZoneMap.put("Pacific/Noumea",             "Pacific/Noumea");          // UTC+11
+        userToJavaTimeZoneMap.put("Pacific/Chatham",            "Pacific/Chatham");         // UTC+12:45
+        userToJavaTimeZoneMap.put("Pacific/Honolulu",           "Pacific/Honolulu");        // UTC-10
+        userToJavaTimeZoneMap.put("Pacific/Kiritimati",         "Pacific/Kiritimati");      // UTC+14
+        userToJavaTimeZoneMap.put("Pacific/Marquesas",          "Pacific/Marquesas");       // UTC-9:30
+        userToJavaTimeZoneMap.put("Pacific/Pago_Pago",          "Pacific/Pago_Pago");       // UTC-11
+        userToJavaTimeZoneMap.put("Pacific/Tongatapu",          "Pacific/Tongatapu");       // UTC+13
     }
 
     // Set up format data structures for autodetection of formats during user data import workflow.
@@ -194,6 +207,10 @@ public class TimeStampConvertUtils {
 
         for (Map.Entry<String, String> userJavaTimeFormat : userToJavaTimeFormatMap.entrySet()) {
             javaToUserTimeFormatMap.put(userJavaTimeFormat.getValue(), userJavaTimeFormat.getKey());
+        }
+
+        for (Map.Entry<String, String> userjavaTimeZoneFormat : userToJavaTimeZoneMap.entrySet()) {
+            javaToUserTimeZoneMap.put(userjavaTimeZoneFormat.getValue(), userjavaTimeZoneFormat.getKey());
         }
 
         // Construct all supported java date + time formats (included date only formats).
@@ -258,6 +275,10 @@ public class TimeStampConvertUtils {
 
     public static String mapJavaToUserTimeFormat(String javaTimeFormat) {
         return javaToUserTimeFormatMap.get(javaTimeFormat);
+    }
+
+    public static String mapJavaToUserTimeZone(String javaTimeZone) {
+        return javaToUserTimeZoneMap.get(javaTimeZone);
     }
 
     // Simple method for date conversion which assumes one of five basic date only formats.
@@ -440,6 +461,9 @@ public class TimeStampConvertUtils {
                         if (userToJavaTimeZoneMap.containsKey(userTimeZoneStr)) {
                             log.debug("Found user defined time zone: " + userTimeZoneStr);
                             String javaTimeZoneStr = userToJavaTimeZoneMap.get(userTimeZoneStr);
+                            if (javaTimeZoneStr.equals(SYSTEM_USER_TIME_ZONE)) {
+                                javaTimeZoneStr = "UTC";
+                            }
                             log.debug("Java time zone string is: " + javaTimeZoneStr);
                             zoneId = TimeZone.getTimeZone(javaTimeZoneStr).toZoneId();
                         } else {
