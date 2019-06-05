@@ -258,9 +258,11 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                     // verifying type of the argument
                     Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
                 }
-            } else { // verifying columns which need to be dropped are really dropped
-                Assert.assertTrue(argsToBeDropped.contains(attrName));// checking for attrs : IsPublicDomain, IsMatched
-                Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
+            } else { // verifying IsPublicDomain, IsMatched which need to be dropped are really dropped
+                if(argsToBeDropped.contains(attrName)) {
+                    Assert.assertTrue(argsToBeDropped.contains(attrName));// checking for attrs : IsPublicDomain, IsMatched
+                    Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
+                }
             }
         }
         Assert.assertEquals(count, amfields.size());
@@ -269,20 +271,23 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         Assert.assertTrue(mustPresentItemsSet.isEmpty()); // verify all mustPresentItem list is all covered
     }
 
-    private void verifyTargetSrcAvro(Iterator<GenericRecord> records, List<String> strAttrs) {
+    private void verifyTargetSrcAvro(Iterator<GenericRecord> records, List<String> strAttrs,
+            Map<String, String> mapFieldType) {
         Set<String> mustPresentSet = new HashSet<>(mustPresentItems);
         Set<Object> removeItemSet = new HashSet<>();
+        // verifying all the mustPresentList attributes are present
+        Iterator<String> iterSet = mustPresentSet.iterator();
+        while (iterSet.hasNext()) {
+            Object itemVal = iterSet.next();
+            if (mapFieldType.containsKey(itemVal.toString())) {
+                removeItemSet.add(itemVal);
+            }
+        }
+        mustPresentSet.removeAll(removeItemSet);
+        Assert.assertTrue(mustPresentSet.size() == 0);
         // check value of these attributes for all the records
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            // verifying all the mustPresentList attributes are present
-            Iterator<String> iterSet = mustPresentSet.iterator();
-            while (iterSet.hasNext()) {
-                Object itemVal = iterSet.next();
-                if (record.get(itemVal.toString()) != null) {
-                    removeItemSet.add(itemVal);
-                }
-            }
             // verifying LatticeAccountId exists with String type and value all populated
             Object latticeAccId = record.get(DataCloudConstants.LATTICE_ACCOUNT_ID);
             Assert.assertTrue(latticeAccId instanceof String || latticeAccId instanceof Utf8);
@@ -294,15 +299,13 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             Assert.assertTrue(latticeId != null);
             // Verifying no String attribute exists with empty string "" (should all be replaced by null)
             for (int i = 0; i < strAttrs.size(); i++) {
-                Object objVal = record.get(strAttrs.get(i));
-                String strVal = (objVal == null) ? null : String.valueOf(objVal);
+                Object strVal = record.get(strAttrs.get(i));
                 if (strVal != null) {
-                    Assert.assertFalse(strVal.isEmpty());
+                    Assert.assertFalse(StringUtils.isBlank(strVal.toString()));
                 }
+
             }
         }
-        mustPresentSet.removeAll(removeItemSet);
-        Assert.assertTrue(mustPresentSet.size() == 0);
     }
 
     @Override
@@ -328,6 +331,6 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             throw new RuntimeException(e);
         }
         // verifying srcAttrs record Value Data
-        verifyTargetSrcAvro(records, strAttrs);
+        verifyTargetSrcAvro(records, strAttrs, mapFieldType);
     }
 }
