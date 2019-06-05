@@ -12,38 +12,45 @@ let sortCheckGreater = null;
 let sortCheckLessThan = null;
 
 const compare = (a, b) => {
-
     sortingType = typeof a[sortingName];
+
+    console.log(a[sortingName]);
+    console.log(sortingType);
 
     switch (sortingType) {
       case 'string': {
         sortCheckGreater = (((a[sortingName])+'').toLowerCase() < ((b[sortingName])+'').toLowerCase());
         sortCheckLessThan = (((a[sortingName])+'').toLowerCase() > ((b[sortingName])+'').toLowerCase());
+
+        switch (sortingDirection) {
+          case DIRECTION_ASC: {
+            if (sortCheckGreater) {
+              return -1;
+            }
+            if (sortCheckLessThan) {
+              return 1;
+            }
+            return 0;
+          }
+          case DIRECTION_DESC:
+            if (sortCheckLessThan) {
+              return -1;
+            }
+            if (sortCheckGreater) {
+              return 1;
+            }
+            return 0;
+        }
       }
       case 'number': {
-        sortCheckGreater = ((a, b) => a[sortingName] - b[sortingName]);
-        sortCheckLessThan = ((a, b) => b[sortingName] - a[sortingName]);
+        switch (sortingDirection) {
+          case DIRECTION_ASC: {
+            return a[sortingName] - b[sortingName];
+          }
+          case DIRECTION_DESC:
+            return b[sortingName] - a[sortingName];
+        }
       }
-    }
-
-    switch (sortingDirection) {
-      case DIRECTION_ASC: {
-        if (sortCheckGreater) {
-          return -1;
-        }
-        if (sortCheckLessThan) {
-          return 1;
-        }
-        return 0;
-      }
-      case DIRECTION_DESC:
-        if (sortCheckLessThan) {
-          return -1;
-        }
-        if (sortCheckGreater) {
-          return 1;
-        }
-        return 0;
     }
 }
 
