@@ -146,12 +146,15 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var stats = vm.launches.cumulativeStats;
         vm.summaryData = {
             selectedTargets: stats.selectedTargets,
-            suppressed: stats.suppressed,
+            selectedContacts: stats.selectedContacts,
+            accountsSuppressed: stats.accountsSuppressed,
+            contactsSuppressed: stats.contactsSuppressed,
             accountErrors: stats.accountErrors,
             contactErrors: stats.contactErrors,
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
+        console.log(vm.summaryData);
 
     }
 
