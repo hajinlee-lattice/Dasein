@@ -270,6 +270,7 @@ public class PlayResource {
     @PostMapping(value = "/launch-always-on", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Launch every play launch marked as always on")
+    @Deprecated
     public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
         Boolean isPlayLaunched = false;
         List<PlayLaunchChannel> channels = playLaunchChannelService.findByIsAlwaysOnTrue();
@@ -642,8 +643,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (playLaunch.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
