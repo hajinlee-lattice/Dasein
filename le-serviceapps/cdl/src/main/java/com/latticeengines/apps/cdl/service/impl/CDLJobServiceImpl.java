@@ -99,11 +99,17 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String QUARTZ_STACK = "quartz";
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
-    private static final String CACHE_KEY_PREFIX = CacheName.Constants.CDLScheduledJobCacheName;
+
+    @VisibleForTesting
+    static String CACHE_KEY_PREFIX = CacheName.Constants.CDLScheduledJobCacheName;
+
     private static final String DELIMITER = ":";
-    private static final String HIGH_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
+    @VisibleForTesting
+    static String HIGH_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
         "HIGH_PRIORITY_RUNNING_JOB_MAP";
-    private static final String LOW_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
+
+    @VisibleForTesting
+    static String LOW_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
             "LOW_PRIORITY_RUNNING_JOB_MAP";
 
     @VisibleForTesting
