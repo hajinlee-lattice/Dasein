@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
+import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+
 
 @Component("orchestrationProgressDao")
 public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<OrchestrationProgress>
@@ -38,22 +40,39 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
+        StringBuilder sb = new StringBuilder();
+        for (String column : fields.keySet()) {
+            sb.append(column + " = :" + column + " and ");
+        }
         String orderStr = "";
         if (CollectionUtils.isNotEmpty(orderFields)) {
             orderStr = "order by " + String.join(", ", orderFields);
         }
-        String queryStr = String.format(
-                "from %s p where p.orchestration.name = :name and p.status = :ProgressStatus %s",
-                entityClz.getSimpleName(), orderStr);
+        String queryStr = String.format("from %s where %s %s", entityClz.getSimpleName(),
+                sb.substring(0, sb.length() - 4), orderStr);
         Query<OrchestrationProgress> query = session.createQuery(queryStr);
-
         for (String column : fields.keySet()) {
+            if (fields.get(column).getClass().isEnum()) {
+                query.setParameter(column, fields.get(column).toString());
+            } else {
                 query.setParameter(column, fields.get(column));
+            }
         }
-
         return query.list();
     }
 
+    @Override
+    public boolean hasJobInProgress(Orchestration orch) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<OrchestrationProgress> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s p where p.orchestration.name = :name and p.status in (:ProgressStatus) ",
+                entityClz.getSimpleName());
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
+        query.setParameter("name", orch.getName());
+        query.setParameterList("ProgressStatus", new Object[] { ProgressStatus.PROCESSING, ProgressStatus.NEW });
+        return query.list().isEmpty();
+    }
 
     @Override
     public boolean isDuplicateVersion(String orchName, String version) {

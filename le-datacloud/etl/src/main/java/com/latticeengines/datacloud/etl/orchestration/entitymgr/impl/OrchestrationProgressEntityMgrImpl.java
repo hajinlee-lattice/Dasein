@@ -14,6 +14,7 @@ import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressD
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 
 @Component("orchestrationProgressEntityMgr")
@@ -26,6 +27,12 @@ public class OrchestrationProgressEntityMgrImpl extends BaseEntityMgrImpl<Orches
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         return orchestrationProgressDao.findProgressesByField(fields, orderFields);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasJobInProgress(Orchestration orch) {
+        return orchestrationProgressDao.hasJobInProgress(orch);
     }
 
     @Override

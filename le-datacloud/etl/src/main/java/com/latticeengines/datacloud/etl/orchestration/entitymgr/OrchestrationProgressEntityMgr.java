@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 
 public interface OrchestrationProgressEntityMgr extends BaseEntityMgr<OrchestrationProgress> {
@@ -20,4 +21,6 @@ public interface OrchestrationProgressEntityMgr extends BaseEntityMgr<Orchestrat
     List<OrchestrationProgress> findProgressesToCheckStatus();
 
     boolean isDuplicateVersion(String orchName, String version);
+
+    boolean hasJobInProgress(Orchestration orch);
 }

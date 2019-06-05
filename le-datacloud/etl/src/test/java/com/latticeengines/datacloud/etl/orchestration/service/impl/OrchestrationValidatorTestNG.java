@@ -80,9 +80,8 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         orchestration = orchestrationEntityMgr.findByField("Name", ORCHESTRATION_NAME);
 
         orchestrationprogress = new OrchestrationProgress();
-        // orchestrationprogress.setPid(1L); //Auto generate
         orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
-        orchestrationprogress.setStatus(ProgressStatus.NOTSTARTED);
+        orchestrationprogress.setStatus(ProgressStatus.NEW);
         orchestrationprogress.setLatestUpdateTime(new Date());
         orchestrationprogress.setRetries(0);
         orchestrationprogress.setStartTime(new Date());
@@ -122,7 +121,8 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertTrue(triggeredVersions.isEmpty());
 
         // trigger at 0:00 every day when not job in progress
-        orchestrationProgressService.updateProgress(orchestrationprogress).status(ProgressStatus.NEW).commit(true);
+        orchestrationProgressService.updateProgress(orchestrationprogress).status(ProgressStatus.NOTSTARTED)
+                .commit(true);
 
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertEquals(triggeredVersions.size(), 1);
