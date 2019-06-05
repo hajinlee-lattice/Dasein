@@ -3,8 +3,10 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +80,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // the Lattice Data Cloud decision graph.
     private List<Pair<EntityMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
 
+    private Set<String> fieldsToClear = new HashSet<>();
+
     // Entity match errors
     private List<String> entityMatchErrors;
 
@@ -127,6 +131,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void prepareForRetravel() {
         super.prepareForRetravel();
         entityMatchErrors = null;
+        fieldsToClear.clear();
     }
 
     @Override
@@ -379,6 +384,16 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void addEntityLdcMatchTypeToTupleList(Pair<EntityMatchType, MatchKeyTuple> pair) {
         entityLdcMatchTypeToTupleList.add(pair);
+    }
+
+    public Set<String> getFieldsToClear() {
+        return fieldsToClear;
+    }
+
+    public void addFieldToClear(String field) {
+        if (StringUtils.isNotBlank(field)) {
+            fieldsToClear.add(field);
+        }
     }
 
     public List<String> getEntityMatchErrors() {
