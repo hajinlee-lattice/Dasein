@@ -588,15 +588,23 @@ angular.module('lp.import')
             Object.keys(object).forEach(index => {
                 let element = object[index];
                 let alreadyAdded = ImportWizardStore.isAlreadySave(saved, element.userField);//underscore.findWhere(saved, {userField: element.userField});
-                if(alreadyAdded != undefined && alreadyAdded.mappedField != element.mappedField){
+                if(alreadyAdded == undefined){
+                    saved.push(element);
+                }else if(alreadyAdded != undefined && alreadyAdded.mappedField != element.mappedField){
                     alreadyAdded.mappedField = element.mappedField;
                     alreadyAdded.dateFormatString = element.dateFormatString ? element.dateFormatString : null;
                     alreadyAdded.timeFormatString = element.timeFormatString ? element.timeFormatString : null;
                     alreadyAdded.timezone = element.timezone ? element.timezone : null;
-                }else if(alreadyAdded == undefined){
-                    saved.push(element);
+                }else if(alreadyAdded != undefined && alreadyAdded.mappedField == element.mappedField){
+                    alreadyAdded.dateFormatString = alreadyAdded.dateFormatString == undefined ? (element.dateFormatString ? element.dateFormatString : null) : alreadyAdded.dateFormatString ;
+                    alreadyAdded.timeFormatString = alreadyAdded.timeFormatString == undefined ? (element.timeFormatString ? element.timeFormatString : null) : alreadyAdded.timeFormatString ;
+                    // element.timeFormatString ? element.timeFormatString : null;
+                    alreadyAdded.timezone = alreadyAdded.timezone == undefined ? (element.timezone ? element.timezone : null) : alreadyAdded.timezone ;
+                    //element.timezone ? element.timezone : null;
                 }
             });
+            this.setSaveObjects(saved, name);
+            return;
         }else{
             this.setSaveObjects(object, name);
         }
