@@ -241,7 +241,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                 count++;
                 // verifying all the mustPresentList attributes are present
                 if (mustPresentItemsSet.contains(attrName)) {
-                    mustPresentItemsSet.remove(srcAttr.getAttribute());
+                    mustPresentItemsSet.remove(attrName);
                 }
                 // verifying there are no attributes named as TechIndicator_*
                 if (attrName.startsWith("TechIndicator_")) {
@@ -253,18 +253,17 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                 }
                 // verifying the presence of required attribute
                 if (srcAttr.getArguments().equals(("RETAIN")) || srcAttr.getArguments().equals(("LATTICEID"))) {
-                    Assert.assertTrue(mapFieldType.containsKey(srcAttr.getAttribute()));
-                } else if (mapFieldType.containsKey(srcAttr.getAttribute())) {
+                    Assert.assertTrue(mapFieldType.containsKey(attrName));
+                } else if (mapFieldType.containsKey(attrName)) {
                     // verifying type of the argument
-                    Assert.assertEquals(mapFieldType.get(srcAttr.getAttribute()), srcAttr.getArguments());
+                    Assert.assertEquals(mapFieldType.get(attrName), srcAttr.getArguments());
                 }
             } else { // verifying IsPublicDomain, IsMatched which need to be dropped are really dropped
-                if(argsToBeDropped.contains(attrName)) {
-                    Assert.assertTrue(argsToBeDropped.contains(attrName));// checking for attrs : IsPublicDomain, IsMatched
-                    Assert.assertTrue(!mapFieldType.containsKey(srcAttr.getAttribute()));
-                }
+                Assert.assertTrue(!mapFieldType.containsKey(attrName));
+                argsToBeDropped.remove(attrName);
             }
         }
+        Assert.assertTrue(argsToBeDropped.isEmpty());
         Assert.assertEquals(count, amfields.size());
         Assert.assertEquals(techInd, TECH_IND); // Don’t have attributes named as TechIndicator_*
         Assert.assertEquals(ldcAttr, LDC_ATTRS); // Have 10 attributes named as LDC_*
