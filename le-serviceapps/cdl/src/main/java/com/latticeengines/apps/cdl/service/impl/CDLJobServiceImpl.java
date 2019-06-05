@@ -56,6 +56,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ActivityObject;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
@@ -98,8 +99,12 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String QUARTZ_STACK = "quartz";
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
-    private static final String HIGH_PRIORITY_QUEUE = "HIGH_PRIORITY_QUEUE";
-    private static final String LOW_PRIORITY_QUEUE = "LOW_PRIORITY_QUEUE";
+    private static final String CACHE_KEY_PREFIX = CacheName.Constants.CDLJobCacheName;
+    private static final String DELIMITER = ":";
+    private static final String HIGH_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
+        "HIGH_PRIORITY_RUNNING_JOB_MAP";
+    private static final String LOW_PRIORITY_RUNNING_JOB_MAP = CACHE_KEY_PREFIX + DELIMITER +
+            "LOW_PRIORITY_RUNNING_JOB_MAP";
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
@@ -452,9 +457,11 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         PriorityQueueUtils.createOrUpdateQueue(activityObjects);
+        log.info("High priority Queue : " + JsonUtils.serialize(PriorityQueueUtils.getAllMemberWithSortFromHighPriorityQueue()));
+        log.info("Low priority Queue : " + JsonUtils.serialize(PriorityQueueUtils.getAllMemberWithSortFromLowPriorityQueue()));
 
-        highMap = getMap(HIGH_PRIORITY_QUEUE);
-        lowMap = getMap(LOW_PRIORITY_QUEUE);
+        highMap = getMap(HIGH_PRIORITY_RUNNING_JOB_MAP);
+        lowMap = getMap(LOW_PRIORITY_RUNNING_JOB_MAP);
 
         StringBuilder sb = new StringBuilder();
         if (clusterIdIsEmpty) {
@@ -489,7 +496,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         runningPAJobsCount++;
                     }
                 }
-                if (System.currentTimeMillis() - jobProperty.getStartTime() > TimeUnit.HOURS.toMillis(2)) {
+                if ((System.currentTimeMillis() - jobProperty.getStartTime() > TimeUnit.HOURS.toMillis(2)) && JobStatus.PENDING.equals(jobProperty.getJobStatus())) {
                     highMapIterator.remove();
                 }
             }
@@ -512,7 +519,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         runningPAJobsCount++;
                     }
                 }
-                if (System.currentTimeMillis() - jobProperty.getStartTime() > TimeUnit.HOURS.toMillis(2)) {
+                if ((System.currentTimeMillis() - jobProperty.getStartTime() > TimeUnit.HOURS.toMillis(2)) && JobStatus.PENDING.equals(jobProperty.getJobStatus())) {
                     lowMapMapIterator.remove();
                 }
             }
@@ -574,8 +581,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
 
-        updateRedisTemplate(HIGH_PRIORITY_QUEUE, highMap);
-        updateRedisTemplate(LOW_PRIORITY_QUEUE, lowMap);
+        updateRedisTemplate(HIGH_PRIORITY_RUNNING_JOB_MAP, highMap);
+        updateRedisTemplate(LOW_PRIORITY_RUNNING_JOB_MAP, lowMap);
     }
 
     private List<Action> getImportActions(List<Action> actions) {
@@ -595,7 +602,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     Map<String, JobProperty> getMap(String key) {
         if (redisTemplate.opsForValue().get(key) == null) {
             Map<String, JobProperty> newMap = new HashMap<>();
-            redisTemplate.opsForValue().set(key, newMap);
+            redisTemplate.opsForValue().set(key, newMap, 7, TimeUnit.DAYS);
             return newMap;
         }
         ObjectMapper mapper = JsonUtils.getObjectMapper();
@@ -613,7 +620,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @VisibleForTesting
     void updateRedisTemplate(String key, Map<String, JobProperty> map) {
-        redisTemplate.opsForValue().set(key, JsonUtils.serialize(map));
+        redisTemplate.opsForValue().set(key, JsonUtils.serialize(map), 7, TimeUnit.DAYS);
     }
 
     @VisibleForTesting
@@ -750,7 +757,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
         log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, retry: %s, success" +
                         " %s",
-                String.valueOf(applicationId), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
+                applicationId.toString(), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
         return true;
     }
 
@@ -806,7 +813,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
         log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, retry: %s, success" +
                         " %s",
-                String.valueOf(applicationId), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
+                applicationId.toString(), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
         return true;
     }
 
