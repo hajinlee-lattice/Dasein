@@ -220,7 +220,7 @@ export default class S3FileList extends Component {
             },
             header: [
                 {
-                    name: "fileName",
+                    name: "file_name",
                     displayName: "File",
                     sortable: true
                 },
@@ -243,6 +243,7 @@ export default class S3FileList extends Component {
             columns: [
                 {
                     colSpan: 7,
+                    onlyTemplate: true,
                     template: cell => {
                         if (cell.props.rowData.file_type != null) {
                             return (
