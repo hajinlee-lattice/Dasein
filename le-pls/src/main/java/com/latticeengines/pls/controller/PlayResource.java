@@ -228,12 +228,14 @@ public class PlayResource {
     @PreAuthorize("hasRole('Create_PLS_Plays')") // ask later
     @ApiOperation(value = "Create play launch channel for a given play")
     public PlayLaunchChannel createPlayLaunchChannel( //
-            @PathVariable("playName") String playName, @RequestBody PlayLaunchChannel playLaunchChannel, //
+            @PathVariable("playName") String playName, //
+            @RequestBody PlayLaunchChannel playLaunchChannel, //
+            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel);
+        return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel, launchNow);
     }
 
     @RequestMapping(value = "/{playName}/channels/{channelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -244,10 +246,11 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
             @RequestBody PlayLaunchChannel playLaunchChannel, //
+            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel);
+        return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel, launchNow);
     }
 
     @RequestMapping(value = "/launch-always-on", method = RequestMethod.POST, headers = "Accept=application/json")

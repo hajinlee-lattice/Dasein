@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface PlayLaunchChannelService {
@@ -17,5 +18,7 @@ public interface PlayLaunchChannelService {
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playName, String lookupId);
 
     PlayLaunchChannel findById(String channelId);
+
+    PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel);
 
 }

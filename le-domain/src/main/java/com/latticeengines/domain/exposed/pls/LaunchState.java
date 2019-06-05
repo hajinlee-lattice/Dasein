@@ -8,6 +8,7 @@ import java.util.Set;
 
 public enum LaunchState {
     UnLaunched, //
+    Queued, //
     Launching, //
     Launched, //
     Failed, //
@@ -24,7 +25,12 @@ public enum LaunchState {
     static {
         Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
         statesAfterUnLaunched.add(Launching);
+        statesAfterUnLaunched.add(Queued);
         transitionMap.put(UnLaunched, statesAfterUnLaunched);
+
+        Set<LaunchState> statesAfterQueued = new HashSet<>();
+        statesAfterUnLaunched.add(Launching);
+        transitionMap.put(Queued, statesAfterQueued);
 
         Set<LaunchState> statesAfterLaunching = new HashSet<>();
         statesAfterLaunching.add(Launched);
