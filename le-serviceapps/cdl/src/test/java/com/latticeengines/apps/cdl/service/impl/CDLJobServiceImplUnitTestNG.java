@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -43,7 +44,6 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -59,7 +59,7 @@ public class CDLJobServiceImplUnitTestNG {
     private WorkflowProxy workflowProxy;
 
     @Mock
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
 
     @Mock
     private ActionService actionService;
@@ -76,14 +76,15 @@ public class CDLJobServiceImplUnitTestNG {
 
     private String USERID = "Auto Scheduled";
 
-    private static final String HIGH_PRIORITY_QUEUE = "HIGH_PRIORITY_QUEUE";
-    private static final String LOW_PRIORITY_QUEUE = "LOW_PRIORITY_QUEUE";
+    private static final String HIGH_PRIORITY_RUNNING_JOB_MAP = "HIGH_PRIORITY_RUNNING_JOB_MAP";
+    private static final String LOW_PRIORITY_RUNNING_JOB_MAP = "LOW_PRIORITY_RUNNING_JOB_MAP";
 
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-
+        CDLJobServiceImpl.CACHE_KEY_PREFIX = "CDLScheduledJobCache";
+        CDLJobServiceImpl.HIGH_PRIORITY_RUNNING_JOB_MAP = "HIGH_PRIORITY_RUNNING_JOB_MAP";
+        CDLJobServiceImpl.LOW_PRIORITY_RUNNING_JOB_MAP = "LOW_PRIORITY_RUNNING_JOB_MAP";
     }
 
     @Test(groups = "unit")
@@ -115,13 +116,13 @@ public class CDLJobServiceImplUnitTestNG {
         List<SimpleDataFeed> simpleDataFeeds = new ArrayList<>();
         simpleDataFeeds.add(simpleDataFeed1);
         simpleDataFeeds.add(simpleDataFeed2);
-        when(dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
+        when(dataFeedService.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
 
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis - 1000);
         doReturn(currentTime).when(cdlJobService).getNextInvokeTime(any(CustomerSpace.class), any(Tenant.class), any(CDLJobDetail.class));
 
-        doNothing().when(dataFeedProxy).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
+        doNothing().when(dataFeedService).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
 
         doReturn(true).when(cdlJobService).submitProcessAnalyzeJob(any(Tenant.class), any(CDLJobDetail.class));
         doReturn(false).when(cdlJobService).systemCheck();
@@ -151,7 +152,7 @@ public class CDLJobServiceImplUnitTestNG {
         List<SimpleDataFeed> simpleDataFeeds = new ArrayList<>();
         simpleDataFeeds.add(simpleDataFeed1);
 
-        when(dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
+        when(dataFeedService.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
 
         CDLJobDetail cdlJobDetail =  new CDLJobDetail();
         when(cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(cdlJobDetail);
@@ -173,14 +174,14 @@ public class CDLJobServiceImplUnitTestNG {
         Date currentTime = new Date(currentTimeMillis - 1000);
         doReturn(currentTime).when(cdlJobService).getNextInvokeTime(any(CustomerSpace.class), any(Tenant.class), any(CDLJobDetail.class));
 
-        doNothing().when(dataFeedProxy).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
+        doNothing().when(dataFeedService).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
 
         when(cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(Collections.singletonList(cdlJobDetail));
 
         Map<String, List<Object>> highMap = new HashMap<>();
         Map<String, List<Object>> lowMap = new HashMap<>();
-        doReturn(highMap).when(cdlJobService).getMap(eq(HIGH_PRIORITY_QUEUE));
-        doReturn(lowMap).when(cdlJobService).getMap(eq(LOW_PRIORITY_QUEUE));
+        doReturn(highMap).when(cdlJobService).getMap(eq(HIGH_PRIORITY_RUNNING_JOB_MAP));
+        doReturn(lowMap).when(cdlJobService).getMap(eq(LOW_PRIORITY_RUNNING_JOB_MAP));
 
         doReturn(false).when(cdlJobService).retryProcessAnalyze(any(Tenant.class), any(CDLJobDetail.class));
         when(cdlJobDetailEntityMgr.createJobDetail(eq(CDLJobType.PROCESSANALYZE), any(Tenant.class))).thenReturn(cdlJobDetail);

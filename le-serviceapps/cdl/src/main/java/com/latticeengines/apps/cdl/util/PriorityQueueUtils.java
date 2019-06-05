@@ -207,6 +207,11 @@ public class PriorityQueueUtils {
         } else {
             newObject.setDataCloudRefresh(activityObject.getDataCloudRefresh() ? 1 : 0);
         }
+        if (activityObject.getRetry() == null) {
+            newObject.setRetry(0);
+        } else {
+            newObject.setRetry(activityObject.getRetry() ? 1 : 0);
+        }
         newObject.setInvokeTime(activityObject.getInvokeTime() != null ? activityObject.getInvokeTime().getTime() : currentTime);
         if (activityObject.getScheduleNow() == null) {
             newObject.setScheduleNow(0);
@@ -233,6 +238,9 @@ public class PriorityQueueUtils {
 
     private static boolean isValid(ActivityObject activityObject) {
         if (activityObject.getScheduleNow() != null && activityObject.getScheduleNow()) {
+            return true;
+        }
+        if (activityObject.getRetry() != null && activityObject.getRetry()) {
             return true;
         }
         if ((activityObject.getDataCloudRefresh() != null && activityObject.getDataCloudRefresh()) || activityObject.getInvokeTime() != null) {

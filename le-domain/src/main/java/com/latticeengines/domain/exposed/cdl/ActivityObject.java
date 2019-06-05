@@ -14,6 +14,7 @@ public class ActivityObject {
     private List<Action> actions;
     private Boolean dataCloudRefresh;
     private Date invokeTime;
+    private Boolean retry;
 
     public Tenant getTenant() { return tenant; }
 
@@ -38,4 +39,12 @@ public class ActivityObject {
     public Date getInvokeTime() { return invokeTime; }
 
     public void setInvokeTime(Date invokeTime) { this.invokeTime = invokeTime; }
+
+    public Boolean getRetry() {
+        return retry;
+    }
+
+    public void setRetry(Boolean retry) {
+        this.retry = retry;
+    }
 }
