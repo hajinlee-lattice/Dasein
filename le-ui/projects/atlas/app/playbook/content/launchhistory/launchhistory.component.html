@@ -31,31 +31,31 @@
             displayname="displayName">
         </chips>
         <ul class="history-metadata" ng-if="!vm.externalIntegrationEnabled">
-        	<li>
+        	<li class="cell-border">
         		<dl>
         			<dt>Total Recommendations</dt>
         			<dd class="blue-text">{{vm.summaryData.selectedTargets | number}}</dd>
         		</dl>
         	</li>
-        	<li>
+        	<li class="cell-border">
         		<dl>
         			<dt>Suppressed</dt>
         			<dd class="red-text">{{vm.summaryData.accountsSuppressed | number}}</dd>
         		</dl>
         	</li>
-            <li>
+            <li class="cell-border">
                 <dl>
                     <dt>Errors</dt>
                     <dd class="red-text">{{vm.summaryData.accountErrors | number}}</dd>
                 </dl>
             </li>
-            <li>
+            <li class="cell-border">
                 <dl>
-                    <dt>Contact Errors</dt>
-                    <dd class="red-text">{{vm.summaryData.contactErrors | number}}</dd>
+                    <dt>Launched Recommendations</dt>
+                    <dd class="green-text">{{vm.summaryData.recommendationsLaunched | number}}</dd>
                 </dl>
             </li>
-            <li>
+            <li class="cell-border">
                 <dl>
                     <dt>Contacts within Recommendations</dt>
                     <dd class="green-text">{{vm.summaryData.contactsWithinRecommendations | number}}</dd>
