@@ -30,6 +30,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -53,6 +54,7 @@ import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -78,6 +80,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private CDLService cdlService;
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
@@ -237,10 +242,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (dataFeedTask == null) {
             table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
         } else {
             table = dataFeedTask.getImportTemplate();
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
@@ -278,13 +283,73 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return merged;
     }
 
-    private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
+    private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
             Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        // 1. set system related mapping
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getIdType() != null) {
+                String systemName = cdlService.getSystemNameFromFeedType(feedType);
+                if (StringUtils.isNotEmpty(systemName)) {
+                    if (StringUtils.isEmpty(fieldMapping.getSystemName()) || systemName.equals(fieldMapping.getSystemName())) {
+                        fieldMapping.setFieldType(UserDefinedType.TEXT);
+                        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                        switch (fieldMapping.getIdType()) {
+                            case Account:
+                                String accountSystemId = importSystem.getAccountSystemId();
+                                if (StringUtils.isEmpty(accountSystemId)) {
+                                    accountSystemId = importSystem.generateAccountSystemId();
+                                    importSystem.setAccountSystemId(accountSystemId);
+                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                }
+                                break;
+                            case Contact:
+                                String contactSystemId = importSystem.getContactSystemId();
+                                if (StringUtils.isEmpty(contactSystemId)) {
+                                    contactSystemId = importSystem.generateContactSystemId();
+                                    importSystem.setContactSystemId(contactSystemId);
+                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
+                        }
+                    } else {
+                        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
+                                fieldMapping.getSystemName());
+                        if (importSystem == null) {
+                            throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
+                        }
+                        switch (fieldMapping.getIdType()) {
+                            case Account:
+                                if (StringUtils.isEmpty(importSystem.getAccountSystemId())) {
+                                    throw new IllegalArgumentException(String.format("System %s does not have system " +
+                                            "account id!", importSystem.getDisplayName()));
+                                }
+                                fieldMapping.setFieldType(UserDefinedType.TEXT);
+                                fieldMapping.setMappedField(importSystem.getAccountSystemId());
+                                fieldMapping.setMappedToLatticeField(false);
+                                break;
+                            case Contact:
+                                if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
+                                    throw new IllegalArgumentException(String.format("System %s does not have system " +
+                                            "contact id!", importSystem.getDisplayName()));
+                                }
+                                fieldMapping.setFieldType(UserDefinedType.TEXT);
+                                fieldMapping.setMappedField(importSystem.getContactSystemId());
+                                fieldMapping.setMappedToLatticeField(false);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
+                        }
+                    }
+                }
+            }
+        }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         Table standardTable = templateTable == null ? SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch)

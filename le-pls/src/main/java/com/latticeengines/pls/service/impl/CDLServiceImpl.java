@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -356,7 +357,8 @@ public class CDLServiceImpl implements CDLService {
                     display.setEntity(entityType.getEntity());
                     display.setObject(entityType.getDisplayName());
                     display.setFeedType(folderName);
-                    display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
+                    display.setS3ImportSystem(getS3ImportSystem(customerSpace,
+                            S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                     templates.add(display);
                 }
@@ -373,7 +375,8 @@ public class CDLServiceImpl implements CDLService {
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setEntity(entityType.getEntity());
-                display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
+                display.setS3ImportSystem(getS3ImportSystem(customerSpace,
+                        S3PathBuilder.getSystemNameFromFeedType(folderName)));
                 display.setImportStatus(task.getS3ImportStatus() == null ?
                         DataFeedTask.S3ImportStatus.Pause : task.getS3ImportStatus());
                 templates.add(display);
@@ -390,11 +393,16 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType) {
+    public void createS3ImportSystem(String customerSpace, String systemDisplayName,
+                                     S3ImportSystem.SystemType systemType, Boolean primary) {
         S3ImportSystem s3ImportSystem = new S3ImportSystem();
+        String systemName = AvroUtils.getAvroFriendlyString(systemDisplayName);
         s3ImportSystem.setSystemType(systemType);
         s3ImportSystem.setName(systemName);
         s3ImportSystem.setTenant(MultiTenantContext.getTenant());
+        if (Boolean.TRUE.equals(primary)) {
+            s3ImportSystem.setPriority(1);
+        }
         cdlProxy.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxProxy.createTemplateFolder(customerSpace, systemName, null, null);
     }
@@ -402,6 +410,11 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
         return cdlProxy.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @Override
+    public List<S3ImportSystem> getAllS3ImportSystem(String customerSpace) {
+        return cdlProxy.getS3ImportSystemList(customerSpace);
     }
 
     @Override
@@ -494,6 +507,19 @@ public class CDLServiceImpl implements CDLService {
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
         return fileContent.toString();
+    }
+
+    @Override
+    public String getSystemNameFromFeedType(String feedType) {
+        if (StringUtils.isEmpty(feedType) || !feedType.contains("_")) {
+            return null;
+        }
+        return feedType.substring(0, feedType.lastIndexOf("_"));
+    }
+
+    @Override
+    public void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
+        cdlProxy.updateS3ImportSystem(customerSpace, importSystem);
     }
 
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {

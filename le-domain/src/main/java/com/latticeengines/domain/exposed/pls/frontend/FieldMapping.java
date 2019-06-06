@@ -24,6 +24,15 @@ public class FieldMapping {
     private CDLExternalSystemType cdlExternalSystemType = null;
 
     @JsonProperty
+    private String systemName;
+
+    /**
+     * for System id type, should be one of (Account, Contact)
+     */
+    @JsonProperty
+    private IdType idType;
+
+    @JsonProperty
     private boolean mappedToLatticeField;
 
     // Represents the date format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY"
@@ -110,7 +119,27 @@ public class FieldMapping {
 
     public void setTimezone(String timezone) { this.timezone = timezone; }
 
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public IdType getIdType() {
+        return idType;
+    }
+
+    public void setIdType(IdType idType) {
+        this.idType = idType;
+    }
+
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public enum IdType {
+        Account, Contact
     }
 }

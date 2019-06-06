@@ -112,13 +112,14 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testS3ImportSystem() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce);
-        cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other);
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce, false);
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other, false);
         S3ImportSystem system = cdlService.getS3ImportSystem(customerSpace, "SYSTEM1");
         Assert.assertNotNull(system);
         Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
         Assert.assertThrows(RuntimeException.class,
-                () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other));
+                () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other,
+                        false));
     }
 
     @Test(groups = "deployment", enabled = false)
