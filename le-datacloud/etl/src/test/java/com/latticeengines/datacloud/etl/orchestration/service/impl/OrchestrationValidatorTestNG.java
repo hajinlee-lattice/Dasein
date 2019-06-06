@@ -39,7 +39,6 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
 
     private Ingestion ingestion;
     private Orchestration orchestration;
-    private OrchestrationProgress orchestrationprogress;
 
     @Inject
     private IngestionEntityMgr ingestionEntityMgr;
@@ -107,15 +106,8 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         config.setCronExpression("0 0 0 ? * * *");
 
         // prepare OrchestrationProgress
-        orchestrationprogress = new OrchestrationProgress();
-        orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
-        orchestrationprogress.setStatus(ProgressStatus.NEW);
-        orchestrationprogress.setLatestUpdateTime(new Date());
-        orchestrationprogress.setRetries(0);
-        orchestrationprogress.setStartTime(new Date());
-        orchestrationprogress.setTriggeredBy("");
-        orchestrationprogress.setOrchestration(orchestration);
-        orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
+        OrchestrationProgress orchestrationprogress = createOrchestrationProgress();
+
 
         // has job in progress, not triggered
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
@@ -141,6 +133,7 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertTrue(triggeredVersions.isEmpty());
 
     }
+
 
     // Orchestration is enabled in testScheduledTrigger()
     @Test(groups = "functional", priority = 2)
@@ -178,6 +171,19 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertEquals(triggeredVersions.size(), 1);
         Assert.assertEquals(triggeredVersions.get(0), version);
+    }
+
+    private OrchestrationProgress createOrchestrationProgress() {
+        OrchestrationProgress orchestrationprogress = new OrchestrationProgress();
+        orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
+        orchestrationprogress.setStatus(ProgressStatus.NEW);
+        orchestrationprogress.setLatestUpdateTime(new Date());
+        orchestrationprogress.setRetries(0);
+        orchestrationprogress.setStartTime(new Date());
+        orchestrationprogress.setTriggeredBy("");
+        orchestrationprogress.setOrchestration(orchestration);
+        orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
+        return orchestrationprogress;
     }
 
 }
