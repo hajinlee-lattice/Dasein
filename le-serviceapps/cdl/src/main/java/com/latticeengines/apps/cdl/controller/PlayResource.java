@@ -247,15 +247,16 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18219,
                     new String[] { "ChannelId is not the same for the Play launch channel being updated" });
         }
+        PlayLaunch playLaunch = null;
         if (playLaunchChannel.getPlayLaunch() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot update a Play launch Channel without play launch id" });
+            playLaunch = new PlayLaunch();
+        } else {
+            playLaunch = playLaunchChannel.getPlayLaunch();
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
-        PlayLaunch playLaunch = playLaunchChannel.getPlayLaunch();
         playLaunch.setPlay(play);
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
@@ -269,6 +270,7 @@ public class PlayResource {
     @PostMapping(value = "/launch-always-on", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Launch every play launch marked as always on")
+    @Deprecated
     public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
         Boolean isPlayLaunched = false;
         List<PlayLaunchChannel> channels = playLaunchChannelService.findByIsAlwaysOnTrue();
@@ -641,8 +643,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (playLaunch.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

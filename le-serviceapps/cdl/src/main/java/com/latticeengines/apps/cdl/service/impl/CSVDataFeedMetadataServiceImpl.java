@@ -119,6 +119,21 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     result = false;
                     break;
                 }
+                if (!StringUtils.equals(attr.getDateFormatString(),
+                        srcAttrs.get(attr.getName()).getDateFormatString())) {
+                    result = false;
+                    break;
+                }
+                if (!StringUtils.equals(attr.getTimeFormatString(),
+                        srcAttrs.get(attr.getName()).getTimeFormatString())) {
+                    result = false;
+                    break;
+                }
+                if (!StringUtils.equals(attr.getTimezone(),
+                        srcAttrs.get(attr.getName()).getTimezone())) {
+                    result = false;
+                    break;
+                }
             }
         }
         return result;

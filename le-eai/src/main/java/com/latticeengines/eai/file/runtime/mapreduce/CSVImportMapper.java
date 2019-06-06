@@ -43,6 +43,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -135,6 +137,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
+        LogManager.getLogger(TimeStampConvertUtils.class).setLevel(Level.WARN);
         conf = context.getConfiguration();
         schema = AvroJob.getOutputKeySchema(conf);
         LOG.info("schema is: " + schema.toString());
@@ -197,7 +201,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             throw new CriticalImportException(
                                     "There's critical exception in import, will fail the job!");
                         }
-                        LOG.debug("Start to processing line: " + lineNum);
                         beforeEachRecord();
                         GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
@@ -302,7 +305,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 } catch (Exception e) { // This catch is for the row error
                     rowError = true;
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn(e.getMessage());
                 }
                 try {
                     validateAttribute(csvRecord, attr, csvColumnName);

@@ -52,7 +52,6 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
             String[] dirs = avroDir.trim().split("/");
             avroDir = "";
             for (int i = 0; i < (dirs.length - 1); i++) {
-                log.info("Get avro path dir " + dirs[i]);
                 if (!dirs[i].isEmpty()) {
                     avroDir = avroDir + "/" + dirs[i];
                 }
