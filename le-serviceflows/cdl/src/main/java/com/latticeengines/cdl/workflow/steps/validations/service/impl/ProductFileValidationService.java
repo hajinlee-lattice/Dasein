@@ -141,6 +141,10 @@ public class ProductFileValidationService
 
     private void downloadFromS3ifNeeded(Table currentTable,
             ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
+        if (currentTable == null) {
+            log.info("no consolidated product table.");
+            return;
+        }
         tenantId = productFileValidationServiceConfiguration.getCustomerSpace().getTenantId();
         customer = productFileValidationServiceConfiguration.getCustomerSpace().toString();
         String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
