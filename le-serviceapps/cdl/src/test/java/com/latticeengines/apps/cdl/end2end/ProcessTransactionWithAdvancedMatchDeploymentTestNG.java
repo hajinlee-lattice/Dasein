@@ -37,6 +37,12 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         mockCSVImport(BusinessEntity.Transaction, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Transaction, ADVANCED_MATCH_SUFFIX, 2, "DefaultSystem_TransactionData");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
     }
 
     @Override
