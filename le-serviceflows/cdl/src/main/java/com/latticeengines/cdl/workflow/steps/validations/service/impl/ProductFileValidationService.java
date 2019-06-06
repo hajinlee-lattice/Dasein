@@ -148,9 +148,10 @@ public class ProductFileValidationService
         List<ImportExportRequest> requests = new ArrayList<>();
         addTableToRequestForImport(currentTable, requests);
         if (CollectionUtils.isEmpty(requests)) {
+            log.info("There's no source dir found.");
             return;
         }
-        log.info("begin import data request size ");
+        log.info("Starting to export from s3 to hdfs. size=" + requests.size());
         List<HdfsS3ImporterExporter> exporters = new ArrayList<>();
         for (ImportExportRequest request : requests) {
             exporters.add(buildImporterExporter(request));
