@@ -542,6 +542,18 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 if (attr.getSourceAttrName() != null) {
                     templateAttrs.get(attr.getName()).setSourceAttrName(attr.getSourceAttrName());
                 }
+                if (!StringUtils.equals(attr.getDateFormatString(),
+                        templateAttrs.get(attr.getName()).getDateFormatString())) {
+                    templateAttrs.get(attr.getName()).setDateFormatString(attr.getDateFormatString());
+                }
+                if (!StringUtils.equals(attr.getTimeFormatString(),
+                        templateAttrs.get(attr.getName()).getTimeFormatString())) {
+                    templateAttrs.get(attr.getName()).setTimeFormatString(attr.getTimeFormatString());
+                }
+                if (!StringUtils.equals(attr.getDateFormatString(),
+                        templateAttrs.get(attr.getName()).getTimezone())) {
+                    templateAttrs.get(attr.getName()).setTimezone(attr.getTimezone());
+                }
             }
         }
         return templateTable;
