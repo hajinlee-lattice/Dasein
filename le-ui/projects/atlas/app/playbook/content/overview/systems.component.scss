@@ -46,8 +46,7 @@
                 width: 100px;
                 button.button.borderless-button {
                     width: auto;
-                    &.campaign-activate {
-                        background: url(/assets/images/campaignoverview/campaign-button-ready-to-launch.png) top center no-repeat;
+                    &.campaign-launch-button {
                         min-height: 29px;
                         min-width: 68px;
                         border: 1px solid transparent;
@@ -67,6 +66,14 @@
                         &[disabled] {
                             pointer-events: none;
                             opacity: .5;
+                        }
+                        &.activate {
+                            &.Active {
+                                background: url(/assets/images/campaignoverview/campaign-button-active.png) top center no-repeat;
+                            }
+                        }
+                        &.launch {
+                            background: url(/assets/images/campaignoverview/campaign-button-ready-to-launch.png) top center no-repeat;
                         }
                     }
                 }

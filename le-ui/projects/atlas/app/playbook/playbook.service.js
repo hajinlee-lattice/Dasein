@@ -858,7 +858,7 @@ angular.module('lp.playbook')
             play_name = play_name || $stateParams.play_name,
             sendEngineId = opts.sendEngineId,
             getExcludeItems = opts.getExcludeItems || PlaybookWizardStore.getExcludeItems(),
-            getDestinationAccountId = opts.getDestinationAccountId ||  PlaybookWizardStore.getDestinationAccountId();
+            getDestinationAccountId = opts.getDestinationAccountId || PlaybookWizardStore.getDestinationAccountId();
 
         PlaybookWizardStore.getPlay(play_name, true).then(function (data) {
             if (data.ratingEngine && data.ratingEngine.id) {

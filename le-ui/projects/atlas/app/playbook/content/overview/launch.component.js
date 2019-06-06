@@ -43,7 +43,8 @@ class LaunchComponent extends Component {
         super(props);
 
         let connection = this.props.connection,
-            type = (connection.config.name ? connection.config.name.toLowerCase() : 'none');
+            config = this.props.config || {},
+            type = (config.name ? config.name.toLowerCase() : 'none');
 
         this.state = {
             play: props.play,
@@ -76,7 +77,7 @@ class LaunchComponent extends Component {
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: true,
-            getDestinationAccountId: this.props.connection.accountId
+            getDestinationAccountId: this.props.connection.lookupIdMap.accountId
         });
 
         this.unsubscribe = store.subscribe(this.handleChange);
@@ -94,6 +95,7 @@ class LaunchComponent extends Component {
     getLaunchAccountsCoverage(play, opts) {
         let playstore = store.getState()['playbook'],
             vm = this;
+
         playstore.playbookWizardStore.launchAccountsCoverage(play.name, {
             sendEngineId: opts.sendEngineId,
             getExcludeItems: opts.getExcludeItems,
@@ -237,7 +239,24 @@ class LaunchComponent extends Component {
         }
     }
 
+    activate(play, connection) {
+        let vm = this,
+            closeModal = (response) => {
+                vm.props.closeFn();
+            };
+
+        actions.saveChannel(play.name, {
+            channelId: connection.id,
+            playLaunch: connection.playLaunch,
+            lookupIdMap: connection.lookupIdMap,
+            isAlwaysOn: !connection.isAlwaysOn
+        }, closeModal);
+    }
+
     launch = (play, connection, opts) => {
+        // save channel (saveChannel)
+        // launch if launching saveLaunch() (send opts.action = launch)
+        
         // FIXME crappy hack to select all buckets because of setState recursion
         var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
         this.state.selectedBuckets = this.state.selectedBuckets.splice(0,4);
@@ -247,10 +266,11 @@ class LaunchComponent extends Component {
             play = opts.play || store.getState().playbook.play,
             ratings = store.getState().playbook.ratings,
             launchObj = opts.launchObj || {
+                id: (connection.playLaunch ? connection.playLaunch.id : ''), // FIXME just a hack for now to unblock me, this shouldn't be needed
                 bucketsToLaunch: this.state.selectedBuckets,
-                destinationOrgId: connection.orgId,
-                destinationSysType: connection.externalSystemType,
-                destinationAccountId: connection.accountId,
+                destinationOrgId: connection.lookupIdMap.orgId,
+                destinationSysType: connection.lookupIdMap.externalSystemType,
+                destinationAccountId: connection.lookupIdMap.accountId,
                 topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
                 launchUnscored: this.state.unscored,
                 excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId
@@ -262,13 +282,12 @@ class LaunchComponent extends Component {
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
 
-            actions.destinationAccountId(connection.orgId);
-
         if(play) {
             let vm = this,
                 closeModal = (response) => {
                     vm.props.closeFn();
                 };
+
             if(lastIncompleteLaunch) {
                 actions.saveLaunch(play.name, {
                     engineId: opts.engineId,
@@ -277,18 +296,30 @@ class LaunchComponent extends Component {
                     save: true
                 }, closeModal);
             } else if(lastIncompleteLaunchId) {
-                actions.savePlayLaunch(play.name, {
-                    engineId: opts.engineId,
-                    launch_id: lastIncompleteLaunchId,
-                    launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj),
-                    save: save
-                }, closeModal);
+                actions.saveChannel(play.name, {
+                    launchOpts: {
+                        engineId: opts.engineId,
+                        launch_id: lastIncompleteLaunchId,
+                        launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj),
+                        save: save,
+                        callback: closeModal
+                    },
+                    channelId: connection.id,
+                    playLaunch: connection.playLaunch,
+                    lookupIdMap: connection.lookupIdMap
+                });
             } else {
-                actions.savePlayLaunch(play.name, {
-                    engineId: opts.engineId,
-                    launchObj: launchObj,
-                    save: save
-                }, closeModal);
+                actions.saveChannel(play.name, {
+                    launchOpts: {
+                        engineId: opts.engineId,
+                        launchObj: launchObj,
+                        save: save,
+                        callback: closeModal
+                    },
+                    playLaunch: connection.playLaunch,
+                    channelId: connection.id,
+                    lookupIdMap: connection.lookupIdMap,
+                });
             }
         }
     }
@@ -358,7 +389,8 @@ class LaunchComponent extends Component {
         if(this.state.launchAccountsCoverage) {
             var play = this.state.play,
                 connection = this.props.connection,
-                type = (connection.config.name ? connection.config.name.toLowerCase() : 'none'),
+                config = this.props.config,
+                type = (config.name ? config.name.toLowerCase() : 'none'),
                 bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),
                 coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
                 engineId = coverageObj.engineId,
@@ -460,13 +492,12 @@ class LaunchComponent extends Component {
                             <li>
                                 <LeButton
                                     name="launchautomatically"
-                                    disabled={true}
                                     config={{
                                         label: "Launch Automatically",
                                         classNames: "blue-button"
                                     }}
                                     callback={() => {
-                                        console.log('Launch Automatically Clicked');
+                                        this.activate(play, connection);
                                     }} />
                             </li>
                         </ul>
