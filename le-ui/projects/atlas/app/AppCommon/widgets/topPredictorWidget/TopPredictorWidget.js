@@ -30,15 +30,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     }
 
     $scope.backToSummaryView = false;
-    // Get Internal category list
-    var internalCategoryObj = data.InternalAttributes;
-    if (internalCategoryObj) {
-        $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
-        $scope.internalCategories = internalCategoryObj.categories;
-        $scope.showInternalCategories = internalCategoryObj.total > 0;
 
-        for (var i = 0; i < $scope.internalCategories.length; i++) {
-            if($scope.internalCategories[i].name == 'ACCOUNT_ATTRIBUTES') {
+    $scope.formatAttributes = function (categories) {
+        for (var i = 0; i < categories.length; i++) {
+            if(categories[i].name == 'ACCOUNT_ATTRIBUTES') {
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'ACCOUNT_ATTRIBUTES' });
                 if (myAttributesCategory) {
                     myAttributesCategory.categoryName = 'My Attributes';
@@ -52,34 +47,44 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 }
                 $scope.hasAccountAttributes = true;
                 
-                $scope.internalCategories[i].name = 'My Attributes';
-                $scope.internalCategories[i].color = '#457DB9';
+                categories[i].name = 'My Attributes';
+                categories[i].color = '#457DB9';
                 
                 
             }
-            if ($scope.internalCategories[i].name == 'My Attributes') {
+            if (categories[i].name == 'My Attributes') {
 
                 $scope.hasAccountAttributes = false;
-                $scope.internalCategories[i].color = '#457DB9';
+                categories[i].color = '#457DB9';
                 
                 var myAttributesCategory = chartData.children.find(function(category) { return category.name == 'My Attributes' });
                 if (myAttributesCategory) {
                     setAttributeColor(myAttributesCategory, '#457DB9');
                 }
             }
-            if($scope.internalCategories[i].name == 'Product Spend Profile') {
-                $scope.internalCategories[i].color = '#B887B6';
+            if(categories[i].name == 'Product Spend Profile') {
+                categories[i].color = '#B887B6';
                 var productSpendCategory = chartData.children.find(function(category) { return category.name == 'Product Spend Profile' });
                 if (productSpendCategory) {
                     setAttributeColor(productSpendCategory, '#B887B6');
                 }
             }
         }
+    }
+
+    // Get Internal category list
+    var internalCategoryObj = data.InternalAttributes;
+    if (internalCategoryObj) {
+        $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
+        $scope.internalCategories = internalCategoryObj.categories;
+        $scope.showInternalCategories = internalCategoryObj.total > 0;
+        $scope.formatAttributes($scope.internalCategories);
 
         // Get External category list
         var externalCategoryObj = data.ExternalAttributes;
         $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
         $scope.externalCategories = externalCategoryObj.categories;
+        $scope.formatAttributes($scope.externalCategories);
         $scope.showExternalCategories = externalCategoryObj.total > 0;
     }
 
