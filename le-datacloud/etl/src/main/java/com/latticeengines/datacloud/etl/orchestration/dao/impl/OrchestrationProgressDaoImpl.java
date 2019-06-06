@@ -83,7 +83,7 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
         query.setParameter("version", version);
         query.setParameter("name", orchName);
-        return !CollectionUtils.isEmpty(query.list());
+        return CollectionUtils.isNotEmpty(query.list());
     }
 
     @Override

@@ -79,16 +79,6 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         orchestrationEntityMgr.save(orchestration);
         orchestration = orchestrationEntityMgr.findByField("Name", ORCHESTRATION_NAME);
 
-        orchestrationprogress = new OrchestrationProgress();
-        orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
-        orchestrationprogress.setStatus(ProgressStatus.NEW);
-        orchestrationprogress.setLatestUpdateTime(new Date());
-        orchestrationprogress.setRetries(0);
-        orchestrationprogress.setStartTime(new Date());
-        orchestrationprogress.setTriggeredBy("");
-        orchestrationprogress.setOrchestration(orchestration);
-        orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
-
     }
 
     @AfterClass(groups = "functional")
@@ -116,12 +106,24 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
 
         config.setCronExpression("0 0 0 ? * * *");
 
+        // prepare OrchestrationProgress
+        orchestrationprogress = new OrchestrationProgress();
+        orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
+        orchestrationprogress.setStatus(ProgressStatus.NEW);
+        orchestrationprogress.setLatestUpdateTime(new Date());
+        orchestrationprogress.setRetries(0);
+        orchestrationprogress.setStartTime(new Date());
+        orchestrationprogress.setTriggeredBy("");
+        orchestrationprogress.setOrchestration(orchestration);
+        orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
+
         // has job in progress, not triggered
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
 
+
         // trigger at 0:00 every day when not job in progress
-        orchestrationProgressService.updateProgress(orchestrationprogress).status(ProgressStatus.NOTSTARTED)
+        orchestrationProgressService.updateProgress(orchestrationprogress).status(ProgressStatus.FINISHED)
                 .commit(true);
 
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
