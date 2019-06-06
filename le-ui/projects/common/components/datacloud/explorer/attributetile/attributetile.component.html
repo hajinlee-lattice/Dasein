@@ -207,8 +207,8 @@
                                 <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                             </div>
                         </li>
-                        <li class="lift" ng-if="stat.Lift">
-                            <span>{{stat.Lift|number:1}}x</span>
+                        <li class="lift">
+                            <span ng-if="vm.section == 're.model_iteration'">{{stat.Lift|number:1}}x</span>
                         </li>
                         <li class="count">
                             <span>{{stat.Cnt|number}}</span>
