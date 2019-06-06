@@ -197,7 +197,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             throw new CriticalImportException(
                                     "There's critical exception in import, will fail the job!");
                         }
-                        LOG.debug("Start to processing line: " + lineNum);
                         beforeEachRecord();
                         GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
