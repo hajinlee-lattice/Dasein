@@ -63,11 +63,12 @@ export default class S3FileList extends Component {
     handleChange = () => {
         const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
+        let s3FilesSorted = s3Files.sort((a, b) => b['last_modified'] - a['last_modified']);
 
         let state = Object.assign({}, this.state);
         state.showEmpty = s3Files && s3Files.length == 0;
         state.showLoading = false;
-        state.data = s3Files;
+        state.data = s3FilesSorted;
         state.path = data.path;
         state.forceReload = true;
 
