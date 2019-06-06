@@ -12,10 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressDao;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 
 @Component("orchestrationProgressEntityMgr")
-public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgressEntityMgr {
+public class OrchestrationProgressEntityMgrImpl extends BaseEntityMgrImpl<OrchestrationProgress>
+        implements OrchestrationProgressEntityMgr {
     @Autowired
     private OrchestrationProgressDao orchestrationProgressDao;
 
@@ -23,6 +27,12 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         return orchestrationProgressDao.findProgressesByField(fields, orderFields);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasJobInProgress(Orchestration orch) {
+        return orchestrationProgressDao.hasJobInProgress(orch);
     }
 
     @Override
@@ -72,5 +82,11 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     public boolean isDuplicateVersion(String orchName, String version) {
         return orchestrationProgressDao.isDuplicateVersion(orchName, version);
     }
+
+    @Override
+    public BaseDao<OrchestrationProgress> getDao() {
+        return orchestrationProgressDao;
+    }
+
 
 }

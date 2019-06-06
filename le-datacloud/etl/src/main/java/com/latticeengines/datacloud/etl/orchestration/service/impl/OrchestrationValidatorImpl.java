@@ -53,15 +53,17 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
             PredefinedScheduleConfig config = (PredefinedScheduleConfig) orch.getConfig();
             if (StringUtils.isBlank(config.getCronExpression())) {
                 return false;
+            }
+            if (orchestrationProgressEntityMgr.hasJobInProgress(orch)) {
+                return false;
+            }
+            Date latestScheduledTime = CronUtils.getPreviousFireTimeByCron(config.getCronExpression());
+            String scheduledVersion = HdfsPathBuilder.dateFormat.format(latestScheduledTime);
+            if (!isDuplicateVersion(orch.getName(), scheduledVersion)) {
+                triggeredVersions.add(scheduledVersion);
+                return true;
             } else {
-                Date latestScheduledTime = CronUtils.getPreviousFireTimeByCron(config.getCronExpression());
-                String scheduledVersion = HdfsPathBuilder.dateFormat.format(latestScheduledTime);
-                if (!isDuplicateVersion(orch.getName(), scheduledVersion)) {
-                    triggeredVersions.add(scheduledVersion);
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
             }
         }
         if (orch.getConfig() instanceof ExternalTriggerConfig) {

@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEntityMgr;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig.TriggerStrategy;
@@ -75,6 +77,7 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         orchestration.setSchedularEnabled(false);
         orchestrationEntityMgr.save(orchestration);
         orchestration = orchestrationEntityMgr.findByField("Name", ORCHESTRATION_NAME);
+
     }
 
     @AfterClass(groups = "functional")
@@ -83,7 +86,7 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         ingestionEntityMgr.delete(ingestion);
         orchestrationEntityMgr.delete(orchestration);
     }
-
+    
     @Test(groups = "functional", priority = 1)
     public void testScheduledTrigger() {
         List<String> triggeredVersions = new ArrayList<>();
@@ -100,8 +103,21 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
 
-        // trigger at 0:00 every day
         config.setCronExpression("0 0 0 ? * * *");
+
+        // prepare OrchestrationProgress
+        OrchestrationProgress orchestrationprogress = createOrchestrationProgress();
+
+
+        // has job in progress, not triggered
+        Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
+        Assert.assertTrue(triggeredVersions.isEmpty());
+
+
+        // trigger at 0:00 every day when not job in progress
+        orchestrationProgressService.updateProgress(orchestrationprogress).status(ProgressStatus.FINISHED)
+                .commit(true);
+
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertEquals(triggeredVersions.size(), 1);
         Assert.assertEquals(triggeredVersions.get(0),
@@ -115,7 +131,9 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         triggeredVersions.clear();
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
+
     }
+
 
     // Orchestration is enabled in testScheduledTrigger()
     @Test(groups = "functional", priority = 2)
@@ -155,4 +173,18 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertEquals(triggeredVersions.get(0), version);
     }
 
+    private OrchestrationProgress createOrchestrationProgress() {
+        OrchestrationProgress orchestrationprogress = new OrchestrationProgress();
+        orchestrationprogress.setHdfsPod(HdfsPodContext.getHdfsPodId());
+        orchestrationprogress.setStatus(ProgressStatus.NEW);
+        orchestrationprogress.setLatestUpdateTime(new Date());
+        orchestrationprogress.setRetries(0);
+        orchestrationprogress.setStartTime(new Date());
+        orchestrationprogress.setTriggeredBy("");
+        orchestrationprogress.setOrchestration(orchestration);
+        orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
+        return orchestrationprogress;
+    }
+
 }
+
