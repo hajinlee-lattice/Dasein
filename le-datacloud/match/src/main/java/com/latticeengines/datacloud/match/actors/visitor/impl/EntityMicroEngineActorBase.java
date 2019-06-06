@@ -33,6 +33,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -189,6 +191,19 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
 
             if (CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors())) {
                 traveler.setEntityMatchErrors(associationResponse.getAssociationErrors());
+            }
+
+            // clear all system IDs that have conflict
+            if (CollectionUtils.isNotEmpty(associationResponse.getConflictEntries())) {
+                for (EntityLookupEntry entry : associationResponse.getConflictEntries()) {
+                    if (entry == null || entry.getType() != EntityLookupEntry.Type.EXTERNAL_SYSTEM) {
+                        // only clear out system IDs that have conflict
+                        continue;
+                    }
+
+                    Pair<String, String> sys = EntityLookupEntryConverter.toExternalSystem(entry);
+                    traveler.addFieldToClear(sys.getKey());
+                }
             }
         } else {
             log.error("Got invalid entity association response in actor {}, should not have happened", self());

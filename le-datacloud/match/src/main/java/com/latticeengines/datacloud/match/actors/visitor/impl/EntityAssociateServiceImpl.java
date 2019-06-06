@@ -347,7 +347,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 }
                 // fail to associate the highest priority entry
                 return getResponse(
-                        request, null, null, null, false,
+                        request, null, null, null, false, Collections.singleton(maxPriorityEntry),
                         getConflictMessages(targetEntitySeed.getId(), request, maxPriorityResult, null, null));
             }
 
@@ -379,14 +379,15 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             log.debug("Association result = {}, mapping conflict entries = {}," +
                     " seed conflict entries = {}, requestId = {}",
                     result, mappingConflictEntries, seedConflictEntries, requestId);
+            Set<EntityLookupEntry> conflictEntries = getConflictEntries(mappingConflictEntries, seedConflictEntries,
+                    result.getMiddle(), result.getRight());
             return getResponse(
                     request, targetEntitySeed.getId(),
                     targetEntitySeed,
                     // generate updated seed
-                    mergeSeed(targetEntitySeed, seedToUpdate,
-                            getConflictEntries(mappingConflictEntries, seedConflictEntries, result.getMiddle(),
-                                    result.getRight())),
+                    mergeSeed(targetEntitySeed, seedToUpdate, conflictEntries),
                     targetEntitySeed.isNewlyAllocated(),
+                    conflictEntries,
                     getConflictMessages(targetEntitySeed.getId(), request, result, mappingConflictEntries,
                             seedConflictEntries));
         }
@@ -395,11 +396,14 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         log.debug("No need for additional association. Mapping conflict entries = {}," +
                 " seed conflict entries = {}, requestId = {}",
                 mappingConflictEntries, seedConflictEntries, requestId);
+        Set<EntityLookupEntry> conflictEntries = getConflictEntries(mappingConflictEntries, seedConflictEntries, null,
+                null);
         return getResponse(
                 request, targetEntitySeed.getId(), //
                 targetEntitySeed, //
-                merge(targetEntitySeed, maxPriorityEntry, mappingConflictEntries, seedConflictEntries), //
-                targetEntitySeed.isNewlyAllocated(),
+                merge(targetEntitySeed, maxPriorityEntry, conflictEntries), //
+                targetEntitySeed.isNewlyAllocated(), //
+                conflictEntries, //
                 getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
                         seedConflictEntries));
     }
@@ -408,11 +412,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * helper to merge highest priority match key given known conflict match keys
      */
     private EntityRawSeed merge(@NotNull EntityRawSeed target, @NotNull EntityLookupEntry maxPriorityEntry,
-            List<Pair<EntityLookupEntry, String>> mappingConflicts, Set<EntityLookupEntry> seedConflicts) {
+            Set<EntityLookupEntry> conflictEntries) {
         return mergeSeed(
                 target, new EntityRawSeed(target.getId(), target.getEntity(),
                         Collections.singletonList(maxPriorityEntry), null),
-                getConflictEntries(mappingConflicts, seedConflicts, null, null));
+                conflictEntries);
     }
 
     /*
@@ -609,21 +613,18 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         return entries.get(0);
     }
 
-    // TODO using pre-update seed for now since we only need pre-update accountId
-    // attr for email-only match keys, perform artificial update later
-
     private EntityAssociationResponse getResponse(
             @NotNull EntityAssociationRequest request, String entitySeedId, EntityRawSeed targetSeedBeforeUpdate,
-            EntityRawSeed targetSeedAfterUpdate, boolean isNewlyAllocated, @NotNull List<String> associationErrors) {
+            EntityRawSeed targetSeedAfterUpdate, boolean isNewlyAllocated, Set<EntityLookupEntry> conflictEntries,
+            @NotNull List<String> associationErrors) {
         return new EntityAssociationResponse(request.getTenant(), request.getEntity(), isNewlyAllocated, entitySeedId,
-                targetSeedBeforeUpdate, targetSeedAfterUpdate, associationErrors);
+                targetSeedBeforeUpdate, targetSeedAfterUpdate, conflictEntries, associationErrors);
     }
 
     private EntityAssociationResponse getResponse(@NotNull EntityAssociationRequest request, String entitySeedId,
             EntityRawSeed targetSeedBeforeUpdate, EntityRawSeed targetSeedAfterUpdate, boolean isNewlyAllocated) {
         return new EntityAssociationResponse(request.getTenant(), request.getEntity(), entitySeedId,
-                targetSeedBeforeUpdate, targetSeedAfterUpdate,
-                isNewlyAllocated);
+                targetSeedBeforeUpdate, targetSeedAfterUpdate, isNewlyAllocated);
     }
 
     /*

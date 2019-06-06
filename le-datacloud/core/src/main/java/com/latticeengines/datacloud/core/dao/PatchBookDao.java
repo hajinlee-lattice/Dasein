@@ -14,4 +14,5 @@ public interface PatchBookDao extends BaseDao<PatchBook> {
      * @param value value to be set, nullable
      */
     void updateField(@NotNull List<Long> pIds, @NotNull String fieldName, Object value);
+
 }
