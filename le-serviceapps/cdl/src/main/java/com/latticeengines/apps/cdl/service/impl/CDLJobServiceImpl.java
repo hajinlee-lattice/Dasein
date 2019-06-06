@@ -251,7 +251,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                     }
                 }
             } catch (Exception e) {
-                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed", e);
+                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed: ", e);
                 throw e;
             }
         } else if (cdlJobType == CDLJobType.EXPORT) {

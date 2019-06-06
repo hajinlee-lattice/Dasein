@@ -82,7 +82,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static Object[][] getIngestions1() {
         return new Object[][] {
                 { ORB_INGESTION,
-                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"FileName\":\"orb-db2-export-sample.zip\"}",
+                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"FileName\":\"orb-db2-export-sample.zip\"}",
                         IngestionType.API } //
         };
     }
@@ -145,7 +145,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         // no sequential dependencies among groups
         // can comment out any group(s)
         // Disable Orb test as Orb Key is expired
-        // testIngestions1();
+        testIngestions1();
         testIngestions2();
         testIngestions3();
     }
