@@ -27,7 +27,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
     static final String BEAN_NAME = "matchContact";
 
     private String matchTargetTablePrefix = null;
-    private String newAccountTableName = NamingUtils.timestamp("NewAccounts");
+    private String newAccountTableName = NamingUtils.timestamp("NewAccountsFromContact");
 
 
     @Override

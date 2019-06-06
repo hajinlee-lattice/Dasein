@@ -13,61 +13,57 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
-@Component(MatchAccount.BEAN_NAME)
+@Component(MatchTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountStepConfiguration> {
+public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransactionStepConfiguration> {
+    @SuppressWarnings("unused")
+    private static final Logger log = LoggerFactory.getLogger(MatchTransaction.class);
 
-    private static final Logger log = LoggerFactory.getLogger(MatchAccount.class);
-
-    static final String BEAN_NAME = "matchAccount";
+    static final String BEAN_NAME = "matchTransaction";
 
     private String matchTargetTablePrefix = null;
+    private String newAccountTableName = NamingUtils.timestamp("NewAccountsFromTxn");
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("MatchAccount");
+        request.setName("MatchTransaction");
         matchTargetTablePrefix = entity.name() + "_Matched";
-
-        if (isShortCutMode()) {
-            log.info("Found diff table and batch store in context, using short-cut pipeline");
-            return null;
-        }
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
-        TransformationStepConfig merge;
+        TransformationStepConfig merge = mergeInputs(true, false, true);
+        steps.add(merge);
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            merge = concatImports(null);
-        } else {
-            merge = dedupAndConcatImports(InterfaceName.AccountId.name());
+            merge = mergeInputs(true, false, true);
+            TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix);
+            steps.add(match);
         }
-        TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix);
-        steps.add(merge);
-        steps.add(match);
 
         request.setSteps(steps);
         return request;
-    }
-
-    private boolean isShortCutMode() {
-        return Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
     }
 
     @Override
     protected void onPostTransformationCompleted() {
         String targetTableName = TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion);
         mergeInputSchema(targetTableName);
-        putStringValueInContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE, targetTableName);
+        putStringValueInContext(ENTITY_MATCH_TXN_TARGETTABLE, targetTableName);
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
+        Table newAccountTable = metadataProxy.getTable(customerSpace.toString(), newAccountTableName);
+        if (newAccountTable != null) {
+            putStringValueInContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, newAccountTableName);
+            addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
+        }
     }
 
     private TransformationStepConfig match(int inputStep, String matchTargetTable) {
@@ -84,12 +80,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
         Set<String> columnNames = getInputTableColumnNames(0);
-        if (configuration.isEntityMatchEnabled()) {
-            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    null);
-        } else {
-            return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
-        }
+        return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
+                newAccountTableName);
     }
-
 }

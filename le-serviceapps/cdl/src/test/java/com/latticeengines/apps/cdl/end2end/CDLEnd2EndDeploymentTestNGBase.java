@@ -159,8 +159,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
 
+    // After ProcessAccount
     static final Long ACCOUNT_1 = 900L;
+    // After ProcessAccountWithAdvancedMatch
     static final Long ENTITY_MATCH_ACCOUNT_1 = 903L;
+    // After ProcessTransactionWithAdvancedMatch
+    static final Long ENTITY_MATCH_ACCOUNT_4 = 1176L;
     static final Long CONTACT_1 = 900L;
     static final Long ENTITY_MATCH_CONTACT_1 = 900L;
     static final Long TRANSACTION_1 = 41156L;

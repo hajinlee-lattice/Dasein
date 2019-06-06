@@ -197,6 +197,24 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         if (step == null) {
             return false;
         }
+        // For now, don't treat embedded accounts from transaction match as a
+        // trigger to rebuild (re-profile) account.
+        // Reason:
+        // 1. Too expensive
+        // 2. Those accounts only have CustomerAccountId anyway, don't change
+        // anything in Account stats except CustomerAccountId
+        // Consequence:
+        // 1. Stats of CustomerAccountId could be stale if there is
+        // only transaction import, but it will be updated in future rebuild
+        // account job (Similar behavior as <30% updated account from imports
+        // won't trigger rebuilding account)
+        // 2. Count of account & segmentation query result are
+        // not impacted
+        // 3. Edge case: Importing transaction before account could have empty
+        // "My Attribute" category in "My Data" page. But since PM plans to
+        // filter out Accounts created from transaction in application anyway,
+        // it should be fine.
+        // TODO: Confirm the behavior with PM/Yunfeng/Feng
         return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
     }
 }
