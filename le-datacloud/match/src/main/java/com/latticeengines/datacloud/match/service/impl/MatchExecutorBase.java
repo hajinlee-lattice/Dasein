@@ -180,6 +180,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
+        List<String> inputFields = matchContext.getInput().getFields();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
 
@@ -319,6 +320,19 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
             }
 
+            if (CollectionUtils.isNotEmpty(internalRecord.getFieldsToClear())) {
+                // clear out specific fields in input (copy new row for now to avoid affecting
+                // input object)
+                List<Object> clearedInput = new ArrayList<>();
+                for (int i = 0; i < inputFields.size(); i++) {
+                    if (internalRecord.getFieldsToClear().contains(inputFields.get(i))) {
+                        clearedInput.add(null);
+                    } else {
+                        clearedInput.add(internalRecord.getInput().get(i));
+                    }
+                }
+                internalRecord.setInput(clearedInput);
+            }
             internalRecord.setOutput(output);
 
             if (matchedRecord) {
