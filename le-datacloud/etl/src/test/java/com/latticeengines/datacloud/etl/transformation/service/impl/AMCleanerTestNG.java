@@ -271,17 +271,28 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     }
 
     private void verifyTargetSrcAvro(Iterator<GenericRecord> records, List<String> strAttrs,
-            Map<String, String> mapFieldType) {
+            Set<String> allFields) {
         Set<String> mustPresentSet = new HashSet<>(mustPresentItems);
         Set<Object> removeItemSet = new HashSet<>();
-        // verifying all the mustPresentList attributes are present
-        Iterator<String> iterSet = mustPresentSet.iterator();
-        while (iterSet.hasNext()) {
-            Object itemVal = iterSet.next();
-            if (mapFieldType.containsKey(itemVal.toString())) {
-                removeItemSet.add(itemVal);
+        int countLdc = 0;
+        int countTechInd = 0;
+        for (String columnVal : allFields) {
+            // Verifying 10 attributes named as LDC_*
+            if (columnVal.startsWith("LDC_")) {
+                countLdc++;
+            }
+            // Verifying don’t have attributes named as TechIndicator_*
+            if (columnVal.startsWith("TechIndicator_")) {
+                countTechInd++;
+            }
+            // verifying all the mustPresentList attributes are present
+            if (mustPresentSet.contains(columnVal)) {
+                removeItemSet.add(columnVal);
             }
         }
+        Assert.assertEquals(countLdc, 10);
+        Assert.assertEquals(countTechInd, 0);
+        // remove HashSet -> check
         mustPresentSet.removeAll(removeItemSet);
         Assert.assertTrue(mustPresentSet.size() == 0);
         // check value of these attributes for all the records
@@ -330,6 +341,6 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             throw new RuntimeException(e);
         }
         // verifying srcAttrs record Value Data
-        verifyTargetSrcAvro(records, strAttrs, mapFieldType);
+        verifyTargetSrcAvro(records, strAttrs, mapFieldType.keySet());
     }
 }
