@@ -100,8 +100,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                     Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
                     if (getComparisonTypesToBeIgnored().contains(transaction.getTimeFilter().getRelation())) {
                         ((BucketRestriction) node).setIgnored(true);
-                    } else {
-                        ((BucketRestriction) node).setIgnored(false);
                     }
                 }
             });
@@ -119,8 +117,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                     String attrName = ((BucketRestriction) node).getAttr().getAttribute();
                     if (dateAttributes.contains(attrName)) {
                         ((BucketRestriction) node).setIgnored(true);
-                    } else {
-                        ((BucketRestriction) node).setIgnored(false);
                     }
                 }
             });
