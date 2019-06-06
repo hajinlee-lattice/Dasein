@@ -273,7 +273,6 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     private void verifyTargetSrcAvro(Iterator<GenericRecord> records, List<String> strAttrs,
             Set<String> allFields) {
         Set<String> mustPresentSet = new HashSet<>(mustPresentItems);
-        Set<Object> removeItemSet = new HashSet<>();
         int countLdc = 0;
         int countTechInd = 0;
         for (String columnVal : allFields) {
@@ -287,13 +286,11 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             }
             // verifying all the mustPresentList attributes are present
             if (mustPresentSet.contains(columnVal)) {
-                removeItemSet.add(columnVal);
+                mustPresentSet.remove(columnVal);
             }
         }
-        Assert.assertEquals(countLdc, 10);
-        Assert.assertEquals(countTechInd, 0);
-        // remove HashSet -> check
-        mustPresentSet.removeAll(removeItemSet);
+        Assert.assertEquals(countLdc, LDC_ATTRS);
+        Assert.assertEquals(countTechInd, TECH_IND);
         Assert.assertTrue(mustPresentSet.size() == 0);
         // check value of these attributes for all the records
         while (records.hasNext()) {
