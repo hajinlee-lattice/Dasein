@@ -35,7 +35,7 @@ class SystemsComponent extends Component {
         this.state = {
             refresh: false,
             play: props.play,
-            connections: props.connections
+            connections: null
         };
 
         this._connectors = {
@@ -73,6 +73,14 @@ class SystemsComponent extends Component {
             actions.fetchRatings([playstore.play.ratingEngine.id], false);
         }
 
+        if(playstore.play.name) {
+            if(!playstore.connections) {
+                actions.fetchConnections(playstore.play.name);
+            } else {
+                this.setState({connections: playstore.connections});
+            }
+        }
+
         this.unsubscribe = store.subscribe(this.handleChange);
     }
 
@@ -85,8 +93,9 @@ class SystemsComponent extends Component {
         this.setState(state);
     }
 
-    getLaunchStateText(launch) {
-        var launchState = (launch ? launch.launchState : 'Unlaunched'),
+    getLaunchStateText(connection, play) {
+        var launch = connection.playLaunch,
+            launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
             text = [];
 
@@ -116,6 +125,40 @@ class SystemsComponent extends Component {
         return text;
     }
 
+    getLaunchButton(connection, play) {
+        var button = [],
+            launch = connection.playLaunch,
+            launchState = (launch ? launch.launchState : 'Unlaunched'),
+            launched = (launchState === 'Launched' ? true : false),
+            launching =  (launchState === 'Launching' ? true : false),
+            active = false;
+
+        var activeState = (true ? 'Active' : 'Inactive');
+        if(connection.isAlwaysOn) {
+            button.push(
+                <LeButton
+                    name="activate"
+                    config={{
+                        label: activeState,
+                        classNames: `borderless-button campaign-launch-button activate ${activeState}`
+                    }}
+                    callback={() => {this.activateButtonClickHandler(connection, play)} } />
+            );
+        } else {
+            button.push(
+                <LeButton
+                    name="launch"
+                    disabled={launching}
+                    config={{
+                        label: "Ready to launch",
+                        classNames: "borderless-button campaign-launch-button launch"
+                    }}
+                    callback={() => {this.launchButtonClickHandler(connection, play)} } />
+            );
+        }
+        return button;
+    }
+
     getConnectionsList(connections) {
         if(connections) {
             var connectionsAr = [],
@@ -128,7 +171,7 @@ class SystemsComponent extends Component {
             }
             connectionsAr.forEach(function(connection){
                 connection.config = (this._connectors[connection.externalSystemName] ? this._connectors[connection.externalSystemName].config : {});
-                connection.launchConfiguration = this.props.connections.launchConfigurations[connection.orgId];
+                connection.launchConfiguration = this.state.connections.launchConfigurations[connection.orgId];
 
                 var launchState = (connection.launchConfiguration ? connection.launchConfiguration.launchState : 'Unlaunched'),
                     launched = (launchState === 'Launched' ? true : false);
@@ -141,8 +184,8 @@ class SystemsComponent extends Component {
     }
 
     makeConnections(connections, play) {
-        var connections = this.getConnectionsList(connections),
-            connectionTemplates = [];
+        //var connections = this.getConnectionsList(connections),
+        var connectionTemplates = [];
         connections.forEach(function(connection) {
             connectionTemplates.push(this.connectionTemplate(connection, play))
         }, this);
@@ -152,33 +195,36 @@ class SystemsComponent extends Component {
     connectionTemplate(connection, play) {
         var connectionsTemplate = [];
         if(connection) {
-            var launchState = (connection.launchConfiguration ? connection.launchConfiguration.launchState : 'Unlaunched'),
+            var launchState = (connection.playLaunch ? connection.playLaunch.launchState : 'Unlaunched'),
                 launched = (launchState === 'Launching' ? true : false);
 
-            console.log(this.state.play);
+            var configObj = this._connectors[connection.lookupIdMap.externalSystemName],
+                config = (configObj ? configObj.config : {});
 
             return (
                 <LeHPanel hstretch={"true"} className={'connection-card'}>
                     <div class="connection-logo">
-                        <img src={connection.config.img} />
-                        <h2>{connection.orgName}</h2>
+                        <img src={config.img} />
+                        <h2>{connection.lookupIdMap.orgName}</h2>
                     </div>
                     <div class="connection-info">
-                        {this.getLaunchStateText(connection.launchConfiguration)}
+                        {this.getLaunchStateText(connection, play)}
                     </div>
                     <div class="connection-launch">
-                        <LeButton
-                            name="launch"
-                            disabled={launched}
-                            config={{
-                                label: "Ready to launch",
-                                classNames: "borderless-button campaign-activate"
-                            }}
-                            callback={() => {this.launchButtonClickHandler(connection, play)} } />
+                        {this.getLaunchButton(connection, play)}
                     </div>
                 </LeHPanel>
             );
         }
+    }
+
+    activateButtonClickHandler(connection, play) {
+        actions.saveChannel(play.name, {
+            channelId: connection.id,
+            playLaunch: connection.playLaunch,
+            lookupIdMap: connection.lookupIdMap,
+            isAlwaysOn: !connection.isAlwaysOn
+        });
     }
 
     launchButtonClickHandler(connection, play) {
@@ -192,17 +238,20 @@ class SystemsComponent extends Component {
                     modalActions.closeModal(store);
                 }
 
+                let configObj = this._connectors[connection.lookupIdMap.externalSystemName],
+                    config = (configObj ? configObj.config : {});
+
                 return (
-                    <LaunchComponent closeFn={closeModal} connection={connection} play={this.state.play} />
+                    <LaunchComponent closeFn={closeModal} connection={connection} play={this.state.play} config={config} />
                 );
             },
             title: () => {
                 return (
-                    <p>Launch to {connection.orgName}</p>
+                    <p>Launch to {connection.lookupIdMap.orgName}</p>
                 );
             },
             titleIcon: () => {
-                let src = (this._connectors[connection.externalSystemName] ? this._connectors[connection.externalSystemName].config.img : '');
+                let src = (this._connectors[connection.lookupIdMap.externalSystemName] ? this._connectors[connection.lookupIdMap.externalSystemName].config.img : '');
                 return (
                     <img src={src} />
                 );
@@ -220,7 +269,7 @@ class SystemsComponent extends Component {
                     <h2>Connected Systems</h2>
                     <p>Activate a system to automate sending accounts and contacts.</p>
                     <LeVPanel hstretch={"true"} className={'systems-grid'}>
-                        {this.makeConnections(this.props.connections, this.props.play)}
+                        {this.makeConnections(this.state.connections, this.props.play)}
                     </LeVPanel>
                 </div>
             );

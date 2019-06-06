@@ -64,6 +64,10 @@ export const actions = {
         httpService.get('/pls/play', observer, {});
     },
     fetchConnections: (play_name, deferred) => {
+        let playstore = store.getState()['playbook'];
+        if(playstore.connections) {
+            return false;
+        }
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
             response => {
@@ -75,7 +79,8 @@ export const actions = {
                 return deferred.resolve(response.data);
             }
         );
-        httpService.get(`/pls/play/${play_name}/launches/configurations`, observer, {});
+        //httpService.get(`/pls/play/${play_name}/launches/configurations`, observer, {});
+        httpService.get(`/pls/play/${play_name}/channels?include-unlaunched-channels=true`, observer, {});
     },
     fetchRatings: (ratingEngineIds, restrictNotNullSalesforceId, deferred) => {
         let playstore = store.getState()['playbook'];
@@ -121,6 +126,59 @@ export const actions = {
             });
             actions.saveLaunch(play_name, opts);
         });
+    },
+    saveChannel: (play_name, opts, cb) => {
+        // pls/play/{playname}/channels/{channelID} 
+        // post creates new (no id)
+        // put creates/updates (has id, use id as channleID)
+        // to launch also send launchObj same way as previous method
+        // launch automatically is always on, send always on true, otherwise false
+        // {
+        //     “playLaunch”: LaunchObj
+        //     “lookupIdMap”:{ // this comes in channels api
+        //       “configId”:“943d854a-ef58-4377-b002-7b3748eb6bb3",
+        //       “orgId”: “Lattice_S3",
+        //       “externalSystemType”: “FILE_SYSTEM”
+        //     },
+        //     “isAlwaysOn”:true //auto launch
+        // }
+        
+        var opts = opts || {},
+            channelId = opts.channelId || '',
+            isAlwaysOn = opts.isAlwaysOn || false,
+            launchObj = (opts.launchOpts ? opts.launchOpts.launchObj : {}),
+            lookupIdMap = opts.lookupIdMap || {},
+            launchCallback = (opts.launchOpts && opts.launchOpts.callback ? opts.launchOpts.callback : null),
+            method = (channelId ? 'put' : 'post');
+
+        var channelObj = {
+            id: channelId,
+            playLaunch: launchObj,
+            lookupIdMap: lookupIdMap,
+            isAlwaysOn: isAlwaysOn
+        };
+        http[method](`/pls/play/${play_name}/channels/${channelId}`, channelObj).then((response) => {
+            let playstore = store.getState()['playbook'],
+                connections = playstore.connections,
+                connectionIndex = connections.findIndex(function(connection) {
+                    return connection.id === channelId;
+                });
+
+            connections[connectionIndex] = response.data;
+
+            store.dispatch({
+                type: CONST.FETCH_CONNECTIONS,
+                payload: connections
+            });
+            
+            if(opts.launchOpts) {
+                actions.saveLaunch(play_name, opts.launchOpts, launchCallback);
+            }
+            if(cb && typeof cb === 'function') {
+                cb();
+            }
+        });
+
     },
     saveLaunch: (play_name, opts, cb) => {
         var opts = opts || {},
