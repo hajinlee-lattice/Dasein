@@ -65,17 +65,6 @@ public class EntityLookupEntryConverter {
                new String[] { systemIdName }, new String[] { systemIdValue });
     }
 
-    /**
-     * Parse a pair of systemId name/value from input entry
-     *
-     * @param entry input lookup entry
-     * @return [ systemId name, systemId value ], will not be {@literal null}
-     */
-    public static Pair<String, String> toSystemId(@NotNull EntityLookupEntry entry) {
-        check(entry, EntityLookupEntry.Type.EXTERNAL_SYSTEM);
-        return Pair.of(entry.getSerializedKeys(), entry.getSerializedValues());
-    }
-
     public static EntityLookupEntry fromDomainCountry(
             @NotNull String entity, @NotNull String domain, String country) {
         return new EntityLookupEntry(

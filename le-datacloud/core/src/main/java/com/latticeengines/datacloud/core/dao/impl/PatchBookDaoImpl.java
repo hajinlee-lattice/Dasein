@@ -40,4 +40,5 @@ public class PatchBookDaoImpl
         return String.format("UPDATE %s SET %s = :%s WHERE %s IN (:%s)",
                 PatchBook.class.getSimpleName(), fieldName, fieldName, PatchBook.COLUMN_PID, PID_LIST_PARAMETER_NAME);
     }
+
 }

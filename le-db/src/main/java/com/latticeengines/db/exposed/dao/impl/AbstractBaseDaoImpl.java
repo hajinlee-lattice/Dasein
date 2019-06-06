@@ -192,6 +192,32 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     @SuppressWarnings("unchecked")
+    public final List<T> findAllSortedByFieldWithPagination(int offset, int limit,
+            String sortByField, Object... fieldsAndValues) {
+        // verify offset and limit
+        if (offset < 0 || limit < 0) {
+            throw new IllegalArgumentException("Value of Offset and limit should be >= 0");
+        }
+        Session session = getCurrentSession();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            if (i > 0) {
+                sb.append(" and ");
+            }
+            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
+        }
+        String queryStr = String.format("from %s where %s order by %s",
+                getEntityClass().getSimpleName(), sb.toString(), sortByField);
+        Query<T> query = session.createQuery(queryStr);
+        query.setMaxResults(limit);
+        query.setFirstResult(offset);
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
+        }
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll() {
         Session session = getCurrentSession();
