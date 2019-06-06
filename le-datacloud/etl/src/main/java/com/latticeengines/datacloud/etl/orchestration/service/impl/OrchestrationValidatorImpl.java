@@ -54,7 +54,7 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
             if (StringUtils.isBlank(config.getCronExpression())) {
                 return false;
             }
-            if (!orchestrationProgressEntityMgr.hasJobInProgress(orch)) {
+            if (orchestrationProgressEntityMgr.hasJobInProgress(orch)) {
                 return false;
             }
             Date latestScheduledTime = CronUtils.getPreviousFireTimeByCron(config.getCronExpression());
