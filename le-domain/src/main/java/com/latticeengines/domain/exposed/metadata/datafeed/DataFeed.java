@@ -149,7 +149,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "SCHEDULE_NOW")
     @JsonProperty("schedule_now")
-    private boolean scheduleNow = false;
+    private Boolean scheduleNow = false;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "SCHEDULE_TIME", nullable = true)
@@ -186,10 +186,12 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.tenantId = tenantId;
     }
 
+    @Override
     public Tenant getTenant() {
         return tenant;
     }
 
+    @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
 
@@ -365,11 +367,11 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.nextInvokeTime = nextInvokeTime;
     }
 
-    public boolean isScheduleNow() {
+    public Boolean isScheduleNow() {
         return scheduleNow;
     }
 
-    public void setScheduleNow(boolean scheduleNow) {
+    public void setScheduleNow(Boolean scheduleNow) {
         this.scheduleNow = scheduleNow;
     }
 
@@ -459,8 +461,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             if (nameMap.containsKey(name)) {
                 return nameMap.get(name);
             } else {
-                throw new IllegalArgumentException(
-                        "Cannot find a data feed status with name " + name);
+                throw new IllegalArgumentException("Cannot find a data feed status with name " + name);
             }
         }
 
@@ -477,6 +478,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             return StringUtils.capitalize(super.name());
         }
 
+        @Override
         public String toString() {
             return this.name;
         }
