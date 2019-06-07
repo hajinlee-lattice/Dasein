@@ -63,9 +63,9 @@ export const actions = {
         );
         httpService.get('/pls/play', observer, {});
     },
-    fetchConnections: (play_name, deferred) => {
+    fetchConnections: (play_name, force, deferred) => {
         let playstore = store.getState()['playbook'];
-        if(playstore.connections) {
+        if(playstore.connections && !force) {
             return false;
         }
         deferred = deferred || { resolve: (data) => data }
@@ -172,13 +172,13 @@ export const actions = {
             });
             
             if(opts.launchOpts) {
+                opts.launchOpts.channelId = channelId;
                 actions.saveLaunch(play_name, opts.launchOpts, launchCallback);
             }
             if(cb && typeof cb === 'function') {
                 cb();
             }
         });
-
     },
     saveLaunch: (play_name, opts, cb) => {
         var opts = opts || {},
@@ -186,6 +186,7 @@ export const actions = {
             action = opts.action || '',
             launchObj = opts.launchObj || '',
             save = opts.save || false,
+            channelId = opts.channelId || '',
             getUrl = function(play_name, launch_id, action) {
                 return '/pls/play/' + play_name + '/launches' + (launch_id ? '/' + launch_id : '') + (action ? '/' + action : '');
             };
@@ -199,13 +200,25 @@ export const actions = {
                     });
 
                     let playstore = store.getState()['playbook'],
-                        play = playstore.play;
+                        play = playstore.play,
+                        connections = playstore.connections,
+                        connectionIndex = connections.findIndex(function(connection) {
+                            return connection.id === channelId;
+                        });
+
+                    connections[connectionIndex].playLaunch = response.data;
+
+                    store.dispatch({
+                        type: CONST.FETCH_CONNECTIONS,
+                        payload: connections
+                    });
 
                     play.launchHistory.mostRecentLaunch = response.data;
                     store.dispatch({
                         type: CONST.SAVE_PLAY,
                         payload: play
                     });
+
                     if(cb && typeof cb === 'function') {
                         cb();
                     }

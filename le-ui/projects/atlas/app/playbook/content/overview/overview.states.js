@@ -1,5 +1,6 @@
 import OverviewComponent from './overview.component';
-import SummaryContainer from 'atlas/import/templates/components/summary';
+//import SummaryContainer from 'atlas/import/templates/components/summary';
+import OverviewSummaryContainer from 'atlas/playbook/content/overviewsummary/overviewsummary';
 
 import ReactRouter from 'atlas/react/router';
 
@@ -14,7 +15,7 @@ const playbookOverview = {
         }
     }],
     views: {
-        'summary@': SummaryContainer,
+        'summary@': OverviewSummaryContainer,
         'main@': OverviewComponent
     }
 };

@@ -6,6 +6,7 @@ import './systems.component.scss';
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
 import { actions } from '../../playbook.redux';
 import { store } from 'store';
+import { debounce } from 'lodash';
 import LaunchComponent from "./launch.component";
 import LeVPanel from "common/widgets/container/le-v-panel";
 import LeHPanel from "common/widgets/container/le-h-panel";
@@ -35,7 +36,8 @@ class SystemsComponent extends Component {
         this.state = {
             refresh: false,
             play: props.play,
-            connections: null
+            connections: null,
+            checkLaunch: null
         };
 
         this._connectors = {
@@ -93,11 +95,44 @@ class SystemsComponent extends Component {
         this.setState(state);
     }
 
+
+    checkLaunching() {
+        if(this.state.checkLaunch) {
+            return false;
+        }
+        var interval = .5 * (1000 * 60),
+            vm = this,
+            checkLaunch = setInterval(function() {
+
+                let playstore = store.getState()['playbook'];
+
+                actions.fetchConnections(playstore.play.name, true);
+
+                let connections = playstore.connections,
+                    launchingConnection = connections.find(function(connection) {
+                        return (connection  && connection.playLaunch && connection.playLaunch.launchState === 'Launching');
+                    });
+
+                if(!launchingConnection) {
+                    clearInterval(checkLaunch);
+                    vm.setState({checkLaunch: null});
+                }
+            }, interval);
+
+        this.setState({checkLaunch: checkLaunch});
+    }
+
     getLaunchStateText(connection, play) {
         var launch = connection.playLaunch,
             launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
+            launching = (launchState === 'Launching' ? true : false),
             text = [];
+
+            if(launching) {
+                this.checkLaunching();
+            }
+
 
         if(launched) {
             text.push(
@@ -113,6 +148,12 @@ class SystemsComponent extends Component {
                             Contacts Sent: {launch.contactsLaunched.toLocaleString()}
                         </li>
                     </ul>
+                </div>
+            );
+        } else if(launching) {
+            text.push(
+                <div class="launch-text unlaunched">
+                    Launching...
                 </div>
             );
         } else {
@@ -205,7 +246,7 @@ class SystemsComponent extends Component {
                 <LeHPanel hstretch={"true"} className={'connection-card'}>
                     <div class="connection-logo">
                         <img src={config.img} />
-                        <h2>{connection.lookupIdMap.orgName}</h2>
+                        <h2 title={connection.lookupIdMap.orgName}>{connection.lookupIdMap.orgName}</h2>
                     </div>
                     <div class="connection-info">
                         {this.getLaunchStateText(connection, play)}
@@ -266,8 +307,7 @@ class SystemsComponent extends Component {
         if(this.state.connections) {
             return (
                 <div class="connected-systems">
-                    <h2>Connected Systems</h2>
-                    <p>Activate a system to automate sending accounts and contacts.</p>
+                    <h2 className="panel-label">Channels</h2>
                     <LeVPanel hstretch={"true"} className={'systems-grid'}>
                         {this.makeConnections(this.state.connections, this.props.play)}
                     </LeVPanel>

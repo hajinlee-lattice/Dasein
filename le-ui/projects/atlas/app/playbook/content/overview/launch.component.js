@@ -239,7 +239,7 @@ class LaunchComponent extends Component {
         }
     }
 
-    activate(play, connection) {
+    activate(play, connection, opts) {
         let vm = this,
             closeModal = (response) => {
                 vm.props.closeFn();
@@ -249,7 +249,16 @@ class LaunchComponent extends Component {
             channelId: connection.id,
             playLaunch: connection.playLaunch,
             lookupIdMap: connection.lookupIdMap,
-            isAlwaysOn: !connection.isAlwaysOn
+            isAlwaysOn: !connection.isAlwaysOn,
+            launchObj: opts.launchObj || {
+                bucketsToLaunch: this.state.selectedBuckets,
+                destinationOrgId: connection.lookupIdMap.orgId,
+                destinationSysType: connection.lookupIdMap.externalSystemType,
+                destinationAccountId: connection.lookupIdMap.accountId,
+                topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
+                launchUnscored: this.state.unscored,
+                excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId
+            }
         }, closeModal);
     }
 
@@ -266,7 +275,7 @@ class LaunchComponent extends Component {
             play = opts.play || store.getState().playbook.play,
             ratings = store.getState().playbook.ratings,
             launchObj = opts.launchObj || {
-                id: (connection.playLaunch ? connection.playLaunch.id : ''), // FIXME just a hack for now to unblock me, this shouldn't be needed
+                //id: (connection.playLaunch ? connection.playLaunch.id : ''), // FIXME just a hack for now to unblock me, this shouldn't be needed
                 bucketsToLaunch: this.state.selectedBuckets,
                 destinationOrgId: connection.lookupIdMap.orgId,
                 destinationSysType: connection.lookupIdMap.externalSystemType,
@@ -293,6 +302,7 @@ class LaunchComponent extends Component {
                     engineId: opts.engineId,
                     launch_id: lastIncompleteLaunch.launchId,
                     launchObj: Object.assign({},lastIncompleteLaunch, launchObj),
+                    channelId: connection.id,
                     save: true
                 }, closeModal);
             } else if(lastIncompleteLaunchId) {
@@ -492,12 +502,16 @@ class LaunchComponent extends Component {
                             <li>
                                 <LeButton
                                     name="launchautomatically"
+                                    disabled={!canLaunch}
                                     config={{
                                         label: "Launch Automatically",
                                         classNames: "blue-button"
                                     }}
                                     callback={() => {
-                                        this.activate(play, connection);
+                                        this.activate(play, connection, {
+                                            engineId: engineId, 
+                                            lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch
+                                        }); 
                                     }} />
                             </li>
                         </ul>
