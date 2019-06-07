@@ -92,8 +92,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
         updateEarliestLatestTransaction();
-        enrichTableSchema(diffTable);
-        enrichTableSchema(rawTable);
+        enrichTableSchema(diffTable, null);
+        enrichTableSchema(rawTable, TableRoleInCollection.ConsolidatedRawTransaction);
     }
 
     @Override
@@ -436,7 +436,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
     }
 
-    private void enrichTableSchema(Table table) {
+    private void enrichTableSchema(Table table, TableRoleInCollection tableRole) {
         if (configuration.isEntityMatchEnabled()) {
             table.getAttributes().forEach(attr -> {
                 // update metadata for AccountId attribute since it is only
@@ -460,6 +460,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             });
         }
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+        if (tableRole != null) {
+            dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), tableRole, inactive);
+        }
     }
 
 }

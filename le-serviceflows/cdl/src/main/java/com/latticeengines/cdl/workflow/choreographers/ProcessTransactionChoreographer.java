@@ -123,9 +123,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 TableRoleInCollection.ConsolidatedRawTransaction, active);
         hasRawStore = StringUtils.isNotBlank(rawTableName);
         if (hasRawStore) {
-            log.info("Found raw period store.");
+            log.info("Found raw transaction store.");
         } else {
-            log.info("No raw period store");
+            log.info("No raw transaction store");
         }
     }
 
