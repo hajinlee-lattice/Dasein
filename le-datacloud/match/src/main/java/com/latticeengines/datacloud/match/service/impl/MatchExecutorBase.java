@@ -151,10 +151,15 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchHistories.add(matchHistory);
         }
 
-        publishMatchHistory(matchHistories);
+        String tenantName = null;
+        if (matchContext.getInput().getTenant() != null &&
+                StringUtils.isNotBlank(matchContext.getInput().getTenant().getName())) {
+            tenantName = matchContext.getInput().getTenant().getName();
+        }
+        publishMatchHistory(tenantName, matchHistories);
     }
 
-    private void publishMatchHistory(List<MatchHistory> matchHistories) {
+    private void publishMatchHistory(String tenantName, List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
             log.debug("MatchHistory not enabled, returning.");
             return;
@@ -171,7 +176,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        firehoseService.sendBatch(deliveryStreamName, histories);
+        firehoseService.sendBatch(deliveryStreamName, tenantName + "/", histories);
     }
 
     @VisibleForTesting
