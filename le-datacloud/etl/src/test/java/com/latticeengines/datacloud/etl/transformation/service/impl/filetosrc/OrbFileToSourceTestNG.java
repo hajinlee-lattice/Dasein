@@ -109,8 +109,8 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
         String[] expectedIds = new String[] { "12885634", "11108077", "17145445", "12221764",
                 "13262799", "11352808", "11417478", "17149076", "48010954", "50304275", "59621453",
                 "59815388", "61932862", "201146532", "12438907", "12682624", "201148328",
-                "100041221857", "100038778540", "100039685996", "100040386494", "100036947123",
-                "100042212357" };
+                "100039974710", "100041765143", "100037457877", "100042032273", "100039605366",
+                "100040987540", "100040004061" };
         Set<String> expectedIdSet = new HashSet<>(Arrays.asList(expectedIds));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -119,7 +119,7 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(expectedIdSet.contains(orbNum));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 23);
+        Assert.assertEquals(rowNum, 24);
     }
 
 }
