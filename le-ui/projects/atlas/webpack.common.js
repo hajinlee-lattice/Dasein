@@ -65,11 +65,6 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                use: [{ loader: 'ng-annotate-loader' }]
-            },
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
                 use: { loader: 'babel-loader' }
             }
         ]

@@ -58,11 +58,6 @@ module.exports = {
             { test: /\.(woff|woff2|eot|ttf|otf)$/, use: ["file-loader"] },
             { test: /\.html$/, use: ["raw-loader"] },
             {
-                test: /\.*\.js$/,
-                exclude: /node_modules/,
-                use: ["ng-annotate-loader"]
-            },
-            {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: { loader: "babel-loader" }
