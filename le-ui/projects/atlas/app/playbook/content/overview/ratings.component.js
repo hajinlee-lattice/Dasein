@@ -38,7 +38,7 @@ class RatingsComponent extends Component {
     render() {
         return (
             <LeVPanel className="main-panel panel ratings-chart">
-                <h2> Ratings</h2>
+                <h2 className="panel-label"> Ratings</h2>
                 <div class="lift-chart">
                     {this.barChart(this.props.play)}
                 </div>

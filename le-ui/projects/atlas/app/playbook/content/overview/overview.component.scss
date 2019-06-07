@@ -1,4 +1,21 @@
 .playbook-overview {
+    h2 {
+        font-size: 1.2em;
+        font-weight: bold;
+        &.panel-label {
+            margin-bottom: 20px;
+        }
+    }
+    .overview-header {
+        margin: 10px;
+        padding: 10px;
+        margin-bottom: 40px;
+        h1 {
+            font-size: 1.5em;
+            font-weight: bold;
+            float: left;
+        }
+    }
     .panel {
         margin: 10px;
         padding: 10px;
@@ -12,7 +29,13 @@
         }
     }
     .launch-history {
-        text-align: right;
+        float: right;
+        a {
+            span.ico {
+                position: relative;
+                top: -2px;
+            }
+        }
     }
     .systems-component {
         flex: 1 1 auto;
@@ -20,27 +43,34 @@
     }
     .main-component {
         flex: 0 1 auto;
-        .lift-chart {
-            font-size: 10px;
-            width: 390px;
-            .bar-labels {
-                & > strong {
-                    position: relative;
-                    top: -5px;
-                    &:before {
-                        //top: -18px !important;
+        .panel {
+            &.ratings-chart {
+                margin: 0;
+                padding: 0;
+                margin-bottom: 50px;
+                .lift-chart {
+                    font-size: 10px;
+                    width: 390px;
+                    .bar-labels {
+                        & > strong {
+                            position: relative;
+                            top: -5px;
+                            &:before {
+                                //top: -18px !important;
+                            }
+                        }
                     }
-                }
-            }
-            .additional-info {
-                & > span {
-                    position: relative;
-                    top: -5px;
-                    &:before {
-                        top: -18px !important;
-                    }
-                    &.label-Accounts {
-                        min-width: 46px;
+                    .additional-info {
+                        & > span {
+                            position: relative;
+                            top: -5px;
+                            &:before {
+                                top: -18px !important;
+                            }
+                            &.label-Accounts {
+                                min-width: 46px;
+                            }
+                        }
                     }
                 }
             }
