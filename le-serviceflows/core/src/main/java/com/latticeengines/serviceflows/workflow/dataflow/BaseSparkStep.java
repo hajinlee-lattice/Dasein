@@ -12,11 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -25,6 +28,8 @@ import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.job.AbstractSparkJob;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -40,6 +45,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     @Inject
     private DataUnitProxy dataUnitProxy;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     @Resource(name = "distCpConfiguration")
     protected Configuration distCpConfiguration;
@@ -77,15 +85,15 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     protected CustomerSpace customerSpace;
     private int scalingMultiplier;
 
-    LivySession createLivySession(String jobName) {
+    protected LivySession createLivySession(String jobName) {
         return livySessionManager.createLivySession(jobName, getLivyConf(), getSparkConf());
     }
 
-    void killLivySession() {
+    protected void killLivySession() {
         livySessionManager.killSession();
     }
 
-    void computeScalingMultiplier(List<DataUnit> inputs) {
+    protected void computeScalingMultiplier(List<DataUnit> inputs) {
         long totalInputCount = inputs.stream().mapToLong(du -> {
             if (du instanceof HdfsDataUnit) {
                 return du.getCount() == null ? 0L : du.getCount();
@@ -95,6 +103,15 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }).sum();
         scalingMultiplier = ScalingUtils.getMultiplier(totalInputCount);
         log.info("Set scalingMultiplier=" + scalingMultiplier + " based on totalInputCount=" + totalInputCount);
+    }
+
+    protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
+    SparkJobResult runSparkJob(LivySession session, Class<J> jobClz, C jobConfig) {
+        return sparkJobService.runJob(session, jobClz, jobConfig);
+    }
+
+    protected String getRandomWorkspace() {
+        return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
     }
 
     protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
@@ -117,10 +134,6 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     private Map<String, String> getSparkConf() {
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingMultiplier;
-        if (scalingMultiplier > 1) {
-            // when scaling factor > 1, we eagerly want more executors
-            minExe *= 2;
-        }
         int maxExe = maxExecutors * scalingMultiplier;
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));

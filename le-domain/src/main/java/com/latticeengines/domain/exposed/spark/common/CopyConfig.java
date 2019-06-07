@@ -6,11 +6,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
+// simple modification of columns
+// can also concatenate multiple inputs
 public class CopyConfig extends SparkJobConfig {
 
     public static final String NAME = "copy";
 
-    // operation sequence: select -> drop -> rename -> add create/update time
+    // operation sequence: select -> drop -> rename -> concatenate
     @JsonProperty("SelectAttrs")
     private List<String> selectAttrs;
 
