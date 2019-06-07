@@ -292,6 +292,13 @@ angular.module('common.datacloud.query.results', [
                                 "num_rows": vm.pagesize,
                                 "row_offset": offset
                             }
+                            // for PLS-13560
+                            // "sort": {
+                            //     "attributes": [{
+                            //         "entity": "Account",
+                            //         "attribute": "AccountId"
+                            //     }]
+                            // }
                         };
                     
                     PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 

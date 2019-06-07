@@ -18,15 +18,19 @@
                 text-transform: none;
             }
             &:hover {
-                border: 1px solid green;
+                border: 1px solid #85c774; //rgb(133,199,116)
             }
             .connection-logo {
                 flex: 0 1 auto;
-                width: 100px;
+                width: 130px;
+                text-align: center;
+                img {
+                    width: 50%;
+                }
                 h2 {
                     width: 100%;
                     text-align: center;
-                    font-size: 16px;
+                    font-size: 12px;
                     margin-bottom: 10px;
                     white-space: nowrap;
                     overflow: hidden;
@@ -34,16 +38,20 @@
                 }
             }
             .connection-info {
+                display: flex; // to valign
+                align-items: center; // vertical center things inside
                 flex: 1 1 auto;
                 height: 100%;
                 border-left: 1px solid #ccc;
                 border-right: 1px solid #ccc;
                 padding: 0 10px;
                 margin: 0 10px;
+                font-size: 12px;
             }
             .connection-launch {
                 flex: 0 1 auto;
-                width: 100px;
+                width: 130px;
+                text-align: center;
                 button.button.borderless-button {
                     width: auto;
                     &.campaign-launch-button {

@@ -89,8 +89,11 @@ export default class OverviewComponent extends Component {
         if (this.state.play) {
             return (
                 <ReactMainContainer className={'container playbook-overview show-spinner'}>
-                    <div className="launch-history">{this.launchHistoryLink(this.state.play)}</div>
-                    <LeHPanel hstretch={"true"} vstretch={"true"}>
+                    <div className="overview-header">
+                        <h1>Campaign Dashboard</h1>
+                        <div className="launch-history">{this.launchHistoryLink(this.state.play)}</div>
+                    </div>
+                    <LeHPanel hstretch={"true"} vstretch={"true"} className="components">
                         <div class="systems-component">
                             <SystemsComponent play={this.state.play} connections={this.state.connections} />
                         </div>
@@ -100,7 +103,7 @@ export default class OverviewComponent extends Component {
                                     <RatingsComponent play={this.state.play} />
                                 </span>
                                 <span>
-                                    <h2>SFDC Talking Points</h2>
+                                    <h2 className="panel-label">SFDC Talking Points</h2>
                                     {this.makeTalkingpoints(this.state.play)}
                                 </span>
                             </GridLayout>
