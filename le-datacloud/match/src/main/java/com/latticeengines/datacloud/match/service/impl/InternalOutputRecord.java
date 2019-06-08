@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
@@ -51,6 +52,9 @@ public class InternalOutputRecord extends OutputRecord {
     private DnBReturnCode dnbCode;
     private MatchHistory fabricMatchHistory = new MatchHistory();
     private Date requestTimeStamp = new Date();
+
+    // field names that should be cleared out in the output
+    private Set<String> fieldsToClear;
 
     // For Entity Match, the InternalOutputRecord must contain the map between the MatchKeys and the position of the
     // corresponding fields in the input record, for each Entity.  This is then passed on to the MatchTraveler and
@@ -288,6 +292,14 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setRequestTimeStamp(Date requestTimeStamp) {
         this.requestTimeStamp = requestTimeStamp;
+    }
+
+    public Set<String> getFieldsToClear() {
+        return fieldsToClear;
+    }
+
+    public void setFieldsToClear(Set<String> fieldsToClear) {
+        this.fieldsToClear = fieldsToClear;
     }
 
     public Map<String, Map<MatchKey, List<Integer>>> getEntityKeyPositionMaps() {

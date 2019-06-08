@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -696,6 +697,43 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 .format("Should match to anonymous account with EntityKeyMap=%s", JsonUtils.serialize(accountKeyMap)));
     }
 
+    /**
+     * Test conflict system IDs are correctly cleared out in the input row of match
+     * result
+     */
+    @Test(groups = "functional", dataProvider = "conflictSystemId", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testClearConflictSystemIds(ClearConflictIDTestCase testCase) {
+        Tenant tenant = newTestTenant();
+
+        // prepare existing data
+        EntityKeyMap entityKeyMap = getEntityKeyMap();
+        for (String[] data : testCase.existingData) {
+            matchAccount(Arrays.asList(data), true, tenant, entityKeyMap, FIELDS);
+        }
+
+        // match with input data
+        Pair<MatchInput, MatchOutput> result = matchAccount(Arrays.asList(testCase.inputData), true, tenant,
+                entityKeyMap, FIELDS);
+        Assert.assertNotNull(result.getRight(), "MatchOutput in result should not be null");
+
+        MatchOutput output = result.getRight();
+        Assert.assertNotNull(output.getResult(), "Output result list should not be null");
+        Assert.assertEquals(output.getResult().size(), 1, "Output result list should only have one entry");
+
+        OutputRecord record = output.getResult().get(0);
+        Assert.assertNotNull(record, "Output record at idx 0 should not be null");
+        Assert.assertNotNull(record.getInput(), "match input row in output record should not be null");
+        Assert.assertEquals(record.getInput().size(), testCase.inputData.length,
+                "match input row in output record should have the same length as test case input");
+
+        // check whether conflict system IDs are cleared in input row in the record
+        List<Object> resultInput = record.getInput();
+        for (int i = 0; i < resultInput.size(); i++) {
+            Assert.assertEquals(resultInput.get(i), testCase.expectedInputAfterMatch[i],
+                    String.format("Expected input does not match result input at idx=%d", i));
+        }
+    }
+
     private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
             List<Object> data2, boolean isMatched) {
         Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data1, true, tenant,
@@ -1054,6 +1092,99 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         }; //
     }
 
+    @DataProvider(name = "conflictSystemId")
+    private Object[][] conflictSystemIdTestData() {
+        return new Object[][] { //
+                { //
+                        /*
+                         * match on account ID, mkto id already have diff value in existing account
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null, null,
+                                                "060902413" } //
+                                }, //
+                                new String[] { "acct_id_1", "mkto_id_2", null, "fakename1", "fakedomain1.com", null,
+                                        null, "060902413" },
+                                new String[] { "acct_id_1", null, null, "fakename1", "fakedomain1.com", null, null,
+                                        "060902413" }) //
+                }, //
+                { //
+                        /*
+                         * match on account ID, mkto id in input already taken by another account
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_1", null, null, null, null, null, null, null }, //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                }, //
+                                new String[] { "acct_id_1", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
+                                        null, "060902413" },
+                                new String[] { "acct_id_1", null, "eloqua_id_1", null, "fakedomain1.com", null, null,
+                                        "060902413" }) //
+                }, //
+                { //
+                        /*
+                         * match on mkto id, but matched account have a different account ID (higher
+                         * priority), create new account. mkto id in input is already taken, thus
+                         * cleared out
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                }, //
+                                new String[] { "acct_id_1", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
+                                        null, "060902413" },
+                                new String[] { "acct_id_1", null, "eloqua_id_1", null, "fakedomain1.com", null, null,
+                                        "060902413" }) //
+                }, //
+                { //
+                        /*
+                         * match on account ID, mkto id in input is the same as matched account, no
+                         * conflict. domain & DUNS is taken by another account but won't be cleared out.
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_1", null, null, null, "fakedomain1.com", null, null, "060902413" }, //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                }, //
+                                new String[] { "acct_id_2", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
+                                        null, "060902413" },
+                                new String[] { "acct_id_2", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
+                                        null, "060902413" }) //
+                }, //
+                { //
+                        /*
+                         * match on mkto id, existing account have no account ID, no conflict (one
+                         * account can have multiple domain, and it won't be cleared anyways).
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_1", null, null, null, null, null, null, null }, //
+                                        { null, "mkto_id_2", null, null, "fakedomain2.com", null, null, null } //
+                                }, //
+                                new String[] { "acct_id_2", "mkto_id_2", null, null, "fakedomain1.com", null, null,
+                                        "060902413" },
+                                new String[] { "acct_id_2", "mkto_id_2", null, null, "fakedomain1.com", null, null,
+                                        "060902413" }) //
+                }, //
+                { //
+                        /*
+                         * match on account id, existing account have no mkto id, no conflict
+                         */
+                        new ClearConflictIDTestCase( //
+                                new String[][] { //
+                                        { "acct_id_1", null, null, null, null, null, null, null }, //
+                                        { null, "mkto_id_2", null, null, "fakedomain1.com", null, null, null } //
+                                }, //
+                                new String[] { "acct_id_1", "mkto_id_1", null, null, "fakedomain1.com", null, null,
+                                        "060902413" },
+                                new String[] { "acct_id_1", "mkto_id_1", null, null, "fakedomain1.com", null, null,
+                                        "060902413" }) //
+                }, //
+        };
+    }
+
     private static String concatIdxes(Integer idx1, Integer idx2) {
         return idx1.toString() + "_" + idx2.toString();
     }
@@ -1118,5 +1249,27 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     @Override
     protected Logger getLogger() {
         return log;
+    }
+
+    /*
+     * Test class for testClearConflictSystemIds
+     */
+    private class ClearConflictIDTestCase {
+        String[][] existingData;
+        String[] inputData;
+        String[] expectedInputAfterMatch;
+
+        ClearConflictIDTestCase(String[][] existingData, String[] inputData, String[] expectedInputAfterMatch) {
+            this.existingData = existingData;
+            this.inputData = inputData;
+            this.expectedInputAfterMatch = expectedInputAfterMatch;
+        }
+
+        @Override
+        public String toString() {
+            return "ClearConflictIDTestCase{" + "existingData=" + Arrays.toString(existingData) + ", inputData="
+                    + Arrays.toString(inputData) + ", expectedInputAfterMatch="
+                    + Arrays.toString(expectedInputAfterMatch) + '}';
+        }
     }
 }
