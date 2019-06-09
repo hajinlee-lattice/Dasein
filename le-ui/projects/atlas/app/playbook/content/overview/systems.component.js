@@ -88,6 +88,7 @@ class SystemsComponent extends Component {
 
     componentWillUnmount() {
       this.unsubscribe();
+      clearInterval(this.state.checkLaunch);
     }
 
     handleChange = () => {
@@ -100,10 +101,9 @@ class SystemsComponent extends Component {
         if(this.state.checkLaunch) {
             return false;
         }
-        var interval = .5 * (1000 * 60),
+        var interval = .1 * (1000 * 60),
             vm = this,
             checkLaunch = setInterval(function() {
-
                 let playstore = store.getState()['playbook'];
 
                 actions.fetchConnections(playstore.play.name, true);
@@ -273,7 +273,7 @@ class SystemsComponent extends Component {
             callback: (action) => {
                 modalActions.closeModal(store);
             },
-            className: 'rating-modal',
+            className: 'launch-modal',
             template: () => {
                 function closeModal() {
                     modalActions.closeModal(store);

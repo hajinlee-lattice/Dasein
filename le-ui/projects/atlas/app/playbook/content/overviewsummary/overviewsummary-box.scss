@@ -1,5 +1,12 @@
 @import "../../../../../common/widgets/layout/layout.scss";
 @import "../../../../../common/widgets/colors.scss";
+.le-summary-header {
+    .title {
+        padding-left: 35px!important;
+        background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
+        background-size: contain;
+    }
+}
 .le-summary-box {
     // border: 5px solid green;
     flex: 1;

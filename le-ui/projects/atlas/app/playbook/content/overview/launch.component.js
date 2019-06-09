@@ -30,7 +30,7 @@ import './launch.component.scss';
  * need momentjs
  */ 
 
- function debounceEventHandler(...args) {
+function debounceEventHandler(...args) {
      const debounced = _.debounce(...args)
      return function(e) {
          e.persist()
@@ -426,6 +426,17 @@ class LaunchComponent extends Component {
 
             return (
                 <LeVPanel className={'campaign-launch'} hstretch={true}>
+                    <div className={'launch-section recommendations'}>
+                        <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
+                        <ul>
+                            <li>
+                                <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
+                                <label for="limitRecommendations"> 
+                                    Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
                     <div className={'launch-section model-ratings'}>
                         {this.makeBucketList(play, coverage, {
                             unscoredAccountCountPercent: unscoredAccountCountPercent
@@ -444,16 +455,14 @@ class LaunchComponent extends Component {
                             </li>
                         </ul>
                     </div>
-                    <div className={'launch-section recommendations'}>
-                        <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: {recommendationCounts.launched}</h2>
-                        <ul>
-                            <li>
-                                <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
-                                <label for="limitRecommendations"> 
-                                    Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
-                                </label>
-                            </li>
-                        </ul>
+                    <div className="launch-section schedule">
+                        <h2>Launch Schedule</h2>
+                        <label for="schedule">Launch</label> 
+                        <select id="schedule">
+                            <option>Once</option>
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                        </select>
                     </div>
                     <div className={'launch-section launch-buttons'}>
                         <ul>
