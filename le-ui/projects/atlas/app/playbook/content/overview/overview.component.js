@@ -81,7 +81,7 @@ export default class OverviewComponent extends Component {
             return(
                 <a href="javascript:void(0);" onClick={() => {
                     NgState.getAngularState().go('home.playbook.dashboard.launchhistory', {play_name: play.name}); 
-                }}><span class="ico ico-cog ico-black"></span> Launch History</a>
+                }}>Launch History</a>
             );
         }
     }
@@ -90,8 +90,12 @@ export default class OverviewComponent extends Component {
             return (
                 <ReactMainContainer className={'container playbook-overview show-spinner'}>
                     <div className="overview-header">
-                        <h1>Campaign Dashboard</h1>
-                        <div className="launch-history">{this.launchHistoryLink(this.state.play)}</div>
+                        <h1>
+                            Campaign Dashboard
+                        </h1>
+                        <div className="launch-history">
+                            {this.launchHistoryLink(this.state.play)}
+                        </div>
                     </div>
                     <LeHPanel hstretch={"true"} vstretch={"true"} className="components">
                         <div class="systems-component">
