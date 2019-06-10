@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -65,10 +64,9 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     @Inject
     private PeriodProxy periodProxy;
 
-    @Inject
-    private Configuration yarnConfiguration;
-
     private List<PeriodStrategy> periodStrategies;
+
+    private boolean entityMatchEnabled;
 
     @Override
     protected void initializeConfiguration() {
@@ -95,6 +93,11 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         earliestTransaction = DateTimeUtils.dayPeriodToDate(feed.getEarliestTransaction());
 
         loadProductMap();
+
+        entityMatchEnabled = configuration.isEntityMatchEnabled();
+        if (entityMatchEnabled) {
+            log.info("Entity match is enabled for transaction rebuild");
+        }
     }
 
     @Override

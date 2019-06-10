@@ -44,6 +44,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.camille.exposed.Camille;
@@ -58,6 +60,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -159,8 +162,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
 
+    // After ProcessAccount
     static final Long ACCOUNT_1 = 900L;
+    // After ProcessAccountWithAdvancedMatch
     static final Long ENTITY_MATCH_ACCOUNT_1 = 903L;
+    // After ProcessTransactionWithAdvancedMatch
+    // 191 new CustomerAccountId compared to checkpoint of
+    // ProcessAccountWithAdvancedMatch
+    static final Long ENTITY_MATCH_ACCOUNT_4 = 1094L;
     static final Long CONTACT_1 = 900L;
     static final Long ENTITY_MATCH_CONTACT_1 = 900L;
     static final Long TRANSACTION_1 = 41156L;
@@ -295,6 +304,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -1454,9 +1466,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(dailyFileContainingTargetDay);
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
+        String aidFld = isEntityMatchEnabled() ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
-            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(InterfaceName.AccountId.name()).toString())
+            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
                     && VERIFY_DAILYTXN_PRODUCTID.equals(record.get(InterfaceName.ProductId.name()).toString())) {
                 verifyRecord = record;
                 break;
@@ -1485,6 +1498,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             default:break;
         }
         return feedType;
+    }
+
+    private boolean isEntityMatchEnabled() {
+        FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
+        return FeatureFlagUtils.isEntityMatchEnabled(flags);
     }
 
 }

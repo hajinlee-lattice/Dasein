@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MatchAccount;
 import com.latticeengines.cdl.workflow.steps.merge.MatchContact;
+import com.latticeengines.cdl.workflow.steps.merge.MatchTransaction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -30,6 +31,9 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
     @Inject
     private MatchContact matchContact;
 
+    @Inject
+    private MatchTransaction matchTransaction;
+
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         if (step.name().endsWith(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account)) {
@@ -37,6 +41,9 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
             return true;
         } else if (step.name().endsWith(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact)) {
             log.info("Skip matchContact, because no imports for Contact");
+            return true;
+        } else if (step.name().endsWith(matchTransaction.name()) && hasNoImports(step, BusinessEntity.Transaction)) {
+            log.info("Skip matchTransaction, because no imports for Transaction");
             return true;
         } else {
             return false;

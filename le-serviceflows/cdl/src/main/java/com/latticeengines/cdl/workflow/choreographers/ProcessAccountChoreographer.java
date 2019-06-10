@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -194,6 +195,17 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
      * check whether we have embedded accounts created by matching other entities
      */
     private boolean hasEmbeddedAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (step == null) {
+            return false;
+        }
+        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
+                || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
+    }
+
+    // For quicker testing purpose on local: skip account rebuild in txn end2end
+    // test with entity match enabled -- Replace hasEmbeddedAccounts() with
+    // hasEmbeddedAccountsForRebuild() in shouldRebuild()
+    private boolean hasEmbeddedAccountsForRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         if (step == null) {
             return false;
         }

@@ -57,6 +57,13 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            rebuildTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            updateTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public ProcessTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

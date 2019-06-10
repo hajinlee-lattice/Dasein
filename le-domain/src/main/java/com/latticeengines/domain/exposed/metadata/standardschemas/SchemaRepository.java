@@ -159,7 +159,8 @@ public class SchemaRepository {
             table = getTransactionSchema(enableEntityMatch);
             break;
         case PeriodTransaction:
-            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false);
+            table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation, false,
+                    enableEntityMatch);
             break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
@@ -215,15 +216,15 @@ public class SchemaRepository {
             table = getTransactionSchema(enableEntityMatch);
             break;
         case TransactionRaw:
-            table = getRawTransactionSchema(includeCdlTimestamps);
+            table = getRawTransactionSchema(includeCdlTimestamps, enableEntityMatch);
             break;
         case TransactionDailyAggregation:
             table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionDailyAggregation,
-                    includeCdlTimestamps);
+                    includeCdlTimestamps, enableEntityMatch);
             break;
         case TransactionPeriodAggregation:
             table = getAggregatedTransactionSchema(SchemaInterpretation.TransactionPeriodAggregation,
-                    includeCdlTimestamps);
+                    includeCdlTimestamps, enableEntityMatch);
             break;
         case DeleteAccountTemplate:
             table = getDeleteAccountTemplateSchema();
@@ -1025,7 +1026,7 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getRawTransactionSchema(boolean includeCdlTimestamps) {
+    private Table getRawTransactionSchema(boolean includeCdlTimestamps, boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.TransactionRaw);
 
         table.addAttribute(attr(InterfaceName.TransactionId.name()) //
@@ -1036,6 +1037,17 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerAccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
@@ -1168,8 +1180,19 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getAggregatedTransactionSchema(SchemaInterpretation schema, boolean includeCdlTimestamps) {
+    private Table getAggregatedTransactionSchema(SchemaInterpretation schema, boolean includeCdlTimestamps,
+            boolean enableEntityMatch) {
         Table table = createTable(schema);
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerAccountId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //

@@ -37,7 +37,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(resumeFromCheckPoint());
         verifyNumAttrsInAccount();
         verifyDateTypeAttrs();
         new Thread(() -> {
@@ -55,21 +55,30 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
-                saveCheckpoint(CHECK_POINT);
+                saveCheckpoint(saveToCheckPoint());
             }
         }
     }
 
-    private void importData() throws Exception {
+    protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Transaction, 1, "DefaultSystem_TransactionData");
         Thread.sleep(1100);
         mockCSVImport(BusinessEntity.Transaction, 2, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
     }
 
-    private void verifyProcess() {
+    protected String resumeFromCheckPoint() {
+        return ProcessAccountDeploymentTestNG.CHECK_POINT;
+    }
+
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
+    }
+
+    protected void verifyProcess() {
         clearCache();
         runCommonPAVerifications();
+
         verifyNumAttrsInAccount();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
@@ -77,7 +86,6 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
-
         verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
                 VERIFY_DAILYTXN_AMOUNT_1, //
                 VERIFY_DAILYTXN_QUANTITY_1, //
@@ -91,7 +99,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
     }
 
-    private void verifyDateTypeAttrs() {
+    protected void verifyDateTypeAttrs() {
         FrontEndQuery query = new FrontEndQuery();
         query.setMainEntity(BusinessEntity.Account);
         Bucket bkt = Bucket.dateBkt(TimeFilter.ever());
@@ -104,7 +112,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count.longValue(), 0);
+        Assert.assertEquals(count.longValue(), expectedUserTestDateCntsBeforePA());
 
         bkt = Bucket.dateBkt(TimeFilter.latestDay());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
@@ -114,6 +122,10 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Assert.assertTrue(count > 0);
         Assert.assertTrue(count < ACCOUNT_1);
         log.info("verify date done");
+    }
+
+    protected int expectedUserTestDateCntsBeforePA() {
+        return 0;
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
@@ -134,7 +146,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         return expectedReport;
     }
 
-    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
@@ -144,7 +156,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
@@ -155,7 +167,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);

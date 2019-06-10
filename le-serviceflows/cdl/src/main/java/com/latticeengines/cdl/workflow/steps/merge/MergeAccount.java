@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private String matchedAccountTable;
     private String newAccountTableFromContactMatch;
+    private String newAccountTableFromTxnMatch;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -85,32 +87,29 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private List<TransformationStepConfig> entityMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        int mergeStep;
+        List<TransformationStepConfig> extracts = new ArrayList<>();
+        List<Integer> extractSteps = new ArrayList<>();
         if (StringUtils.isNotBlank(newAccountTableFromContactMatch)) {
-            int extractStep = 0;
-            mergeStep = 1;
-            upsertStep = 2;
-            diffStep = 3;
-            TransformationStepConfig extract = extractNewAccount();
-            TransformationStepConfig merge;
-            if (StringUtils.isNotBlank(matchedAccountTable)) {
-                merge = dedupAndMerge(InterfaceName.EntityId.name(), //
-                        Collections.singletonList(extractStep), Collections.singletonList(matchedAccountTable));
-            } else {
-                merge = dedupAndMerge(InterfaceName.EntityId.name(), //
-                        Collections.singletonList(extractStep), null);
-            }
-            steps.add(extract);
-            steps.add(merge);
-        } else {
-            mergeStep = 0;
-            upsertStep = 1;
-            diffStep = 2;
-            // just dedupe
-            TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), null,
-                    Collections.singletonList(matchedAccountTable));
-            steps.add(merge);
+            extracts.add(extractNewAccount(newAccountTableFromContactMatch,
+                    getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE)));
+            extractSteps.add(extractSteps.size());
         }
+        if (StringUtils.isNotBlank(newAccountTableFromTxnMatch)) {
+            extracts.add(extractNewAccount(newAccountTableFromTxnMatch,
+                    getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE)));
+            extractSteps.add(extractSteps.size());
+        }
+        steps.addAll(extracts);
+
+        int mergeStep = extractSteps.size();
+        TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), //
+                CollectionUtils.isEmpty(extractSteps) ? null : extractSteps, //
+                StringUtils.isBlank(matchedAccountTable) ? null : Collections.singletonList(matchedAccountTable));
+        steps.add(merge);
+
+        upsertStep = mergeStep + 1;
+        diffStep = mergeStep + 2;
+
         TransformationStepConfig upsert = upsertMaster(true, mergeStep);
         TransformationStepConfig diff = diff(mergeStep, upsertStep);
         TransformationStepConfig report = reportDiff(diffStep);
@@ -150,6 +149,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         addAttrsToMap(attrsToInherit, inputMasterTableName);
         addAttrsToMap(attrsToInherit, matchedAccountTable);
         addAttrsToMap(attrsToInherit, newAccountTableFromContactMatch);
+        addAttrsToMap(attrsToInherit, newAccountTableFromTxnMatch);
         updateAttrs(table, attrsToInherit);
         table.getAttributes().forEach(attr -> {
             attr.setTags(Tag.INTERNAL);
@@ -165,6 +165,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         super.initializeConfiguration();
         matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
         newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
+        newAccountTableFromTxnMatch = getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE);
     }
 
     @Override
@@ -194,11 +195,11 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
     }
 
-    private TransformationStepConfig extractNewAccount() {
+    private TransformationStepConfig extractNewAccount(String newAccountTable, String matchTargetTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_EXTRACT_EMBEDDED_ENTITY);
-        addBaseTables(step, newAccountTableFromContactMatch);
-        addBaseTables(step, getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE));
+        addBaseTables(step, newAccountTable);
+        addBaseTables(step, matchTargetTable);
         ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
         config.setEntity(BusinessEntity.Account.name());
         config.setEntityIdFld(InterfaceName.AccountId.name());
