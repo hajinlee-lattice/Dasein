@@ -33,7 +33,12 @@ public class FailureReportingListener extends LEJobListener {
             WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
             if (job != null) {
                 List<Throwable> exceptions = jobExecution.getAllFailureExceptions();
-
+                for (Throwable throwable : exceptions) {
+                    if (throwable instanceof LedpException) {
+                        log.info("Job execution %s failed with error details %s", jobExecution.getId(),
+                                ((LedpException) throwable).getErrorDetails());
+                    }
+                }
                 if (exceptions.size() > 0) {
                     Throwable exception = exceptions.get(0);
 
