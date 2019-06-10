@@ -4,6 +4,8 @@ import Observer from "common/app/http/observer";
 import './system-mapping.component.scss';
 import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
 
+import {isEmpty} from 'common/app/utilities/ObjectUtilities.js'
+
 export default class SystemMappingComponent extends Component {
 
     constructor(props) {
@@ -14,6 +16,8 @@ export default class SystemMappingComponent extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
+   
+
     componentWillUnmount(){
         // this.props.system = this.state.system;
         this.props.closed(this.state.system);
@@ -23,7 +27,6 @@ export default class SystemMappingComponent extends Component {
         let observer = new Observer(
             response => {
                 // httpService.printObservables();
-                console.log('HEY ', response);
                 if (response.data) {
                     let tmp = response.data;
                     let data = [];
@@ -63,15 +66,21 @@ export default class SystemMappingComponent extends Component {
         systemCopy.accountId = event.target.value;
         this.setState({system: systemCopy});
     }
+
+
     getAccountIDSelection() {
-        if (this.state.accountIdSelectionLoaded) {
+        if(!this.state.accountIdSelectionLoaded){
+            return (<i class="fa fa-spinner fa-spin fa-fw" />);
+        }else if(isEmpty(this.state.systemsAvailable)){
+            return (
+                <p>No Lookup IDs exist</p>
+            );
+        }else{
             return (
                 <select value={this.state.system.accountId} onChange={this.accountIdClickHandler}>
                     {this.getSystemsAvailable()}
                 </select>
             );
-        } else {
-            return (<i class="fa fa-spinner fa-spin fa-fw" />);
         }
     }
 
@@ -121,9 +130,7 @@ export default class SystemMappingComponent extends Component {
     }
 
     render() {
-        console.log('RENDER MAPPING');
         return (
-
             <div className="system-mapping some-table">
                 <div className="le-flex-row">
                     <div className="le-flex-column">
