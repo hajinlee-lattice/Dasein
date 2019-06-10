@@ -31,6 +31,12 @@ public final class BusinessCalendarUtils {
             evaluationYear = getCurrentYear();
         }
 
+        if (calendar.getMode() == null) {
+            String msg = "Business calendar mode cannot be empty";
+            Exception exception = new UnsupportedOperationException(msg);
+            throw new LedpException(LedpCode.LEDP_40060, msg, exception);
+        }
+
         switch (calendar.getMode()) {
             case STARTING_DAY:
                 return validateStartingDay(calendar.getStartingDay(), evaluationYear);
