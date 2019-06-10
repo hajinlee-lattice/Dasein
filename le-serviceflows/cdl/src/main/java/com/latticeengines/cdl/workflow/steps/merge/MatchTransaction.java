@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -40,7 +41,8 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
-        TransformationStepConfig merge = mergeInputs(true, false, true);
+        TransformationStepConfig merge = mergeInputs(true, true, false, true, matchTargetTablePrefix,
+                InterfaceName.Id.name(), batchStorePrimaryKey, inputTableNames);
         steps.add(merge);
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();

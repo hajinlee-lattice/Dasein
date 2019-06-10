@@ -84,8 +84,8 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
                 BusinessEntity.CuratedAccount);
         verifyBatchStore(getExpectedBatchStoreCounts());
-        // verifyServingStore(getExpectedServingStoreCounts());
-        // verifyRedshift(getExpectedRedshiftCounts());
+        verifyServingStore(getExpectedServingStoreCounts());
+        verifyRedshift(getExpectedRedshiftCounts());
         verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
                 VERIFY_DAILYTXN_AMOUNT_1, //
                 VERIFY_DAILYTXN_QUANTITY_1, //

@@ -82,6 +82,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private String mergedImportTable;
 
+    private boolean entityMatchEnabled;
+
     @Override
     protected void onPostTransformationCompleted() {
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
@@ -99,6 +101,12 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
+
+        entityMatchEnabled = configuration.isEntityMatchEnabled();
+        if (entityMatchEnabled) {
+            log.info("Entity match is enabled for transaction merge");
+        }
+
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
         initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
@@ -111,7 +119,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         stringFields = new ArrayList<>();
         longFields = new ArrayList<>();
         intFields = new ArrayList<>();
-        Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true);
+        Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true,
+                entityMatchEnabled);
         getTableFields(rawTemplate, stringFields, longFields, intFields);
 
         List<String> curStringFields = new ArrayList<>();
@@ -135,14 +144,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
                     TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         }
 
-        String matchedTxnTable = getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE);
-        if (StringUtils.isBlank(matchedTxnTable)) {
+        mergedImportTable = getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE);
+        if (StringUtils.isBlank(mergedImportTable)) {
             throw new RuntimeException("There's no matched table found!");
-        }
-        if (configuration.isEntityMatchEnabled()) {
-            mergedImportTable = matchedTxnTable;
-        } else {
-            mergedImportTable = mergedBatchStoreName;
         }
     }
 
@@ -371,7 +375,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        Table table = SchemaRepository.instance().getSchema(schema, true);
+        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled);
         String tableName = NamingUtils.timestamp(role.name());
         table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();

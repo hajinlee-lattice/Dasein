@@ -83,6 +83,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private List<PeriodStrategy> periodStrategies;
 
+    private boolean entityMatchEnabled;
+
     @Override
     protected BusinessEntity getEntity() {
         return BusinessEntity.PeriodTransaction;
@@ -124,6 +126,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
 
         getProductTable();
+
+        entityMatchEnabled = configuration.isEntityMatchEnabled();
+        if (entityMatchEnabled) {
+            log.info("Entity match is enabled for transaction rebuild");
+        }
     }
 
     private String getRawTransactionTableName() {
@@ -322,7 +329,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (configuration.isEntityMatchEnabled()) {
+        if (entityMatchEnabled) {
             // In the future, Transaction could have more account fields, need
             // to consider:
             // 1. Are they needed in transaction store
@@ -385,7 +392,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (configuration.isEntityMatchEnabled()) {
+        if (entityMatchEnabled) {
             // In the future, Transaction could have more account fields, need
             // to consider:
             // 1. Are they needed in transaction store
