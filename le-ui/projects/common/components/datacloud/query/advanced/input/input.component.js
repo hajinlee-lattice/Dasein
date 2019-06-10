@@ -32,8 +32,8 @@ angular
 
                 vm.categoryClassInput = function (category = '') {
                     // console.log('[input]', category);
-                    var category = category.toLowerCase().replace(/\s/g, "-");
-                    return category;
+                    var cat = category.toLowerCase().replace(/\s/g, "-");
+                    return cat;
                 }
 
                 vm.init();
