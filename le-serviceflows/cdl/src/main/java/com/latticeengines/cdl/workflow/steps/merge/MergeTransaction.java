@@ -35,10 +35,14 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -62,7 +66,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     static final String BEAN_NAME = "mergeTransaction";
 
     private Table rawTable;
-    private int mergeStep, dailyStep, mergeRawStep, standardizeStep, dayPeriodStep;
+    private int dailyStep, mergeRawStep, standardizeStep, dayPeriodStep;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -76,20 +80,33 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private boolean schemaChanged;
 
+    private String mergedImportTable;
+
+    private boolean entityMatchEnabled;
+
     @Override
     protected void onPostTransformationCompleted() {
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
-        Table table = metadataProxy.getTable(
+        Table diffTable = metadataProxy.getTable(
                 customerSpace.toString(), diffTableName);
-        isDataQuotaLimit(table);
+        isDataQuotaLimit(diffTable);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
         updateEarliestLatestTransaction();
+        enrichTableSchema(diffTable, null);
+        enrichTableSchema(rawTable, TableRoleInCollection.ConsolidatedRawTransaction);
     }
 
+    @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
+
+        entityMatchEnabled = configuration.isEntityMatchEnabled();
+        if (entityMatchEnabled) {
+            log.info("Entity match is enabled for transaction merge");
+        }
+
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
         initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
@@ -102,7 +119,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         stringFields = new ArrayList<>();
         longFields = new ArrayList<>();
         intFields = new ArrayList<>();
-        Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true);
+        Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true,
+                entityMatchEnabled);
         getTableFields(rawTemplate, stringFields, longFields, intFields);
 
         List<String> curStringFields = new ArrayList<>();
@@ -126,6 +144,10 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
                     TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         }
 
+        mergedImportTable = getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE);
+        if (StringUtils.isBlank(mergedImportTable)) {
+            throw new RuntimeException("There's no matched table found!");
+        }
     }
 
 
@@ -161,6 +183,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return false;
     }
 
+    @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("MergeTransaction");
@@ -175,23 +198,20 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
    }
 
     private List<TransformationStepConfig> getUpgradeSteps() {
-        mergeStep = 0;
-        dailyStep = 1;
-        mergeRawStep = 2;
-        standardizeStep = 3;
-        dayPeriodStep = 4;
+        dailyStep = 0;
+        mergeRawStep = 1;
+        standardizeStep = 2;
+        dayPeriodStep = 3;
 
-        TransformationStepConfig inputMerge = mergeInputs(true, false, true);
         TransformationStepConfig daily = addTrxDate();
         TransformationStepConfig rawMerge = mergeRaw();
         TransformationStepConfig standardize = standardizeTrx(mergeRawStep);
         TransformationStepConfig dayPeriods = collectDays();
         TransformationStepConfig rawCleanup = cleanupRaw(rawTable);
         TransformationStepConfig dailyPartition = partitionDaily();
-        TransformationStepConfig report = reportDiff(mergeStep);
+        TransformationStepConfig report = reportDiff(mergedImportTable);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(inputMerge);
         steps.add(daily);
         steps.add(rawMerge);
         steps.add(standardize);
@@ -203,20 +223,17 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private List<TransformationStepConfig> getSteps() {
-        mergeStep = 0;
-        dailyStep = 1;
-        standardizeStep = 2;
-        dayPeriodStep = 3;
+        dailyStep = 0;
+        standardizeStep = 1;
+        dayPeriodStep = 2;
 
-        TransformationStepConfig inputMerge = mergeInputs(true, false, true);
         TransformationStepConfig daily = addTrxDate();
         TransformationStepConfig standardize = standardizeTrx(dailyStep);
         TransformationStepConfig dayPeriods = collectDays();
         TransformationStepConfig dailyPartition = partitionDaily();
-        TransformationStepConfig report = reportDiff(mergeStep);
+        TransformationStepConfig report = reportDiff(mergedImportTable);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(inputMerge);
         steps.add(daily);
         steps.add(standardize);
         steps.add(dayPeriods);
@@ -229,7 +246,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     private TransformationStepConfig addTrxDate() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATE_CONVERTOR);
-        step.setInputSteps(Collections.singletonList(mergeStep));
+
+        List<String> baseSources = Collections.singletonList(mergedImportTable);
+        Map<String, SourceTable> baseTables;
+        baseTables = new HashMap<>();
+        SourceTable sourceMasterTable = new SourceTable(mergedImportTable, customerSpace);
+        baseTables.put(mergedImportTable, sourceMasterTable);
+        step.setBaseSources(baseSources);
+        step.setBaseTables(baseTables);
+
         PeriodDateConvertorConfig config = new PeriodDateConvertorConfig();
         config.setTrxTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
@@ -350,7 +375,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private Table buildPeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        Table table = SchemaRepository.instance().getSchema(schema, true);
+        Table table = SchemaRepository.instance().getSchema(schema, true, entityMatchEnabled);
         String tableName = NamingUtils.timestamp(role.name());
         table.setName(tableName);
         String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
@@ -412,6 +437,35 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
                             ", The data you uploaded has exceeded the limit.");
             }
             log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + transactionDataQuotaLimit);
+        }
+    }
+
+    private void enrichTableSchema(Table table, TableRoleInCollection tableRole) {
+        if (configuration.isEntityMatchEnabled()) {
+            table.getAttributes().forEach(attr -> {
+                // update metadata for AccountId attribute since it is only
+                // created after transaction match and does not have the correct
+                // metadata
+                if (InterfaceName.AccountId.name().equals(attr.getName())) {
+                    attr.setInterfaceName(InterfaceName.AccountId);
+                    attr.setDisplayName("Atlas Account ID");
+                    // TODO: Not marked as internal for existing daily/period
+                    // txn store. Not sure for entity match. Need to check with
+                    // PM
+                    // attr.setTags(Tag.INTERNAL);
+                    attr.setLogicalDataType(LogicalDataType.Id);
+                    attr.setNullable(false);
+                    attr.setApprovedUsage(ApprovedUsage.NONE);
+                    attr.setSourceLogicalDataType(attr.getPhysicalDataType());
+                    attr.setCategory(Category.DEFAULT.name());
+                    attr.setSubcategory("Other");
+                    attr.setFundamentalType(FundamentalType.ALPHA.getName());
+                }
+            });
+        }
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+        if (tableRole != null) {
+            dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), tableRole, inactive);
         }
     }
 

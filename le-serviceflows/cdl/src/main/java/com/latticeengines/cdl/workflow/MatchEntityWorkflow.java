@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.merge.EntityMatchCheckpoint;
 import com.latticeengines.cdl.workflow.steps.merge.MatchAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MatchContactWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.MatchTransactionWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -27,6 +28,9 @@ public class MatchEntityWorkflow extends AbstractWorkflow<MatchEntityWorkflowCon
     private MatchContactWrapper matchContactWrapper;
 
     @Inject
+    private MatchTransactionWrapper matchTransactionWrapper;
+
+    @Inject
     private EntityMatchCheckpoint entityMatchCheckpoint;
 
     @Override
@@ -34,6 +38,7 @@ public class MatchEntityWorkflow extends AbstractWorkflow<MatchEntityWorkflowCon
         return new WorkflowBuilder(name(), config) //
                 .next(matchAccountWrapper) //
                 .next(matchContactWrapper) //
+                .next(matchTransactionWrapper) //
                 .next(entityMatchCheckpoint) //
                 .build();
     }

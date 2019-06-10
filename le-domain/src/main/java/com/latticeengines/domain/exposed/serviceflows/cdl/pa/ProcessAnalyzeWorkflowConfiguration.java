@@ -222,6 +222,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }

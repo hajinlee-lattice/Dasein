@@ -58,6 +58,11 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public RebuildTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

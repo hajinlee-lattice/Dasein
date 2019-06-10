@@ -62,6 +62,11 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
         public UpdateTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

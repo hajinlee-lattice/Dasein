@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +38,17 @@ public final class MatchUtils {
     }
 
     static String getAllocateIdMatchConfigForAccount(String customer, MatchInput baseMatchInput,
-                                                     Set<String> columnNames) {
+            Set<String> columnNames, String newAccountTableName) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(BusinessEntity.Account.name());
         baseMatchInput.setAllocateId(true);
-        baseMatchInput.setOutputNewEntities(false);
+        if (StringUtils.isNotEmpty(newAccountTableName)) {
+            baseMatchInput.setOutputNewEntities(true);
+            config.setNewEntitiesTableName(newAccountTableName);
+        } else {
+            baseMatchInput.setOutputNewEntities(false);
+        }
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
