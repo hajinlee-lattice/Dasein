@@ -335,18 +335,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         return objs;
     }
 
-    private long count(String destination) {
-        if (!destination.endsWith("*.avro")) {
-            if (destination.endsWith("/")) {
-                destination += "*.avro";
-            } else {
-                destination += "/*.avro";
-            }
-        }
-        log.info("Counting records for " + destination);
-        return AvroUtils.count(yarnConfiguration, destination);
-    }
-
     @SuppressWarnings("static-access")
     private void updateCurrentVersion(Ingestion ingestion, String version) {
         PatchBookConfiguration config = (PatchBookConfiguration) ingestion.getProviderConfiguration();
