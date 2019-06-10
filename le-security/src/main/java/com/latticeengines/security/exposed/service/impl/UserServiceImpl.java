@@ -243,7 +243,6 @@ public class UserServiceImpl implements UserService {
                 expirationDate = null;
             } else {
                 if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(), expirationDate)) {
-
                     throw new AccessDeniedException("Access denied.");
                 }
             }
