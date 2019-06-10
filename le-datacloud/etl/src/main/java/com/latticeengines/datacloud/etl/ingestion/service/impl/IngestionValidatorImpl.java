@@ -27,8 +27,6 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfigur
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration.CollectCriteria;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchRequest;
-import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 
@@ -131,20 +129,8 @@ public class IngestionValidatorImpl implements IngestionValidator {
                 throw new IllegalArgumentException(
                         "BookType or PatchMode is missing in PatchBookConfiguration. Please check Ingestion table in db");
             }
-            // Validation of source version (datacloud version) is included
-            // patch validate api
-            PatchRequest patchRequest = new PatchRequest();
-            patchRequest.setMode(patchConfig.getPatchMode());
-            patchRequest.setDataCloudVersion(request.getSourceVersion());
-            PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
-                    patchRequest);
-            if (!patchResponse.isSuccess()) {
-                throw new RuntimeException(
-                        "PatchBook validation failed. Please call patch validation API to check detailed errors.");
-            }
-            // TODO: In validation api, better to provide info whether is
-            // anything to patch or not, don't want to auto-wire
-            // PatchBookEntityMgr here
+            // PatchBook validation takes place inside ingestion workflow due to
+            // pagination is required and validation could take long time
             return;
         default:
             throw new RuntimeException(

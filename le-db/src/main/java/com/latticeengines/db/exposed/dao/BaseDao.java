@@ -52,6 +52,10 @@ public interface BaseDao<T> {
 
     T merge(T entity);
     
+    long findAllCount();
+
+    long findCountByFields(Object... fieldsAndValues);
+
     void flushSession();
     
     void clearSession();
