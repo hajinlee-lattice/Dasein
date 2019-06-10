@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,11 +19,15 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.minlog.Log;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -45,6 +50,12 @@ import reactor.core.publisher.ParallelFlux;
 @Component("patchBookValidator")
 public class PatchBookValidatorImpl implements PatchBookValidator {
 
+    private static final Logger log = LoggerFactory.getLogger(PatchBookValidatorImpl.class);
+
+    private static final long AM_COL_CACHE_TTL_IN_HRS = 1L; // 1 hr ttl, add to property file later if needed
+    // TODO remove dummy version after source attr table has versioning
+    private static final String DUMMY_SRC_ATTR_DC_VERSION = "2.0.999"; // dummy version for src attr cache
+
     @Autowired
     @Qualifier("accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
@@ -55,6 +66,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     @Autowired
     @Qualifier("sourceAttributeEntityMgr")
     private SourceAttributeEntityMgr sourceAttributeEntityMgr;
+
+    private volatile LoadingCache<String, List<AccountMasterColumn>> amColumnCache;
+    private volatile LoadingCache<String, List<SourceAttribute>> srcAttrCache;
 
     @Override
     public Pair<Integer, List<PatchBookValidationError>> validate(
@@ -112,10 +126,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                 DataCloudConstants.ATTR_IS_CTRY_PRIMARY_LOCATION, DataCloudConstants.ATTR_IS_ST_PRIMARY_LOCATION,
                 DataCloudConstants.ATTR_IS_ZIP_PRIMARY_LOCATION));
         List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
-        ParallelFlux<AccountMasterColumn> amCols = columnEntityMgr
-                .findAll(dataCloudVersion);
-        // Getting List from ParallelFlux
-        List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
+        List<AccountMasterColumn> amColsList = getAMColumns(dataCloudVersion);
         // Collected AMColumnIds that we need to compare into a set
         Map<String, AccountMasterColumn> amColsMap = new HashMap<>();
         for (AccountMasterColumn a : amColsList) { // mapping columnId to
@@ -307,8 +318,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     List<PatchBookValidationError> validateSourceAttribute(@NotNull List<PatchBook> books,
             @NotNull String dataCloudVersion) {
         /* extract attributes based on domain and duns based source */
-        List<SourceAttribute> sourceAttributes = sourceAttributeEntityMgr
-                .getAttributes("AccountMaster", "MapStage", "mapAttribute", null, false);
+        List<SourceAttribute> sourceAttributes = getSourceAttributes(dataCloudVersion);
         Set<String> attrNamesForDomBasedSources = new HashSet<>();
         Set<String> attrNamesForDunsBasedSources = new HashSet<>();
         for (SourceAttribute srcAttr : sourceAttributes) {
@@ -433,6 +443,58 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(domainPatchValidate(books));
         return errors;
+    }
+
+    /*
+     * wrappers around in-memory cache
+     */
+    private List<AccountMasterColumn> getAMColumns(@NotNull String dataCloudVersion) {
+        initAmColumnCache();
+        return amColumnCache.get(dataCloudVersion);
+    }
+
+    private List<SourceAttribute> getSourceAttributes(@NotNull String dataCloudVersion) {
+        initSourceAttrCache();
+        return srcAttrCache.get(DUMMY_SRC_ATTR_DC_VERSION);
+    }
+
+    private void initAmColumnCache() {
+        if (amColumnCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (amColumnCache == null) {
+                log.info("Instantiating AM column cache");
+                amColumnCache = Caffeine.newBuilder() //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .build((dataCloudVersion) -> {
+                            log.info("Loading AM columns for datacloud version {}", dataCloudVersion);
+                            ParallelFlux<AccountMasterColumn> amCols = columnEntityMgr.findAll(dataCloudVersion);
+                            return amCols.sequential().collectList().block();
+                        });
+            }
+        }
+    }
+
+    private void initSourceAttrCache() {
+        if (srcAttrCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (srcAttrCache == null) {
+                log.info("Instantiating source attribute cache");
+                srcAttrCache = Caffeine.newBuilder() //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .build((dataCloudVersion) -> {
+                            log.info("Loading source attributes for datacloud version {}", dataCloudVersion);
+                            // TODO use datacloud version after the table supports it
+                            return sourceAttributeEntityMgr.getAttributes("AccountMaster", "MapStage", "mapAttribute",
+                                    null, false);
+                        });
+            }
+        }
     }
 
     /*

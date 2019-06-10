@@ -52,13 +52,12 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -66,11 +65,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
-@ContextConfiguration(locations = { "classpath:test-datacloud-match-context.xml" })
-public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTests {
-
-    // Doesn't require DataCloud 2.0.14 dynamo table really exists
-    private static final String TEST_DATA_CLOUD_VERSION = "2.0.14";
+public class PatchBookValidatorImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     // partial error messages used for matching validation errors
     private static final String INVALID_DUNS_ERROR_MSG = "Invalid DUNS";
@@ -106,7 +101,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     private void testPatchBookValidation(
             PatchBook.Type type, PatchBook[] books, PatchBookValidationError[] expectedErrors) {
         Pair<Integer, List<PatchBookValidationError>> validationResult = validator
-                .validate(type, TEST_DATA_CLOUD_VERSION, Arrays.asList(books));
+                .validate(type, currentDataCloudVersion, Arrays.asList(books));
         Assert.assertNotNull(validationResult);
         List<PatchBookValidationError> errors = validationResult.getValue();
         Assert.assertNotNull(errors);
@@ -183,7 +178,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "functional", dataProvider = "attrPatchValidateAndStandardize")
     private void testAttrPatchItemsValidateAndStandardize(PatchBook[] books, PatchBookValidationError[] expectedErrors) {
         List<PatchBookValidationError> errors = validator
-                .validatePatchKeyItemAndStandardize(Arrays.asList(books), TEST_DATA_CLOUD_VERSION);
+                .validatePatchKeyItemAndStandardize(Arrays.asList(books), currentDataCloudVersion);
         Assert.assertNotNull(errors);
         Assert.assertEquals(errors.size(), expectedErrors.length);
 
@@ -196,7 +191,7 @@ public class PatchBookValidatorImplTestNG extends AbstractTestNGSpringContextTes
     @Test(groups = "functional", dataProvider = "patchBookMatchKeyConflict")
     private void testPatchBookMatchKeyConflict(PatchBook[] books, PatchBookValidationError[] expectedErrors) {
         List<PatchBookValidationError> errors = validator //
-                .validateConflictInPatchItems(Arrays.asList(books), TEST_DATA_CLOUD_VERSION);
+                .validateConflictInPatchItems(Arrays.asList(books), currentDataCloudVersion);
         Assert.assertNotNull(errors);
         Assert.assertEquals(errors.size(), expectedErrors.length);
 
