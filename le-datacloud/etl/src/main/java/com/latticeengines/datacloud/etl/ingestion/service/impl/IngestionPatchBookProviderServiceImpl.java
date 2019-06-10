@@ -325,12 +325,14 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             // Following columns are only for reference so that we have some
             // history to track since we don't support generating logs for
             // ingestion jobs for now
-            objs[idx][12] = books.get(idx).getCreatedDate().getTime();
+            objs[idx][12] = books.get(idx).getCreatedDate() == null ? null : books.get(idx).getCreatedDate().getTime();
             objs[idx][13] = books.get(idx).getCreatedBy();
-            objs[idx][14] = books.get(idx).getLastModifiedDate().getTime();
+            objs[idx][14] = books.get(idx).getLastModifiedDate() == null ? null
+                    : books.get(idx).getLastModifiedDate().getTime();
             objs[idx][15] = books.get(idx).getLastModifiedBy();
-            objs[idx][16] = books.get(idx).getEffectiveSince().getTime();
-            objs[idx][17] = books.get(idx).getExpireAfter().getTime();
+            objs[idx][16] = books.get(idx).getEffectiveSince() == null ? null
+                    : books.get(idx).getEffectiveSince().getTime();
+            objs[idx][17] = books.get(idx).getExpireAfter() == null ? null : books.get(idx).getExpireAfter().getTime();
         });
         return objs;
     }
