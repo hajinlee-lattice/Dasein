@@ -869,11 +869,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private void updateWorkflowJobErrorDetails(WorkflowJob workflowJob, String applicationId,
                                                com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus) {
-        log.info("Job status for application id %s is %s", applicationId, yarnStatus);
         if (workflowJob.getErrorDetails() == null && yarnStatus != null) {
-            LedpException ledpException = new LedpException(LedpCode.LEDP_00002,
+            log.info("Job status for application id %s is %s", applicationId, yarnStatus);
+            LedpException ledpException = new LedpException(LedpCode.LEDP_28015,
                     new String[]{applicationId,
-                            yarnStatus.getStatus().toString()});
+                            yarnStatus.toString()});
             workflowJob.setErrorDetails(ledpException.getErrorDetails());
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
         }

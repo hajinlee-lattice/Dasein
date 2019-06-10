@@ -35,7 +35,7 @@ public class FailureReportingListener extends LEJobListener {
                 List<Throwable> exceptions = jobExecution.getAllFailureExceptions();
                 for (Throwable throwable : exceptions) {
                     if (throwable instanceof LedpException) {
-                        log.info("Job execution %s failed with error details %s", jobExecution.getId(),
+                        log.error("Job execution %s failed with error details %s", jobExecution.getId(),
                                 ((LedpException) throwable).getErrorDetails());
                     }
                 }
