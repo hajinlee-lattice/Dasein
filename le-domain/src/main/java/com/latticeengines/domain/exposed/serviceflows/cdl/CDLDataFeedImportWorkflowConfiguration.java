@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedFromS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
@@ -21,6 +22,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         private InputFileValidatorConfiguration inputFileValidatorConfiguration = new InputFileValidatorConfiguration();
         private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
         private PrepareImportConfiguration prepareImportConfiguration = new PrepareImportConfiguration();
+        private ImportDataFeedFromS3Configuration importFromS3 = new ImportDataFeedFromS3Configuration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
@@ -29,6 +31,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             exportToS3.setCustomerSpace(customerSpace);
             inputFileValidatorConfiguration.setCustomerSpace(customerSpace);
             prepareImportConfiguration.setCustomerSpace(customerSpace);
+            importFromS3.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -38,6 +41,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             exportToS3.setInternalResourceHostPort(internalResourceHostPort);
             inputFileValidatorConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             prepareImportConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            importFromS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -51,6 +55,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             exportToS3.setMicroServiceHostPort(microServiceHostPort);
             inputFileValidatorConfiguration.setMicroServiceHostPort(microServiceHostPort);
             prepareImportConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            importFromS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -89,6 +94,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.add(importDataFeedTaskConfiguration);
             configuration.add(exportToS3);
             configuration.add(inputFileValidatorConfiguration);
+            configuration.add(importFromS3);
             return configuration;
         }
 
@@ -96,6 +102,13 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         public Builder fileValidation(BusinessEntity businessEntity, boolean enableEntityMatch) {
             inputFileValidatorConfiguration.setEntity(businessEntity);
             inputFileValidatorConfiguration.setEnableEntityMatch(enableEntityMatch);
+            return this;
+        }
+
+        public Builder importFromS3(BusinessEntity businessEntity) {
+            if (BusinessEntity.Product != businessEntity) {
+                importFromS3.setSkipStep(true);
+            }
             return this;
         }
 
