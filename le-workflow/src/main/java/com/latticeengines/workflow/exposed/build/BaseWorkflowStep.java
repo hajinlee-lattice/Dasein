@@ -240,7 +240,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
 
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28015, new String[] { appId, status.getStatus().toString() });
+            throw new LedpException(LedpCode.LEDP_28015, new String[]{appId, status.toString()});
         }
 
     }
