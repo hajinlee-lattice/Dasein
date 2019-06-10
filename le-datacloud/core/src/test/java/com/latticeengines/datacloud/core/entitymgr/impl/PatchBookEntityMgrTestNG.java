@@ -84,9 +84,13 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         if (hotFix != null) {
             books = patchBookEntityMgr.findByTypeAndHotFix(type, hotFix);
             Assert.assertNotNull(books);
+            long count = patchBookEntityMgr.findCountByTypeAndHotFix(type, hotFix);
+            Assert.assertEquals(count, books.size());
 
         } else {
             books = patchBookEntityMgr.findByType(type);
+            long count = patchBookEntityMgr.findCountByType(type);
+            Assert.assertEquals(count, books.size());
         }
         Assert.assertFalse(books.isEmpty()); // should at least have the book we created
         books.forEach(b -> {
