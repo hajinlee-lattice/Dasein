@@ -12,6 +12,9 @@ public class PatchBookConfiguration extends ProviderConfiguration {
     @JsonProperty("PatchMode")
     private PatchMode patchMode;
 
+    @JsonProperty("SkipValidation")
+    private boolean skipValidation;
+
     // Don't allow multiple PatchBook ingestion running at same time
     @Override
     @JsonProperty("ConcurrentNum")
@@ -41,4 +44,11 @@ public class PatchBookConfiguration extends ProviderConfiguration {
         this.patchMode = patchMode;
     }
 
+    public boolean isSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(boolean skipValidation) {
+        this.skipValidation = skipValidation;
+    }
 }
