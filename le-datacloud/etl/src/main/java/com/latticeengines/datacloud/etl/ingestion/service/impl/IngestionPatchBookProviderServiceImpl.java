@@ -159,7 +159,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
                         patchRequest);
                 if (!patchResponse.isSuccess()) {
-                    log.info(String.format("PatchBook validation failed. PatchRequest: %s. PatchResponse: %s",
+                    log.error(String.format("PatchBook validation failed. PatchRequest: %s. PatchResponse: %s",
                             JsonUtils.serialize(patchRequest), JsonUtils.serialize(patchResponse)));
                     throw new RuntimeException("PatchBook validation failed");
                 }
