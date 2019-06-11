@@ -11,8 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 @Component("playLaunchChannelService")
@@ -22,6 +26,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
+
+    @Inject
+    private PlayLaunchEntityMgr playLaunchEntityMgr;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -34,12 +41,10 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     @Override
     public PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel) {
         PlayLaunchChannel retrievedPlayLaunchChannel = findById(playLaunchChannel.getId());
-
         if (retrievedPlayLaunchChannel == null) {
             throw new NullPointerException("Cannot find Play Launch Channel for given play channel id");
         } else {
-            retrievedPlayLaunchChannel = playLaunchChannelEntityMgr.updatePlayLaunchChannel(playLaunchChannel,
-                    retrievedPlayLaunchChannel);
+            playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
         }
         return retrievedPlayLaunchChannel;
     }
@@ -65,8 +70,27 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
         }
-
         return channels;
+    }
+
+    @Override
+    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel) {
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
+        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
+        playLaunch.setPlay(playLaunchChannel.getPlay());
+        playLaunch.setLaunchState(LaunchState.Queued);
+        playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchChannel.getExcludeItemsWithoutSalesforceId());
+        playLaunch.setTopNCount(playLaunchChannel.getTopNCount());
+        playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
+        playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
+        playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
+        playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
+        playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
+        playLaunchEntityMgr.create(playLaunch);
+        return playLaunch;
     }
 
     private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
