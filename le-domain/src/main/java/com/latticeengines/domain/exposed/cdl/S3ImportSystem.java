@@ -81,10 +81,6 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @JsonProperty("contact_system_id")
     private String contactSystemId;
 
-    @Column(name = "PRODUCT_SYSTEM_ID")
-    @JsonProperty("product_system_id")
-    private String productSystemId;
-
     @Override
     public Long getPid() {
         return pid;
@@ -173,14 +169,6 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         this.contactSystemId = contactSystemId;
     }
 
-    public String getProductSystemId() {
-        return productSystemId;
-    }
-
-    public void setProductSystemId(String productSystemId) {
-        this.productSystemId = productSystemId;
-    }
-
     @JsonIgnore
     public String generateAccountSystemId() {
         return String.format("user_%s_%s_Id", name, NamingUtils.uuid("Account"));
@@ -189,11 +177,6 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @JsonIgnore
     public String generateContactSystemId() {
         return String.format("user_%s_%s_Id", name, NamingUtils.uuid("Contact"));
-    }
-
-    @JsonIgnore
-    public String generateProductSystemId() {
-        return String.format("user_%s_%s_Id", name, NamingUtils.uuid("Product"));
     }
 
     public enum SystemType {

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -114,9 +115,29 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce, false);
         cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other, false);
-        S3ImportSystem system = cdlService.getS3ImportSystem(customerSpace, "SYSTEM1");
-        Assert.assertNotNull(system);
-        Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
+
+        List<S3ImportSystem> allSystem = cdlService.getAllS3ImportSystem(customerSpace);
+        for (S3ImportSystem system : allSystem) {
+            if (system.getName().equals("SYSTEM1")) {
+                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
+                Assert.assertTrue(system.isPrimarySystem());
+            } else {
+                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Other);
+                Assert.assertEquals(system.getPriority(), 2);
+            }
+        }
+        cdlService.createS3ImportSystem(customerSpace, "PRIMARY SYSTEM", S3ImportSystem.SystemType.Other, true);
+        allSystem = cdlService.getAllS3ImportSystem(customerSpace);
+        Assert.assertEquals(allSystem.size(), 3);
+        boolean hasPrimary = false;
+        for (S3ImportSystem system : allSystem) {
+            if (system.getDisplayName().equals("PRIMARY SYSTEM")) {
+                hasPrimary = true;
+                Assert.assertTrue(system.isPrimarySystem());
+                Assert.assertEquals(system.getAccountSystemId(), InterfaceName.CustomerAccountId.name());
+            }
+        }
+        Assert.assertTrue(hasPrimary);
         Assert.assertThrows(RuntimeException.class,
                 () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other,
                         false));

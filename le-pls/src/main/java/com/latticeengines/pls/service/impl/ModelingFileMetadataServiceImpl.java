@@ -306,6 +306,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     importSystem.setAccountSystemId(accountSystemId);
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
+                                fieldMapping.setMappedField(accountSystemId);
                                 break;
                             case Contact:
                                 String contactSystemId = importSystem.getContactSystemId();
@@ -314,6 +315,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     importSystem.setContactSystemId(contactSystemId);
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
+                                fieldMapping.setMappedField(contactSystemId);
                                 break;
                             default:
                                 throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
@@ -321,6 +323,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     } else {
                         S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
                                 fieldMapping.getSystemName());
+                        S3ImportSystem currentSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
+                                systemName);
                         if (importSystem == null) {
                             throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
                         }
@@ -333,6 +337,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setFieldType(UserDefinedType.TEXT);
                                 fieldMapping.setMappedField(importSystem.getAccountSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
+                                currentSystem.setAccountSystemId(importSystem.getAccountSystemId());
+                                cdlService.updateS3ImportSystem(customerSpace.toString(), currentSystem);
                                 break;
                             case Contact:
                                 if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
@@ -342,6 +348,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setFieldType(UserDefinedType.TEXT);
                                 fieldMapping.setMappedField(importSystem.getContactSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
+                                currentSystem.setContactSystemId(importSystem.getContactSystemId());
+                                cdlService.updateS3ImportSystem(customerSpace.toString(), currentSystem);
                                 break;
                             default:
                                 throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());

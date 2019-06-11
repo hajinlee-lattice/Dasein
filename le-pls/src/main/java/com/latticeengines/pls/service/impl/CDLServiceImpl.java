@@ -399,6 +399,7 @@ public class CDLServiceImpl implements CDLService {
         String systemName = AvroUtils.getAvroFriendlyString(systemDisplayName);
         s3ImportSystem.setSystemType(systemType);
         s3ImportSystem.setName(systemName);
+        s3ImportSystem.setDisplayName(systemDisplayName);
         s3ImportSystem.setTenant(MultiTenantContext.getTenant());
         if (Boolean.TRUE.equals(primary)) {
             s3ImportSystem.setPriority(1);
