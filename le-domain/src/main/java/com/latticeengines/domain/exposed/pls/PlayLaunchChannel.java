@@ -10,6 +10,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -113,6 +116,19 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @JsonProperty("launchUnscored")
     @Column(name = "LAUNCH_UNSCORED", nullable = false)
     private boolean launchUnscored = false;
+
+    @JsonProperty("launchType")
+    @Column(name = "LAUNCH_TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LaunchType launchType;
+
+    @JsonProperty("cronSchedule")
+    @Column(name = "CRON_SCHEDULE")
+    private String cronSchedule;
+
+    @JsonProperty("nextScheduledLaunch")
+    @Column(name = "NEXT_SCHEDULED_LAUNCH")
+    private Date nextScheduledLaunch;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -293,6 +309,30 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setLaunchUnscored(Boolean launchUnscored) {
         this.launchUnscored = launchUnscored;
+    }
+
+    public LaunchType getLaunchType() {
+        return launchType;
+    }
+
+    public void setLaunchType(LaunchType launchType) {
+        this.launchType = launchType;
+    }
+
+    public String getCronSchedule() {
+        return cronSchedule;
+    }
+
+    public void setCronSchedule(String cronSchedule) {
+        this.cronSchedule = cronSchedule;
+    }
+
+    public Date getNextScheduledLaunch() {
+        return nextScheduledLaunch;
+    }
+
+    public void setNextScheduledLaunch(Date nextScheduledLaunch) {
+        this.nextScheduledLaunch = nextScheduledLaunch;
     }
 
 }

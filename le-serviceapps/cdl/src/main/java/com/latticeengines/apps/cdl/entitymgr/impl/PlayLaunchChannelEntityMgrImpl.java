@@ -124,6 +124,12 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.isLaunchUnscored()) {
             existingPlayLaunchChannel.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
         }
+        if (playLaunchChannel.getLaunchType() != null) {
+            existingPlayLaunchChannel.setLaunchType(playLaunchChannel.getLaunchType());
+        }
+        if (playLaunchChannel.getCronSchedule() != null) {
+            existingPlayLaunchChannel.setCronSchedule(playLaunchChannel.getCronSchedule());
+        }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);
