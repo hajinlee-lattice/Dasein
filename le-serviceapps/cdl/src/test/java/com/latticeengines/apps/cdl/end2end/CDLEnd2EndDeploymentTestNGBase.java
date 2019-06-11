@@ -294,7 +294,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
+    protected ServingStoreProxy servingStoreProxy;
 
     @Inject
     protected PeriodProxy periodProxy;

@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -183,6 +184,9 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 BusinessEntity.PurchaseHistory);
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
         cms.forEach(cm -> {
+            if (InterfaceName.AccountId.name().equals(cm.getAttrName())) {
+                return;
+            }
             if (ActivityMetricsUtils.isHasPurchasedAttr(cm.getAttrName())) {
                 Assert.assertEquals(cm.getFundamentalType(), FundamentalType.BOOLEAN);
             } else if (ActivityMetricsUtils.isTotalSpendAttr(cm.getAttrName())
