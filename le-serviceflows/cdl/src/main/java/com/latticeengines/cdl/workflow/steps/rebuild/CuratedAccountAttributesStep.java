@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -282,7 +283,20 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
             if (InterfaceName.NumberOfContacts.name().equals(attr.getName())) {
+                attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                attr.setSubcategory(null);
                 attr.setDisplayName(NUMBER_OF_CONTACTS_DISPLAY_NAME);
+                attr.setDescription("This curated attribute is calculated by counting the number of contacts " +
+                        "matching each account");
+                // TODO(ysong):  Should we also be setting the following?
+                //   1. LogicalDataType
+                //   2. PhysicalDataType
+                attr.setFundamentalType(FundamentalType.NUMERIC.getName());
+                // TODO(ysong):  Is setting the Source Logical Data Type to the Physical Data Type correct?  I see it
+                //   done elsewhere.
+                attr.setSourceLogicalDataType(attr.getPhysicalDataType());
+                // TODO(ysong):  I believe Number of Contacts should not be nullable because it should be computed in
+                //   this step for all accounts.  Please confirm.
             }
         });
     }

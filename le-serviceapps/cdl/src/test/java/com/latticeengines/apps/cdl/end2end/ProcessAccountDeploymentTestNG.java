@@ -10,12 +10,15 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,8 +27,11 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -40,6 +46,8 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  * Process Account, Contact and Product for a new tenant
  */
 public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDeploymentTestNG.class);
+
     static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";
 
@@ -153,6 +161,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         verifyAccountFeatures();
         verifyAccountProfile();
         verifyDateAttrs();
+        verifyNumberOfContacts();
 
         // Check that stats cubes only exist for the entities specified below.
         verifyStats(getEntitiesInStats());
@@ -190,6 +199,34 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Assert.assertTrue("Ever".equals(bucket.getLabel()) || //
                 (bucket.getLabel().contains("Last") && bucket.getLabel().contains("Days")), //
                 JsonUtils.serialize(attrStat));
+    }
+
+    private void verifyNumberOfContacts() {
+        Table table = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.CuratedAccount.getServingStore());
+        Assert.assertNotNull(table);
+        Attribute attribute = table.getAttribute(InterfaceName.NumberOfContacts.name());
+        Assert.assertNotNull(attribute);
+        Assert.assertEquals(attribute.getCategory(), Category.CURATED_ACCOUNT_ATTRIBUTES);
+        Assert.assertEquals(attribute.getDisplayName(), CuratedAccountAttributesStep.NUMBER_OF_CONTACTS_DISPLAY_NAME);
+        Assert.assertEquals(attribute.getFundamentalType(), FundamentalType.NUMERIC.getName());
+        log.error("$JAW$ Number of Contacts Phyiscal Data Type is: " + attribute.getPhysicalDataType());
+
+        StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());
+        Assert.assertNotNull(container);
+        Map<String, StatsCube> cubes = container.getStatsCubes();
+        Assert.assertTrue(MapUtils.isNotEmpty(cubes));
+        Assert.assertTrue(cubes.containsKey(BusinessEntity.CuratedAccount.name()));
+        StatsCube cube = cubes.get(BusinessEntity.CuratedAccount.name());
+        Map<String, AttributeStats> attrStats = cube.getStatistics();
+        Assert.assertTrue(MapUtils.isNotEmpty(attrStats));
+        Assert.assertTrue(attrStats.containsKey(InterfaceName.NumberOfContacts.name()));
+        AttributeStats attrStat = attrStats.get(InterfaceName.NumberOfContacts.name());
+        Assert.assertNotNull(attrStat.getBuckets());
+        Assert.assertTrue(CollectionUtils.isNotEmpty(attrStat.getBuckets().getBucketList()));
+        log.error("$JAW$ Number of Contacts Stats Cube Buckets:");
+        for (Bucket bucket : attrStat.getBuckets().getBucketList()) {
+            log.error("    " + bucket.toString());
+        }
     }
 
     private void verifyNumAttrsInAccount() {

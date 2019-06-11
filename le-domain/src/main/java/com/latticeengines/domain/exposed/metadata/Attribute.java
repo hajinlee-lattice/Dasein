@@ -577,6 +577,9 @@ public class Attribute
 
     /**
      * Used for VisiDB/legacy systems
+     *
+     * Note(jwinter): FundamentalType is still clearly important in Atlas including its usage to distinguish
+     *   Timestamp and Date type attributes from other Numeric types which also have Schema Type LONG.
      */
     public void setFundamentalType(String fundamentalType) {
         properties.put("FundamentalType", fundamentalType);
