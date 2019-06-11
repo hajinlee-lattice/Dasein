@@ -24,6 +24,7 @@ export default class ViewMappings extends Component {
             showEmpty: false,
             showLoading: false,
             entity: '',
+            object: '',
             latticeMappings: [],
             customMappings: []
         };
@@ -79,12 +80,14 @@ export default class ViewMappings extends Component {
         let ImportWizardStore = this.ImportWizardStore;
         let entity = ImportWizardStore.getEntityType();
         let feedType = ImportWizardStore.getFeedType();
+        let object = ImportWizardStore.getObject();
 
         console.log(ImportWizardStore.getTemplateData());
 
         let state = Object.assign({}, this.state);
         state.forceReload = true;
         state.entity = entity;
+        state.object = object
         this.setState(state, function () {
             this.setState({ forceReload: false });    
         });
@@ -181,7 +184,7 @@ export default class ViewMappings extends Component {
                 <section className="container setup-import data-import">
                     <div className="row">
                         <div className="columns twelve box-outline">
-                            <div className="section-header"><h4>View {this.state.entity} Mappings</h4></div>
+                            <div className="section-header"><h4>View {this.state.object} Mappings</h4></div>
                             <hr />
                             <div className="section-body view-mappings with-padding">
                                 <h5><i className="ico ico-lattice-dots-color"></i> Lattice Fields</h5>

@@ -558,6 +558,13 @@ angular.module('lp.import')
         this.feedType = type;
     };
 
+    this.setObject = function(obj) {
+        this.Object = obj;
+    };
+    this.getObject = function() {
+        return this.Object;
+    };
+
     this.getAutoImport = function(){
         return this.autoImport;
     }
