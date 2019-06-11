@@ -52,8 +52,6 @@ public class TransformFunction extends BaseOperation implements Function {
         }
 
         Map<String, Object> arguments = definition.arguments;
-        log.info(String.format("Starting %s transform with argument %s", definition.name,
-                arguments));
         Object value = transform.transform(arguments, record);
         if (value == null) {
             value = null;
