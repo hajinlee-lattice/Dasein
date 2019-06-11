@@ -78,7 +78,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
     }
 
     private void registerTable(String tableName, String targetDir) throws Exception {
-        Table eventTable = MetadataConverter.getTable(yarnConfiguration, targetDir, null, null);
+        Table eventTable = MetadataConverter.getTable(yarnConfiguration, targetDir, null, null, true);
         eventTable.setName(tableName);
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), tableName, eventTable);
         putStringValueInContext(SCORING_RESULT_TABLE_NAME, tableName);
