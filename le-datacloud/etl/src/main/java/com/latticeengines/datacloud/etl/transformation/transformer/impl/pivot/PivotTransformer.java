@@ -46,9 +46,12 @@ public class PivotTransformer extends AbstractDataflowTransformer<PivotTransform
                                          PivotTransformerConfig configuration) {
         dataFlowBeanName = configuration.getBeanName();
 
-        setupParameters(parameters);
+        //obsolete, this is done automatically by AbstractDataflowTransformer
+        //setupParameters(parameters);
+
     }
 
+    //obsolete now.
     private void setupParameters(TransformationFlowParameters parameters) {
 
         //time stamp field name in target src

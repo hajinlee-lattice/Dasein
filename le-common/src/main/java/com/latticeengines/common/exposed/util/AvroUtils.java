@@ -97,6 +97,19 @@ public class AvroUtils {
         return reader;
     }
 
+    public static FileReader<GenericRecord> getLocalFileReader(File file) {
+        FileReader<GenericRecord> reader;
+
+        try {
+            GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
+            reader = DataFileReader.openReader(file, fileReader);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Getting avro file reader from path: " + file, e);
+        }
+        return reader;
+    }
+
     public static DataFileStream<GenericRecord> getAvroFileStream(Configuration config, Path path) {
         DataFileStream<GenericRecord> streamReader;
         try {
@@ -799,6 +812,58 @@ public class AvroUtils {
                 }
             }
         }
+    }
+
+    public static DataFileWriter<GenericRecord> getLocalFileWriter(File avroFile,
+                                                              boolean snappy,
+                                                              boolean create,
+                                                              Schema schema) {
+        create = !avroFile.exists() || create;
+        if (!avroFile.exists() && !create){
+
+            log.error(avroFile + " does not exist and create == false");
+            throw new RuntimeException("try to write to an non-existing file without creating it");
+
+        }
+
+        if (create && schema == null) {
+
+            log.error("try to create " + avroFile + " with schema == null");
+            throw new RuntimeException("try to create an avro file without schema");
+
+        }
+
+        DataFileWriter<GenericRecord> writer = null;
+
+        try {
+            writer = new DataFileWriter<>(new GenericDatumWriter<>());
+
+            if (snappy) {
+
+                writer.setCodec(CodecFactory.snappyCodec());
+
+            }
+
+            if (create) {
+
+                FileUtils.deleteQuietly(avroFile);
+                writer.create(schema, avroFile);
+
+            } else {
+
+                writer.appendTo(avroFile);
+
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("getting avro file writer from " + avroFile, e);
+
+        }
+
+        return writer;
+
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {

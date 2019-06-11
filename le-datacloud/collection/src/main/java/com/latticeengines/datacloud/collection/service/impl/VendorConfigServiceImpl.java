@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.service.VendorConfigService;
@@ -20,8 +21,11 @@ public class VendorConfigServiceImpl implements VendorConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(VendorConfigServiceImpl.class);
 
-    private static final int DEF_COLLECTION_BATCH = 8192;
-    private static final int DEF_MAX_RETRIES = 3;
+    @Value("${datacloud.collection.req.collect.batch}")
+    private int DEF_COLLECTION_BATCH;
+
+    @Value("${datacloud.collection.req.max.retry}")
+    private int DEF_MAX_RETRIES;
 
     @Inject
     private VendorConfigMgr vendorConfigMgr;
