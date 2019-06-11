@@ -275,9 +275,10 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     }
 
     /**
-     * Only ingest columns which are needed or for reference in transformer For
-     * Domain, DUNS and Items, add PATCH_ prefix to avoid potential attribute
-     * name conflict in dataflow
+     * Only ingest columns which are needed or for reference in transformer
+     * 
+     * For Domain, DUNS and Items, add PATCH_ prefix to avoid potential
+     * attribute name conflict in dataflow
      * 
      * @return
      */
