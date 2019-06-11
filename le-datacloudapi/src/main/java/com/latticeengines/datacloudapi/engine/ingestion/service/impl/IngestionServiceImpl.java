@@ -1,6 +1,7 @@
 package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,23 @@ public class IngestionServiceImpl implements IngestionService {
                     "There is already a progress ingesting " + progress.getSource() + " to "
                             + progress.getDestination());
         }
-        return ingestionProgressService.saveProgress(progress);
+        if (immediate) {
+            // 1. Progress needs to be saved first before submitting to workflow
+            // due to before progress is serialized and passed to workflow, it
+            // needs to be
+            // populated with PID; otherwise inside workflow, we are not able to
+            // update this progress
+            // 2. Set status as PROCESSING before submitting to workflow to
+            // avoid the corner case that scan is
+            // also called at same time and same progress is submitted twice to
+            // workflow. If later the progress is failed to be submitted to
+            // workflow, status will be updated to FAILED later.
+            progress.setStatus(ProgressStatus.PROCESSING);
+            progress = ingestionProgressService.saveProgress(progress);
+            return submitAll(Collections.singletonList(progress)).get(0);
+        } else {
+            return ingestionProgressService.saveProgress(progress);
+        }
     }
 
     @Override
@@ -251,6 +268,10 @@ public class IngestionServiceImpl implements IngestionService {
                 submittedProgresses.add(progress);
             } catch (Exception e) {
                 log.error("Failed to submit workflow for progress " + progress, e);
+                progress = ingestionProgressService.updateProgress(progress) //
+                        .status(ProgressStatus.FAILED) //
+                        .errorMessage(e.getMessage().substring(0, Math.min(1000, e.getMessage().length()))) //
+                        .commit(true);
             }
         }
         return submittedProgresses;
