@@ -11,30 +11,21 @@
             padding: 1rem;
         }
         .left{
-            // border: 1px solid red;
             display: flex;
             flex: 0.5;
             max-width: 350px;
             padding: 1rem;
             justify-content: center;
         }
-        // .priorities{
-        //     border: 1px solid blue;
-        //     flex: 1.5;
-        // }
 
         .info{
-            // border: 1px solid green;
             display: flex;
-            // flex: 0.5;
             max-width: 350px;
-            padding: 1rem;
+            padding: 0.5rem;
             justify-content: center;
         }
         .priorities-controlls{
-            // justify-content: space-around;
-            // border: 1px solid red;
-            padding: 1rem;
+            padding: 0.5rem;
             border-top: 1px solid gray;
         }
     }
