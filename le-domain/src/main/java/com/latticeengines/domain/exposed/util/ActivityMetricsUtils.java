@@ -196,6 +196,28 @@ public class ActivityMetricsUtils {
     }
 
     /**
+     * Check whether it is TotalSpend attr
+     *
+     * @param fullName
+     * @return
+     */
+    public static boolean isTotalSpendAttr(String fullName) {
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getTotalSpendAbbr());
+    }
+
+    /**
+     * Check whether it is AvgSpend attr
+     *
+     * @param fullName
+     * @return
+     */
+    public static boolean isAvgSpendAttr(String fullName) {
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getAvgSpendAbbr());
+    }
+
+    /**
      * @param activityMetrics
      * @return Format: PeriodAbbr_PeriodVal_PeriodAbbr_PeriodVal_..._MetricsAbbr
      */
@@ -373,6 +395,24 @@ public class ActivityMetricsUtils {
      */
     public static String getSpendChangeAbbr() {
         return METRICS_ABBR.get(InterfaceName.SpendChange);
+    }
+
+    /**
+     * Get TotalSpend metrics abbr name
+     *
+     * @return
+     */
+    public static String getTotalSpendAbbr() {
+        return METRICS_ABBR.get(InterfaceName.TotalSpendOvertime);
+    }
+
+    /**
+     * Get AvgSpend metrics abbr name
+     *
+     * @return
+     */
+    public static String getAvgSpendAbbr() {
+        return METRICS_ABBR.get(InterfaceName.AvgSpendOvertime);
     }
 
     /**
