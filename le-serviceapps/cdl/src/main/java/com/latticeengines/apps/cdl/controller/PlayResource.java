@@ -187,7 +187,9 @@ public class PlayResource {
     @ApiOperation(value = "Create play launch channel")
     public PlayLaunchChannel createPlayLaunchChannel( //
             @PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, @RequestBody PlayLaunchChannel playLaunchChannel) {
+            @PathVariable("playName") String playName,
+            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
+            @RequestBody PlayLaunchChannel playLaunchChannel) {
         if (playLaunchChannel == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch channel object is null" });
         }
@@ -204,29 +206,15 @@ public class PlayResource {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
-        PlayLaunch playLaunch = playLaunchChannel.getPlayLaunch();
-        if (playLaunch == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot create a Play launch Channel without a play launch object" });
-        }
-        if (playLaunch.getDestinationOrgId() == null || playLaunch.getDestinationSysType() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Play Launch within Channel needs Destination Org and Destination System" });
-        }
-
-        playLaunch.setTenant(MultiTenantContext.getTenant());
-        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
-        playLaunch.setLaunchState(LaunchState.UnLaunched);
-        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
-        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
-        playLaunch.setPlay(play);
-        playLaunchService.create(playLaunch);
 
         playLaunchChannel.setPlay(play);
-        playLaunchChannel.setPlayLaunch(playLaunch);
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
-        return playLaunchChannelService.create(playLaunchChannel);
+        playLaunchChannelService.create(playLaunchChannel);
+        if (launchNow) {
+            playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel);
+        }
+        return playLaunchChannel;
     }
 
     @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
@@ -235,6 +223,7 @@ public class PlayResource {
     public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
+            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
             @RequestBody PlayLaunchChannel playLaunchChannel, //
             HttpServletResponse response) {
         if (playLaunchChannel == null) {
@@ -247,84 +236,78 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18219,
                     new String[] { "ChannelId is not the same for the Play launch channel being updated" });
         }
-        PlayLaunch playLaunch = null;
-        if (playLaunchChannel.getPlayLaunch() == null) {
-            playLaunch = new PlayLaunch();
-        } else {
-            playLaunch = playLaunchChannel.getPlayLaunch();
-        }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
-        playLaunch.setPlay(play);
-        playLaunch.setTenant(MultiTenantContext.getTenant());
-        playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
-        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
-        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunchChannel.setPlay(play);
-
-        return playLaunchChannelService.update(playLaunchChannel);
-    }
-
-    @PostMapping(value = "/launch-always-on", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Launch every play launch marked as always on")
-    @Deprecated
-    public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
-        Boolean isPlayLaunched = false;
-        List<PlayLaunchChannel> channels = playLaunchChannelService.findByIsAlwaysOnTrue();
-        for (PlayLaunchChannel channel : channels) {
-            // refractor logic to service layer?
-            PlayLaunch existingPlayLaunch = channel.getPlayLaunch();
-            if (existingPlayLaunch == null) {
-                throw new LedpException(LedpCode.LEDP_32000, new String[] { "No play launch found" });
-            }
-            PlayLaunch playLaunch = new PlayLaunch();
-            playLaunch.setTenant(MultiTenantContext.getTenant());
-            playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
-            playLaunch.setCreatedBy(existingPlayLaunch.getCreatedBy());
-            playLaunch.setUpdatedBy(existingPlayLaunch.getUpdatedBy());
-            playLaunch.setExcludeItemsWithoutSalesforceId(existingPlayLaunch.getExcludeItemsWithoutSalesforceId());
-            playLaunch.setTopNCount(existingPlayLaunch.getTopNCount());
-            playLaunch.setBucketsToLaunch(existingPlayLaunch.getBucketsToLaunch());
-            playLaunch.setLaunchUnscored(existingPlayLaunch.isLaunchUnscored());
-            playLaunch.setLaunchState(LaunchState.UnLaunched);
-            playLaunch.setDestinationAccountId(existingPlayLaunch.getDestinationAccountId());
-            playLaunch.setDestinationOrgId(existingPlayLaunch.getDestinationOrgId());
-            playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
-            playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
-            Play play = channel.getPlay();
-            // are these validations necessary?
-            playLaunch.setPlay(play);
-            channel.setPlayLaunch(playLaunch);
-            playLaunchChannelService.update(channel);
-            playLaunch = channel.getPlayLaunch();
-            // PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
-            // if (play.getRatingEngine() != null) {
-            // validateNonEmptyTargetsForLaunch(customerSpace, play,
-            // play.getName(), playLaunch, //
-            // playLaunch.getDestinationAccountId());
-            // }
-            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-            playLaunch.setApplicationId(appId);
-
-            playLaunch.setLaunchState(LaunchState.Launching);
-            playLaunch.setPlay(play);
-            playLaunch.setTableName(createTable(playLaunch));
-
-            Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-
-            playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
-            playLaunch.setAccountsSuppressed(0L);
-            playLaunch.setAccountsErrored(0L);
-            playLaunch.setAccountsLaunched(0L);
-            playLaunch.setContactsLaunched(0L);
-            playLaunchService.update(playLaunch);
-            isPlayLaunched = true;
+        playLaunchChannel = playLaunchChannelService.update(playLaunchChannel);
+        if (launchNow) {
+            playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel);
         }
-        return isPlayLaunched;
+        return playLaunchChannel;
     }
+
+    // @PostMapping(value = "/launch-always-on", headers =
+    // "Accept=application/json")
+    // @ResponseBody
+    // @ApiOperation(value = "Launch every play launch marked as always on")
+    // public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
+    // Boolean isPlayLaunched = false;
+    // List<PlayLaunchChannel> channels =
+    // playLaunchChannelService.findByIsAlwaysOnTrue();
+    // for (PlayLaunchChannel channel : channels) {
+    // // refractor logic to service layer?
+    // PlayLaunch existingPlayLaunch = channel.getPlayLaunch();
+    // if (existingPlayLaunch == null) {
+    // throw new LedpException(LedpCode.LEDP_32000, new String[] { "No play
+    // launch found" });
+    // }
+    // PlayLaunch playLaunch = new PlayLaunch();
+    // playLaunch.setTenant(MultiTenantContext.getTenant());
+    // playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
+    // playLaunch.setCreatedBy(existingPlayLaunch.getCreatedBy());
+    // playLaunch.setUpdatedBy(existingPlayLaunch.getUpdatedBy());
+    // playLaunch.setExcludeItemsWithoutSalesforceId(existingPlayLaunch.getExcludeItemsWithoutSalesforceId());
+    // playLaunch.setTopNCount(existingPlayLaunch.getTopNCount());
+    // playLaunch.setBucketsToLaunch(existingPlayLaunch.getBucketsToLaunch());
+    // playLaunch.setLaunchUnscored(existingPlayLaunch.isLaunchUnscored());
+    // playLaunch.setLaunchState(LaunchState.UnLaunched);
+    // playLaunch.setDestinationAccountId(existingPlayLaunch.getDestinationAccountId());
+    // playLaunch.setDestinationOrgId(existingPlayLaunch.getDestinationOrgId());
+    // playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
+    // playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
+    // Play play = channel.getPlay();
+    // // are these validations necessary?
+    // playLaunch.setPlay(play);
+    // channel.setPlayLaunch(playLaunch);
+    // playLaunchChannelService.update(channel);
+    // playLaunch = channel.getPlayLaunch();
+    // // PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
+    // // if (play.getRatingEngine() != null) {
+    // // validateNonEmptyTargetsForLaunch(customerSpace, play,
+    // // play.getName(), playLaunch, //
+    // // playLaunch.getDestinationAccountId());
+    // // }
+    // String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+    // playLaunch.setApplicationId(appId);
+    //
+    // playLaunch.setLaunchState(LaunchState.Launching);
+    // playLaunch.setPlay(play);
+    // playLaunch.setTableName(createTable(playLaunch));
+    //
+    // Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+    //
+    // playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
+    // playLaunch.setAccountsSuppressed(0L);
+    // playLaunch.setAccountsErrored(0L);
+    // playLaunch.setAccountsLaunched(0L);
+    // playLaunch.setContactsLaunched(0L);
+    // playLaunchService.update(playLaunch);
+    // isPlayLaunched = true;
+    // }
+    // return isPlayLaunched;
+    // }
 
     // -------------
     // Play Launches
@@ -643,11 +626,8 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (playLaunch.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
