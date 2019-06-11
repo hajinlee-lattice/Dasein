@@ -239,8 +239,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             progress.setRetries(progress.getRetries() + 1);
         }
         progress.setStatus(ProgressStatus.PROCESSING);
-        ingestionProgressEntityMgr.saveProgress(progress);
-        return progress;
+        return ingestionProgressEntityMgr.saveProgress(progress);
     }
 
     @Override
