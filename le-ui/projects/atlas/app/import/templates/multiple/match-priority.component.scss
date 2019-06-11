@@ -1,0 +1,35 @@
+
+.match-priority{
+    .wizard-container{
+        border: 1px solid gray;
+        margin-top: 20px;
+
+        .sub-header{
+            width: 100%;
+            font-size: 18px;
+            border-bottom: 1px solid gray;
+        }
+        .left{
+            border: 1px solid red;
+            display: flex;
+            flex: 1;
+        }
+        .priorities{
+            border: 1px solid blue;
+            flex: 2;
+        }
+
+        .info{
+            border: 1px solid green;
+            display: flex;
+            flex: 1;
+        }
+        .footer{
+            // justify-content: space-around;
+            border: 1px solid red;
+            height: 50px;
+            max-height: 50px;
+            min-height: 50px;
+        }
+    }
+}

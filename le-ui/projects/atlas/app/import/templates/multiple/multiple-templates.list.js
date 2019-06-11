@@ -1,20 +1,12 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from './multipletemplates.redux';
-import LeHPanel from 'common/widgets/container/le-h-panel';
 import ReactRouter from '../../../react/router';
-import NgState from "atlas/ng-state";
-import {
-    SPACEBETWEEN,
-    SPACEEVEN,
-    CENTER
-} from "common/widgets/container/le-alignments";
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
     EDIT_TEMPLATE,
     IMPORT_DATA
 } from "../templates-row-actions";
-import EditControl from "common/widgets/table/controlls/edit-controls";
 import CopyComponent from "common/widgets/table/controlls/copy-controll";
 import EditorText from "common/widgets/table/editors/editor-text";
 
@@ -23,14 +15,13 @@ import Message, {
     NOTIFICATION
 } from "common/app/utilities/message";
 
+import  LeHPanel from '../../../../../common/widgets/container/le-h-panel';
 import LeTable from "common/widgets/table/table";
 import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
 import ReactMainContainer from "atlas/react/react-main-container";
 import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
 
-import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
-import { TYPE_SUCCESS } from "../../../../../common/widgets/banner/le-banner.utils";
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
@@ -105,6 +96,11 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
+                    name: "Priority",
+                    displayName: "Priority",
+                    sortable: false
+                },
+                {
                     name: "SystemName",
                     displayName: "System Name",
                     sortable: false
@@ -151,6 +147,9 @@ export default class MultipleTemplatesList extends Component {
                             return null;
                         }
                     }
+                },
+                {
+                    colSpan: 1
                 },
                 {
                     colSpan: 2,
@@ -219,7 +218,7 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 4,
+                    colSpan: 3,
                     template: cell => {
                         let lastEditedDate = '';
                         let lastEditedDateNumeric = null;
@@ -267,18 +266,31 @@ export default class MultipleTemplatesList extends Component {
             <ReactMainContainer>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-                    <LeButton
-                        name="add"
-                        config={{
-                            label: "Add System",
-                            classNames: "blue-button",
-                            iconside: RIGHT,
-                            icon: 'fa fa-plus-circle'
-                        }}
-                        callback={() => {
-                            ReactRouter.getStateService().go('sistemcreation');
-                        }}
-                    />
+                    <LeHPanel>
+                        <LeButton
+                            name="matchpriority"
+                            config={{
+                                classNames: "borderless-button",
+                                iconside: RIGHT,
+                                icon: 'fa fa-list-ol'
+                            }}
+                            callback={() => {
+                                ReactRouter.getStateService().go('matchpriority');
+                            }}
+                        />
+                        <LeButton
+                            name="add"
+                            config={{
+                                label: "Add System",
+                                classNames: "blue-button",
+                                iconside: RIGHT,
+                                icon: 'fa fa-plus-circle'
+                            }}
+                            callback={() => {
+                                ReactRouter.getStateService().go('sistemcreation');
+                            }}
+                        />
+                    </LeHPanel>
                 </LeToolBar>
                 <LeTable
                     name="multiple-templates"
