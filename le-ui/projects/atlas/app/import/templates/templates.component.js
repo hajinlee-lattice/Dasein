@@ -55,7 +55,8 @@ export default class TemplatesComponent extends Component {
             data: [],
             entity: '',
             entityType: '',
-            feedType: ''
+            feedType: '',
+            object: ''
         };
 
     }
@@ -68,34 +69,32 @@ export default class TemplatesComponent extends Component {
             case "Accounts": {
                 state.entity = "accounts";
                 state.entityType = 'Account';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Contacts": {
                 state.entity = "contacts";
                 state.entityType = 'Contact';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Purchases": {
                 state.entity = "productpurchases";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Bundles": {
                 state.entity = "productbundles";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Hierarchy": {
                 state.entity = "producthierarchy";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
         }
+
+        state.feedType = response.data.FeedType;
+        state.object = response.data.Object;
 
         this.setState(state, function () {
             
@@ -107,6 +106,7 @@ export default class TemplatesComponent extends Component {
             ImportWizardStore.setFeedType(this.state.feedType);
             ImportWizardStore.setTemplateAction(action);
             ImportWizardStore.setTemplateData(data);
+            ImportWizardStore.setObject(this.state.object);
             if (action == 'view-template') {
                 this.viewTemplate(response);
             } else {

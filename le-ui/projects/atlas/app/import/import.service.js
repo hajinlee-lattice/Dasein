@@ -94,7 +94,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
@@ -159,7 +159,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
@@ -199,7 +199,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'productpurchases.ids.latticefields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -235,7 +235,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'productbundles.ids.latticefields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -270,7 +270,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Product Hierarchy', 
                 state: 'producthierarchy.ids.producthierarchy', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -556,6 +556,13 @@ angular.module('lp.import')
     };
     this.setFeedType = function(type) {
         this.feedType = type;
+    };
+
+    this.setObject = function(obj) {
+        this.Object = obj;
+    };
+    this.getObject = function() {
+        return this.Object;
     };
 
     this.getAutoImport = function(){
