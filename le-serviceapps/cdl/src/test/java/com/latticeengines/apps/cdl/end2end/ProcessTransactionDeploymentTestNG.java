@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -13,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -90,6 +93,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 VERIFY_DAILYTXN_AMOUNT_1, //
                 VERIFY_DAILYTXN_QUANTITY_1, //
                 VERIFY_DAILYTXN_COST);
+        verifyPurchaseHistoryAttrs();
     }
 
     private void verifyNumAttrsInAccount() {
@@ -172,6 +176,22 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
         return map;
+    }
+
+    protected void verifyPurchaseHistoryAttrs() {
+        List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(mainCustomerSpace,
+                BusinessEntity.PurchaseHistory);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
+        cms.forEach(cm -> {
+            if (ActivityMetricsUtils.isHasPurchasedAttr(cm.getAttrName())) {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.BOOLEAN);
+            } else if (ActivityMetricsUtils.isTotalSpendAttr(cm.getAttrName())
+                    || ActivityMetricsUtils.isAvgSpendAttr(cm.getAttrName())) {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.CURRENCY);
+            } else {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.NUMERIC);
+            }
+        });
     }
 
 }
