@@ -178,26 +178,27 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_EFFECTIVE_SINCE));
             Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_EXPIRE_AFTER));
 
-            Assert.assertNotNull(record.get(PatchBook.COLUMN_PATCH_ITEMS));
-            Map<?, ?> map = JsonUtils.deserialize(record.get(PatchBook.COLUMN_PATCH_ITEMS).toString(), Map.class);
+            Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_ITEMS));
+            Map<?, ?> map = JsonUtils.deserialize(record.get(DataCloudConstants.ATTR_PATCH_ITEMS).toString(),
+                    Map.class);
             Map<String, Object> patchItems = JsonUtils.convertMap(map, String.class, Object.class);
             switch (type) {
             case Domain:
-                Assert.assertNotNull(record.get(PatchBook.COLUMN_DUNS));
+                Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_DUNS));
                 // All domain patch items are populated with Cleanup = true and
                 // HotFix = false
                 Assert.assertTrue((Boolean) record.get(PatchBook.COLUMN_CLEANUP));
                 Assert.assertFalse((Boolean) record.get(PatchBook.COLUMN_HOTFIX));
                 // Domain, Name, Country, State, ZipCode are not populated,
                 // check whether field exists in schema
-                Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_DOMAIN));
+                Assert.assertNotNull(record.getSchema().getField(DataCloudConstants.ATTR_PATCH_DOMAIN));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_NAME));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_COUNTRY));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_STATE));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_ZIPCODE));
                 break;
             case Attribute:
-                Assert.assertNotNull(record.get(PatchBook.COLUMN_DOMAIN));
+                Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_DOMAIN));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_COUNTRY), fakeValue(pid, COUNTRY)));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_STATE), fakeValue(pid, STATE)));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_ZIPCODE), fakeValue(pid, ZIPCODE)));
@@ -207,7 +208,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
                 Assert.assertFalse((Boolean) record.get(PatchBook.COLUMN_CLEANUP));
                 Assert.assertTrue((Boolean) record.get(PatchBook.COLUMN_HOTFIX));
                 // DUNS is not populated, check whether field exists in schema
-                Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_DUNS));
+                Assert.assertNotNull(record.getSchema().getField(DataCloudConstants.ATTR_PATCH_DUNS));
                 break;
             default:
                 break;
