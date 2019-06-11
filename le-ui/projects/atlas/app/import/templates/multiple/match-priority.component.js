@@ -5,6 +5,8 @@ import ReactRouter from '../../../react/router';
 import './match-priority.component.scss';
 import LeHPanel from "../../../../../common/widgets/container/le-h-panel";
 import LeButton from "common/widgets/buttons/le-button";
+import PrioritiesLitComponent from "./priorities-list.component";
+import { SPACEBETWEEN } from "../../../../../common/widgets/container/le-alignments";
 
 export default class MatchPriorityComponent extends Component {
     constructor(props) {
@@ -30,10 +32,35 @@ export default class MatchPriorityComponent extends Component {
 
                     <LeHPanel hstretch={"true"} >
                         <p className="left">System Priority</p>
-                        <LeVPanel className="priorities">
-                            The box here
+                        <PrioritiesLitComponent/>
+                        <LeVPanel className="info">
+                            <p>MATCH PRIORITY</p>
+                            <span>If any of the systems provide multiple IDs, Lattice will use the ID with the highest priority while matching accounts and contacts</span>
                         </LeVPanel>
-                        <div className="info">MATCH PRIORITY</div>
+                    </LeHPanel>
+                    <LeHPanel hstretch={true} halignment={SPACEBETWEEN} className="priorities-controlls">
+                    <LeButton
+                        name="cancel"
+                        config={{
+                            label: "Cancel",
+                            classNames: "gray-button"
+                        }}
+                        callback={() => {
+                            ReactRouter.getStateService().go('templateslist');
+                            // alert('Call APIS');
+                        }}
+                    />
+                     <LeButton
+                        name="update"
+                        config={{
+                            label: "Update",
+                            classNames: "blue-button"
+                        }}
+                        callback={() => {
+                            ReactRouter.getStateService().go('templateslist');
+                            // alert('Call APIS');
+                        }}
+                    />
                     </LeHPanel>
                 </LeVPanel>
             </ReactMainContainer>

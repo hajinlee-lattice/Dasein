@@ -8,28 +8,34 @@
             width: 100%;
             font-size: 18px;
             border-bottom: 1px solid gray;
+            padding: 1rem;
         }
         .left{
-            border: 1px solid red;
+            // border: 1px solid red;
             display: flex;
-            flex: 1;
+            flex: 0.5;
+            max-width: 350px;
+            padding: 1rem;
+            justify-content: center;
         }
-        .priorities{
-            border: 1px solid blue;
-            flex: 2;
-        }
+        // .priorities{
+        //     border: 1px solid blue;
+        //     flex: 1.5;
+        // }
 
         .info{
-            border: 1px solid green;
+            // border: 1px solid green;
             display: flex;
-            flex: 1;
+            // flex: 0.5;
+            max-width: 350px;
+            padding: 1rem;
+            justify-content: center;
         }
-        .footer{
+        .priorities-controlls{
             // justify-content: space-around;
-            border: 1px solid red;
-            height: 50px;
-            max-height: 50px;
-            min-height: 50px;
+            // border: 1px solid red;
+            padding: 1rem;
+            border-top: 1px solid gray;
         }
     }
 }
