@@ -254,7 +254,7 @@ public class AvroUtils {
         if (matches.size() == 1) {
             return countOneFile(configuration, matches.get(0));
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(4, matches.size()));
 
         List<Callable<Long>> counters = new ArrayList<>();
         long count = 0L;
