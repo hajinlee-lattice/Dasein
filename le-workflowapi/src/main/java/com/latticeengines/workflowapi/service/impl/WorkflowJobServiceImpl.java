@@ -873,7 +873,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.info("Job status for application id %s is %s", applicationId, yarnStatus);
             LedpException ledpException = new LedpException(LedpCode.LEDP_28015,
                     new String[]{applicationId,
-                            yarnStatus.toString()});
+                            yarnStatus.getErrorReport()});
             workflowJob.setErrorDetails(ledpException.getErrorDetails());
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
         }

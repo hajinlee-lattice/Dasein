@@ -238,11 +238,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
-
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28015, new String[]{appId, status.toString()});
+            throw new LedpException(LedpCode.LEDP_28015, new String[]{appId, status.getErrorReport()});
         }
-
     }
 
     protected String getHdfsDir(String path) {
