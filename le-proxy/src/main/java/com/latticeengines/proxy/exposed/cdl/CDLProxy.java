@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.BulkEntityMatchRequest;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
@@ -400,6 +401,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             throw new RuntimeException("Cannot encode systemName: " + systemName);
         }
         return get("get s3 import system", url, S3ImportSystem.class);
+    }
+
+    public List<S3ImportSystem> getS3ImportSystemList(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/list",
+                    shortenCustomerSpace(customerSpace));
+        List<?> rawlist = get("get s3 import system list", url, List.class);
+        return JsonUtils.convertList(rawlist, S3ImportSystem.class);
+    }
+
+    public void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/update",
+                shortenCustomerSpace(customerSpace));
+        post("update s3 import system", url, importSystem, Void.class);
     }
 
     @SuppressWarnings("unchecked")
