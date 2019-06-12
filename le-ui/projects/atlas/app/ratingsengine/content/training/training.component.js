@@ -97,7 +97,7 @@ angular.module('lp.ratingsengine.wizard.training', [
                         customFile: (vm.filters.dataStores.indexOf('CustomFileAttributes') > -1) ? true : false,
                         deduplicationType: (vm.filters.deduplicationType == 'ONELEADPERDOMAIN') ? true : false,
                         excludePublicDomains: (vm.filters.excludePublicDomains == true) ? false : true,
-                        transformationGroup: (vm.filters.transformationGroup == 'NONE') ? false : true
+                        transformationGroup: (vm.filters.transformationGroup == 'none') ? false : true
                     }
 
                     vm.configFilters = angular.copy(vm.filters);
@@ -342,9 +342,9 @@ angular.module('lp.ratingsengine.wizard.training', [
                 vm.configFilters.excludePublicDomains = vm.checkboxModel.excludePublicDomains ? false : true;
 
                 if(!vm.checkboxModel.transformationGroup) {
-                    vm.configFilters.transformationGroup = 'NONE';
+                    vm.configFilters.transformationGroup = 'none';
                 } else {
-                    vm.configFilters.transformationGroup = 'ALL';
+                    vm.configFilters.transformationGroup = 'all';
                 }
 
                 $timeout(function () {
