@@ -1,6 +1,8 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from './multipletemplates.redux';
+import NgState from "atlas/ng-state";
+import { s3actions } from 'atlas/import/s3files/s3files.redux';
 import ReactRouter from '../../../react/router';
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
@@ -26,6 +28,9 @@ export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
         super(props);
+        this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
+        this.TemplatesStore = ReactRouter.getRouter().ngservices.TemplatesStore;
+
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
         this.state = {
@@ -260,6 +265,80 @@ export default class MultipleTemplatesList extends Component {
         };
 
         return config;
+    }
+
+    setDataTypes = (response) => {
+        let state = Object.assign({}, this.state);
+
+        console.log(response.type);
+        switch (response.type) {
+            case "Accounts": {
+                state.entity = "accounts";
+                state.entityType = 'Account';
+                break;
+            }
+            case "Contacts": {
+                state.entity = "contacts";
+                state.entityType = 'Contact';
+                break;
+            }
+            case "Product Purchases": {
+                state.entity = "productpurchases";
+                state.entityType = 'Product';
+                break;
+            }
+            case "Product Bundles": {
+                state.entity = "productbundles";
+                state.entityType = 'Product';
+                break;
+            }
+            case "Product Hierarchy": {
+                state.entity = "producthierarchy";
+                state.entityType = 'Product';
+                break;
+            }
+        }
+
+        state.feedType = response.data.FeedType;
+        state.object = response.data.Object;
+
+        this.setState(state, function () {
+            
+            // Wait until setState is completed and do some stuff.
+            let action = response.action;
+            let data = response.data;
+            let ImportWizardStore = this.ImportWizardStore;
+            ImportWizardStore.setEntityType(this.state.entityType);
+            ImportWizardStore.setFeedType(this.state.feedType);
+            ImportWizardStore.setTemplateAction(action);
+            ImportWizardStore.setTemplateData(data);
+            ImportWizardStore.setObject(this.state.object);
+            if (action == 'view-template') {
+                this.viewTemplate(response);
+            } else {
+                this.createTemplate(response);
+            }
+
+        });
+    }
+
+    createTemplate = (response) => {
+        let params = {
+            importOnly: (response.action == 'import-data') ? true : false,
+            action: response.action,
+            data: response.data
+        }
+
+        let goTo = `home.import.entry.${this.state.entity}`;
+        s3actions.setPath(response.data.Path);
+        NgState.getAngularState().go(goTo, params);
+    }
+
+    viewTemplate(response) {
+        let params = {
+            data: response.data
+        }
+        NgState.getAngularState().go('home.viewmappings', params);
     }
     render() {
         return (

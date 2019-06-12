@@ -192,6 +192,15 @@ angular.module('lp.import.entry', [
         }
     }
 
+    vm.goBack = () => {
+        var flags = FeatureFlagService.Flags();
+        if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+            $state.go('home.multipletemplates');
+        }else{
+            $state.go('home.importtemplates');
+        }
+    }
+
     vm.setFeatureFlagPermissions = function() {
         var featureFlags = {};
         featureFlags[flags.VDB_MIGRATION] = false;
