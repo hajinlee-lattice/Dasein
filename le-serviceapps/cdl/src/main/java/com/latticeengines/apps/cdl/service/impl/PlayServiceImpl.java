@@ -148,8 +148,9 @@ public class PlayServiceImpl implements PlayService {
             throw new LedpException(LedpCode.LEDP_18144);
         }
         Play play = playEntityMgr.getPlayByName(name, considerDeleted);
-        if (play != null) {
-            updateLastRefreshedDate(play.getRatingEngine());
+        RatingEngine ratingEngine = play.getRatingEngine();
+        if (play != null && ratingEngine != null) {
+            updateLastRefreshedDate(ratingEngine);
             setBucketMetadata(tenant, play);
         }
         return play;
@@ -175,9 +176,9 @@ public class PlayServiceImpl implements PlayService {
             } else {
                 String reId = play.getRatingEngine().getId();
                 try {
-                    List<BucketMetadata> latestABCDBuckets =
-                            bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenant.getId(),
-                                    ((AIModel) play.getRatingEngine().getPublishedIteration()).getModelSummaryId());
+                    List<BucketMetadata> latestABCDBuckets = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
+                            tenant.getId(),
+                            ((AIModel) play.getRatingEngine().getPublishedIteration()).getModelSummaryId());
                     play.getRatingEngine().setBucketMetadata(latestABCDBuckets);
                 } catch (Exception ex) {
                     log.error("Ignoring exception while loading latest ABCD" + " bucket of rating engine " + reId
@@ -319,17 +320,18 @@ public class PlayServiceImpl implements PlayService {
             return null;
         }
         RatingEngine ratingEngine = play.getRatingEngine();
-
         if (tenant != null) {
             MultiTenantContext.setTenant(tenant);
         }
 
         LaunchHistory launchHistory = updatePlayLaunchHistory(play);
-        if (shouldLoadCoverage) {
-            populateCoverageInfo(play, launchHistory, ratingEngine);
+        if (ratingEngine != null) {
+            if (shouldLoadCoverage) {
+                populateCoverageInfo(play, launchHistory, ratingEngine);
+            }
+            setBucketMetadata(tenant, play);
+            updateLastRefreshedDate(ratingEngine, lastRefreshedDate);
         }
-        setBucketMetadata(tenant, play);
-        updateLastRefreshedDate(play.getRatingEngine(), lastRefreshedDate);
         return play;
     }
 
@@ -340,11 +342,10 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private LaunchHistory getLaunchHistoryForPlay(Play play) {
-        PlayLaunch lastIncompleteLaunch =
-                playLaunchService.findLatestByPlayId(play.getPid(), Collections.singletonList(LaunchState.UnLaunched));
-        PlayLaunch lastCompletedLaunch =
-                playLaunchService.findLatestByPlayId(play.getPid(),
-                        Arrays.asList(LaunchState.Launched, LaunchState.PartialSync, LaunchState.Synced));
+        PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
+                Collections.singletonList(LaunchState.UnLaunched));
+        PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
+                Arrays.asList(LaunchState.Launched, LaunchState.PartialSync, LaunchState.Synced));
         PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);
@@ -353,20 +354,23 @@ public class PlayServiceImpl implements PlayService {
         return launchHistory;
     }
 
-    private CoverageInfo getCoverageInfo(RatingEngine ratingEngine) {
+    private CoverageInfo getCoverageInfo(Play play) {
         CoverageInfo coverageInfo = new CoverageInfo();
-        MetadataSegment segment = ratingEngine.getSegment();
+        MetadataSegment segment = play.getTargetSegment();
+        RatingEngine ratingEngine = play.getRatingEngine();
         if (segment != null) {
             coverageInfo.setAccountCount(segment.getAccounts());
             coverageInfo.setContactCount(segment.getContacts());
         }
-        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
-            coverageInfo.setBucketCoverageCounts(CoverageInfo.fromCounts(ratingEngine.getCountsAsMap()));
-        } else {
-            Tenant tenant = MultiTenantContext.getTenant();
-            List<BucketMetadata> buckets = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenant.getId(),
-                    ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
-            coverageInfo.setBucketCoverageCounts(CoverageInfo.fromBuckets(buckets));
+        if (ratingEngine != null) {
+            if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
+                coverageInfo.setBucketCoverageCounts(CoverageInfo.fromCounts(ratingEngine.getCountsAsMap()));
+            } else {
+                Tenant tenant = MultiTenantContext.getTenant();
+                List<BucketMetadata> buckets = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenant.getId(),
+                        ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId());
+                coverageInfo.setBucketCoverageCounts(CoverageInfo.fromBuckets(buckets));
+            }
         }
         return coverageInfo;
     }
@@ -375,7 +379,7 @@ public class PlayServiceImpl implements PlayService {
         try {
             PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getLastIncompleteLaunch();
 
-            CoverageInfo coverageInfo = getCoverageInfo(ratingEngine);
+            CoverageInfo coverageInfo = getCoverageInfo(play);
             Long accountCount = coverageInfo.getAccountCount();
             if (accountCount == null) {
                 throw new IllegalStateException(
@@ -390,11 +394,10 @@ public class PlayServiceImpl implements PlayService {
 
             log.info(String.format("For play %s, account number and contact number are %d and %d, respectively",
                     play.getName(), accountCount, contactCount));
-
-            Long mostRecentSuccessfulLaunchAccountNum =
-                    mostRecentSuccessfulPlayLaunch == null ? 0L : mostRecentSuccessfulPlayLaunch.getAccountsLaunched();
-            Long mostRecentSuccessfulLaunchContactNum =
-                    mostRecentSuccessfulPlayLaunch == null ? 0L : mostRecentSuccessfulPlayLaunch.getContactsLaunched();
+            Long mostRecentSuccessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0L
+                    : mostRecentSuccessfulPlayLaunch.getAccountsLaunched();
+            Long mostRecentSuccessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0L
+                    : mostRecentSuccessfulPlayLaunch.getContactsLaunched();
 
             Long newAccountsNum = accountCount - mostRecentSuccessfulLaunchAccountNum;
             Long newContactsNum = contactCount - mostRecentSuccessfulLaunchContactNum;
@@ -432,11 +435,11 @@ public class PlayServiceImpl implements PlayService {
         }
         Play play = playEntityMgr.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_18144, new String[] {playName});
+            throw new LedpException(LedpCode.LEDP_18144, new String[] { playName });
         }
 
-        List<PlayLaunch> launches =
-                playLaunchService.findByPlayId(play.getPid(), Arrays.asList(LaunchState.Launched, LaunchState.Failed));
+        List<PlayLaunch> launches = playLaunchService.findByPlayId(play.getPid(),
+                Arrays.asList(LaunchState.Launched, LaunchState.Failed));
 
         if (CollectionUtils.isEmpty(launches)) {
             log.warn("Play " + playName
@@ -454,9 +457,7 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private void updateLastRefreshedDate(RatingEngine ratingEngine, Date lastRefreshedDate) {
-        if (ratingEngine != null) {
-            ratingEngine.setLastRefreshedDate(lastRefreshedDate);
-        }
+        ratingEngine.setLastRefreshedDate(lastRefreshedDate);
     }
 
     private void updateLastRefreshedDate(List<Play> plays) {
@@ -499,8 +500,8 @@ public class PlayServiceImpl implements PlayService {
             List<Play> plays = getAllPlays();
             if (plays != null) {
                 for (Play play : plays) {
-                    List<AttributeLookup> playAttributes =
-                            talkingPointService.getAttributesInTalkingPointOfPlay(play.getName());
+                    List<AttributeLookup> playAttributes = talkingPointService
+                            .getAttributesInTalkingPointOfPlay(play.getName());
                     for (AttributeLookup attributeLookup : playAttributes) {
                         if (attributes.contains(sanitize(attributeLookup.toString()))) {
                             dependingPlays.add(play);
