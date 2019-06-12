@@ -4,15 +4,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
+import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -96,24 +98,17 @@ public class HdfsPathBuilder {
 
     public Path constructTransformationSourceDir(Source source, String version) {
         Path dir = null;
-        if (source instanceof IngestedRawSource) {
+        if (source instanceof TransformedToAvroSource || source instanceof IngestedRawSource) {
             dir = constructRawDir(source);
-            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
-                dir = dir.append(version);
-            }
-        } else if (source instanceof DerivedSource) {
-            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
-                dir = constructSnapshotDir(source.getSourceName(), version);
-            } else {
-                dir = constructSnapshotRootDir(source.getSourceName());
-            }
         } else if (source instanceof IngestionSource) {
-            dir = constructIngestionDir(((IngestionSource) source).getIngestionName(), version);
+            dir = constructIngestionDir(((IngestionSource) source).getIngestionName());
+        } else if (source instanceof DerivedSource || source instanceof HasSqlPresence) {
+            dir = constructSnapshotRootDir(source.getSourceName());
         } else {
             dir = constructSourceDir(source.getSourceName());
-            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
-                dir = dir.append(version);
-            }
+        }
+        if (StringUtils.isNotBlank(version)) {
+            dir = dir.append(version);
         }
         return dir;
     }

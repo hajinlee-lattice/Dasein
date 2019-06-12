@@ -12,6 +12,7 @@ import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTe
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.proxy.exposed.datacloudapi.PurgeProxy;
 
+// dpltc deploy -a datacloudapi
 public class PurgeResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(PurgeResourceDeploymentTestNG.class);
 

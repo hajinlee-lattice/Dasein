@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -27,6 +28,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.dataflow.transformation.patch.AttributePatch;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -35,6 +37,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
@@ -59,14 +62,14 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
     /*
      * Sources for fake account master data
      */
-    private GeneralSource attrPatchBookForFakeAM = new GeneralSource("AttributePatchBookForFakeAM");
+    private IngestionSource attrPatchBookForFakeAM = new IngestionSource("AttributePatchBookForFakeAM");
     private GeneralSource fakeAM = new GeneralSource("FakeAccountMaster");
     private GeneralSource fakePatchedAM = new GeneralSource("FakeAccountMasterPatched");
     private GeneralSource fakePatchedAMTez = new GeneralSource("FakeAccountMasterPatchedTez");
     /*
      * Sources for real account master data (sampled)
      */
-    private GeneralSource attrPatchBookForRealAM = new GeneralSource("AttributePatchBookForRealAM");
+    private IngestionSource attrPatchBookForRealAM = new IngestionSource("AttributePatchBookForRealAM");
     private GeneralSource realAM = new GeneralSource("RealAccountMaster");
     private GeneralSource realPatchedAM = new GeneralSource("RealAccountMasterPatched");
 
@@ -111,6 +114,8 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         TransformationStepConfig step0 = new TransformationStepConfig();
         step0.setBaseSources(Arrays
                 .asList(fakeAM.getSourceName(), attrPatchBookForFakeAM.getSourceName()));
+        step0.setBaseIngestions(Collections.singletonMap(attrPatchBookForFakeAM.getSourceName(),
+                new SourceIngestion(attrPatchBookForFakeAM.getIngestionName())));
         step0.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step0.setTargetSource(fakePatchedAM.getSourceName());
         step0.setConfiguration(getConfigStr());
@@ -119,6 +124,8 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         TransformationStepConfig step1 = new TransformationStepConfig();
         step1.setBaseSources(Arrays
                 .asList(fakeAM.getSourceName(), attrPatchBookForFakeAM.getSourceName()));
+        step1.setBaseIngestions(Collections.singletonMap(attrPatchBookForFakeAM.getSourceName(),
+                new SourceIngestion(attrPatchBookForFakeAM.getIngestionName())));
         step1.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step1.setTargetSource(fakePatchedAMTez.getSourceName());
         step1.setConfiguration(setDataFlowEngine(getConfigStr(), "TEZ"));
@@ -127,6 +134,8 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setBaseSources(Arrays
                 .asList(realAM.getSourceName(), attrPatchBookForRealAM.getSourceName()));
+        step2.setBaseIngestions(Collections.singletonMap(attrPatchBookForRealAM.getSourceName(),
+                new SourceIngestion(attrPatchBookForRealAM.getIngestionName())));
         step2.setTransformer(AttributePatch.TRANSFORMER_NAME);
         step2.setTargetSource(realPatchedAM.getSourceName());
         step2.setConfiguration(setDataFlowEngine(getConfigStr(), "TEZ"));
@@ -148,10 +157,10 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
     @Test(groups = "pipeline1")
     public void testTransformation() {
         // upload data for fake & real AM
-        prepareAttributePatchBook(attrPatchBookDataForFakeAM, attrPatchBookForFakeAM.getSourceName());
+        prepareAttributePatchBook(attrPatchBookDataForFakeAM, attrPatchBookForFakeAM);
         uploadBaseSourceData(fakeAM.getSourceName(), baseSourceVersion, AM_SCHEMA, fakeAMData);
         generateSchemaFile(fakeAM, baseSourceVersion, AM_SCHEMA_PROPERTIES);
-        prepareAttributePatchBook(attrPatchBookDataForRealAM, attrPatchBookForRealAM.getSourceName());
+        prepareAttributePatchBook(attrPatchBookDataForRealAM, attrPatchBookForRealAM);
         uploadBaseSourceFile(realAM.getSourceName(), REAL_AM_TEST_FILE, baseSourceVersion);
         generateSchemaFile(realAM, baseSourceVersion, AM_SCHEMA_PROPERTIES);
         // perform transformation
@@ -184,12 +193,12 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
         // do nothing since we are using verifyIntermediateResult to check the results
     }
 
-    private void prepareAttributePatchBook(Object[][] patchBooks, String sourceName) {
+    private void prepareAttributePatchBook(Object[][] patchBooks, Source baseSource) {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(DataCloudConstants.ATTR_PATCH_DOMAIN, String.class));
         schema.add(Pair.of(DataCloudConstants.ATTR_PATCH_DUNS, String.class));
         schema.add(Pair.of(DataCloudConstants.ATTR_PATCH_ITEMS, String.class));
-        uploadBaseSourceData(sourceName, baseSourceVersion, schema, patchBooks);
+        uploadBaseSourceData(baseSource, baseSourceVersion, schema, patchBooks);
     }
 
     /*
