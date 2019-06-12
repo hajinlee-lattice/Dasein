@@ -42,13 +42,20 @@ public interface CDLService {
 
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 
-    void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType);
+    void createS3ImportSystem(String customerSpace, String systemDisplayName, S3ImportSystem.SystemType systemType,
+                              Boolean primary);
 
     S3ImportSystem getS3ImportSystem(String customerSpace, String systemName);
+
+    List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
     List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable);
 
     boolean autoImport(String templateFileName);
 
     String getTemplateMappingContent(Table templateTable, Table standardTable);
+
+    String getSystemNameFromFeedType(String feedType);
+
+    void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
 }

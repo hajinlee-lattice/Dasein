@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,15 +48,29 @@ public class S3ImportResource {
 
     @RequestMapping(value = "/system", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Move file to Succeed folder")
+    @ApiOperation(value = "Create an Import System")
     public void createS3ImoprtSystem(@PathVariable String customerSpace, @RequestBody S3ImportSystem system) {
         s3ImportSystemService.createS3ImportSystem(customerSpace, system);
     }
 
+    @RequestMapping(value = "/system/update", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update an Import System")
+    public void updateS3ImoprtSystem(@PathVariable String customerSpace, @RequestBody S3ImportSystem system) {
+        s3ImportSystemService.updateS3ImportSystem(customerSpace, system);
+    }
+
     @RequestMapping(value = "/system", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Move file to Succeed folder")
+    @ApiOperation(value = "Get Import System by system name")
     public S3ImportSystem getS3ImoprtSystem(@PathVariable String customerSpace, @RequestParam String systemName) {
         return s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @RequestMapping(value = "/system/list", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get All Import Systems")
+    public List<S3ImportSystem> getS3ImoprtSystem(@PathVariable String customerSpace) {
+        return s3ImportSystemService.getAllS3ImportSystem(customerSpace);
     }
 }

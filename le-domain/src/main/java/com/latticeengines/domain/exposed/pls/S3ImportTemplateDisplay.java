@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -15,20 +16,28 @@ public class S3ImportTemplateDisplay {
 
     @JsonProperty("Object")
     private String object;
+
     @JsonProperty("Path")
     private String path;
+
     @JsonProperty("TemplateName")
     private String templateName;
+
     @JsonProperty("LastEditedDate")
     private Date lastEditedDate;
+
     @JsonProperty("Exist")
     private Boolean exist;
+
     @JsonProperty("FeedType")
     private String feedType;
-    @JsonProperty("SystemName")
-    private String systemName;
+
+    @JsonProperty("ImportSystem")
+    private S3ImportSystem s3ImportSystem;
+
     @JsonProperty("ImportStatus")
     private DataFeedTask.S3ImportStatus importStatus;
+
     @JsonProperty("Entity")
     private BusinessEntity entity;
 
@@ -85,12 +94,12 @@ public class S3ImportTemplateDisplay {
         return JsonUtils.serialize(this);
     }
 
-    public String getSystemName() {
-        return systemName;
+    public S3ImportSystem getS3ImportSystem() {
+        return s3ImportSystem;
     }
 
-    public void setSystemName(String systemName) {
-        this.systemName = systemName;
+    public void setS3ImportSystem(S3ImportSystem s3ImportSystem) {
+        this.s3ImportSystem = s3ImportSystem;
     }
 
     public DataFeedTask.S3ImportStatus getImportStatus() {

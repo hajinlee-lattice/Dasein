@@ -318,21 +318,34 @@ public class CDLResource {
     @PostMapping(value = "/s3import/system")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
-    public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemName,
-                                                      @RequestParam S3ImportSystem.SystemType systemType) {
+    public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemDisplayName,
+                                                      @RequestParam S3ImportSystem.SystemType systemType,
+                                                      @RequestParam(value = "primary", required = false,
+                                                              defaultValue = "false") Boolean primary) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            cdlService.createS3ImportSystem(customerSpace.toString(), systemName, systemType);
+            cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
-                    String.format(createS3ImportSystemMsg, systemName));
+                    String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_18216, new String[]{systemName});
+            throw new LedpException(LedpCode.LEDP_18216, new String[]{systemDisplayName});
         }
+    }
+
+    @GetMapping(value = "/s3import/system/list")
+    @ResponseBody
+    @ApiOperation("create new S3 Import system")
+    public List<S3ImportSystem> getS3ImportSystemList() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return cdlService.getAllS3ImportSystem(customerSpace.toString());
     }
 
     @GetMapping(value = "/s3import/system")
