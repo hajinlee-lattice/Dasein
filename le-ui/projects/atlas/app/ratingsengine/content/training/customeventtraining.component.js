@@ -95,7 +95,7 @@ angular.module('lp.ratingsengine.wizard.training')
                     RatingsEngineStore.modelTrainingOptions[trainingOption] = !current;
                     return;
                 case 'transformationGroup':
-                    RatingsEngineStore.modelTrainingOptions[trainingOption] = current == 'NONE' ? null : 'NONE';
+                    RatingsEngineStore.modelTrainingOptions[trainingOption] = current == 'none' ? null : 'none';
                     return;
             }
             
