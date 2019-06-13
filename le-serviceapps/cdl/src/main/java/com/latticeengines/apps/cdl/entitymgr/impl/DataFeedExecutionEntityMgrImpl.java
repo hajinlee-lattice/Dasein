@@ -133,4 +133,13 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
 
         return datafeedExecutionDao.updateStatus(execution);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeedExecution updateRetryCount(DataFeedExecution execution) {
+        if (execution == null) {
+            return null;
+        }
+        return datafeedExecutionDao.updateRetryCount(execution);
+    }
 }

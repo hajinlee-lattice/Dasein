@@ -1,10 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +25,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataFeedService;
-import com.latticeengines.apps.cdl.service.PriorityQueueService;
+import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -31,11 +33,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.AutoSchedulePriorityObject;
-import com.latticeengines.domain.exposed.cdl.DataCloudRefreshPriorityObject;
-import com.latticeengines.domain.exposed.cdl.PriorityQueue;
-import com.latticeengines.domain.exposed.cdl.RetryPriorityObject;
-import com.latticeengines.domain.exposed.cdl.ScheduleNowPriorityObject;
+import com.latticeengines.domain.exposed.cdl.AutoScheduleTenantActivity;
+import com.latticeengines.domain.exposed.cdl.DataCloudRefreshTenantActivity;
+import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.RetryTenantActivity;
+import com.latticeengines.domain.exposed.cdl.ScheduleNowTenantActivity;
+import com.latticeengines.domain.exposed.cdl.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
@@ -57,10 +61,10 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-@Component("PriorityQueueService")
-public class PriorityQueueServiceImpl implements PriorityQueueService {
+@Component("SchedulingPAService")
+public class SchedulingPAServiceImpl implements SchedulingPAService {
 
-    private static final Logger log = LoggerFactory.getLogger(PriorityQueueServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SchedulingPAServiceImpl.class);
 
     @Inject
     private DataFeedService dataFeedService;
@@ -86,14 +90,6 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    private PriorityQueue<RetryPriorityObject> retryPriorityQueue;
-    private PriorityQueue<ScheduleNowPriorityObject> customerScheduleNowPriorityQueue;
-    private PriorityQueue<AutoSchedulePriorityObject> customerAutoSchedulePriorityQueue;
-    private PriorityQueue<DataCloudRefreshPriorityObject> customerDataCloudRefreshPriorityQueue;
-    private PriorityQueue<ScheduleNowPriorityObject> nonCustomerScheduleNowPriorityQueue;
-    private PriorityQueue<AutoSchedulePriorityObject> nonCustomerAutoSchedulePriorityQueue;
-    private PriorityQueue<DataCloudRefreshPriorityObject> nonCustomerDataCloudRefreshPriorityQueue;
-
     @Value("${cdl.processAnalyze.maximum.priority.large.account.count}")
     private long largeAccountCountLimit;
 
@@ -107,17 +103,16 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
     private int maxLargeJobCount;
 
     @Value("${cdl.processAnalyze.concurrent.job.count}")
-    int concurrentProcessAnalyzeJobs;
+    private int concurrentProcessAnalyzeJobs;
+
+    private List<SchedulingPAQueue> schedulingPAQueues;
+
+    private List<TenantActivity> tenantActivityList;
+
+    private SystemStatus systemStatus;
 
     @Override
-    public void init() {
-        retryPriorityQueue = new PriorityQueue<>();
-        customerScheduleNowPriorityQueue = new PriorityQueue<>();
-        customerAutoSchedulePriorityQueue = new PriorityQueue<>();
-        customerDataCloudRefreshPriorityQueue = new PriorityQueue<>();
-        nonCustomerScheduleNowPriorityQueue = new PriorityQueue<>();
-        nonCustomerAutoSchedulePriorityQueue = new PriorityQueue<>();
-        nonCustomerDataCloudRefreshPriorityQueue = new PriorityQueue<>();
+    public void setSystemStatus() {
 
         int runningTotalCount = 0;
         int runningScheduleNowCount = 0;
@@ -126,6 +121,7 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
         Set<String> largeJobTenantId = new HashSet<>();
         Set<String> runningPATenantId = new HashSet<>();
 
+        tenantActivityList = new LinkedList<>();
         List<DataFeed> allDataFeeds = dataFeedService.getDataFeeds(TenantStatus.ACTIVE, "4.0");
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
@@ -153,28 +149,22 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
                 Tenant tenant = simpleDataFeed.getTenant();
                 MultiTenantContext.setTenant(tenant);
                 if (retryProcessAnalyze(execution)) {
-                    RetryPriorityObject retryPriorityObject = new RetryPriorityObject();
+                    TenantActivity retryPriorityObject = new RetryTenantActivity();
                     retryPriorityObject.setTenantId(tenant.getId());
                     retryPriorityObject.setLastFinishTime(execution.getUpdated().getTime());
-                    if (retryPriorityObject.isValid()) {
-                        retryPriorityObject.setIsLarge(isLarge(MultiTenantContext.getShortTenantId()));
-                        retryPriorityQueue.add(retryPriorityObject);
-                        if (retryPriorityObject.isLarge()) {
-                            largeJobTenantId.add(tenant.getId());
-                        }
+                    retryPriorityObject.setIsLarge(isLarge(MultiTenantContext.getShortTenantId()));
+                    tenantActivityList.add(retryPriorityObject);
+                    if (retryPriorityObject.isLarge()) {
+                        largeJobTenantId.add(tenant.getId());
                     }
                 } else {
                     if (simpleDataFeed.isScheduleNow()) {
-                        ScheduleNowPriorityObject scheduleNowPriorityObject =
-                                new ScheduleNowPriorityObject(tenant.getTenantType());
+                        TenantActivity scheduleNowPriorityObject =
+                                new ScheduleNowTenantActivity(tenant.getTenantType());
                         scheduleNowPriorityObject.setTenantId(tenant.getId());
                         scheduleNowPriorityObject.setScheduleTime(simpleDataFeed.getScheduleTime().getTime());
                         scheduleNowPriorityObject.setIsLarge(isLarge(MultiTenantContext.getShortTenantId()));
-                        if (isCustomer(tenant.getTenantType())) {
-                            customerScheduleNowPriorityQueue.add(scheduleNowPriorityObject);
-                        } else {
-                            nonCustomerScheduleNowPriorityQueue.add(scheduleNowPriorityObject);
-                        }
+                        tenantActivityList.add(scheduleNowPriorityObject);
                         if (scheduleNowPriorityObject.isLarge()) {
                             largeJobTenantId.add(tenant.getId());
                         }
@@ -200,19 +190,15 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
                             if (simpleDataFeed.getNextInvokeTime() == null || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                                 dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                             }
-                            AutoSchedulePriorityObject autoSchedulePriorityObject =
-                                    new AutoSchedulePriorityObject(tenant.getTenantType());
+                            AutoScheduleTenantActivity autoSchedulePriorityObject =
+                                    new AutoScheduleTenantActivity(tenant.getTenantType());
                             autoSchedulePriorityObject.setTenantId(tenant.getId());
                             autoSchedulePriorityObject.setInvokeTime(invokeTime.getTime());
                             autoSchedulePriorityObject.setFirstActionTime(firstActionTime);
                             autoSchedulePriorityObject.setLastActionTime(lastActionTime);
                             if(autoSchedulePriorityObject.isValid()) {
                                 autoSchedulePriorityObject.setIsLarge(isLarge(MultiTenantContext.getShortTenantId()));
-                                if (isCustomer(tenant.getTenantType())) {
-                                    customerAutoSchedulePriorityQueue.add(autoSchedulePriorityObject);
-                                } else {
-                                    nonCustomerAutoSchedulePriorityQueue.add(autoSchedulePriorityObject);
-                                }
+                                tenantActivityList.add(autoSchedulePriorityObject);
                                 if (autoSchedulePriorityObject.isLarge()) {
                                     largeJobTenantId.add(tenant.getId());
                                 }
@@ -223,15 +209,11 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
                     DataCollectionStatus status =
                             dataCollectionProxy.getOrCreateDataCollectionStatus(MultiTenantContext.getShortTenantId(), null);
                     if (isDataCloudRefresh(tenant, currentBuildNumber, status)) {
-                        DataCloudRefreshPriorityObject dataCloudRefreshPriorityObject =
-                                new DataCloudRefreshPriorityObject(tenant.getTenantType());
+                        DataCloudRefreshTenantActivity dataCloudRefreshPriorityObject =
+                                new DataCloudRefreshTenantActivity(tenant.getTenantType());
                         dataCloudRefreshPriorityObject.setTenantId(tenant.getId());
                         dataCloudRefreshPriorityObject.setIsLarge(isLarge(status));
-                        if (isCustomer(tenant.getTenantType())) {
-                            customerDataCloudRefreshPriorityQueue.add(dataCloudRefreshPriorityObject);
-                        } else {
-                            nonCustomerDataCloudRefreshPriorityQueue.add(dataCloudRefreshPriorityObject);
-                        }
+                        tenantActivityList.add(dataCloudRefreshPriorityObject);
                         if (dataCloudRefreshPriorityObject.isLarge()) {
                             largeJobTenantId.add(tenant.getId());
                         }
@@ -242,8 +224,16 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
         int canRunJobCount = concurrentProcessAnalyzeJobs -runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
         int canRunLargeJobCount = maxLargeJobCount - runningLargeJobCount;
-        retryPriorityQueue.setSystemStatus(canRunJobCount, canRunLargeJobCount, canRunScheduleNowJobCount,
-                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, largeJobTenantId, runningPATenantId);
+
+        systemStatus = new SystemStatus();
+        systemStatus.setCanRunJobCount(canRunJobCount);
+        systemStatus.setCanRunLargeJobCount(canRunLargeJobCount);
+        systemStatus.setCanRunScheduleNowJobCount(canRunScheduleNowJobCount);
+        systemStatus.setRunningTotalCount(runningTotalCount);
+        systemStatus.setRunningLargeJobCount(runningLargeJobCount);
+        systemStatus.setRunningScheduleNowCount(runningScheduleNowCount);
+        systemStatus.setLargeJobTenantId(largeJobTenantId);
+        systemStatus.setRunningPATenantId(runningPATenantId);
         log.info("running PA tenant is : " + JsonUtils.serialize(runningPATenantId));
         log.info("running PA job count : " + runningTotalCount);
         log.info("running ScheduleNow PA job count : " + runningScheduleNowCount);
@@ -252,170 +242,75 @@ public class PriorityQueueServiceImpl implements PriorityQueueService {
         log.info("large PA Job tenant is : " + JsonUtils.serialize(largeJobTenantId));
     }
 
+    public void initQueue() {
+        SchedulingPAQueue<RetryTenantActivity> retrySchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<ScheduleNowTenantActivity> customerScheduleNowSchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<AutoScheduleTenantActivity> customerAutoScheduleSchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<DataCloudRefreshTenantActivity> customerDataCloudRefreshSchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<ScheduleNowTenantActivity> nonCustomerScheduleNowSchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<AutoScheduleTenantActivity> nonCustomerAutoScheduleSchedulingPAQueue = new SchedulingPAQueue<>();
+        SchedulingPAQueue<DataCloudRefreshTenantActivity> nonCustomerDataCloudRefreshSchedulingPAQueue = new SchedulingPAQueue<>();
+    }
+
     @Override
     public Boolean isLargeTenant(String tenantId) {
-        return retryPriorityQueue.isLargeJob(tenantId);
+        return systemStatus.getLargeJobTenantId().contains(tenantId);
     }
 
     @Override
     public List<String> getRunningPATenantId() {
-        return retryPriorityQueue.getRunningPATenantId();
-    }
-
-    @Override
-    public String peekFromRetryPriorityQueue() {
-        return retryPriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromCustomerScheduleNowPriorityQueue() {
-        return customerScheduleNowPriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromCustomerAutoSchedulePriorityQueue() {
-        return customerAutoSchedulePriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromCustomerDataCloudRefreshPriorityQueue() {
-        return customerDataCloudRefreshPriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromNonCustomerScheduleNowPriorityQueue() {
-        return nonCustomerScheduleNowPriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromNonCustomerAutoSchedulePriorityQueue() {
-        return nonCustomerAutoSchedulePriorityQueue.peek();
-    }
-
-    @Override
-    public String peekFromNonCustomerDataCloudRefreshPriorityQueue() {
-        return nonCustomerDataCloudRefreshPriorityQueue.peek();
-    }
-
-    @Override
-    public String pollFromRetryPriorityQueue() {
-        return retryPriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromCustomerScheduleNowPriorityQueue() {
-        return customerScheduleNowPriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromCustomerAutoSchedulePriorityQueue() {
-        return customerAutoSchedulePriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromCustomerDataCloudRefreshPriorityQueue() {
-        return customerDataCloudRefreshPriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromNonCustomerScheduleNowPriorityQueue() {
-        return nonCustomerScheduleNowPriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromNonCustomerAutoSchedulePriorityQueue() {
-        return nonCustomerAutoSchedulePriorityQueue.poll();
-    }
-
-    @Override
-    public String pollFromNonCustomerDataCloudRefreshPriorityQueue() {
-        return nonCustomerDataCloudRefreshPriorityQueue.poll();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromRetryPriorityQueue() {
-        return retryPriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromCustomerScheduleNowPriorityQueue() {
-        return customerScheduleNowPriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromCustomerAutoSchedulePriorityQueue() {
-        return customerAutoSchedulePriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromCustomerDataCloudRefreshPriorityQueue() {
-        return customerDataCloudRefreshPriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromNonCustomerScheduleNowPriorityQueue() {
-        return nonCustomerScheduleNowPriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromNonCustomerAutoSchedulePriorityQueue() {
-        return nonCustomerAutoSchedulePriorityQueue.getCanRunJobs();
-    }
-
-    @Override
-    public List<String> getCanRunJobTenantFromNonCustomerDataCloudRefreshPriorityQueue() {
-        return nonCustomerDataCloudRefreshPriorityQueue.getCanRunJobs();
+        return new ArrayList<>(systemStatus.getRunningPATenantId());
     }
 
     @Override
     public Map<String, List<String>> showQueue() {
         Map<String, List<String>> queueMap = new HashMap<>();
-        queueMap.put("retryPriorityQueue", retryPriorityQueue.getAll());
-        queueMap.put("customerScheduleNowPriorityQueue", customerScheduleNowPriorityQueue.getAll());
-        queueMap.put("customerAutoSchedulePriorityQueue", customerAutoSchedulePriorityQueue.getAll());
-        queueMap.put("customerDataCloudRefreshPriorityQueue", customerDataCloudRefreshPriorityQueue.getAll());
-        queueMap.put("nonCustomerScheduleNowPriorityQueue", nonCustomerScheduleNowPriorityQueue.getAll());
-        queueMap.put("nonCustomerAutoSchedulePriorityQueue", nonCustomerAutoSchedulePriorityQueue.getAll());
-        queueMap.put("nonCustomerDataCloudRefreshPriorityQueue", nonCustomerDataCloudRefreshPriorityQueue.getAll());
+        queueMap.put("retrySchedulingPAQueue", retrySchedulingPAQueue.getAll());
+        queueMap.put("customerScheduleNowSchedulingPAQueue", customerScheduleNowSchedulingPAQueue.getAll());
+        queueMap.put("customerAutoScheduleSchedulingPAQueue", customerAutoScheduleSchedulingPAQueue.getAll());
+        queueMap.put("customerDataCloudRefreshSchedulingPAQueue", customerDataCloudRefreshSchedulingPAQueue.getAll());
+        queueMap.put("nonCustomerScheduleNowSchedulingPAQueue", nonCustomerScheduleNowSchedulingPAQueue.getAll());
+        queueMap.put("nonCustomerAutoScheduleSchedulingPAQueue", nonCustomerAutoScheduleSchedulingPAQueue.getAll());
+        queueMap.put("nonCustomerDataCloudRefreshSchedulingPAQueue", nonCustomerDataCloudRefreshSchedulingPAQueue.getAll());
         return queueMap;
     }
 
     @Override
     public String getPositionFromQueue(String tenantName) {
-        int index = retryPriorityQueue.getPosition(tenantName);
+        int index = retrySchedulingPAQueue.getPosition(tenantName);
         String queueName = "";
         if (index == -1) {
-            index = customerScheduleNowPriorityQueue.getPosition(tenantName);
+            index = customerScheduleNowSchedulingPAQueue.getPosition(tenantName);
             if (index == -1) {
-                index = customerAutoSchedulePriorityQueue.getPosition(tenantName);
+                index = customerAutoScheduleSchedulingPAQueue.getPosition(tenantName);
                 if (index == -1) {
-                    index = customerDataCloudRefreshPriorityQueue.getPosition(tenantName);
+                    index = customerDataCloudRefreshSchedulingPAQueue.getPosition(tenantName);
                     if (index == -1) {
-                        index = nonCustomerScheduleNowPriorityQueue.getPosition(tenantName);
+                        index = nonCustomerScheduleNowSchedulingPAQueue.getPosition(tenantName);
                         if (index == -1) {
-                            index = nonCustomerAutoSchedulePriorityQueue.getPosition(tenantName);
+                            index = nonCustomerAutoScheduleSchedulingPAQueue.getPosition(tenantName);
                             if (index == -1) {
-                                index = nonCustomerDataCloudRefreshPriorityQueue.getPosition(tenantName);
+                                index = nonCustomerDataCloudRefreshSchedulingPAQueue.getPosition(tenantName);
                                 if (index != -1) {
-                                     queueName = "nonCustomerDataCloudRefreshPriorityQueue";
+                                     queueName = "nonCustomerDataCloudRefreshSchedulingPAQueue";
                                 }
                             } else {
-                                queueName = "nonCustomerAutoSchedulePriorityQueue";
+                                queueName = "nonCustomerAutoScheduleSchedulingPAQueue";
                             }
                         } else {
-                            queueName = "nonCustomerScheduleNowPriorityQueue";
+                            queueName = "nonCustomerScheduleNowSchedulingPAQueue";
                         }
                     } else {
-                        queueName = "customerDataCloudRefreshPriorityQueue";
+                        queueName = "customerDataCloudRefreshSchedulingPAQueue";
                     }
                 } else {
-                    queueName = "customerAutoSchedulePriorityQueue";
+                    queueName = "customerAutoScheduleSchedulingPAQueue";
                 }
             } else {
-                queueName = "customerScheduleNowPriorityQueue";
+                queueName = "customerScheduleNowSchedulingPAQueue";
             }
         } else {
-            queueName = "retryPriorityQueue";
+            queueName = "retrySchedulingPAQueue";
         }
         if (index != -1) {
             return String.format("tenant %s at Queue %s Position %d", tenantName, queueName, index);

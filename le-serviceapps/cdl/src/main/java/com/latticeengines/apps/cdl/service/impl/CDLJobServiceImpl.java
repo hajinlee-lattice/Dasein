@@ -34,7 +34,7 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
-import com.latticeengines.apps.cdl.service.PriorityQueueService;
+import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -110,7 +110,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private ActionService actionService;
 
     @Inject
-    private PriorityQueueService priorityQueueService;
+    private SchedulingPAService schedulingPAService;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -349,9 +349,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void schedulePAJob() {
-        priorityQueueService.init();
+        schedulingPAService.init();
 
-        List<String> canRunRetryJobList = priorityQueueService.getCanRunJobTenantFromRetryPriorityQueue();
+        List<String> canRunRetryJobList = schedulingPAService.getCanRunJobTenantFromRetryPriorityQueue();
         if (CollectionUtils.isNotEmpty(canRunRetryJobList)) {
             for (String needRunJobTenantId : canRunRetryJobList) {
                 try {
@@ -363,12 +363,12 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
         List<String> canRunJobList = new ArrayList<>();
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromCustomerScheduleNowPriorityQueue());
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromCustomerAutoSchedulePriorityQueue());
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromCustomerDataCloudRefreshPriorityQueue());
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromNonCustomerScheduleNowPriorityQueue());
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromNonCustomerAutoSchedulePriorityQueue());
-        canRunJobList.addAll(priorityQueueService.getCanRunJobTenantFromNonCustomerDataCloudRefreshPriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerScheduleNowPriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerAutoSchedulePriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerDataCloudRefreshPriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerScheduleNowPriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerAutoSchedulePriorityQueue());
+        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerDataCloudRefreshPriorityQueue());
         if (CollectionUtils.isNotEmpty(canRunJobList)) {
             for (String needRunJobTenantId : canRunJobList) {
                 submitProcessAnalyzeJob(needRunJobTenantId);

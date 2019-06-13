@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.PriorityQueueService;
+import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 
@@ -20,11 +20,11 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "priorityQueue", description = "Rest resource for get priority queue")
 @RestController
-@RequestMapping("/priorityqueue")
-public class PriorityQueueResource {
+@RequestMapping("/schedulingPAQueue")
+public class SchedulingPAQueueResource {
 
     @Inject
-    private PriorityQueueService priorityQueueService;
+    private SchedulingPAService schedulingPAService;
 
     @RequestMapping(value = "/getQueueInfo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -32,8 +32,8 @@ public class PriorityQueueResource {
     @NoMetricsLog
     @NoCustomerSpace
     public Map<String, List<String>> getQueueInfo() {
-        priorityQueueService.init();
-        return priorityQueueService.showQueue();
+        schedulingPAService.init();
+        return schedulingPAService.showQueue();
     }
 
     @RequestMapping(value = "/getRunningInfo", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -42,8 +42,8 @@ public class PriorityQueueResource {
     @NoMetricsLog
     @NoCustomerSpace
     public List<String> getRunningInfo() {
-        priorityQueueService.init();
-        return priorityQueueService.getRunningPATenantId();
+        schedulingPAService.init();
+        return schedulingPAService.getRunningPATenantId();
     }
 
     @RequestMapping(value = "/getPosition", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -52,8 +52,8 @@ public class PriorityQueueResource {
     @NoMetricsLog
     @NoCustomerSpace
     public String getPosition(@RequestParam String tenantName) {
-        priorityQueueService.init();
-        return priorityQueueService.getPositionFromQueue(tenantName);
+        schedulingPAService.init();
+        return schedulingPAService.getPositionFromQueue(tenantName);
     }
 
 }
