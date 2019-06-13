@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -51,6 +52,9 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -442,6 +446,17 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
             exp = e;
         }
         Assert.assertNotNull(exp);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyRequiredFieldMissingV2() {
+        FieldValidationDocument document = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
+        List<FieldValidation> validations = document.getValidations();
+        Assert.assertNotNull(validations);
+        List<FieldValidation> errorValidations = validations.stream()
+                .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
+                .collect(Collectors.toList());
+        Assert.assertNotNull(errorValidations);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

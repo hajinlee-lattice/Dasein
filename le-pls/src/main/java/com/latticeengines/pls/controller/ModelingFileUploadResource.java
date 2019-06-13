@@ -143,14 +143,15 @@ public class ModelingFileUploadResource {
     @ApiOperation(value = "Validate csv field mapping.")
     public ResponseDocument<FieldValidationDocument> validateFieldMappingDocumnet( //
             @RequestParam(value = "displayName") String csvFileName,
-            @RequestParam(value = "entity", defaultValue = "File") String entity,
-            @RequestParam(value = "source") String source, @RequestParam(value = "feedType") String feedType,
+            @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
+            @RequestParam(value = "source", required = false, defaultValue = "") String source,
+            @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
             @RequestBody FieldMappingDocument fieldMappingDocument) {
-        FieldValidationDocument document = new FieldValidationDocument();
-        document.setValidations(new ArrayList<>());
-        return ResponseDocument.successResponse(document);
+        return ResponseDocument.successResponse(
+                modelingFileMetadataService.validateFieldMappings(csvFileName, fieldMappingDocument, entity, source,
+                        feedType));
     }
-
+    
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //

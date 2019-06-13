@@ -44,6 +44,8 @@ public class TimeStampConvertUtils {
 
     public static final String SYSTEM_USER_TIME_ZONE = "Time Zone is Part of Value";
 
+    public static final String SYSTEM_SEPARATOR = " ";
+
     // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
     // and optional "Z" at the end.
     public static final Pattern TZ_DATE_TIME = Pattern.compile(
@@ -60,11 +62,11 @@ public class TimeStampConvertUtils {
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.
     // Mapping from user exposed date format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
     // Mapping from user exposed time format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaTimeFormatMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaTimeFormatMap = new LinkedHashMap<>();
     // Mapping from user exposed time zone format to Java 8 supported time zones.
-    private static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
 
     // Reverse mapping from Java 8 date library date format to user exposed format.
     private static final Map<String, String> javaToUserDateFormatMap = new LinkedHashMap<>();
