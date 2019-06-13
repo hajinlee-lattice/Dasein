@@ -23,7 +23,6 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -202,46 +201,33 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             throw new UnsupportedOperationException(
                     "Do not know how to extract versioned table for " + CollectedSource.class);
         }
+        if (source instanceof TableSource) {
+            return ((TableSource) source).getTable();
+        }
+        String path = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
         if (source instanceof HasSqlPresence) {
-            String path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         } else {
-            String path = null;
-            if (source instanceof TableSource) {
-                return ((TableSource) source).getTable();
-            } else if (source instanceof TransformedToAvroSource || source instanceof IngestedRawSource) {
-                path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
-            } else {
-                path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
-            }
             return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         }
-
     }
 
     @Override
     public Table getTableAtVersions(Source source, List<String> versions) {
-        if (source instanceof CollectedSource) {
+        if (source instanceof CollectedSource || source instanceof TableSource) {
             throw new UnsupportedOperationException(
-                    "Do not know how to extract versioned table for " + CollectedSource.class);
+                    "Do not know how to extract versioned table for " + CollectedSource.class + " or "
+                            + TableSource.class);
         }
-        List<String> paths = new ArrayList<String>();
-        for (String version : versions) {
-            if (source instanceof TransformedToAvroSource) {
-                log.info(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-                paths.add(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-            } else {
-                log.info(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
-                        + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-                paths.add(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
-                        + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-            }
+        List<String> paths = new ArrayList<>();
+        if (CollectionUtils.isEmpty(versions)) {
+            paths.add(hdfsPathBuilder.constructTransformationSourceDir(source, null).toString());
+        } else {
+            versions.forEach(version -> {
+                paths.add(hdfsPathBuilder.constructTransformationSourceDir(source, version).toString());
+            });
         }
         if (source instanceof HasSqlPresence) {
             return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),

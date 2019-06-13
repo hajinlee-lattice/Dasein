@@ -26,8 +26,7 @@ public class IngestionPurger extends VersionedPurger{
     @Override
     public List<String> findAllVersions(PurgeStrategy strategy) {
         try {
-            IngestionSource ingestion = new IngestionSource();
-            ingestion.setIngestionName(strategy.getSource());
+            IngestionSource ingestion = new IngestionSource(strategy.getSource());
             return hdfsSourceEntityMgr.getVersions(ingestion);
         } catch (Exception ex) {
             log.error("Fail to get all versions for ingestion " + strategy.getSource(), ex);
@@ -50,8 +49,7 @@ public class IngestionPurger extends VersionedPurger{
 
     @Override
     public boolean isSourceExisted(PurgeStrategy strategy) {
-        Source source = new IngestionSource();
-        ((IngestionSource) source).setIngestionName(strategy.getSource());
+        Source source = new IngestionSource(strategy.getSource());
         return hdfsSourceEntityMgr.checkSourceExist(source);
     }
 
