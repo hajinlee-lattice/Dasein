@@ -202,11 +202,14 @@ public class MatchResource {
     @ResponseBody
     @ApiOperation(value = "Serve multiple requests to publish entity seed/lookup entries "
             + "from source tenant (staging env) to dest tenant (staging/serving env). "
-            + "Only support small-scale publish (approx. <= 10K seeds).")
+            + "Only support small-scale publish (approx. <= 10K seeds). ")
     public List<EntityPublishStatistics> publishEntity(@RequestBody List<EntityPublishRequest> requests) {
         try {
             validateEntityPublishRequests(requests);
             List<EntityPublishStatistics> stats = new ArrayList<>();
+            // Don't introduce parallelism here. Order is enforced. Succeeding
+            // publish request might have dependency on preceding requests as
+            // data published first will be overwritten by data published later
             requests.forEach(request -> {
                 stats.add(publishEntity(request));
             });
