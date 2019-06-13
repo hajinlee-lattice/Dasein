@@ -425,7 +425,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
                     if (isEmptyString(fieldCsvValue)) {
-                        return "";
+                        return null;
                     }
                     if (fieldCsvValue.matches("[0-9]+")) {
                         return fieldCsvValue;
