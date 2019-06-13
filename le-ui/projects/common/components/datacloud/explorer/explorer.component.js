@@ -133,7 +133,7 @@ export default function (
 
 
         // Only run in Atlas
-        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team') {
+        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team' && vm.section != 'lookup') {
             if (vm.section == 're.model_iteration') {
                 var ratingId = $stateParams['rating_id'],
                     aiModel = $stateParams['aiModel'],
