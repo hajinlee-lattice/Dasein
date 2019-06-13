@@ -410,10 +410,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return JsonUtils.convertList(rawlist, S3ImportSystem.class);
     }
 
+    @SuppressWarnings("unchecked")
     public void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/update",
                 shortenCustomerSpace(customerSpace));
-        post("update s3 import system", url, importSystem, Void.class);
+        ResponseDocument<String> responseDoc = post("update s3 import system", url, importSystem,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            throw new RuntimeException("Cannot update S3 Import System!");
+        }
+        if (!responseDoc.isSuccess()) {
+            throw new LedpException(LedpCode.LEDP_40061, responseDoc.getErrors().toArray());
+        }
+
     }
 
     @SuppressWarnings("unchecked")

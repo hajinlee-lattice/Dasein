@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -291,6 +292,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         // 1. set system related mapping
+        FieldMapping customerLatticeId = null;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getIdType() != null) {
                 String systemName = cdlService.getSystemNameFromFeedType(feedType);
@@ -304,18 +306,32 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 if (StringUtils.isEmpty(accountSystemId)) {
                                     accountSystemId = importSystem.generateAccountSystemId();
                                     importSystem.setAccountSystemId(accountSystemId);
+                                    importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
                                 fieldMapping.setMappedField(accountSystemId);
+                                if (fieldMapping.isMapToLatticeId()) {
+                                    customerLatticeId = new FieldMapping();
+                                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                                    customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
+                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                }
                                 break;
                             case Contact:
                                 String contactSystemId = importSystem.getContactSystemId();
                                 if (StringUtils.isEmpty(contactSystemId)) {
                                     contactSystemId = importSystem.generateContactSystemId();
                                     importSystem.setContactSystemId(contactSystemId);
+                                    importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
                                 fieldMapping.setMappedField(contactSystemId);
+                                if (fieldMapping.isMapToLatticeId()) {
+                                    customerLatticeId = new FieldMapping();
+                                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                                    customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                }
                                 break;
                             default:
                                 throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
@@ -323,8 +339,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     } else {
                         S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
                                 fieldMapping.getSystemName());
-                        S3ImportSystem currentSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
-                                systemName);
                         if (importSystem == null) {
                             throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
                         }
@@ -337,8 +351,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setFieldType(UserDefinedType.TEXT);
                                 fieldMapping.setMappedField(importSystem.getAccountSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
-                                currentSystem.setAccountSystemId(importSystem.getAccountSystemId());
-                                cdlService.updateS3ImportSystem(customerSpace.toString(), currentSystem);
+                                if (importSystem.isMapToLatticeAccount()) {
+                                    customerLatticeId = new FieldMapping();
+                                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                                    customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
+                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                }
                                 break;
                             case Contact:
                                 if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
@@ -348,14 +366,33 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setFieldType(UserDefinedType.TEXT);
                                 fieldMapping.setMappedField(importSystem.getContactSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
-                                currentSystem.setContactSystemId(importSystem.getContactSystemId());
-                                cdlService.updateS3ImportSystem(customerSpace.toString(), currentSystem);
+                                if (importSystem.isMapToLatticeContact()) {
+                                    customerLatticeId = new FieldMapping();
+                                    customerLatticeId.setUserField(fieldMapping.getUserField());
+                                    customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                }
                                 break;
                             default:
                                 throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
                         }
                     }
                 }
+            }
+        }
+        // map customer lattice id
+        if (customerLatticeId != null) {
+            boolean existFromTemplate = false;
+            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
+                    fieldMapping.setUserField(customerLatticeId.getUserField());
+                    fieldMapping.setFieldType(customerLatticeId.getFieldType());
+                    existFromTemplate = true;
+                }
+            }
+            if (!existFromTemplate) {
+                customerLatticeId.setMappedToLatticeField(false);
+                fieldMappingDocument.getFieldMappings().add(customerLatticeId);
             }
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
