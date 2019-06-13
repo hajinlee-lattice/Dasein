@@ -54,6 +54,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
@@ -765,11 +766,24 @@ public class CheckpointService {
         try {
             StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
                     + " you must run the following HTTP Requests:\n");
+            for (BusinessEntity businessEntity : Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+                msg.append("POST " + matchapiHostPort + "/match/matches/entity/versions\n");
+                msg.append("Body:\n");
+                BumpVersionRequest request = new BumpVersionRequest();
+                String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion, businessEntity.name());
+                Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+                request.setTenant(destTenant);
+                request.setEnvironments(Arrays.asList(EntityMatchEnvironment.STAGING, EntityMatchEnvironment.SERVING));
+                msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(request) + "\n");
+            }
+
             msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
             msg.append("Body:\n");
 
             List<EntityPublishRequest> requests = new ArrayList<>();
             for (BusinessEntity businessEntity: Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+                String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion, businessEntity.name());
+                Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
                 List<Tenant> srcTenants = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(precedingCheckpoints)) {
                     srcTenants.addAll(precedingCheckpoints.stream()
@@ -784,12 +798,11 @@ public class CheckpointService {
                     EntityPublishRequest request = new EntityPublishRequest();
                     request.setEntity(businessEntity.name());
                     request.setSrcTenant(srcTenant);
-                    String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion,
-                            businessEntity.name());
-                    Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+
                     request.setDestTenant(destTenant);
                     request.setDestEnv(EntityMatchEnvironment.STAGING);
                     request.setDestTTLEnabled(false);
+                    request.setBumpupVersion(false);
                     requests.add(request);
 
                     request = om.readValue(om.writeValueAsString(request), EntityPublishRequest.class);
@@ -798,7 +811,7 @@ public class CheckpointService {
                 }
             }
 
-            msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(requests));
+            msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(requests) + "\n");
             log.info(msg.toString());
         } catch (IOException e) {
             log.error("Failed to print EntityPublishRequest:\n" + e.getMessage(), e);
