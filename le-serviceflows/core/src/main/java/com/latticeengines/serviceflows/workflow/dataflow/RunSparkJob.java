@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -74,11 +73,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
     }
 
     protected SparkJobResult runSparkJob(LivySession session) {
-        return sparkJobService.runJob(session, getJobClz(), jobConfig);
-    }
-
-    protected String getRandomWorkspace() {
-        return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+        return runSparkJob(session, getJobClz(), jobConfig);
     }
 
     protected CustomerSpace parseCustomerSpace(S stepConfiguration) {

@@ -324,7 +324,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         if (detail == null) {
             updateEntityValueMapInContext(entity, EXISTING_RECORDS, 0L, Long.class);
-            log.error("Fail to find data collection status in workflow context, set previous count as 0 fors entity "
+            log.error("Fail to find data collection status in workflow context, set previous count as 0 for entity "
                     + entity);
             return;
         }

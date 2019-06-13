@@ -317,11 +317,17 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         metadataProxy.createTable(mainCustomerSpace, tableName, newTable);
     }
 
+//    protected void activateRatingEngine(String engineId, Tenant tenant) {
+//        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), engineId);
+//        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+//        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine, false);
+//    }
+
     protected void activateRatingEngine(String engineId, Tenant tenant) {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(engineId);
         ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine, true);
+        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine, false);
     }
 
 }

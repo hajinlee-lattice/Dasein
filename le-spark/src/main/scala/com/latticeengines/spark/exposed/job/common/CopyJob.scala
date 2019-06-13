@@ -2,9 +2,10 @@ package com.latticeengines.spark.exposed.job.common
 
 import com.latticeengines.domain.exposed.spark.common.CopyConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.MergeUtils
 import org.apache.commons.collections4.MapUtils
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
 
@@ -16,8 +17,13 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[CopyConfig]): Unit = {
     val config: CopyConfig = lattice.config
-    val input = lattice.input.head
+    val inputs: List[DataFrame] = lattice.input
+    val dfs = inputs map {df => processDf(df, config)}
+    val concatenated = dfs reduce {(d1, d2) => MergeUtils.concat2(d1, d2)}
+    lattice.output = concatenated :: Nil
+  }
 
+  private def processDf(input: DataFrame, config: CopyConfig): DataFrame = {
     val colsToSelect: Option[List[String]] =
       if (config.getSelectAttrs == null)
         None
@@ -51,7 +57,7 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
         filtered.toDF(newAttrs: _*)
       }
 
-    lattice.output = renamed :: Nil
+    renamed
   }
 
   // second return toggles select vs drop

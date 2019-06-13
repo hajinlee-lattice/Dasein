@@ -49,4 +49,6 @@ source ${APP_ROOT}/ENV_VARS
 cd ${APP_ROOT}
 npm install ecdsa-sig-formatter
 npm install debug
+num_js_files=`find . -path "*node_modules/*/*.js" | wc -l`
+echo "Number of js files in node_modules folders: ${num_js_files}"
 node app.js

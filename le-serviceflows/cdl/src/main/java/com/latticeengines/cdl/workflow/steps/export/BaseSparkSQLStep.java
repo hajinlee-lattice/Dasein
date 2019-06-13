@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,11 +19,14 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.EventType;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.service.SparkSQLService;
@@ -44,11 +49,14 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     @Inject
     private EntityQueryService entityQueryService;
 
+    @Resource(name = "eventQueryServiceSparkSQL")
+    private EventQueryService eventQueryService;
+
     @Inject
     private TenantService tenantService;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     private LivySession livySession;
 
@@ -57,7 +65,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     protected abstract String parseEvaluationDateStr(S stepConfiguration);
     protected abstract AttributeRepository parseAttrRepo(S stepConfiguration);
 
-    Map<String, String> getHdfsPaths(AttributeRepository attrRepo) {
+    protected Map<String, String> getHdfsPaths(AttributeRepository attrRepo) {
         String customer = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         Map<String, String> pathMap = new HashMap<>();
         attrRepo.getTableNames().forEach(tblName -> {
@@ -71,7 +79,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         return pathMap;
     }
 
-    void startLivySession(Map<String, String> hdfsPathMap) {
+    protected void startSparkSQLSession(Map<String, String> hdfsPathMap) {
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         QueryServiceUtils.setAttrRepo(attrRepo);
         QueryServiceUtils.toLocalAttrRepoMode();
@@ -79,7 +87,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 1, false, getClass().getSimpleName());
     }
 
-    HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
+    protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
         setCustomerSpace();
 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
@@ -100,7 +108,22 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         });
     }
 
-    void stopLivySession() {
+    protected HdfsDataUnit getEventScoringTarget(EventFrontEndQuery frontEndQuery) {
+        setCustomerSpace();
+        frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
+        frontEndQuery.setPageFilter(null);
+        DataCollection.Version version = parseDataCollectionVersion(configuration);
+        String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, version);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + ctx.getRetryCount() + ") get SparkSQL data.");
+            }
+            return sparkSQLService.getData(customerSpace, livySession, sql, Collections.emptyMap());
+        });
+    }
+
+    protected void stopSparkSQLSession() {
         if (livySession != null) {
             livySessionService.stopSession(livySession);
         }
