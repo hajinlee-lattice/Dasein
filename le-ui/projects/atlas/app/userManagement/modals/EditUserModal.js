@@ -46,6 +46,12 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
 
     $scope.hasLatticeEmail = $scope.user.Email.toLowerCase().includes('@lattice-engines.com');
 
+    $scope.disableExpire = function(){
+        if (currentLevel.ordinal != 4){
+            return true;
+        }
+    }
+
     if (userLevel.ordinal <= 1) {
         // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     	//$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];

@@ -41,7 +41,8 @@
                             </div>
                             <div class="form-group" ng-if="allowExpireSelect()">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}</label>
-                                <input type="date" class="form-control" data-ng-model="user.ExpirationDate" ng-disabled="showAddUserSuccess" />
+                                <input type="date" class="form-control" data-ng-model="user.ExpirationDate"
+                                       ng-disabled="showAddUserSuccess || disableExpire()" />
                             </div>
                         </div>
                     </div>
