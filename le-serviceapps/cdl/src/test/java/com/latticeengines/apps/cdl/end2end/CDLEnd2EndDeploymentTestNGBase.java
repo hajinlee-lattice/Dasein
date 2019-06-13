@@ -282,7 +282,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected Configuration yarnConfiguration;
 
     @Inject
-    private CheckpointService checkpointService;
+    protected CheckpointService checkpointService;
 
     @Inject
     private TestArtifactService testArtifactService;
