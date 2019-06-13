@@ -3,8 +3,6 @@ package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
-    @JsonProperty("IngestionName")
-    private String ingestionName;
 
     @JsonProperty("Qualifier")
     private String qualifier = "\"";
@@ -23,14 +21,6 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
 
     @JsonProperty("CompressType")
     private CompressType compressType;
-
-    public String getIngestionName() {
-        return ingestionName;
-    }
-
-    public void setIngestionName(String ingestionName) {
-        this.ingestionName = ingestionName;
-    }
 
     public String getQualifier() {
         return qualifier;

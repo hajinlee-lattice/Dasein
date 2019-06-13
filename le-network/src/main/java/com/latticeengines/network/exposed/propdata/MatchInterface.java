@@ -1,5 +1,7 @@
 package com.latticeengines.network.exposed.propdata;
 
+import java.util.List;
+
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -23,4 +25,13 @@ public interface MatchInterface {
      * @return current version of all requested environments after bumped up
      */
     BumpVersionResponse bumpVersion(@NotNull BumpVersionRequest request);
+
+    /**
+     * Client for MatchResource#publishEntity API
+     * 
+     * @param requests
+     *            requests list, should not be empty
+     * @return published statistics for each requests
+     */
+    List<EntityPublishStatistics> publishEntity(List<EntityPublishRequest> requests);
 }

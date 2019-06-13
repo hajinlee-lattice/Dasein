@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.filetosrc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -8,7 +10,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
@@ -29,12 +31,10 @@ public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private GeneralSource source = new GeneralSource("HGSeedRaw");
 
-    @Autowired
-    private IngestionSource baseSource;
+    private IngestionSource baseSource = new IngestionSource(IngestionNames.HGDATA);
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
-        baseSource.setIngestionName(IngestionNames.HGDATA);
         uploadBaseSourceFile(baseSource, "Lattice_Engines_2017-02-14.zip", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -57,9 +57,9 @@ public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
         // -----------
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = new ArrayList<String>();
-        baseSources.add(baseSource.getSourceName());
-        step1.setBaseSources(baseSources);
+        step1.setBaseSources(Arrays.asList(baseSource.getSourceName()));
+        step1.setBaseIngestions(Collections.singletonMap(baseSource.getSourceName(),
+                new SourceIngestion(baseSource.getIngestionName())));
         step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
         step1.setTargetSource(source.getSourceName());
         String confParamStr1 = getIngestedFileToSourceTransformerConfig();
@@ -76,7 +76,6 @@ public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private String getIngestedFileToSourceTransformerConfig() {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngestionName(IngestionNames.HGDATA);
         conf.setFileNameOrExtension("7330 Lattice Engines.csv");
         conf.setCompressedFileNameOrExtension("Lattice_Engines_2017-02-14.zip");
         conf.setCompressType(CompressType.ZIP);

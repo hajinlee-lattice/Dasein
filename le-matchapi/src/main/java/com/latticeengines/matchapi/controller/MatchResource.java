@@ -198,6 +198,27 @@ public class MatchResource {
         }
     }
 
+    @PostMapping(value = "/entity/publish/list")
+    @ResponseBody
+    @ApiOperation(value = "Serve multiple requests to publish entity seed/lookup entries "
+            + "from source tenant (staging env) to dest tenant (staging/serving env). "
+            + "Only support small-scale publish (approx. <= 10K seeds). ")
+    public List<EntityPublishStatistics> publishEntity(@RequestBody List<EntityPublishRequest> requests) {
+        try {
+            validateEntityPublishRequests(requests);
+            List<EntityPublishStatistics> stats = new ArrayList<>();
+            // Don't introduce parallelism here. Order is enforced. Succeeding
+            // publish request might have dependency on preceding requests as
+            // data published first will be overwritten by data published later
+            requests.forEach(request -> {
+                stats.add(publishEntity(request));
+            });
+            return stats;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25042, e);
+        }
+    }
+
     @PostMapping(value = "/entity/versions")
     @ResponseBody
     @ApiOperation(value = "Bump up entity match version of a target tenant in a list of specified environments")
@@ -218,6 +239,9 @@ public class MatchResource {
     }
 
     private void validateEntityPublishRequest(EntityPublishRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Please provide non-empty entity publish request");
+        }
         if (StringUtils.isBlank(request.getEntity())) {
             throw new IllegalArgumentException("Please provide entity");
         }
@@ -234,6 +258,17 @@ public class MatchResource {
                 && EntityMatchEnvironment.STAGING == request.getDestEnv()) {
             throw new IllegalArgumentException("Publish within staging env for same tenant is not allowed");
         }
+    }
+
+    private void validateEntityPublishRequests(List<EntityPublishRequest> requests) {
+        if (CollectionUtils.isEmpty(requests) || requests.contains(null)) {
+            throw new IllegalArgumentException("EntityPublishRequest cannot be empty");
+        }
+        // Validate all requests first instead of finishing some publish
+        // requests and failing validation in the middle.
+        requests.forEach(request -> {
+            validateEntityPublishRequest(request);
+        });
     }
 
     private void validateBumpVersionRequest(BumpVersionRequest request) {
