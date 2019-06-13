@@ -592,6 +592,7 @@ public enum LedpCode {
     LEDP_28028("Unsupported PMML version {0} detected. We only support {1}."), //
     LEDP_28029("Download model summary failed."), //
     LEDP_28030("Problem in event counting: {0}."), //
+    LEDP_28031("Workflow yarn step {0} has lost node error: {1}."), //
 
     // le-dellebi
     LEDP_29000(
