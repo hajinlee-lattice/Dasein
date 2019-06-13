@@ -159,9 +159,9 @@ public class CheckpointService {
     // table instead of only current tenant.
     // Reason is in current tenant's staging table, only entries which are
     // touched in match job exist which means the staging table doesn't have
-    // complete entity universe for the tenant. Only serving table has complete
-    // entity universe, but serving table doesn't support scan for lookup
-    // performance concern.
+    // complete entity universe for the tenant. Although serving table has
+    // complete entity universe, serving table doesn't support scan due to
+    // lookup performance concern.
     private List<String> precedingCheckpoints;
 
     private Map<TableRoleInCollection, String> savedRedshiftTables = new HashMap<>();
@@ -750,9 +750,9 @@ public class CheckpointService {
      * 
      * Reason is in current tenant's staging table, only entries which are
      * touched in match job exist, which means the staging table doesn't have
-     * complete entity universe for the tenant. Only serving table has complete
-     * entity universe, but serving table doesn't support scan for lookup
-     * performance concern.
+     * complete entity universe for the tenant. Although serving table has
+     * complete entity universe, serving table doesn't support scan due to
+     * lookup performance concern.
      * 
      * @param checkpointName
      * @param checkpointVersion
