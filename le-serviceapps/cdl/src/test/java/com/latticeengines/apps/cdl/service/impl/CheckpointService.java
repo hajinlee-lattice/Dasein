@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -37,10 +38,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -153,10 +154,24 @@ public class CheckpointService {
 
     private String checkpointDir;
 
+    // For entity match enabled PA, when saving checkpoint for match lookup/seed
+    // table, need to publish all the preceding checkpoints' staging lookup/seed
+    // table instead of only current tenant.
+    // Reason is in current tenant's staging table, only entries which are
+    // touched in match job exist which means the staging table doesn't have
+    // complete entity universe for the tenant. Only serving table has complete
+    // entity universe, but serving table doesn't support scan for lookup
+    // performance concern.
+    private List<String> precedingCheckpoints;
+
     private Map<TableRoleInCollection, String> savedRedshiftTables = new HashMap<>();
 
     public void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
+    }
+
+    public void setPrecedingCheckpoints(List<String> precedingCheckpoints) {
+        this.precedingCheckpoints = precedingCheckpoints;
     }
 
     public void resumeCheckpoint(String checkpoint, int checkpointVersion) throws IOException {
@@ -728,32 +743,64 @@ public class CheckpointService {
         }
     }
 
-    private void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
+    /**
+     * For entity match enabled PA, when saving checkpoint for match lookup/seed
+     * table, need to publish all the preceding checkpoints' staging lookup/seed
+     * table instead of only current tenant.
+     * 
+     * Reason is in current tenant's staging table, only entries which are
+     * touched in match job exist, which means the staging table doesn't have
+     * complete entity universe for the tenant. Only serving table has complete
+     * entity universe, but serving table doesn't support scan for lookup
+     * performance concern.
+     * 
+     * @param checkpointName
+     * @param checkpointVersion
+     */
+    @VisibleForTesting
+    void printPublishEntityRequest(String checkpointName, String checkpointVersion) {
         if (!isEntityMatchEnabled()) {
             return;
         }
         try {
+            StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
+                    + " you must run the following HTTP Requests:\n");
+            msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
+            msg.append("Body:\n");
+
+            List<EntityPublishRequest> requests = new ArrayList<>();
             for (BusinessEntity businessEntity: Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
-                StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
-                        + " you must run the following HTTP Requests:\n");
-                msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish\n");
-                EntityPublishRequest entityPublishRequest = new EntityPublishRequest();
-                entityPublishRequest.setEntity(businessEntity.name());
-                entityPublishRequest.setSrcTenant(mainTestTenant);
-                String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion, businessEntity.name());
-                Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
-                entityPublishRequest.setDestTenant(destTenant);
-                entityPublishRequest.setDestEnv(EntityMatchEnvironment.STAGING);
-                entityPublishRequest.setDestTTLEnabled(false);
-                msg.append("Body:\n");
-                ObjectMapper mapper = new ObjectMapper();
-                msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
-                msg.append("\nPOST " + matchapiHostPort + "/match/matches/entity/publish\n");
-                entityPublishRequest.setDestEnv(EntityMatchEnvironment.SERVING);
-                msg.append(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entityPublishRequest));
-                log.info(msg.toString());
+                List<Tenant> srcTenants = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(precedingCheckpoints)) {
+                    srcTenants.addAll(precedingCheckpoints.stream()
+                            .map(cp -> new Tenant(CustomerSpace
+                                    .parse(getCheckPointTenantId(cp, checkpointVersion, businessEntity.name()))
+                                    .toString()))
+                            .collect(Collectors.toList()));
+                }
+                srcTenants.add(mainTestTenant);
+
+                for (Tenant srcTenant : srcTenants) {
+                    EntityPublishRequest request = new EntityPublishRequest();
+                    request.setEntity(businessEntity.name());
+                    request.setSrcTenant(srcTenant);
+                    String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion,
+                            businessEntity.name());
+                    Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
+                    request.setDestTenant(destTenant);
+                    request.setDestEnv(EntityMatchEnvironment.STAGING);
+                    request.setDestTTLEnabled(false);
+                    requests.add(request);
+
+                    request = om.readValue(om.writeValueAsString(request), EntityPublishRequest.class);
+                    request.setDestEnv(EntityMatchEnvironment.SERVING);
+                    requests.add(request);
+                }
             }
-        } catch (JsonProcessingException e) {
+
+            msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(requests));
+            log.info(msg.toString());
+        } catch (IOException e) {
             log.error("Failed to print EntityPublishRequest:\n" + e.getMessage(), e);
         }
     }
@@ -798,7 +845,8 @@ public class CheckpointService {
         return "cdlend2end_" + checkpoint + "_" + entity.toLowerCase() + "_" + checkpointVersion;
     }
 
-    private boolean isEntityMatchEnabled() {
+    @VisibleForTesting
+    boolean isEntityMatchEnabled() {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
         return FeatureFlagUtils.isEntityMatchEnabled(flags);
     }
