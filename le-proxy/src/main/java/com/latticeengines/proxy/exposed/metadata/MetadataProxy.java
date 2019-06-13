@@ -212,6 +212,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return table;
     }
 
+    public boolean dataTableExists(String customerSpace, String tableName) {
+        return getTableSummary(customerSpace, tableName) != null;
+    }
+
 
     public long getTableAttributeCount(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attribute_count", customerSpace, tableName);

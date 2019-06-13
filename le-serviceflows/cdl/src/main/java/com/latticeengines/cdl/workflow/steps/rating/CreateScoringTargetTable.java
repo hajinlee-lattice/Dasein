@@ -51,12 +51,12 @@ public class CreateScoringTargetTable
     @Override
     protected void postIngestion() {
         super.postIngestion();
-        removeObjectFromContext(FILTER_EVENT_TABLE);
-        putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, targetTableName);
-        putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
-        if (evaluationPeriod != null)
-            putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
-        putStringValueInContext(HAS_CROSS_SELL_MODEL, hasCrossSellModel + "");
+//        removeObjectFromContext(FILTER_EVENT_TABLE);
+//        putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, targetTableName);
+//        putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
+//        if (evaluationPeriod != null)
+//            putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
+//        putStringValueInContext(HAS_CROSS_SELL_MODEL, String.valueOf(hasCrossSellModel));
     }
 
     @Override

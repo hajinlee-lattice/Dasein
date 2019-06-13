@@ -21,6 +21,8 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -41,15 +43,15 @@ import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
-import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1533618545277";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "LETest1559890354442"; // "JLM1533618545277";
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 
@@ -57,10 +59,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private ModelSummaryProxy plsModelSummaryProxy;
+    private com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy plsModelSummaryProxy;
 
     @Inject
-    private com.latticeengines.proxy.exposed.lp.ModelSummaryProxy modelSummaryProxy;
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -108,9 +110,12 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private void setup(boolean useExistingTenant, boolean enableAIRatings) throws Exception {
         if (useExistingTenant) {
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
+            MultiTenantContext.setTenant(mainTestTenant);
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
+            mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
             initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+            attachPlsProxies();
         } else {
             setupEnd2EndTestEnvironment();
             setupBusinessCalendar();
@@ -143,25 +148,30 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
                 modelSummaryProxy.downloadModelSummary(mainCustomerSpace);
                 initModelSummaries();
+
                 ai1 = createCrossSellEngine(segment, modelSummary1, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
+                Assert.assertNotNull(ai1.getSegment());
                 activateRatingEngine(ai1.getId());
 
                 ai2 = createCrossSellEngine(segment, modelSummary2, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getLatestIteration().getId(), ModelingQueryType.TARGET);
                 Assert.assertTrue(targetCount > 100);
+                Assert.assertNotNull(ai2.getSegment());
                 activateRatingEngine(ai2.getId());
 
                 ai3 = createCustomEventEngine(segment, modelSummary3);
+                Assert.assertNotNull(ai3.getSegment());
                 activateRatingEngine(ai3.getId());
             }
         }
     }
 
     private void initModelSummaries() {
+        testBed.attachProtectedProxy(plsModelSummaryProxy);
         List<ModelSummary> summaries = plsModelSummaryProxy.getSummaries();
         if (CollectionUtils.isNotEmpty(summaries)) {
             for (ModelSummary summary : summaries) {
@@ -206,13 +216,11 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
         log.info("Updated rating model " + model.getId());
 
-        final String modelGuid = modelSummary.getId();
-        final String engineId = newEngine.getId();
-        new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
-        Thread.sleep(300);
-
-        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
+        ratingEngineProxy.setScoringIteration(mainCustomerSpace, newEngine.getId(), model.getId(),
                 BucketMetadataUtils.getDefaultMetadata(), null);
+        Thread.sleep(300);
+        insertBucketMetadata(modelSummary.getId(), newEngine.getId());
+        Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 
@@ -234,11 +242,10 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
         log.info("Updated rating model " + model.getId());
 
-        final String modelGuid = modelSummary.getId();
-        final String engineId = newEngine.getId();
-        ratingEngineProxy.setScoringIteration(mainCustomerSpace, engineId, model.getId(),
+        ratingEngineProxy.setScoringIteration(mainCustomerSpace, newEngine.getId(), model.getId(),
                 BucketMetadataUtils.getDefaultMetadata(), null);
-        new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
+        Thread.sleep(300);
+        insertBucketMetadata(modelSummary.getId(), newEngine.getId());
         Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
