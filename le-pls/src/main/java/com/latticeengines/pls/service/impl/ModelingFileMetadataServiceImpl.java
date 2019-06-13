@@ -244,11 +244,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         // modify field document before final validation
         Table templateTable = null;
-        if (dataFeedTask == null) {
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
-        } else {
+        if (dataFeedTask != null) {
             templateTable = dataFeedTask.getImportTemplate();
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), templateTable);
         }
 
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
@@ -300,7 +297,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
             }
         }
-        log.info("ignored " + JsonUtils.serialize(ignored));
+        log.info("ignored fields " + JsonUtils.serialize(ignored));
         // check user changed behavior
         for (FieldMapping fieldMapping : fieldMappings) {
             String message = null;
