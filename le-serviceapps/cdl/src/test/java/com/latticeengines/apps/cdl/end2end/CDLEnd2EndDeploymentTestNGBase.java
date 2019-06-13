@@ -354,8 +354,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         setupPurchaseHistoryMetrics();
         setDefaultAPSRollupPeriod();
 
-        attachProtectedProxy(fileUploadProxy);
-        attachProtectedProxy(testMetadataSegmentProxy);
+        attachPlsProxies();
 
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
@@ -374,6 +373,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         setupPurchaseHistoryMetrics();
         setDefaultAPSRollupPeriod();
 
+        attachPlsProxies();
+    }
+
+    protected void attachPlsProxies() {
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
     }

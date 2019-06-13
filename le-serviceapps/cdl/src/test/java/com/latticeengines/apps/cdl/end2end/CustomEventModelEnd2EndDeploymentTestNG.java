@@ -102,8 +102,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
     /**
      * This test is part of CD pipeline and Trunk Health
      */
-    @Test(groups = { "end2end",
-            "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
+    @Test(groups = { "end2end", "precheckin" }, dependsOnMethods = "end2endCDLStyleCustomEventModelTest")
     public void end2endCDLStyleCustomEventReModelTest() {
         moveCustomerDataToS3();
         runCustomEventRemodel(testType);
@@ -124,6 +123,12 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
                     s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
+                    hdfsDataDir + "/SortedContact*", s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
+                    hdfsDataDir + "/Aggregated*", s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
+                    hdfsDataDir + "/Calculated**", s3DataDir, "");
             HdfsUtils.rmdir(yarnConfiguration, hdfsAnalyticsDir);
             HdfsUtils.rmdir(yarnConfiguration, hdfsDataDir);
         } catch (Exception ex) {

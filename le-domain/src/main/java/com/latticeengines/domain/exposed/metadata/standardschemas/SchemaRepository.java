@@ -392,7 +392,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
@@ -551,7 +551,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -783,7 +783,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
@@ -998,7 +998,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.Cost) //
                 .logicalType(LogicalDataType.Metric) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME",
@@ -1008,7 +1008,7 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE")) //
@@ -1117,7 +1117,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Cost) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
@@ -1126,7 +1126,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
@@ -1166,7 +1166,7 @@ public class SchemaRepository {
                     .notNull() //
                     .interfaceName(InterfaceName.CDLCreatedTime) //
                     .logicalType(LogicalDataType.Timestamp) //
-                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
             table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
                     .allowedDisplayNames(Collections.emptySet()) //
@@ -1174,7 +1174,7 @@ public class SchemaRepository {
                     .notNull() //
                     .interfaceName(InterfaceName.CDLUpdatedTime) //
                     .logicalType(LogicalDataType.Timestamp) //
-                    .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                    .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
         }
         return table;
@@ -1261,7 +1261,7 @@ public class SchemaRepository {
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.TotalCost) //
                 .logicalType(LogicalDataType.Metric) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY", "TOTAL QUANTITY")) //
@@ -1373,7 +1373,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
