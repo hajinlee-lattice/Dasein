@@ -32,6 +32,12 @@ import com.joestelmach.natty.Parser;
 public class TimeStampConvertUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
+    // Boolean flag to disable debug logging in this class.  log.isDebugEnabled() was not working properly when tested
+    // in dev environment and thus for now I am not using it.
+    // TODO(jwinter): Figure out why log.isDebugEnabled() is always returning true even though log.debug logs do not
+    //   always print.
+    private static final boolean ENABLE_DEBUG_LOG = false;
+
     private static final Pattern MONTH = Pattern.compile("([a-zA-Z])([a-zA-Z]{2,})");
 
     public static final String SYSTEM_JAVA_TIME_ZONE = "ISO 8601";
@@ -42,12 +48,14 @@ public class TimeStampConvertUtils {
     // and optional "Z" at the end.
     public static final Pattern TZ_DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
-                    + "(\\d{1,2}((:\\d{1,2}(:\\d{1,2}(\\.\\d{3})?)?)|(-\\d{1,2}(-\\d{1,2}(\\.\\d{3})?)?)|( \\d{1,2}( \\d{1,2}(\\.\\d{3})?)?))(\\s+[aApP][mM])?)[Zz]?");
+                    + "(\\d{1,2}((:\\d{1,2}(:\\d{1,2}(\\.\\d{3})?)?)|(-\\d{1,2}(-\\d{1,2}(\\.\\d{3})?)?)|"
+                    + "( \\d{1,2}( \\d{1,2}(\\.\\d{3})?)?))(\\s+[aApP][mM])?)[Zz]?");
 
     // Regular expression pattern to match all current date/time formats.
     private static final Pattern DATE_TIME = Pattern.compile(
             "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})\\s+"
-                    + "(\\d{1,2}((:\\d{1,2}){1,2}|(-\\d{1,2}){1,2}|( \\d{1,2}){1,2})(\\s+[aApP][mM])?)");
+                    + "(\\d{1,2}((:\\d{1,2}(:\\d{1,2}(\\.\\d{3})?)?)|(-\\d{1,2}(-\\d{1,2}(\\.\\d{3})?)?)|"
+                    + "( \\d{1,2}( \\d{1,2}(\\.\\d{3})?)?))(\\s+[aApP][mM])?)");
 
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.
@@ -291,13 +299,15 @@ public class TimeStampConvertUtils {
             java.lang.IllegalStateException
              */
 
-            log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
-            log.debug(e.toString());
-            // Uncomment the three lines below if needed for debugging.
-            //StringWriter sw = new StringWriter();
-            //e.printStackTrace(new PrintWriter(sw));
-            //log.debug("Stack Trace is:\n" + sw.toString());
-            log.debug("Attempting to use Natty Date Parser to process the date/time.");
+            if (ENABLE_DEBUG_LOG) {
+                log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
+                log.debug(e.toString());
+                // Uncomment the three lines below if needed for debugging.
+                //StringWriter sw = new StringWriter();
+                //e.printStackTrace(new PrintWriter(sw));
+                //log.debug("Stack Trace is:\n" + sw.toString());
+                log.debug("Attempting to use Natty Date Parser to process the date/time.");
+            }
 
             // DO NOT trust natty parser with any month letters in date string!
             if (date.chars().filter(Character::isLetter).count() >= 3) {
@@ -324,8 +334,12 @@ public class TimeStampConvertUtils {
     // time format, or time zone strings are provided.
     public static long convertToLong(String dateTime, String userDateFormatStr, String userTimeFormatStr,
                                      String userTimeZoneStr) {
-        log.debug("Date is: " + dateTime + "  Date Format is: " + userDateFormatStr
-                + "  Time Format is: " + userTimeFormatStr + "  Time Zone is: " + userTimeZoneStr);
+        // Avoid any repetitive computation performed to check if log is enabled.
+        //boolean debugLogEnabled = log.isDebugEnabled();
+        if (ENABLE_DEBUG_LOG) {
+            log.debug("Date is: " + dateTime + "  Date Format is: " + userDateFormatStr
+                    + "  Time Format is: " + userTimeFormatStr + "  Time Zone is: " + userTimeZoneStr);
+        }
 
         // Remove excessive whitespace from the date/time value.  First trim the beginning and end.
         dateTime = dateTime.trim();
@@ -338,13 +352,17 @@ public class TimeStampConvertUtils {
         // (first letter capitalized) to allow Java 8 DateTimeFormatter to work properly.
         Matcher monthMatcher = MONTH.matcher(dateTime);
         if (monthMatcher.find() && monthMatcher.groupCount() == 2) {
-            log.debug("Reformatting text form of month to proper case for Java DateTimeFormatter.");
-            log.debug("Original dateTime is: " + dateTime);
-            //log.debug("Group 1 is: " + monthMatcher.group(1));
-            //log.debug("Group 2 is: " + monthMatcher.group(2));
+            if (ENABLE_DEBUG_LOG) {
+                log.debug("Reformatting text form of month to proper case for Java DateTimeFormatter.");
+                log.debug("Original dateTime is: " + dateTime);
+                //log.debug("First letter of month is: " + monthMatcher.group(1));
+                //log.debug("Rest of letters in month are: " + monthMatcher.group(2));
+            }
             dateTime = dateTime.replaceFirst(monthMatcher.group(1) + monthMatcher.group(2),
                     monthMatcher.group(1).toUpperCase() + monthMatcher.group(2).toLowerCase());
-            log.debug("Formatted month dateTime is: " + dateTime);
+            if (ENABLE_DEBUG_LOG) {
+                log.debug("Formatted month dateTime is: " + dateTime);
+            }
         }
 
         try {
@@ -355,7 +373,9 @@ public class TimeStampConvertUtils {
                 if (userToJavaDateFormatMap.containsKey(userDateFormatStr)) {
                     LocalDateTime localDateTime = null;
                     boolean foundValidTimeFormat = false;
-                    log.debug("Found user defined date format: " + userDateFormatStr);
+                    if (ENABLE_DEBUG_LOG) {
+                        log.debug("Found user defined date format: " + userDateFormatStr);
+                    }
                     String javaDateFormatStr = userToJavaDateFormatMap.get(userDateFormatStr);
                     String javaFormatUsed = javaDateFormatStr;
 
@@ -363,11 +383,12 @@ public class TimeStampConvertUtils {
                     if (StringUtils.isNotEmpty(userTimeFormatStr)) {
                         userTimeFormatStr = userTimeFormatStr.trim();
                         if (userToJavaTimeFormatMap.containsKey(userTimeFormatStr)) {
-                            log.debug("Found user defined time format: " + userTimeFormatStr);
                             String javaTimeFormatStr = userToJavaTimeFormatMap.get(userTimeFormatStr);
-
-                            log.debug("Java date/time format string is: " + javaDateFormatStr + " "
-                                    + javaTimeFormatStr);
+                            if (ENABLE_DEBUG_LOG) {
+                                log.debug("Found user defined time format: " + userTimeFormatStr);
+                                log.debug("Java date/time format string is: " + javaDateFormatStr + " "
+                                        + javaTimeFormatStr);
+                            }
 
                             // Check if the date is in ISO 8601 format, and remove the "T" and trailing time zone
                             // (eg. "Z").
@@ -393,29 +414,35 @@ public class TimeStampConvertUtils {
                                 // as a backup plan.  Strip off extra characters from the date/time which represent the
                                 // unparsable time component of the date/time.  Note that this will not work if there is
                                 // white space inside the date format, but this is just a heuristic backup plan.
-                                log.debug("Could not parse date/time from: " + dateTime
-                                        + ".  Trying to strip time component and parse only date.");
                                 String dateWithTimeStripped = dateTime.replaceFirst("(\\s+.+)", "");
-                                log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                                if (ENABLE_DEBUG_LOG) {
+                                    log.debug("Could not parse date/time from: " + dateTime
+                                            + ".  Trying to strip time component and parse only date.");
+                                    log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                                }
                                 try {
                                     localDateTime = LocalDate.parse(dateWithTimeStripped,
                                             java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
                                             .atStartOfDay();
+                                }
                                 */
+
 
                                 // When parsing date and time doesn't work, try just parsing out a date from the value
                                 // as a backup plan.
                                 try {
-                                    log.debug("Could not parse date/time from: " + dateTime
-                                            + ".  Trying to parse only date");
+                                    if (ENABLE_DEBUG_LOG) {
+                                        log.debug("Could not parse date/time from: " + dateTime +
+                                                ".  Trying to parse only date");
+                                    }
                                     localDateTime = LocalDate.parse(dateTime,
                                             java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
                                             .atStartOfDay();
                                 } catch (DateTimeParseException e2) {
                                     throw new IllegalArgumentException(
-                                            "Date/time value (" + dateTime + ") could not be parsed by format string: " +
-                                                    userDateFormatStr + " " + userTimeFormatStr + "\nException was: " +
-                                                    e.toString());
+                                            "Date/time value (" + dateTime +
+                                                    ") could not be parsed by format string: " + userDateFormatStr +
+                                                    " " + userTimeFormatStr + "\nException was: " + e.toString());
                                 }
                             }
                         } else {
@@ -428,8 +455,10 @@ public class TimeStampConvertUtils {
                     } else {
                         // If a time format was not provided, use the date format only and assume the time is the start
                         // of the day.
-                        log.debug("Time format string was empty.  Using on date format.");
-                        log.debug("Java date only format string is: " + javaDateFormatStr);
+                        if (ENABLE_DEBUG_LOG) {
+                            log.debug("Time format string was empty.  Using on date format.");
+                            log.debug("Java date only format string is: " + javaDateFormatStr);
+                        }
                         // Parse the date value provided using DateTimeFormatter with only a date component.
                         try {
                             localDateTime = LocalDate.parse(dateTime,
@@ -438,9 +467,12 @@ public class TimeStampConvertUtils {
                             // When parsing a date doesn't work, try cutting off extra characters from the date/time
                             // string which might represent a time.  Note that this will not work if there is white
                             // space inside the date format, but this is just a heuristic backup plan.
-                            log.debug("Could not parse date from: " + dateTime + ".  Trying to strip time component");
                             String dateWithTimeStripped = dateTime.replaceFirst("(\\s+.+)", "");
-                            log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                            if (ENABLE_DEBUG_LOG) {
+                                log.debug("Could not parse date from: " + dateTime +
+                                        ".  Trying to strip time component");
+                                log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
+                            }
                             try {
                                 localDateTime = LocalDate.parse(dateWithTimeStripped,
                                         java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
@@ -451,37 +483,48 @@ public class TimeStampConvertUtils {
                             }
                         }
                     }
-                    log.debug("LocalDateTime is: " + localDateTime.format(
-                            java.time.format.DateTimeFormatter.ofPattern(javaFormatUsed)));
+                    if (ENABLE_DEBUG_LOG) {
+                        log.debug("LocalDateTime is: " + localDateTime.format(
+                                java.time.format.DateTimeFormatter.ofPattern(javaFormatUsed)));
+                    }
 
                     // Now process the user provided time zone string, if provided.
                     ZoneId zoneId;
                     if (StringUtils.isNotEmpty(userTimeZoneStr)) {
                         userTimeZoneStr = userTimeZoneStr.trim();
                         if (userToJavaTimeZoneMap.containsKey(userTimeZoneStr)) {
-                            log.debug("Found user defined time zone: " + userTimeZoneStr);
                             String javaTimeZoneStr = userToJavaTimeZoneMap.get(userTimeZoneStr);
                             if (javaTimeZoneStr.equals(SYSTEM_USER_TIME_ZONE)) {
                                 javaTimeZoneStr = "UTC";
+                                if (ENABLE_DEBUG_LOG) {
+                                    log.debug("Time zone provided in value as per ISO 8601.  Assuming UTC for now.");
+                                }
+                            } else if (ENABLE_DEBUG_LOG) {
+                                log.debug("Found user defined time zone: " + userTimeZoneStr);
+                                log.debug("Java time zone string is: " + javaTimeZoneStr);
                             }
-                            log.debug("Java time zone string is: " + javaTimeZoneStr);
                             zoneId = TimeZone.getTimeZone(javaTimeZoneStr).toZoneId();
+                            if (ENABLE_DEBUG_LOG) {
+                                log.debug("Zone ID based on user time zone is: " + zoneId.getId());
+                            }
                         } else {
                             log.error("User provided time zone is not supported: " + userTimeZoneStr);
                             throw new IllegalArgumentException("User provided time zone is not supported: "
                                     + userTimeZoneStr);
                         }
-                        log.debug("Using user provided time zone: " + zoneId.getId());
                     } else {
-                        log.debug("User provided time zone string is empty, using UTC");
+                        if (ENABLE_DEBUG_LOG) {
+                            log.debug("User provided time zone string is empty, using UTC");
+                        }
                         zoneId = ZoneId.of("UTC");
                     }
 
                     // Convert the LocalDateTime to a millisecond timestamp according the the provided (or UTC default)
                     // timezone.
                     long timestamp = localDateTime.atZone(zoneId).toInstant().toEpochMilli();
-                    log.debug("Millisecond timestamp is: " + timestamp);
-
+                    if (ENABLE_DEBUG_LOG) {
+                        log.debug("Millisecond timestamp is: " + timestamp);
+                    }
                     return timestamp;
                 } else {
                     // If the date string is not supported, throw an error since the pattern string is not valid.
@@ -495,7 +538,9 @@ public class TimeStampConvertUtils {
                 // being called in a place that assumes the old functionality or is being called on a date value
                 // that was generated before date/time formats were stored.  In either case, the original behavior is
                 // likely desired.
-                log.warn("User provided date format string is empty, using original convertToLong(date)");
+                if (ENABLE_DEBUG_LOG) {
+                    log.debug("User provided date format string is empty, using original convertToLong(date)");
+                }
                 return convertToLong(dateTime);
             }
         } catch (Exception e) {
@@ -504,11 +549,13 @@ public class TimeStampConvertUtils {
             java.lang.IllegalStateException
              */
 
-            log.error("Caught Exception thrown: " + e.toString());
-            // Uncomment the three lines below if needed for debugging.
-            //StringWriter sw = new StringWriter();
-            //e.printStackTrace(new PrintWriter(sw));
-            //log.error("Stack Trace is:\n" + sw.toString());
+            if (ENABLE_DEBUG_LOG) {
+                log.debug("Caught Exception thrown: " + e.toString());
+                // Uncomment the three lines below if needed for debugging.
+                //StringWriter sw = new StringWriter();
+                //e.printStackTrace(new PrintWriter(sw));
+                //log.debug("Stack Trace is:\n" + sw.toString());
+            }
             throw e;
         }
     }
@@ -564,21 +611,25 @@ public class TimeStampConvertUtils {
     }
 
     public static String removeIso8601TandZFromDateTime(String dateTime) {
+        String strippedDateTime = dateTime;
         Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
         if (dateTimeMatcher.find()) {
-            //log.debug("Found Date/Time value with ISO 8601 format (T & Z): " + dateTime);
-            //log.debug("Regular expression matches with " + dateTimeMatcher.groupCount()
-            //        + " group(s)");
-            //for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
-            //    log.debug("  Group " + i + ": " + dateTimeMatcher.group(i));
-            //}
-            dateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
-            //log.debug("Stripping T & Z to end up with: " + dateTime);
+            strippedDateTime = dateTimeMatcher.group(1) + " " + dateTimeMatcher.group(4);
+            /*
+            if (ENABLE_DEBUG_LOG) {
+                log.debug("Found Date/Time value with ISO 8601 format (T & Z): " + dateTime);
+                log.debug("Regular expression matches with " + dateTimeMatcher.groupCount() + " group(s)");
+                for (int i = 0; i <= dateTimeMatcher.groupCount(); i++) {
+                    log.debug("  Group " + i + ": " + dateTimeMatcher.group(i));
+                }
+                log.debug("Stripping T & Z to end up with: " + strippedDateTime);
+            }
+            */
         }
-        //else {
+        //else if (ENABLE_DEBUG_LOG) {
         //    log.debug("No regular expression match");
         //}
-        return dateTime;
+        return strippedDateTime;
     }
 
 }
