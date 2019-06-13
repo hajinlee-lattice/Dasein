@@ -85,6 +85,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
     private static final Set<String> VAL_TRUE = Sets.newHashSet("true", "t", "1", "yes", "y");
     private static final Set<String> VAL_FALSE = Sets.newHashSet("false", "f", "0", "no", "n");
+    private static final Set<String> EMPTY_SET = Sets.newHashSet("none", "null", "na", "N/A", "Blank",
+            "empty");
 
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
     private static final int MAX_CACHE_IDS = 5000000;
@@ -399,6 +401,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case INT:
                 return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
+                if (isEmptyString(fieldCsvValue)) {
+                    return null;
+                }
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
@@ -419,6 +424,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    if (isEmptyString(fieldCsvValue)) {
+                        return "";
+                    }
                     if (fieldCsvValue.matches("[0-9]+")) {
                         return fieldCsvValue;
                     }
@@ -482,6 +490,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
         return numberFormatter.parse(inputStr, Locale.getDefault());
+    }
+
+    @VisibleForTesting
+    boolean isEmptyString(String inputStr) {
+        inputStr = inputStr.trim();
+        for (String emptyStr : EMPTY_SET) {
+            if (emptyStr.equalsIgnoreCase(inputStr)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
