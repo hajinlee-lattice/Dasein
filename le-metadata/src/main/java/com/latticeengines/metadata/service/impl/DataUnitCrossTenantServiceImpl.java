@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metada
 
     @Override
     public boolean delete(String customerSpace, DataUnit dataUnit) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeServiceRegistry.getRunTimeService(dataUnit.getClass());
         if (dataUnitRuntimeService == null) {
             throw new RuntimeException(
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",

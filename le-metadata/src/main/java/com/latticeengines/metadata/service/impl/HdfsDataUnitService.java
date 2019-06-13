@@ -1,29 +1,39 @@
 package com.latticeengines.metadata.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
 
-@Component("HdfsDataUnitService")
-public class HdfsDataUnitService extends DataUnitRuntimeService<HdfsDataUnit> {
+@Component("hdfsDataUnitService")
+public class HdfsDataUnitService extends AbstractDataUnitRuntimeServiceImpl<HdfsDataUnit> //
+        implements DataUnitRuntimeService {
 
     private static final Logger log = LoggerFactory.getLogger(HdfsDataUnitService.class);
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     @Override
-    public Boolean delete(HdfsDataUnit dataUnit) {
+    protected Class<HdfsDataUnit> getUnitClz() {
+        return HdfsDataUnit.class;
+    }
+
+    @Override
+    public Boolean delete(DataUnit dataUnit) {
         try {
-            log.info("delete hdfs " + dataUnit.getName());
-            HdfsUtils.rmdir(yarnConfiguration, dataUnit.getPath());
-            log.info("delete RedshiftDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
+            HdfsDataUnit hdfsDataUnit = (HdfsDataUnit) dataUnit;
+            log.info("deleting hdfs " + hdfsDataUnit.getName());
+            HdfsUtils.rmdir(yarnConfiguration, hdfsDataUnit.getPath());
+            log.info("deleted HdfsDataUnit record : tenant is " + hdfsDataUnit.getTenant() //
+                    + ", name is " + hdfsDataUnit.getName());
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -31,8 +41,4 @@ public class HdfsDataUnitService extends DataUnitRuntimeService<HdfsDataUnit> {
         }
     }
 
-    @Override
-    public Boolean renameTableName(HdfsDataUnit dataUnit, String tablename) {
-        throw new UnsupportedOperationException("HdfsDataUnitService can not support this method.");
-    }
 }
