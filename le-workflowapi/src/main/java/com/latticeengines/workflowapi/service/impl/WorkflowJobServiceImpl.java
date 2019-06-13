@@ -27,7 +27,6 @@ import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -43,6 +42,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntity
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
@@ -871,7 +871,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                                                com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus) {
         if (workflowJob.getErrorDetails() == null && yarnStatus != null) {
             log.info("Job status for application id %s is %s", applicationId, yarnStatus);
-            LedpException ledpException = new LedpException(LedpCode.LEDP_28015,
+            LedpException ledpException = new LedpException(WorkflowUtils.getWorkFlowErrorCode(yarnStatus.getDiagnostics()),
                     new String[]{applicationId,
                             yarnStatus.getErrorReport()});
             workflowJob.setErrorDetails(ledpException.getErrorDetails());

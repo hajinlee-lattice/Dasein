@@ -23,7 +23,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -239,7 +238,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28015, new String[]{appId, status.getErrorReport()});
+            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()), new String[]{appId,
+                    status.getErrorReport()});
         }
     }
 
