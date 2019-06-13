@@ -777,6 +777,8 @@ public class CheckpointService {
                 msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(request) + "\n");
             }
 
+            msg.append(
+                    "Following API might take 10+ mins to respond -- Could track publish progress in tomcat console");
             msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
             msg.append("Body:\n");
 
