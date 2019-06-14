@@ -18,7 +18,11 @@ export default function configureStore(initialState = {}) {
     return store;
 }
 
-export const store = configureStore();
+if (!window.store) {
+    window.store = configureStore();
+}
+
+export const store = window.store;
 
 export function injectAsyncReducer(store, name, asyncReducer) {
     store.asyncReducers[name] = asyncReducer;
