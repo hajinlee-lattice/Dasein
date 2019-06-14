@@ -21,9 +21,9 @@ import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("importDataFeedFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ImportDataFeedFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
+public class ImportDataTableFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ImportDataFeedFromS3.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportDataTableFromS3.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
