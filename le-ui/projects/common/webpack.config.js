@@ -11,8 +11,7 @@ module.exports = {
             app: path.resolve(__dirname, "./app"),
             assets: path.resolve(__dirname, "./assets"),
             components: path.resolve(__dirname, "./components"),
-            widgets: path.resolve(__dirname, "./widgets")
-        }
+            widgets: path.resolve(__dirname, "./widgets")        }
     },
     entry: {
         widgets: "./widgets/index.js"
