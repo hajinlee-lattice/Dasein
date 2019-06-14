@@ -8,14 +8,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -23,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -33,11 +28,9 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -45,14 +38,8 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
-import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("productFileValidationService")
 @Lazy(value = false)
@@ -65,32 +52,8 @@ public class ProductFileValidationService
 
     private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
 
-    private static final String SUCCESS_FILE = "_SUCCESS";
-
-    @Resource(name = "distCpConfiguration")
-    private Configuration distCpConfiguration;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${camille.zk.pod.id:Default}")
-    private String podId;
-
-    @Value("${aws.customer.s3.bucket}")
-    private String s3Bucket;
-
-    @Inject
-    private EMREnvService emrEnvService;
-
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    private String customer;
-    private String tenantId;
-    private String queueName;
 
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
@@ -101,7 +64,6 @@ public class ProductFileValidationService
 
         Table currentTable = getCurrentConsolidateProductTable(
                 productFileValidationServiceConfiguration.getCustomerSpace());
-        downloadFromS3ifNeeded(currentTable, productFileValidationServiceConfiguration);
         List<Product> currentProducts = getCurrentProducts(currentTable);
         CSVFormat format = LECSVFormat.format;
         // copy error file if file exists
@@ -139,33 +101,6 @@ public class ProductFileValidationService
         return errorLine;
     }
 
-    private void downloadFromS3ifNeeded(Table currentTable,
-            ProductFileValidationConfiguration productFileValidationServiceConfiguration) {
-        if (currentTable == null) {
-            log.info("no consolidated product table.");
-            return;
-        }
-        tenantId = productFileValidationServiceConfiguration.getCustomerSpace().getTenantId();
-        customer = productFileValidationServiceConfiguration.getCustomerSpace().toString();
-        String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-        queueName = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
-        List<ImportExportRequest> requests = new ArrayList<>();
-        addTableToRequestForImport(currentTable, requests);
-        if (CollectionUtils.isEmpty(requests)) {
-            log.info("There's no source dir found.");
-            return;
-        }
-        log.info("Starting to export from s3 to hdfs. size=" + requests.size());
-        List<HdfsS3ImporterExporter> exporters = new ArrayList<>();
-        for (ImportExportRequest request : requests) {
-            exporters.add(buildImporterExporter(request));
-        }
-        int threadPoolSize = Math.min(5, requests.size());
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-import-export", threadPoolSize);
-        ThreadPoolUtils.runRunnablesInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
-        executorService.shutdown();
-        log.info("Finished to export from hdfs to s3 or vice versa.");
-    }
 
     private static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
             List<String> productTypes, List<String> productStatuses) {
@@ -427,54 +362,4 @@ public class ProductFileValidationService
         inputProductMap.put(compositeId, newProduct);
     }
 
-    private void addTableToRequestForImport(Table table, List<ImportExportRequest> requests) {
-        List<Extract> extracts = table.getExtracts();
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        if (CollectionUtils.isNotEmpty(extracts)) {
-            extracts.forEach(extract -> {
-                if (StringUtils.isNotBlank(extract.getPath())) {
-                    String hdfsPath = pathBuilder.getFullPath(extract.getPath());
-                    try {
-                        if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
-                            String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, tenantId, s3Bucket);
-                            if (isDoImport(s3Path, hdfsPath)) {
-                                requests.add(
-                                        new ImportExportRequest(s3Path, hdfsPath, table.getName(), false, false, true));
-                            }
-                        }
-                    } catch (Exception ex) {
-                        throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
-                    }
-                }
-            });
-        }
-    }
-
-    private boolean isDoImport(String s3Path, String hdfsPath) {
-        try {
-            boolean hasHdfsSuccess = HdfsUtils.fileExists(distCpConfiguration, getSuccessFile(hdfsPath));
-            if (hasHdfsSuccess) {
-                log.warn(String.format("there's hdfs path %s.", getSuccessFile(hdfsPath)));
-                return false;
-            }
-            boolean hasS3Path = HdfsUtils.fileExists(distCpConfiguration, s3Path);
-            if (!hasS3Path) {
-                log.warn(String.format("There's No hdfs success path=%s, and there's No S3 path=%s", hdfsPath, s3Path));
-                return false;
-            }
-            log.info(String.format("hdfs path %s, s3 path %s", hdfsPath, s3Path));
-            return true;
-        } catch (Exception ex) {
-            log.warn("Failed to check file=" + hdfsPath + " error=" + ex.getMessage());
-            return false;
-        }
-    }
-
-    private String getSuccessFile(String hdfsPath) {
-        return hdfsPath + "/" + SUCCESS_FILE;
-    }
-
-    private HdfsS3ImporterExporter buildImporterExporter(ImportExportRequest request) {
-        return new HdfsS3ImporterExporter(customer, distCpConfiguration, queueName, dataUnitProxy, request);
-    }
 }
