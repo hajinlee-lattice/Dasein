@@ -101,7 +101,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
+            Query query = getQuery(attrRepo, frontEndQuery, eventType);
             return queryEvaluatorService.getCount(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
@@ -113,15 +113,14 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
+            Query query = getQuery(attrRepo, frontEndQuery, eventType);
             return queryEvaluatorService.getData(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
-    private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType,
-            DataCollection.Version version) {
+    private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType) {
         ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
@@ -136,8 +135,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             map.putAll(segmentMap);
         }
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, getBatchUser());
-        return query;
+        return queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, getBatchUser());
     }
 
     @Override
@@ -145,7 +143,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        Query query = getQuery(attrRepo, frontEndQuery, eventType, version);
+        Query query = getQuery(attrRepo, frontEndQuery, eventType);
         try {
             return queryEvaluatorService.getQueryStr(attrRepo, query, getBatchUser());
         } catch (Exception e) {
