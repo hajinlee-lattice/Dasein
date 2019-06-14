@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
+import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 
 @Component("dataUnitCrossTenantService")
 public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metadata.service.DataUnitCrossTenantService {
