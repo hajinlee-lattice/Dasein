@@ -48,7 +48,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(allSystems.size(), 1);
         S3ImportSystem defaultSystem = allSystems.get(0);
         Assert.assertTrue(defaultSystem.isPrimarySystem());
-        Assert.assertEquals(defaultSystem.getAccountSystemId(), InterfaceName.CustomerAccountId.name());
+        Assert.assertNull(defaultSystem.getAccountSystemId());
         // create 2 new systems
         cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_SalesforceSystem",
                 S3ImportSystem.SystemType.Salesforce, false);
@@ -81,6 +81,13 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(defaultAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, defaultFeedType);
 
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+        }
+
         modelingFileMetadataService.resolveMetadata(defaultAccountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 defaultFeedType);
         defaultAccountFile = sourceFileService.findByName(defaultAccountFile.getName());
@@ -89,6 +96,13 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 SOURCE, ENTITY_ACCOUNT, defaultFeedType, null, ENTITY_ACCOUNT + "Data");
         Assert.assertNotNull(defaultAccountFile);
         Assert.assertNotNull(defaultDFId);
+
+        defaultSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
+        Assert.assertNotNull(defaultSystem);
+        Assert.assertNotNull(defaultSystem.getAccountSystemId());
+        Table defaultAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, defaultDFId).getImportTemplate();
+        Assert.assertNotNull(defaultAccountTable);
+        Assert.assertNull(defaultAccountTable.getAttribute(InterfaceName.CustomerAccountId));
 
         // salesforce system with match account it to default system.
         SourceFile sfAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
@@ -101,6 +115,11 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
                 fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+            if (fieldMapping.getUserField().equals("ID")) {
+                fieldMapping.setSystemName(sfSystemName);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMapToLatticeId(true);
             }
             //remove id field.
             if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
@@ -141,10 +160,19 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
         Assert.assertEquals(allSystems.size(), 3);
         defaultSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
-        Assert.assertTrue(defaultSystem.isPrimarySystem());
-        Assert.assertEquals(defaultSystem.getAccountSystemId(), InterfaceName.CustomerAccountId.name());
+        Assert.assertFalse(defaultSystem.isPrimarySystem());
         sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
-        Assert.assertEquals(sfSystem.getAccountSystemId(), InterfaceName.CustomerAccountId.name());
+        Assert.assertTrue(sfSystem.isPrimarySystem());
+        Assert.assertNotNull(sfSystem.getAccountSystemId());
+        Table sfAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, sfDFId).getImportTemplate();
+        Assert.assertNotNull(sfAccountTable);
+        Assert.assertNotNull(sfAccountTable.getAttribute(defaultSystem.getAccountSystemId()));
+        Attribute customerAccountId = sfAccountTable.getAttribute(InterfaceName.CustomerAccountId);
+        Assert.assertNotNull(customerAccountId);
+        Assert.assertEquals(customerAccountId.getDisplayName(), "ID");
+        Attribute sfSystemIdAttr = sfAccountTable.getAttribute(sfSystem.getAccountSystemId());
+        Assert.assertNotNull(sfSystemIdAttr);
+        Assert.assertEquals(sfSystemIdAttr.getDisplayName(), "ID");
         otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
         Assert.assertNotNull(otherSystem.getAccountSystemId());
         Table otherSystemAccountTable =
@@ -205,11 +233,11 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(sfSystemContactIdAttr);
         Assert.assertEquals(sfSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
         otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
-        Assert.assertNotNull(otherSystem.getContactSystemId());
-        Assert.assertEquals(otherSystem.getContactSystemId(), sfSystem.getContactSystemId());
+        Assert.assertNull(otherSystem.getContactSystemId());
+
         Table otherSystemContactTable =
                 dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherContactDFId).getImportTemplate();
-        Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(otherSystem.getContactSystemId());
+        Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(sfSystem.getContactSystemId());
         Assert.assertNotNull(otherSystemContactIdAttr);
         Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
 

@@ -308,6 +308,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     importSystem.setAccountSystemId(accountSystemId);
                                     importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                    fieldMapping.setMappedToLatticeField(false);
                                 }
                                 fieldMapping.setMappedField(accountSystemId);
                                 if (fieldMapping.isMapToLatticeId()) {
@@ -393,6 +394,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (!existFromTemplate) {
                 customerLatticeId.setMappedToLatticeField(false);
                 fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+            }
+        } else {
+            Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
+            while (fmIterator.hasNext()) {
+                FieldMapping fieldMapping = fmIterator.next();
+                if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
+                        || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
+                    fmIterator.remove();
+                    break;
+                }
             }
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
