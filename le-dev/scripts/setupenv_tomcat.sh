@@ -18,7 +18,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         TOMCAT_TGZ_ARCHIVE_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         TOMCAT_TGZ="${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 	    # if active apache mirror cannot find the version, fall back to archive server
-        wget "${TOMCAT_TGZ_URL}" -O ${TOMCAT_TGZ} || wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
+        wget ${TOMCAT_TGZ_URL} -O ${TOMCAT_TGZ} || wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
     fi
     rm -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION} || true
     tar xzf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C ${ARTIFACT_DIR}
@@ -60,10 +60,10 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     sudo mkdir -p /etc/ledp/tls
     sudo chown -R ${USER} /etc/ledp/tls
     rm -rf /etc/ledp/tls/*
-    aws s3 cp s3://latticeengines-test-artifacts/artifacts/tls/star.lattice.local.crt /etc/ledp/tls/server.crt
-    aws s3 cp s3://latticeengines-test-artifacts/artifacts/tls/star.lattice.local.key /etc/ledp/tls/server.key
-    aws s3 cp s3://latticeengines-test-artifacts/artifacts/tls/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
-    aws s3 cp s3://latticeengines-test-artifacts/artifacts/tls/cacerts /etc/ledp/tls/cacerts
+    aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt /etc/ledp/tls/server.crt
+    aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key /etc/ledp/tls/server.key
+    aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
+    aws s3 cp s3://latticeengines-dev-chef/tls/cacerts /etc/ledp/tls/cacerts
     chmod 600 /etc/ledp/tls/server.crt
     chmod 600 /etc/ledp/tls/server.key
     chmod 600 /etc/ledp/tls/ledp_keystore.jks
