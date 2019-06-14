@@ -69,19 +69,22 @@ public class DynamoServiceImpl implements DynamoService {
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
             @Value("${aws.region}") String region) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
-        remoteClient = AmazonDynamoDBClientBuilder.standard()
+        remoteClient = AmazonDynamoDBClientBuilder.standard() //
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
                 .withRegion(Regions.fromName(region)) //
                 .build();
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            localClient = AmazonDynamoDBClientBuilder.standard()
+            localClient = AmazonDynamoDBClientBuilder.standard() //
                     .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region)) //
                     .build();
         }
         client = remoteClient;
         dynamoDB = new DynamoDB(client);
-        autoScaleClient = (AWSApplicationAutoScalingClient) AWSApplicationAutoScalingClientBuilder.standard().build();
+        autoScaleClient = (AWSApplicationAutoScalingClient) AWSApplicationAutoScalingClientBuilder.standard() //
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
+                .withRegion(Regions.fromName(region)) //
+                .build();
     }
 
     public DynamoServiceImpl(AmazonDynamoDB client) {
