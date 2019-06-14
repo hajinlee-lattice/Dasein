@@ -83,7 +83,7 @@ public class S3ImportServiceImpl implements S3ImportService {
                     s3ImportMessageService.deleteMessage(message);
                 }
             } catch (RuntimeException e) {
-                log.error(String.format("Cannot submit import for: %s, error: %s", message.getKey(), e.toString()));
+                log.error(String.format("Cannot submit import for: %s", message.getKey()), e);
             }
         }
         return false;
