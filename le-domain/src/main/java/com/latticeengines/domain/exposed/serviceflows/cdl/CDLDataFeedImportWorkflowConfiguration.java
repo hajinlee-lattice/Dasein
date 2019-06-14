@@ -4,8 +4,8 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedFromS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataTableFromS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
@@ -22,7 +22,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         private InputFileValidatorConfiguration inputFileValidatorConfiguration = new InputFileValidatorConfiguration();
         private ImportExportS3StepConfiguration exportToS3 = new ImportExportS3StepConfiguration();
         private PrepareImportConfiguration prepareImportConfiguration = new PrepareImportConfiguration();
-        private ImportDataFeedFromS3Configuration importFromS3 = new ImportDataFeedFromS3Configuration();
+        private ImportDataTableFromS3Configuration importFromS3 = new ImportDataTableFromS3Configuration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
