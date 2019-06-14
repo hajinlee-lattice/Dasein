@@ -1,5 +1,5 @@
 import React, { Component } from "common/react-vendor";
-import { store, injectAsyncReducer } from 'store';
+import { store } from 'store';
 import ReactRouter from '../../../react/router';
 import NgState from "atlas/ng-state";
 
@@ -11,11 +11,13 @@ import Observer from "common/app/http/observer";
 import LeTable from "common/widgets/table/table";
 import LeButton from "common/widgets/buttons/le-button";
 import './viewMappings.component.scss';
+import FeatureFlagsUtilities, { ENABLE_MULTI_TEMPLATE_IMPORT } from '../../../../../common/app/services/featureFlags.utilities';
 
 export default class ViewMappings extends Component {
 
     constructor(props) {
         super(props);
+        // console.log('STORE ', store.getState());
 
         this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
 
@@ -217,7 +219,13 @@ export default class ViewMappings extends Component {
                                             classNames: "white-button"
                                         }}
                                         callback={() => {
-                                            NgState.getAngularState().go('home.importtemplates', {});
+                                            
+                                            // console.log('VIEW STATE ', FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT));
+                                            if(FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT)){
+                                                NgState.getAngularState().go('home.multipletemplates', {});
+                                            }else {
+                                                NgState.getAngularState().go('home.importtemplates', {});
+                                            }
                                         }}
                                     />
                                 </div>
