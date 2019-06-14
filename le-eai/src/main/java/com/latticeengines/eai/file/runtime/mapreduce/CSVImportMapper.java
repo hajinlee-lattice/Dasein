@@ -329,14 +329,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                     failMapper = true;
                 } catch (LedpException e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     if (e.getCode().equals(LedpCode.LEDP_17017)) {
                         duplicateMap.put(attr.getDisplayName(), e.getMessage());
                     } else {
+                        LOG.warn(e.getMessage());
                         throw e;
                     }
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
@@ -413,9 +416,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         //   https://solutions.lattice-engines.com/browse/DP-9653
                         // We change the behavior of negative timestamps from throwing an exception and failing to
                         // parse the input CSV row to logging a warning and setting the timestamp value to zero.
-                        LOG.warn(String.format(
-                                "Converting date/time %s to timestamp generated negative value %d for column %s",
-                                fieldCsvValue, timestamp, attr.getDisplayName()));
+
+                        // Comment out warnings because log files are too large.
+                        //LOG.warn(String.format(
+                        //        "Converting date/time %s to timestamp generated negative value %d for column %s",
+                        //        fieldCsvValue, timestamp, attr.getDisplayName()));
                         return 0L;
                     }
                     return timestamp;
@@ -453,18 +458,21 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case BOOLEAN:
                 return convertBooleanVal(fieldCsvValue);
             default:
-                LOG.info("size is:" + fieldCsvValue.length());
+                // Comment out warnings because log files are too large.
+                //LOG.info("size is:" + fieldCsvValue.length());
                 throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
                         + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.\n" +
                     "Error message was: %s", fieldCsvValue, avroType, attr.getDisplayName(), e.getMessage()), e);
         } catch (Exception e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
                     "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
                     e.getMessage()), e);

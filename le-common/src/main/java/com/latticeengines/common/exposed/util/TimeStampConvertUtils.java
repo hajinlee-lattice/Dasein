@@ -299,6 +299,25 @@ public class TimeStampConvertUtils {
             java.lang.IllegalStateException
              */
 
+
+            if (date.chars().filter(Character::isLetter).count() >= 3) {
+                // DO NOT trust natty parser with any month letters in date string!
+                // Thus, if Joda Date/Time Parser fails on letter style month, just throw exception rather than try
+                // Natty Parser.
+                if (date.matches("\\d{2}[-|/][a-zA-Z]{3}[-|/]\\d{2,4}")) {
+                    try {
+                        return DATE_FORMATTER_LOCALE.parseMillis(date);
+                    } catch (Exception e2) {
+                        throw new IllegalArgumentException(
+                                "Joda Parser failed to parse date with letter style month with error: " +
+                                        e2.getMessage());
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            "Letter style month was not formated correctly for Joda Parser: " + date);
+                }
+            }
+
             if (ENABLE_DEBUG_LOG) {
                 log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
                 log.debug(e.toString());
@@ -309,19 +328,18 @@ public class TimeStampConvertUtils {
                 log.debug("Attempting to use Natty Date Parser to process the date/time.");
             }
 
-            // DO NOT trust natty parser with any month letters in date string!
-            if (date.chars().filter(Character::isLetter).count() >= 3) {
-                if (date.matches("\\d{2}[-|/][a-zA-Z]{3}[-|/]\\d{2,4}")) {
-                    return DATE_FORMATTER_LOCALE.parseMillis(date);
-                } else {
-                    throw new IllegalArgumentException("Cannot parse date: " + date);
-                }
+            // If Joda Parser cannot parse the date value, try the Natty Parser.
+            List<Date> dates;
+            try {
+                LogManager.getLogger(Parser.class).setLevel(Level.OFF);
+                // Create date/time parser with default time zone UTC.
+                Parser parser = new Parser(TimeZone.getTimeZone("UTC"));
+                List<DateGroup> groups = parser.parse(date);
+                dates = groups.get(0).getDates();
+            } catch (Exception e2) {
+                throw new IllegalArgumentException(
+                        "Natty Parser failed to parse date with error: " + e2.getMessage());
             }
-            LogManager.getLogger(Parser.class).setLevel(Level.OFF);
-            // Create date/time parser with default time zone UTC.
-            Parser parser = new Parser(TimeZone.getTimeZone("UTC"));
-            List<DateGroup> groups = parser.parse(date);
-            List<Date> dates = groups.get(0).getDates();
             return dates.get(0).getTime();
         }
     }
