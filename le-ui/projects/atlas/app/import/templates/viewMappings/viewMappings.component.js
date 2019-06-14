@@ -12,7 +12,7 @@ import LeTable from "common/widgets/table/table";
 import LeLink from "common/widgets/link/le-link";
 import LeButton from "common/widgets/buttons/le-button";
 import './viewMappings.component.scss';
-import FeatureFlagsUtilities, { ENABLE_MULTI_TEMPLATE_IMPORT } from '../../../../../common/app/services/featureFlags.utilities';
+import FeatureFlagsUtilities, { ENABLE_MULTI_TEMPLATE_IMPORT } from 'common/app/services/featureFlags.utilities';
 
 export default class ViewMappings extends Component {
 
