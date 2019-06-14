@@ -42,6 +42,7 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
             importS3.setVersion(version);
+            initStepConf.setDataCollectionVersion(version);
             return this;
         }
 
