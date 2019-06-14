@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-
 import java.util.Collections;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -30,7 +29,7 @@ public class S3ImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
 
     @Test(groups = "manual")
     public void runTest() {
-        importData(BusinessEntity.Account, "Account_401_500.csv", "Account");
+        importData(BusinessEntity.Account, "Account_401_500.csv");
         S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();
         config.setFeedType(ENTITY_ACCOUNT + FEED_TYPE_SUFFIX);
         config.setS3Bucket(S3_BUCKET);

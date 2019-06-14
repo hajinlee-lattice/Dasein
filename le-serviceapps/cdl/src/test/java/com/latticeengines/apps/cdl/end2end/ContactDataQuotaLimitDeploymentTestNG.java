@@ -65,7 +65,7 @@ public class ContactDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importData(BusinessEntity.Contact, contactCsv, "Contact", false, false);
+        importData(BusinessEntity.Contact, contactCsv, null, false, false);
     }
 
     protected void processAnalyze() {

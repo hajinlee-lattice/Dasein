@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -86,7 +87,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         Set<String> columnNames = getInputTableColumnNames(0);
         if (configuration.isEntityMatchEnabled()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    null);
+                    getSystemIds(BusinessEntity.Account), null);
         } else {
             return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
         }

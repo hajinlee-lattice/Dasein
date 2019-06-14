@@ -42,6 +42,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -56,6 +57,7 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -69,6 +71,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -180,8 +183,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
     static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 103L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1006L;
+    static final Long ENTITY_MATCH_ACCOUNT_2 = 109L;
+    static final Long ENTITY_MATCH_ACCOUNT_3 = 1012L;
     static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
     static final Long CONTACT_2 = 100L;
     static final Long CONTACT_3 = 1000L;
@@ -501,6 +504,42 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
+    /**
+     * Load {@link S3ImportSystem} from test artifact repo and upsert it
+     *
+     * @param systemName
+     *            target system name
+     */
+    protected void mockImportSystem(@NotNull String systemName) {
+        Preconditions.checkNotNull(systemName, "Cannot mock S3ImportSystem with null name");
+        S3ImportSystem system = getMockSystem(systemName);
+        // update tenant to test tenant
+        system.setTenant(mainTestTenant);
+        S3ImportSystem currSystem = cdlProxy.getS3ImportSystem(mainCustomerSpace, systemName);
+        if (currSystem != null) {
+            cdlProxy.updateS3ImportSystem(mainCustomerSpace, system);
+        } else {
+            cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        }
+    }
+
+    /*
+     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3 bucket.
+     * Filename format: "System_<SYSTEM_NAME>.json"
+     */
+    private S3ImportSystem getMockSystem(@NotNull String systemName) {
+        String filename = String.format("System_%s.json", systemName);
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), filename);
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.readValue(is, S3ImportSystem.class);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Failed to read S3ImportSystem(name=%s) from s3. bucket=%s, version=%s", filename,
+                            S3_AVRO_DIR, getAvroFileVersion()));
+        }
+    }
+
     private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String feedTaskId;
@@ -549,8 +588,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         actionProxy.createAction(mainCustomerSpace, action);
     }
 
-    void importData(BusinessEntity entity, String s3FileName, String feedType) {
-        importData(entity, s3FileName, feedType, false, false);
+    void importData(BusinessEntity entity, String s3FileName) {
+        importData(entity, s3FileName, null, false, false);
+    }
+
+    void importData(BusinessEntity entity, String s3FileName, String systemName) {
+        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
@@ -558,7 +601,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
-        feedType = getFeedTypeByEntity(entity.name());
+        if (feedType == null) {
+            feedType = getFeedTypeByEntity(entity.name());
+        }
         if (s3FileName.endsWith(".gz"))
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
@@ -1485,20 +1530,28 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals(verifyRecord.get(InterfaceName.TotalCost.name()), cost);
     }
 
-    private String getFeedTypeByEntity(String entity) {
+    protected String getFeedTypeByEntity(String entity) {
+        return getFeedType(entity, "DefaultSystem");
+    }
+
+    protected String getFeedType(String entity, String systemName) {
         String feedType = entity + "Schema";
-        String systemName = "DefaultSystem";
         String splitChart = "_";
         switch (entity) {
-            case "Account": feedType =
-                    systemName + splitChart + EntityType.Accounts.getDefaultFeedTypeName();break;
-            case "Contact": feedType =
-                    systemName + splitChart + EntityType.Contacts.getDefaultFeedTypeName();break;
-            case "Transaction": feedType =
-                    systemName + splitChart + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
-            case "Product": feedType =
-                    systemName + splitChart + EntityType.ProductBundles.getDefaultFeedTypeName();break;
-            default:break;
+        case "Account":
+            feedType = systemName + splitChart + EntityType.Accounts.getDefaultFeedTypeName();
+            break;
+        case "Contact":
+            feedType = systemName + splitChart + EntityType.Contacts.getDefaultFeedTypeName();
+            break;
+        case "Transaction":
+            feedType = systemName + splitChart + EntityType.ProductPurchases.getDefaultFeedTypeName();
+            break;
+        case "Product":
+            feedType = systemName + splitChart + EntityType.ProductBundles.getDefaultFeedTypeName();
+            break;
+        default:
+            break;
         }
         return feedType;
     }
