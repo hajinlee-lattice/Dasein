@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -164,6 +165,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
         Assert.assertTrue(sfSystem.isPrimarySystem());
         Assert.assertNotNull(sfSystem.getAccountSystemId());
+        Assert.assertTrue(sfSystem.isMapToLatticeAccount());
         Table sfAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, sfDFId).getImportTemplate();
         Assert.assertNotNull(sfAccountTable);
         Assert.assertNotNull(sfAccountTable.getAttribute(defaultSystem.getAccountSystemId()));
@@ -240,6 +242,28 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(sfSystem.getContactSystemId());
         Assert.assertNotNull(otherSystemContactIdAttr);
         Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
+
+        // exception when double primary system.
+        defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(defaultAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, defaultFeedType);
+
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMapToLatticeId(true);
+            }
+        }
+
+        SourceFile finalDefaultAccountFile = defaultAccountFile;
+        FieldMappingDocument finalFieldMappingDocument = fieldMappingDocument;
+        Assert.expectThrows(LedpException.class,
+                () -> modelingFileMetadataService.resolveMetadata(finalDefaultAccountFile.getName(),
+                        finalFieldMappingDocument, ENTITY_ACCOUNT, SOURCE, defaultFeedType));
 
     }
 }

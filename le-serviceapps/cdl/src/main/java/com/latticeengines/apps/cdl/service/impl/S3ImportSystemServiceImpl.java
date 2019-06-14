@@ -97,6 +97,8 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         if (StringUtils.isEmpty(s3ImportSystem.getContactSystemId())) {
             s3ImportSystem.setContactSystemId(importSystem.getContactSystemId());
         }
+        s3ImportSystem.setMapToLatticeAccount(importSystem.isMapToLatticeAccount());
+        s3ImportSystem.setMapToLatticeContact(importSystem.isMapToLatticeContact());
         if (importSystem.getPriority() != s3ImportSystem.getPriority() && importSystem.getPriority() < Integer.MAX_VALUE) {
             int currentPriority = s3ImportSystem.getPriority();
             int destPriority = importSystem.getPriority();

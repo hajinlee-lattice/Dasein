@@ -303,6 +303,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         switch (fieldMapping.getIdType()) {
                             case Account:
                                 String accountSystemId = importSystem.getAccountSystemId();
+                                if (fieldMapping.isMapToLatticeId()) {
+                                    importSystem.setMapToLatticeAccount(true);
+                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                    importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                                }
                                 if (StringUtils.isEmpty(accountSystemId)) {
                                     accountSystemId = importSystem.generateAccountSystemId();
                                     importSystem.setAccountSystemId(accountSystemId);
@@ -320,6 +325,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 break;
                             case Contact:
                                 String contactSystemId = importSystem.getContactSystemId();
+                                if (fieldMapping.isMapToLatticeId()) {
+                                    importSystem.setMapToLatticeContact(true);
+                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                    importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                                }
                                 if (StringUtils.isEmpty(contactSystemId)) {
                                     contactSystemId = importSystem.generateContactSystemId();
                                     importSystem.setContactSystemId(contactSystemId);
