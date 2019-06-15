@@ -84,18 +84,23 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
-        matchValidationService.validateDataCloudVersion(input.getDataCloudVersion());
-        clearAllocateModeFlag(input);
+        try {
+            matchValidationService.validateDataCloudVersion(input.getDataCloudVersion(), input.getTenant());
+            clearAllocateModeFlag(input);
 
-        // Skip logic for setting up mock for CDL lookup if MatchInput has Operational Mode set to LDC Match or
-        // Entity Match.
-        if (input.getOperationalMode() == null || OperationalMode.CDL_LOOKUP.equals(input.getOperationalMode())) {
-            if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId) //
-                    && !"AccountId".equals(input.getKeyMap().get(MatchKey.LookupId).get(0))) {
-                input = mockForCDLLookup(input);
+            // Skip logic for setting up mock for CDL lookup if MatchInput has
+            // Operational Mode set to LDC Match or
+            // Entity Match.
+            if (input.getOperationalMode() == null || OperationalMode.CDL_LOOKUP.equals(input.getOperationalMode())) {
+                if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId) //
+                        && !"AccountId".equals(input.getKeyMap().get(MatchKey.LookupId).get(0))) {
+                    input = mockForCDLLookup(input);
+                }
             }
+            return realTimeMatchService.match(input);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25007, "PropData matchRealTime failed.", e);
         }
-        return realTimeMatchService.match(input);
     }
 
     @PostMapping(value = "/bulkrealtime")
@@ -110,7 +115,8 @@ public class MatchResource {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
                 for (MatchInput matchInput : input.getInputList()) {
                     clearAllocateModeFlag(matchInput);
-                    matchValidationService.validateDataCloudVersion(matchInput.getDataCloudVersion());
+                    matchValidationService.validateDataCloudVersion(matchInput.getDataCloudVersion(),
+                            matchInput.getTenant());
                 }
             }
             return realTimeMatchService.matchBulk(input);
@@ -134,7 +140,7 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            matchValidationService.validateDataCloudVersion(matchVersion);
+            matchValidationService.validateDataCloudVersion(matchVersion, input.getTenant());
             matchValidationService.validateDecisionGraph(input.getDecisionGraph());
             if (input.bumpupEntitySeedVersion()) {
                 entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, input.getTenant());
@@ -142,7 +148,7 @@ public class MatchResource {
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed: " + e.getMessage(), e);
         }
     }
 
@@ -158,11 +164,11 @@ public class MatchResource {
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            matchValidationService.validateDataCloudVersion(matchVersion);
+            matchValidationService.validateDataCloudVersion(matchVersion, input.getTenant());
             BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
             return bulkMatchService.getWorkflowConf(input, hdfsPod);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
+            throw new LedpException(LedpCode.LEDP_25007, "PropData getBulkMatchConfig failed: " + e.getMessage(), e);
         }
     }
 

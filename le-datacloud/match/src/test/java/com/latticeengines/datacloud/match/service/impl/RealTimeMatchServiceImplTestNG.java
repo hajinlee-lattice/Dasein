@@ -78,7 +78,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Autowired
     private CountryCodeService countryCodeService;
 
-    @Test(groups = "functional")
+    // Test against retired V1.0 matcher -- DerivedColumnsCache
+    // Disable the test as SQL Server is shutdown
+    @Test(groups = "functional", enabled = false)
     public void testSimpleMatchRTSCache() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
@@ -90,7 +92,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "functional")
+    // Test against retired V1.0 matcher -- DerivedColumnsCache
+    // Disable the test as SQL Server is shutdown
+    @Test(groups = "functional", enabled = false)
     public void testSimpleRealTimeBulkMatchRTSCache() {
         Object[][] data = new Object[][] { //
                 { 123, null, "Chevron Corporation", null, null, "USA" },
@@ -174,7 +178,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(notNulls > 5);
     }
 
-    @Test(groups = "functional")
+    // Test against retired V1.0 matcher -- DerivedColumnsCache
+    // Disable the test as SQL Server is shutdown
+    @Test(groups = "functional", enabled = false)
     public void testDuns() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "12345" },
@@ -234,8 +240,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
      * Mandatory to add Fake name or fake Duns because need to treat as normal
      * domain and not public domain. Otherwise, lookup by public domain only
      * will be treated as normal domain
+     *
+     * Disable the test as SQL Server is shutdown
      */
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testExcludePublicDomain() {
         Object[][] data = new Object[][] { { 123, "my@gmail.com", "Fake name", null } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data,
