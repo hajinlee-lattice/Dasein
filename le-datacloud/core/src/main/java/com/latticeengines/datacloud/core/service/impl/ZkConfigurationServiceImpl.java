@@ -93,7 +93,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         Path poolPath = dbPoolPath(pool);
         try {
             List<DataSourceConnection> connections = new ArrayList<>();
-            ArrayNode arrayNode = mapper.readValue(camille.get(poolPath).getData(), ArrayNode.class);
+            String data = camille.get(poolPath).getData();
+            if (StringUtils.isBlank(data)) {
+                return connections;
+            }
+            ArrayNode arrayNode = mapper.readValue(data, ArrayNode.class);
             for (JsonNode jsonNode : arrayNode) {
                 connections.add(mapper.treeToValue(jsonNode, DataSourceConnection.class));
             }

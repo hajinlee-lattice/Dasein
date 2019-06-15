@@ -10,7 +10,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +86,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
             Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + avroFileName));
             MatchInput input = createAvroBulkMatchInput(true, schema);
             MatchCommand command = matchProxy.matchBulk(input, podId);
-            ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+            ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
             Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /*
  * Service to validate all match related entities
@@ -24,10 +25,12 @@ public interface MatchValidationService {
     void validateDefaultDecisionGraph();
 
     /**
-     * Validate whether the given data cloud version is valid to be used for matching
+     * Validate whether the given data cloud version is valid to be used for
+     * matching
      *
-     * @param dataCloudVersion data cloud version, cannot be {@literal null}
-     * @throws RuntimeException if the given version cannot be used for matching
+     * @param dataCloudVersion:
+     *            data cloud version, cannot be {@literal null}
+     * @param tenant
      */
-    void validateDataCloudVersion(@NotNull String dataCloudVersion);
+    void validateDataCloudVersion(@NotNull String dataCloudVersion, @NotNull Tenant tenant);
 }

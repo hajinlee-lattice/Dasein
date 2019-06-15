@@ -30,6 +30,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -49,6 +50,9 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
     @Autowired
     private TestMatchInputService testMatchInputService;
+
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -253,6 +257,8 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         matchInput.setData(data);
         matchInput.setKeyMap(keyMap);
         matchInput.setPredefinedSelection(Predefined.Model);
+        String latestVersion = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
+        matchInput.setDataCloudVersion(latestVersion);
 
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
         MatchOutput output = restTemplate.postForObject(url, matchInput, MatchOutput.class);

@@ -29,7 +29,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -122,8 +121,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         cleanupAvroDir(avroDir);
     }
 
-    // Test against DerivedColumnsCache
-    @Test(groups = "deployment", enabled = true)
+    // Test against retired V1.0 matcher -- DerivedColumnsCache
+    // Disable the test as SQL Server is shutdown
+    @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
@@ -156,7 +156,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (Object res : output.getResult().get(0).getOutput()) {
             String field = output.getOutputFields().get(idx++);
             if (!StringUtils.isEmpty(res)) {
-                System.out.print(field + " = " + res + ", ");
+                log.info(field + " = " + res + ", ");
             }
         }
     }
@@ -170,12 +170,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         input.setHomogeneous(false);
         input.setInputList(inputList);
 
-        ObjectMapper om = new ObjectMapper();
-        System.out.println(om.writeValueAsString(input));
+        log.info("Match input: " + JsonUtils.serialize(input));
 
         long startLookup = System.currentTimeMillis();
         BulkMatchOutput output = matchProxy.matchRealTime(input);
-        System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
+        log.info("Time taken to do dnb based AM lookup for " + size + " entries (with "
                 + (size > domains.size() ? domains.size() : size) + " unique domains) = "
                 + (System.currentTimeMillis() - startLookup) + " millis");
         Assert.assertNotNull(output);
@@ -205,15 +204,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         long startLookup = System.currentTimeMillis();
         MatchOutput output = matchProxy.matchRealTime(matchInput);
-        if (version.equals("1.0.0")) {
-            System.out.println("Time taken to do DerivedColumnsCache lookup for " + size + " entries (with "
-                    + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                    + (System.currentTimeMillis() - startLookup) + " millis");
-        } else {
-            System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
-                    + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                    + (System.currentTimeMillis() - startLookup) + " millis");
-        }
+        log.info("Time taken to do dnb based AM lookup for " + size + " entries (with "
+                + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                + (System.currentTimeMillis() - startLookup) + " millis");
         Assert.assertNotNull(output);
         Assert.assertNotNull(output.getResult());
         Assert.assertEquals(output.getResult().size(), size);
@@ -298,6 +291,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
+        String latestVersion = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
+        input.setDataCloudVersion(latestVersion);
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
 
@@ -476,16 +471,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             String currApprVerForMajVer = dataCloudVersionService
                     .latestApprovedForMajorVersion(majVer).getVersion();
             // returning current datacloud version
-            // TODO: 2.0.17 introduced new schema in AccountMasterLookup table,
-            // which is not compatible with 2.0.16 versions. So removed previous
-            // version from test. Add previous version back after we release
-            // 2.0.18
             prevAndCurrentApprovedVer
                     .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
         }
-        Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
-        objs[0] = new Object[] { "1.0.0" };
-        int i = 1;
+        Object[][] objs = new Object[prevAndCurrentApprovedVer.size()][1];
+        int i = 0;
         for (String version : prevAndCurrentApprovedVer) {
             objs[i++] = new Object[] { version };
         }
@@ -505,9 +495,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 latestVersions.add(dataCloudVersionEntityMgr.latestApprovedForMajorVersion(majorVersion).getVersion());
             }
         }
-        Object[][] objs = new Object[latestVersions.size() + 1][1];
-        objs[0] = new Object[] { "1.0.0" };
-        int i = 1;
+        Object[][] objs = new Object[latestVersions.size()][1];
+        int i = 0;
         for (String latestVersion : latestVersions) {
             objs[i++] = new Object[] { latestVersion };
         }

@@ -19,7 +19,7 @@ public class ZkConfigurationServiceImplTestNG extends DataCloudCoreFunctionalTes
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConnectionPool() throws SQLException {
         for (DataSourcePool pool: DataSourcePool.values()) {
             List<DataSourceConnection> connectionList =
