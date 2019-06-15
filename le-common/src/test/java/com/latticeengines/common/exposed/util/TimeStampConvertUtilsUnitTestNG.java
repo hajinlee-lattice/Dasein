@@ -42,7 +42,7 @@ public class TimeStampConvertUtilsUnitTestNG {
             } else {
                 Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
             }
-            log.info("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
+            log.debug("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
                     + TimeZone.getTimeZone(javaTimeZones).toZoneId());
         }
     }

@@ -17,7 +17,7 @@
 
     <properties>
         <component-name>spark</component-name>
-        <livy.version>0.5.0-incubating</livy.version>
+        <livy.version>0.6.0-incubating</livy.version>
     </properties>
 
     <profiles>
