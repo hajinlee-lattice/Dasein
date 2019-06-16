@@ -206,10 +206,9 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Assert.assertNotNull(table);
         Attribute attribute = table.getAttribute(InterfaceName.NumberOfContacts.name());
         Assert.assertNotNull(attribute);
-        Assert.assertEquals(attribute.getCategory(), Category.CURATED_ACCOUNT_ATTRIBUTES);
+        Assert.assertEquals(attribute.getCategory(), Category.CURATED_ACCOUNT_ATTRIBUTES.getName());
         Assert.assertEquals(attribute.getDisplayName(), CuratedAccountAttributesStep.NUMBER_OF_CONTACTS_DISPLAY_NAME);
         Assert.assertEquals(attribute.getFundamentalType(), FundamentalType.NUMERIC.getName());
-        log.error("$JAW$ Number of Contacts Phyiscal Data Type is: " + attribute.getPhysicalDataType());
 
         StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());
         Assert.assertNotNull(container);
@@ -223,10 +222,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         AttributeStats attrStat = attrStats.get(InterfaceName.NumberOfContacts.name());
         Assert.assertNotNull(attrStat.getBuckets());
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrStat.getBuckets().getBucketList()));
-        log.error("$JAW$ Number of Contacts Stats Cube Buckets:");
-        for (Bucket bucket : attrStat.getBuckets().getBucketList()) {
-            log.error("    " + bucket.toString());
-        }
     }
 
     private void verifyNumAttrsInAccount() {
