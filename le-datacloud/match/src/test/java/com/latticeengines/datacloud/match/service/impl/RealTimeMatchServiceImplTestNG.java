@@ -148,6 +148,12 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
 
+        // Test default datacloud version
+        input.setDataCloudVersion(null);
+        output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
     @Test(groups = "functional")

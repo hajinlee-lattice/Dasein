@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
@@ -59,7 +58,7 @@ import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-@Component
+// dpltc deploy -a matchapi,workflowapi
 public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final String avroDir = "/tmp/MatchResourceDeploymentTestNG";
@@ -474,8 +473,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             prevAndCurrentApprovedVer
                     .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
         }
-        Object[][] objs = new Object[prevAndCurrentApprovedVer.size()][1];
-        int i = 0;
+        Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
+        objs[0][0] = null;
+        int i = 1;
         for (String version : prevAndCurrentApprovedVer) {
             objs[i++] = new Object[] { version };
         }
@@ -495,8 +495,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 latestVersions.add(dataCloudVersionEntityMgr.latestApprovedForMajorVersion(majorVersion).getVersion());
             }
         }
-        Object[][] objs = new Object[latestVersions.size()][1];
-        int i = 0;
+        Object[][] objs = new Object[latestVersions.size() + 1][1];
+        objs[0][0] = null; // Test default datacloud version
+        int i = 1;
         for (String latestVersion : latestVersions) {
             objs[i++] = new Object[] { latestVersion };
         }
