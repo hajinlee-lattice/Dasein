@@ -15,7 +15,7 @@
                         <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
                             initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true" nosort=true
                             single-selection="false" allowcustomvalues="true" dontrandomizeid="true" icon="fa fa-plus"
-                            ng-show="vm.showChips()">
+                            ng-show="vm.showChips()" name="ChipsController" context="vm">
                         </chips>
                     </span>
 
@@ -48,9 +48,10 @@
                         </span>
 
                         <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
-                            <option value="Yes">True</option>
-                            <option value="No">False</option>
-                            <option value="" ng-if="vm.showEmptyOption()">Empty</option>
+                            <option value="Yes">true</option>
+                            <option value="No">false</option>
+                            <option value="Present" ng-if="vm.showEmptyOption()">present</option>
+                            <option value="Empty" ng-if="vm.showEmptyOption()">empty</option>
                         </select>
                     </span>
 
@@ -89,8 +90,8 @@
 
                             <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
                                 initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true"
-                                single-selection="false" allowcustomvalues="true" dontrandomizeid="true"
-                                icon="fa fa-plus" ng-show="vm.showChips()" nosort=true>
+                                single-selection="false" allowcustomvalues="true" dontrandomizeid="true" context="vm"
+                                icon="fa fa-plus" ng-show="vm.showChips()" nosort=true name="ChipsController">
                             </chips>
 
                             <span ng-if="vm.editMode == 'Preset'">
@@ -123,10 +124,10 @@
             <div class="le-col-span-2">
                 <div class="flex-container-controller">
                     <!-- <div ng-class="vm.showUnsetButton() ? 'edit-controllers' : 'edit-controller'"> -->
-                    <button class="button blue-button set" ng-click="vm.setBucket($event)"
+                    <button class="button blue-button set" ng-click="vm.clickSet($event)"
                         ng-disabled="!vm.isValid()">SET</button>
                     <button class="button gray-button unset" ng-if="vm.showUnsetButton()"
-                        ng-click="vm.setBucket($event, true)">UNSET</button>
+                        ng-click="vm.clickSet($event, true)">UNSET</button>
                     <!-- </div> -->
                 </div>
             </div>

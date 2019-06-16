@@ -79,8 +79,6 @@ export default class LeSegmentItem extends Component {
 		}
 	}
 
-
-
 	renderTile(TileComponent, content, editform) {
 		return (
 			<TileComponent>

@@ -4,6 +4,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
         this.cmpMap = {
             'EQUAL': 'is equal to',
             'NOT_EQUAL': 'is not equal to',
+            'IN_COLLECTION': 'is equal to',
+            'NOT_IN_COLLECTION': 'is not',
             'GREATER_THAN': 'is greater than',
             'GREATER_OR_EQUAL': 'is greater than or equal to',
             'LESS_THAN': 'is less than',
@@ -11,13 +13,15 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             'GTE_AND_LTE': 'is greater than or equal and lesser than or equal',
             'GTE_AND_LT': 'is between',
             'GT_AND_LT': "is greater than and less than",
+            'IS_NULL': 'is empty',
+            'IS_NOT_NULL': 'is present'
         };
 
         function setValsBasedOnPosition(cmp, valsArray, position, value) {
             switch (cmp) {
                 case 'GTE_AND_LT':
                 case 'BETWEEN':
-                case 'BETWEEN_DATE':{
+                case 'BETWEEN_DATE': {
                     valsArray[position] = value;
                     break;
                 }
@@ -47,8 +51,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 case 'LESS_THAN':
                 case 'LESS_OR_EQUAL':
                 case 'BEFORE':
-                case 'WITHIN': 
-                case 'PRIOR_ONLY':{
+                case 'WITHIN':
+                case 'PRIOR_ONLY': {
                     if (position == valsArray.length - 1 || valsArray.length == 0) {
                         return null;
                     } else {
@@ -134,7 +138,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                     }
                     default: return false;
                 }
-            }else if('PercentChange' === type){ //TO DO: change this with back end value
+            } else if ('PercentChange' === type) { //TO DO: change this with back end value
                 // console.log('IS AverageSeries');
                 switch (typeToShow) {
                     case 'Percent': {
@@ -144,7 +148,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         return false;
                     }
                 }
-            }else {
+            } else {
                 switch (typeToShow) {
                     case 'Numerical': {
                         return true;
@@ -174,6 +178,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             if (!bucketRestriction.bkt) {
                 return;
             }
+
+            //console.log('[transaction-service] getOperationLabel()', type, bucketRestriction.bkt.Cmp, cmpMap[bucketRestriction.bkt.Cmp]);
 
             switch (type) {
                 case 'TimeSeries': {
@@ -223,13 +229,13 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
         }
 
         function getNumericalValue(bucketRestriction, position) {
-            if(bucketRestriction.ignored === false){
+            if (bucketRestriction.ignored === false) {
                 return bucketRestriction.bkt.Vals[position];
             }
         }
 
         function getEnumValues(bucketRestriction) {
-            if(bucketRestriction.ignored === false){
+            if (bucketRestriction.ignored === false) {
                 return bucketRestriction.bkt.Vals;
             }
         }
@@ -252,19 +258,19 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 default: return 'Unknown';
             }
         }
-        
-        function sameValues(vals1, vals2){
+
+        function sameValues(vals1, vals2) {
             var sameVals = true;
-            if(vals1 && vals2 && vals1.length == vals2.length){
+            if (vals1 && vals2 && vals1.length == vals2.length) {
                 var index = 0;
-                vals1.forEach(function(val) {
-                    if(val != vals2[index]){
+                vals1.forEach(function (val) {
+                    if (val != vals2[index]) {
                         sameVals = false;
                         return;
                     }
                     index++;
                 });
-            }else{
+            } else {
                 sameVals = false;
             }
             return sameVals;
@@ -288,17 +294,17 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                     var lbl2 = bkt.Lbl;
                     isSameBucket = neg1 == neg2 && lbl1 == lbl2;
                 }
-            } else if(bucket && bucket.Chg && bkt && bkt.Chg){
+            } else if (bucket && bucket.Chg && bkt && bkt.Chg) {
                 var direction1 = bucket.Chg.Direction;
                 var direction2 = bkt.Chg.Direction;
                 var cmp1 = bucket.Chg.Cmp;
                 var cmp2 = bkt.Chg.Cmp;
 
                 isSameBucket = direction1 == direction2 && cmp1 == cmp2;
-                if(isSameBucket){
+                if (isSameBucket) {
                     isSameBucket = sameValues(bucket.Chg.Vals, bkt.Chg.Vals);
                 }
-            } else{
+            } else {
                 if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                     var tmp = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp && bkt.Direction == bucket.Direction;
                     isSameBucket = tmp;
@@ -307,7 +313,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             var r = isSameAttribute && isSameBucket;
             return r;
         }
-    
+
         this.isBucketUsed = function (bucket) {
             return typeof bucket.bkt.Id == "number";//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
         }
@@ -330,10 +336,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         return [];
                     }
                 }
-            }else if (bucketRestriction.bkt.Chg){
+            } else if (bucketRestriction.bkt.Chg) {
                 switch (type) {
                     case 'PercentChange': {
-                        var values = bucketRestriction.bkt.Chg.Vals;        
+                        var values = bucketRestriction.bkt.Chg.Vals;
                         if (values) {
                             var listPct = values.toString();
                             listPct = listPct.replace(/,/g, ' - ');
@@ -346,7 +352,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         return [];
                     }
                 }
-            }else {
+            } else {
                 var vals = bucketRestriction.bkt;
                 if (vals) {
                     var list = vals.toString();
@@ -364,7 +370,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 switch (subType) {
                     case 'Time': {
                         var tsTime = txn.Time;
-                        if(tsTime){
+                        if (tsTime) {
                             return getValsBasedOnPosition(tsTime.Cmp, tsTime.Vals, position);
                         }
                         // if (tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1) {
@@ -388,9 +394,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         return 0;
                     }
                 }
-            }else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+            } else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
                 return getValsBasedOnPosition(bucketRestriction.bkt.Chg.Cmp, bucketRestriction.bkt.Chg.Vals, position);
-            }else{
+            } else {
                 return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
             }
         }
@@ -424,7 +430,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         return [];
                     }
                 }
-            } else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+            } else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
                 return bucketRestriction.bkt.Chg.Vals;
             } else {
                 return bucketRestriction.bkt.Vals;
@@ -451,6 +457,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             bucketRestriction.bkt.Cmp = value;
         }
         this.changeNumericalCmpValue = function (bucketRestriction, value) {
+            // console.log('changeNumericalCmpValue', bucketRestriction, value, bucketRestriction.bkt.Vals);
             bucketRestriction.bkt.Cmp = value;
         }
 
@@ -462,6 +469,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
         }
 
         this.changeValue = function (bucketRestriction, type, value, position, subType) {
+            // console.log(bucketRestriction, type, value, position, subType)
             if (type === 'TimeSeries') {
                 var txn = bucketRestriction.bkt.Txn;
                 if (txn) {
@@ -493,11 +501,16 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                     }
 
                 }
-            }else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+            } else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
                 setValsBasedOnPosition(bucketRestriction.bkt.Chg.Cmp, bucketRestriction.bkt.Chg.Vals, position, value);
-            } else{
+            } else {
                 setValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position, value);
             }
+        }
+
+        this.changeVals = function (bucketRestriction, value) {
+            // console.log('[transaction-service] changeVals()', value, bucketRestriction);
+            bucketRestriction.bkt.Vals = value;
         }
 
         this.changeTimeframePeriod = function (bucketRestriction, type, value) {
@@ -565,10 +578,12 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
             }
             else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
                 bucketRestriction.bkt.Chg.Cmp = value;
-            } else{
+            } else {
                 bucketRestriction.bkt.Cmp = value;
             }
         }
+
+        this.changeCmpValue = this.changeCmp;
 
         this.removeKey = function (bucketRestriction, type, subType) {
             if (type === 'TimeSeries') {
@@ -620,9 +635,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                     }
 
                 }
-            }else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
+            } else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
                 bucketRestriction.bkt.Chg.Vals = [];
-            } else{
+            } else {
                 bucketRestriction.bkt.Vals = [];
             }
         }
@@ -656,7 +671,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
 
         this.getBktValue = function (bucketRestriction, position) {
             var txn = bucketRestriction.bkt.Txn;
-            if(txn){
+            if (txn) {
                 if (txn.Negate !== undefined) {
                     return (txn.Negate === true) ? 'No' : 'Yes';
                 }
@@ -666,7 +681,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 if (txn.Amt) {
                     return txn.Amt.Vals[position];
                 }
-            }else{
+            } else {
                 return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
             }
         }
@@ -690,7 +705,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                 case 'TimeSeries': {
                     return getTransacionCmp(bucketRestriction);
                 };
-                case 'PercentChange' : {
+                case 'PercentChange': {
                     return bucketRestriction.bkt.Chg;
                 }
 
@@ -717,7 +732,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', ['
                         console.warn('TimeSeries does not have Txn object');
                     }
                 };
-                case 'PercentChange' : {
+                case 'PercentChange': {
                     return bucketRestriction.bkt.Chg.Cmp;
                 }
                 default: return bucketRestriction.bkt.Cmp;

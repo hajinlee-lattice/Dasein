@@ -20,17 +20,17 @@ const States = $stateProvider => {
             pageTitle: 'Attribute Admin'
         },
         onEnter: (ReduxService, $state, $stateParams) => {
-            console.log($state.get('home.attributes'));
+            // console.log($state.get('home.attributes'));
             ReduxService.connect(
                 'attributes',
                 actions,
                 reducer,
                 $state.get('home.attributes')
             );
-            console.log('onEnter', $state.get('home.attributes'));
+            // console.log('onEnter', $state.get('home.attributes'));
         },
         onExit: $state => {
-            console.log('onExit', $state.get('home.attributes'));
+            // console.log('onExit', $state.get('home.attributes'));
             $state.get('home.attributes').data.redux.unsubscribe();
         },
         resolve: {
