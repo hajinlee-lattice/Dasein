@@ -36,7 +36,7 @@ public class MatchInput implements Fact, Dimension {
 
     // legacy configuration to be removed
     @JsonIgnore
-    private static final String predefinedVersion = "1.0";
+    private static final String predefinedVersion = "2.0";
     @JsonProperty("Tenant")
     private Tenant tenant;
     @JsonProperty("Fields")
