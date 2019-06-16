@@ -161,6 +161,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_AVRO_VERSION = "6";
     static final String S3_AVRO_VERSION_ADVANCED_MATCH = "6";
     static final String ADVANCED_MATCH_SUFFIX = "EntityMatch";
+    private static final String MAP_ID_PREFIX = "LETest_MapTo_";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
@@ -183,14 +184,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
     static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 109L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1012L;
+    static final Long ENTITY_MATCH_ACCOUNT_2 = 111L;
+    static final Long ENTITY_MATCH_ACCOUNT_3 = 1014L;
     static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
     static final Long CONTACT_2 = 100L;
     static final Long CONTACT_3 = 1000L;
     static final Long UPDATED_CONTACT = 100L;
-    static final Long ENTITY_MATCH_CONTACT_2 = 100L;
-    static final Long ENTITY_MATCH_CONTACT_3 = 1000L;
+    static final Long ENTITY_MATCH_CONTACT_2 = 105L;
+    static final Long ENTITY_MATCH_CONTACT_3 = 1005L;
     static final Long ENTITY_MATCH_UPDATED_CONTACT = 100L;
     static final Long TRANSACTION_2 = 39004L;
     static final Long TRANSACTION_3 = 50238L;
@@ -673,6 +674,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
+        modifyMatchIdMappings(fieldMappingDocument.getFieldMappings());
         switch (entity) {
         case Account:
             modifyFieldMappingsForAccount(fieldMappingDocument);
@@ -680,6 +682,38 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         case Contact:
             modifyFieldMappingsForContact(fieldMappingDocument);
         default:
+        }
+    }
+
+    /*
+     * Modify field mapping for match IDs. Fields need to have the following format
+     * to be mapped to other system (for unique ID, need to specify its own system
+     * name)
+     *
+     * Format: <PREFIX>_<SystemName>_<Entity>_<map_to_lattice_id> E.g.,
+     * LETest_MapTo_DefaultSystem_Account_True will map this column to default
+     * system's account ID and also map to global customer account ID
+     */
+    private void modifyMatchIdMappings(List<FieldMapping> fieldMappings) {
+        for (FieldMapping mapping : fieldMappings) {
+            // map ID to other system
+            if (mapping.getUserField().startsWith(MAP_ID_PREFIX)) {
+                String system = mapping.getUserField().substring(MAP_ID_PREFIX.length());
+                // parse system name & entity. Format =
+                // <SystemName>_<Entity>_<map_to_lattice_id>
+                String[] tokens = system.split("_");
+                mapping.setSystemName(tokens[0]);
+                mapping.setIdType(BusinessEntity.Account.name().equals(tokens[1]) ? FieldMapping.IdType.Account
+                        : FieldMapping.IdType.Contact);
+                boolean mapToLatticeId = false;
+                if (tokens.length == 3 && tokens[2].equalsIgnoreCase(Boolean.TRUE.toString())) {
+                    // map to lattice account ID
+                    mapToLatticeId = true;
+                }
+                mapping.setMapToLatticeId(mapToLatticeId);
+                log.info("Map user field [{}] to system [{}] for entity [{}]. MapToLatticeId={}",
+                        mapping.getUserField(), mapping.getSystemName(), tokens[1], mapToLatticeId);
+            }
         }
     }
 
