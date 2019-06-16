@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -282,7 +283,12 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
             if (InterfaceName.NumberOfContacts.name().equals(attr.getName())) {
+                attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                attr.setSubcategory(null);
                 attr.setDisplayName(NUMBER_OF_CONTACTS_DISPLAY_NAME);
+                attr.setDescription("This curated attribute is calculated by counting the number of contacts " +
+                        "matching each account");
+                attr.setFundamentalType(FundamentalType.NUMERIC.getName());
             }
         });
     }
