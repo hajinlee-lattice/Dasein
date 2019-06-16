@@ -87,7 +87,7 @@ public class ContactFileValidationService
                                 for (GenericRecord record : reader) {
                                     boolean rowError = false;
                                     String id = StringUtils
-                                            .isBlank(getFieldValue(record, InterfaceName.ContactId.name()))
+                                            .isNotBlank(getFieldValue(record, InterfaceName.ContactId.name()))
                                                     ? getFieldValue(record, InterfaceName.ContactId.name())
                                                     : getFieldValue(record, InterfaceName.Id.name());
                                     String accountId = getFieldValue(record, InterfaceName.AccountId.name());
