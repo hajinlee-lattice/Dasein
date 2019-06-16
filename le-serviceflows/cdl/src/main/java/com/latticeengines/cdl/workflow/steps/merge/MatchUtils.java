@@ -1,5 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -42,7 +46,7 @@ public final class MatchUtils {
             Set<String> columnNames, List<String> systemIds, String newAccountTableName) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
-        baseMatchInput.setTargetEntity(BusinessEntity.Account.name());
+        baseMatchInput.setTargetEntity(Account.name());
         baseMatchInput.setAllocateId(true);
         if (StringUtils.isNotEmpty(newAccountTableName)) {
             baseMatchInput.setOutputNewEntities(true);
@@ -55,7 +59,7 @@ public final class MatchUtils {
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
         entityKeyMap.setKeyMap(getAccountMatchKeysAccount(columnNames, systemIds));
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
-        entityKeyMaps.put(BusinessEntity.Account.name(), entityKeyMap);
+        entityKeyMaps.put(Account.name(), entityKeyMap);
         baseMatchInput.setEntityKeyMaps(entityKeyMaps);
 
         config.setMatchInput(baseMatchInput);
@@ -67,7 +71,7 @@ public final class MatchUtils {
             String newAccountTableName) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
-        baseMatchInput.setTargetEntity(BusinessEntity.Contact.name());
+        baseMatchInput.setTargetEntity(Contact.name());
         baseMatchInput.setAllocateId(true);
         baseMatchInput.setOutputNewEntities(true);
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -77,8 +81,8 @@ public final class MatchUtils {
         MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
                 .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds));
         baseMatchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
-                BusinessEntity.Account.name(), accountKeyMap, //
-                BusinessEntity.Contact.name(), contactKeyMap
+                Account.name(), accountKeyMap, //
+                Contact.name(), contactKeyMap
         )));
 
         config.setMatchInput(baseMatchInput);
@@ -110,6 +114,7 @@ public final class MatchUtils {
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Zipcode, InterfaceName.PostalCode.name());
+        addLegacyCustomerId(columnNames, matchKeys, systemIds, Account);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Account match keys = {}", JsonUtils.serialize(matchKeys));
         return matchKeys;
@@ -122,9 +127,26 @@ public final class MatchUtils {
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Email, InterfaceName.Email.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.SystemId, InterfaceName.CustomerContactId.name());
+        addLegacyCustomerId(columnNames, matchKeys, systemIds, Contact);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Contact match keys = {}", JsonUtils.serialize(matchKeys));
         return matchKeys;
+    }
+
+    /*
+     * Add CustomerAccountId for account or CustomerContactId for contact to system
+     * ID list. TODO remove when CustomerXXXId field is retired)
+     */
+    private static void addLegacyCustomerId(Set<String> cols, Map<MatchKey, List<String>> keyMap,
+            List<String> systemIds, BusinessEntity entity) {
+        Preconditions.checkArgument(entity == Account || entity == Contact,
+                String.format("Legacy customer ID can only be set for Account and Contact, Unsupported entity = %s",
+                        entity == null ? null : entity.name()));
+        InterfaceName customerId = entity == Account ? InterfaceName.CustomerAccountId
+                : InterfaceName.CustomerContactId;
+        if (CollectionUtils.isEmpty(systemIds) || !systemIds.contains(customerId.name())) {
+            addMatchKeyIfExists(cols, keyMap, MatchKey.SystemId, customerId.name());
+        }
     }
 
     /*
