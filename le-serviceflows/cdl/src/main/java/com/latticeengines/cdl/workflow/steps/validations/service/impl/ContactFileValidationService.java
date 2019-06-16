@@ -86,27 +86,38 @@ public class ContactFileValidationService
                                 // iterate through record in avro file
                                 for (GenericRecord record : reader) {
                                     boolean rowError = false;
-                                    String id = getFieldValue(record, InterfaceName.ContactId.name());
+                                    String id = StringUtils
+                                            .isBlank(getFieldValue(record, InterfaceName.ContactId.name()))
+                                                    ? getFieldValue(record, InterfaceName.ContactId.name())
+                                                    : getFieldValue(record, InterfaceName.Id.name());
                                     String accountId = getFieldValue(record, InterfaceName.AccountId.name());
-                                    if (StringUtils.isBlank(id)) {
-                                        id = getFieldValue(record, InterfaceName.Id.name());
-                                    }
-                                    // account id and contact id is non-null
-                                    for (Character c : invalidChars) {
-                                        if ((StringUtils.isNotBlank(id) && id.indexOf(c) != -1)
-                                                || (StringUtils.isNotBlank(accountId) && accountId.indexOf(c) != -1)) {
-                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                            String field = id.indexOf(c) != -1 ? id : accountId;
-                                            String message = String.format(
-                                                    "Invalid character found \"%s\" from attribute \"%s\".",
-                                                    c.toString(), field);
-                                            csvFilePrinter.printRecord(lineId, "", message);
-                                            rowError = true;
-                                            fileError = true;
-                                            errorInPath++;
-                                            errorLine++;
-                                            break;
+                                    String errorMessage = "";
+                                    if (StringUtils.isNotBlank(id)) {
+                                        boolean isIllegalContacId = invalidChars.stream()
+                                                .anyMatch(e -> id.indexOf(e) != -1);
+                                        if (isIllegalContacId == true) {
+                                            errorMessage += String.format(
+                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
+                                                    id);
                                         }
+                                    }
+                                    if (StringUtils.isNotBlank(accountId)) {
+                                        boolean isIllegalAccountId = invalidChars.stream()
+                                                .anyMatch(e -> accountId.indexOf(e) != -1);
+                                        if (isIllegalAccountId == true) {
+                                            errorMessage += String.format(
+                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
+                                                    accountId);
+                                        }
+                                    }
+
+                                    if (StringUtils.isNotBlank(errorMessage)) {
+                                        String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                        csvFilePrinter.printRecord(lineId, "", errorMessage);
+                                        rowError = true;
+                                        fileError = true;
+                                        errorInPath++;
+                                        errorLine++;
                                     }
 
                                     String email = getFieldValue(record, InterfaceName.Email.name());
