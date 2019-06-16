@@ -63,8 +63,9 @@ public class SqlServerHelper implements DbHelper {
     private static final Logger log = LoggerFactory.getLogger(SqlServerHelper.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
     private static final Integer MAX_RETRIES = 2;
-
     private static final Integer QUEUE_SIZE = 20000;
+    public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
+
     @Value("${datacloud.match.sqlfetch.realtime.timeout:1}")
     private Integer realtimeTimeoutMins;
     @Value("${datacloud.match.sqlfetch.bulk.timeout:8}")
@@ -691,7 +692,7 @@ public class SqlServerHelper implements DbHelper {
                                     }
                                     String version = matchContext.getInput().getDataCloudVersion();
                                     if (StringUtils.isEmpty(version)) {
-                                        version = MatchInput.DEFAULT_DATACLOUD_VERSION;
+                                        version = DEFAULT_DATACLOUD_VERSION;
                                     }
                                     if (StringUtils.isEmpty(groupDataCloudVersion)) {
                                         groupDataCloudVersion = version;
