@@ -34,7 +34,7 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
     MatchPlanner matchPlanner;
 
     @Autowired
-    @Qualifier("columnSelectionService")
+    @Qualifier("accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Test(groups = "functional")

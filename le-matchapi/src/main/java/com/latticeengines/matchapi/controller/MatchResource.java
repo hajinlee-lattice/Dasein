@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
@@ -64,6 +67,9 @@ public class MatchResource {
     @Inject
     private List<BulkMatchService> bulkMatchServiceList;
 
+    @Resource(name = "bulkMatchServiceWithAccountMaster")
+    private BulkMatchService defaultBulkMatchService;
+
     @Inject
     private MatchValidationService matchValidationService;
 
@@ -72,6 +78,9 @@ public class MatchResource {
 
     @Inject
     private EntityMatchInternalService entityInternalMatchService;
+
+    @Inject
+    private DataCloudVersionService datacloudVersionService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -85,6 +94,7 @@ public class MatchResource {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
+            setDataCloudVersion(input, null);
             matchValidationService.validateDataCloudVersion(input.getDataCloudVersion(), input.getTenant());
             clearAllocateModeFlag(input);
 
@@ -113,8 +123,10 @@ public class MatchResource {
         long time = System.currentTimeMillis();
         try {
             if (CollectionUtils.isNotEmpty(input.getInputList())) {
+                String datacloudVersion = datacloudVersionService.currentApprovedVersion().getVersion();
                 for (MatchInput matchInput : input.getInputList()) {
                     clearAllocateModeFlag(matchInput);
+                    setDataCloudVersion(matchInput, datacloudVersion);
                     matchValidationService.validateDataCloudVersion(matchInput.getDataCloudVersion(),
                             matchInput.getTenant());
                 }
@@ -139,19 +151,25 @@ public class MatchResource {
     public MatchCommand matchBulk(@RequestBody MatchInput input,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
-            String matchVersion = input.getDataCloudVersion();
-            matchValidationService.validateDataCloudVersion(matchVersion, input.getTenant());
+            setDataCloudVersion(input, null);
+            String datacloudVersion = input.getDataCloudVersion();
+            matchValidationService.validateDataCloudVersion(datacloudVersion, input.getTenant());
             matchValidationService.validateDecisionGraph(input.getDecisionGraph());
             if (input.bumpupEntitySeedVersion()) {
                 entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, input.getTenant());
             }
-            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
+            BulkMatchService bulkMatchService = getBulkMatchService(datacloudVersion);
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed: " + e.getMessage(), e);
         }
     }
 
+    /**
+     * @param input
+     * @param hdfsPod
+     * @return
+     */
     @PodContextAware
     @PostMapping(value = "/bulkconf", produces = "application/json")
     @ResponseBody
@@ -163,9 +181,10 @@ public class MatchResource {
     public BulkMatchWorkflowConfiguration getBulkMatchConfig(@RequestBody MatchInput input,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
-            String matchVersion = input.getDataCloudVersion();
-            matchValidationService.validateDataCloudVersion(matchVersion, input.getTenant());
-            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
+            setDataCloudVersion(input, null);
+            String datacloudVersion = input.getDataCloudVersion();
+            matchValidationService.validateDataCloudVersion(datacloudVersion, input.getTenant());
+            BulkMatchService bulkMatchService = getBulkMatchService(datacloudVersion);
             return bulkMatchService.getWorkflowConf(input, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData getBulkMatchConfig failed: " + e.getMessage(), e);
@@ -177,8 +196,7 @@ public class MatchResource {
     @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
     public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {
         try {
-            BulkMatchService bulkMatchService = getBulkMatchService(null);
-            return bulkMatchService.status(rootuid.toUpperCase());
+            return defaultBulkMatchService.status(rootuid.toUpperCase());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
@@ -321,6 +339,26 @@ public class MatchResource {
         input.setKeyMap(ImmutableMap.of(MatchKey.LatticeAccountID, idFields));
         input.setSkipKeyResolution(true);
         return input;
+    }
+
+    /**
+     * Set default DataCloud version if it's not provided in MatchInput.
+     *
+     * Current default DataCloud version is latest approved version with major
+     * version as 2.0
+     *
+     * @param input
+     */
+    private void setDataCloudVersion(MatchInput input, String datacloudVersion) {
+        if (StringUtils.isBlank(input.getDataCloudVersion())) {
+            if (StringUtils.isBlank(datacloudVersion)) {
+                datacloudVersion = datacloudVersionService.currentApprovedVersion().getVersion();
+            }
+            log.warn("Found a match request without DataCloud version, force to use {}. MatchInput={}",
+                    datacloudVersion,
+                    JsonUtils.serialize(input));
+            input.setDataCloudVersion(datacloudVersion);
+        }
     }
 
 }

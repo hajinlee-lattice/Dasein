@@ -764,8 +764,8 @@ public class CheckpointService {
             return;
         }
         try {
-            StringBuilder msg = new StringBuilder("\nTo publish Entity Match Seed Table version " + checkpointVersion
-                    + " you must run the following HTTP Requests:\n");
+            StringBuilder msg = new StringBuilder("\nTo save Entity Match Seed Table to checkpoint of version "
+                    + checkpointVersion + ", you need to run the following HTTP Requests:\n");
             for (BusinessEntity businessEntity : Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
                 msg.append("POST " + matchapiHostPort + "/match/matches/entity/versions\n");
                 msg.append("Body:\n");
@@ -778,12 +778,12 @@ public class CheckpointService {
             }
 
             msg.append(
-                    "Following API might take 10+ mins to respond -- Could track publish progress in tomcat console");
-            msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
-            msg.append("Body:\n");
-
-            List<EntityPublishRequest> requests = new ArrayList<>();
+                    "Following APIs might take 5+ mins to respond -- Could track publish progress in tomcat console\n");
             for (BusinessEntity businessEntity: Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+                msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
+                msg.append("Body:\n");
+
+                List<EntityPublishRequest> requests = new ArrayList<>();
                 String destTenantId = getCheckPointTenantId(checkpointName, checkpointVersion, businessEntity.name());
                 Tenant destTenant = new Tenant(CustomerSpace.parse(destTenantId).toString());
                 List<Tenant> srcTenants = new ArrayList<>();
@@ -811,9 +811,8 @@ public class CheckpointService {
                     request.setDestEnv(EntityMatchEnvironment.SERVING);
                     requests.add(request);
                 }
+                msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(requests) + "\n");
             }
-
-            msg.append(om.writerWithDefaultPrettyPrinter().writeValueAsString(requests) + "\n");
             log.info(msg.toString());
         } catch (IOException e) {
             log.error("Failed to print EntityPublishRequest:\n" + e.getMessage(), e);
