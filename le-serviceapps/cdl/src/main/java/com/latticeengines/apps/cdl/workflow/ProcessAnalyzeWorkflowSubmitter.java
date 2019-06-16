@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${eai.export.dynamo.signature}")
     private String signature;
+
+    @Value("${cdl.processAnalyze.actions.count:0}")
+    private int actionCountLimit;
 
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
@@ -220,6 +224,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     List<Long> getActionIds(String customerSpace) {
         List<Action> actions = actionService.findByOwnerId(null);
+        if (actionCountLimit > 0 && actions.size() > actionCountLimit) {
+            actions = actions.stream().sorted(Comparator.comparing(Action::getPid)).collect(Collectors.toList()).subList(0, actionCountLimit);
+        }
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
