@@ -290,6 +290,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
             customer = CustomerSpace.shortenCustomerSpace(customer);
             if (DebugGatewayWatcher.hasPassport(customer)) {
                 logLevel = "DEBUG";
+                log.warn("Turn on YARN app DEBUG log for " + customer);
             }
         }
 
