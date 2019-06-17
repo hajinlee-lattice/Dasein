@@ -163,10 +163,11 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     private List<ColumnMetadata> requestMetadataPage(String dataCloudVersion, int page, int size) {
-        String url = constructUrl("/?page={page}&size={size}", page, size);
-        if (StringUtils.isNotBlank(dataCloudVersion)) {
-            url += "&datacloudversion=" + dataCloudVersion;
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = latestVersion("").getVersion();
         }
+        String url = constructUrl("/?page={page}&size={size}&datacloudversion={dataCloudVersion}", page, size,
+                dataCloudVersion);
         return getList("get metadata page", url, ColumnMetadata.class);
     }
 
