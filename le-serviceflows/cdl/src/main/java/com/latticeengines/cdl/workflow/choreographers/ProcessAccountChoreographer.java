@@ -59,11 +59,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        if (isRematchStep(step)) {
-            return !shouldRematch;
-        } else {
-            return isCommonSkip(step, seq);
-        }
+        return isCommonSkip(step, seq);
     }
 
     @Override
@@ -181,10 +177,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
         }
         return false;
-    }
-
-    private boolean isRematchStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().endsWith(rematchAccount.name());
     }
 
     boolean hasNonTrivialChange() {

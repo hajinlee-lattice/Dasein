@@ -147,7 +147,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             List<Map<String, Object>> props = jdbcTemplate.queryForList("show variables like '%wait_timeout%'");
             log.info("Timeout Configuration from DB Session: " + props);
         } catch(Exception e) {
-            //Ignore. It is only for logging purpose
+            log.warn("Failed to check timeout configuration from DB session.", e);
         }
 
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
