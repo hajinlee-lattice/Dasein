@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -58,7 +58,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
@@ -230,7 +229,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     /*
-     * validate field mapping document before saving document
+     * validate field mapping document before saving document, two steps: first is comparing field mapping after user changed and
+     * mapping with best effort, second step is generating new template table in memory, integrate it to method finalSchemaCheck
+     * in DataFeedTaskManage service
      */
     @Override
     public FieldValidationDocument validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
@@ -255,112 +256,97 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // validate field mapping document
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
-        Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
         List<String> ignored = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(fieldMappingDocument.getIgnoredFields())) {
             ignored = fieldMappingDocument.getIgnoredFields();
         }
-        List<FieldMapping> newCustomerFields = new ArrayList<>();
-        if (fieldMappingDocument.getExtraFieldMappingInfo() != null) {
-            newCustomerFields = fieldMappingDocument.getExtraFieldMappingInfo().getNewMappings();
-        }
+
         FieldValidationDocument validationDocument = new FieldValidationDocument();
         List<FieldValidation> validations = new ArrayList<>();
         validationDocument.setValidations(validations);
 
-        Table finalTable = mergeTable(templateTable, standardTable);
-        Iterator<Attribute> iter = finalTable.getAttributes().iterator();
-        // check lattice field both in template and standard table
+        FieldMappingDocument documentBestEffort = getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType);
+        // filter off field mapping with cdl external system, or will cause multiple lattice field mapped to the same user field
+        Map<String, FieldMapping> userFieldMap = fieldMappings.stream()
+                .filter(mapping -> mapping.getCdlExternalSystemType() == null && StringUtils
+                        .isNotBlank(mapping.getUserField()))
+                .collect(Collectors.toMap(FieldMapping::getUserField, Function.identity()));
+
+        // compare field mapping document after being modified with field mapping best effort
+        for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
+            String userField = bestEffortMapping.getUserField();
+            if (StringUtils.isNotBlank(userField)) {
+                FieldMapping fieldMapping = userFieldMap.get(userField);
+                if (bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
+                    String message = String
+                            .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
+                                    bestEffortMapping.getFieldType());
+                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                            message));
+                } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
+                    String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
+                            fieldMapping.getDateFormatString() :
+                            fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                                    + fieldMapping.getTimeFormatString();
+                    String correctFormat = StringUtils
+                            .isBlank(bestEffortMapping.getTimeFormatString()) ?
+                            bestEffortMapping.getDateFormatString() :
+                            bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                                    + bestEffortMapping.getTimeFormatString();
+                    String message = String
+                            .format("%s is set as %s but appears to be %s in your file.", userField,
+                                    userFormat, correctFormat);
+                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.ERROR,
+                            message));
+                }
+            }
+        }
+
+        List<String> unmappedUserFields = fieldMappings.stream()
+                .filter(fieldMapping -> StringUtils.isNotBlank(fieldMapping.getUserField())
+                        && StringUtils.isBlank(fieldMapping.getMappedField())).map(fieldMapping -> fieldMapping.getUserField())
+                .collect(Collectors.toList());
+        Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Table templateWithStandard = mergeTable(templateTable, standardTable);
+        Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
+        // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         while (iter.hasNext()) {
             Attribute latticeAttr = iter.next();
             String attrName = latticeAttr.getName();
             if (!mappedFields.contains(attrName)) {
-                // required field is a must
-                if (latticeAttr.getRequired() && latticeAttr.getDefaultValueStr() == null) {
-                    String message = String.format("%s is not mapped, and is a required field.", attrName);
-                    validations.add(createValidation(null, attrName, ValidationStatus.ERROR, message));
-                } else {
-                    // check lattice field can be mapped by user field, while not mapped by user
-                    for (FieldMapping fieldMapping : newCustomerFields) {
-                        String userField = fieldMapping.getUserField();
-                        if (!ignored.contains(userField)) {
-                            if (userField.equals(attrName)
-                                    || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
-                                String message = String.format("Lattice field %s can be mapped to %s, while not",
-                                        attrName, userField);
-                                validations.add(createValidation(null, attrName, ValidationStatus.WARNING, message));
-                            }
+                // check lattice field can be mapped by user field, while not mapped by user
+                for (String userField : unmappedUserFields) {
+                    if (!ignored.contains(userField)) { // skip if ignored by user
+                        if (userField.equals(latticeAttr.getDisplayName())
+                                || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
+                            String message = String.format("Lattice field %s can be mapped to %s, while not",
+                                    attrName, userField);
+                            validations.add(createValidation(null, attrName, ValidationStatus.WARNING, message));
                         }
                     }
                 }
             }
         }
-        log.info("ignored fields " + JsonUtils.serialize(ignored));
-        // check user changed behavior
-        for (FieldMapping fieldMapping : fieldMappings) {
-            String message = null;
-            // valid mapping info
-            if (fieldMapping.isMappedToLatticeField()) {
-                validations.add(createValidation(fieldMapping.getUserField(), fieldMapping.getMappedField(), ValidationStatus.VALID,
-                        message));
-            } else if (StringUtils.isBlank(fieldMapping.getMappedField())
-                    && StringUtils.isNotBlank(fieldMapping.getUserField())) {
-                String userField = fieldMapping.getUserField();
-                if (ignored.contains(userField)) {
-                    message = "User ignore this field: " + userField;
-                    validations.add(createValidation(userField, null, ValidationStatus.IGNORED, message));
-                } else {
-                    // check user's behavior on type whether it is legal, first
-                    // get type according to field values
-                    FieldMapping systemRecognised = new FieldMapping();
-                    systemRecognised.setUserField(userField);
-                    UserDefinedType parsedType = resolver.getFieldTypeFromColumnContent(systemRecognised);
-                    UserDefinedType type = fieldMapping.getFieldType();
-                    // check user change field type
-                    if (parsedType != type) {
-                        message = String.format("%s is set as %s but appears to only have %s values.", userField, type,
-                                parsedType);
-                        validations.add(createValidation(userField, null, ValidationStatus.ERROR, message));
-                    } else {
-                        // check user change date or time format
-                        if (UserDefinedType.DATE == type && !resolver.checkUserDateType(fieldMapping)) {
-                            String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString())
-                                    ? fieldMapping.getDateFormatString()
-                                    : fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
-                                            + fieldMapping.getTimeFormatString();
-                            String correctFormat = StringUtils.isBlank(systemRecognised.getTimeFormatString())
-                                    ? systemRecognised.getDateFormatString()
-                                    : systemRecognised.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
-                                            + systemRecognised.getTimeFormatString();
-                            message = String.format("%s is set as %s but appears to be %s in your file.", userField,
-                                    userFormat, correctFormat);
-                            validations.add(createValidation(userField, null, ValidationStatus.ERROR, message));
-                        } else {
-                            // normal user field not mapped to lattice field
-                            message = String.format("User field %s not mapped to lattice field.", userField);
-                            validations.add(createValidation(userField, null, ValidationStatus.INFO, message));
-                        }
-                    }
-                }
-            }
-        }
+
+        // generate template in memory
+        Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
+        Table finalTemplate = mergeTable(templateTable, generatedTemplate);
+        // compare type, require flag between template and standard schema
+        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
 
         return validationDocument;
     }
 
-    private Table mergeTable(Table templateTable, Table standardTable) {
+    private Table mergeTable(Table templateTable, Table renderedTable) {
         if (templateTable == null) {
-            return standardTable;
+            return renderedTable;
         }
         Map<String, Attribute> templateAttrs = new HashMap<>();
         templateTable.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
-        for (Attribute attr : standardTable.getAttributes()) {
+        for (Attribute attr : renderedTable.getAttributes()) {
             if (!templateAttrs.containsKey(attr.getName())) {
-                Attribute newAttr = new Attribute(attr.getName());
-                AttributeUtils.copyPropertiesFromAttribute(attr, newAttr);
-                templateTable.addAttribute(newAttr);
+                templateTable.addAttribute(attr);
             }
         }
         return templateTable;
@@ -376,12 +362,103 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return validation;
     }
 
+    void checkTemplateTable(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
+        Map<String, Attribute> standardAttrs = new HashMap<>();
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
+                , enableEntityMatch);
+        standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
+        for (Map.Entry<String, Attribute> attrEntry : standardAttrs.entrySet()) {
+            if (attrEntry.getValue().getRequired() && attrEntry.getValue().getDefaultValueStr() == null) {
+                if(!templateAttrs.containsKey(attrEntry.getKey())) {
+                    String message = String
+                            .format("%s is not mapped, and is a required field.", attrEntry.getKey());
+                    validations.add(createValidation(null, attrEntry.getKey(), ValidationStatus.ERROR, message));
+                }
+            }
+            if (templateAttrs.containsKey(attrEntry.getKey())) {
+                Attribute attr1 = attrEntry.getValue();
+                Attribute attr2 = templateAttrs.get(attrEntry.getKey());
+                if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
+                    // A temp fix for schema update in maint_4.8.0.
+                    if (InterfaceName.Amount.equals(attr1.getInterfaceName())
+                            || InterfaceName.Quantity.equals(attr1.getInterfaceName())
+                            || InterfaceName.Cost.equals(attr1.getInterfaceName())) {
+                        if (!attr2.getPhysicalDataType().equalsIgnoreCase("int") && !attr2.getPhysicalDataType().equalsIgnoreCase("double")) {
+                            String message = String
+                                    .format("Attribute %s has wrong data type %s", attr2.getDisplayName(),
+                                            attr2.getPhysicalDataType());
+                            validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                                    ValidationStatus.ERROR, message));
+                        }
+                    } else if (InterfaceName.CreatedDate.equals(attr1.getInterfaceName())
+                            || InterfaceName.LastModifiedDate.equals(attr1.getInterfaceName())) {
+                        if (!attr2.getPhysicalDataType().equalsIgnoreCase("string") && !attr2.getPhysicalDataType().equalsIgnoreCase("long")) {
+                            String message = String
+                                    .format("Attribute %s has wrong data type %s", attr2.getDisplayName(),
+                                            attr2.getPhysicalDataType());
+                            validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                                    ValidationStatus.ERROR, message));
+                        }
+
+                    } else {
+                        String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
+                        validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                                ValidationStatus.ERROR, message));
+                    }
+                }
+                if (!attr1.getRequired().equals(attr2.getRequired())) {
+                    String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
+                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                            ValidationStatus.ERROR, message));
+                }
+                if (attr1.getInterfaceName() == null || attr2.getInterfaceName() == null) {
+                    log.warn("Interface name is null for attribute : " + attr1.getName());
+                } else if (!attr1.getInterfaceName().equals(attr2.getInterfaceName())) {
+                    String message = "Interface name is not the same for attribute: " + attr1.getDisplayName();
+                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                            ValidationStatus.ERROR, message));
+
+                }
+            }
+        }
+    }
+
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
         resolveMetadata(sourceFile, fieldMappingDocument, table, false, null, null);
+    }
+
+    private Table generateTemplate(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
+            String source, String feedType) {
+        decodeFieldMapping(fieldMappingDocument);
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        Table table, schemaTable;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        if (dataFeedTask == null) {
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
+        } else {
+            table = dataFeedTask.getImportTemplate();
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
+        }
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
+
+        log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
+        if (!resolver.isFieldMappingDocumentFullyDefined()) {
+            throw new RuntimeException(
+                    String.format("Metadata is not fully defined for file %s", sourceFile.getName()));
+        }
+        resolver.calculateBasedOnFieldMappingDocument(table);
+        return resolver.getMetadata();
     }
 
     @Override
