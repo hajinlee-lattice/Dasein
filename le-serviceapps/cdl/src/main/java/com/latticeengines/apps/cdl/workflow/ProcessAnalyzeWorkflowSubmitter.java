@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,6 +81,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${eai.export.dynamo.signature}")
     private String signature;
+
+    @Value("${cdl.processAnalyze.actions.import.count}")
+    private int importActionCount;
 
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
@@ -240,33 +244,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
+        Set<Long> importActionIds = new HashSet<>();
         List<Long> completedActionIds = actions.stream()
-                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobPids))
+                .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds))
                 .map(Action::getPid).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
-
-        List<Long> attrManagementActionIds = actions.stream()
-                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType())).map(Action::getPid)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
-            log.info(
-                    String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
-            completedActionIds.addAll(attrManagementActionIds);
-        }
-
-        List<Long> businessCalendarChangeActionIds = actions.stream()
-                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE)).map(Action::getPid)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(businessCalendarChangeActionIds)) {
-            log.info(String.format("Actions that associated with business calendar change are: %s",
-                    businessCalendarChangeActionIds));
-            completedActionIds.addAll(businessCalendarChangeActionIds);
-        }
-
-        List<Long> ratingEngineActionIds = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
-                .collect(Collectors.toList());
-        log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
         return completedActionIds;
     }
@@ -409,15 +391,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-                                     List<Long> completedImportAndDeleteJobPids) {
+    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids, Set<Long> importActionIds) {
         boolean isComplete = true; // by default every action is valid
-        if (selectedTypes.contains(action.getType())) {
+        if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
             // special check if is selected type
             isComplete = false;
+            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
+                return false;
+            }
             if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                importActionIds.add(action.getPid());
                 isComplete = true;
-            } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+            } else {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
                         .getActionConfiguration();
                 if (importActionConfiguration == null) {
@@ -425,8 +410,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     return false;
                 }
                 if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    importActionIds.add(action.getPid());
                     isComplete = true;
                 }
+            }
+        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+            isComplete = false;
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                isComplete = true;
             }
         }
         return isComplete;
