@@ -144,24 +144,35 @@ export const actions = {
         // }
         
         var opts = opts || {},
-            channelId = opts.channelId || '',
+            id = opts.id || '',
             isAlwaysOn = opts.isAlwaysOn || false,
-            launchObj = (opts.launchOpts ? opts.launchOpts.launchObj : {}),
             lookupIdMap = opts.lookupIdMap || {},
-            launchCallback = (opts.launchOpts && opts.launchOpts.callback ? opts.launchOpts.callback : null),
-            method = (channelId ? 'put' : 'post');
+            method = (id ? 'put' : 'post'),
+            bucketsToLaunch = opts.bucketsToLaunch,
+            cronSchedule = opts.cronSchedule,
+            excludeItemsWithoutSalesforceId = opts.excludeItemsWithoutSalesforceId,
+            launchUnscored = opts.launchUnscored,
+            topNCount = opts.topNCount,
+            launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
+            launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''); // ?launch-now=true (if once is selected from schedule)
 
         var channelObj = {
-            id: channelId,
-            playLaunch: launchObj,
+            id: id,
             lookupIdMap: lookupIdMap,
-            isAlwaysOn: isAlwaysOn
+            isAlwaysOn: isAlwaysOn,
+            bucketsToLaunch: bucketsToLaunch,
+            cronSchedule: cronSchedule,
+            excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId,
+            launchUnscored: launchUnscored,
+            topNCount: topNCount,
+            launchType: launchType
         };
-        http[method](`/pls/play/${play_name}/channels/${channelId}`, channelObj).then((response) => {
+
+        http[method](`/pls/play/${play_name}/channels/${id}${launchNow}`, channelObj).then((response) => {
             let playstore = store.getState()['playbook'],
                 connections = playstore.connections,
                 connectionIndex = connections.findIndex(function(connection) {
-                    return connection.id === channelId;
+                    return connection.id === id;
                 });
 
             connections[connectionIndex] = response.data;
@@ -171,10 +182,6 @@ export const actions = {
                 payload: connections
             });
             
-            if(opts.launchOpts) {
-                opts.launchOpts.channelId = channelId;
-                actions.saveLaunch(play_name, opts.launchOpts, launchCallback);
-            }
             if(cb && typeof cb === 'function') {
                 cb();
             }
