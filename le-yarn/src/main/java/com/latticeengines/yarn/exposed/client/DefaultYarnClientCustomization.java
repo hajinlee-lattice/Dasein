@@ -310,6 +310,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "-Dlog4j.configuration=file:log4j.properties", //
                 "-Dlog4j2.debug", //
                 "-Dlog4j.configurationFile=log4j2-yarn.xml", //
+                "-DLOG4J_LE_LEVEL=INFO", //
                 "-DLOG4J_DEBUG_DIR=${LOG_DIR}" //
         ), " ");
     }
