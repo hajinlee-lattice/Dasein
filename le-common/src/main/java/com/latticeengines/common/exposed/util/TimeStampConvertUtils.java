@@ -314,7 +314,7 @@ public class TimeStampConvertUtils {
                     }
                 } else {
                     throw new IllegalArgumentException(
-                            "Letter style month was not formated correctly for Joda Parser: " + date);
+                            "Letter style month was not formatted correctly for Joda Parser: " + date);
                 }
             }
 
@@ -338,7 +338,8 @@ public class TimeStampConvertUtils {
                 dates = groups.get(0).getDates();
             } catch (Exception e2) {
                 throw new IllegalArgumentException(
-                        "Natty Parser failed to parse date with error: " + e2.getMessage());
+                        "Natty Parser failed to parse date with error: " + e2.getMessage() +
+                        "\nJoda Parser also failed to parse date with error: " + e.getMessage());
             }
             return dates.get(0).getTime();
         }
@@ -495,7 +496,7 @@ public class TimeStampConvertUtils {
                                 localDateTime = LocalDate.parse(dateWithTimeStripped,
                                         java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
                             } catch (DateTimeParseException e2) {
-                                throw new IllegalArgumentException("Date value (" + dateTime +
+                                throw new IllegalArgumentException("Date-only value (" + dateTime +
                                         ") could not be parsed by " + "format string: " + userDateFormatStr +
                                         "\nException was: " + e.toString());
                             }

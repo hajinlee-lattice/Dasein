@@ -446,7 +446,7 @@ public class TimeStampConvertUtilsUnitTestNG {
             Assert.assertTrue(e instanceof IllegalArgumentException);
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Date value (11/11/11) could not be parsed by format string: YYYY-MM-DD"),
+                            "Date-only value (11/11/11) could not be parsed by format string: YYYY-MM-DD"),
                     "Wrong error message: " + e.getMessage());
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of date only not matching date format.");
@@ -597,7 +597,7 @@ public class TimeStampConvertUtilsUnitTestNG {
             Assert.assertTrue(e instanceof IllegalArgumentException);
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Date value (2018/Sept/01) could not be parsed by format string: YYYY/MMM/DD"),
+                            "Date-only value (2018/Sept/01) could not be parsed by format string: YYYY/MMM/DD"),
                     "Wrong error message: " + e.getMessage());
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of four character month.");
