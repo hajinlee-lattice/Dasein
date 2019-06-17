@@ -85,7 +85,7 @@ public class DebugGatewayWatcher {
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to issue debug gateway passport to " //
-                    + String.valueOf(JsonUtils.serialize(signal)), e);
+                    + JsonUtils.serialize(signal), e);
         }
     }
 
