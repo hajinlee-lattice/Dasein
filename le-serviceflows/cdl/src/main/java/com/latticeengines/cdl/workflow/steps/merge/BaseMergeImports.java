@@ -364,7 +364,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             log.info("Bump up entity match version for environments = {}", environments);
             BumpVersionResponse response = matchProxy.bumpVersion(request);
             log.info("Current entity match versions = {}", response.getVersions());
-            putObjectInContext(NEW_ENTITY_MATCH_ENVS, environments);
+            updatedEnvs.addAll(environments);
+            putObjectInContext(NEW_ENTITY_MATCH_ENVS, updatedEnvs);
         }
     }
 
