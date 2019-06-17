@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -597,7 +598,7 @@ public class MetadataResolver {
                 fundamentalType = ModelingMetadata.FT_NUMERIC;
                 break;
             case "LONG":
-                fundamentalType = ModelingMetadata.FT_YEAR;
+                fundamentalType = FundamentalType.DATE.getName();
                 break;
             case "STRING":
             default:
@@ -731,7 +732,7 @@ public class MetadataResolver {
                     useTimeZone = true;
                 }
             }
-            
+
         }
         if (MapUtils.isEmpty(hitMap)) {
             return null;
