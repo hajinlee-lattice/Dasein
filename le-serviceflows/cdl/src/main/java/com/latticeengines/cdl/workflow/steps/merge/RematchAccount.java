@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,10 +20,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 
@@ -56,8 +60,11 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("RematchAccount");
 
+        int dropStep = 0;
         List<TransformationStepConfig> steps = new ArrayList<>();
-        TransformationStepConfig match = match(true);
+        TransformationStepConfig drop = dropRefreshingIds();
+        TransformationStepConfig match = match(dropStep);
+        steps.add(drop);
         steps.add(match);
         request.setSteps(steps);
         return request;
@@ -70,14 +77,28 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
         addToListInContext(TEMPORARY_CDL_TABLES, masterTableName, String.class);
     }
 
-    private TransformationStepConfig match(boolean registerBatchStore) {
+    private TransformationStepConfig dropRefreshingIds() {
         TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
         addBaseTables(step, masterTableName);
-        step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig());
-        if (registerBatchStore) {
-            setTargetTable(step, batchStoreTablePrefix);
+        CopyConfig config = new CopyConfig();
+        List<String> colsToDrop = new ArrayList<>();
+        colsToDrop.add(InterfaceName.LatticeAccountId.name());
+        if (configuration.isEntityMatchEnabled()) {
+            colsToDrop.add(InterfaceName.EntityId.name());
+            colsToDrop.add(InterfaceName.AccountId.name());
         }
+        config.setDropAttrs(colsToDrop);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig match(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MATCH);
+        step.setInputSteps(Collections.singletonList(inputStep));
+        step.setConfiguration(getMatchConfig());
+        setTargetTable(step, batchStoreTablePrefix);
         return step;
     }
 
