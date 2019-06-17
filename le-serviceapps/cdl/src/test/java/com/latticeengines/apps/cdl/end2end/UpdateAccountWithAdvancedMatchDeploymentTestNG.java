@@ -70,6 +70,12 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     }
 
     @Override
+    protected void createSystems() {
+        mockImportSystem("DefaultSystem");
+        mockImportSystem("Mkto");
+    }
+
+    @Override
     protected Long getPrePAAccountCount() {
         return ENTITY_MATCH_ACCOUNT_1;
     }
@@ -79,11 +85,15 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 2, "DefaultSystem_AccountData");
         Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 3, "DefaultSystem_AccountData");
+        mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 98, "DefaultSystem_AccountData_Test");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Account, ADVANCED_MATCH_SUFFIX, 99, "Mkto_AccountData_Test");
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 2, "DefaultSystem_ContactData");
         Thread.sleep(2000);
-        mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 3, "DefaultSystem_ContactData");
+        mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 98, "DefaultSystem_ContactData_Test");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 99, "Mkto_ContactData_Test");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }

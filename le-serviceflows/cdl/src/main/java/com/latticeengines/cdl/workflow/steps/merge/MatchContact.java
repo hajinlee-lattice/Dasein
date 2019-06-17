@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.C
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -109,7 +110,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
         String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
-                getInputTableColumnNames(0), newAccountTableName);
+                getInputTableColumnNames(0), getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
+                newAccountTableName);
         step.setConfiguration(configStr);
         return step;
     }

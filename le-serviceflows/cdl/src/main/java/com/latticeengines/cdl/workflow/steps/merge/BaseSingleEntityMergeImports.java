@@ -5,11 +5,15 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
@@ -32,11 +37,15 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProc
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseMergeImports<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseSingleEntityMergeImports.class);
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     protected String inputMasterTableName;
     protected String diffTableName;
@@ -241,6 +250,42 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 .stream() //
                 .map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Retrieve all system IDs for target entity of current tenant (sorted by system
+     * priority from high to low)
+     *
+     * @param entity
+     *            target entity
+     * @return non-null list of system IDs
+     */
+    protected List<String> getSystemIds(BusinessEntity entity) {
+        if (entity != BusinessEntity.Account && entity != BusinessEntity.Contact) {
+            throw new UnsupportedOperationException(
+                    String.format("Does not support retrieving system IDs for entity [%s]", entity.name()));
+        }
+
+        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace.toString());
+        if (CollectionUtils.isEmpty(systems)) {
+            return Collections.emptyList();
+        }
+
+        log.info("Current systems = {}", systems);
+
+        return systems.stream() //
+                .filter(Objects::nonNull) //
+                // sort by system priority (lower number has higher priority)
+                .sorted(Comparator.comparing(S3ImportSystem::getPriority)) //
+                .map(sys -> {
+                    if (entity == BusinessEntity.Account) {
+                        return sys.getAccountSystemId();
+                    } else {
+                        return sys.getContactSystemId();
+                    }
+                }) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toList());
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
