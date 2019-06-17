@@ -12,6 +12,7 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.service.impl.AccountMasterColumnServiceImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component("testMatchInputService")
@@ -42,7 +43,8 @@ public class TestMatchInputService {
     public ColumnSelection enrichmentSelection() {
         return constructColumnSelection(Arrays.asList( //
                 "TechIndicator_AddThis", //
-                "TechIndicator_AdobeCreativeSuite"));
+                "TechIndicator_AdobeCreativeSuite", //
+                InterfaceName.IsMatched.name()));
     }
 
     public ColumnSelection companyProfileSelection() {
