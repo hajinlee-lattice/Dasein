@@ -78,7 +78,23 @@
             }
         }
     }
-    .talking-points {
+    .talking-points-label {
+        & > strong {
+            float: left;
+        }
+        & > a {
+            font-size: 12px;
+            font-weight: normal;
+            float: right;
+            margin-right: 20px;
+        }
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+    }
+    .talking-points-count {
         & > a {
             display: block;
         }
