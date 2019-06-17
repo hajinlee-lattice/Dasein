@@ -102,7 +102,8 @@ public class PlayServiceImpl implements PlayService {
         log.info(String.format("%s play %sfor tenant %s", //
                 play.getName() == null ? "Creating" : "Updating", //
                 play.getName() == null //
-                        ? "" : String.format("with name: %s, ", play.getName()),
+                        ? ""
+                        : String.format("with name: %s, ", play.getName()),
                 tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
@@ -148,9 +149,8 @@ public class PlayServiceImpl implements PlayService {
             throw new LedpException(LedpCode.LEDP_18144);
         }
         Play play = playEntityMgr.getPlayByName(name, considerDeleted);
-        RatingEngine ratingEngine = play.getRatingEngine();
-        if (play != null && ratingEngine != null) {
-            updateLastRefreshedDate(ratingEngine);
+        if (play != null && play.getRatingEngine() != null) {
+            updateLastRefreshedDate(play.getRatingEngine());
             setBucketMetadata(tenant, play);
         }
         return play;
@@ -168,10 +168,9 @@ public class PlayServiceImpl implements PlayService {
 
                 Map<String, Long> counts = play.getRatingEngine().getCountsAsMap();
                 if (counts != null) {
-                    play.getRatingEngine()
-                            .setBucketMetadata(counts.keySet().stream() //
-                                    .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
-                                    .collect(Collectors.toList()));
+                    play.getRatingEngine().setBucketMetadata(counts.keySet().stream() //
+                            .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                            .collect(Collectors.toList()));
                 }
             } else {
                 String reId = play.getRatingEngine().getId();
