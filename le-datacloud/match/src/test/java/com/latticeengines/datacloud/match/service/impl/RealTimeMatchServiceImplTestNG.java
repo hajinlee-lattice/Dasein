@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
@@ -47,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component
@@ -214,16 +217,21 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { 456, "testfakedomain.com", null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
-        input.setCustomSelection(testMatchInputService.enrichmentSelection());
+        ColumnSelection columnSelection = testMatchInputService.enrichmentSelection();
+        input.setCustomSelection(columnSelection);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
         // Check IsMatched flag & column
+        OptionalInt isMatchedIndex = IntStream.range(0, columnSelection.getColumns().size()) //
+                .filter(i -> InterfaceName.IsMatched.name().equals(columnSelection.getColumns().get(i).getColumnName())) //
+                .findFirst();
         Assert.assertTrue(output.getResult().get(0).isMatched());
-        Assert.assertTrue((boolean) (output.getResult().get(0).getOutput().get(2)));
-        Assert.assertTrue(output.getResult().get(1).isMatched());
-        Assert.assertFalse((boolean) (output.getResult().get(1).getOutput().get(2)));
+        Assert.assertTrue(isMatchedIndex.isPresent());
+        Assert.assertTrue((boolean) (output.getResult().get(0).getOutput().get(isMatchedIndex.getAsInt())));
+        Assert.assertFalse(output.getResult().get(1).isMatched());
+        Assert.assertFalse((boolean) (output.getResult().get(1).getOutput().get(isMatchedIndex.getAsInt())));
     }
 
     @Test(groups = "functional")
