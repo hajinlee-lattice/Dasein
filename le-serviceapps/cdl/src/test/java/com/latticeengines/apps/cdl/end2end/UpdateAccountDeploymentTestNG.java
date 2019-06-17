@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -24,6 +25,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         new Thread(this::createTestSegment3).start();
 
+        createSystems();
         importData();
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
@@ -39,6 +41,13 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
             }
         }
 
+    }
+
+    /**
+     * Create all {@link S3ImportSystem} required by e2e test
+     */
+    protected void createSystems() {
+        // do nothing
     }
 
     protected Long getPrePAAccountCount() {
