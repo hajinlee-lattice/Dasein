@@ -139,13 +139,13 @@ class SystemsComponent extends Component {
                 <div class="launch-text launched">
                     <ul>
                         <li>
-                            Last Launched: {new Date(launch.created).toLocaleDateString("en-US")}
+                            Last Launched: {new Date(connection.created).toLocaleDateString("en-US")}
                         </li>
                         <li>
-                            Accounts Sent: {launch.accountsLaunched.toLocaleString()}
+                            Accounts Sent: {connection.accountsLaunched.toLocaleString()}
                         </li>
                         <li>
-                            Contacts Sent: {launch.contactsLaunched.toLocaleString()}
+                            Contacts Sent: {connection.contactsLaunched.toLocaleString()}
                         </li>
                     </ul>
                 </div>
@@ -261,8 +261,8 @@ class SystemsComponent extends Component {
 
     activateButtonClickHandler(connection, play) {
         actions.saveChannel(play.name, {
-            channelId: connection.id,
-            playLaunch: connection.playLaunch,
+            id: connection.id,
+            //playLaunch: connection.playLaunch,
             lookupIdMap: connection.lookupIdMap,
             isAlwaysOn: !connection.isAlwaysOn
         });
@@ -316,7 +316,7 @@ class SystemsComponent extends Component {
         } else {
             return (
                 <Aux>
-                    <p>Loading...</p>
+                    <div className="loader"></div>
                 </Aux>
             );
         }
