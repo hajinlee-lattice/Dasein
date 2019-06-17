@@ -28,12 +28,13 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
-
+/**
+ * Should only run this step for non-EntityMatch tenants
+ */
 @Component(RematchAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountStepConfiguration> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(RematchAccount.class);
 
     static final String BEAN_NAME = "rematchAccount";
@@ -52,14 +53,15 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
                 log.info("Found re-matched table in context, going through short-cut mode.");
                 rematchedTableName = rematchedTableNameInContext;
                 registerBatchStore();
-                addToListInContext(TEMPORARY_CDL_TABLES, masterTableName, String.class);
+                if (!rematchedTable.getName().equalsIgnoreCase(masterTableName)) {
+                    addToListInContext(TEMPORARY_CDL_TABLES, masterTableName, String.class);
+                }
                 return null;
             }
         }
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("RematchAccount");
-
         int dropStep = 0;
         List<TransformationStepConfig> steps = new ArrayList<>();
         TransformationStepConfig drop = dropRefreshingIds();
@@ -84,10 +86,6 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
         CopyConfig config = new CopyConfig();
         List<String> colsToDrop = new ArrayList<>();
         colsToDrop.add(InterfaceName.LatticeAccountId.name());
-        if (configuration.isEntityMatchEnabled()) {
-            colsToDrop.add(InterfaceName.EntityId.name());
-            colsToDrop.add(InterfaceName.AccountId.name());
-        }
         config.setDropAttrs(colsToDrop);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
@@ -105,12 +103,7 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
         Set<String> columnNames = getMasterTableColumnNames();
-        if (configuration.isEntityMatchEnabled()) {
-            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), null);
-        } else {
-            return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
-        }
+        return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
     }
 
     private void setMasterTableName() {
