@@ -457,6 +457,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
 
         }
+        // 4. Set External Id field mapToLattice flag
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
