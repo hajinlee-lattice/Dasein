@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
