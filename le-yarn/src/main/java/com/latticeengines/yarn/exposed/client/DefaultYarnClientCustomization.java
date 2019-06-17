@@ -23,9 +23,11 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.math.IntMath;
+import com.latticeengines.camille.exposed.watchers.DebugGatewayWatcher;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public class DefaultYarnClientCustomization extends YarnClientCustomization {
@@ -282,8 +284,17 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
+        String customer = containerProperties.getProperty(AppMasterProperty.CUSTOMER.name());
+        String logLevel = "INFO";
+        if (StringUtils.isNotBlank(customer)) {
+            customer = CustomerSpace.shortenCustomerSpace(customer);
+            if (DebugGatewayWatcher.hasPassport(customer)) {
+                logLevel = "DEBUG";
+            }
+        }
+
         environment.putIfAbsent("LOG_DIR", "<LOG_DIR>");
-        environment.putIfAbsent("LE_LOG_OPTS", getLogOpts());
+        environment.putIfAbsent("LE_LOG_OPTS", getLogOpts(logLevel));
         environment.putIfAbsent("LE_CIPHER_OPTS", CipherUtils.getSecretPropertyStr()); // secret
         environment.putIfAbsent("LE_JACOCO_OPT", getJacocoOpt(containerProperties));
         environment.putIfAbsent("LE_TRUSTSTORE_OPT", getTrustStoreOpt(containerProperties));
@@ -304,13 +315,13 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         ), " ");
     }
 
-    private static String getLogOpts() {
+    private static String getLogOpts(String logLevel) {
         return StringUtils.join(Arrays.asList( //
                 "-Dlog4j.debug", //
                 "-Dlog4j.configuration=file:log4j.properties", //
                 "-Dlog4j2.debug", //
                 "-Dlog4j.configurationFile=log4j2-yarn.xml", //
-                "-DLOG4J_LE_LEVEL=INFO", //
+                "-DLOG4J_LE_LEVEL=" + logLevel, //
                 "-DLOG4J_DEBUG_DIR=${LOG_DIR}" //
         ), " ");
     }
