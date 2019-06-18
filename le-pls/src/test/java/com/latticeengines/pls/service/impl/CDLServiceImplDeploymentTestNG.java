@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -174,6 +175,6 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 return;
             }
         }
-        assertTrue(false, "No data collection folder was created!");
+        fail("No data collection folder was created!");
     }
 }
