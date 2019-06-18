@@ -32,6 +32,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLooku
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoDBLookupServiceImpl;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateServiceImpl;
+import com.latticeengines.datacloud.match.actors.visitor.impl.EntityIdAssociateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityLookupServiceImpl;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntitySystemIdBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.MatchAnchorActor;
@@ -125,8 +126,10 @@ public class MatchActorSystemExcetionHandlingTestNG extends DataCloudMatchFuncti
                 { AccountMatchPlannerMicroEngineActor.class.getSimpleName(), true, accountMatchDG }, //
                 { DunsDomainBasedMicroEngineActor.class.getSimpleName(), true, accountMatchDG }, //
                 { FUZZY_MATCH_JUNCTION_ACTOR, true, accountMatchDG }, //
+                { EntityIdAssociateMicroEngineActor.class.getSimpleName(), true, accountMatchDG }, //
                 { DunsGuideValidateMicroEngineActor.class.getSimpleName(), false, ldcMatchDG }, //
                 { CachedDunsGuideValidateMicroEngineActor.class.getSimpleName(), true, ldcMatchDG }, //
+
                 // Services
                 { EntityLookupServiceImpl.class.getSimpleName(), true, accountMatchDG }, //
                 { EntityAssociateServiceImpl.class.getSimpleName(), true, accountMatchDG }, //

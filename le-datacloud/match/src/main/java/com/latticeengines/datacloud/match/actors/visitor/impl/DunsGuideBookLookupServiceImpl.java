@@ -199,7 +199,7 @@ public class DunsGuideBookLookupServiceImpl extends DataSourceLookupServiceBase 
                 for (int i = 0; i < params.size(); i++) {
                     String requestId = params.get(i).getKey();
                     String returnAddr = getReqReturnAddr(requestId);
-                    // Inject failure is ONLY for testing purpose
+                    // Inject failure only for testing purpose
                     injectFailure(getReq(requestId));
                     removeReq(requestId);
                     sendResponse(requestId, books.get(i), returnAddr);
