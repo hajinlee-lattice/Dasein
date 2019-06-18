@@ -17,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -129,6 +131,11 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @JsonProperty("nextScheduledLaunch")
     @Column(name = "NEXT_SCHEDULED_LAUNCH")
     private Date nextScheduledLaunch;
+
+    @JsonProperty("channelConfig")
+    @Column(name = "CHANNEL_CONFIG")
+    @Lob
+    private String channelConfig;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -333,6 +340,18 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setNextScheduledLaunch(Date nextScheduledLaunch) {
         this.nextScheduledLaunch = nextScheduledLaunch;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        ChannelConfig newChannelConfig = null;
+        if (channelConfig != null) {
+            newChannelConfig = JsonUtils.deserialize(channelConfig, ChannelConfig.class);
+        }
+        return newChannelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = JsonUtils.serialize(channelConfig);
     }
 
 }

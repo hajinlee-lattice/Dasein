@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayLaunchChannelRepository;
 import com.latticeengines.apps.cdl.repository.reader.PlayLaunchChannelReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.PlayLaunchChannelWriterRepository;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -129,6 +130,24 @@ public class PlayLaunchChannelEntityMgrImpl
         }
         if (playLaunchChannel.getCronSchedule() != null) {
             existingPlayLaunchChannel.setCronSchedule(playLaunchChannel.getCronSchedule());
+        }
+
+        if (playLaunchChannel.getChannelConfig() != null) {
+            if (existingPlayLaunchChannel.getChannelConfig() != null) {
+                log.info("playLaunchChannel");
+                log.info(JsonUtils.serialize(playLaunchChannel.getChannelConfig()));
+                log.info("existingPlayLaunchChannel before copy");
+                log.info(JsonUtils.serialize(existingPlayLaunchChannel.getChannelConfig()));
+
+                existingPlayLaunchChannel.setChannelConfig(
+                        existingPlayLaunchChannel.getChannelConfig().copyConfig(playLaunchChannel.getChannelConfig()));
+
+                log.info("existingPlayLaunchChannel after copy");
+                log.info(JsonUtils.serialize(existingPlayLaunchChannel.getChannelConfig()));
+
+            } else {
+                existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
+            }
         }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
 

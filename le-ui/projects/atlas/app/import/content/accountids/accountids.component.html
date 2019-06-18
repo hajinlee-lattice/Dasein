@@ -1,4 +1,4 @@
-<div class="import-accountid container file-import-content">
+<div class="import-accountid container file-import-content" ng-if="!vm.isMultipleTemplates()">
     <div class="header">
         <h2>Account ID</h2>
         <p ng-if="!vm.entityMatchEnabled">
@@ -32,4 +32,132 @@
             </div>
         </div>
     </form>
+</div>
+
+<!-- MULTI TEMPLATES -->
+
+<!-- UNIQUE ID -->
+<div
+  class="import-multipletemplates container file-import-content"
+  ng-if="vm.isMultipleTemplates()"
+>
+  <div class="header">
+    <h2>Unique ID</h2>
+    <p>
+      Select your unique IDs to de-duplicate your account records.
+    </p>
+  </div>
+  <form name="form">
+    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
+      <div class="id-options-item">
+          <select class="form-control">
+            <option>
+              System 1
+            </option>
+          </select>
+          <span class="info">
+              This field will be available as 'your system name'. Account ID in My
+              Attributes​
+          </span>
+      </div>
+      <br>
+      <label class="match-contact">
+        <input type="checkbox" />
+        Match this ID to Contact ID field in Lattice
+      </label>
+      <p><strong>Only one of your systems can map to Account ID. Once enabled, this cannot be changed or removed.​</strong> </p>
+    </div>
+  </form>
+<!--  -->
+  
+
+<!-- MULTI TEMPLATES -->
+
+<!-- UNIQUE ID -->
+<div
+  class="import-multipletemplates container file-import-content"
+  ng-if="vm.isMultipleTemplates()"
+>
+  <div class="header">
+    <h2>Unique ID</h2>
+    <p>
+      Select your unique IDs to de-duplicate your contact records.
+    </p>
+  </div>
+  <form name="form">
+    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
+      <div class="id-options-item">
+          <select class="form-control">
+            <option>
+              System 1
+            </option>
+          </select>
+          <span class="info">
+              This field will be available as 'your system name'.Contact ID in My
+              Attributes​
+          </span>
+      </div>
+      <br>
+      <label class="match-contact">
+        <input type="checkbox" />
+        Match this ID to Contact ID field in Lattice
+      </label>
+      <p><strong>Only one of your systems can map to Account ID. Once enabled, this cannot be changed or removed.​</strong> </p>
+    </div>
+  </form>
+<!--  -->
+  <!-- MATCH IDs -->
+  <div class="match-ids-multi-templates">
+    <div class="header">
+      <h2>Match IDs</h2>
+      <p>
+        Select Other IDS from in your file uploaded. This ids will be used to
+        match you accounts with accounts from other systems
+      </p>
+      <p>Note: These are not used to de-duplicate your accounts</p>
+      <br />
+    </div>
+
+    <form name="form">
+      <ul class="field-mapping multi-templates">
+        <li class="header">
+          <ul class="match-id-header">
+            <li class="system-name">Fields in the uploaded File</li>
+            <li class="system-type">Use ID from System</li>
+          </ul>
+        </li>
+        <li
+          class="field"
+          ng-repeat="field in vm.matchIdItems track by $index"
+        >
+          <ul class="match-ids">
+            <li class="system-name">
+                <select
+                class="form-control"
+                
+              >
+              </select>
+            </li>
+            <li class="system-type">
+              <select
+                class="form-control"
+                
+              >
+              </select>
+            </li>
+            <li class="remove-button" ng-click="vm.removeMatchId($index)">
+              <span title="remove mapping"><i class="fa fa-times"></i></span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </form>
+    <button
+      class="button gray-button match-id-add"
+      type="button"
+      ng-click="vm.addMatchId()"
+    >
+      Add another ID
+    </button>
+  </div>
 </div>
