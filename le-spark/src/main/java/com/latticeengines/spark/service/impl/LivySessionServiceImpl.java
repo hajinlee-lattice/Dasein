@@ -46,6 +46,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             payLoad.put("name", name);
         }
         Map<String, String> conf = new HashMap<>();
+        conf.put("livy.rsc.launcher.port.range", "10000~10999");
         if (MapUtils.isNotEmpty(sparkConf)) {
             conf.putAll(sparkConf);
         }
