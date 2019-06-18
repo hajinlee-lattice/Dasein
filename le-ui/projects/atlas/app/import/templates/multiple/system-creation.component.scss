@@ -1,5 +1,10 @@
 @import "atlas/react/react-main.component.scss";
+
+.systems-grid{
+  grid-template-columns: repeat( auto-fill, minmax(150px, 1fr) );//override this 260px to change column width
+}
 .system-creation {
+  min-height: 100px;
   .le-header {
     font-size: 18px;
     margin: 0 0 1em 0;
@@ -24,7 +29,8 @@
       cursor: pointer;
     }
     .system-image {
-      height: 50px;
+      max-height: 50px;
+      // border: 1px solid red;
     }
   }
 }
