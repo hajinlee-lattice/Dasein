@@ -20,8 +20,9 @@ export default class SystemCreationComponent extends Component {
         this.validate = this.validate.bind(this);
         this.systemsObj = [
             { name: 'Salesforce', img: '/atlas/assets/images/logo_salesForce_2.png', text: 'Text' },
+            { name: 'Marketo', img: '/atlas/assets/images/logo_marketo_2.png', text: 'Text' },
             { name: 'Eloqua', img: '/atlas/assets/images/eloqua.png', text: 'Text' },
-            { name: 'Others', img: '/atlas/assets/images/logo_others.png', text: 'Text' }
+            { name: 'Others', img: '/atlas/assets/images/other_systems.png', text: 'Text' }
         ];
         this.state = { systemSelected: undefined, valid: false, newSystemName: '' };
     }
@@ -49,10 +50,10 @@ export default class SystemCreationComponent extends Component {
                     // console.log('CLIKC');
                     this.setState({ systemSelected: system }, this.validate);
                 }}>
-                    <div className="system-image"><LeCardImg src={system.img} /></div>
-                    <LeCardBody contentAlignment={CENTER}>
+                    <LeCardImg src={system.img} classNames="system-image" />
+                    {/* <LeCardBody contentAlignment={CENTER}>
                         <p>{system.text}</p>
-                    </LeCardBody>
+                    </LeCardBody> */}
                 </LeCard>
             );
         }, this);
@@ -67,7 +68,7 @@ export default class SystemCreationComponent extends Component {
                 <LeVPanel vstretch={"true"} hstretch={"true"} className={"system-creation"}>
                     <p className="le-header">Import Data: Add System</p>
                     <p className="le-sub-header">Select System</p>
-                    <GridLayout gap={MIN_GAP}>
+                    <GridLayout gap={MIN_GAP} classNames="systems-grid">
                         {this.getSystemSupported()}
                     </GridLayout>
 

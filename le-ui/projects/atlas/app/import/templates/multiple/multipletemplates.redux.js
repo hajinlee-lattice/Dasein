@@ -26,7 +26,8 @@ export const actions = {
     },
     fetchPriorities: () => {
         let observer = new Observer(response => {
-            // httpService.unsubscribeObservable(observer)
+            httpService.unsubscribeObservable(observer)
+            console.log(response);
             return store.dispatch({
                 type: CONST.FETCH_PRIORITIES,
                 payload: response.data,
@@ -45,7 +46,7 @@ export const actions = {
                 ],
             });
         }, 3000);
-        // httpService.get('/pls/cdl/s3import/template', observer, {})
+        httpService.get('/pls/cdl/s3import/system/list', observer, {})
     },
     resetPriorities: () => {
         return store.dispatch({

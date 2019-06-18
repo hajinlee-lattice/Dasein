@@ -73,6 +73,9 @@
   </form>
 </div>
 
+<!-- MULTI TEMPLATES -->
+
+<!-- UNIQUE ID -->
 <div
   class="import-multipletemplates container file-import-content"
   ng-if="vm.isMultipleTemplates()"
@@ -84,41 +87,41 @@
     </p>
   </div>
   <form name="form">
-    <div class="id-options" ng-init="vm.checkFieldsDelay(form)">
+    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
       <div class="id-options-item">
-        <div>
-          <label for="dedupeField">
-            This field will be available as 'your system name'.Contact ID in My
-            Attributes​
-          </label>
           <select class="form-control">
             <option>
               System 1
             </option>
           </select>
-        </div>
+          <span class="info">
+              This field will be available as 'your system name'.Contact ID in My
+              Attributes​
+          </span>
       </div>
-      <label>
-        Match with ID
+      <br>
+      <label class="match-contact">
         <input type="checkbox" />
+        Match this ID to Contact ID field in Lattice
       </label>
-      <p>Note:</p>
+      <p><strong>Only one of your systems can map to Account ID. Once enabled, this cannot be changed or removed.​</strong> </p>
     </div>
   </form>
-
-  <div class="match-ids file-import-content">
+<!--  -->
+  <!-- MATCH IDs -->
+  <div class="match-ids-multi-templates">
     <div class="header">
       <h2>Match IDs</h2>
       <p>
-        Select Other IDS from in your file uploaded. This ids will be used to match you accounts with accounts from other systems
+        Select Other IDS from in your file uploaded. This ids will be used to
+        match you accounts with accounts from other systems
       </p>
-      <br>
       <p>Note: These are not used to de-duplicate your accounts</p>
-      <br>
+      <br />
     </div>
 
     <form name="form">
-      <ul class="field-mapping">
+      <ul class="field-mapping multi-templates">
         <li class="header">
           <ul class="match-id-header">
             <li class="system-name">Fields in the uploaded File</li>
@@ -127,50 +130,36 @@
         </li>
         <li
           class="field"
-          ng-repeat="field in vm.fields track by $index"
-          ng-init="vm.fieldMapping[$index] = vm.fieldMapping[$index] || {}"
+          ng-repeat="field in vm.matchIdItems track by $index"
         >
-          <ul>
+          <ul class="match-ids">
             <li class="system-name">
-              <input
+                <select
                 class="form-control"
-                type="text"
-                ng-model="vm.fieldMapping[$index].mappedField"
-                ng-blur="vm.changeLatticeField(vm.fieldMapping, form)"
-                ng-init="vm.checkValidDelay(form)"
-                ng-required="true"
-              />
+                
+              >
+              </select>
             </li>
             <li class="system-type">
               <select
                 class="form-control"
-                ng-model="vm.fieldMapping[$index].cdlExternalSystemType"
-                ng-required="true"
-                ng-class="{'required': true}"
-                ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+                
               >
-                <option value="" hidden disabled>--</option>
-                <option ng-repeat="type in field.types" value="{{ type }}">
-                  {{ type }}
-                </option>
               </select>
             </li>
-            <li class="remove-button">
-              <span
-                title="remove mapping"
-                ><i class="fa fa-times"></i
-              ></span>
+            <li class="remove-button" ng-click="vm.removeMatchId($index)">
+              <span title="remove mapping"><i class="fa fa-times"></i></span>
             </li>
           </ul>
         </li>
       </ul>
     </form>
     <button
-      class="button gray-button"
+      class="button gray-button match-id-add"
       type="button"
-      ng-click="vm.addIdentifier($event)"
+      ng-click="vm.addMatchId()"
     >
-      Add
+      Add another ID
     </button>
   </div>
 </div>
