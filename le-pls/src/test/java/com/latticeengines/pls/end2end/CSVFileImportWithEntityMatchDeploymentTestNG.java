@@ -44,7 +44,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testInvalidFile")
+    @Test(groups = "deployment")
     public void testImport() {
         prepareBaseData(ENTITY_ACCOUNT);
         getDataFeedTask(ENTITY_ACCOUNT);
@@ -53,7 +53,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
         Assert.assertNull(accountTemplate.getAttribute(InterfaceName.AccountId));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testInvalidFile() throws IOException {
         SourceFile accountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
