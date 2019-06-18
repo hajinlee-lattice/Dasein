@@ -28,7 +28,8 @@ angular.module('lp.import.wizard.accountids', [])
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
         keyMap: {},
-        saveMap: {}
+        saveMap: {},
+        matchIdItems: []
     });
 
     vm.init = function() {
