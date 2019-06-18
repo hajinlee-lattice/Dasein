@@ -90,11 +90,9 @@
     }
   
     .match-ids-multi-templates{
-      // display: flex;
       flex-direction: row;
       width: 100%;
       .field-mapping.multi-templates {
-        // border: 1px solid red;
         width: 100%;
         .match-id-header{
           width: 100%;

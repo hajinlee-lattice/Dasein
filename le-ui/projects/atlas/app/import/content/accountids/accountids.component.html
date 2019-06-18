@@ -34,44 +34,8 @@
     </form>
 </div>
 
-<!-- MULTI TEMPLATES -->
 
-<!-- UNIQUE ID -->
-<div
-  class="import-multipletemplates container file-import-content"
-  ng-if="vm.isMultipleTemplates()"
->
-  <div class="header">
-    <h2>Unique ID</h2>
-    <p>
-      Select your unique IDs to de-duplicate your account records.
-    </p>
-  </div>
-  <form name="form">
-    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
-      <div class="id-options-item">
-          <select class="form-control">
-            <option>
-              System 1
-            </option>
-          </select>
-          <span class="info">
-              This field will be available as 'your system name'. Account ID in My
-              Attributes​
-          </span>
-      </div>
-      <br>
-      <label class="match-contact">
-        <input type="checkbox" />
-        Match this ID to Contact ID field in Lattice
-      </label>
-      <p><strong>Only one of your systems can map to Account ID. Once enabled, this cannot be changed or removed.​</strong> </p>
-    </div>
-  </form>
-<!--  -->
-  
 
-<!-- MULTI TEMPLATES -->
 
 <!-- UNIQUE ID -->
 <div
@@ -89,7 +53,7 @@
       <div class="id-options-item">
           <select class="form-control">
             <option>
-              System 1
+              System 1.AccountID
             </option>
           </select>
           <span class="info">
