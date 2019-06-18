@@ -837,14 +837,14 @@ public class SchemaRepository {
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
-                .fundamentalType(FundamentalType.DATE.name()) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
-                .fundamentalType(FundamentalType.DATE.name()) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         return table;
     }
