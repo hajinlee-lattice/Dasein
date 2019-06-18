@@ -105,10 +105,10 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             throw new RuntimeException("Cannot find raw transaction table.");
         }
 
-        long cnt = ScalingUtils.getTableCount(rawTable);
-        int multiplier = ScalingUtils.getMultiplier(cnt);
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
         if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on raw txn table count=" + cnt);
+            log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
             scalingMultiplier = multiplier;
         }
 
