@@ -13,7 +13,8 @@ var CONST = {
     ACCOUNTS_COVERAGE: 'ACCOUNTS_COVERAGE',
     EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID: 'EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID',
     DESTINATION_ACCOUNT_ID: 'DESTINATION_ACCOUNT_ID',
-    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE'
+    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE',
+    FETCH_TYPES: 'FETCH_TYPES'
 }
 
 const initialState = {
@@ -25,7 +26,8 @@ const initialState = {
     accountsCoverage: null,
     excludeItemsWithoutSalesforceId: null,
     destinationAccountId: null,
-    playbookWizardStore: null
+    playbookWizardStore: null,
+    types: null
 };
 
 export const actions = {
@@ -103,10 +105,33 @@ export const actions = {
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
     },
-    savePlay: (play) => {
-        store.dispatch({
-            type: CONST.SAVE_PLAY,
-            payload: play
+    fetchTypes: (cb, deferred) => {
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_TYPES,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.get('/pls/playtypes', observer, {});
+    },
+    savePlay: (opts, cb) => {
+        http.post('/pls/play/', opts).then((response) => {
+            store.dispatch({
+                type: CONST.SAVE_PLAY,
+                payload: response.data
+            });
+            
+            if(cb && typeof cb === 'function') {
+                cb();
+            }
         });
     },
     savePlayLaunch: (play_name, opts) => {
@@ -277,6 +302,11 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 ratings: action.payload
+            }
+        case CONST.FETCH_TYPES:
+            return {
+                ...state,
+                types: action.payload
             }
         case CONST.SAVE_LAUNCH:
             return {

@@ -306,7 +306,7 @@ class LaunchComponent extends Component {
             actions.saveChannel(play.name, {
                 id: connection.id,
                 lookupIdMap: connection.lookupIdMap,
-                isAlwaysOn: !connection.isAlwaysOn,
+                isAlwaysOn: (!launchObj.launchSchedule ? false : !connection.isAlwaysOn),
                 bucketsToLaunch: launchObj.bucketsToLaunch,
                 cronSchedule: launchObj.launchSchedule, //cronSchedule, //?
                 excludeItemsWithoutSalesforceId: launchObj.excludeItemsWithoutSalesforceId,
