@@ -286,6 +286,42 @@ public class TimeStampConvertUtilsUnitTestNG {
         actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23-31-04.123", "YYYY/MM/DD", "00-00-00.000 24H",
                 "");
         Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 27: ISO 8601 date format but user only provided date format and not time format.
+        // ISO 8601 date/time with date-only format YYYY-MM-DD format provided, America/Los_Angeles timezone.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2017-03-04T12:34:56Z",
+                "YYYY-MM-DD", "", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1488614400000L);
+
+        // Test Case 28: ISO 8601 date format but user only provided date format and not time format.
+        // ISO 8601 date/time with milliseconds with date-only format YYYY-MM-DD format provided, America/Los_Angeles
+        // timezone.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2017-03-04T12:34:56.789Z",
+                "YYYY-MM-DD", "", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1488614400000L);
+
+        // Test Case 29: Test case where provided time format has milliseconds but actual value does not.
+        // Regular date type with date format YYYY/MM/DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31:04", "YYYY/MM/DD",
+                "00:00:00.000 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 30: Test case where provided time format has milliseconds but actual value does not even have
+        // seconds.  Regular date type with date format YYYY/MM/DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31", "YYYY/MM/DD",
+                "00:00:00.000 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679860000L);
+
+        // Test Case 30: Test case where provided time format has seconds but actual value does not have seconds.
+        // Regular date type with date format YYYY.MM.DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("07.04.19 11-31 PM", "DD.MM.YY",
+                "00-00-00 12H", "UTC");
+        Assert.assertEquals(actualTime, 1554679860000L);
     }
 
     // Test stripping out T and Z from dates in ISO 8601 format.
