@@ -35,6 +35,7 @@ import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
@@ -118,11 +119,11 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
         // Collected AMColumnIds that we need to compare into a set
         Map<String, AccountMasterColumn> amColsMap = new HashMap<>();
-        for (AccountMasterColumn a : amColsList) { // mapping columnId to
-                                                   // accMasterColumn
+        for (AccountMasterColumn a : amColsList) { // mapping columnId to accMasterColumn
             amColsMap.put(a.getAmColumnId(), a);
         }
         Map<String, List<Long>> errNotInAmAndExcluded = new HashMap<>();
+        List<Long> attrCleanupKeys = new ArrayList<>();
         // Iterate through input patch Books
         for (PatchBook book : books) {
             List<String> encodedAttrs = new ArrayList<>();
@@ -144,6 +145,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     keysExcluded.add(patchAttr);
                 }
             }
+            if (book.getType().equals(Type.Attribute) && book.isCleanup()) {
+                attrCleanupKeys.add(book.getPid());
+            }
             if (encodedAttrs.size() > 0) {
                 PatchBookValidationError error = new PatchBookValidationError();
                 error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
@@ -164,6 +168,12 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             PatchBookValidationError error = new PatchBookValidationError();
             error.setMessage(itemNotInAmOrExcluded.getKey());
             error.setPatchBookIds(itemNotInAmOrExcluded.getValue());
+            patchBookValidErrorList.add(error);
+        }
+        if (attrCleanupKeys.size() > 0) {
+            PatchBookValidationError error = new PatchBookValidationError();
+            error.setMessage(ERR_ATTRI_CLEANUP);
+            error.setPatchBookIds(attrCleanupKeys);
             patchBookValidErrorList.add(error);
         }
         return patchBookValidErrorList;
