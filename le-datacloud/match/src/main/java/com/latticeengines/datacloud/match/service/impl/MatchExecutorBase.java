@@ -219,13 +219,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
 
-            // NOTE for entity match, check for entityId
-            // otherwise, check for latticeAccountId to determine if we have a
-            // match or not
-            boolean matchedRecord = internalRecord.isMatched()
-                    || (!isEntityMatch && (internalRecord.getLatticeAccountId() != null))
-                    || (isEntityMatch && StringUtils.isNotBlank(internalRecord.getEntityId()));
-
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
@@ -255,8 +248,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
                     value = true;
-                } else if (field.toLowerCase().contains("ismatched")) {
-                    value = StringUtils.isNotEmpty(internalRecord.getLatticeAccountId());
+                } else if (InterfaceName.IsMatched.name().equalsIgnoreCase(field)) {
+                    value = internalRecord.isMatched();
                 } else if (ColumnSelection.Predefined.LeadToAcct
                         .equals(matchContext.getInput().getPredefinedSelection())
                         && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
@@ -335,17 +328,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             }
             internalRecord.setOutput(output);
 
-            if (matchedRecord) {
+            // For LDC and Entity match, IsMatched flag is marked in
+            // FuzzyMatchServiceImpl.fetchIdResult
+            if (internalRecord.isMatched()) {
                 totalMatched++;
-                internalRecord.setMatched(true);
-            } else {
-                internalRecord.setMatched(false);
-                internalRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
-            }
 
+            }
             internalRecord.setResultsInPartition(null);
+
             OutputRecord outputRecord = new OutputRecord();
-            if (returnUnmatched || matchedRecord) {
+            if (returnUnmatched || internalRecord.isMatched()) {
                 if (excludeUnmatchedPublicDomain && internalRecord.isPublicDomain()) {
                     log.warn("Excluding the record, because it is using the public domain: "
                             + internalRecord.getParsedDomain());
