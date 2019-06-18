@@ -95,6 +95,8 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         }
         context.setDuration(System.currentTimeMillis() - request.getTimestamp());
+        // Inject failure only for testing purpose
+        injectFailure(request);
         return context;
     }
 

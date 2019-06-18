@@ -264,6 +264,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             writeDnBMatchHistory(dnBMatchHistories);
         }
         context.setDuration(System.currentTimeMillis() - request.getTimestamp());
+        // Inject failure only for testing purpose
+        injectFailure(request);
         return context;
     }
 
@@ -523,22 +525,27 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         @Override
         public void run() {
             while (!shouldTerminate) {
-                DnBBatchMatchContext finishedBatch = null;
-                synchronized (finishedBatches) {
-                    while (!shouldTerminate && finishedBatches.isEmpty()) {
-                        try {
-                            finishedBatches.wait();
-                        } catch (InterruptedException e) {
-                            if (!shouldTerminate) {
-                                log.warn("DnB lookup executor (in background) is interrupted");
+                try {
+                    DnBBatchMatchContext finishedBatch = null;
+                    synchronized (finishedBatches) {
+                        while (!shouldTerminate && finishedBatches.isEmpty()) {
+                            try {
+                                finishedBatches.wait();
+                            } catch (InterruptedException e) {
+                                if (!shouldTerminate) {
+                                    log.warn("DnB lookup executor (in background) is interrupted");
+                                }
                             }
                         }
+                        finishedBatch = finishedBatches.poll();
                     }
-                    finishedBatch = finishedBatches.poll();
+                    if (finishedBatch != null) {
+                        dnbBatchFetchResult(finishedBatch);
+                    }
+                } catch (Exception ex) {
+                    log.error("Exception in fetching dnb batch request result", ex);
                 }
-                if (finishedBatch != null) {
-                    dnbBatchFetchResult(finishedBatch);
-                }
+
             }
         }
     }

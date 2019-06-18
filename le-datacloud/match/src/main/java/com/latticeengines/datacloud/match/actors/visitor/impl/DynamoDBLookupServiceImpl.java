@@ -254,12 +254,14 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
                                     log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
                                 }
                             }
+                            // Inject failure only for testing purpose
+                            injectFailure(getReq(reqIds.get(i)));
                             String returnAddr = getReqReturnAddr(reqIds.get(i));
                             removeReq(reqIds.get(i));
                             sendResponse(reqIds.get(i), lookupEntry, returnAddr);
                         }
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        log.error("Fail to lookup in Dynamo table for datacloud version " + dataCloudVersion, ex);
                         List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
                         for (String reqId : reqIds) {
                             DataSourceLookupRequest req = getReq(reqId);
