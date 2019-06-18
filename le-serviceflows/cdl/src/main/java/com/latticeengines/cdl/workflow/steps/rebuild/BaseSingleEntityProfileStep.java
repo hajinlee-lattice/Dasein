@@ -115,10 +115,10 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             if (masterTable == null) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
-            long count = ScalingUtils.getTableCount(masterTable);
-            int multiplier = ScalingUtils.getMultiplier(count);
+            double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
+            int multiplier = ScalingUtils.getMultiplier(sizeInGb);
             if (multiplier > 1) {
-                log.info("Set multiplier=" + multiplier + " base on master table count=" + count);
+                log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
                 scalingMultiplier = multiplier;
             }
         }
