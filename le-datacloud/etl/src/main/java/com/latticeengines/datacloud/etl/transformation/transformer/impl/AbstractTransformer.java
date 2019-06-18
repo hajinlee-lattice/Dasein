@@ -116,7 +116,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         Source baseSource = step.getBaseSources()[baseSourceIdx];
         if (!(baseSource instanceof DerivedSource || baseSource instanceof IngestionSource)) {
             throw new IllegalArgumentException(
-                    "Only source with DerivedSource or IngestionSource type is supported to provide schema directory");
+                    "Only source with DerivedSource or IngestionSource type is supported to _CURRENT_VERSION file path");
         }
         return hdfsPathBuilder.constructVersionFile(baseSource).toString();
     }
