@@ -2,20 +2,33 @@ import React, {
     Component,
     react2angular
 } from "../../../../../common/react-vendor";
+import { moment } from "common/vendor.index"
 import "./overviewsummary.scss";
 import Aux from "../../../../../common/widgets/hoc/_Aux";
 import SummaryBox from "./overviewsummary-box";
+import LeVPanel from "common/widgets/container/le-v-panel";
+import LeHPanel from "common/widgets/container/le-h-panel";
+import {
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+    CENTER,
+    SPACEAROUND,
+    SPACEBETWEEN,
+    SPACEEVEN
+} from "common/widgets/container/le-alignments";
 
 import { store } from 'store';
 import { actions } from '../../playbook.redux';
-
 
 export default class OverviewSummaryContainer extends Component {
     constructor(props) {
         super(props);
         this.state = {
             loading: false,
-            play: null
+            play: null,
+            types: null
         };
     }
 
@@ -25,6 +38,17 @@ export default class OverviewSummaryContainer extends Component {
     componentDidMount() {
         let playstore = store.getState()['playbook'];
         this.state.play = playstore.play;
+
+        if(!playstore.types) {
+            let vm = this;
+            actions.fetchTypes(function() {
+                let playstore = store.getState()['playbook'];
+                vm.state.types = playstore.types;
+                vm.setState(vm.state);
+            });
+        } else {
+            this.state.types = playstore.types;
+        }
         this.setState(this.state);
     }
 
@@ -45,26 +69,103 @@ export default class OverviewSummaryContainer extends Component {
         return boxes;
     }
 
+    savePlay(play, opts) {
+        for(var i in opts) {
+            if(opts[i] === play[i]) {
+                delete opts[i];
+            }
+        }
+        if(!Object.keys(opts).length) { // no changes were made
+            return false;
+        }
+
+        var savePlay = Object.assign(opts, {
+            name: play.name,
+            createdBy: play.createdBy
+        });
+
+        var vm = this;
+        actions.savePlay(savePlay, function() {
+            let playstore = store.getState()['playbook'];
+            vm.state.play = playstore.play;
+            vm.setState(vm.state);
+        });
+    }
+
+    makeTypeOptions(play, types) {
+        let options = [],
+            _types = {};
+        types.forEach(function(type) {
+            _types[type.displayName] = type;
+            var selected = false;
+            if(type.displayName === play.playType.displayName) {
+                selected = true;
+            }
+            options.push(<option selected={selected}>{type.displayName}</option>);
+        });
+
+        return (
+            <select id="type" onChange={ (e) => { this.savePlay(play, {playType: _types[event.target.value]}) } }>
+                {options}
+            </select>
+        );
+    }
+
+    constrainText(event, limit) {
+        if(event.target.innerText && limit) {
+            event.target.innerText = event.target.innerText.substring(0, limit);
+        }
+    }
+
     render() {
-        if(this.state.play) {
-            let play = this.state.play;
+        if(this.state.play && this.state.types) {
+            let play = this.state.play,
+                types = this.state.types;
             return (
                 <Aux>
-                    <div className="le-summary-container le-flex-v-panel">
-                        <div className="le-summary-header le-flex-v-panel">
-                            <p className="title">{play.displayName}</p>
-                            <p className="description">
-                                {play.description}
-                            </p>
-                        </div>
-                        <div className="le-flex-h-panel boxes-container">
-                            {this.makeSummaryBoxes({
-                                Segment: play.targetSegment.display_name,
-                                Accounts: play.targetSegment.accounts.toLocaleString(),
-                                Contacts: play.targetSegment.contacts.toLocaleString(),
-                                "Scoring Model": (play.ratingEngine ? play.ratingEngine.displayName : null)
-                            })}
-                        </div>
+                    <div className={'overview-summary'}>
+                        <LeVPanel hstretch={"true"} className={'le-summary-container'}>
+                            <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-header'}>
+                                <p className="title">
+                                    <LeVPanel hstretch={"true"} className={'title-container'}>
+                                        <div className={'play-type'}>
+                                            {this.makeTypeOptions(play, types)}
+                                        </div>
+                                        <div className={'play-name'}>
+                                            <span contenteditable="true" onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
+                                                {play.displayName}
+                                            </span>
+                                        </div>
+                                        <div className={'play-created'}>
+                                            <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
+                                                <span>
+                                                    Created: {moment(play.created).format('MMM D, YYYY')} 
+                                                    <i title={play.createdBy} class="fa fa-user"></i>
+                                                </span>
+                                                <span>
+                                                    Edited: {moment(play.updated).format('MMM D, YYYY')}
+                                                    <i title={play.updatedBy} class="fa fa-user"></i>
+                                                </span>
+                                            </LeHPanel>
+                                        </div>
+                                    </LeVPanel>
+                                </p>
+                                <p className="description">
+                                    <span contenteditable="true" data-default="Add a description" onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
+                                        {play.description}
+                                    </span>
+                                </p>
+                            </LeHPanel>
+
+                            <div className="le-flex-h-panel boxes-container">
+                                {this.makeSummaryBoxes({
+                                    Segment: play.targetSegment.display_name,
+                                    Accounts: play.targetSegment.accounts.toLocaleString(),
+                                    Contacts: play.targetSegment.contacts.toLocaleString(),
+                                    "Scoring Model": (play.ratingEngine ? play.ratingEngine.displayName : null)
+                                })}
+                            </div>
+                        </LeVPanel>
                     </div>
                 </Aux>
             );

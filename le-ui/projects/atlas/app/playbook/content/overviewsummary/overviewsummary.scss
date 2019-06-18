@@ -1,40 +1,105 @@
 @import "../../../../../common/widgets/layout/layout.scss";
 @import "../../../../../common/widgets/colors.scss";
-.le-summary-container {
-  min-height: 217px;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  overflow: hidden;
-  width: 100%;
-  // max-height: 180px;
-  background-image: url(/assets/images/bkg-blue-fire.jpg);
-  color: $pearl-white;
-  justify-content: space-between;
-  align-items: center;
-  .le-summary-header {
+
+.overview-summary {
+    min-height: 217px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url(/assets/images/bkg-blue-fire.jpg);
+    color: $pearl-white;
+    width: 100%;
     margin-top: 0.3em;
-    max-width: 1200px;;
-    & > p,
-    span {
-      color: $pearl-white;
-      padding: 0 .5em;
-    }
-    & > .title {
-      font-size: 20px;
-      margin-top: 1.2em;
-      padding: 0 0.7%;
-    }
-    & > .description {
-     
-      padding: 0 0.7%;
-    }
-  }
-  .boxes-container {
+    overflow: hidden;
     justify-content: space-between;
-    flex-wrap: wrap;
-    flex:1;
-    // padding: 0 2.12766%;
-    max-width: 1200px;
-  }
+    align-items: center;
+    .le-summary-container {
+        margin: 0 auto;
+        max-width: 1200px;;
+        background: none;
+        .le-summary-header {
+            margin: 1em;
+            & > p,
+            span {
+                color: $pearl-white;
+                padding: 0 .5em;
+            }
+            & > .title {
+                padding: 0;
+                margin: 0;
+                padding: 0 0.7%;
+                width: 350px;
+                .play-type {
+                    select {
+                        border: none;
+                        padding: 0;
+                        // -webkit-appearance: none;
+                        // -moz-appearance: none;
+                        // appearance: none;
+                        // -ms-appearance: none;
+                        background: none;
+                        color: white;
+                        & > option {
+                            color: black;
+                        }
+                        position: relative;
+                    }
+                }
+                .play-name {
+                    font-size: 20px;
+                    padding-left: 30px;
+                    background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
+                    background-size: contain;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+                .play-created {
+                    .le-summary-times {
+                        font-size: 12px;
+                        span {
+                            white-space: nowrap;
+                            border-right: 1px solid rgba(255,255,255,.5);
+                            &:last-child {
+                                border-right: none;
+                            }
+                            & > i {
+                                margin-left: 5px;
+                            }
+                        }
+                    }
+                }
+            }
+            & > .description {
+                padding: 0;
+                margin: 0;
+                padding: 0 0.7%;
+                padding-left: 30px;
+                border-left: 1px solid rgba(255,255,255,.5);
+            }
+        }
+    }
+    *[contenteditable] {
+        // position: relative;
+        display: inline-block;
+        &:after {
+            content: "\f040";
+            font-family: FontAwesome;
+            font-style: normal;
+            font-weight: normal;
+            text-decoration: inherit;
+            font-size: 12px;
+            opacity: 0.4;
+            margin-left: 10px;
+            // position: absolute;
+            // top: 0px;
+            // right: -12px;
+            // height: 12px;
+            // width: 12px;
+        }
+        &:hover {
+            &:after {
+                opacity: 1;
+            }
+        }
+    }
 }
