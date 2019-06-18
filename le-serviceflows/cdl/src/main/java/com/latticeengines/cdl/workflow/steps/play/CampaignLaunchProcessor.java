@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -212,6 +213,14 @@ public class CampaignLaunchProcessor {
         }
     }
 
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+        // prepare basic account and contact front end queries
+        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
+        applyEmailFilterToQueries(playLaunchContext);
+        handleLookupIdBasedSuppression(playLaunchContext);
+        handleTopNLimit(playLaunchContext);
+    }
+
     private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext,
             DataCollection.Version version) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
@@ -231,6 +240,14 @@ public class CampaignLaunchProcessor {
         // prepare account and contact front end queries
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
         return accountFetcher.getCount(playLaunchContext, version);
+    }
+
+    private void handleTopNLimit(PlayLaunchContext playLaunchContext) {
+        Long topNCount = playLaunchContext.getPlayLaunch().getTopNCount();
+        if (topNCount != null) {
+            log.info(String.format("Handling Top N Count: %d", topNCount));
+            playLaunchContext.getAccountFrontEndQuery().setPageFilter(new PageFilter(0, topNCount));
+        }
     }
 
     private long handleTopNLimit(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
@@ -311,6 +328,23 @@ public class CampaignLaunchProcessor {
         return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
+    private void handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext) {
+        // do handling of SFDC id based suppression
+        PlayLaunch launch = playLaunchContext.getPlayLaunch();
+        if (launch.getExcludeItemsWithoutSalesforceId()) {
+            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+
+            Restriction accountRestriction = accountFrontEndQuery.getAccountRestriction().getRestriction();
+            Restriction nonNullLookupIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, launch.getDestinationAccountId()).isNotNull().build();
+
+            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
+                    .and(accountRestriction, nonNullLookupIdRestriction).build();
+            accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
+
+        }
+    }
+
     private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount,
             DataCollection.Version version) {
         // do handling of SFDC id based suppression
@@ -376,7 +410,7 @@ public class CampaignLaunchProcessor {
         return processedSegmentAccountsCount;
     }
 
-    private PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
+    public PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
         PlayLaunchContextBuilder playLaunchContextBuilder = new PlayLaunchContextBuilder();
 
         CustomerSpace customerSpace = config.getCustomerSpace();
@@ -479,8 +513,8 @@ public class CampaignLaunchProcessor {
             modifiableAccountIdCollectionForContacts.clear();
             modifiableAccountIdCollectionForContacts.addAll(accountIds);
 
-            // fetch corresponding contacts and prepare map of accountIs vs list
-            // of contacts
+            // fetch corresponding contacts and prepare map of accountIds vs
+            // list of contacts
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList = //
                     contactFetcher.fetch(playLaunchContext, version);
 

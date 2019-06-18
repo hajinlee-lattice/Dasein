@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -56,8 +55,7 @@ public class FrontEndQueryCreator {
         initLookupFieldsConfiguration();
     }
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
-        Play play = playLaunchContext.getPlay();
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -67,13 +65,17 @@ public class FrontEndQueryCreator {
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, launch.getDestinationAccountId());
 
-        prepareQueryWithRestrictions(playLaunchContext);
+        prepareQueryWithRestrictions(playLaunchContext, separateActWithCnt);
 
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
         }
 
         addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
+    }
+
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
+        prepareFrontEndQueries(playLaunchContext, false);
     }
 
     private void addSort(PlayLaunchContext playLaunchContext, FrontEndQuery accountFrontEndQuery,
@@ -151,30 +153,32 @@ public class FrontEndQueryCreator {
         entityFrontEndQuery.setSort(sort);
     }
 
-    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext) {
+    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
 
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
-        List<Object> modifiableAccountIdCollectionForContacts =
-                playLaunchContext.getModifiableAccountIdCollectionForContacts();
+        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
+                .getModifiableAccountIdCollectionForContacts();
         String ratingId = playLaunchContext.getRatingId();
         if (playLaunchContext.getSegment() != null) {
-            FrontEndRestriction accountRestriction =
-                    new FrontEndRestriction(playLaunchContext.getSegment().getAccountRestriction());
+            FrontEndRestriction accountRestriction = new FrontEndRestriction(
+                    playLaunchContext.getSegment().getAccountRestriction());
             if (ratingId != null) {
                 accountRestriction = createAccountRestrictionForSelectedRatings(playLaunchContext, ratingId);
             }
 
-            FrontEndRestriction contactRestriction =
-                    new FrontEndRestriction(playLaunchContext.getSegment().getContactRestriction());
+            FrontEndRestriction contactRestriction = new FrontEndRestriction(
+                    playLaunchContext.getSegment().getContactRestriction());
 
             accountFrontEndQuery.setAccountRestriction(accountRestriction);
             accountFrontEndQuery.setContactRestriction(contactRestriction);
 
             Restriction extractedContactRestriction = contactRestriction.getRestriction() == null
                     ? LogicalRestriction.builder().or(new ArrayList<>()).build() : contactRestriction.getRestriction();
-            contactFrontEndQuery.setContactRestriction(
-                    prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
+            if (!separateActWithCnt) {
+                contactFrontEndQuery.setContactRestriction(prepareContactRestriction(extractedContactRestriction,
+                        modifiableAccountIdCollectionForContacts));
+            }
         }
 
         List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getPublishedIteration());
@@ -213,13 +217,11 @@ public class FrontEndQueryCreator {
 
         Restriction baseRestriction = playLaunchContext.getSegment().getAccountRestriction();
 
-        ratingRestriction =
-                playLaunchContext.getPlayLaunch().isLaunchUnscored() //
-                        ? Restriction.builder()
-                                .or(ratingRestriction,
-                                        new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
-                                .build()
-                        : ratingRestriction;
+        ratingRestriction = playLaunchContext.getPlayLaunch().isLaunchUnscored() //
+                ? Restriction.builder()
+                        .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
+                        .build()
+                : ratingRestriction;
 
         Restriction finalAccountRestriction = Restriction.builder().and(baseRestriction, ratingRestriction).build();
         return new FrontEndRestriction(finalAccountRestriction);
@@ -227,9 +229,9 @@ public class FrontEndQueryCreator {
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
             Collection<Object> modifiableAccountIdCollection) {
-        Restriction accountIdRestriction =
-                Restriction.builder().let(BusinessEntity.Contact, InterfaceName.AccountId.name())
-                        .inCollection(modifiableAccountIdCollection).build();
+        Restriction accountIdRestriction = Restriction.builder()
+                .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
+                .build();
         return new FrontEndRestriction(
                 Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
     }

@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
+import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConf
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("campaignLaunchInitStep")
@@ -44,17 +45,20 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
     private static final Logger log = LoggerFactory.getLogger(CampaignLaunchInitStep.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private CampaignLaunchProcessor campaignLaunchProcessor;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
     @Inject
     private PeriodProxy periodProxy;
+
+    @Inject
+    protected SparkJobService sparkJobService;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -90,11 +94,18 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
                 try {
                     startSparkSQLSession(getHdfsPaths(attrRepo));
-                    /*
-                     * 1. form front end query 2. get dataframe for account and
-                     * contact respectively 3. generate avro out of dataframe
-                     * with predefined format for recommendation
-                     */
+                    // 1. form FrontEndQuery for Account and Contact
+                    PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+                    campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
+                    // 2. get DataFrame for Account and Contact
+                    HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
+                    HdfsDataUnit contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
+                    // 3. join Contact DF with Account DF
+                    HdfsDataUnit joinedDataUnit = join();
+
+                    // 4. generate avro out of DataFrame with predefined format
+                    // for Recommendations
+
                 } finally {
                     stopSparkSQLSession();
                 }

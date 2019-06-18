@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.JoinConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeRuleRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
@@ -39,6 +40,7 @@ import reactor.core.publisher.Flux;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME), //
         @JsonSubTypes.Type(value = RemoveOrphanConfig.class, name = RemoveOrphanConfig.NAME), //
+        @JsonSubTypes.Type(value = JoinConfig.class, name = JoinConfig.NAME), //
         @JsonSubTypes.Type(value = MergeImportsConfig.class, name = MergeImportsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeScoringTargetsConfig.class, name = MergeScoringTargetsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeRuleRatingsConfig.class, name = MergeRuleRatingsConfig.NAME), //
