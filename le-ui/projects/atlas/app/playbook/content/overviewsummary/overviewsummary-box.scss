@@ -1,25 +1,29 @@
 @import "../../../../../common/widgets/layout/layout.scss";
 @import "../../../../../common/widgets/colors.scss";
-.le-summary-header {
-    .title {
-        padding-left: 35px!important;
-        background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
-        background-size: contain;
+
+.overview-summary {
+    .le-summary-container {
+        .boxes-container {
+            justify-content: space-between;
+            flex-wrap: wrap;
+            flex:1;
+            max-width: 1200px;
+        }
     }
-}
-.le-summary-box {
-    // border: 5px solid green;
-    flex: 1;
-    background: rgba(28, 56, 75, 0.5);
-    padding: 0.8em;
-    justify-content: center;
-    .title {
-        font-size: 12px;
-        text-transform: uppercase;
-        opacity: .7;
-    }
-    .body {
-        font-size: 14px;
-        font-weight: bold;
+    .le-summary-box {
+        // border: 5px solid green;
+        flex: 1;
+        background: rgba(28, 56, 75, 0.5);
+        padding: 0.8em;
+        justify-content: center;
+        .title {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: .7;
+        }
+        .body {
+            font-size: 14px;
+            font-weight: bold;
+        }
     }
 }
