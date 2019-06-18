@@ -684,6 +684,7 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime != null) {
@@ -714,12 +715,13 @@ public class MetadataResolver {
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
                 String trimedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;
                     try {
-                        date = dtf.parse(trimedColumnField.trim());
+                        date = dtf.parse(trimedColumnField);
                     } catch (DateTimeParseException e) {
                         log.debug("Found columnField unparsable as date/time: " + columnField);
                     }
