@@ -1,19 +1,23 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-public class SchedulingPAQueue<T extends TenantActivity> {
+import org.apache.commons.lang3.StringUtils;
+
+public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     private SystemStatus systemStatus;
 
     private PriorityQueue<T> priorityQueue;
 
-    public SchedulingPAQueue() {
+    private String objectClassName;
+
+    public SchedulingPAQueue(SystemStatus systemStatus) {
+        this.systemStatus = systemStatus;
         priorityQueue = new PriorityQueue<>();
     }
 
@@ -25,36 +29,44 @@ public class SchedulingPAQueue<T extends TenantActivity> {
         return getAllMemberFromQueue(priorityQueue);
     }
 
+    public String getObjectClassName() {
+        return objectClassName;
+    }
+
     public int getPosition(String tenantName) {
         return getPositionFromQueue(priorityQueue, tenantName);
     }
 
-    public String peek() {
-        return peekFromPriorityQueue(priorityQueue);
+    public String peek(Set<String> canRunJobSet) {
+        return peekFromPriorityQueue(priorityQueue, canRunJobSet);
     }
 
-    public String poll() {
-        return pollFromPriorityQueue(priorityQueue);
+    public String poll(Set<String> canRunJobSet) {
+        return pollFromPriorityQueue(priorityQueue, canRunJobSet);
     }
 
     public void add(T priorityObject) {
-        priorityQueue.add(priorityObject);
+        if (priorityObject.checkAddConstraint(systemStatus)) {
+            if (StringUtils.isEmpty(objectClassName)) {
+                objectClassName = priorityObject.getInstance().getName();
+            }
+            priorityQueue.add(priorityObject);
+        }
     }
 
     /**
      * @return a list of tenantIds to run PA
      */
-    public List<String> getCanRunJobs() {
-        Set<String> canRunJobList = new HashSet<>();
+    public Set<String> getCanRunJobs(Set<String> canRunJobSet) {
         String tenantId;
         do {
-            tenantId = poll();
+            tenantId = poll(canRunJobSet);
             if (tenantId == null) {
                 break;
             }
-            canRunJobList.add(tenantId);
+            canRunJobSet.add(tenantId);
         }while (true);
-        return new ArrayList<>(canRunJobList);
+        return canRunJobSet;
     }
 
 
@@ -64,7 +76,7 @@ public class SchedulingPAQueue<T extends TenantActivity> {
         while (priorityQueue.peek() != null) {
             T priorityObject = priorityQueue.poll();
             priorityObjectList.add(priorityObject);
-            memberList.add(priorityObject.getTenantId());
+            memberList.add(priorityObject.getTenantActivity().getTenantId());
         }
         priorityQueue.addAll(priorityObjectList);
         return memberList;
@@ -77,7 +89,7 @@ public class SchedulingPAQueue<T extends TenantActivity> {
         while (priorityQueue.peek() != null) {
             T priorityObject = priorityQueue.poll();
             priorityObjectList.add(priorityObject);
-            if (tenantId.equalsIgnoreCase(priorityObject.getTenantId())) {
+            if (tenantId.equalsIgnoreCase(priorityObject.getTenantActivity().getTenantId())) {
                 priorityQueue.addAll(priorityObjectList);
                 return index;
             }
@@ -87,46 +99,19 @@ public class SchedulingPAQueue<T extends TenantActivity> {
         return -1;
     }
 
-    private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue) {
+    private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
         T priorityObject = priorityQueue.peek();
-        return (priorityObject != null && checkViolated(priorityObject)) ? priorityObject.getTenantId() : null;
+        return (priorityObject != null && priorityObject.checkPopConstraint(systemStatus, canRunJobSet)) ?
+                priorityObject.getTenantActivity().getTenantId() : null;
     }
 
-    private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue) {
+    private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
         T priorityObject = priorityQueue.peek();
-        if (priorityObject != null && checkViolated(priorityObject)) {
-            changeSystemState(priorityObject);
+        if (priorityObject != null && priorityObject.checkPopConstraint(systemStatus, canRunJobSet)) {
+            systemStatus.changeSystemState(priorityObject.getTenantActivity());
             priorityQueue.poll();
-            return priorityObject.getTenantId();
+            return priorityObject.getTenantActivity().getTenantId();
         }
         return null;
-    }
-
-    /**
-     *
-     * Take tenantActivity to run PA editing the system status
-     *
-     */
-    private void changeSystemState(T tenantActivity) {
-        systemStatus.setCanRunJobCount(systemStatus.getCanRunJobCount() - 1);
-        if (tenantActivity.isLarge()) {
-            systemStatus.setCanRunLargeJobCount(systemStatus.getRunningLargeJobCount() - 1);
-        }
-        if (tenantActivity.isScheduledNow()) {
-            systemStatus.setCanRunScheduleNowJobCount(systemStatus.getRunningScheduleNowCount() - 1);
-        }
-    }
-
-    public Boolean checkViolated(T priorityObject) {
-        if (priorityObject == null) {
-            return false;
-        }
-        if (systemStatus.getCanRunJobCount() < 1) {
-            return false;
-        }
-        if (systemStatus.getCanRunLargeJobCount() < 1 && priorityObject.isLarge()) {
-            return false;
-        }
-        return systemStatus.getCanRunScheduleNowJobCount() >= 1 || !priorityObject.isScheduledNow();
     }
 }

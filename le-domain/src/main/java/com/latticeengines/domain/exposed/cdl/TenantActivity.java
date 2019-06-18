@@ -1,23 +1,15 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.security.TenantType;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = ScheduleNowTenantActivity.class, name = "CustomerPriorityObject"),
-        @JsonSubTypes.Type(value = AutoScheduleTenantActivity.class, name = "AutoScheduleTenantActivity"),
-        @JsonSubTypes.Type(value = DataCloudRefreshTenantActivity.class, name = "DataCloudRefreshTenantActivity"),
-})
-public class TenantActivity implements Comparable<TenantActivity> {
+public class TenantActivity {
 
     @JsonProperty("tenant_id")
     private String tenantId;
 
     @JsonProperty("tenant_type")
-    protected TenantType tenantType;
+    private TenantType tenantType;
 
     @JsonProperty("is_large")
     private boolean isLarge;
@@ -46,24 +38,31 @@ public class TenantActivity implements Comparable<TenantActivity> {
     @JsonProperty("is_data_cloud_refresh")
     private boolean isDataCloudRefresh;
 
-    public TenantType getTenantType() {
-        return tenantType;
+    @JsonProperty("is_auto_schedule")
+    private boolean isAutoSchedule;
+
+    public String getTenantId() {
+        return tenantId;
     }
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
 
-    public String getTenantId() {
-        return tenantId;
+    public TenantType getTenantType() {
+        return tenantType;
     }
 
-    public void setIsLarge(boolean isLarge) {
-        this.isLarge = isLarge;
+    public void setTenantType(TenantType tenantType) {
+        this.tenantType = tenantType;
     }
 
     public boolean isLarge() {
         return isLarge;
+    }
+
+    public void setLarge(boolean large) {
+        isLarge = large;
     }
 
     public boolean isScheduledNow() {
@@ -72,6 +71,14 @@ public class TenantActivity implements Comparable<TenantActivity> {
 
     public void setScheduledNow(boolean scheduledNow) {
         this.scheduledNow = scheduledNow;
+    }
+
+    public Long getScheduleTime() {
+        return scheduleTime;
+    }
+
+    public void setScheduleTime(Long scheduleTime) {
+        this.scheduleTime = scheduleTime;
     }
 
     public Long getInvokeTime() {
@@ -98,6 +105,14 @@ public class TenantActivity implements Comparable<TenantActivity> {
         this.firstActionTime = firstActionTime;
     }
 
+    public Long getLastFinishTime() {
+        return lastFinishTime;
+    }
+
+    public void setLastFinishTime(Long lastFinishTime) {
+        this.lastFinishTime = lastFinishTime;
+    }
+
     public boolean isRetry() {
         return isRetry;
     }
@@ -114,27 +129,11 @@ public class TenantActivity implements Comparable<TenantActivity> {
         isDataCloudRefresh = dataCloudRefresh;
     }
 
-    public Long getScheduleTime() {
-        return scheduleTime;
+    public boolean isAutoSchedule() {
+        return isAutoSchedule;
     }
 
-    public void setScheduleTime(Long scheduleTime) {
-        this.scheduleTime = scheduleTime;
-    }
-
-    @Override
-    public int compareTo(TenantActivity o) {
-        if (o.getTenantType() == tenantType) {
-            return 0;
-        }
-        return o.getTenantType() == TenantType.CUSTOMER ? 1 : -1;
-    }
-
-    public Long getLastFinishTime() {
-        return lastFinishTime;
-    }
-
-    public void setLastFinishTime(Long lastFinishTime) {
-        this.lastFinishTime = lastFinishTime;
+    public void setAutoSchedule(boolean autoSchedule) {
+        isAutoSchedule = autoSchedule;
     }
 }

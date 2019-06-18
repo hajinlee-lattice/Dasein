@@ -2,9 +2,9 @@ package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Set;
 
-public class MaxPA implements Constraint {
+public class DataCloudRefreshExist implements Constraint {
     @Override
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
-        return currentState.getCanRunJobCount() < 1;
+        return !target.isDataCloudRefresh();
     }
 }

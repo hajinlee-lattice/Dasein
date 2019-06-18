@@ -94,4 +94,19 @@ public class SystemStatus {
     public void setRunningPATenantId(Set<String> runningPATenantId) {
         this.runningPATenantId = runningPATenantId;
     }
+
+    /**
+     *
+     * Take tenantActivity to run PA editing the system status
+     *
+     */
+    public void changeSystemState(TenantActivity tenantActivity) {
+        this.canRunJobCount = this.canRunJobCount - 1;
+        if (tenantActivity.isLarge()) {
+            this.canRunLargeJobCount = this.canRunLargeJobCount - 1;
+        }
+        if (tenantActivity.isScheduledNow()) {
+            this.canRunScheduleNowJobCount = this.runningScheduleNowCount - 1;
+        }
+    }
 }

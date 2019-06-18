@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -349,11 +350,10 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void schedulePAJob() {
-        schedulingPAService.init();
-
-        List<String> canRunRetryJobList = schedulingPAService.getCanRunJobTenantFromRetryPriorityQueue();
-        if (CollectionUtils.isNotEmpty(canRunRetryJobList)) {
-            for (String needRunJobTenantId : canRunRetryJobList) {
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        Set<String> canRunRetryJobSet = canRunJobTenantMap.get("retry");
+        if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
+            for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
                     cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
                 } catch (Exception e) {
@@ -362,15 +362,9 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
-        List<String> canRunJobList = new ArrayList<>();
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerScheduleNowPriorityQueue());
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerAutoSchedulePriorityQueue());
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromCustomerDataCloudRefreshPriorityQueue());
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerScheduleNowPriorityQueue());
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerAutoSchedulePriorityQueue());
-        canRunJobList.addAll(schedulingPAService.getCanRunJobTenantFromNonCustomerDataCloudRefreshPriorityQueue());
-        if (CollectionUtils.isNotEmpty(canRunJobList)) {
-            for (String needRunJobTenantId : canRunJobList) {
+        Set<String> canRunJobSet = canRunJobTenantMap.get("other");
+        if (CollectionUtils.isNotEmpty(canRunJobSet)) {
+            for (String needRunJobTenantId : canRunJobSet) {
                 submitProcessAnalyzeJob(needRunJobTenantId);
             }
         }

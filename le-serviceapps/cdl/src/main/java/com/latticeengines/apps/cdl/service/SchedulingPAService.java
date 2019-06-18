@@ -2,32 +2,21 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.TenantActivity;
 
 public interface SchedulingPAService {
 
-    void setSystemStatus();
+    SystemStatus setSystemStatus(List<TenantActivity> tenantActivityList);
 
-    void initQueue();
+    List<SchedulingPAQueue> initQueue();
 
-    Boolean isLargeTenant(String tenantName);
+    Map<String, Set<String>> getCanRunJobTenantList();
 
-    List<String> getRunningPATenantId();
-
-    List<String> getCanRunJobTenantFromRetryPriorityQueue();
-
-    List<String> getCanRunJobTenantFromCustomerScheduleNowPriorityQueue();
-
-    List<String> getCanRunJobTenantFromCustomerAutoSchedulePriorityQueue();
-
-    List<String> getCanRunJobTenantFromCustomerDataCloudRefreshPriorityQueue();
-
-    List<String> getCanRunJobTenantFromNonCustomerScheduleNowPriorityQueue();
-
-    List<String> getCanRunJobTenantFromNonCustomerAutoSchedulePriorityQueue();
-
-    List<String> getCanRunJobTenantFromNonCustomerDataCloudRefreshPriorityQueue();
-
-    Map<String, List<String>> showQueue();
+    String showQueue();
 
     String getPositionFromQueue(String tenantName);
 }

@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,19 +28,8 @@ public class SchedulingPAQueueResource {
     @ApiOperation(value = "getQueueInfo")
     @NoMetricsLog
     @NoCustomerSpace
-    public Map<String, List<String>> getQueueInfo() {
-        schedulingPAService.init();
+    public String getQueueInfo() {
         return schedulingPAService.showQueue();
-    }
-
-    @RequestMapping(value = "/getRunningInfo", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "getRunningInfo")
-    @NoMetricsLog
-    @NoCustomerSpace
-    public List<String> getRunningInfo() {
-        schedulingPAService.init();
-        return schedulingPAService.getRunningPATenantId();
     }
 
     @RequestMapping(value = "/getPosition", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -52,7 +38,6 @@ public class SchedulingPAQueueResource {
     @NoMetricsLog
     @NoCustomerSpace
     public String getPosition(@RequestParam String tenantName) {
-        schedulingPAService.init();
         return schedulingPAService.getPositionFromQueue(tenantName);
     }
 
