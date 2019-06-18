@@ -57,7 +57,8 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class MatchActorSystemExcetionHandlingTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchActorSystemTestNG.class);
+    @SuppressWarnings("unused")
+    private static final Logger log = LoggerFactory.getLogger(MatchActorSystemExcetionHandlingTestNG.class);
 
     private static final Tenant TENANT = new Tenant(
             MatchActorSystemExcetionHandlingTestNG.class.getSimpleName() + UUID.randomUUID().toString());
