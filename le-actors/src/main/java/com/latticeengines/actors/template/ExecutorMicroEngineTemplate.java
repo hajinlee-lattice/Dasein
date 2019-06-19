@@ -89,6 +89,8 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
+        // Inject failure only for testing purpose
+        injectFailure(traveler);
         validateTraveler(traveler);
         if (accept(traveler)) {
             if (!executorInitiated.get()) {
@@ -156,7 +158,7 @@ public abstract class ExecutorMicroEngineTemplate extends VisitorActorTemplate {
                     execute(traveler);
                     travel(traveler, self(), false);
                 } catch (Exception e) {
-                    traveler.warn(
+                    traveler.error(
                             String.format("Force to return anchor due to exception encountered at %s: %s",
                                     getActorName(self()), e.getMessage()),
                             e);

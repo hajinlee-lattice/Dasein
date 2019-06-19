@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelException;
 import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 
@@ -97,10 +96,11 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
     private void sendFailureResponse(DataSourceLookupRequest request, Exception ex) {
         Response response = new Response();
         response.setTravelerContext(request.getMatchTravelerContext());
-        log.error(String.format("Encountered issue at %s for request %s: %s",
+        String errorMsg = String.format("Encountered issue at %s for request %s: %s",
                 DataSourceWrapperActorTemplate.class.getSimpleName(), request.getMatchTravelerContext().getTravelerId(),
-                ex.getMessage()));
-        response.getTravelerContext().setTravelException(new TravelException(ex.getMessage(), ex));
-        matchActorSystem.sendResponse(response, request.getMatchTravelerContext().getAnchorActorLocation());
+                ex.getMessage());
+        log.error(errorMsg);
+        response.getTravelerContext().error(errorMsg, ex);
+        matchActorSystem.sendResponse(response, request.getMatchTravelerContext().getOriginalLocation());
     }
 }

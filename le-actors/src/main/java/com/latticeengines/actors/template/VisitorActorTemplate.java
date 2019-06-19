@@ -117,8 +117,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                     }
                     rejected = true;
                 } catch (Exception e) {
-                    traveler.warn(String.format("Force to return anchor due to exception encountered at %s: %s",
-                            getActorName(self()), e.getMessage()), e);
+                    String errorMsg = String.format("Force to return anchor due to exception encountered at %s: %s",
+                            getActorName(self()), e.getMessage());
+                    traveler.error(errorMsg, e);
                     forceReturnToAnchor(traveler);
                     return;
                 }
@@ -132,7 +133,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                     process(response);
                     rejected = false;
                 } catch (Exception e) {
-                    traveler.warn(String.format("Force to return anchor due to exception encountered at %s: %s",
+                    traveler.error(String.format("Force to return anchor due to exception encountered at %s: %s",
                             getActorName(self()), e.getMessage()), e);
                     forceReturnToAnchor(traveler);
                     return;
@@ -185,10 +186,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     protected void forceReturnToAnchor(Traveler traveler) {
         // IsProcessed flag should already been set. Set again for safety
         traveler.setProcessed(true);
-        // TODO: current implementation will return to anchor of current
-        // decision graph. Prefer to return to entry anchor if different
-        // decision graph has different anchor
-        ActorRef anchorRef = getContext().actorFor(traveler.getAnchorActorLocation());
+        ActorRef anchorRef = getContext().actorFor(traveler.getOriginalLocation());
         if (log.isDebugEnabled()) {
             log.debug(self() + " is sending traveler " + traveler + " to " + anchorRef);
         }
@@ -219,6 +217,13 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected boolean logCheckInNOut() {
         return true;
+    }
+
+    // Only for testing purpose
+    protected void injectFailure(Traveler traveler) {
+        if (getCurrentActorName().equals(traveler.getActorOrServiceToInjectFailure())) {
+            throw new RuntimeException(ActorUtils.INJECTED_FAILURE_MSG);
+        }
     }
 
 }

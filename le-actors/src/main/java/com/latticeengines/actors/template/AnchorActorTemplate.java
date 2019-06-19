@@ -33,6 +33,8 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
+        // Inject failure only for testing purpose
+        injectFailure(traveler);
         traveler.addRetry();
         if (shouldPrepareRetravel(traveler)) {
             traveler.prepareForRetravel();
@@ -54,8 +56,8 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
             junctionRef.tell(response, self());
             return true;
         }
-        // Completed whole trip, reduce retry count by one to compensate the increment
-        // at the start of this function
+        // Completed whole trip, reduce retry count by one to compensate the
+        // increment at the start of this function
         traveler.descRetry();
         return false;
     }
@@ -83,7 +85,7 @@ public abstract class AnchorActorTemplate extends VisitorActorTemplate {
         try {
             decisionGraph = getGuideBook().getDecisionGraphByName(traveler.getDecisionGraph());
         } catch (Exception e) {
-            traveler.warn("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
+            traveler.error("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
             return false;
         }
         if (decisionGraph.getRetries() == null || traveler.getRetries() > decisionGraph.getRetries()) {

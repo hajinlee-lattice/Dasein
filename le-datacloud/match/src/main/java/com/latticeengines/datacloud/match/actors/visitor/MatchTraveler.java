@@ -82,9 +82,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     private Set<String> fieldsToClear = new HashSet<>();
 
-    // Entity match errors
-    private List<String> entityMatchErrors;
-
     /***************************************************************************
      * Bound to current decision graph or request to external assistant actors
      ***************************************************************************/
@@ -130,7 +127,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @Override
     public void prepareForRetravel() {
         super.prepareForRetravel();
-        entityMatchErrors = null;
         fieldsToClear.clear();
     }
 
@@ -397,11 +393,11 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     }
 
     public List<String> getEntityMatchErrors() {
-        return entityMatchErrors;
+        return getTravelErrors();
     }
 
     public void setEntityMatchErrors(List<String> entityMatchErrors) {
-        this.entityMatchErrors = entityMatchErrors;
+        logTravelErrors(entityMatchErrors);
     }
 
 }

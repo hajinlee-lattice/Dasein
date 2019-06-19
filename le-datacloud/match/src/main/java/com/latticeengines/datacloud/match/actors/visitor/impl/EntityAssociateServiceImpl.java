@@ -278,6 +278,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull EntityRawSeed targetEntitySeed) {
         try {
             EntityAssociationResponse response = associate(requestId, request, targetEntitySeed);
+            // inject failure only for testing purpose
+            injectFailure(getReq(requestId));
             // send successful response
             String returnAddress = getReqReturnAddr(requestId);
             removeReq(requestId);

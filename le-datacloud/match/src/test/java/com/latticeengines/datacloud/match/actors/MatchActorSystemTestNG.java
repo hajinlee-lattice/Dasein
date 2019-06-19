@@ -399,7 +399,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setDataCloudVersion(currentDataCloudVersion);
         matchInput.setRootOperationUid(UUID.randomUUID().toString());
         matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(false);
+        matchInput.setUseRemoteDnB(true);
         matchInput.setTenant(TENANT);
         matchInput.setAllocateId(true);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap(entity));

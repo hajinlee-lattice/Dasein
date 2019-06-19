@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelException;
+import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
-import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
@@ -97,16 +97,16 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     }
 
     protected void sendFailureResponse(DataSourceLookupRequest request, Exception ex) {
-        Response response = new Response();
-        response.setTravelerContext(request.getMatchTravelerContext());
-        log.error(String.format("Encountered issue at %s for request %s%s: %s",
-                DataSourceWrapperActorTemplate.class.getSimpleName(), request.getMatchTravelerContext().getTravelerId(),
+        MatchTraveler travaler = request.getMatchTravelerContext();
+        String errorMsg = String.format("Encountered issue at %s for request %s%s: %s",
+                this.getClass().getSimpleName(), request.getMatchTravelerContext().getTravelerId(),
                 request.getMatchTravelerContext().getMatchInput().getRootOperationUid() == null ? ""
                                 : " (RootOperationID="
                                         + request.getMatchTravelerContext().getMatchInput().getRootOperationUid() + ")",
-                ex.getMessage()), ex);
-        response.getTravelerContext().setTravelException(new TravelException(ex.getMessage(), ex));
-        actorSystem.sendResponse(response, request.getMatchTravelerContext().getAnchorActorLocation());
+                ex.getMessage());
+        log.error(errorMsg, ex);
+        travaler.error(errorMsg, ex);
+        actorSystem.sendResponse(travaler, request.getMatchTravelerContext().getOriginalLocation());
     }
 
     protected boolean isBatchMode() {
@@ -133,6 +133,17 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     protected MatchActorSystem getActorSystem() {
         return actorSystem;
+    }
+
+    // Only for testing purpose
+    protected void injectFailure(DataSourceLookupRequest req) {
+        if (req == null || req.getMatchTravelerContext() == null) {
+            return;
+        }
+        MatchTraveler traveler = req.getMatchTravelerContext();
+        if (this.getClass().getSimpleName().equals(traveler.getActorOrServiceToInjectFailure())) {
+            throw new RuntimeException(ActorUtils.INJECTED_FAILURE_MSG);
+        }
     }
 
     /**
