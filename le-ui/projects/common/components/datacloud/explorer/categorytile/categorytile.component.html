@@ -1,6 +1,6 @@
 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
     <span>
-        <h2 title="{{category}}" ng-init="lastDataRefresh = vm.getDateMap(category)">
+        <h2 alt="{{category}}" ng-init="lastDataRefresh = vm.getDateMap(category)">
             <div class="category-icon">
                 <img ng-src="{{vm.categoryIcon(category)}}" onerror="this.style.display='none'" />
             </div>
