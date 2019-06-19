@@ -8,7 +8,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public interface ModelingFileMetadataService {
@@ -37,6 +37,6 @@ public interface ModelingFileMetadataService {
 
     List<LatticeSchemaField> getSchemaToLatticeSchemaFields(String entity, String source, String feedType);
 
-    FieldValidationDocument validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
-            String entity, String source, String feedType);
+    List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+                                                String entity, String source, String feedType);
 }

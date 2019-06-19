@@ -54,7 +54,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -450,9 +449,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
     @Test(groups = "deployment")
     public void verifyRequiredFieldMissingV2() {
-        FieldValidationDocument document = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
-        List<FieldValidation> validations = document.getValidations();
+        List<FieldValidation> validations = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
         Assert.assertNotNull(validations);
+        System.out.println("logic " + JsonUtils.serialize(validations));
         List<FieldValidation> errorValidations = validations.stream()
                 .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
                 .collect(Collectors.toList());

@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -54,7 +53,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -234,7 +232,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      * in DataFeedTaskManage service
      */
     @Override
-    public FieldValidationDocument validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+    public List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
             String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s, sourceFile : %s",
@@ -261,9 +259,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             ignored = fieldMappingDocument.getIgnoredFields();
         }
 
-        FieldValidationDocument validationDocument = new FieldValidationDocument();
         List<FieldValidation> validations = new ArrayList<>();
-        validationDocument.setValidations(validations);
 
         FieldMappingDocument documentBestEffort = getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType);
         // filter off field mapping with cdl external system, or will cause multiple lattice field mapped to the same user field
@@ -271,12 +267,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .filter(mapping -> mapping.getCdlExternalSystemType() == null && StringUtils
                         .isNotBlank(mapping.getUserField()))
                 .collect(Collectors.toMap(FieldMapping::getUserField, Function.identity()));
+        Set<String> standardAttrNames =
+                standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
 
         // compare field mapping document after being modified with field mapping best effort
         for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
-            if (StringUtils.isNotBlank(userField)) {
+            // skip user field mapped to standard attribute or user ignored fields
+            if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
                 FieldMapping fieldMapping = userFieldMap.get(userField);
+                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                    continue;
+                }
                 if (bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
                     String message = String
                             .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
@@ -335,7 +337,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // compare type, require flag between template and standard schema
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
 
-        return validationDocument;
+        return validations;
     }
 
     private Table mergeTable(Table templateTable, Table renderedTable) {
@@ -381,45 +383,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 Attribute attr1 = attrEntry.getValue();
                 Attribute attr2 = templateAttrs.get(attrEntry.getKey());
                 if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
-                    // A temp fix for schema update in maint_4.8.0.
-                    if (InterfaceName.Amount.equals(attr1.getInterfaceName())
-                            || InterfaceName.Quantity.equals(attr1.getInterfaceName())
-                            || InterfaceName.Cost.equals(attr1.getInterfaceName())) {
-                        if (!attr2.getPhysicalDataType().equalsIgnoreCase("int") && !attr2.getPhysicalDataType().equalsIgnoreCase("double")) {
-                            String message = String
-                                    .format("Attribute %s has wrong data type %s", attr2.getDisplayName(),
-                                            attr2.getPhysicalDataType());
-                            validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
-                                    ValidationStatus.ERROR, message));
-                        }
-                    } else if (InterfaceName.CreatedDate.equals(attr1.getInterfaceName())
-                            || InterfaceName.LastModifiedDate.equals(attr1.getInterfaceName())) {
-                        if (!attr2.getPhysicalDataType().equalsIgnoreCase("string") && !attr2.getPhysicalDataType().equalsIgnoreCase("long")) {
-                            String message = String
-                                    .format("Attribute %s has wrong data type %s", attr2.getDisplayName(),
-                                            attr2.getPhysicalDataType());
-                            validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
-                                    ValidationStatus.ERROR, message));
-                        }
-
-                    } else {
                         String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
                         validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
                                 ValidationStatus.ERROR, message));
-                    }
                 }
                 if (!attr1.getRequired().equals(attr2.getRequired())) {
                     String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
                     validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
                             ValidationStatus.ERROR, message));
-                }
-                if (attr1.getInterfaceName() == null || attr2.getInterfaceName() == null) {
-                    log.warn("Interface name is null for attribute : " + attr1.getName());
-                } else if (!attr1.getInterfaceName().equals(attr2.getInterfaceName())) {
-                    String message = "Interface name is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
-                            ValidationStatus.ERROR, message));
-
                 }
             }
         }

@@ -39,8 +39,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidationDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.repository.writer.SourceFileWriterRepository;
@@ -161,17 +159,13 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
                 "/pls/models/uploadfile/validate?displayName=%s&entity=Account&feedType=DefaultSystem_AccountData&source=File",
                 fileName);
         entity = new HttpEntity<>(fieldDocument);
-        result = restTemplate.exchange(getRestAPIHostPort() + validateAPI, HttpMethod.POST, entity, String.class);
-        ResponseDocument<FieldValidationDocument> validationDcoument = JsonUtils.deserialize(result.getBody(),
-                new TypeReference<ResponseDocument<FieldValidationDocument>>() {
-                });
-        // verify normal file can pass validation
-        List<FieldValidation> validations = validationDcoument.getResult().getValidations();
+        ResponseEntity<List> list = restTemplate.exchange(getRestAPIHostPort() + validateAPI, HttpMethod.POST,
+                entity, List.class);
+        List<FieldValidation> validations = JsonUtils.convertList(list.getBody(), FieldValidation.class);
+        // verify normal file can pass validation, no warning or error
         Assert.assertNotNull(validations);
-        for (FieldValidation validation : validations) {
-            Assert.assertNotEquals(validation.getStatus(), ValidationStatus.ERROR);
-        }
-        
+        Assert.assertEquals(validations.size(), 0);
+
     }
 
     @Test(groups = "deployment")
