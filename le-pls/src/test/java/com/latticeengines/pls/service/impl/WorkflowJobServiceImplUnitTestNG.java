@@ -94,6 +94,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private Long TS_2019_01_20 = 1547942400000L;
     private Long TS_2019_01_19 = 1547856000000L;
     private Long TS_2019_01_18 = 1547769600000L;
+    private Long[] actionPids = {101L, 102L, 103L};
 
     private static final String INITIATOR = "test@lattice-engines.com";
 
@@ -226,7 +227,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetActionIdsForJob() {
-        List<Long> actionIds = workflowJobService.getActionIdsForJob(createProcessAnalyzeJob(jobIds[0]));
+        List<Long> actionIds = workflowJobService.getActionIdsForJob(createProcessAnalyzeJob(jobIds[0], actionPids));
         Assert.assertEquals(actionIds.size(), 3);
         Assert.assertTrue(actionIds.contains(101L) && actionIds.contains(102L) && actionIds.contains(103L));
         log.info(String.format("actionIds=%s", actionIds));
@@ -268,12 +269,24 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testUpdateJobWithSubJobsIfIsPnA() {
-        Job job1 = createProcessAnalyzeJob(jobIds[0]);
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
+        Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null);
         Assert.assertNotNull(job1.getSubJobs());
-        job1 = createProcessAnalyzeJob(jobIds[0]);
+        job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
         job1.setJobType("bulkmatchworkflow");
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null);
+        Assert.assertNull(job1.getSubJobs());
+
+        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
+        job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        List<Job> jobs = new ArrayList<>();
+        jobs.add(job1);
+        Map<Long, Action> actionMap = workflowJobService.getActionMap(jobs);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, actionMap);
+        Assert.assertNotNull(job1.getSubJobs());
+        job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        job1.setJobType("bulkmatchworkflow");
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, actionMap);
         Assert.assertNull(job1.getSubJobs());
     }
 
@@ -319,6 +332,33 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testUpdateAllJobs() {
+        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
+        Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        List<Job> jobs = new ArrayList<>();
+        jobs.add(job1);
+        workflowJobService.updateAllJobs(jobs);
+        Assert.assertNotNull(job1.getSubJobs());
+        Assert.assertEquals(job1.getSubJobs().size(), 4);
+        job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        job1.setJobType("bulkmatchworkflow");
+        jobs = new ArrayList<>();
+        jobs.add(job1);
+        workflowJobService.updateAllJobs(jobs);
+        Assert.assertNull(job1.getSubJobs());
+    }
+
+    @Test(groups = "unit")
+    public void testGetActionMap() {
+        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
+        Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        List<Job> jobs = new ArrayList<>();
+        jobs.add(job1);
+        Map<Long, Action> actionMap = workflowJobService.getActionMap(jobs);
+        Assert.assertEquals(actionMap.size(), 5);
+    }
+
+    @Test(groups = "unit")
     public void testUpdateOrphanJobsBySameOrphanType() {
         List<Job> jobList = prepareJobList();
         Job paJob = jobList.get(1);
@@ -344,8 +384,8 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private List<Job> prepareJobList() {
         List<Job> jobList = new ArrayList<>();
-        Job pa1 = createProcessAnalyzeJob(1L);
-        Job pa2 = createProcessAnalyzeJob(2L);
+        Job pa1 = createProcessAnalyzeJob(1L, actionPids);
+        Job pa2 = createProcessAnalyzeJob(2L, actionPids);
         pa1.setStartTimestamp(new Date(TS_2019_01_18));
         pa2.setStartTimestamp(new Date(TS_2019_01_21));
         jobList.add(pa1);
@@ -519,7 +559,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         return job;
     }
 
-    private Job createProcessAnalyzeJob(Long jobId) {
+    private Job createProcessAnalyzeJob(Long jobId, Long[] actionPids) {
         Job job = new Job();
         job.setId(jobId);
         job.setName("processAnalyzeWorkflow");
@@ -527,7 +567,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         job.setJobType("processAnalyzeWorkflow");
         job.setStartTimestamp(new Date());
         job.setJobStatus(JobStatus.COMPLETED);
-        List<Long> actionIds = Arrays.asList(101L, 102L, 103L);
+        List<Long> actionIds = Arrays.asList(actionPids);
         Map<String, String> inputContext = new HashMap<>();
         inputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, actionIds.toString());
         job.setInputs(inputContext);

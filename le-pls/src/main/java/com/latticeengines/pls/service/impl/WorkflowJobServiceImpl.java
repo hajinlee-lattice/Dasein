@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -164,7 +165,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 updateJobWithRatingEngine(job);
                 updateStepDisplayNameAndNumSteps(job);
                 updateJobDisplayNameAndDescription(job);
-                updateJobWithSubJobsIfIsPnA(job);
+                updateJobWithSubJobsIfIsPnA(job, null);
             } else {
                 if (useCustomerSpace) {
                     log.error(String.format("Job of jobId=%s is null for customerSpace=%s", jobId, customerSpace));
@@ -177,9 +178,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return job;
     }
 
-    private List<Action> getActions(List<Long> actionPids) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return actionProxy.getActionsByPids(tenantId, actionPids);
+    private List<Action> getActions(List<Long> actionPids, Map<Long, Action> actionMap) {
+        if (actionMap != null && actionMap.size() > 0) {
+            List<Action> actions = new ArrayList<>();
+            for (Long actionPid : actionPids) {
+                actions.add(actionMap.get(actionPid));
+            }
+            return actions;
+        } else {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            return actionProxy.getActionsByPids(tenantId, actionPids);
+        }
     }
 
     @Override
@@ -187,7 +196,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (CollectionUtils.isEmpty(actionPids)) {
             return Collections.emptyList();
         }
-        List<Action> actionsWithType = getActions(actionPids).stream()
+        List<Action> actionsWithType = getActions(actionPids, null).stream()
                 .filter(action -> action.getType().equals(actionType)).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(actionsWithType)) {
             return expandActions(actionsWithType);
@@ -542,7 +551,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setDescription(job.getJobType());
     }
 
-    private void updateAllJobs(List<Job> jobs) {
+    @VisibleForTesting
+    void updateAllJobs(List<Job> jobs) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
         List<ModelSummary> modelSummaries = modelSummaryProxy.getModelSummaries(customerSpace.toString(), "all");
@@ -562,7 +572,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         updateExpiredOrphanJobs(jobs);
         updateJobsWithActionId(jobs);
-
+        Map<Long, Action> actionMap = getActionMap(jobs);
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
@@ -570,8 +580,31 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (hasCG) {
                 updateJobWithRatingEngineSummaryInfo(job, true, ratingIdToRatingEngineSummaries);
             }
-            updateJobWithSubJobsIfIsPnA(job);
+            updateJobWithSubJobsIfIsPnA(job, actionMap);
         }
+    }
+
+
+    @VisibleForTesting
+    Map<Long, Action> getActionMap(List<Job> jobs) {
+        List<Long> allActionPids = new ArrayList<>();
+        for (Job job : jobs) {
+            if (job.getJobType().equals(PA_JOB_TYPE)) {
+                List<Long> actionPids = getActionIdsForJob(job);
+                if (CollectionUtils.isNotEmpty(actionPids)) {
+                    allActionPids.addAll(actionPids);
+                }
+            }
+        }
+        Map<Long, Action> actionMap;
+        if (CollectionUtils.isNotEmpty(allActionPids)) {
+            List<Action> actions = getActions(allActionPids, null);
+            actionMap = actions.stream().collect(Collectors.toMap(Action::getPid,
+                    Action -> Action, (key1, key2) -> key2));
+        } else {
+            actionMap = new HashMap<>();
+        }
+        return actionMap;
     }
 
     @VisibleForTesting
@@ -626,11 +659,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @VisibleForTesting
-    void updateJobWithSubJobsIfIsPnA(Job job) {
+    void updateJobWithSubJobsIfIsPnA(Job job, Map<Long, Action> actionMap) {
         if (job.getJobType().equals(PA_JOB_TYPE)) {
             List<Long> actionPids = getActionIdsForJob(job);
             if (CollectionUtils.isNotEmpty(actionPids)) {
-                List<Action> actions = getActions(actionPids);
+                List<Action> actions;
+                if (actionMap != null && actionMap.size() > 0) {
+                    actions = getActions(actionPids, actionMap);
+                } else {
+                    actions = getActions(actionPids, null);
+                }
                 List<Job> subJobs = expandActions(actions);
                 job.setSubJobs(updateJobsWithActionId(subJobs));
             }
