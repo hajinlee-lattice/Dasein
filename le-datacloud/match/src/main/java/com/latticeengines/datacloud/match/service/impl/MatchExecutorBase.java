@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.firehose.FirehoseService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -29,6 +30,9 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -61,6 +66,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     protected MetricService metricService;
+
+    @Autowired
+    private BatonService batonService;
 
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
@@ -151,15 +159,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchHistories.add(matchHistory);
         }
 
-        String tenantName = null;
-        if (matchContext.getInput().getTenant() != null &&
-                StringUtils.isNotBlank(matchContext.getInput().getTenant().getName())) {
-            tenantName = matchContext.getInput().getTenant().getName();
-        }
-        publishMatchHistory(tenantName, matchHistories);
+        String s3ObjectPrefix = getS3ObjectPrefix(matchContext);
+        publishMatchHistory(s3ObjectPrefix, matchHistories);
     }
 
-    private void publishMatchHistory(String tenantName, List<MatchHistory> matchHistories) {
+    private void publishMatchHistory(String s3ObjectPrefix, List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
             log.debug("MatchHistory not enabled, returning.");
             return;
@@ -176,7 +180,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        firehoseService.sendBatch(deliveryStreamName, tenantName + "/", histories);
+        firehoseService.sendBatch(deliveryStreamName, s3ObjectPrefix, histories);
     }
 
     @VisibleForTesting
@@ -404,5 +408,26 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return record.getEntityIds().get(entity);
+    }
+
+    private String getS3ObjectPrefix(MatchContext matchContext) {
+        if (matchContext.getInput().getTenant() != null &&
+                StringUtils.isNotBlank(matchContext.getInput().getTenant().getId()) &&
+                StringUtils.isNotBlank(matchContext.getInput().getTenant().getName())) {
+            Tenant tenant = matchContext.getInput().getTenant();
+            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+            FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
+            try {
+                if (flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
+                        && Boolean.TRUE.equals(flags.get(
+                                LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()))) {
+                    return matchContext.getInput().getTenant().getName() + "/";
+                }
+            } catch (Exception e) {
+                log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
+                        " feature flag!", e);
+            }
+        }
+        return null;
     }
 }
