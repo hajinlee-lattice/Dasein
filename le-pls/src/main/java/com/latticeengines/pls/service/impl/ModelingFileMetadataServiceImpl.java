@@ -235,8 +235,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
             String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s, sourceFile : %s",
-                customerSpace.toString(), entity, source, feedType, sourceFileName));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);

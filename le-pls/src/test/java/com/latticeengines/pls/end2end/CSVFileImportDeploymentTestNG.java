@@ -451,7 +451,6 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     public void verifyRequiredFieldMissingV2() {
         List<FieldValidation> validations = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
         Assert.assertNotNull(validations);
-        System.out.println("logic " + JsonUtils.serialize(validations));
         List<FieldValidation> errorValidations = validations.stream()
                 .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
                 .collect(Collectors.toList());
