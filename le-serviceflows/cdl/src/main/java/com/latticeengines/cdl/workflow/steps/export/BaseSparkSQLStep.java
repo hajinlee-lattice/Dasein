@@ -33,6 +33,7 @@ import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.query.factory.SparkQueryProvider;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
@@ -61,8 +62,11 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     private LivySession livySession;
 
     protected abstract CustomerSpace parseCustomerSpace(S stepConfiguration);
+
     protected abstract DataCollection.Version parseDataCollectionVersion(S stepConfiguration);
+
     protected abstract String parseEvaluationDateStr(S stepConfiguration);
+
     protected abstract AttributeRepository parseAttrRepo(S stepConfiguration);
 
     protected Map<String, String> getHdfsPaths(AttributeRepository attrRepo) {
@@ -83,8 +87,12 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         QueryServiceUtils.setAttrRepo(attrRepo);
         QueryServiceUtils.toLocalAttrRepoMode();
+        double totalSizeInGb = hdfsPathMap.values().stream() //
+                .mapToDouble(path -> ScalingUtils.getHdfsPathSizeInGb(yarnConfiguration, path)) //
+                .sum();
+        int scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
         livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
-                1, false, getClass().getSimpleName());
+                scalingMultiplier, false, getClass().getSimpleName());
     }
 
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
