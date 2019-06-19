@@ -73,6 +73,7 @@ public class CDLResource {
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
+    private static final String updateS3ImportSystemPriorityMsg = "System priority has been updated.</p>";
 
     @Inject
     private CDLJobProxy cdlJobProxy;
@@ -340,12 +341,33 @@ public class CDLResource {
     @GetMapping(value = "/s3import/system/list")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
-    public List<S3ImportSystem> getS3ImportSystemList() {
+    public List<S3ImportSystem> getS3ImportSystemList(
+            @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
+            @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return cdlService.getAllS3ImportSystem(customerSpace.toString());
+    }
+
+    @PostMapping(value = "/s3import/system/list")
+    @ResponseBody
+    @ApiOperation("update import system priority based on sequence")
+    public Map<String, UIAction> updateSystemPriorityBasedOnSequence(@RequestBody List<S3ImportSystem> systemList) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            cdlService.updateS3ImportSystemPriorityBasedOnSequence(customerSpace.toString(), systemList);
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    updateS3ImportSystemPriorityMsg);
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        } catch (RuntimeException e) {
+            log.error("Failed to Update system priority: " + e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18222, new String[] {e.getMessage()});
+        }
     }
 
     @GetMapping(value = "/s3import/system")
