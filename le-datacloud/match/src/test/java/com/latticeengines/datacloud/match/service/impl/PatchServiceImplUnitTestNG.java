@@ -857,7 +857,8 @@ public class PatchServiceImplUnitTestNG {
     private PatchBook newLookupTestPatchBook(
             long id, @NotNull MatchKeyTuple tuple, @NotNull String patchDomain, @NotNull String patchDuns) {
         PatchBook book =  TestPatchBookUtils.newPatchBook(
-                id, PatchBook.Type.Lookup, tuple, TestPatchBookUtils.newDomainDunsPatchItems(patchDomain, patchDuns));
+                id, PatchBook.Type.Lookup, false, tuple,
+                TestPatchBookUtils.newDomainDunsPatchItems(patchDomain, patchDuns));
         // make sure the test case has valid match keys
         Assert.assertTrue(PatchBookUtils.shouldPatchAMLookupTable(book));
         return book;
