@@ -492,7 +492,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         // 1. set system related mapping
-        FieldMapping customerLatticeId = null;
+//        FieldMapping customerLatticeId = null;
+        List<FieldMapping> customerLatticeIdList = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getIdType() != null) {
                 String systemName = cdlService.getSystemNameFromFeedType(feedType);
@@ -516,11 +517,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     fieldMapping.setMappedToLatticeField(false);
                                 }
                                 fieldMapping.setMappedField(accountSystemId);
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    customerLatticeId = new FieldMapping();
+                                if (importSystem.isMapToLatticeAccount()) {
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             case Contact:
@@ -537,11 +539,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
                                 fieldMapping.setMappedField(contactSystemId);
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    customerLatticeId = new FieldMapping();
+                                if (importSystem.isMapToLatticeContact()) {
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             default:
@@ -563,10 +566,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setMappedField(importSystem.getAccountSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
                                 if (importSystem.isMapToLatticeAccount()) {
-                                    customerLatticeId = new FieldMapping();
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             case Contact:
@@ -578,10 +582,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setMappedField(importSystem.getContactSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
                                 if (importSystem.isMapToLatticeContact()) {
-                                    customerLatticeId = new FieldMapping();
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             default:
@@ -592,18 +597,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         // map customer lattice id
-        if (customerLatticeId != null) {
-            boolean existFromTemplate = false;
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
-                    fieldMapping.setUserField(customerLatticeId.getUserField());
-                    fieldMapping.setFieldType(customerLatticeId.getFieldType());
-                    existFromTemplate = true;
+        if (CollectionUtils.isNotEmpty(customerLatticeIdList)) {
+            for (FieldMapping customerLatticeId : customerLatticeIdList) {
+                boolean existFromTemplate = false;
+                for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                    if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
+                        fieldMapping.setUserField(customerLatticeId.getUserField());
+                        fieldMapping.setFieldType(customerLatticeId.getFieldType());
+                        existFromTemplate = true;
+                    }
                 }
-            }
-            if (!existFromTemplate) {
-                customerLatticeId.setMappedToLatticeField(false);
-                fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+                if (!existFromTemplate) {
+                    customerLatticeId.setMappedToLatticeField(false);
+                    fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+                }
             }
         } else {
             Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
