@@ -68,6 +68,9 @@ public class LivySessionServiceImpl implements LivySessionService {
         } catch (HttpClientErrorException e) {
             log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
             throw e;
+        } catch (Exception e) {
+            log.error("Unknown http error of type " + e.getClass().getCanonicalName(), e);
+            throw e;
         }
         log.info("Starting new livy session on " + host + ": " + resp);
         int sessionId = parseSessionId(resp);

@@ -210,6 +210,7 @@ public class ExtractScoringTarget extends BaseSparkSQLStep<GenerateRatingStepCon
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") merging " //
                         + containers.size() + " scoring targets.");
+                log.warn("Previous failure:",  ctx.getLastThrowable());
             }
             try {
                 String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
