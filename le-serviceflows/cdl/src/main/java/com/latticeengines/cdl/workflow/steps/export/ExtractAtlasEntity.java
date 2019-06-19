@@ -71,6 +71,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:",  ctx.getLastThrowable());
             }
             Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
             try {

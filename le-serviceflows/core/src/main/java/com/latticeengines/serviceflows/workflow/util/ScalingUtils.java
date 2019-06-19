@@ -33,7 +33,9 @@ public final class ScalingUtils {
         } else {
             int log3 = (int) Math.floor(Math.log10(div8) / Math.log10(3));
             int lowerBound = Math.max(log3 + 2, 1);
-            return Math.min(lowerBound, 4);
+            int multiplier = Math.min(lowerBound, 4);
+            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
+            return multiplier;
         }
     }
 
