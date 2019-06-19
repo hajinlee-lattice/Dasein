@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
@@ -43,7 +44,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
-            payLoad.put("name", name);
+            payLoad.put("name", NamingUtils.uuid(name));
         }
         Map<String, String> conf = new HashMap<>();
         conf.put("livy.rsc.launcher.port.range", "10000~10999");
