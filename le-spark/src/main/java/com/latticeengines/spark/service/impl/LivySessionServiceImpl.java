@@ -1,7 +1,9 @@
 package com.latticeengines.spark.service.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
@@ -34,6 +35,7 @@ public class LivySessionServiceImpl implements LivySessionService {
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
     private static final String URI_SESSIONS = "/sessions";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
@@ -44,7 +46,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
-            payLoad.put("name", NamingUtils.timestamp(name));
+            payLoad.put("name", name + DATE_FORMAT.format(new Date()));
         }
         Map<String, String> conf = new HashMap<>();
         conf.put("livy.rsc.launcher.port.range", "10000~10999");
