@@ -132,8 +132,9 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
                 EntityLookupResponse lookupResponse = new EntityLookupResponse(
                         lookupRequest.getTenant(), lookupRequest.getEntity(),
                         lookupRequest.getTuple(), entityIds);
+                // inject failure only for testing purpose
+                injectFailure(getReq(requestId));
                 String returnAddress = getReqReturnAddr(requestId);
-
                 // remove request and send response
                 removeReq(requestId);
                 sendResponse(requestId, lookupResponse, returnAddress);
