@@ -176,6 +176,8 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_AM_DECODER = "AMDecoder";
     public static final String TRANSFORMER_AM_REFRESH_VER_UPDATER = "amRefreshVersionUpdater";
 
+    public static final String TRANSFORMER_SOURCE_TO_S3_PUBLISHER = "sourceToS3Publisher";
+
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 
     /*************************************************
