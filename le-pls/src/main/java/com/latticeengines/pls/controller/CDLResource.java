@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -348,7 +349,14 @@ public class CDLResource {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return cdlService.getAllS3ImportSystem(customerSpace.toString());
+        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace.toString());
+        if (Boolean.TRUE.equals(filterByAccountSystemId)) {
+            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
+        }
+        if (Boolean.TRUE.equals(filterByContactSystemId)) {
+            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
+        }
+        return allSystems;
     }
 
     @PostMapping(value = "/s3import/system/list")
