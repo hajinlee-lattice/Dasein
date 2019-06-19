@@ -116,7 +116,7 @@ export default class SystemCreationComponent extends Component {
                             );
                             // pls/cdl/s3import/system?systemName={systemName}&systemType=
                             // url, body, observer, headers
-                            let url = `${'/pls/cdl/s3import/system?systemName='}${this.state.newSystemName}${'&systemType='}${this.state.systemSelected.name}`;
+                            let url = `${'/pls/cdl/s3import/system?systemDisplayName='}${this.state.newSystemName}${'&systemType='}${this.state.systemSelected.name}`;
                             httpService.post(url, {}, observer, {});
                             // let config = {
                             //     callback: (action) => {
