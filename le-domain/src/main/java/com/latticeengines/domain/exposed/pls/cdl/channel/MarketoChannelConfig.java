@@ -11,18 +11,6 @@ public class MarketoChannelConfig implements ChannelConfig {
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
-    // @JsonProperty("showNumContactsLaunched")
-    // private Boolean showNumContactsLaunched = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsSupressed")
-    // private Boolean showNumContactsSupressed = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsInSegment")
-    // private Boolean showNumContactsInSegment = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsWithDupeEmails")
-    // private Boolean showNumContactsWithDupeEmails = Boolean.FALSE;
-
     @JsonProperty("supressContactsWithoutEmails")
     private Boolean supressContactsWithoutEmails = Boolean.FALSE;
 
@@ -37,41 +25,6 @@ public class MarketoChannelConfig implements ChannelConfig {
 
     @JsonProperty("folderName")
     private String folderName;
-
-    // public Boolean isShowNumContactsLaunched() {
-    // return showNumContactsLaunched;
-    // }
-    //
-    // public void setShowNumContactsLaunched(boolean showNumContactsLaunched) {
-    // this.showNumContactsLaunched = showNumContactsLaunched;
-    // }
-    //
-    // public Boolean isShowNumContactsSupressed() {
-    // return showNumContactsSupressed;
-    // }
-    //
-    // public void setShowNumContactsSupressed(boolean showNumContactsSupressed)
-    // {
-    // this.showNumContactsSupressed = showNumContactsSupressed;
-    // }
-    //
-    // public Boolean isShowNumContactsInSegment() {
-    // return showNumContactsInSegment;
-    // }
-    //
-    // public void setShowNumContactsInSegment(boolean showNumContactsInSegment)
-    // {
-    // this.showNumContactsInSegment = showNumContactsInSegment;
-    // }
-    //
-    // public Boolean isShowNumContactsWithDupeEmails() {
-    // return showNumContactsWithDupeEmails;
-    // }
-    //
-    // public void setShowNumContactsWithDupeEmails(boolean
-    // showNumContactsWithDupeEmails) {
-    // this.showNumContactsWithDupeEmails = showNumContactsWithDupeEmails;
-    // }
 
     public Long getContactLimit() {
         return contactLimit;
@@ -125,11 +78,6 @@ public class MarketoChannelConfig implements ChannelConfig {
     public ChannelConfig copyConfig(ChannelConfig config) {
         MarketoChannelConfig marketoChannelConfig = this;
         MarketoChannelConfig newMarketoChannelConfig = (MarketoChannelConfig) config;
-        // marketoChannelConfig.setShowNumContactsLaunched(newMarketoChannelConfig.isShowNumContactsLaunched());
-        // marketoChannelConfig.setShowNumContactsSupressed(newMarketoChannelConfig.isShowNumContactsSupressed());
-        // marketoChannelConfig.setShowNumContactsInSegment(newMarketoChannelConfig.isShowNumContactsInSegment());
-        // marketoChannelConfig
-        // .setShowNumContactsWithDupeEmails(newMarketoChannelConfig.isShowNumContactsWithDupeEmails());
         marketoChannelConfig.setContactLimit(newMarketoChannelConfig.getContactLimit());
         marketoChannelConfig.setSupressContactsWithoutEmails(newMarketoChannelConfig.isSupressContactsWithoutEmails());
         marketoChannelConfig
