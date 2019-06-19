@@ -118,8 +118,10 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     private Node pivotRuleBased(Set<String> ruleEngineIds, Node ruleRating) {
         ruleRating = ruleRating.filter(idCol + " != null", new FieldList(idCol));
-        ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name(),
-                InterfaceName.CDLUpdatedTime.name());
+        ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name());
+        if (ruleRating.getFieldNames().contains(InterfaceName.CDLUpdatedTime.name())) {
+            ruleRating = ruleRating.discard(InterfaceName.CDLUpdatedTime.name());
+        }
         ruleRating = renameIds(ruleRating);
         return pivotField(ruleRating, ruleEngineIds, InterfaceName.Rating.name(), String.class,
                 null).renamePipe("rule_rating");
@@ -127,8 +129,10 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     private Node pivotAIBased(Node rawRatings) {
         rawRatings = renameIds(rawRatings);
-        rawRatings = rawRatings.discard(InterfaceName.CDLUpdatedTime.name(), "Model_GUID",
-                InterfaceName.__Composite_Key__.name());
+        rawRatings = rawRatings.discard("Model_GUID", InterfaceName.__Composite_Key__.name());
+        if (rawRatings.getFieldNames().contains(InterfaceName.CDLUpdatedTime.name())) {
+            rawRatings = rawRatings.discard(InterfaceName.CDLUpdatedTime.name());
+        }
         Node rating = pivotField(rawRatings, aiEngineIds, InterfaceName.Rating.name(), String.class,
                 null).renamePipe("ai_rating");
         List<Node> rhs = new ArrayList<>();

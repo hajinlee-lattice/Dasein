@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -242,6 +243,10 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
         RatingRule rule = RatingRule.constructDefaultRule();
 
+        for (RatingBucketName bucket: RatingBucketName.values()) {
+            rule.getBucketToRuleMap().put(bucket.getName(), defaultRulesFromUI());
+        }
+
         Map<String, Restriction> ruleA = new HashMap<>();
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and(
                 new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("B", "G")),
@@ -263,6 +268,13 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         model.setRatingRule(rule);
 
         return model;
+    }
+
+    private static Map<String, Restriction> defaultRulesFromUI() {
+        Map<String, Restriction> map = new HashMap<>();
+        map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, LogicalRestriction.builder().and(Collections.emptyList()).build());
+        map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, LogicalRestriction.builder().and(Collections.emptyList()).build());
+        return map;
     }
 
     @Test(groups = "functional")
@@ -325,6 +337,32 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         model.setRatingRule(rule);
 
         return model;
+    }
+
+    @Test(groups = "functional")
+    public void testSparkSQLQueries() {
+        RatingModel model = ruleBasedModel();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(VALUE_CONTACT_TITLE));
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+
+        Map<String, String> sqls = queryService.getSparkSQLRuleBasedQueries(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotEquals(sqls.get("default"), "");
+        Assert.assertNotEquals(sqls.get("A"), "");
+        Assert.assertEquals(sqls.get("B"), "");
+        Assert.assertNotEquals(sqls.get("C"), "");
+        Assert.assertEquals(sqls.get("D"), "");
+        Assert.assertEquals(sqls.get("E"), "");
+        Assert.assertEquals(sqls.get("F"), "");
     }
 
 }
