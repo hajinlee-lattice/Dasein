@@ -219,7 +219,7 @@ angular.module('lp.delete.entry', [])
 
         function getDataProcessingPageHref() {   
             var url = $location.absUrl().split('/');
-            url[url.length - 1] = "jobs/status";
+            url[url.length - 1] = "jobs/status/data";
             return url.join("/");   
         }
 
