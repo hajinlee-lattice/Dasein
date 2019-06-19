@@ -63,7 +63,7 @@ public interface ChannelConfig {
     // this.selectUnscored = selectUnscored;
     // }
 
-    public ChannelConfig copyConfig(ChannelConfig config);
+    ChannelConfig copyConfig(ChannelConfig config);
     // this.setLimitAccounts(config.isLimitAccounts());
     // this.setLimitContacts(config.isLimitContacts());
     // this.setSelectRatingIfContainsModel(config.isSelectRatingIfContainsModel());
