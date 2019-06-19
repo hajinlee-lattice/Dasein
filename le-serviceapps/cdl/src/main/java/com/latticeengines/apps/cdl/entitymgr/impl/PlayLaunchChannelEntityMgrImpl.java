@@ -112,12 +112,8 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getIsAlwaysOn() != null) {
             existingPlayLaunchChannel.setIsAlwaysOn(playLaunchChannel.getIsAlwaysOn());
         }
-        if (playLaunchChannel.getExcludeItemsWithoutSalesforceId() != null) {
-            existingPlayLaunchChannel
-                    .setExcludeItemsWithoutSalesforceId(playLaunchChannel.getExcludeItemsWithoutSalesforceId());
-        }
-        if (playLaunchChannel.getTopNCount() != null) {
-            existingPlayLaunchChannel.setTopNCount(playLaunchChannel.getTopNCount());
+        if (playLaunchChannel.getMaxAccountsToLaunch() != null) {
+            existingPlayLaunchChannel.setMaxAccountsToLaunch(playLaunchChannel.getMaxAccountsToLaunch());
         }
         if (playLaunchChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
@@ -128,8 +124,8 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(playLaunchChannel.getLaunchType());
         }
-        if (playLaunchChannel.getCronSchedule() != null) {
-            existingPlayLaunchChannel.setCronSchedule(playLaunchChannel.getCronSchedule());
+        if (playLaunchChannel.getCronScheduleExpression() != null) {
+            existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
         }
 
         if (playLaunchChannel.getChannelConfig() != null) {

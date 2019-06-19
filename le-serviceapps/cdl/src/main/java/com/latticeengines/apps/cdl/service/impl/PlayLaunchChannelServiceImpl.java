@@ -82,8 +82,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(playLaunchChannel.getPlay());
         playLaunch.setLaunchState(LaunchState.Queued);
-        playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchChannel.getExcludeItemsWithoutSalesforceId());
-        playLaunch.setTopNCount(playLaunchChannel.getTopNCount());
+        // playLaunch.setExcludeItemsWithoutSalesforceId(((SalesforceChannelConfig)playLaunchChannel.getChannelConfig()).getRestrictNotNullLookupId());
+        playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
         playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());

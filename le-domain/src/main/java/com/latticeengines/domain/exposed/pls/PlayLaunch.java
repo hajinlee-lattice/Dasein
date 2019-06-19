@@ -113,7 +113,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Tenant tenant;
 
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID", nullable = true)
+    @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayLaunchChannel playLaunchChannel;
 
