@@ -1,6 +1,6 @@
 angular
     .module('common.attributes.activate', ['mainApp.core.redux'])
-    .config(function($stateProvider) {
+    .config(function ($stateProvider) {
         $stateProvider.state('home.attributes.activate', {
             url: '/activate/:category/:subcategory',
             params: {
@@ -15,7 +15,7 @@ angular
             },
             onExit: [
                 'AttrConfigStore',
-                function(AttrConfigStore) {
+                function (AttrConfigStore) {
                     AttrConfigStore.init();
                 }
             ],
@@ -23,11 +23,11 @@ angular
                 overview: [
                     '$q',
                     'AttrConfigService',
-                    function($q, AttrConfigService) {
+                    function ($q, AttrConfigService) {
                         var deferred = $q.defer();
 
                         AttrConfigService.getOverview('activation').then(
-                            function(response) {
+                            function (response) {
                                 deferred.resolve(response.data || []);
                             }
                         );
@@ -40,7 +40,7 @@ angular
                     '$stateParams',
                     'AttrConfigService',
                     'AttrConfigStore',
-                    function(
+                    function (
                         $q,
                         $stateParams,
                         AttrConfigService,
@@ -54,7 +54,7 @@ angular
                         AttrConfigService.getConfig(
                             'activation',
                             category
-                        ).then(function(response) {
+                        ).then(function (response) {
                             AttrConfigStore.setData(
                                 'config',
                                 response.data || []
@@ -79,7 +79,7 @@ angular
             overview: '<',
             config: '<'
         },
-        controller: function(AttrConfigStore, $state, $ngRedux) {
+        controller: function (AttrConfigStore, $state, $ngRedux) {
             let vm = this;
 
             vm.store = AttrConfigStore;
@@ -88,18 +88,18 @@ angular
 
             vm.redux = $state.get('home.attributes').data.redux;
 
-            console.log(
-                '-!- Redux controller init',
-                this,
-                $state.get('home.attributes')
-            );
+            // console.log(
+            //     '-!- Redux controller init',
+            //     this,
+            //     $state.get('home.attributes')
+            // );
 
-            vm.$onInit = function() {
-                $ngRedux.subscribe(state => {
-                    console.log('-!- Redux store has changed', vm.redux.store);
-                });
+            vm.$onInit = function () {
+                // $ngRedux.subscribe(state => {
+                //     console.log('-!- Redux store has changed', vm.redux.store);
+                // });
 
-                vm.redux.get();
+                // vm.redux.get();
             };
         }
     });

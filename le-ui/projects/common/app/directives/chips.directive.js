@@ -63,14 +63,14 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     scope.sortId = sortid;
                     scope.queryItems = scope.queryItems.sort(scope.sortList);
 
-                    console.log('[chips] sorting', scope.sortId, !scope.nosort)
+                    // console.log('[chips] sorting', scope.sortId, !scope.nosort)
                     if (scope.sortreverse) {
                         scope.queryItems.reverse();
                     }
                 }
 
                 scope.init = function () {
-                    console.log('[chips] init', scope);
+                    // console.log('[chips] init', scope);
                     if (scope.queryItems && scope.queryItems.length > 0 && !scope.nosort) {
                         scope.sort(scope.sortId);
                     }
@@ -269,6 +269,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
 
                 scope.chooseItem = function (item, callCallback) {
+                    // console.log('chooseItem()', item, scope.query);
                     if (item) {
                         if (scope.singleSelection) {
                             scope.chips = {};
@@ -286,11 +287,10 @@ angular.module('mainApp.appCommon.directives.chips', [])
                             scope.setListVisibility(false);
                         }
                     }
-
-                    // console.log(scope.chips);
                 }
 
                 scope.addCustomValue = (value, callCallback) => {
+                    // console.log('addCustomValue()', value, scope.query);
                     if (!value) {
                         return false;
                     }
@@ -345,7 +345,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
 
                 if (scope.context && scope.name) {
                     if (scope.context[scope.name]) {
-                        console.warn('Warning: Clobberying ""' + scope.name + '" in context controller!');
+                        console.warn('Warning: Clobbering "' + scope.name + '" in context controller!');
                     }
                     scope.context[scope.name] = scope;
                 }

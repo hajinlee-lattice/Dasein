@@ -118,9 +118,9 @@ public class TestPatchBookUtils {
      * @param patchItems patchItems instance
      * @return created {@link PatchBook} instance
      */
-    public static PatchBook newPatchBook(
-            long patchBookId, @NotNull MatchKeyTuple tuple, Map<String, Object> patchItems) {
-        return newPatchBook(patchBookId, null, tuple, patchItems);
+    public static PatchBook newPatchBook(long patchBookId, @NotNull MatchKeyTuple tuple,
+            Map<String, Object> patchItems) {
+        return newPatchBook(patchBookId, null, false, tuple, patchItems);
     }
 
     /**
@@ -132,10 +132,11 @@ public class TestPatchBookUtils {
      * @return created {@link PatchBook} instance
      */
     public static PatchBook newPatchBook(
-            long patchBookId, PatchBook.Type type, @NotNull MatchKeyTuple tuple, Map<String, Object> patchItems) {
+            long patchBookId, PatchBook.Type type, @NotNull Boolean isCleanup, @NotNull MatchKeyTuple tuple, Map<String, Object> patchItems) {
         PatchBook book = new PatchBook();
         book.setPid(patchBookId);
         book.setType(type);
+        book.setCleanup(isCleanup);
         book.setDomain(tuple.getDomain());
         book.setDuns(tuple.getDuns());
         book.setName(tuple.getName());

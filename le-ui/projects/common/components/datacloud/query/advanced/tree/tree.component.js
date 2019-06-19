@@ -134,32 +134,6 @@ angular
                     }
                 }
 
-                vm.setBucket = function ($event, unset) {
-                    vm.editing = false;
-
-                    if (unset) {
-                        vm.unused = true;
-                        vm.tree.bucketRestriction.bkt = {};
-                        vm.tree.bucketRestriction.ignored = true;
-                    } else {
-                        vm.unused = false;
-                        vm.tree.bucketRestriction.ignored = false;
-                    }
-
-                    vm.records_updating = true;
-
-                    vm.root.updateCount();
-                    vm.updateBucketCount();
-
-                    $event.preventDefault();
-                    $event.stopPropagation();
-
-                    // $timeout(function () {
-                    //     vm.records_updating = false;
-                    // }, 250);
-                    console.log('[tree] setBucket()', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction)
-                }
-
                 vm.editBucket = function () {
                     if (vm.root.draggedItem == vm || QueryStore.getPublicProperty('disableAllTreeRestrictions')) {
                         return;

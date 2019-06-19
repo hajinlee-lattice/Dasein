@@ -22,6 +22,11 @@ public interface PatchBookValidator {
     String EXCLUDED_PATCH_ITEM = "Invalid Patched Items provided. Column present in excluded Patch list : ";
 
     /**
+     * Error Messages for : type = Attribute and Cleanup = 1
+     */
+    String ERR_ATTRI_CLEANUP = "Cannot cleanup PatchBook Type : Attribute. Error for Ids : ";
+
+    /**
      * Error Messages for conflict in patchItems in patchBook
      */
     String CONFLICT_IN_PATCH_ITEM = "Conflict exists in provided patch items for match keys : ";

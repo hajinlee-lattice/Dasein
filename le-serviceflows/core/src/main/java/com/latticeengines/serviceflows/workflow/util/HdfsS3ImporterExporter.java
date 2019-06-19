@@ -120,8 +120,7 @@ public class HdfsS3ImporterExporter implements Runnable {
     }
 
     private Configuration createConfiguration() {
-        Properties properties = new Properties();
-        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, properties);
+        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, new Properties());
         String jobName = StringUtils.isNotBlank(tableName) ? tenantId + "~" + tableName : tenantId;
         hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
         return hadoopConfiguration;
