@@ -62,7 +62,13 @@ public class LivySessionServiceImpl implements LivySessionService {
             log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
         String url = host + URI_SESSIONS;
-        String resp = restTemplate.postForObject(url, payLoad, String.class);
+        String resp;
+        try {
+            resp = restTemplate.postForObject(url, payLoad, String.class);
+        } catch (HttpClientErrorException e) {
+            log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
+            throw e;
+        }
         log.info("Starting new livy session on " + host + ": " + resp);
         int sessionId = parseSessionId(resp);
         LivySession session = new LivySession(host, sessionId);
