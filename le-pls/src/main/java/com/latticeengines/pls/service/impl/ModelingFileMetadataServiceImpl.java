@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -413,10 +414,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (dataFeedTask == null) {
             table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), null);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
         } else {
             table = dataFeedTask.getImportTemplate();
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), table);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
