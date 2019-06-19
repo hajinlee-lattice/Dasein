@@ -8,20 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EloquaChannelConfig implements ChannelConfig {
 
-    @JsonProperty("accountLimit")
-    private Long accountLimit;
-
-    // @JsonProperty("showNumContactsLaunched")
-    // private Boolean showNumContactsLaunched = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsSupressed")
-    // private Boolean showNumContactsSupressed = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsInSegment")
-    // private Boolean showNumContactsInSegment = Boolean.FALSE;
-    //
-    // @JsonProperty("showNumContactsWithDupeEmails")
-    // private Boolean showNumContactsWithDupeEmails = Boolean.FALSE;
+    @JsonProperty("contactLimit")
+    private Long contactLimit;
 
     @JsonProperty("supressContactsWithoutEmails")
     private Boolean supressContactsWithoutEmails = Boolean.FALSE;
@@ -29,47 +17,12 @@ public class EloquaChannelConfig implements ChannelConfig {
     @JsonProperty("supressAccountWithoutContacts")
     private Boolean supressAccountWithoutContacts = Boolean.FALSE;
 
-    // public Boolean isShowNumContactsLaunched() {
-    // return showNumContactsLaunched;
-    // }
-    //
-    // public void setShowNumContactsLaunched(boolean showNumContactsLaunched) {
-    // this.showNumContactsLaunched = showNumContactsLaunched;
-    // }
-    //
-    // public Boolean isShowNumContactsSupressed() {
-    // return showNumContactsSupressed;
-    // }
-    //
-    // public void setShowNumContactsSupressed(boolean showNumContactsSupressed)
-    // {
-    // this.showNumContactsSupressed = showNumContactsSupressed;
-    // }
-    //
-    // public Boolean isShowNumContactsInSegment() {
-    // return showNumContactsInSegment;
-    // }
-    //
-    // public void setShowNumContactsInSegment(boolean showNumContactsInSegment)
-    // {
-    // this.showNumContactsInSegment = showNumContactsInSegment;
-    // }
-    //
-    // public Boolean isShowNumContactsWithDupeEmails() {
-    // return showNumContactsWithDupeEmails;
-    // }
-    //
-    // public void setShowNumContactsWithDupeEmails(boolean
-    // showNumContactsWithDupeEmails) {
-    // this.showNumContactsWithDupeEmails = showNumContactsWithDupeEmails;
-    // }
-
-    public Long getAccoutLimit() {
-        return accountLimit;
+    public Long getContactLimit() {
+        return contactLimit;
     }
 
-    public void setAccountLimit(Long accountLimit) {
-        this.accountLimit = accountLimit;
+    public void setContactLimit(Long contactLimit) {
+        this.contactLimit = contactLimit;
     }
 
     public Boolean isSupressContactsWithoutEmails() {
@@ -92,11 +45,7 @@ public class EloquaChannelConfig implements ChannelConfig {
     public ChannelConfig copyConfig(ChannelConfig config) {
         EloquaChannelConfig eloquaChannelConfig = this;
         EloquaChannelConfig newEloquaChannelConfig = (EloquaChannelConfig) config;
-        // eloquaChannelConfig.setShowNumContactsLaunched(newEloquaChannelConfig.isShowNumContactsLaunched());
-        // eloquaChannelConfig.setShowNumContactsSupressed(newEloquaChannelConfig.isShowNumContactsSupressed());
-        // eloquaChannelConfig.setShowNumContactsInSegment(newEloquaChannelConfig.isShowNumContactsInSegment());
-        // eloquaChannelConfig.setShowNumContactsWithDupeEmails(newEloquaChannelConfig.isShowNumContactsWithDupeEmails());
-        eloquaChannelConfig.setAccountLimit(newEloquaChannelConfig.getAccoutLimit());
+        eloquaChannelConfig.setContactLimit(newEloquaChannelConfig.getContactLimit());
         eloquaChannelConfig.setSupressContactsWithoutEmails(newEloquaChannelConfig.isSupressContactsWithoutEmails());
         eloquaChannelConfig.setSupressAccountWithoutContacts(newEloquaChannelConfig.isSupressAccountWithoutContacts());
         return this;

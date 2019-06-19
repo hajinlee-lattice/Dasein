@@ -18,56 +18,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 })
 public interface ChannelConfig {
 
-    // @JsonProperty("limitAccounts")
-    // private Boolean limitAccounts = Boolean.FALSE;
-    //
-    // @JsonProperty("limitContacts")
-    // private Boolean limitContacts = Boolean.FALSE;
-    //
-    // @JsonProperty("selectRatingIfContainsModel")
-    // private Boolean selectRatingIfContainsModel = Boolean.FALSE;
-    //
-    // @JsonProperty("selectUnscored")
-    // private Boolean selectUnscored = Boolean.FALSE;
-    //
-    // public Boolean isLimitAccounts() {
-    // return limitAccounts;
-    // }
-    //
-    // public void setLimitAccounts(boolean limitAccounts) {
-    // this.limitAccounts = limitAccounts;
-    // }
-    //
-    // public Boolean isLimitContacts() {
-    // return limitContacts;
-    // }
-    //
-    // public void setLimitContacts(boolean limitContacts) {
-    // this.limitContacts = limitContacts;
-    // }
-    //
-    // public Boolean isSelectRatingIfContainsModel() {
-    // return selectRatingIfContainsModel;
-    // }
-    //
-    // public void setSelectRatingIfContainsModel(boolean
-    // selectRatingIfContainsModel) {
-    // this.selectRatingIfContainsModel = selectRatingIfContainsModel;
-    // }
-    //
-    // public Boolean isSelectUnscored() {
-    // return selectUnscored;
-    // }
-    //
-    // public void setSelectUnscored(boolean selectUnscored) {
-    // this.selectUnscored = selectUnscored;
-    // }
-
     ChannelConfig copyConfig(ChannelConfig config);
-    // this.setLimitAccounts(config.isLimitAccounts());
-    // this.setLimitContacts(config.isLimitContacts());
-    // this.setSelectRatingIfContainsModel(config.isSelectRatingIfContainsModel());
-    // this.setSelectUnscored(config.isSelectUnscored());
-    // return this;
 
 }
