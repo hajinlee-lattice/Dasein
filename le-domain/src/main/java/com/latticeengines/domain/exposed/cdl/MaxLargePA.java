@@ -8,4 +8,9 @@ public class MaxLargePA implements Constraint {
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
         return currentState.getCanRunLargeJobCount() < 1 && target.isLarge();
     }
+
+    @Override
+    public String getName() {
+        return MaxLargePA.class.getName();
+    }
 }

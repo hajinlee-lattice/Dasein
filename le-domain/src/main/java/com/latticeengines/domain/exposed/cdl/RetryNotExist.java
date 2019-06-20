@@ -2,14 +2,14 @@ package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Set;
 
-public class MaxPA implements Constraint {
+public class RetryNotExist implements Constraint {
     @Override
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
-        return currentState.getCanRunJobCount() < 1;
+        return target.isRetry();
     }
 
     @Override
     public String getName() {
-        return MaxPA.class.getName();
+        return RetryNotExist.class.getName();
     }
 }

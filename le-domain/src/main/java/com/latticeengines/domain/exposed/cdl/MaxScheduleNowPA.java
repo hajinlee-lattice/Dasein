@@ -7,4 +7,9 @@ public class MaxScheduleNowPA implements Constraint {
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
         return currentState.getCanRunScheduleNowJobCount() < 1 && target.isScheduledNow();
     }
+
+    @Override
+    public String getName() {
+        return MaxScheduleNowPA.class.getName();
+    }
 }

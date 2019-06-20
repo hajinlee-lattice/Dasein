@@ -5,18 +5,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
-import com.latticeengines.domain.exposed.cdl.SystemStatus;
-import com.latticeengines.domain.exposed.cdl.TenantActivity;
 
 public interface SchedulingPAService {
 
-    SystemStatus setSystemStatus(List<TenantActivity> tenantActivityList);
+    Map<String, Object> setSystemStatus();
 
     List<SchedulingPAQueue> initQueue();
 
     Map<String, Set<String>> getCanRunJobTenantList();
 
-    String showQueue();
+    Map<String, List<String>> showQueue();
 
     String getPositionFromQueue(String tenantName);
 }

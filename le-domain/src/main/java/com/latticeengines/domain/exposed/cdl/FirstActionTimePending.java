@@ -15,4 +15,9 @@ public class FirstActionTimePending implements Constraint {
         long firstMinute = (currentTime - target.getFirstActionTime()) / 3600000;
         return !((target.getTenantType() == TenantType.CUSTOMER && firstMinute >= 2) || firstMinute >= 6);
     }
+
+    @Override
+    public String getName() {
+        return FirstActionTimePending.class.getName();
+    }
 }

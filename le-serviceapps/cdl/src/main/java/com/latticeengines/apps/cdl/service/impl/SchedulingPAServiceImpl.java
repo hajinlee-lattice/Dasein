@@ -64,6 +64,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPAServiceImpl.class);
 
+    private static final String RETRY_KEY = "RETRY_KEY";
+    private static final String OTHER_KEY = "OTHER_KEY";
+    private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
+    private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
+
     @Inject
     private DataFeedService dataFeedService;
 
@@ -104,7 +109,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private int concurrentProcessAnalyzeJobs;
 
     @Override
-    public SystemStatus setSystemStatus(List<TenantActivity> tenantActivityList) {
+    public Map<String, Object> setSystemStatus() {
 
         int runningTotalCount = 0;
         int runningScheduleNowCount = 0;
@@ -113,7 +118,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> largeJobTenantId = new HashSet<>();
         Set<String> runningPATenantId = new HashSet<>();
 
-        tenantActivityList = new LinkedList<>();
+        List<TenantActivity> tenantActivityList = new LinkedList<>();
         List<DataFeed> allDataFeeds = dataFeedService.getDataFeeds(TenantStatus.ACTIVE, "4.0");
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
@@ -202,15 +207,18 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         log.info("running PA job count : " + runningTotalCount);
         log.info("running ScheduleNow PA job count : " + runningScheduleNowCount);
         log.info("running large PA job count : " + runningLargeJobCount);
-        log.info("priority Queue : " + JsonUtils.serialize(showQueue()));
         log.info("large PA Job tenant is : " + JsonUtils.serialize(largeJobTenantId));
-        return systemStatus;
+        Map<String, Object> map = new HashMap<>();
+        map.put(SYSTEM_STATUS, systemStatus);
+        map.put(TENANT_ACTIVITY_LIST, tenantActivityList);
+        return map;
     }
 
     public List<SchedulingPAQueue> initQueue() {
-        List<TenantActivity> tenantActivityList = new LinkedList<>();
         List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
-        SystemStatus systemStatus = setSystemStatus(tenantActivityList);
+        Map<String, Object> map = setSystemStatus();
+        SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
+        List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
         SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
         SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
         SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
@@ -243,24 +251,33 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> canRunRetryJobTenantSet = new HashSet<>();
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
         for (SchedulingPAQueue schedulingPAQueue : schedulingPAQueues) {
-
-            if (schedulingPAQueue.getObjectClassName() == RetrySchedulingPAObject.class.getName()) {
-                canRunRetryJobTenantSet = schedulingPAQueue.getCanRunJobs(canRunJobTenantSet);
-            } else {
-                schedulingPAQueue.getCanRunJobs(canRunJobTenantSet);
+            if (schedulingPAQueue.size() > 0) {
+                log.info(String.format("queue %s shows : %s", schedulingPAQueue.getObjectClassName(),
+                        JsonUtils.serialize(schedulingPAQueue.getAll())));
+                if (schedulingPAQueue.getObjectClassName().equals(RetrySchedulingPAObject.class.getName())) {
+                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.getCanRunJobs(canRunJobTenantSet));
+                } else {
+                    schedulingPAQueue.getCanRunJobs(canRunJobTenantSet);
+                }
             }
         }
         Map<String, Set<String>> canRunJobTenantMap = new HashMap<>();
-        canRunJobTenantMap.put("retry", canRunRetryJobTenantSet);
+        canRunJobTenantMap.put(RETRY_KEY, canRunRetryJobTenantSet);
         canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
-        canRunJobTenantMap.put("other", canRunJobTenantSet);
+        canRunJobTenantMap.put(OTHER_KEY, canRunJobTenantSet);
+        log.info("can run PA job tenant list is : " + JsonUtils.serialize(canRunJobTenantMap));
         return canRunJobTenantMap;
     }
 
     @Override
-    public String showQueue() {
+    public Map<String, List<String>> showQueue() {
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
-        return JsonUtils.serialize(schedulingPAQueues);
+        Map<String, List<String>> tenantMap = new HashMap<>();
+        for (SchedulingPAQueue schedulingPAQueue : schedulingPAQueues) {
+            tenantMap.put(schedulingPAQueue.getObjectClassName(), schedulingPAQueue.getAll());
+        }
+        log.info("priority Queue : " + JsonUtils.serialize(tenantMap));
+        return tenantMap;
     }
 
     @Override

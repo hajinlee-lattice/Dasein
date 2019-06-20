@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -21,15 +20,9 @@ public abstract class SchedulingPAObject<T extends SchedulingPAObject> implement
      */
     private TenantActivity tenantActivity;
 
-    /**
-     * this method is used when schedulingPAObject push into queue. check if this object can push into
-     * queue or not.
-     */
-    abstract boolean checkAddConstraint(SystemStatus systemStatus);
-    /**
-     * this method is used when schedulingPAObject pop from queue. check if this object can pop queue or not.
-     */
-    abstract boolean checkPopConstraint(SystemStatus systemStatus, Set<String> scheduledTenants);
+    abstract List<Constraint> getPushConstraints();
+
+    abstract List<Constraint> getPopConstraints();
 
     public abstract Class<T> getInstance();
 
@@ -56,14 +49,4 @@ public abstract class SchedulingPAObject<T extends SchedulingPAObject> implement
         return o.getTenantType() == TenantType.CUSTOMER ? 1 : -1;
     }
 
-    public boolean checkConstraint(SystemStatus systemStatus, Set<String> scheduledTenants, List<Constraint> constraintList) {
-        boolean violated = false;
-        for (Constraint constraint : constraintList) {
-            if (constraint.checkViolated(systemStatus, scheduledTenants, this.getTenantActivity())) {
-                violated = true;
-                break;
-            }
-        }
-        return !violated;
-    }
 }

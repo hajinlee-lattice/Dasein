@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +31,7 @@ public class SchedulingPAQueueResource {
     @ApiOperation(value = "getQueueInfo")
     @NoMetricsLog
     @NoCustomerSpace
-    public String getQueueInfo() {
+    public Map<String, List<String>> getQueueInfo() {
         return schedulingPAService.showQueue();
     }
 

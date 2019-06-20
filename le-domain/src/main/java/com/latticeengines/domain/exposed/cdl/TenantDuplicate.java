@@ -10,4 +10,9 @@ public class TenantDuplicate implements Constraint {
         }
         return scheduledTenants.contains(target.getTenantId());
     }
+
+    @Override
+    public String getName() {
+        return TenantDuplicate.class.getName();
+    }
 }

@@ -7,4 +7,9 @@ public class RetryExist implements Constraint {
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
         return !target.isRetry();
     }
+
+    @Override
+    public String getName() {
+        return RetryExist.class.getName();
+    }
 }

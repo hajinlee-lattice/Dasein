@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.cdl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
 
@@ -23,17 +22,17 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
-    boolean checkAddConstraint(SystemStatus systemStatus) {
-        return checkConstraint(systemStatus, null, pushConstraintList);
+    List<Constraint> getPushConstraints() {
+        return pushConstraintList;
     }
 
     @Override
-    boolean checkPopConstraint(SystemStatus systemStatus, Set scheduledTenants) {
-        return checkConstraint(systemStatus, scheduledTenants, popConstraintList);
+    List<Constraint> getPopConstraints() {
+        return popConstraintList;
     }
 
     @Override
-    public Class getInstance() {
+    public Class<AutoScheduleSchedulingPAObject> getInstance() {
         return AutoScheduleSchedulingPAObject.class;
     }
 
@@ -50,6 +49,7 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new FirstActionTimePending());
         pushConstraintList.add(new LastActionTimePending());
+        pushConstraintList.add(new RetryNotExist());
     }
 
     private void initPopConstraint() {

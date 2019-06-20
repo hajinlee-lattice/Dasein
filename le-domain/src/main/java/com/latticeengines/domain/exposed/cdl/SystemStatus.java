@@ -106,7 +106,7 @@ public class SystemStatus {
             this.canRunLargeJobCount = this.canRunLargeJobCount - 1;
         }
         if (tenantActivity.isScheduledNow()) {
-            this.canRunScheduleNowJobCount = this.runningScheduleNowCount - 1;
+            this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount - 1;
         }
     }
 }

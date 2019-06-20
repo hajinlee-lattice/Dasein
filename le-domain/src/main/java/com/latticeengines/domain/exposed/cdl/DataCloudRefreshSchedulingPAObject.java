@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.cdl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
 
@@ -25,6 +24,7 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
     private void initPushConstraint() {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new DataCloudRefreshExist());
+        pushConstraintList.add(new RetryNotExist());
     }
 
     private void initPopConstraint() {
@@ -35,18 +35,18 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
-    boolean checkAddConstraint(SystemStatus systemStatus) {
-        return checkConstraint(systemStatus, null, pushConstraintList);
+    List<Constraint> getPushConstraints() {
+        return pushConstraintList;
     }
 
     @Override
-    public Class getInstance() {
+    List<Constraint> getPopConstraints() {
+        return popConstraintList;
+    }
+
+    @Override
+    public Class<DataCloudRefreshSchedulingPAObject> getInstance() {
         return DataCloudRefreshSchedulingPAObject.class;
-    }
-
-    @Override
-    boolean checkPopConstraint(SystemStatus systemStatus, Set scheduledTenants) {
-        return checkConstraint(systemStatus, scheduledTenants, popConstraintList);
     }
 
     @Override

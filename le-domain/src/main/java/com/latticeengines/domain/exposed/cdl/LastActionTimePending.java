@@ -13,4 +13,9 @@ public class LastActionTimePending implements Constraint {
         long lastMinute = (currentTime - target.getLastActionTime()) / 60000;
         return lastMinute < 10;
     }
+
+    @Override
+    public String getName() {
+        return LastActionTimePending.class.getName();
+    }
 }

@@ -81,6 +81,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
+    private static final String RETRY_KEY = "RETRY_KEY";
+    private static final String OTHER_KEY = "OTHER_KEY";
+
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
@@ -351,7 +354,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void schedulePAJob() {
         Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
-        Set<String> canRunRetryJobSet = canRunJobTenantMap.get("retry");
+        Set<String> canRunRetryJobSet = canRunJobTenantMap.get(RETRY_KEY);
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
@@ -362,7 +365,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
-        Set<String> canRunJobSet = canRunJobTenantMap.get("other");
+        Set<String> canRunJobSet = canRunJobTenantMap.get(OTHER_KEY);
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String needRunJobTenantId : canRunJobSet) {
                 submitProcessAnalyzeJob(needRunJobTenantId);

@@ -7,4 +7,9 @@ public class DataCloudRefreshExist implements Constraint {
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
         return !target.isDataCloudRefresh();
     }
+
+    @Override
+    public String getName() {
+        return DataCloudRefreshExist.class.getName();
+    }
 }

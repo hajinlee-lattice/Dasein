@@ -7,4 +7,9 @@ public class ScheduleNowExist implements Constraint {
     public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
         return !target.isScheduledNow();
     }
+
+    @Override
+    public String getName() {
+        return ScheduleNowExist.class.getName();
+    }
 }
