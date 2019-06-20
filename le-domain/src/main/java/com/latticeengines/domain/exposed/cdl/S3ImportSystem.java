@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -24,7 +25,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -80,6 +80,14 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Column(name = "CONTACT_SYSTEM_ID")
     @JsonProperty("contact_system_id")
     private String contactSystemId;
+
+    @Column(name = "MAP_TO_LATTICE_ACCOUNT")
+    @JsonProperty("map_to_lattice_account")
+    private Boolean mapToLatticeAccount = false;
+
+    @Column(name = "MAP_TO_LATTICE_CONTACT")
+    @JsonProperty("map_to_lattice_contact")
+    private Boolean mapToLatticeContact = false;
 
     @Override
     public Long getPid() {
@@ -171,12 +179,28 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
 
     @JsonIgnore
     public String generateAccountSystemId() {
-        return String.format("user_%s_%s_Id", name, NamingUtils.uuid("Account"));
+        return String.format("user_%s_%s_AccountId", name, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
     }
 
     @JsonIgnore
     public String generateContactSystemId() {
-        return String.format("user_%s_%s_Id", name, NamingUtils.uuid("Contact"));
+        return String.format("user_%s_%s_ContactId", name, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+    }
+
+    public Boolean isMapToLatticeAccount() {
+        return mapToLatticeAccount;
+    }
+
+    public void setMapToLatticeAccount(Boolean mapToLatticeAccount) {
+        this.mapToLatticeAccount = mapToLatticeAccount;
+    }
+
+    public Boolean isMapToLatticeContact() {
+        return mapToLatticeContact;
+    }
+
+    public void setMapToLatticeContact(Boolean mapToLatticeContact) {
+        this.mapToLatticeContact = mapToLatticeContact;
     }
 
     public enum SystemType {

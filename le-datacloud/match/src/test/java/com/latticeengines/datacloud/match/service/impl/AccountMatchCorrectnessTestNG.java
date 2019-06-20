@@ -42,8 +42,6 @@ import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 /**
  * This test is mainly focused on Account match with AllocateId mode
- *
- * dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
  */
 @Listeners({ SimpleRetryListener.class })
 public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBase {
@@ -266,7 +264,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain1, Country,
         // State, Email2, DUNS, Domain2, Email1
         data = Arrays.asList(null, null, null, null, "www.aol.com", "USA", "CA",
-                "private@lattice-engines.com", 000000000, "not_a_domain_or_email", "somebody@outlook.com");
+                "private@lattice-engines.com", "000000000", "not_a_domain_or_email", "somebody@outlook.com");
 
         // Set up match request.  Fix the KeyMap for domain.
         entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Email1", "Domain1", "Domain2", "Email2"));

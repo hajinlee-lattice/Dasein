@@ -52,7 +52,7 @@ public class UploadFileWithoutLimitDeploymentTestNG extends CDLEnd2EndDeployment
         long spendTime = 0L;
         if (importingEntity.equals(BusinessEntity.Account)) {
             spendTime = System.currentTimeMillis();
-            importData(BusinessEntity.Account, account_csv, "Account", false, outsizeFlag);
+            importData(BusinessEntity.Account, account_csv, null, false, outsizeFlag);
             log.info("Import " + account_csv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
                     + " second");
         }

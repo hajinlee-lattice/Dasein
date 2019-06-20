@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
@@ -82,13 +84,22 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(playLaunchChannel.getPlay());
         playLaunch.setLaunchState(LaunchState.Queued);
-        playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchChannel.getExcludeItemsWithoutSalesforceId());
-        playLaunch.setTopNCount(playLaunchChannel.getTopNCount());
+        playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
         playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
         playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
         playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
+
+        if (playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig) {
+            MarketoChannelConfig channelConfig = (MarketoChannelConfig) playLaunchChannel.getChannelConfig();
+            playLaunch.setAudienceId(channelConfig.getAudienceId());
+            playLaunch.setAudienceName(channelConfig.getAudienceName());
+            playLaunch.setFolderName(channelConfig.getFolderName());
+        } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
+            SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
+            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
+        }
         playLaunchEntityMgr.create(playLaunch);
         return playLaunch;
     }

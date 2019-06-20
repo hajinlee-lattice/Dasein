@@ -65,7 +65,7 @@ public class TransactionDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploym
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importData(BusinessEntity.Transaction, transactionCsv, "Transaction", false, false);
+        importData(BusinessEntity.Transaction, transactionCsv, null, false, false);
     }
 
     protected void processAnalyze() {

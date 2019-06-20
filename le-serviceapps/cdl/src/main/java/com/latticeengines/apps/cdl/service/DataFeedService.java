@@ -62,6 +62,8 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version);
 
+    List<DataFeed> getDataFeeds(TenantStatus status, String version);
+
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
@@ -71,4 +73,6 @@ public interface DataFeedService {
     void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request);
 
     DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace);
+
+    Boolean increasedRetryCount(String customerSpace);
 }

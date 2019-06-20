@@ -67,7 +67,7 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
         long spendTime = 0L;
         spendTime = System.currentTimeMillis();
-        importData(BusinessEntity.Account, accountCsv, "Account", false, false);
+        importData(BusinessEntity.Account, accountCsv, null, false, false);
         log.info("Import " + accountCsv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
                 + " second");
     }

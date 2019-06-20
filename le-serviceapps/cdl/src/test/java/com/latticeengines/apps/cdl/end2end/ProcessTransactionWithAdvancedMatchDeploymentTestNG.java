@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
+        checkpointService
+                .setPrecedingCheckpoints(Arrays.asList(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT));
         log.info("Setup Complete!");
     }
 

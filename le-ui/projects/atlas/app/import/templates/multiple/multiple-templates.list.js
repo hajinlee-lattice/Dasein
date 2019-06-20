@@ -101,7 +101,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "Priority",
+                    name: "ImportSystem.priority",
                     displayName: "Priority",
                     sortable: false
                 },
@@ -345,7 +345,7 @@ export default class MultipleTemplatesList extends Component {
             <ReactMainContainer>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-                    <LeHPanel>
+                    <LeHPanel className="multitemplates-toolbar">
                         <LeButton
                             name="matchpriority"
                             config={{

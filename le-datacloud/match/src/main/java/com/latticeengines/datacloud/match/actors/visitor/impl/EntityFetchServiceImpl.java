@@ -105,6 +105,8 @@ public class EntityFetchServiceImpl extends DataSourceMicroBatchLookupServiceBas
                     String requestId = pair.getKey();
                     String entityId = pair.getValue().getEntityId();
                     EntityFetchResponse fetchResponse = new EntityFetchResponse(tenant, seedMap.get(entityId));
+                    // inject failure only for testing purpose
+                    injectFailure(getReq(requestId));
                     // remove request and send response
                     String returnAddress = getReqReturnAddr(requestId);
                     removeReq(requestId);

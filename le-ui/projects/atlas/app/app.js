@@ -6,8 +6,6 @@ import MainController from './app.controller.js';
 import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
 
-
-
 angular
     .module('Atlas', [
         'ngRoute',

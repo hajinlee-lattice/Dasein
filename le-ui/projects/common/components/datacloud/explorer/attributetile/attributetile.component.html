@@ -55,7 +55,7 @@
             ng-if="vm.lookupMode && vm.hasCompanyInfo" />
 
         <div class="header">
-            <h2 title="{{enrichment.DisplayName}}">
+            <h2 alt="{{enrichment.DisplayName}}">
                 <div class="category-icon">
                     <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>

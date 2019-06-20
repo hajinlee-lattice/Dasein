@@ -165,7 +165,7 @@ public class AccountExtensionUtil {
     /*
      * Reformats date attributes and converts matchOutput to data page
      */
-    public static DataPage processMatchOutputResults(List<ColumnMetadata> dateAttributesMetadata,
+    public static DataPage processMatchOutputResults(String customerSpace, List<ColumnMetadata> dateAttributesMetadata,
             MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, ColumnMetadata> dateAttributesMap = dateAttributesMetadata.stream()
@@ -182,7 +182,7 @@ public class AccountExtensionUtil {
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("No match on MatchApi, reverting to ObjectApi");
+                            log.info("No match on MatchApi, reverting to ObjectApi on Tenant: " + customerSpace);
                         } else {
                             log.info("Found full match from lattice data cloud as well as from my data table.");
 

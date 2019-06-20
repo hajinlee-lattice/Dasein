@@ -248,67 +248,6 @@ public class PlayResource {
         return playLaunchChannel;
     }
 
-    // @PostMapping(value = "/launch-always-on", headers =
-    // "Accept=application/json")
-    // @ResponseBody
-    // @ApiOperation(value = "Launch every play launch marked as always on")
-    // public Boolean launchAlwaysOn(@PathVariable String customerSpace) {
-    // Boolean isPlayLaunched = false;
-    // List<PlayLaunchChannel> channels =
-    // playLaunchChannelService.findByIsAlwaysOnTrue();
-    // for (PlayLaunchChannel channel : channels) {
-    // // refractor logic to service layer?
-    // PlayLaunch existingPlayLaunch = channel.getPlayLaunch();
-    // if (existingPlayLaunch == null) {
-    // throw new LedpException(LedpCode.LEDP_32000, new String[] { "No play
-    // launch found" });
-    // }
-    // PlayLaunch playLaunch = new PlayLaunch();
-    // playLaunch.setTenant(MultiTenantContext.getTenant());
-    // playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
-    // playLaunch.setCreatedBy(existingPlayLaunch.getCreatedBy());
-    // playLaunch.setUpdatedBy(existingPlayLaunch.getUpdatedBy());
-    // playLaunch.setExcludeItemsWithoutSalesforceId(existingPlayLaunch.getExcludeItemsWithoutSalesforceId());
-    // playLaunch.setTopNCount(existingPlayLaunch.getTopNCount());
-    // playLaunch.setBucketsToLaunch(existingPlayLaunch.getBucketsToLaunch());
-    // playLaunch.setLaunchUnscored(existingPlayLaunch.isLaunchUnscored());
-    // playLaunch.setLaunchState(LaunchState.UnLaunched);
-    // playLaunch.setDestinationAccountId(existingPlayLaunch.getDestinationAccountId());
-    // playLaunch.setDestinationOrgId(existingPlayLaunch.getDestinationOrgId());
-    // playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
-    // playLaunch.setDestinationSysType(existingPlayLaunch.getDestinationSysType());
-    // Play play = channel.getPlay();
-    // // are these validations necessary?
-    // playLaunch.setPlay(play);
-    // channel.setPlayLaunch(playLaunch);
-    // playLaunchChannelService.update(channel);
-    // playLaunch = channel.getPlayLaunch();
-    // // PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
-    // // if (play.getRatingEngine() != null) {
-    // // validateNonEmptyTargetsForLaunch(customerSpace, play,
-    // // play.getName(), playLaunch, //
-    // // playLaunch.getDestinationAccountId());
-    // // }
-    // String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-    // playLaunch.setApplicationId(appId);
-    //
-    // playLaunch.setLaunchState(LaunchState.Launching);
-    // playLaunch.setPlay(play);
-    // playLaunch.setTableName(createTable(playLaunch));
-    //
-    // Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-    //
-    // playLaunch.setAccountsSelected(totalAvailableRatedAccounts);
-    // playLaunch.setAccountsSuppressed(0L);
-    // playLaunch.setAccountsErrored(0L);
-    // playLaunch.setAccountsLaunched(0L);
-    // playLaunch.setContactsLaunched(0L);
-    // playLaunchService.update(playLaunch);
-    // isPlayLaunched = true;
-    // }
-    // return isPlayLaunched;
-    // }
-
     // -------------
     // Play Launches
     // -------------
@@ -626,8 +565,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (playLaunch.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

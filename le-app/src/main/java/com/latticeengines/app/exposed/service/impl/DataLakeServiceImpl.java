@@ -218,7 +218,8 @@ public class DataLakeServiceImpl implements DataLakeService {
                 // for fallback mechanism we'll use original logic to get data
                 // from redshift
 
-                log.info("Falling back to old logic for extracting account data from Redshift");
+                log.info("Falling back to old logic for extracting account data from Redshift for AccountId: "
+                        + internalAccountId + " of Tenant: " + customerSpace);
 
                 List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
                         .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
@@ -362,7 +363,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);
         List<ColumnMetadata> dateAttributesMetadata = servingMetadata.stream().filter(ColumnMetadata::isDateAttribute)
                 .collect(Collectors.toList());
-        return AccountExtensionUtil.processMatchOutputResults(dateAttributesMetadata, matchOutput);
+        return AccountExtensionUtil.processMatchOutputResults(customerSpace, dateAttributesMetadata, matchOutput);
     }
 
     private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId, List<Column> fields) {
@@ -386,10 +387,10 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
-        return convertToDataPage(matchOutput);
+        return convertToDataPage(customerSpace, matchOutput);
     }
 
-    private DataPage convertToDataPage(MatchOutput matchOutput) {
+    private DataPage convertToDataPage(String customerSpace, MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, Object> data = null;
         if (matchOutput != null //
@@ -397,7 +398,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                 && matchOutput.getResult().get(0) != null) {
 
             if (matchOutput.getResult().get(0).isMatched() != Boolean.TRUE) {
-                log.info("No match on MatchApi, reverting to ObjectApi");
+                log.info("No match on MatchApi, reverting to ObjectApi on Tenant: " + customerSpace);
             } else {
                 log.info("Found full match from lattice data cloud as well as from my data table.");
                 final Map<String, Object> tempDataRef = new HashMap<>();

@@ -1,41 +1,74 @@
 package com.latticeengines.serviceflows.workflow.util;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.io.IOException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public final class ScalingUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(ScalingUtils.class);
+
+    private static final double GB = 1024. * 1024 * 1024;
+
     /**
-     * 100_000 -> 2
-     * 1_000_000 -> 3
-     * 10_000_000 -> 4
+     * 8G -> 2
+     * 24G -> 3
+     * 72G -> 4
      */
-    public static int getMultiplier(long count) {
-        return (int) Math.max(1, Math.ceil(Math.log10((count + 1.D)) - 4));
+    public static int getMultiplier(double sizeInGb) {
+        double div8 = Math.floor(sizeInGb / 8.);
+        if (div8 < 1) {
+            return 1;
+        } else {
+            int log3 = (int) Math.floor(Math.log10(div8) / Math.log10(3));
+            int lowerBound = Math.max(log3 + 2, 1);
+            int multiplier = Math.min(lowerBound, 4);
+            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
+            return multiplier;
+        }
     }
 
-    public static long getTableCount(Table table) {
-        if (table == null) {
-            return 0L;
+    public static double getTableSizeInGb(Configuration configuration, Table table) {
+        double totalSize = 0.;
+        if (CollectionUtils.isNotEmpty(table.getExtracts())) {
+            for (Extract extract: table.getExtracts()) {
+                String path = extract.getPath();
+                double extractSize = getHdfsPathSizeInGb(configuration, path);
+                totalSize += (extractSize / GB);
+            }
         }
-        AtomicLong maxCnt = new AtomicLong(0L);
-        Long count = table.getCount();
-        if (count != null && count > 0) {
-            maxCnt.set(count);
-        } else if (CollectionUtils.isNotEmpty(table.getExtracts())) {
-            table.getExtracts().forEach(extract -> {
-                Long thisCount = extract.getProcessedRecords();
-                if (thisCount != null) {
-                    synchronized (maxCnt) {
-                        maxCnt.set(maxCnt.get() + thisCount);
-                    }
-                }
-            });
+        return totalSize;
+    }
+
+    public static double getHdfsPathSizeInGb(Configuration configuration, String path) {
+        if (StringUtils.isNotBlank(path)) {
+            if (!path.endsWith(".parquet") && !path.endsWith(".avro")) {
+                // default is avro
+                path = PathUtils.toAvroGlob(path);
+            }
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            final String globPath = path;
+            long extractSize = 0;
+            try {
+                extractSize = retry.execute(ctx -> HdfsUtils.getTotalBytes(configuration, globPath));
+            } catch (IOException e) {
+                log.warn("Failed to get extract size for " + path);
+            }
+            return extractSize / GB;
+        } else {
+            return 0.0;
         }
-        return maxCnt.get();
     }
 
     /**

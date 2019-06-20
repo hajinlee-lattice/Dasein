@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
+import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 
 @Component("dataUnitCrossTenantService")
 public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metadata.service.DataUnitCrossTenantService {
@@ -40,7 +41,7 @@ public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metada
 
     @Override
     public boolean delete(String customerSpace, DataUnit dataUnit) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeServiceRegistry.getRunTimeService(dataUnit.getClass());
         if (dataUnitRuntimeService == null) {
             throw new RuntimeException(
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",

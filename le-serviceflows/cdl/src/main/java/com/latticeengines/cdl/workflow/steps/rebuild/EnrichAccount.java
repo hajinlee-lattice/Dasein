@@ -107,10 +107,10 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
             }
         }
 
-        long count = ScalingUtils.getTableCount(masterTable);
-        int multiplier = ScalingUtils.getMultiplier(count);
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
         if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on master table count=" + count);
+            log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
             scalingMultiplier = multiplier;
         }
 

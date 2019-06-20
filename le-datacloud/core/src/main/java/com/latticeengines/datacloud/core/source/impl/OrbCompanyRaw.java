@@ -1,9 +1,9 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
+import com.latticeengines.datacloud.core.source.IngestionNames;
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
 import com.latticeengines.datacloud.core.source.Source;
 
@@ -12,8 +12,7 @@ public class OrbCompanyRaw implements DerivedSource {
 
     private static final long serialVersionUID = -2367515837904364398L;
 
-    @Autowired
-    private IngestionSource baseSource;
+    private IngestionSource baseSource = new IngestionSource(IngestionNames.ORB_INTELLIGENCE);
 
     @Override
     public String getSourceName() {

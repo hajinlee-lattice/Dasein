@@ -51,9 +51,16 @@ public abstract class Traveler {
     // If exceed time limit, treat as timeout failure
     private Timeout travelTimeout;
 
+    // Travel errors
+    private List<String> travelErrors;
+
     // ONLY for testing purpose, set to true: Traveler will ignore decision
     // graph and return to sender after processing
     private boolean returnSender;
+
+    // ONLY for testing purpose, force to inject exception at actor with
+    // designated name, or system at designated class name
+    private String actorOrServiceToInjectFailure;
 
     /***********************************
      * Bound to current decision graph
@@ -226,6 +233,22 @@ public abstract class Traveler {
         this.returnSender = returnSender;
     }
 
+    public String getActorOrServiceToInjectFailure() {
+        return actorOrServiceToInjectFailure;
+    }
+
+    public void setActorOrServiceToInjectFailure(String actorOrServiceToInjectFailure) {
+        this.actorOrServiceToInjectFailure = actorOrServiceToInjectFailure;
+    }
+
+    public List<String> getTravelErrors() {
+        return travelErrors;
+    }
+
+    public void setTravelErrors(List<String> travelErrors) {
+        this.travelErrors = travelErrors;
+    }
+
     /********************
      * Business methods
      ********************/
@@ -264,6 +287,21 @@ public abstract class Traveler {
 
     public boolean visitingQueueIsEmpty() {
         return visitingQueue.isEmpty();
+    }
+
+    public void error(String message, Throwable throwable) {
+        if (Level.ERROR.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.ERROR, throwable, prefixByAge(message)));
+            logTravelErrors(message);
+            setTravelException(new TravelException(message, throwable));
+        }
+    }
+
+    public void error(String message) {
+        if (Level.ERROR.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.ERROR, prefixByAge(message)));
+            logTravelErrors(message);
+        }
     }
 
     public void warn(String message, Throwable throwable) {
@@ -343,6 +381,9 @@ public abstract class Traveler {
         visitedHistory.clear();
         checkpoints.clear();
         visitingQueue.clear();
+        if (travelErrors != null) {
+            travelErrors.clear();
+        }
     }
 
     @Override
@@ -391,6 +432,20 @@ public abstract class Traveler {
 
     protected void recoverOtherTransitionHistory(List<Object> others) {
 
+    }
+
+    public void logTravelErrors(List<String> travelErrors) {
+        if (this.travelErrors == null) {
+            this.travelErrors = new ArrayList<>();
+        }
+        this.travelErrors.addAll(travelErrors);
+    }
+
+    public void logTravelErrors(String travelError) {
+        if (this.travelErrors == null) {
+            this.travelErrors = new ArrayList<>();
+        }
+        this.travelErrors.add(travelError);
     }
 
     /**

@@ -67,9 +67,9 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
-        <aws.version>1.11.519</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.546</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
-        <spark.version>2.4.0</spark.version>
+        <spark.version>2.4.2</spark.version>
         <scala.version>2.11.12</scala.version>
         <jackson.dataformat.version>2.9.8</jackson.dataformat.version>
         <jackson.fasterxml.version>2.9.8</jackson.fasterxml.version>
@@ -88,8 +88,6 @@
         <cascading.version>3.3.0</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version> <!-- should cut this dep -->
-        <!-- if until 2018 or cascading 3.3, they still do not release new
-            version, we should move away from cascading-flink -->
         <flink.version>1.8.0</flink.version>
         <akka.version>2.4.20</akka.version> <!-- match flink version -->
 
@@ -135,7 +133,7 @@
         <tinkerpop.version>3.3.4</tinkerpop.version>
         <springfox.swagger.version>2.9.2</springfox.swagger.version>
         <io.swagger.version>1.5.22</io.swagger.version>
-        <io.micrometer.version>1.1.1</io.micrometer.version>
+        <io.micrometer.version>1.1.5</io.micrometer.version>
 
         <!-- Confluent -->
         <kafka.version>0.11.0.0-cp1</kafka.version>

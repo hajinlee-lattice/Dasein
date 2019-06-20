@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -134,7 +134,6 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             if (system.getDisplayName().equals("PRIMARY SYSTEM")) {
                 hasPrimary = true;
                 Assert.assertTrue(system.isPrimarySystem());
-                Assert.assertEquals(system.getAccountSystemId(), InterfaceName.CustomerAccountId.name());
             }
         }
         Assert.assertTrue(hasPrimary);
@@ -176,6 +175,6 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 return;
             }
         }
-        assertTrue(false, "No data collection folder was created!");
+        fail("No data collection folder was created!");
     }
 }

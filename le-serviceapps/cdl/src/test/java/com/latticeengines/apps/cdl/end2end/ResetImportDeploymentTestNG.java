@@ -64,9 +64,9 @@ public class ResetImportDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
-        importData(BusinessEntity.Account, "Account_401_500.csv", "AccountSchema");
+        importData(BusinessEntity.Account, "Account_401_500.csv");
 
-        importData(BusinessEntity.Contact, "Contact_401_500.csv", "ContactSchema");
+        importData(BusinessEntity.Contact, "Contact_401_500.csv");
 
 
     }

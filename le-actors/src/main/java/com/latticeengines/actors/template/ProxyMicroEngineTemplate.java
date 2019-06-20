@@ -39,6 +39,8 @@ public abstract class ProxyMicroEngineTemplate extends VisitorActorTemplate {
 
     @Override
     protected boolean process(Traveler traveler) {
+        // Inject failure only for testing purpose
+        injectFailure(traveler);
         if (accept(traveler)) {
             sendReqToAssistantActor(traveler);
             return true;

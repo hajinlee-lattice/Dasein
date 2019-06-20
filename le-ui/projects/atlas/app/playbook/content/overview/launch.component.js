@@ -31,12 +31,28 @@ import './launch.component.scss';
  */ 
 
 function debounceEventHandler(...args) {
-     const debounced = _.debounce(...args)
-     return function(e) {
-         e.persist()
-         return debounced(e)
-     }
- }
+    const debounced = _.debounce(...args)
+    return function(e) {
+        e.persist()
+        return debounced(e)
+    }
+}
+
+function chron(frequency) {
+    var date = new Date(),
+        daysofweek = 'SUN,MON,TUE,WED,THU,FRI,SAT'.split(','),
+        dayofweek = daysofweek[date.getDay()],
+        day = date.getDate(),
+        months = 1;
+
+    var schedule = {
+        Once: null,
+        Weekly: `0 0 12 ? * ${dayofweek} *`,
+        Monthly: `0 0 12 ${day} 1/${months} ? *`
+    }
+
+    return schedule[frequency];
+}
 
 class LaunchComponent extends Component {
     constructor(props) {
@@ -58,13 +74,17 @@ class LaunchComponent extends Component {
             limitRecommendationsAmount: null,
             excludeItemsWithoutSalesforceId: true,
             destinationAccountId: null,
-            launchAccountsCoverage: null
+            launchAccountsCoverage: null,
+            launchSchedule: null,
+            launchingState: 'unlaunching'
         };
 
     }
 
     componentDidMount() {
         let playstore = store.getState()['playbook'];
+        
+        this.setState({launchLoading: playstore.launchLoading});
 
         if(playstore.play.ratingEngine) {
             if(!playstore.ratings) {
@@ -239,36 +259,11 @@ class LaunchComponent extends Component {
         }
     }
 
-    activate(play, connection, opts) {
-        let vm = this,
-            closeModal = (response) => {
-                vm.props.closeFn();
-            };
-
-        actions.saveChannel(play.name, {
-            channelId: connection.id,
-            playLaunch: connection.playLaunch,
-            lookupIdMap: connection.lookupIdMap,
-            isAlwaysOn: !connection.isAlwaysOn,
-            launchObj: opts.launchObj || {
-                bucketsToLaunch: this.state.selectedBuckets,
-                destinationOrgId: connection.lookupIdMap.orgId,
-                destinationSysType: connection.lookupIdMap.externalSystemType,
-                destinationAccountId: connection.lookupIdMap.accountId,
-                topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
-                launchUnscored: this.state.unscored,
-                excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId
-            }
-        }, closeModal);
-    }
-
     launch = (play, connection, opts) => {
-        // save channel (saveChannel)
-        // launch if launching saveLaunch() (send opts.action = launch)
-        
         // FIXME crappy hack to select all buckets because of setState recursion
         var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
         this.state.selectedBuckets = this.state.selectedBuckets.splice(0,4);
+        this.state.launchingState = 'launching';
         this.setState(this.state);
 
         var opts = opts || {},
@@ -282,7 +277,8 @@ class LaunchComponent extends Component {
                 destinationAccountId: connection.lookupIdMap.accountId,
                 topNCount: (this.state.limitRecommendations ? this.state.limitRecommendationsAmount : ''),
                 launchUnscored: this.state.unscored,
-                excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId
+                excludeItemsWithoutSalesforceId: this.state.excludeItemsWithoutSalesforceId,
+                launchSchedule: this.state.launchSchedule
                 // audienceName: PlaybookWizardStore.getAudienceName(), //?
                 // audienceId: PlaybookWizardStore.getAudienceId(), //?
                 // folderName: PlaybookWizardStore.getMarketoProgramName(), //?
@@ -294,43 +290,30 @@ class LaunchComponent extends Component {
         if(play) {
             let vm = this,
                 closeModal = (response) => {
+                    this.state.launchingState = 'unlaunching';
+                    this.setState(this.state);
                     vm.props.closeFn();
                 };
 
             if(lastIncompleteLaunch) {
-                actions.saveLaunch(play.name, {
-                    engineId: opts.engineId,
-                    launch_id: lastIncompleteLaunch.launchId,
-                    launchObj: Object.assign({},lastIncompleteLaunch, launchObj),
-                    channelId: connection.id,
-                    save: true
-                }, closeModal);
+                launchObj = Object.assign({},lastIncompleteLaunch, launchObj);
             } else if(lastIncompleteLaunchId) {
-                actions.saveChannel(play.name, {
-                    launchOpts: {
-                        engineId: opts.engineId,
-                        launch_id: lastIncompleteLaunchId,
-                        launchObj: Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj),
-                        save: save,
-                        callback: closeModal
-                    },
-                    channelId: connection.id,
-                    playLaunch: connection.playLaunch,
-                    lookupIdMap: connection.lookupIdMap
-                });
+                launchObj = Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj);
             } else {
-                actions.saveChannel(play.name, {
-                    launchOpts: {
-                        engineId: opts.engineId,
-                        launchObj: launchObj,
-                        save: save,
-                        callback: closeModal
-                    },
-                    playLaunch: connection.playLaunch,
-                    channelId: connection.id,
-                    lookupIdMap: connection.lookupIdMap,
-                });
+                launchObj = launchObj;
             }
+
+            actions.saveChannel(play.name, {
+                id: connection.id,
+                lookupIdMap: connection.lookupIdMap,
+                isAlwaysOn: (!launchObj.launchSchedule ? false : !connection.isAlwaysOn),
+                bucketsToLaunch: launchObj.bucketsToLaunch,
+                cronSchedule: launchObj.launchSchedule, //cronSchedule, //?
+                excludeItemsWithoutSalesforceId: launchObj.excludeItemsWithoutSalesforceId,
+                launchUnscored: launchObj.launchUnscored,
+                topNCount: launchObj.topNCount,
+                launchType: 'FULL'
+            }, closeModal);
         }
     }
 
@@ -375,6 +358,12 @@ class LaunchComponent extends Component {
         // <li>
         //     <input id="email" onChange={this.clickEmail} type="checkbox" /> <label for="email">Email me when new data is available</label>
         // </li>
+    }
+
+    clickLaunchSchedule= (e) => {
+        var schedule = (e.target.value === 'Once' ? null : e.target.value);
+        this.state.launchSchedule = chron(schedule);
+        this.setState(this.state);
     }
 
     getCoverage(accountsCoverage) {
@@ -425,112 +414,82 @@ class LaunchComponent extends Component {
             }
 
             return (
-                <LeVPanel className={'campaign-launch'} hstretch={true}>
-                    <div className={'launch-section recommendations'}>
-                        <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
-                        <ul>
-                            <li>
-                                <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
-                                <label for="limitRecommendations"> 
-                                    Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
-                                </label>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className={'launch-section model-ratings'}>
-                        {this.makeBucketList(play, coverage, {
-                            unscoredAccountCountPercent: unscoredAccountCountPercent
-                        })}
-                    </div>
-                    <div className={'launch-section account-options'}>
-                        <h2>Account Options</h2>
-                        <ul>
-                            <li>
-                                <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
-                                <label for="requireAccountId">Must have email</label>
-                            </li>
-                            <li>
-                                <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
-                                <label for="requireAccountId">Must have account ID</label>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="launch-section schedule">
-                        <h2>Launch Schedule</h2>
-                        <label for="schedule">Launch</label> 
-                        <select id="schedule">
-                            <option>Once</option>
-                            <option>Weekly</option>
-                            <option>Monthly</option>
-                        </select>
-                    </div>
-                    <div className={'launch-section launch-buttons'}>
-                        <ul>
-                            <li>
-                                <LeButton
-                                    name="cancel"
-                                    disabled={false}
-                                    config={{
-                                        label: "Cancel",
-                                        classNames: "white-button"
-                                    }}
-                                    callback={() => { this.props.closeFn(); }} />
-                            </li>
-                            <li>
-                                <LeButton
-                                    name="launchlater"
-                                    disabled={!canLaunch}
-                                    config={{
-                                        label: "Launch Later",
-                                        classNames: "white-button"
-                                    }}
-                                    callback={() => { 
-                                        this.launch(play, connection, {
-                                            engineId: engineId, 
-                                            lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch,
-                                            save: false
-                                        });
-                                    }} />
-                            </li>
-                            <li>
-                                <LeButton
-                                    name="launchnow"
-                                    disabled={!canLaunch}
-                                    config={{
-                                        label: "Launch Now",
-                                        classNames: "white-button"
-                                    }}
-                                    callback={() => { 
-                                        this.launch(play, connection, {
-                                            engineId: engineId, 
-                                            lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch,
-                                            save: true
-                                        }); 
-                                    }} />
-                            </li>
-                            <li>
-                                <LeButton
-                                    name="launchautomatically"
-                                    disabled={!canLaunch}
-                                    config={{
-                                        label: "Launch Automatically",
-                                        classNames: "blue-button"
-                                    }}
-                                    callback={() => {
-                                        this.activate(play, connection, {
-                                            engineId: engineId, 
-                                            lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch
-                                        }); 
-                                    }} />
-                            </li>
-                        </ul>
+                <LeVPanel className={`campaign-launch ${this.state.launchingState}`} hstretch={true}>
+                    <div className="campaign-launch-container">
+                        <div className={'launch-section recommendations'}>
+                            <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
+                            <ul>
+                                <li>
+                                    <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
+                                    <label for="limitRecommendations"> 
+                                        Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className={'launch-section model-ratings'}>
+                            {this.makeBucketList(play, coverage, {
+                                unscoredAccountCountPercent: unscoredAccountCountPercent
+                            })}
+                        </div>
+                        <div className={'launch-section account-options'}>
+                            <h2>Account Options</h2>
+                            <ul>
+                                <li>
+                                    <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
+                                    <label for="requireAccountId">Must have email</label>
+                                </li>
+                                <li>
+                                    <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
+                                    <label for="requireAccountId">Must have account ID</label>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="launch-section schedule">
+                            <h2>Launch Schedule</h2>
+                            <label for="schedule">Launch</label> 
+                            <select id="schedule" onChange={this.clickLaunchSchedule}>
+                                <option>Once</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                        <div className={'launch-section launch-buttons'}>
+                            <ul>
+                                <li>
+                                    <LeButton
+                                        name="cancel"
+                                        disabled={false}
+                                        config={{
+                                            label: "Cancel",
+                                            classNames: "white-button"
+                                        }}
+                                        callback={() => { this.props.closeFn(); }} />
+                                </li>
+                                <li>
+                                    <LeButton
+                                        name="launchnow"
+                                        disabled={!canLaunch}
+                                        config={{
+                                            label: "Launch Now",
+                                            classNames: "white-button"
+                                        }}
+                                        callback={() => { 
+                                            this.launch(play, connection, {
+                                                engineId: engineId, 
+                                                lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch
+                                            }); 
+                                        }} />
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </LeVPanel>
             );
         } else {
             return (
                 <Aux>
-                    <p>Loading...</p>
+                    <div className="loader"></div>
                 </Aux>
             );
         }

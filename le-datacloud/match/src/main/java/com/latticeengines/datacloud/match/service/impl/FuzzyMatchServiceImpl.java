@@ -33,6 +33,7 @@ import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
@@ -107,8 +108,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
-                // TODO: For transaction match, there are multiple entity id to
-                // fetch: traveler.getEntityIds()
                 if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
                     matchRecord.setEntityId(result);
                     if (MapUtils.isNotEmpty(traveler.getNewEntityIds())) {
@@ -123,12 +122,16 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
                     // Need to copy information from MatchTraveler to a place where we can add it to MatchHistory.
                     matchRecord.setEntityMatchHistory(generateEntityMatchHistory(traveler));
+                    if (StringUtils.isNotEmpty(result) && !DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(result)) {
+                        matchRecord.setMatched(true);
+                    }
                 } else {
                     matchRecord.setLatticeAccountId(result);
-                }
-
-                if (StringUtils.isNotEmpty(result)) {
-                    matchRecord.setMatched(true);
+                    if (StringUtils.isNotEmpty(result)) {
+                        matchRecord.setMatched(true);
+                    } else {
+                        matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
+                    }
                 }
 
                 if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {

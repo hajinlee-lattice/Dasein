@@ -33,6 +33,9 @@ public class FieldMapping {
     private IdType idType;
 
     @JsonProperty
+    private boolean mapToLatticeId;
+
+    @JsonProperty
     private boolean mappedToLatticeField;
 
     // Represents the date format string provided by the user for a date attributes.  Eg. "MM/DD/YYYY"
@@ -141,5 +144,13 @@ public class FieldMapping {
 
     public enum IdType {
         Account, Contact
+    }
+
+    public boolean isMapToLatticeId() {
+        return mapToLatticeId;
+    }
+
+    public void setMapToLatticeId(boolean mapToLatticeId) {
+        this.mapToLatticeId = mapToLatticeId;
     }
 }

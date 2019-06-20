@@ -837,14 +837,14 @@ public class SchemaRepository {
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
-                .fundamentalType(FundamentalType.DATE.name()) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
-                .fundamentalType(FundamentalType.DATE.name()) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         return table;
     }
@@ -1454,7 +1454,7 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
         Attribute postalCode = attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet("ZIP", "POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE")) //
+                .allowedDisplayNames(Sets.newHashSet("ZIP", "POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE", "BILLINGPOSTALCODE", "BILLING_POSTAL_CODE", "BILLING_POSTALCODE", "BILLING_ZIP_CODE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //

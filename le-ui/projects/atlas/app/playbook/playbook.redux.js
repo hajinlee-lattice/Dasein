@@ -13,7 +13,8 @@ var CONST = {
     ACCOUNTS_COVERAGE: 'ACCOUNTS_COVERAGE',
     EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID: 'EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID',
     DESTINATION_ACCOUNT_ID: 'DESTINATION_ACCOUNT_ID',
-    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE'
+    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE',
+    FETCH_TYPES: 'FETCH_TYPES'
 }
 
 const initialState = {
@@ -25,7 +26,8 @@ const initialState = {
     accountsCoverage: null,
     excludeItemsWithoutSalesforceId: null,
     destinationAccountId: null,
-    playbookWizardStore: null
+    playbookWizardStore: null,
+    types: null
 };
 
 export const actions = {
@@ -103,10 +105,33 @@ export const actions = {
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
     },
-    savePlay: (play) => {
-        store.dispatch({
-            type: CONST.SAVE_PLAY,
-            payload: play
+    fetchTypes: (cb, deferred) => {
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_TYPES,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.get('/pls/playtypes', observer, {});
+    },
+    savePlay: (opts, cb) => {
+        http.post('/pls/play/', opts).then((response) => {
+            store.dispatch({
+                type: CONST.SAVE_PLAY,
+                payload: response.data
+            });
+            
+            if(cb && typeof cb === 'function') {
+                cb();
+            }
         });
     },
     savePlayLaunch: (play_name, opts) => {
@@ -144,24 +169,35 @@ export const actions = {
         // }
         
         var opts = opts || {},
-            channelId = opts.channelId || '',
+            id = opts.id || '',
             isAlwaysOn = opts.isAlwaysOn || false,
-            launchObj = (opts.launchOpts ? opts.launchOpts.launchObj : {}),
             lookupIdMap = opts.lookupIdMap || {},
-            launchCallback = (opts.launchOpts && opts.launchOpts.callback ? opts.launchOpts.callback : null),
-            method = (channelId ? 'put' : 'post');
+            method = (id ? 'put' : 'post'),
+            bucketsToLaunch = opts.bucketsToLaunch,
+            cronSchedule = opts.cronSchedule,
+            excludeItemsWithoutSalesforceId = opts.excludeItemsWithoutSalesforceId,
+            launchUnscored = opts.launchUnscored,
+            topNCount = opts.topNCount,
+            launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
+            launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''); // ?launch-now=true (if once is selected from schedule)
 
         var channelObj = {
-            id: channelId,
-            playLaunch: launchObj,
+            id: id,
             lookupIdMap: lookupIdMap,
-            isAlwaysOn: isAlwaysOn
+            isAlwaysOn: isAlwaysOn,
+            bucketsToLaunch: bucketsToLaunch,
+            cronSchedule: cronSchedule,
+            excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId,
+            launchUnscored: launchUnscored,
+            topNCount: topNCount,
+            launchType: launchType
         };
-        http[method](`/pls/play/${play_name}/channels/${channelId}`, channelObj).then((response) => {
+
+        http[method](`/pls/play/${play_name}/channels/${id}${launchNow}`, channelObj).then((response) => {
             let playstore = store.getState()['playbook'],
                 connections = playstore.connections,
                 connectionIndex = connections.findIndex(function(connection) {
-                    return connection.id === channelId;
+                    return connection.id === id;
                 });
 
             connections[connectionIndex] = response.data;
@@ -171,10 +207,6 @@ export const actions = {
                 payload: connections
             });
             
-            if(opts.launchOpts) {
-                opts.launchOpts.channelId = channelId;
-                actions.saveLaunch(play_name, opts.launchOpts, launchCallback);
-            }
             if(cb && typeof cb === 'function') {
                 cb();
             }
@@ -270,6 +302,11 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 ratings: action.payload
+            }
+        case CONST.FETCH_TYPES:
+            return {
+                ...state,
+                types: action.payload
             }
         case CONST.SAVE_LAUNCH:
             return {

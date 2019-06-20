@@ -34,10 +34,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MatchInput implements Fact, Dimension {
 
-    public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
     // legacy configuration to be removed
     @JsonIgnore
-    private static final String predefinedVersion = "1.0";
+    private static final String predefinedVersion = "2.0";
     @JsonProperty("Tenant")
     private Tenant tenant;
     @JsonProperty("Fields")
@@ -96,7 +95,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("RequestSource")
     private MatchRequestSource requestSource = MatchRequestSource.SCORING;
     @JsonProperty("DataCloudVersion")
-    private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
+    private String dataCloudVersion;
 
     // only used by cdl lookup
     @JsonProperty("DataCollectionVersion")

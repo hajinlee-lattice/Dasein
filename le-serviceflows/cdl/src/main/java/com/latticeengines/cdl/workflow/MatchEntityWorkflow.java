@@ -11,6 +11,7 @@ import com.latticeengines.cdl.workflow.steps.merge.EntityMatchCheckpoint;
 import com.latticeengines.cdl.workflow.steps.merge.MatchAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MatchContactWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MatchTransactionWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.RematchAccountWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -25,6 +26,9 @@ public class MatchEntityWorkflow extends AbstractWorkflow<MatchEntityWorkflowCon
     private MatchAccountWrapper matchAccountWrapper;
 
     @Inject
+    private RematchAccountWrapper rematchAccountWrapper;
+
+    @Inject
     private MatchContactWrapper matchContactWrapper;
 
     @Inject
@@ -37,6 +41,7 @@ public class MatchEntityWorkflow extends AbstractWorkflow<MatchEntityWorkflowCon
     public Workflow defineWorkflow(MatchEntityWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchAccountWrapper) //
+                .next(rematchAccountWrapper) //
                 .next(matchContactWrapper) //
                 .next(matchTransactionWrapper) //
                 .next(entityMatchCheckpoint) //

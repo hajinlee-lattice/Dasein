@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.ProgressHelper;
@@ -34,6 +36,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
 
     protected T configuration;
 
+    @Override
     public abstract String getName();
 
     protected abstract boolean validateConfig(T config, List<String> sourceNames);
@@ -97,6 +100,25 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         }
 
         return sourceDirInHdfs;
+    }
+
+    protected String getBaseSourceSchemaDir(TransformStep step, int baseSourceIdx) {
+        Source baseSource = step.getBaseSources()[baseSourceIdx];
+        if (!(baseSource instanceof DerivedSource)) {
+            throw new IllegalArgumentException(
+                    "Only source with DerivedSource type is supported to provide schema directory");
+        }
+        return hdfsPathBuilder.constructSchemaDir(baseSource.getSourceName(), step.getBaseVersions().get(baseSourceIdx))
+                .toString();
+    }
+
+    protected String getBaseSourceVersionFilePath(TransformStep step, int baseSourceIdx) {
+        Source baseSource = step.getBaseSources()[baseSourceIdx];
+        if (!(baseSource instanceof DerivedSource || baseSource instanceof IngestionSource)) {
+            throw new IllegalArgumentException(
+                    "Only source with DerivedSource or IngestionSource type is supported to _CURRENT_VERSION file path");
+        }
+        return hdfsPathBuilder.constructVersionFile(baseSource).toString();
     }
 
     @SuppressWarnings("unchecked")

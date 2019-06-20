@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -68,6 +69,7 @@ import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
+// dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
 public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ContactMatchDeploymentTestNG.class);
 
@@ -531,9 +533,10 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
-        EntityPublishStatistics result = matchProxy.publishEntity(request);
-        Assert.assertNotNull(result);
-        return result.getSeedCount();
+        List<EntityPublishStatistics> result = matchProxy.publishEntity(Collections.singletonList(request));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(result));
+        Assert.assertNotNull(result.get(0));
+        return result.get(0).getSeedCount();
     }
 
     private MatchInput prepareBulkMatchInput(InputBuffer buffer) {

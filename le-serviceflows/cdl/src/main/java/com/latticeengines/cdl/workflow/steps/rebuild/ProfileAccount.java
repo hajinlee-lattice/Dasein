@@ -93,10 +93,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         if (fullAccountTable == null) {
             throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
         }
-        long count = ScalingUtils.getTableCount(fullAccountTable);
-        int multiplier = ScalingUtils.getMultiplier(count);
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, fullAccountTable);
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
         if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on fully enriched account table count=" + count);
+            log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
             scalingMultiplier = multiplier;
         }
 

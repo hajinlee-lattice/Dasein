@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -68,13 +68,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     @Lazy
     @Inject
-    @Qualifier("rootRegistry")
-    private MeterRegistry rootRegistry;
-
-    @Lazy
-    @Inject
-    @Qualifier("rootHostRegistry")
-    private MeterRegistry rootHostRegistry;
+    private MeterRegistryFactoryService registryFactory;
 
     @Inject
     private MatchActorSystem matchActorSystem;
@@ -87,7 +81,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
         Counter.builder(METRIC_DYNAMO_THROTTLE) //
                 .tag(TAG_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
-                .register(rootRegistry) //
+                .register(registryFactory.getServiceLevelRegistry()) //
                 .increment();
     }
 
@@ -103,7 +97,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
         DistributionSummary.builder(METRIC_DYNAMO_CALL_RETRY_DIST) //
                 .tag(TAG_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
-                .register(rootRegistry) //
+                .register(registryFactory.getServiceLevelRegistry()) //
                 .record(context.getRetryCount());
     }
 
@@ -127,7 +121,8 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
                 .tag(TAG_MATCH_MODE, history.getActorSystemMode()) //
                 .tag(TAG_ALLOCATE_ID_MODE, String.valueOf(traveler.getMatchInput().isAllocateId())) //
                 .tag(TAG_TENANT, tenantId) //
-                .register(rootRegistry).record(Duration.ofMillis(history.getDuration()));
+                .register(registryFactory.getServiceLevelRegistry()) //
+                .record(Duration.ofMillis(history.getDuration()));
     }
 
     @Override
@@ -144,6 +139,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             return;
         }
 
+        MeterRegistry rootRegistry = registryFactory.getServiceLevelRegistry();
         Timer.builder(METRIC_HISTORY) //
                 .tag(TAG_ENTITY, traveler.getEntity()) //
                 .tag(TAG_MATCH_MODE, traveler.getMode()) //
@@ -205,7 +201,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     private <K, V> void monitorCache(@NotNull Cache<K, V> cache, @NotNull String metricName, @NotNull String matchMode,
             boolean isAllocateMode) {
         // use the host registry since cache is related to single instance
-        CaffeineCacheMetrics.monitor(rootHostRegistry, cache, metricName, //
+        CaffeineCacheMetrics.monitor(registryFactory.getHostLevelRegistry(), cache, metricName, //
                 TAG_ALLOCATE_ID_MODE, String.valueOf(isAllocateMode), TAG_MATCH_MODE, matchMode);
     }
 
@@ -218,7 +214,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
         DistributionSummary.builder(metricName) //
                 .tag(TAG_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
-                .register(rootRegistry) //
+                .register(registryFactory.getServiceLevelRegistry()) //
                 .record(hasEvent ? 1.0 : 0.0);
     }
 

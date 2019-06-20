@@ -323,8 +323,8 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     private static PatchBook fakeDomainPatchItem(long pid) {
         MatchKeyTuple tuple = new MatchKeyTuple.Builder().withDuns(String.valueOf(pid)).build();
         Map<String, Object> patchItems = TestPatchBookUtils.newDomainPatchItems("google.com");
-        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Domain, tuple, patchItems);
-        book.setCleanup(true); // Cleanup mode is only for Domain patch
+        // Cleanup mode is only for Domain patch
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Domain, true, tuple, patchItems);
         return book;
     }
 
@@ -337,8 +337,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
                 .build();
         Map<String, Object> patchItems = new HashMap<>();
         patchItems.put(DataCloudConstants.ATTR_ALEXA_RANK, ALEXA_RANK);
-        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Attribute, tuple, patchItems);
-        book.setCleanup(false);
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Attribute, false, tuple, patchItems);
         return book;
     }
 

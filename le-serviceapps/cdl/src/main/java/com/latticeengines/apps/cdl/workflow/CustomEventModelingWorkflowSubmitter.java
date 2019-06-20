@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.util.ArtifactUtils;
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
@@ -166,6 +167,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         if (!isLPI) {
             version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         }
+        boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -232,6 +234,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //
                 .workflowContainerMem(workflowMemMb) //
+                .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
                 .build();
         return configuration;

@@ -7,20 +7,25 @@ import org.testng.annotations.Test;
 public class ScalingUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "multiplierTestData")
-    public void testMultiplier(long count, int expectedMultiplier) {
-        Assert.assertEquals(ScalingUtils.getMultiplier(count), expectedMultiplier, String.format("%d", count));
+    public void testMultiplier(double sizeInGb, int expectedMultiplier) {
+        Assert.assertEquals(ScalingUtils.getMultiplier(sizeInGb), expectedMultiplier, String.format("%f", sizeInGb));
     }
 
     @DataProvider(name = "multiplierTestData")
     public Object[][] provideMultiplierTestData() {
         return new Object[][] { //
-                { 1000, 1 }, //
-                { 100_000, 2 }, //
-                { 100_001, 2 }, //
-                { 550_000, 2 }, //
-                { 1_000_000, 3 }, //
-                { 10_000_000, 4 }, //
-                { 15_000_000, 4 }, //
+                { 0.1, 1 }, //
+                { 1, 1 }, //
+                { 7.9, 1 }, //
+                { 8, 2 }, //
+                { 8.1, 2 }, //
+                { 9, 2 }, //
+                { 23.9, 2 }, //
+                { 24, 3 }, //
+                { 24.0, 3 }, //
+                { 50, 3 }, //
+                { 72, 4 }, //
+                { 500, 4 }, //
         };
     }
 

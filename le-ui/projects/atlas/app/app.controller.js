@@ -4,7 +4,6 @@ import {
     NOTIFICATION,
     CLOSE_MODAL
 } from '../../common/app/utilities/message';
-
 export default function (
     $scope,
     BrowserStorageUtility,
@@ -17,10 +16,8 @@ export default function (
     ServiceErrorUtility
 ) {
     'ngInject';
-
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
-
     window.BrowserStorageUtility = BrowserStorageUtility;
     SessionTimeoutUtility.init();
 

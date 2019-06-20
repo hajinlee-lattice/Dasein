@@ -13,6 +13,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
+import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 import com.latticeengines.metadata.service.DataUnitService;
 
 @Service("dataUnitService")
@@ -56,7 +57,7 @@ public class DataUnitServiceImpl implements DataUnitService {
 
     @Override
     public boolean delete(DataUnit dataUnit) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeServiceRegistry.getRunTimeService(dataUnit.getClass());
         if (dataUnitRuntimeService == null) {
             throw new RuntimeException(
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",
@@ -74,7 +75,7 @@ public class DataUnitServiceImpl implements DataUnitService {
 
     @Override
     public boolean renameTableName(DataUnit dataUnit, String tableName) {
-        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeService.getRunTimeService(dataUnit.getClass());
+        DataUnitRuntimeService dataUnitRuntimeService = DataUnitRuntimeServiceRegistry.getRunTimeService(dataUnit.getClass());
         if (dataUnitRuntimeService == null) {
             throw new RuntimeException(
                     String.format("Cannot find the dataUnit runtime service for dataUnit class: %s",

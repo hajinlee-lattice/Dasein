@@ -378,7 +378,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.changeBktValsSize = function (bucketRestriction, value) {
-            if (QueryTreeService.two_inputs.indexOf(value) < 0 && bucketRestriction.bkt.Vals.length == 2) {
+            let notChips = ['IN_COLLECTION', 'NOT_IN_COLLECTION'].indexOf(value) < 0;
+            let notTwoInputs = QueryTreeService.two_inputs.indexOf(value) < 0;
+            let hasVals = bucketRestriction.bkt.Vals.length == 2;
+
+            if (notChips && notTwoInputs && hasVals) {
                 bucketRestriction.bkt.Vals.splice(1, 1);
             }
         }
@@ -642,12 +646,14 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (!bucketRestriction.bkt) {
                 return;
             }
+
             var cmp = bucketRestriction.bkt.Cmp;
-            var vals = bucketRestriction.bkt.Vals;
+
+            //console.log('[tree-service] getOperationLabel()', type, cmp, cmpMap, bucketRestriction);
 
             switch (type) {
                 case 'Boolean':
-                    return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
+                    return cmpMap[cmp];
                 case 'Numerical':
                     return cmpMap[cmp];
                 case 'String':
@@ -674,8 +680,10 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 return 'True';
             } if (bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] === 'No') {
                 return 'False';
+            } else {
+                bucketRestriction.bkt.Vals = [];
+                return '';
             }
-            return 'Empty';
         }
 
         function getNumericalValue(bucketRestriction, position) {
@@ -719,7 +727,6 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 };
                 case 'Date': {
                     let tmp = getDateValue(bucketRestriction);
-                    console.log('TMP ', tmp);
                     return tmp;
                 }
                 default: return 'Unknown';
@@ -727,15 +734,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
-            // console.log('Account', bucket, bkt);
             var isSameBucket = true;
+
             if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                 isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
             } else if (bucket && bucket.Fltr !== undefined && bucket.Fltr.Vals != null && bkt.Fltr && bkt.Fltr.Vals !== undefined && bkt.Fltr.Vals != null) {
                 isSameBucket = bkt.Fltr.Vals[0] == bucket.Fltr.Vals[0] && bkt.Fltr.Vals[1] == bucket.Fltr.Vals[1] && bkt.Fltr.Cmp == bucket.Fltr.Cmp;
             }
-
-
 
             return isSameAttribute && isSameBucket;
         }
@@ -750,7 +755,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.getValue = function (bucketRestriction, type, position, subType) {
-            console.log('getValue', bucketRestriction, type, position, subType)
+            // console.log('getValue', bucketRestriction, type, position, subType)
         }
 
         this.getValues = function (bucketRestriction, type, subType) {
@@ -768,7 +773,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
-            bucketRestriction.bkt.Vals[0] = booleanValue.length ? booleanValue : null;
+            if (booleanValue) {
+                bucketRestriction.bkt.Vals[0] = booleanValue;
+            } else {
+                bucketRestriction.bkt.Vals.length = 0;
+            }
         }
         this.changeVals = function (bucketRestriction, value) {
             bucketRestriction.bkt.Vals = value;
@@ -785,6 +794,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             // bucketRestriction.bkt.Vals[position] = value;
         }
 
+        this.changeVas = function (bucketRestriction, type, value, position, subType) { }
         this.changeValue = function (bucketRestriction, type, value, position, subType) { }
 
         this.changeTimeframePeriod = function (bucketRestriction, type, value) {

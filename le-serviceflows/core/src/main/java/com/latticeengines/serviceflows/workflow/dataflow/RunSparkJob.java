@@ -56,7 +56,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
                     if (context.getRetryCount() > 0) {
                         log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
                                 + getJobClz().getSimpleName());
-                        log.warn("Previous failure: " + context.getLastThrowable());
+                        log.warn("Previous failure:",  context.getLastThrowable());
                         killLivySession();
                     }
                     String jobName = tenantId + "~" + getJobClz().getSimpleName() + "~" + getClass().getSimpleName();

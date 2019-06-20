@@ -181,18 +181,26 @@ public class PatchBookUtilsTestNG {
         testPatchEmptyItems.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.Domain), null);
         testPatchEmptyItems.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), "132425135");
         return new Object[][] { { Arrays.asList(
-                        TestPatchBookUtils.newPatchBook(1L,
-                                new MatchKeyTuple.Builder().withDomain("google.com").build(),
-                                TestPatchBookUtils.newDomainDunsPatchItems(null, null)),
-                        TestPatchBookUtils.newPatchBook(2L,
-                                new MatchKeyTuple.Builder().withDomain("yahoo.com").build(),
-                                testPatchEmptyItems),
-                        TestPatchBookUtils.newPatchBook(3L,
-                                new MatchKeyTuple.Builder().withDomain("abc.com").withDuns("112211213").build(),
+                TestPatchBookUtils.newPatchBook(1L,
+                        new MatchKeyTuple //
+                                .Builder() //
+                                        .withDomain("google.com") //
+                                        .build(),
+                        TestPatchBookUtils.newDomainDunsPatchItems(null, null)),
+                TestPatchBookUtils.newPatchBook(2L,
+                        new MatchKeyTuple //
+                                .Builder() //
+                                        .withDomain("yahoo.com") //
+                                        .build(), testPatchEmptyItems),
+                TestPatchBookUtils.newPatchBook(3L,
+                        new MatchKeyTuple //
+                                .Builder() //
+                                        .withDomain("abc.com") //
+                                        .withDuns("112211213") //
+                                        .build(),
                         TestPatchBookUtils.newDomainDunsPatchItems("yahoo.com", "123456789"))),
                 new PatchBookValidationError[] {
                         newError(PatchBookUtils.INVALID_PATCH_ITEMS, 1L, 2L) } },
-
         };
     }
 
@@ -288,7 +296,7 @@ public class PatchBookUtilsTestNG {
 
         return new Object[][] {
                 { TestPatchBookUtils //
-                    .newPatchBook(1L,new MatchKeyTuple //
+                        .newPatchBook(1L, new MatchKeyTuple //
                         .Builder() //
                         .withDomain("www.google.com") // domain standardize
                         .withDuns("123234") // duns standardize
@@ -299,7 +307,7 @@ public class PatchBookUtilsTestNG {
                         .withZipcode("94086") //
                         .build(), map1), //
                   TestPatchBookUtils //
-                      .newPatchBook(2L,new MatchKeyTuple //
+                        .newPatchBook(2L, new MatchKeyTuple //
                         .Builder() //
                         .withDomain("google.com") //
                         .withDuns("000123234") //
@@ -310,7 +318,7 @@ public class PatchBookUtilsTestNG {
                         .withZipcode("94086") //
                         .build(), standardizedMap1) }, // Duns
                 { TestPatchBookUtils //
-                      .newPatchBook(3L,new MatchKeyTuple //
+                        .newPatchBook(3L, new MatchKeyTuple //
                         .Builder() //
                         .withDomain("abc@yahoo.com") // domain standardize
                         .withDuns("123456789") //
@@ -319,7 +327,7 @@ public class PatchBookUtilsTestNG {
                         .withState("Maharashtra") //
                         .withCity("Mumbai") //
                         .withZipcode("400057") //
-                        .build(), map2), //
+                        .build(), map2),
                  TestPatchBookUtils //
                      .newPatchBook(4L, new MatchKeyTuple //
                         .Builder() //
@@ -332,18 +340,18 @@ public class PatchBookUtilsTestNG {
                         .withZipcode("400057") //
                         .build(), standardizedMap2) },
                 { TestPatchBookUtils //
-                     .newPatchBook(5L, new MatchKeyTuple //
-                       .Builder() //
-                       .withDomain("rakutencom") // invalid domain
-                       .withDuns("1111abcsk") // invalid duns
-                       .withName("AAA$$@%@%") // company name standardize
-                       .withCountry("CANADA") //
-                       .withState("ONTARIO") //
-                       .withCity("TORONTO") //
-                       .withZipcode("94404") //
-                       .build(), map3), //
-                 TestPatchBookUtils.
-                     newPatchBook(6L, new MatchKeyTuple //
+                    .newPatchBook(5L, new MatchKeyTuple //
+                        .Builder() //
+                        .withDomain("rakutencom") // invalid domain
+                        .withDuns("1111abcsk") // invalid duns
+                        .withName("AAA$$@%@%") // company name standardize
+                        .withCountry("CANADA") //
+                        .withState("ONTARIO") //
+                        .withCity("TORONTO") //
+                        .withZipcode("94404") //
+                        .build(), map3),
+                 TestPatchBookUtils //
+                     .newPatchBook(6L, new MatchKeyTuple //
                        .Builder() //
                        .withDomain(null) //
                        .withDuns("000001111") //

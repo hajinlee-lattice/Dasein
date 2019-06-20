@@ -19,10 +19,18 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayLaunchChannelRepository;
 import com.latticeengines.apps.cdl.repository.reader.PlayLaunchChannelReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.PlayLaunchChannelWriterRepository;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 
 @Component("playLaunchChannelEntityMgr")
 public class PlayLaunchChannelEntityMgrImpl
@@ -99,7 +107,7 @@ public class PlayLaunchChannelEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel createPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
-        createNewPlayLaunchChannel(playLaunchChannel);
+        verifyNewPlayLaunchChannel(playLaunchChannel);
         playLaunchChannelDao.create(playLaunchChannel);
         return playLaunchChannel;
     }
@@ -111,12 +119,8 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getIsAlwaysOn() != null) {
             existingPlayLaunchChannel.setIsAlwaysOn(playLaunchChannel.getIsAlwaysOn());
         }
-        if (playLaunchChannel.getExcludeItemsWithoutSalesforceId() != null) {
-            existingPlayLaunchChannel
-                    .setExcludeItemsWithoutSalesforceId(playLaunchChannel.getExcludeItemsWithoutSalesforceId());
-        }
-        if (playLaunchChannel.getTopNCount() != null) {
-            existingPlayLaunchChannel.setTopNCount(playLaunchChannel.getTopNCount());
+        if (playLaunchChannel.getMaxAccountsToLaunch() != null) {
+            existingPlayLaunchChannel.setMaxAccountsToLaunch(playLaunchChannel.getMaxAccountsToLaunch());
         }
         if (playLaunchChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
@@ -127,8 +131,19 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(playLaunchChannel.getLaunchType());
         }
-        if (playLaunchChannel.getCronSchedule() != null) {
-            existingPlayLaunchChannel.setCronSchedule(playLaunchChannel.getCronSchedule());
+        if (playLaunchChannel.getCronScheduleExpression() != null) {
+            existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
+        }
+
+        if (playLaunchChannel.getChannelConfig() != null) {
+            LookupIdMap lookupIdMap = findLookupIdMap(playLaunchChannel);
+            verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, playLaunchChannel);
+            if (existingPlayLaunchChannel.getChannelConfig() != null) {
+                existingPlayLaunchChannel.setChannelConfig(
+                        existingPlayLaunchChannel.getChannelConfig().copyConfig(playLaunchChannel.getChannelConfig()));
+            } else {
+                existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
+            }
         }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
 
@@ -136,7 +151,7 @@ public class PlayLaunchChannelEntityMgrImpl
         return existingPlayLaunchChannel;
     }
 
-    private PlayLaunchChannel createNewPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
+    private PlayLaunchChannel verifyNewPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         LookupIdMap lookupIdMap = findLookupIdMap(playLaunchChannel);
         if (lookupIdMap != null) {
@@ -144,7 +159,44 @@ public class PlayLaunchChannelEntityMgrImpl
         } else {
             throw new NullPointerException("Cannot find lookupIdMap for given lookup id map id");
         }
+        verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, playLaunchChannel);
+
         return playLaunchChannel;
+    }
+
+    private void verifyChannelConfigHasSameDestinationAsLookupIdMap(LookupIdMap lookupIdMap,
+            PlayLaunchChannel playLaunchChannel) {
+        CDLExternalSystemName systemName = lookupIdMap.getExternalSystemName();
+        switch (systemName.getDisplayName()) {
+        case "Marketo":
+            if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case "Eloqua":
+            if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case "Salesforce":
+            if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case "AWS S3":
+            if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        }
     }
 
     private LookupIdMap findLookupIdMap(PlayLaunchChannel playLaunchChannel) {

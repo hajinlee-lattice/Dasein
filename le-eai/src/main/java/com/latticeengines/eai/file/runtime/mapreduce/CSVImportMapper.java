@@ -329,14 +329,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                     failMapper = true;
                 } catch (LedpException e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     if (e.getCode().equals(LedpCode.LEDP_17017)) {
                         duplicateMap.put(attr.getDisplayName(), e.getMessage());
                     } else {
+                        LOG.warn(e.getMessage());
                         throw e;
                     }
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
@@ -389,6 +392,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr, boolean trimInput) {
+        // Track a more descriptive Avro Type for error messages.
+        String errorMsgAvroType = avroType.getName();
         try {
             if (trimInput && StringUtils.isNotEmpty(fieldCsvValue)) {
                 fieldCsvValue = fieldCsvValue.trim();
@@ -405,6 +410,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     return null;
                 }
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
+                    errorMsgAvroType = "DATE";
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
@@ -413,9 +419,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         //   https://solutions.lattice-engines.com/browse/DP-9653
                         // We change the behavior of negative timestamps from throwing an exception and failing to
                         // parse the input CSV row to logging a warning and setting the timestamp value to zero.
-                        LOG.warn(String.format(
-                                "Converting date/time %s to timestamp generated negative value %d for column %s",
-                                fieldCsvValue, timestamp, attr.getDisplayName()));
+
+                        // Comment out warnings because log files are too large.
+                        //LOG.warn(String.format(
+                        //        "Converting date/time %s to timestamp generated negative value %d for column %s",
+                        //        fieldCsvValue, timestamp, attr.getDisplayName()));
                         return 0L;
                     }
                     return timestamp;
@@ -424,6 +432,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    errorMsgAvroType = "TIMESTAMP";
                     if (isEmptyString(fieldCsvValue)) {
                         return null;
                     }
@@ -433,16 +442,19 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     try {
                         Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
                         if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                    " using conversion library");
                         }
                         return Long.toString(timestamp);
                     } catch (Exception e) {
-                        LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
-                                "value %s.", attr.getName(), fieldCsvValue));
+                        // Comment out warnings because log files are too large.
+                        //LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
+                        //        "value %s.", attr.getName(), fieldCsvValue));
                         DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
                         Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
                         if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                    " using conversion library or ISO 8601 Format");
                         }
                         return Long.toString(timestamp);
                     }
@@ -453,21 +465,25 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case BOOLEAN:
                 return convertBooleanVal(fieldCsvValue);
             default:
-                LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
+                // Comment out warnings because log files are too large.
+                //LOG.info("size is:" + fieldCsvValue.length());
+                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDataType:"
                         + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.\n" +
-                    "Error message was: %s", fieldCsvValue, avroType, attr.getDisplayName(), e.getMessage()), e);
+                    "Error message was: %s", fieldCsvValue, errorMsgAvroType, attr.getDisplayName(), e.getMessage()),
+                    e);
         } catch (Exception e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
                     "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
-                    e.getMessage()), e);
+                    e.toString()), e);
         }
     }
 

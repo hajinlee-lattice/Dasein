@@ -83,6 +83,6 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         MatchInput matchInput = getBaseMatchInput();
         Set<String> columnNames = getInputTableColumnNames(0);
         return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                newAccountTableName);
+                Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
     }
 }

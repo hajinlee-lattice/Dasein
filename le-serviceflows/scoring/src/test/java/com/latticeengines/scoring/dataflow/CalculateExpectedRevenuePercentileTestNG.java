@@ -3,6 +3,7 @@ package com.latticeengines.scoring.dataflow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -28,6 +30,15 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
 
     @Test(groups = "functional")
     public void testCalculationExpectedRevenuePercentile() {
+        FileUtils.deleteQuietly(new File("/tmp/0tlcm.json"));
+        CalculateExpectedRevenuePercentileParameters parameters = prepareInputWithExpectedRevenue();
+        executeDataFlow(parameters);
+        verifyResults();
+        assertTrue(new File("/tmp/0tlcm.json").exists());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCalculationExpectedRevenuePercentile")
+    public void testCalculationExpectedRevenuePercentileUsingTargetDerivation() {
         CalculateExpectedRevenuePercentileParameters parameters = prepareInputWithExpectedRevenue();
         executeDataFlow(parameters);
         verifyResults();
@@ -111,14 +122,18 @@ public class CalculateExpectedRevenuePercentileTestNG extends ScoringServiceFlow
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
-        
+
         Map<String, Double> normalizationRatioMap = new HashMap<>();
         normalizationRatioMap.put(evModelGuid, 1.23456D);
-        parameters.setNormalizationRatioMap(normalizationRatioMap );
+        parameters.setNormalizationRatioMap(normalizationRatioMap);
 
         setDummyScoreDerivationMap(parameters, evModelGuid);
-
         setFitFunctionParametersMap(parameters);
+
+        parameters.setTargetScoreDerivation(true);
+        Map<String, String> targetScoreDerivationPaths = new HashMap<>();
+        targetScoreDerivationPaths.put(evModelGuid, "file:///tmp/0tlcm.json");
+        parameters.setTargetScoreDerivationPaths(targetScoreDerivationPaths);
 
         return parameters;
     }

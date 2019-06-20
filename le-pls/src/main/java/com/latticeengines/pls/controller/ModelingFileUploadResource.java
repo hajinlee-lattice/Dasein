@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -137,6 +138,20 @@ public class ModelingFileUploadResource {
         }
     }
 
+    @RequestMapping(value = "/validate", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Validate csv field mapping.")
+    public List<FieldValidation> validateFieldMappingDocumnet( //
+           @RequestParam(value = "displayName") String csvFileName,
+           @RequestParam(value = "entity") String entity,
+           @RequestParam(value = "source", defaultValue = "File") String source,
+           @RequestParam(value = "feedType") String feedType,
+           @RequestBody FieldMappingDocument fieldMappingDocument) {
+        return modelingFileMetadataService
+                .validateFieldMappings(csvFileName, fieldMappingDocument, entity, source,
+                        feedType);
+    }
+    
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
