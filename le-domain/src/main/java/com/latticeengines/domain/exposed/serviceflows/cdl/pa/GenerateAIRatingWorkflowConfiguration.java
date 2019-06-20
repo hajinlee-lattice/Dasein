@@ -225,8 +225,14 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivation) {
+            recalculatePercentile.setTargetScoreDerivation(targetScoreDerivation);
+            calculateExpectedRevenuePercentile.setTargetScoreDerivation(targetScoreDerivation);
+            return this;
+        }
+
         public Builder forceSkipRealculatePercentile(boolean forceSkip) {
-            recalculatePercentile.setSkipStep(forceEVSteps);
+            recalculatePercentile.setSkipStep(forceSkip);
             return this;
         }
 

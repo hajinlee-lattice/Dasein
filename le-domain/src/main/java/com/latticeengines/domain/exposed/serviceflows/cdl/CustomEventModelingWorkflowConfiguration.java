@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
@@ -470,6 +471,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            return this;
+        }
+        
         public CustomEventModelingWorkflowConfiguration build() {
             customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.RTS, "1.0");
             exportBucketTool.setUsingDisplayName(false);

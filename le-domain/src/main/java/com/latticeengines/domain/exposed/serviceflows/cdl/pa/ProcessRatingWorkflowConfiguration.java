@@ -112,6 +112,11 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            generateRatingWorfklow.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            return this;
+        }
+
         public Builder skipEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Rating)) {

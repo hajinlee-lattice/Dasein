@@ -26,8 +26,14 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
     @JsonProperty("percentile_upper_bound")
     private Integer percentileUpperBound;
 
+    @JsonProperty("target_score_derivation")
+    private boolean targetScoreDerivation;
+    
     @JsonProperty("original_score_field_map")
     private Map<String, String> originalScoreFieldMap;
+    
+    @JsonProperty("target_score_derivation_paths")
+    private Map<String, String> targetScoreDerivationPaths;
 
     public String getInputTableName() {
         return inputTableName;
@@ -76,7 +82,15 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
     public void setPercentileUpperBound(Integer percentileUpperBound) {
         this.percentileUpperBound = percentileUpperBound;
     }
+    
+    public boolean isTargetScoreDerivation() {
+        return targetScoreDerivation;
+    }
 
+    public void setTargetScoreDerivation(boolean targetScoreDerivation) {
+        this.targetScoreDerivation = targetScoreDerivation;
+    }
+    
     public Map<String, String> getOriginalScoreFieldMap() {
         return originalScoreFieldMap;
     }
@@ -84,4 +98,13 @@ public class RecalculatePercentileScoreParameters extends DataFlowParameters {
     public void setOriginalScoreFieldMap(Map<String, String> originalScoreFieldMap) {
         this.originalScoreFieldMap = originalScoreFieldMap;
     }
+
+    public Map<String, String> getTargetScoreDerivationPaths() {
+        return targetScoreDerivationPaths;
+    }
+
+    public void setTargetScoreDerivationPaths(Map<String, String> targetScoreDerivationPaths) {
+        this.targetScoreDerivationPaths = targetScoreDerivationPaths;
+    }
+    
 }

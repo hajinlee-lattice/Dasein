@@ -3,8 +3,11 @@ package com.latticeengines.scoring.workflow.steps;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -16,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.RecalculatePercentileScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
@@ -36,6 +40,12 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
     private static final int percentileUpperBound = 99;
 
     private int numModels;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Override
     public void execute() {
@@ -58,6 +68,7 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
         params.setModelGuidField(modelGuidField);
         params.setPercentileLowerBound(percentileLowerBound);
         params.setPercentileUpperBound(percentileUpperBound);
+        params.setTargetScoreDerivation(configuration.isTargetScoreDerivation());
 
         Map<String, String> scoreFieldMap = ExpectedRevenueDataFlowUtil
                 .getScoreFieldsMap(getListObjectFromContext(RATING_MODELS, RatingModelContainer.class));
@@ -74,7 +85,11 @@ public class RecalculatePercentileScoreDataFlow extends RunDataFlow<RecalculateP
         } else {
             throw new RuntimeException("Couldn't find any valid scoreFieldMap or individual modelGuid");
         }
-
+        Map<String, String> targetScoreDerivationPaths = ExpectedRevenueDataFlowUtil
+                .getTargetScoreFiDerivationPaths(configuration.getCustomerSpace(), yarnConfiguration,
+                        modelSummaryProxy, scoreFieldMap);
+        params.setTargetScoreDerivationPaths(targetScoreDerivationPaths);
+        
         configuration.setDataFlowParams(params);
     }
 

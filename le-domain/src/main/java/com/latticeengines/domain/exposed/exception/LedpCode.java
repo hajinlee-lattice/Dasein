@@ -346,6 +346,7 @@ public enum LedpCode {
     LEDP_18219("Unable to update PlayLaunchChannel due to {0}"),
     LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"),
     LEDP_18221("User not found"),
+    LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
