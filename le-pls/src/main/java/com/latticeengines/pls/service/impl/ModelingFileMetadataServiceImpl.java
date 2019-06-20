@@ -492,7 +492,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         // 1. set system related mapping
-//        FieldMapping customerLatticeId = null;
         List<FieldMapping> customerLatticeIdList = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getIdType() != null) {
@@ -598,6 +597,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         // map customer lattice id
         if (CollectionUtils.isNotEmpty(customerLatticeIdList)) {
+            boolean customerAccountExists = false;
+            boolean customerContactExists = false;
             for (FieldMapping customerLatticeId : customerLatticeIdList) {
                 boolean existFromTemplate = false;
                 for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -611,17 +612,25 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     customerLatticeId.setMappedToLatticeField(false);
                     fieldMappingDocument.getFieldMappings().add(customerLatticeId);
                 }
-            }
-        } else {
-            Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
-            while (fmIterator.hasNext()) {
-                FieldMapping fieldMapping = fmIterator.next();
-                if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
-                        || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
-                    fmIterator.remove();
-                    break;
+                if (InterfaceName.CustomerAccountId.name().equals(customerLatticeId.getMappedField())) {
+                    customerAccountExists = true;
+                } else if (InterfaceName.CustomerContactId.name().equals(customerLatticeId.getMappedField())) {
+                    customerContactExists = true;
                 }
             }
+            if (!customerAccountExists) {
+                fieldMappingDocument.getFieldMappings()
+                        .removeIf(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()));
+            }
+            if (!customerContactExists) {
+                fieldMappingDocument.getFieldMappings()
+                        .removeIf(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
+            }
+
+        } else {
+            fieldMappingDocument.getFieldMappings().removeIf(fieldMapping ->
+                    InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
+                    || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
