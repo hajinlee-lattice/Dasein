@@ -7,11 +7,8 @@ public class JoinConfig extends SparkJobConfig {
 
     public static final String NAME = "join";
 
-    @JsonProperty("ParentId")
-    private String parentId;
-
-    @JsonProperty("ParentSrcIdx")
-    private Integer parentSrcIdx; // default 1 (the second input)
+    @JsonProperty("JoinKey")
+    private String joinKey;
 
     @Override
     @JsonProperty("Name")
@@ -19,20 +16,12 @@ public class JoinConfig extends SparkJobConfig {
         return NAME;
     }
 
-    public String getParentId() {
-        return parentId;
+    public String getJoinKey() {
+        return joinKey;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
-    public Integer getParentSrcIdx() {
-        return parentSrcIdx;
-    }
-
-    public void setParentSrcIdx(Integer parentSrcIdx) {
-        this.parentSrcIdx = parentSrcIdx;
+    public void setJoinKey(String joinKey) {
+        this.joinKey = joinKey;
     }
 
 }

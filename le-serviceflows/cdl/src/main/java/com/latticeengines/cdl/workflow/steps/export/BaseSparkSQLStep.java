@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.MergeRuleRatingsConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -43,8 +44,10 @@ import com.latticeengines.query.factory.SparkQueryProvider;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
+import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.MergeRuleRatings;
-import com.latticeengines.spark.exposed.service.LivySessionService;
+mport com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
 
@@ -53,6 +56,9 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
 
     @Inject
     private SparkSQLService sparkSQLService;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     @Inject
     private LivySessionService livySessionService;
@@ -109,6 +115,14 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 scalingMultiplier, storageLevel, getClass().getSimpleName());
     }
 
+    protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
+    SparkJobResult executeSparkJob(Class<J> jobClz, C jobConfig) {
+        if (livySession != null) {
+            return super.runSparkJob(livySession, jobClz, jobConfig);
+        }
+        throw new NullPointerException("LivySession not initialized.");
+    }
+
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
         setCustomerSpace();
 
@@ -163,13 +177,13 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
             return sparkSQLService.getData(customerSpace, livySession, defaultSql, null);
         });
         bktResults.add(defaultResult);
-        for (RatingBucketName bucketName: RatingBucketName.values()) {
+        for (RatingBucketName bucketName : RatingBucketName.values()) {
             String bktSql = sqlMap.get(bucketName.getName());
             if (StringUtils.isNotBlank(bktSql)) {
                 HdfsDataUnit bktResult = retry.execute(ctx -> {
                     if (ctx.getRetryCount() > 0) {
                         log.info("(Attempt=" + ctx.getRetryCount() + ") get " + //
-                                bucketName.getName() + " ratings via SparkSQL.");
+                        bucketName.getName() + " ratings via SparkSQL.");
                     }
                     return sparkSQLService.getData(customerSpace, livySession, bktSql, null);
                 });

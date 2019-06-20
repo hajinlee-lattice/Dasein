@@ -1,25 +1,25 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig
+import com.latticeengines.domain.exposed.spark.cdl.JoinConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-class RemoveOrphanJob extends AbstractSparkJob[RemoveOrphanConfig] {
+class JoinJob extends AbstractSparkJob[JoinConfig] {
 
-  override def runJob(spark: SparkSession, lattice: LatticeContext[RemoveOrphanConfig]): Unit = {
-    val config: RemoveOrphanConfig = lattice.config
-    val parentSrcIdx: Int = if (config.getParentSrcIdx == null) 1 else config.getParentSrcIdx.toInt
-    val childSrcIdx: Int = (parentSrcIdx + 1) % 2
-    val parentId = config.getParentId
+  override def runJob(spark: SparkSession, lattice: LatticeContext[JoinConfig]): Unit = {
+    val config: JoinConfig = lattice.config
+    val joinKey: String = config.getJoinKey
+	println(s"joinKey is: $joinKey");
+	
+	// read input
+    val accountTable: DataFrame = lattice.input.head
+    val contactTable: DataFrame = lattice.input(1)
 
-    val parent: DataFrame = lattice.input(parentSrcIdx)
-    val child: DataFrame = lattice.input(childSrcIdx)
-
-    // calculation
-    val result = parent.select(parentId).join(child, Seq(parentId), "inner")
+    // join
+    val df = accountTable.join(contactTable, accountTable(s"$joinKey") === contactTable(s"$joinKey"), "left")
 
     // finish
-    lattice.output = result::Nil
+    //lattice.output = df::Nil
   }
 
 }
