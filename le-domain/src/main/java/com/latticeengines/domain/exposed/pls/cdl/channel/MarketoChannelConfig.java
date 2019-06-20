@@ -12,10 +12,10 @@ public class MarketoChannelConfig implements ChannelConfig {
     private Long contactLimit;
 
     @JsonProperty("supressContactsWithoutEmails")
-    private Boolean supressContactsWithoutEmails = Boolean.FALSE;
+    private Boolean supressContactsWithoutEmails = false;
 
     @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = Boolean.FALSE;
+    private Boolean supressAccountWithoutContacts = false;
 
     @JsonProperty("audienceId")
     private String audienceId;
