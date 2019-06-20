@@ -5,13 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
@@ -22,6 +16,7 @@ import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.common.SparkCountRecordsConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 
 import reactor.core.publisher.Flux;
@@ -47,6 +42,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = PivotRatingsConfig.class, name = PivotRatingsConfig.NAME), //
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
         @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //
+        @JsonSubTypes.Type(value = SparkCountRecordsConfig.class, name = SparkCountRecordsConfig.NAME), //
 })
 public abstract class SparkJobConfig {
 
