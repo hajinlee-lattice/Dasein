@@ -52,6 +52,20 @@ public class DataFeedInternalResource {
         }
     }
 
+    @RequestMapping(value = "/datafeedlist", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @NoCustomerSpace
+    @ApiOperation(value = "get all data feeds.")
+    public List<DataFeed> getAllDataFeeds(
+            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus,
+            @RequestParam(value = "version", required = false, defaultValue = "")String version) {
+        if (StringUtils.isEmpty(tenantStatus) && StringUtils.isEmpty(version)) {
+            return dataFeedService.getAllDataFeeds();
+        } else {
+            return dataFeedService.getDataFeeds(TenantStatus.valueOf(tenantStatus), version);
+        }
+    }
+
     @RequestMapping(value = "/dataQuotaLimitMap", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @NoCustomerSpace
