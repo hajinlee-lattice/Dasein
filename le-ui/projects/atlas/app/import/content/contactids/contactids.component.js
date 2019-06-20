@@ -1,6 +1,8 @@
 angular.module('lp.import.wizard.contactids', [])
 .controller('ImportWizardContactIDs', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, FeatureFlagService
+    $state, $stateParams, $scope, $timeout, 
+    ResourceUtility, ImportWizardStore, FieldDocument, 
+    UnmappedFields, Banner, FeatureFlagService
 ) {
     var vm = this;
 
@@ -29,6 +31,12 @@ angular.module('lp.import.wizard.contactids', [])
 
     vm.init = function() {
         vm.UnmappedFields = UnmappedFields;
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        if (validationStatus) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);

@@ -29,6 +29,13 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     });
 
     vm.init = function() {
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        if (validationStatus) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+        
         vm.fieldMappings.forEach(function(fieldMapping) {
             vm.availableFields.push(fieldMapping.userField);
         });

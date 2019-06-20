@@ -136,7 +136,6 @@ export default class S3FileList extends Component {
                         switch (action) {
                             case "create-template": 
                             case "edit-template": {
-                                console.log(response);
                                 let sourceFile = response.data.Result;
                                 ImportWizardStore.setCsvFileName(sourceFile.name);
                                 NgState.getAngularState().go(this.state.angularGoTo, {});
@@ -165,9 +164,6 @@ export default class S3FileList extends Component {
         if (file.is_directory) {
             this.getFilesFromFolder(file.file_name);
         } else {
-
-
-            console.log(file);
             let state = Object.assign({}, this.state);
             state.selectedItem = file;
             // state.entity = ;

@@ -17,6 +17,7 @@ angular
     'lp.import.wizard.productids',
     'lp.import.wizard.producthierarchyids',
     'lp.import.wizard.producthierarchy',
+    'lp.import.wizard.validatetemplate',
     'lp.import.utils',
     'mainApp.core.utilities.AuthorizationUtility',
     'mainApp.core.redux'
@@ -374,9 +375,70 @@ angular
                 }
             }
         })
-        //app/import/content/customfields/custom-fields.component.html
-        //app/import/content/customfields/customfields.component.html
-        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
+        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.validation', {
+            url: '/validatetemplate',
+            resolve: {
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
+                },
+                TemplateData: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getTemplateData();
+                },
+                Validation: function($q, ImportWizardService, FieldDocument, TemplateData) {
+                    var deferred = $q.defer();
+
+                    // ImportWizardService.validateTemplate(FieldDocument, TemplateData).then(function(result) {
+                    //     deferred.resolve(result);
+                    // });
+
+                    // var validations = [{
+                    //         "userField" : null,
+                    //         "latticeField": null,
+                    //         "status": "SUCCESS",
+                    //         "message": "All fields are successfully validated, you can save your field mappings now."
+                    //     }];
+
+                    var validations = [{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        },{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        },{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        },{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        },{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        }];
+
+                    deferred.resolve(validations);
+                    
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardValidateTemplate',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/validatetemplate/validatetemplate.component.html'
+                }
+            }
+        })
+        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.validation.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
@@ -638,7 +700,48 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', {
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', {
+            url: '/validatetemplate',
+            resolve: {
+                FieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getFieldDocument();
+                },
+                TemplateData: function($q, ImportWizardStore) {
+                    return ImportWizardStore.getTemplateData();
+                },
+                Validation: function($q, ImportWizardService, FieldDocument, TemplateData) {
+                    var deferred = $q.defer();
+
+                    // ImportWizardService.validateTemplate(FieldDocument, TemplateData).then(function(result) {
+                    //     deferred.resolve(result);
+                    // });
+
+                    var validations = [{
+                            "userField" : null,
+                            "latticeField": "Account ID",
+                            "status": "ERROR",
+                            "message": "Account ID is not mapped, and is a required field."
+                        },{
+                            "userField" : null,
+                            "latticeField": null,
+                            "status": "SUCCESS",
+                            "message": "All fields are successfully validated, you can save your field mappings now."
+                        }];
+
+                    deferred.resolve(validations);
+                    
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardValidateTemplate',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/validatetemplate/validatetemplate.component.html'
+                }
+            }
+        })
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
