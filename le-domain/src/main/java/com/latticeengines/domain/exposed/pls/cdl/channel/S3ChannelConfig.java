@@ -15,10 +15,10 @@ public class S3ChannelConfig implements ChannelConfig {
     private Long accountLimit;
 
     @JsonProperty("supressAccountWithoutAccountId")
-    private Boolean supressAccountWithoutAccountId = Boolean.FALSE;
+    private Boolean supressAccountWithoutAccountId = false;
 
     @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = Boolean.FALSE;
+    private Boolean supressAccountWithoutContacts = false;
 
     public Long getAccoutLimit() {
         return accountLimit;

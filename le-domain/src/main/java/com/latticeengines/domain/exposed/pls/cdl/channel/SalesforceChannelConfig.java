@@ -12,7 +12,7 @@ public class SalesforceChannelConfig implements ChannelConfig {
     private Long accountLimit;
 
     @JsonProperty("supressAccountWithoutAccountId")
-    private Boolean supressAccountWithoutAccountId = Boolean.FALSE;
+    private Boolean supressAccountWithoutAccountId = false;
 
     public Long getAccoutLimit() {
         return accountLimit;
