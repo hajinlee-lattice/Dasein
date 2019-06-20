@@ -374,7 +374,7 @@ public class CDLResource {
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error("Failed to Update system priority: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_18222, new String[] {e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18223, new String[] {e.getMessage()});
         }
     }
 
