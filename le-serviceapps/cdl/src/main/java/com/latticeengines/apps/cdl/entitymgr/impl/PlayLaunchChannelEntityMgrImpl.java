@@ -171,28 +171,28 @@ public class PlayLaunchChannelEntityMgrImpl
         case "Marketo":
             if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
                 throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[0],
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                                 systemName.getDisplayName() });
             }
             break;
         case "Eloqua":
             if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
                 throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[0],
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                                 systemName.getDisplayName() });
             }
             break;
         case "Salesforce":
             if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
                 throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[0],
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                                 systemName.getDisplayName() });
             }
             break;
         case "AWS S3":
             if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
                 throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[0],
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                                 systemName.getDisplayName() });
             }
             break;
