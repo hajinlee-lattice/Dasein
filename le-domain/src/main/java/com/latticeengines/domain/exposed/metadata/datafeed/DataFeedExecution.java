@@ -85,6 +85,10 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    @Column(name = "RETRY_COUNT")
+    @JsonProperty("retry_count")
+    private int retryCount = 0;
+
     @Override
     public Long getPid() {
         return pid;
@@ -176,6 +180,14 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
     }
 
     public enum Status {

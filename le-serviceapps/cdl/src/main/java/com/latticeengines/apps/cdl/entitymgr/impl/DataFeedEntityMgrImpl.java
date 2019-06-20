@@ -271,6 +271,12 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DataFeed> getDataFeeds(TenantStatus status, String version) {
+        return datafeedRepository.getDataFeedsByTenantStatus(status, version);
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeed updateStatus(DataFeed feed) {
         return datafeedDao.updateStatus(feed);

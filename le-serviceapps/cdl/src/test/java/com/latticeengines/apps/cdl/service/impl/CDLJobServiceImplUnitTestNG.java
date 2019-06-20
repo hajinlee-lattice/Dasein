@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -11,11 +10,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,15 +25,9 @@ import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionStatus;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
@@ -76,15 +66,9 @@ public class CDLJobServiceImplUnitTestNG {
 
     private String USERID = "Auto Scheduled";
 
-    private static final String HIGH_PRIORITY_RUNNING_JOB_MAP = "HIGH_PRIORITY_RUNNING_JOB_MAP";
-    private static final String LOW_PRIORITY_RUNNING_JOB_MAP = "LOW_PRIORITY_RUNNING_JOB_MAP";
-
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        CDLJobServiceImpl.CACHE_KEY_PREFIX = "CDLScheduledJobCache";
-        CDLJobServiceImpl.HIGH_PRIORITY_RUNNING_JOB_MAP = "HIGH_PRIORITY_RUNNING_JOB_MAP";
-        CDLJobServiceImpl.LOW_PRIORITY_RUNNING_JOB_MAP = "LOW_PRIORITY_RUNNING_JOB_MAP";
     }
 
     @Test(groups = "unit")
@@ -126,73 +110,6 @@ public class CDLJobServiceImplUnitTestNG {
 
         doReturn(true).when(cdlJobService).submitProcessAnalyzeJob(any(Tenant.class), any(CDLJobDetail.class));
         doReturn(false).when(cdlJobService).systemCheck();
-        test_ClusterIDIsNotEmpty();
-        test_ClusterIDIsEmpty();
-    }
-
-    @Test(groups = "unit")
-    public void test_orchestrateJob_New() {
-        cdlJobService.maximumHighPriorityScheduledJobCount = 2;
-        cdlJobService.minimumHighPriorityScheduledJobCount = 1;
-        cdlJobService.maximumLowPriorityScheduledJobCount = 4;
-        cdlJobService.minimumLowPriorityScheduledJobCount = 1;
-        cdlJobService.isActivityBasedPA = true;
-
-        doReturn(false).when(cdlJobService).systemCheck();
-        when(columnMetadataProxy.latestBuildNumber()).thenReturn("2.0.18.0");
-
-        Tenant tenant1 = new Tenant();
-        tenant1.setPid(1L);
-        tenant1.setId("testTenant1");
-        tenant1.setName("testTenant1");
-        SimpleDataFeed simpleDataFeed1 = new SimpleDataFeed();
-        simpleDataFeed1.setStatus(DataFeed.Status.Active);
-        simpleDataFeed1.setTenant(tenant1);
-
-        List<SimpleDataFeed> simpleDataFeeds = new ArrayList<>();
-        simpleDataFeeds.add(simpleDataFeed1);
-
-        when(dataFeedService.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0")).thenReturn(simpleDataFeeds);
-
-        CDLJobDetail cdlJobDetail =  new CDLJobDetail();
-        when(cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(cdlJobDetail);
-
-        List<Action> actions = new ArrayList<>();
-        Action action = new Action();
-        action.setPid(1l);
-        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        action.setCreated(new Date(new Date().getTime() - (60 * 1000 * 15)));
-        action.setUpdated(new Date(new Date().getTime() - (60 * 1000 * 15)));
-        action.setTenant(tenant1);
-        actions.add(action);
-        when(actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE)).thenReturn(actions);
-
-        when(batonService.isEnabled(any(CustomerSpace.class), eq(LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY))).thenReturn(true);
-        doReturn(true).when(cdlJobService).checkDataCloudChange(anyString(), anyString());
-
-        long currentTimeMillis = System.currentTimeMillis();
-        Date currentTime = new Date(currentTimeMillis - 1000);
-        doReturn(currentTime).when(cdlJobService).getNextInvokeTime(any(CustomerSpace.class), any(Tenant.class), any(CDLJobDetail.class));
-
-        doNothing().when(dataFeedService).updateDataFeedNextInvokeTime(anyString(), any(Date.class));
-
-        when(cdlJobDetailEntityMgr.listAllRunningJobByJobType(CDLJobType.PROCESSANALYZE)).thenReturn(Collections.singletonList(cdlJobDetail));
-
-        Map<String, List<Object>> highMap = new HashMap<>();
-        Map<String, List<Object>> lowMap = new HashMap<>();
-        doReturn(highMap).when(cdlJobService).getMap(eq(HIGH_PRIORITY_RUNNING_JOB_MAP));
-        doReturn(lowMap).when(cdlJobService).getMap(eq(LOW_PRIORITY_RUNNING_JOB_MAP));
-
-        doReturn(false).when(cdlJobService).retryProcessAnalyze(any(Tenant.class), any(CDLJobDetail.class));
-        when(cdlJobDetailEntityMgr.createJobDetail(eq(CDLJobType.PROCESSANALYZE), any(Tenant.class))).thenReturn(cdlJobDetail);
-
-        AwsApplicationId applicationId = new AwsApplicationId();
-        applicationId.setJobId(UUID.randomUUID().toString());
-        when(cdlProxy.processAnalyze(anyString(), any(ProcessAnalyzeRequest.class))).thenReturn(applicationId);
-        doNothing().when(cdlJobDetailEntityMgr).updateJobDetail(any(CDLJobDetail.class));
-
-        doNothing().when(cdlJobService).updateRedisTemplate(anyString(), any(Map.class));
-
         test_ClusterIDIsNotEmpty();
         test_ClusterIDIsEmpty();
     }

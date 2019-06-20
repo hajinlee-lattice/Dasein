@@ -113,6 +113,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+        return lockExecution(customerSpace, datafeedName, jobType, 0);
+    }
+
+    private Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType,
+                               int retryCount) {
         String lockName = new Path("/").append(LockType).append("/").append(customerSpace).toString();
         try {
             LockManager.registerCrossDivisionLock(lockName);
@@ -136,7 +141,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                 }
                 failExecution(datafeed, job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
-            DataFeedExecution execution = prepareExecution(datafeed, jobType);
+            DataFeedExecution execution = prepareExecution(datafeed, jobType, retryCount);
             return execution.getPid();
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
@@ -146,11 +151,12 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
-    private DataFeedExecution prepareExecution(DataFeed datafeed, DataFeedExecutionJobType jobType) {
+    private DataFeedExecution prepareExecution(DataFeed datafeed, DataFeedExecutionJobType jobType, int retryCount) {
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.setDataFeedExecutionJobType(jobType);
+        execution.setRetryCount(retryCount);
         datafeedExecutionEntityMgr.create(execution);
         log.info(String.format("preparing execution %s", execution));
 
@@ -466,6 +472,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public List<DataFeed> getDataFeeds(TenantStatus status, String version) {
+        return datafeedEntityMgr.getDataFeeds(status, version);
+    }
+
+    @Override
     public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
         DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (dataFeed == null) {
@@ -488,7 +499,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed,
                 jobType);
-        if (lockExecution(customerSpace, datafeedName, jobType) == null) {
+        if (lockExecution(customerSpace, datafeedName, jobType, (execution.getRetryCount() + 1)) == null) {
             throw new RuntimeException("can't lock execution for job type:" + jobType);
         }
 
@@ -538,5 +549,19 @@ public class DataFeedServiceImpl implements DataFeedService {
         defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
         dataLimit.setTransactionDataQuotaLimit(defaultTransactionQuotaLimit);
         return dataLimit;
+    }
+
+    @Override
+    public Boolean increasedRetryCount(String customerSpace) {
+        DataFeed dataFeed = getOrCreateDataFeed(customerSpace);
+        DataFeedExecution execution =
+                datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
+                DataFeedExecutionJobType.PA);
+        if (execution != null) {
+            execution.setRetryCount(execution.getRetryCount() + 1);
+            datafeedExecutionEntityMgr.updateRetryCount(execution);
+            return true;
+        }
+        return false;
     }
 }
