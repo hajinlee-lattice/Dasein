@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -213,6 +214,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder apsImputationEnabled(boolean apsImputationEnabled) {
             apsGenerationStepConfiguration.setApsImputationEnabled(apsImputationEnabled);
+            return this;
+        }
+        
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            processRatingWorkflowBuilder.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
             return this;
         }
 

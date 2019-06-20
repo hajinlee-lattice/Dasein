@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -24,6 +26,19 @@ public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFuncti
 
     @Test(groups = "functional")
     public void test() {
+        FileUtils.deleteQuietly(new File("/tmp/ppqw.json"));
+        FileUtils.deleteQuietly(new File("/tmp/ukuiv.json"));
+        FileUtils.deleteQuietly(new File("/tmp/nabql.json"));
+        RecalculatePercentileScoreParameters parameters = prepareInput();
+        executeDataFlow(parameters);
+        verifyResult();
+        assertTrue(new File("/tmp/ppqw.json").exists());
+        assertTrue(new File("/tmp/ukuiv.json").exists());
+        assertTrue(!new File("/tmp/nabql.json").exists());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "test")
+    public void testWithTargetScoreDerivation() {
         RecalculatePercentileScoreParameters parameters = prepareInput();
         executeDataFlow(parameters);
         verifyResult();
@@ -100,6 +115,12 @@ public class RecalculatePercentileScoreTestNG extends ServiceFlowsDataFlowFuncti
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
         parameters.setOriginalScoreFieldMap(rawScoreFieldMap);
+        parameters.setTargetScoreDerivation(true);
+        Map<String, String> targetScoreDerivationPaths = new HashMap<>();
+        targetScoreDerivationPaths.put("ms__ed222df9-bd34-4449-b71d-563162464123-ai__ppqw", "file:///tmp/ppqw.json");
+        targetScoreDerivationPaths.put("ms__92fc828f-11eb-4188-9da8-e6f2c9cc35c8-ai_ukuiv", "file:///tmp/ukuiv.json");
+        targetScoreDerivationPaths.put("ms__8769cf68-d174-4427-916d-1ef19db02f0a-ai_nabql", "file:///tmp/nabql.json");
+        parameters.setTargetScoreDerivationPaths(targetScoreDerivationPaths);
 
         return parameters;
     }

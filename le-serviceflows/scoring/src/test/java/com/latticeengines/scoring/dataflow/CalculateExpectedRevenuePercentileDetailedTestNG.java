@@ -107,16 +107,12 @@ public class CalculateExpectedRevenuePercentileDetailedTestNG extends ScoringSer
             Double predictedRevenue = (Double) outputRecord.get(ScoreResultField.PredictedRevenue.displayName);
             Double expectedRevenue = (Double) outputRecord.get(ScoreResultField.ExpectedRevenue.displayName);
             /*
-            if (expectedRevenue != null) {
-                Assert.assertEquals(expectedRevenue,
-                        BigDecimal.valueOf(probability * predictedRevenue)
-                                .setScale( //
-                                        CalculateFittedExpectedRevenueFunction //
-                                                .EV_REVENUE_PRECISION,
-                                        RoundingMode.HALF_UP)
-                                .doubleValue());
-            }
-            */
+             * if (expectedRevenue != null) {
+             * Assert.assertEquals(expectedRevenue,
+             * BigDecimal.valueOf(probability * predictedRevenue) .setScale( //
+             * CalculateFittedExpectedRevenueFunction // .EV_REVENUE_PRECISION,
+             * RoundingMode.HALF_UP) .doubleValue()); }
+             */
             expectedResultRecord.getSchema().getFields().stream().forEach(f -> {
                 if (f.name().equals(ScoreResultField.ExpectedRevenuePercentile.displayName)
                         || f.name().equals(ScoreResultField.Percentile.displayName)) {
@@ -156,10 +152,10 @@ public class CalculateExpectedRevenuePercentileDetailedTestNG extends ScoringSer
         parameters.setModelGuidField(modelGuidField);
         parameters.setPercentileLowerBound(5);
         parameters.setPercentileUpperBound(99);
-        
+
         Map<String, Double> normalizationRatioMap = new HashMap<>();
         normalizationRatioMap.put(evModelGuid, 1.23456D);
-        parameters.setNormalizationRatioMap(normalizationRatioMap );
+        parameters.setNormalizationRatioMap(normalizationRatioMap);
 
         setDummyScoreDerivationMap(parameters, evModelGuid);
 

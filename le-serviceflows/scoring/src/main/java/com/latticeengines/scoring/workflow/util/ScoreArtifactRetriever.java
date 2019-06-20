@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_ENHANCEMEN
 import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_APPID_DIR;
 import static com.latticeengines.domain.exposed.scoringapi.Model.HDFS_SCORE_ARTIFACT_BASE_DIR;
 import static com.latticeengines.domain.exposed.scoringapi.Model.SCORE_DERIVATION_FILENAME;
+import static com.latticeengines.domain.exposed.scoringapi.Model.TARGET_SCORE_DERIVATION_FILENAME;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -128,6 +129,20 @@ public class ScoreArtifactRetriever {
         String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
 
         return retrieveScoreDerivationFromHdfs(hdfsScoreArtifactBaseDir, isEV);
+    }
+
+    public String getTargetScoreDerivationPath(CustomerSpace customerSpace, //
+            String modelId) {
+        try {
+            log.info(String.format("Retrieving %sscore derivation from HDFS for model:%s", "target", modelId));
+            ModelSummary modelSummary = getModelSummary(customerSpace, modelSummaryProxy, modelId);
+            String hdfsScoreArtifactBaseDir = getScoreArtifactBaseDir(customerSpace, modelSummary);
+            return hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + TARGET_SCORE_DERIVATION_FILENAME;
+        } catch (Exception ex) {
+            log.info(String.format("Can not build target score derivation file, modelId=%s, error=%s", modelId,
+                    ex.getMessage()));
+            return null;
+        }
     }
 
     public String getFitFunctionParameters(CustomerSpace customerSpace, //
