@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,30 +31,26 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(SourceToS3Publisher.TRANSFORMER_NAME)
 public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> {
-    public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("SourceToS3Publisher");
-
-    public static final String TRANSFORMER_NAME = TRANSFORMER_SOURCE_TO_S3_PUBLISHER;
-
     private static final Logger log = LoggerFactory.getLogger(SourceToS3Publisher.class);
 
-    private String tenantId = TEST_CUSTOMER.getTenantId();;
-    private String name;
-
-
+    public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("SourceToS3Publisher");
+    public static final String TRANSFORMER_NAME = TRANSFORMER_SOURCE_TO_S3_PUBLISHER;
 
     @Resource(name = "distCpConfiguration")
     private Configuration distCpConfiguration;
 
-
     @Inject
     private EMREnvService emrEnvService;
-
 
     @Autowired
     private S3Service s3Service;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
+
+    private String name;
+
+    private String tenantId = TEST_CUSTOMER.getTenantId();
 
 
     @Override
@@ -74,11 +71,15 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
-            String hdfsDir = getSourceHdfsDir(step, 0);
-            String s3Prefix = gets3nPath(s3Bucket, hdfsDir);
+            String hdfsSnapshotDir = getSourceHdfsDir(step, 0);
+            String hdfsSchemaDir = getBaseSourceSchemaDir(step, 0);
+            String hdfsVersionFilePath = getBaseSourceVersionFilePath(step, 0);
+            String s3SnapshotPrefix = gets3nPath(s3Bucket, hdfsSnapshotDir);
+            String s3SchemaPrefix = gets3nPath(s3Bucket, hdfsSchemaDir);
+            String s3VersionFilePrefix = gets3nPath(s3Bucket, hdfsVersionFilePath);
 
-
-            copyToS3(step, hdfsDir, s3Prefix);
+            copyToS3(step, hdfsSnapshotDir, s3SnapshotPrefix, hdfsSchemaDir, s3SchemaPrefix, hdfsVersionFilePath,
+                    s3VersionFilePrefix);
 
 
             step.setTarget(null);
@@ -93,27 +94,54 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
 
 
 
-    private void copyToS3(TransformStep step, String hdfsDirPath, String s3nDirPath) {
+    private void copyToS3(TransformStep step, String hdfsSnapshotDir, String s3nSnapshotDir, String hdfsSchemaDir,
+            String s3SchemaDir, String hdfsVersionFilePath, String s3VersionFilePrefix) {
         try {
-            if (s3Service.objectExist(s3Bucket, s3nDirPath)) {
-                s3Service.cleanupPrefix(s3Bucket, s3nDirPath);
-            }
+
+            cleanupPrefix(hdfsSnapshotDir, hdfsSchemaDir, hdfsVersionFilePath);
 
             String subFolder = "HdfsToS3";
             Configuration distcpConfiguration = createConfiguration(step, subFolder);
 
-            String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
+            Properties properties = new Properties();
+            properties.setProperty("mapreduce.application.classpath",
+                    "$HADOOP_CONF_DIR,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*"
+                            + ",$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/*,$HADOOP_MAPRED_HOME/share/hadoop/tools/lib/*");
+
+            String queue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
             String overwriteQueue = LedpQueueAssigner.overwriteQueueAssignment(queue,
                     emrEnvService.getYarnQueueScheme());
-            log.info("hdfsPath: " + hdfsDirPath);
-            log.info("s3nPath: " + s3nDirPath);
-            System.out.println("hdfsDirPath:" + hdfsDirPath);
-            System.out.println("s3nDirPath:" + s3nDirPath);
-            HdfsUtils.distcp(distcpConfiguration, hdfsDirPath, s3nDirPath, overwriteQueue);
+
+            log.info("hdfsPath: " + hdfsSnapshotDir);
+            log.info("s3nPath: " + s3nSnapshotDir);
+
+            HdfsUtils.distcp(ConfigurationUtils.createFrom(distcpConfiguration, properties), hdfsSnapshotDir,
+                    s3nSnapshotDir,
+                    overwriteQueue);
+            if (StringUtils.isNotEmpty(hdfsSchemaDir)) {
+                HdfsUtils.distcp(ConfigurationUtils.createFrom(distcpConfiguration, properties), hdfsSchemaDir,
+                        s3SchemaDir, overwriteQueue);
+            }
+            if (StringUtils.isNotEmpty(hdfsVersionFilePath)) {
+                HdfsUtils.distcp(ConfigurationUtils.createFrom(distcpConfiguration, properties), hdfsVersionFilePath,
+                        s3VersionFilePrefix, overwriteQueue);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Cannot copy hdfs Dir to s3!" + e.getMessage());
         }
 
+    }
+
+    private void cleanupPrefix(String s3nSnapshotDir, String s3SchemaDir, String s3VersionFilePrefix) {
+        if (s3Service.isNonEmptyDirectory(s3Bucket, s3nSnapshotDir)) {
+            s3Service.cleanupPrefix(s3Bucket, s3nSnapshotDir);
+        }
+        if (s3Service.isNonEmptyDirectory(s3Bucket, s3SchemaDir)) {
+            s3Service.cleanupPrefix(s3Bucket, s3SchemaDir);
+        }
+        if (s3Service.isNonEmptyDirectory(s3Bucket, s3VersionFilePrefix)) {
+            s3Service.cleanupPrefix(s3Bucket, s3VersionFilePrefix);
+        }
     }
 
     private Configuration createConfiguration(TransformStep step, String jobNameSuffix) {
