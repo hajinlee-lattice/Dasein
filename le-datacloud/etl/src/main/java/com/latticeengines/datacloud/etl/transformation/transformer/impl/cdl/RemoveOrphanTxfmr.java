@@ -43,7 +43,7 @@ public class RemoveOrphanTxfmr extends ConfigurableSparkJobTxfmr<RemoveOrphanCon
     @Override
     protected Schema getTargetSchema(HdfsDataUnit result, RemoveOrphanConfig sparkJobConfig, //
                                      TransformerConfig configuration, List<Schema> baseSchemas) {
-        int idx = sparkJobConfig.getParentSrcIdx() == null ? 1 : sparkJobConfig.getParentSrcIdx();
+        int idx = (sparkJobConfig.getParentSrcIdx() != null && sparkJobConfig.getParentSrcIdx() == 0) ? 1 : 0;
         if (CollectionUtils.size(baseSchemas) > idx && baseSchemas.get(idx) != null) {
             Schema baseSchema = baseSchemas.get(idx);
             Map<String, Schema.Field> inputFields = new HashMap<>();

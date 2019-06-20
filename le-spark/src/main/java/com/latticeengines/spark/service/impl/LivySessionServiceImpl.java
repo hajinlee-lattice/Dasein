@@ -1,7 +1,9 @@
 package com.latticeengines.spark.service.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,7 @@ public class LivySessionServiceImpl implements LivySessionService {
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
     private static final String URI_SESSIONS = "/sessions";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
@@ -43,9 +46,10 @@ public class LivySessionServiceImpl implements LivySessionService {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
-            payLoad.put("name", name);
+            payLoad.put("name", name + DATE_FORMAT.format(new Date()));
         }
         Map<String, String> conf = new HashMap<>();
+        conf.put("livy.rsc.launcher.port.range", "10000~10999");
         if (MapUtils.isNotEmpty(sparkConf)) {
             conf.putAll(sparkConf);
         }
@@ -61,7 +65,13 @@ public class LivySessionServiceImpl implements LivySessionService {
             log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
         String url = host + URI_SESSIONS;
-        String resp = restTemplate.postForObject(url, payLoad, String.class);
+        String resp;
+        try {
+            resp = restTemplate.postForObject(url, payLoad, String.class);
+        } catch (HttpClientErrorException e) {
+            log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
+            throw e;
+        }
         log.info("Starting new livy session on " + host + ": " + resp);
         int sessionId = parseSessionId(resp);
         LivySession session = new LivySession(host, sessionId);
@@ -162,8 +172,8 @@ public class LivySessionServiceImpl implements LivySessionService {
     private List<String> getSparkPackages() {
         return Arrays.asList( //
                 "org.apache.livy:livy-scala-api_2.11:0.6.0-incubating", //
-                "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.6", //
-                "org.apache.spark:spark-avro_2.11:2.4.0" //
+                "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.8", //
+                "org.apache.spark:spark-avro_2.11:2.4.2" //
         );
     }
 

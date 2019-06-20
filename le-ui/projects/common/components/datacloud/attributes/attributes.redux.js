@@ -6,13 +6,13 @@ const initialState = { items: [] };
 
 export const actions = {
     get: () => dispatch => {
-        axios('https://jsonplaceholder.typicode.com/posts').then(response => {
-            console.log('RESPONSE ',response);
-            dispatch({
-                type: FETCH_ATTRIBUTES,
-                payload: response.data
-            });
+        // axios('https://jsonplaceholder.typicode.com/posts').then(response => {
+        // console.log('RESPONSE ',response);
+        return dispatch({
+            type: FETCH_ATTRIBUTES,
+            payload: []
         });
+        // });
     },
     clear: () => dispatch => {
         return dispatch({
@@ -22,7 +22,7 @@ export const actions = {
 };
 
 export const reducer = (state = initialState, action) => {
-    console.log('REDUCER', action);
+    // console.log('REDUCER', action);
     switch (action.type) {
         case FETCH_ATTRIBUTES:
             return {

@@ -17,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -92,22 +94,6 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
 
-    @JsonProperty("contactsLaunched")
-    @Column(name = "CONTACTS_LAUNCHED")
-    private Long contactsLaunched;
-
-    @JsonProperty("accountsLaunched")
-    @Column(name = "ACCOUNTS_LAUNCHED")
-    private Long accountsLaunched;
-
-    @JsonProperty("excludeItemsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
-    private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
-
-    @JsonProperty("topNCount")
-    @Column(name = "TOP_N_COUNT")
-    private Long topNCount;
-
     @JsonProperty("bucketsToLaunch")
     @Column(name = "BUCKETS_TO_LAUNCH")
     @Type(type = "text")
@@ -122,13 +108,22 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Enumerated(EnumType.STRING)
     private LaunchType launchType;
 
-    @JsonProperty("cronSchedule")
-    @Column(name = "CRON_SCHEDULE")
-    private String cronSchedule;
+    @JsonProperty("maxAccountsToLaunch")
+    @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
+    private Long maxAccountsToLaunch;
+
+    @JsonProperty("cronScheduleExpression")
+    @Column(name = "CRON_SCHEDULE_EXPRESSION")
+    private String cronScheduleExpression;
 
     @JsonProperty("nextScheduledLaunch")
     @Column(name = "NEXT_SCHEDULED_LAUNCH")
     private Date nextScheduledLaunch;
+
+    @JsonProperty("channelConfig")
+    @Column(name = "CHANNEL_CONFIG")
+    @Lob
+    private String channelConfig;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -258,36 +253,12 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.isAlwaysOn = isAlwaysOn;
     }
 
-    public Long getContactsLaunched() {
-        return contactsLaunched;
+    public Long getMaxAccountsToLaunch() {
+        return maxAccountsToLaunch;
     }
 
-    public void setContactsLaunched(Long contactsLaunched) {
-        this.contactsLaunched = contactsLaunched;
-    }
-
-    public Long getAccountsLaunched() {
-        return accountsLaunched;
-    }
-
-    public void setAccountsLaunched(Long accountsLaunched) {
-        this.accountsLaunched = accountsLaunched;
-    }
-
-    public Boolean getExcludeItemsWithoutSalesforceId() {
-        return excludeItemsWithoutSalesforceId;
-    }
-
-    public void setExcludeItemsWithoutSalesforceId(Boolean excludeItemsWithoutSalesforceId) {
-        this.excludeItemsWithoutSalesforceId = excludeItemsWithoutSalesforceId;
-    }
-
-    public Long getTopNCount() {
-        return topNCount;
-    }
-
-    public void setTopNCount(Long topNCount) {
-        this.topNCount = topNCount;
+    public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
+        this.maxAccountsToLaunch = maxAccountsToLaunch;
     }
 
     public Set<RatingBucketName> getBucketsToLaunch() {
@@ -319,12 +290,12 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.launchType = launchType;
     }
 
-    public String getCronSchedule() {
-        return cronSchedule;
+    public String getCronScheduleExpression() {
+        return cronScheduleExpression;
     }
 
-    public void setCronSchedule(String cronSchedule) {
-        this.cronSchedule = cronSchedule;
+    public void setCronScheduleExpression(String cronScheduleExpression) {
+        this.cronScheduleExpression = cronScheduleExpression;
     }
 
     public Date getNextScheduledLaunch() {
@@ -333,6 +304,18 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setNextScheduledLaunch(Date nextScheduledLaunch) {
         this.nextScheduledLaunch = nextScheduledLaunch;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        ChannelConfig newChannelConfig = null;
+        if (channelConfig != null) {
+            newChannelConfig = JsonUtils.deserialize(channelConfig, ChannelConfig.class);
+        }
+        return newChannelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = JsonUtils.serialize(channelConfig);
     }
 
 }

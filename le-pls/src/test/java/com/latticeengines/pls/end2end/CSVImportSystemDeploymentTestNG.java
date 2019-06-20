@@ -217,6 +217,10 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 fieldMapping.setSystemName(sfSystemName);
                 fieldMapping.setIdType(FieldMapping.IdType.Contact);
             }
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setSystemName(sfSystemName);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
         }
         modelingFileMetadataService.resolveMetadata(otherContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
                 otherContactFeedType);
@@ -242,6 +246,15 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(sfSystem.getContactSystemId());
         Assert.assertNotNull(otherSystemContactIdAttr);
         Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
+
+        Attribute otherSystemAccountIdAttr = otherSystemContactTable.getAttribute(sfSystem.getAccountSystemId());
+        Assert.assertNotNull(otherSystemAccountIdAttr);
+        Assert.assertEquals(otherSystemAccountIdAttr.getDisplayName(), "Account_ID");
+
+        Attribute otherSystemCustomerAccountIdAttr =
+                otherSystemContactTable.getAttribute(InterfaceName.CustomerAccountId);
+        Assert.assertNotNull(otherSystemCustomerAccountIdAttr);
+        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), "Account_ID");
 
         // exception when double primary system.
         defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",

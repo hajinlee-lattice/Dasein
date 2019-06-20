@@ -19,6 +19,8 @@ import java.util.Scanner;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -149,6 +151,23 @@ public class AvroUtilsUnitTestNG {
                 .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
         List<GenericRecord> records = AvroUtils.readFromInputStream(is);
         records.forEach(record -> System.out.println(record.toString()));
+    }
+
+    @Test(groups = "unit")
+    public void tesCount() throws Exception {
+        InputStream is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
+        Assert.assertNotNull(is);
+
+        String tempDir = "/tmp/AvroUnitTest";
+        String avroPath = tempDir + "/compressed.avro";
+        FileUtils.deleteQuietly(new File(tempDir));
+        FileUtils.copyInputStreamToFile(is, new File(avroPath));
+
+        long count = AvroUtils.count(new Configuration(), avroPath);
+        Assert.assertEquals(count, 192);
+
+        FileUtils.deleteQuietly(new File(tempDir));
     }
 
     @Test(groups = "unit")

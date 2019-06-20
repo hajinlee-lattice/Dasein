@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -126,6 +127,11 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
         if (targetEntityIdColumn != null) {
             // EntityId and {TargetEntity}Id should have same value
             Assert.assertEquals(getColumnValue(output, targetEntityIdColumn), entityId);
+        }
+        if (DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
+            Assert.assertFalse(record.isMatched());
+        } else {
+            Assert.assertTrue(record.isMatched());
         }
         return entityId;
     }

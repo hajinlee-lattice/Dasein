@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
@@ -47,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component
@@ -140,13 +143,19 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional")
     public void testSimpleMatchAccountMaster() {
+        // Schema: ID, Domain, CompanyName, City, State, Country
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" }, //
+                { 456, "testfakedomain.com", null, null, null, null }, //
+        };
+        // ColumnSelection is RTS
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        Assert.assertFalse(output.getResult().get(1).isMatched());
 
         // Test default datacloud version
         input.setDataCloudVersion(null);
@@ -154,6 +163,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        Assert.assertFalse(output.getResult().get(1).isMatched());
     }
 
     @Test(groups = "functional")
@@ -202,14 +213,25 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testMatchEnrichment() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" }, //
+                { 456, "testfakedomain.com", null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
-        input.setCustomSelection(testMatchInputService.enrichmentSelection());
+        ColumnSelection columnSelection = testMatchInputService.enrichmentSelection();
+        input.setCustomSelection(columnSelection);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        // Check IsMatched flag & column
+        OptionalInt isMatchedIndex = IntStream.range(0, columnSelection.getColumns().size()) //
+                .filter(i -> InterfaceName.IsMatched.name().equals(columnSelection.getColumns().get(i).getColumnName())) //
+                .findFirst();
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        Assert.assertTrue(isMatchedIndex.isPresent());
+        Assert.assertTrue((boolean) (output.getResult().get(0).getOutput().get(isMatchedIndex.getAsInt())));
+        Assert.assertFalse(output.getResult().get(1).isMatched());
+        Assert.assertFalse((boolean) (output.getResult().get(1).getOutput().get(isMatchedIndex.getAsInt())));
     }
 
     @Test(groups = "functional")
@@ -300,7 +322,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        Assert.assertEquals(output.getResult().get(0).isMatched().toString(), String.valueOf(isMatched));
+        Assert.assertEquals(output.getResult().get(0).isMatched(), isMatched);
         if(nameKeyword == null) {
             Assert.assertNull(output.getResult().get(0).getOutput().get(0));
         } else {
@@ -397,7 +419,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output.getOutputFields().get(0), MatchConstants.LID_FIELD);
         String latticeAccountId = (String) output.getResult().get(0).getOutput().get(0);
         Assert.assertNotNull(latticeAccountId);
+        Assert.assertTrue(output.getResult().get(0).isMatched());
         Assert.assertNull(output.getResult().get(1).getOutput().get(0));
+        Assert.assertFalse(output.getResult().get(1).isMatched());
 
         data = new Object[][] {
                 { 1, latticeAccountId, "chevron.com", null, null }, //
@@ -413,7 +437,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output.getResult().size(), 2);
         Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(1));
         output.setMetadata(null);
-        System.out.println(JsonUtils.serialize(output));
+        log.info("MatchOutput: {}", JsonUtils.serialize(output));
+        Assert.assertTrue(output.getResult().get(0).isMatched());
+        Assert.assertFalse(output.getResult().get(1).isMatched());
     }
 
     @Test(groups = "functional")

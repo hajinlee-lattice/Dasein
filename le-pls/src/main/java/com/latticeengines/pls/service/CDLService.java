@@ -58,4 +58,6 @@ public interface CDLService {
     String getSystemNameFromFeedType(String feedType);
 
     void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
+
+    void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList);
 }

@@ -57,6 +57,9 @@ public class ColumnMetadataResource {
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         try {
+            if (StringUtils.isBlank(dataCloudVersion)) {
+                dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+            }
             ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
             return columnMetadataService.fromPredefinedSelection(selectName, dataCloudVersion);
         } catch (Exception e) {
@@ -90,6 +93,9 @@ public class ColumnMetadataResource {
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
         return columnMetadataService.findAll(dataCloudVersion, page, size);
     }
 
@@ -97,6 +103,9 @@ public class ColumnMetadataResource {
     @ResponseBody
     @ApiOperation(value = "Get number of columns belong to a data cloud version")
     public Long getCount(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
         MetadataColumnService<?> service = beanDispatcher.getMetadataColumnService(dataCloudVersion);
         return service.count(dataCloudVersion);
     }

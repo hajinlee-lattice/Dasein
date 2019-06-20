@@ -1,6 +1,6 @@
 angular.module('lp.import.wizard.contactids', [])
 .controller('ImportWizardContactIDs', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
+    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, FeatureFlagService
 ) {
     var vm = this;
 
@@ -23,7 +23,8 @@ angular.module('lp.import.wizard.contactids', [])
         initialMapping: {},
         keyMap: {},
         saveMap: {},
-        entityMatchEnabled: entityMatchEnabled
+        entityMatchEnabled: entityMatchEnabled,
+        matchIdItems: []
     });
 
     vm.init = function() {
@@ -117,6 +118,24 @@ angular.module('lp.import.wizard.contactids', [])
         ImportWizardStore.setValidation('ids', form.$valid);
     }
 
+
+    //
+
+    vm.isMultipleTemplates = () => {
+        var flags = FeatureFlagService.Flags();
+        var multipleTemplates = FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT);
+        return multipleTemplates;
+    }
+
+    vm.addMatchId = () => {
+        vm.matchIdItems.push({
+            userField: '-- Select Field --',
+            system: '-- Select System --'
+        });
+    }
+    vm.removeMatchId = (index) => {
+        vm.matchIdItems.splice(index, 1);
+    }
 
     vm.init();
 });

@@ -15,7 +15,7 @@ public class OutputRecord {
     private Integer rowNumber;
 
     @JsonProperty("IsMatched")
-    private Boolean matched;
+    private boolean matched;
 
     @JsonProperty("Input")
     private List<Object> input;
@@ -91,11 +91,11 @@ public class OutputRecord {
         this.rowNumber = rowNumber;
     }
 
-    public Boolean isMatched() {
+    public boolean isMatched() {
         return matched;
     }
 
-    public void setMatched(Boolean matched) {
+    public void setMatched(boolean matched) {
         this.matched = matched;
     }
 

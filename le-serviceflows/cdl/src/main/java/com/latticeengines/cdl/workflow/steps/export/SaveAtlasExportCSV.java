@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
 import java.io.File;
@@ -17,6 +16,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
@@ -178,30 +177,28 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 if (!BusinessEntity.Contact.equals(entity)) {
                     List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
                             .getOrDefault(entity, Collections.emptyList());
-                    if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                        AttributeRepository attrRepo = //
-                                WorkflowStaticContext.getObject(ATTRIBUTE_REPO, AttributeRepository.class);
-                        if (attrRepo == null) {
-                            throw new RuntimeException("Cannot find attribute repo in context");
-                        }
-                        CustomerSpace customerSpace = parseCustomerSpace(configuration);
-                        DataCollection.Version version = configuration.getDataCollectionVersion();
-                        String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                                TableRoleInCollection.SortedProduct, version);
-                        if (StringUtils.isBlank(tblName)) {
-                            throw new RuntimeException("Cannot find sorted product table.");
-                        }
-                        for (ColumnMetadata cm: cms) {
-                            String attrName = cm.getAttrName();
-                            String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
-                            String productName = getProductNameFromRedshift(tblName, productId);
-                            String displayName = cm.getDisplayName();
-                            if (!displayName.startsWith(productName)) {
-                                cm.setDisplayName(productName + ": " + displayName);
+                    if (CollectionUtils.isNotEmpty(cms)) {
+                        if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                            CustomerSpace customerSpace = parseCustomerSpace(configuration);
+                            DataCollection.Version version = configuration.getDataCollectionVersion();
+                            String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                                    TableRoleInCollection.SortedProduct, version);
+                            if (StringUtils.isBlank(tblName)) {
+                                throw new RuntimeException("Cannot find sorted product table, " + //
+                                        "while is exporting purchase history attributes.");
+                            }
+                            for (ColumnMetadata cm : cms) {
+                                String attrName = cm.getAttrName();
+                                String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
+                                String productName = getProductNameFromRedshift(tblName, productId);
+                                String displayName = cm.getDisplayName();
+                                if (!displayName.startsWith(productName)) {
+                                    cm.setDisplayName(productName + ": " + displayName);
+                                }
                             }
                         }
+                        schema.addAll(cms);
                     }
-                    schema.addAll(cms);
                 }
             }
         } else if (ExportEntity.Contact.equals(exportEntity)) {

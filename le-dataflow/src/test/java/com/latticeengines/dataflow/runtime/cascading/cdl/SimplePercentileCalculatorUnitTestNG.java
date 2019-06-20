@@ -16,7 +16,7 @@ public class SimplePercentileCalculatorUnitTestNG {
 
     @Test(groups = "unit")
     public void testSmallDataSet() {
-        Double[] smallDataSet = {0.50, 0.35, 0.15, 0.02, 0.01};
+        Double[] smallDataSet = { 0.50, 0.35, 0.15, 0.02, 0.01 };
         SimplePercentileCalculator percentileCalculator = new SimplePercentileCalculator(5, 99);
         int total = smallDataSet.length;
         for (int i = 0; i < total; ++i) {
@@ -35,7 +35,7 @@ public class SimplePercentileCalculatorUnitTestNG {
 
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testDataWithWrongOrder() {
-        Double[] smallDataSet = {0.01, 0.35, 0.15, 0.02, 0.01};
+        Double[] smallDataSet = { 0.01, 0.35, 0.15, 0.02, 0.01 };
         SimplePercentileCalculator percentileCalculator = new SimplePercentileCalculator(5, 99);
         int total = smallDataSet.length;
         for (int i = 0; i < total; ++i) {
@@ -64,10 +64,10 @@ public class SimplePercentileCalculatorUnitTestNG {
 
     @DataProvider(name = "dataSetProvider", parallel = true)
     public Object[][] dataSetProvider() {
-        return new Object[][]{ //
-            generateSortedRandomDataSet(5),   //
-            generateSortedRandomDataSet(250), //
-            generateSortedRandomDataSet(1250) //
+        return new Object[][] { //
+                generateSortedRandomDataSet(5), //
+                generateSortedRandomDataSet(250), //
+                generateSortedRandomDataSet(1250) //
         };
     }
 
@@ -88,18 +88,17 @@ public class SimplePercentileCalculatorUnitTestNG {
 
             Double curLower = calculator.getLowerBound(pct);
             Double curUpper = calculator.getUpperBound(pct);
-
             assertTrue(curLower > prevLower);
             assertTrue(curUpper > prevUpper);
 
             if (!prevUpper.equals(initValue)) {
                 assertEquals(curLower, prevUpper, //
-                             "Current lower bound " + curLower + "is not equal to previous upper bound " + prevUpper);
+                        "Current lower bound " + curLower + "is not equal to previous upper bound " + prevUpper);
             }
             assertTrue(curLower >= 0 && curLower <= 1.);
             assertTrue(curUpper >= 0 && curUpper <= 1.);
             assertTrue(curLower < curUpper, //
-                       "Lower bound " + curLower + " is larger than or equal to upper bound " + curUpper);
+                    "Lower bound " + curLower + " is larger than or equal to upper bound " + curUpper);
             prevLower = curLower;
             prevUpper = curUpper;
         }

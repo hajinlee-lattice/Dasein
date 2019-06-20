@@ -101,7 +101,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "Priority",
+                    name: "ImportSystem.priority",
                     displayName: "Priority",
                     sortable: false
                 },

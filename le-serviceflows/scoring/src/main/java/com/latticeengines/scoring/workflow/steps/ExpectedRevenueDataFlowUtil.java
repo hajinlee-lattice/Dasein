@@ -114,6 +114,17 @@ public class ExpectedRevenueDataFlowUtil {
         return originalScoreFieldsMap;
     }
 
+    public static Map<String, String> getTargetScoreFiDerivationPaths(CustomerSpace customerSpace,
+            Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy, Map<String, String> scoreFieldMap) {
+        ScoreArtifactRetriever retriever = new ScoreArtifactRetriever(modelSummaryProxy, yarnConfiguration);
+        Map<String, String> targetScoreDerivationPaths = new HashMap<String, String>();
+        scoreFieldMap.forEach((modelId, value) -> {
+            String path = retriever.getTargetScoreDerivationPath(customerSpace, modelId);
+            targetScoreDerivationPaths.put(modelId, path);
+        });
+        return targetScoreDerivationPaths;
+    }
+
     private static List<RatingModelContainer> getModelContainers(List<RatingModelContainer> allContainers) {
         if (allContainers == null) {
             return Collections.emptyList();

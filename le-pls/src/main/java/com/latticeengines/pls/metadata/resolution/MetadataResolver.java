@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -508,7 +509,7 @@ public class MetadataResolver {
         return fieldType;
     }
 
-    private boolean isUserFieldMatchWithAttribute(String header, Attribute attribute) {
+    public boolean isUserFieldMatchWithAttribute(String header, Attribute attribute) {
         List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
         if (CollectionUtils.isNotEmpty(allowedDisplayNames)) {
             final String standardizedHeader = standardizeAttrName(header);
@@ -597,7 +598,7 @@ public class MetadataResolver {
                 fundamentalType = ModelingMetadata.FT_NUMERIC;
                 break;
             case "LONG":
-                fundamentalType = ModelingMetadata.FT_YEAR;
+                fundamentalType = FundamentalType.DATE.getName();
                 break;
             case "STRING":
             default:
@@ -643,7 +644,7 @@ public class MetadataResolver {
         return columnFields;
     }
 
-    private UserDefinedType getFieldTypeFromColumnContent(FieldMapping fieldMapping) {
+    public UserDefinedType getFieldTypeFromColumnContent(FieldMapping fieldMapping) {
         String columnHeaderName = fieldMapping.getUserField();
         UserDefinedType fundamentalType = null;
 
@@ -670,6 +671,50 @@ public class MetadataResolver {
         return fundamentalType;
     }
 
+
+    /*
+     * check the given format can be used to parse column value, if number of
+     * column value can be parsed is more than 10% of size of columnFields
+     */
+    @VisibleForTesting
+    public boolean checkUserDateType(FieldMapping fieldMapping) {
+        String columnHeaderName = fieldMapping.getUserField();
+        List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
+        String dateFormat = fieldMapping.getDateFormatString();
+        String timeFormat = fieldMapping.getTimeFormatString();
+        if (StringUtils.isEmpty(dateFormat)) {
+            return false;
+        }
+        int conformingDateCount = 0;
+        double dateThreshold = 0.1 * columnFields.size();
+        String javaDateFormat = TimeStampConvertUtils.userToJavaDateFormatMap.get(dateFormat);
+        String javaTimeFormat = StringUtils.isEmpty(timeFormat) ? "" : TimeStampConvertUtils.userToJavaTimeFormatMap.get(timeFormat);
+        String format = StringUtils.isBlank(javaTimeFormat) ? javaDateFormat
+                : javaDateFormat + TimeStampConvertUtils.SYSTEM_SEPARATOR + javaTimeFormat;
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+        for (String columnField : columnFields) {
+            if (StringUtils.isNotBlank(columnField)) {
+                TemporalAccessor dateTime = null;
+                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
+                try {
+                    dateTime = dtf.parse(columnField.trim());
+                } catch (DateTimeParseException e) {
+                    log.debug("Found columnField unparsable as date/time: " + columnField);
+                }
+                if (dateTime != null) {
+                    conformingDateCount++;
+                    if (conformingDateCount >= dateThreshold) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (conformingDateCount < dateThreshold) {
+            return false;
+        }
+        return true;
+    }
+
     /*
      * Note that the returned data and time format are the user supported
      * formats not the Java 8 formats. if number of column value can be parsed
@@ -677,12 +722,13 @@ public class MetadataResolver {
      * most occurrence format as result
      */
     @VisibleForTesting
-    boolean isDateTypeColumn(List<String> columnFields, MutableTriple<String, String, String> formatForDateAndTime) {
+    public boolean isDateTypeColumn(List<String> columnFields, MutableTriple<String, String, String> formatForDateAndTime) {
         int conformingDateCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 dateTime = TimeStampConvertUtils.parseDateTime(columnField);
                 if (dateTime != null) {
@@ -696,6 +742,7 @@ public class MetadataResolver {
         if (conformingDateCount < dateThreshold) {
             return false;
         }
+
         MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
         if (result != null) {
             formatForDateAndTime.setLeft(TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
@@ -713,12 +760,13 @@ public class MetadataResolver {
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
                 String trimedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 for (String format : supportedDateTimeFormat) {
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
                     TemporalAccessor date = null;
                     try {
-                        date = dtf.parse(trimedColumnField.trim());
+                        date = dtf.parse(trimedColumnField);
                     } catch (DateTimeParseException e) {
                         log.debug("Found columnField unparsable as date/time: " + columnField);
                     }
@@ -731,7 +779,7 @@ public class MetadataResolver {
                     useTimeZone = true;
                 }
             }
-            
+
         }
         if (MapUtils.isEmpty(hitMap)) {
             return null;

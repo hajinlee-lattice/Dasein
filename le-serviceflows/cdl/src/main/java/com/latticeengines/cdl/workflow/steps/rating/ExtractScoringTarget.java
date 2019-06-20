@@ -177,7 +177,7 @@ public class ExtractScoringTarget extends BaseSparkSQLStep<GenerateRatingStepCon
     }
 
     private void extractAllContainers() {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
@@ -210,6 +210,7 @@ public class ExtractScoringTarget extends BaseSparkSQLStep<GenerateRatingStepCon
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") merging " //
                         + containers.size() + " scoring targets.");
+                log.warn("Previous failure:",  ctx.getLastThrowable());
             }
             try {
                 String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());

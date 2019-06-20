@@ -1,4 +1,7 @@
 section.import-jobs {
+    .le-grid .le-header{
+        border-top: 0;
+    }
     .le-grid{
         min-width: 650px; 
     }
@@ -7,7 +10,8 @@ section.import-jobs {
         font-size: 16px;
     }
     import-job-row {
-        border: 1px solid rgba(0, 0, 0, 0.22);
+        border-top: 1px solid rgba(0, 0, 0, 0.22);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.22);
         .icon-failed {
             padding: 10px;
             color: #F16A24;

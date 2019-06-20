@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -50,6 +52,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -223,12 +227,208 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return table;
     }
 
+    /*
+     * validate field mapping document before saving document, two steps: first is comparing field mapping after user changed and
+     * mapping with best effort, second step is generating new template table in memory, integrate it to method finalSchemaCheck
+     * in DataFeedTaskManage service
+     */
+    @Override
+    public List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+            String entity, String source, String feedType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        // modify field document before final validation
+        Table templateTable = null;
+        if (dataFeedTask != null) {
+            templateTable = dataFeedTask.getImportTemplate();
+        }
+
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                enableEntityMatch);
+        MetadataResolver resolver = getMetadataResolver(getSourceFile(sourceFileName), fieldMappingDocument, true,
+                standardTable);
+
+        // validate field mapping document
+        List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
+        List<String> ignored = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(fieldMappingDocument.getIgnoredFields())) {
+            ignored = fieldMappingDocument.getIgnoredFields();
+        }
+
+        List<FieldValidation> validations = new ArrayList<>();
+
+        FieldMappingDocument documentBestEffort = getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType);
+        // filter off field mapping with cdl external system, or will cause multiple lattice field mapped to the same user field
+        Map<String, FieldMapping> userFieldMap = fieldMappings.stream()
+                .filter(mapping -> mapping.getCdlExternalSystemType() == null && StringUtils
+                        .isNotBlank(mapping.getUserField()))
+                .collect(Collectors.toMap(FieldMapping::getUserField, Function.identity()));
+        Set<String> standardAttrNames =
+                standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+
+        // compare field mapping document after being modified with field mapping best effort
+        for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
+            String userField = bestEffortMapping.getUserField();
+            // skip user field mapped to standard attribute or user ignored fields
+            if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
+                FieldMapping fieldMapping = userFieldMap.get(userField);
+                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                    continue;
+                }
+                if (bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
+                    String message = String
+                            .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
+                                    bestEffortMapping.getFieldType());
+                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                            message));
+                } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
+                    String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
+                            fieldMapping.getDateFormatString() :
+                            fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                                    + fieldMapping.getTimeFormatString();
+                    String correctFormat = StringUtils
+                            .isBlank(bestEffortMapping.getTimeFormatString()) ?
+                            bestEffortMapping.getDateFormatString() :
+                            bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                                    + bestEffortMapping.getTimeFormatString();
+                    String message = String
+                            .format("%s is set as %s but appears to be %s in your file.", userField,
+                                    userFormat, correctFormat);
+                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.ERROR,
+                            message));
+                }
+            }
+        }
+
+        List<String> unmappedUserFields = fieldMappings.stream()
+                .filter(fieldMapping -> StringUtils.isNotBlank(fieldMapping.getUserField())
+                        && StringUtils.isBlank(fieldMapping.getMappedField())).map(fieldMapping -> fieldMapping.getUserField())
+                .collect(Collectors.toList());
+        Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Table templateWithStandard = mergeTable(templateTable, standardTable);
+        Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
+        // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
+        while (iter.hasNext()) {
+            Attribute latticeAttr = iter.next();
+            String attrName = latticeAttr.getName();
+            if (!mappedFields.contains(attrName)) {
+                // check lattice field can be mapped by user field, while not mapped by user
+                for (String userField : unmappedUserFields) {
+                    if (!ignored.contains(userField)) { // skip if ignored by user
+                        if (userField.equals(latticeAttr.getDisplayName())
+                                || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
+                            String message = String.format("Lattice field %s can be mapped to %s, while not",
+                                    attrName, userField);
+                            validations.add(createValidation(null, attrName, ValidationStatus.WARNING, message));
+                        }
+                    }
+                }
+            }
+        }
+
+        // generate template in memory
+        Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
+        Table finalTemplate = mergeTable(templateTable, generatedTemplate);
+        // compare type, require flag between template and standard schema
+        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
+
+        return validations;
+    }
+
+    private Table mergeTable(Table templateTable, Table renderedTable) {
+        if (templateTable == null) {
+            return renderedTable;
+        }
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        templateTable.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
+        for (Attribute attr : renderedTable.getAttributes()) {
+            if (!templateAttrs.containsKey(attr.getName())) {
+                templateTable.addAttribute(attr);
+            }
+        }
+        return templateTable;
+    }
+
+    private FieldValidation createValidation(String userField, String latticeField, ValidationStatus status,
+            String message) {
+        FieldValidation validation = new FieldValidation();
+        validation.setUserField(userField);
+        validation.setLatticeField(latticeField);
+        validation.setStatus(status);
+        validation.setMessage(message);
+        return validation;
+    }
+
+    void checkTemplateTable(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
+        Map<String, Attribute> standardAttrs = new HashMap<>();
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
+                , enableEntityMatch);
+        standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
+        Map<String, Attribute> templateAttrs = new HashMap<>();
+        finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
+        for (Map.Entry<String, Attribute> attrEntry : standardAttrs.entrySet()) {
+            if (attrEntry.getValue().getRequired() && attrEntry.getValue().getDefaultValueStr() == null) {
+                if(!templateAttrs.containsKey(attrEntry.getKey())) {
+                    String message = String
+                            .format("%s is not mapped, and is a required field.", attrEntry.getKey());
+                    validations.add(createValidation(null, attrEntry.getKey(), ValidationStatus.ERROR, message));
+                }
+            }
+            if (templateAttrs.containsKey(attrEntry.getKey())) {
+                Attribute attr1 = attrEntry.getValue();
+                Attribute attr2 = templateAttrs.get(attrEntry.getKey());
+                if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
+                        String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
+                        validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                                ValidationStatus.ERROR, message));
+                }
+                if (!attr1.getRequired().equals(attr2.getRequired())) {
+                    String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
+                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                            ValidationStatus.ERROR, message));
+                }
+            }
+        }
+    }
+
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
         resolveMetadata(sourceFile, fieldMappingDocument, table, false, null, null);
+    }
+
+    private Table generateTemplate(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
+            String source, String feedType) {
+        decodeFieldMapping(fieldMappingDocument);
+        SourceFile sourceFile = getSourceFile(sourceFileName);
+        Table table, schemaTable;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        if (dataFeedTask == null) {
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
+        } else {
+            table = dataFeedTask.getImportTemplate();
+            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
+        }
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
+
+        log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
+        if (!resolver.isFieldMappingDocumentFullyDefined()) {
+            throw new RuntimeException(
+                    String.format("Metadata is not fully defined for file %s", sourceFile.getName()));
+        }
+        resolver.calculateBasedOnFieldMappingDocument(table);
+        return resolver.getMetadata();
     }
 
     @Override
@@ -292,7 +492,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         // 1. set system related mapping
-        FieldMapping customerLatticeId = null;
+        List<FieldMapping> customerLatticeIdList = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getIdType() != null) {
                 String systemName = cdlService.getSystemNameFromFeedType(feedType);
@@ -316,11 +516,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     fieldMapping.setMappedToLatticeField(false);
                                 }
                                 fieldMapping.setMappedField(accountSystemId);
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    customerLatticeId = new FieldMapping();
+                                if (importSystem.isMapToLatticeAccount()) {
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             case Contact:
@@ -337,11 +538,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                 }
                                 fieldMapping.setMappedField(contactSystemId);
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    customerLatticeId = new FieldMapping();
+                                if (importSystem.isMapToLatticeContact()) {
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             default:
@@ -363,10 +565,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setMappedField(importSystem.getAccountSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
                                 if (importSystem.isMapToLatticeAccount()) {
-                                    customerLatticeId = new FieldMapping();
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             case Contact:
@@ -378,10 +581,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.setMappedField(importSystem.getContactSystemId());
                                 fieldMapping.setMappedToLatticeField(false);
                                 if (importSystem.isMapToLatticeContact()) {
-                                    customerLatticeId = new FieldMapping();
+                                    FieldMapping customerLatticeId = new FieldMapping();
                                     customerLatticeId.setUserField(fieldMapping.getUserField());
                                     customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
                                     customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                    customerLatticeIdList.add(customerLatticeId);
                                 }
                                 break;
                             default:
@@ -392,29 +596,41 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         // map customer lattice id
-        if (customerLatticeId != null) {
-            boolean existFromTemplate = false;
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
-                    fieldMapping.setUserField(customerLatticeId.getUserField());
-                    fieldMapping.setFieldType(customerLatticeId.getFieldType());
-                    existFromTemplate = true;
+        if (CollectionUtils.isNotEmpty(customerLatticeIdList)) {
+            boolean customerAccountExists = false;
+            boolean customerContactExists = false;
+            for (FieldMapping customerLatticeId : customerLatticeIdList) {
+                boolean existFromTemplate = false;
+                for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                    if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
+                        fieldMapping.setUserField(customerLatticeId.getUserField());
+                        fieldMapping.setFieldType(customerLatticeId.getFieldType());
+                        existFromTemplate = true;
+                    }
+                }
+                if (!existFromTemplate) {
+                    customerLatticeId.setMappedToLatticeField(false);
+                    fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+                }
+                if (InterfaceName.CustomerAccountId.name().equals(customerLatticeId.getMappedField())) {
+                    customerAccountExists = true;
+                } else if (InterfaceName.CustomerContactId.name().equals(customerLatticeId.getMappedField())) {
+                    customerContactExists = true;
                 }
             }
-            if (!existFromTemplate) {
-                customerLatticeId.setMappedToLatticeField(false);
-                fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+            if (!customerAccountExists) {
+                fieldMappingDocument.getFieldMappings()
+                        .removeIf(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()));
             }
+            if (!customerContactExists) {
+                fieldMappingDocument.getFieldMappings()
+                        .removeIf(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
+            }
+
         } else {
-            Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
-            while (fmIterator.hasNext()) {
-                FieldMapping fieldMapping = fmIterator.next();
-                if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
-                        || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
-                    fmIterator.remove();
-                    break;
-                }
-            }
+            fieldMappingDocument.getFieldMappings().removeIf(fieldMapping ->
+                    InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
+                    || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);

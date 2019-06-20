@@ -39,7 +39,10 @@ public class CalculateExpectedRevenuePercentileDataFlow
         params.setPercentileUpperBound(percentileUpperBound);
         params.setNormalizationRatioMap(normalizationRatioMap);
         params.setCustomerSpace(configuration.getCustomerSpace());
-
+        params.setTargetScoreDerivation(configuration.isTargetScoreDerivation());
+        params.setTargetScoreDerivationPaths( //
+                ExpectedRevenueDataFlowUtil.getTargetScoreFiDerivationPaths( //
+                        configuration.getCustomerSpace(), yarnConfiguration, modelSummaryProxy, originalScoreFieldMap));
         if (MapUtils.isNotEmpty(originalScoreFieldMap)) {
             params.setOriginalScoreFieldMap(originalScoreFieldMap);
         }

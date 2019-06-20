@@ -125,20 +125,20 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
         // Go through the extra sources and make sure that all are
         // registered and provided
-        long maxTotalCnt = 0L;
+        double maxSizeInGb = 0.0;
         for (final String extraSourceName : configuration.getExtraSources().keySet()) {
             DataFlowSource extraSource = sources.stream() //
                     .filter(source -> source.getName().equals(extraSourceName)) //
                     .findFirst().orElse(null);
             if (extraSource == null) {
-                long maxCnt = registerTable(extraSourceName, configuration.getExtraSources().get(extraSourceName));
+                double sizeInGb = registerTable(extraSourceName, configuration.getExtraSources().get(extraSourceName));
                 DataFlowSource source = new DataFlowSource();
                 source.setName(extraSourceName);
                 sources.add(source);
-                maxTotalCnt += maxCnt;
+                maxSizeInGb += sizeInGb;
             }
         }
-        scalingMultiplier = getScalingMultiplier(maxTotalCnt);
+        scalingMultiplier = getScalingMultiplier(maxSizeInGb);
         for (DataFlowSource source : sources) {
             log.info(String.format("Providing source %s to data flow %s", source.getName(),
                     configuration.getBeanName()));
@@ -146,23 +146,23 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         return sources;
     }
 
-    private long registerTable(String name, String path) {
+    private double registerTable(String name, String path) {
         Table table = MetadataConverter.getTable(yarnConfiguration, path, null, null);
         table.setName(name);
         if (metadataProxy.getTable(configuration.getCustomerSpace().toString(), table.getName()) == null) {
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), table.getName(), table);
         }
-        long count = ScalingUtils.getTableCount(table);
-        if (count > 0) {
-            log.info("Found count=" + count + " for table " + table.getName());
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, table);
+        if (sizeInGb > 0) {
+            log.info("Found size=" + sizeInGb + " gb for table " + table.getName());
         }
-        return count;
+        return sizeInGb;
     }
 
-    protected int getScalingMultiplier(long count) {
-        int multiplier = ScalingUtils.getMultiplier(count);
+    protected int getScalingMultiplier(double sizeInGb) {
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
         if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on count=" + count);
+            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
         }
         return multiplier;
     }

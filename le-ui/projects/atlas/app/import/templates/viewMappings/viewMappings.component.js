@@ -144,7 +144,7 @@ export default class ViewMappings extends Component {
                 },
                 {
                     name: "name_in_template",
-                    displayName: "Lattice Field",
+                    displayName: "Custom Field",
                     sortable: false
                 },
                 {

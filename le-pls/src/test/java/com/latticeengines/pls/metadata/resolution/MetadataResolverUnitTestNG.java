@@ -219,5 +219,13 @@ public class MetadataResolverUnitTestNG {
         Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
         Assert.assertEquals(formatForDateAndTime.getMiddle(), "00-00-00.000 24H");
         Assert.assertNull(formatForDateAndTime.getRight());
+
+        // case 26: date time with multiple spaces
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
+                Arrays.asList("2019-06-04  12-23-45", "2019-04-27  12-23-45", "2019-05-27  10-23-45"),
+                formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
+        Assert.assertEquals(formatForDateAndTime.getMiddle(), "00-00-00 24H");
+        Assert.assertNull(formatForDateAndTime.getRight());
     }
 }

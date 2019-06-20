@@ -28,7 +28,8 @@ export default class OverviewComponent extends Component {
         super(props);
         this.state = {
             play: props.play,
-            connections: null
+            connections: null,
+            talkingPointsText: ''
         };
     }
 
@@ -56,20 +57,16 @@ export default class OverviewComponent extends Component {
     }
     makeTalkingpoints(play) {
         if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
+            this.state.talkingPointsText = 'Create Talking Points';
             return (
-                <div className="talking-points">
-                    <a href="javascript:void(0);" onClick={() => {
-                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
-                    }}>Create Talking Points</a>
+                <div className="talking-points-count">
                     No talking points
                 </div>
             );
         } else {
+            this.state.talkingPointsText = 'Edit Talking Points';
             return (
-                <div className="talking-points">
-                    <a href="javascript:void(0);" onClick={() => {
-                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
-                    }}>Edit Talking points</a>
+                <div className="talking-points-count">
                     {play.talkingPoints.length} talking points have been created
                 </div>
             );
@@ -107,7 +104,12 @@ export default class OverviewComponent extends Component {
                                     <RatingsComponent play={this.state.play} />
                                 </span>
                                 <span>
-                                    <h2 className="panel-label">SFDC Talking Points</h2>
+                                    <h2 className="panel-label talking-points-label">
+                                        <strong>SFDC Talking Points</strong>
+                                        <a href="javascript:void(0);" onClick={() => {
+                                            NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: this.state.play.name}); 
+                                        }}>{this.state.talkingPointsText}</a>
+                                    </h2>
                                     {this.makeTalkingpoints(this.state.play)}
                                 </span>
                             </GridLayout>
@@ -118,7 +120,7 @@ export default class OverviewComponent extends Component {
         } else {
             return (
                 <ReactMainContainer className={'container playbook-overview'}>
-                    <p>Loading...</p>
+                    <div className="loader"></div>
                 </ReactMainContainer>
             );
         }

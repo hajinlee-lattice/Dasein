@@ -44,6 +44,8 @@ public class TimeStampConvertUtils {
 
     public static final String SYSTEM_USER_TIME_ZONE = "Time Zone is Part of Value";
 
+    public static final String SYSTEM_SEPARATOR = " ";
+
     // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
     // and optional "Z" at the end.
     public static final Pattern TZ_DATE_TIME = Pattern.compile(
@@ -60,11 +62,11 @@ public class TimeStampConvertUtils {
     // Linked hash maps are used to preserve insertion order as the priority at field mapping phase
     // and to keep generated lists of user supported date formats, time formats, and time zones in order.
     // Mapping from user exposed date format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaDateFormatMap = new LinkedHashMap<>();
     // Mapping from user exposed time format to Java 8 date/time library format.
-    private static final Map<String, String> userToJavaTimeFormatMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaTimeFormatMap = new LinkedHashMap<>();
     // Mapping from user exposed time zone format to Java 8 supported time zones.
-    private static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
+    public static final Map<String, String> userToJavaTimeZoneMap = new LinkedHashMap<>();
 
     // Reverse mapping from Java 8 date library date format to user exposed format.
     private static final Map<String, String> javaToUserDateFormatMap = new LinkedHashMap<>();
@@ -79,6 +81,9 @@ public class TimeStampConvertUtils {
     // represent all legal date time format in system which generated according
     // to date format and time format
     public static final List<java.time.format.DateTimeFormatter> SUPPORTED_DATE_TIME_FORMATTERS = new ArrayList<>();
+
+    // Map for Java time formats to fallback to if the original format fails parsing.
+    private static final Map<String, String> javaTimeFormatFallbackMap = new LinkedHashMap<>();
 
     // Set up static mappings from user exposed date and time format to Java 8 formats.
     static {
@@ -234,6 +239,22 @@ public class TimeStampConvertUtils {
 
     }
 
+    // Set up map of fallback Java time formats.
+    static {
+        javaTimeFormatFallbackMap.put("h:m:s.SSS a", "h:m:s a");
+        javaTimeFormatFallbackMap.put("h:m:s a", "h:m a");
+        javaTimeFormatFallbackMap.put("H:m:s.SSS", "H:m:s");
+        javaTimeFormatFallbackMap.put("H:m:s", "H:m");
+        javaTimeFormatFallbackMap.put("h-m-s.SSS a", "h-m-s a");
+        javaTimeFormatFallbackMap.put("h-m-s a", "h-m a");
+        javaTimeFormatFallbackMap.put("H-m-s.SSS", "H-m-s");
+        javaTimeFormatFallbackMap.put("H-m-s", "H-m");
+        javaTimeFormatFallbackMap.put("h m s.SSS a", "h m s a");
+        javaTimeFormatFallbackMap.put("h m s a", "h m a");
+        javaTimeFormatFallbackMap.put("H m s.SSS", "H m s");
+        javaTimeFormatFallbackMap.put("H m s", "H m");
+    }
+
     // Joda Time date/time formatter for simple original converter.  Only handles dates without times.
     private static final DateTimeFormatter DATE_FORMATTER =
             new DateTimeFormatterBuilder()
@@ -314,7 +335,7 @@ public class TimeStampConvertUtils {
                     }
                 } else {
                     throw new IllegalArgumentException(
-                            "Letter style month was not formated correctly for Joda Parser: " + date);
+                            "Letter style month was not formatted correctly for Joda Parser: " + date);
                 }
             }
 
@@ -338,7 +359,8 @@ public class TimeStampConvertUtils {
                 dates = groups.get(0).getDates();
             } catch (Exception e2) {
                 throw new IllegalArgumentException(
-                        "Natty Parser failed to parse date with error: " + e2.getMessage());
+                        "Natty Parser failed to parse date with error: " + e2.getMessage() +
+                        "\nJoda Parser also failed to parse date with error: " + e.getMessage());
             }
             return dates.get(0).getTime();
         }
@@ -361,6 +383,10 @@ public class TimeStampConvertUtils {
 
         // Remove excessive whitespace from the date/time value.  First trim the beginning and end.
         dateTime = dateTime.trim();
+
+        // Check if the date is in ISO 8601 format, and remove the "T" and trailing time zone (eg. "Z").
+        dateTime = removeIso8601TandZFromDateTime(dateTime);
+
         // Now turn any whitespace larger than one space into exactly one space.
         // NOTE: This won't work if date formats have whitespace in them.
         dateTime = dateTime.replaceFirst("(\\s\\s+)", " ");
@@ -408,10 +434,6 @@ public class TimeStampConvertUtils {
                                         + javaTimeFormatStr);
                             }
 
-                            // Check if the date is in ISO 8601 format, and remove the "T" and trailing time zone
-                            // (eg. "Z").
-                            dateTime = removeIso8601TandZFromDateTime(dateTime);
-
                             // Convert to uppercase in case AM/PM is lowercase which Java can't handle.
                             dateTime = dateTime.replaceAll("([aA])([mM])", "AM")
                                     .replaceAll("([pP])([mM])", "PM");
@@ -423,44 +445,93 @@ public class TimeStampConvertUtils {
                                                 + javaTimeFormatStr));
                                 javaFormatUsed += " " + javaTimeFormatStr;
                             } catch (DateTimeParseException e) {
-                                // TODO(jwinter): Consider whether we should strip out invalid time components of a
-                                //     date/time even when a time format is provided but doesn't match the actual time
-                                //     value.  The risk is silence errors where the user used the wrong time format and
-                                //     it is ignored by the code here but the user never even realizes.
-                                /*
-                                // When parsing date and time doesn't work, try just parsing out a date from the value
-                                // as a backup plan.  Strip off extra characters from the date/time which represent the
-                                // unparsable time component of the date/time.  Note that this will not work if there is
-                                // white space inside the date format, but this is just a heuristic backup plan.
-                                String dateWithTimeStripped = dateTime.replaceFirst("(\\s+.+)", "");
-                                if (ENABLE_DEBUG_LOG) {
-                                    log.debug("Could not parse date/time from: " + dateTime
-                                            + ".  Trying to strip time component and parse only date.");
-                                    log.debug("Date value after stripping trailing characters: " + dateWithTimeStripped);
-                                }
-                                try {
-                                    localDateTime = LocalDate.parse(dateWithTimeStripped,
-                                            java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
-                                            .atStartOfDay();
-                                }
-                                */
-
-
-                                // When parsing date and time doesn't work, try just parsing out a date from the value
-                                // as a backup plan.
-                                try {
+                                // If the original date/time format combination fails to parse the data, try fallback
+                                // time format options.
+                                String fallbackJavaTimeFormatStr = javaTimeFormatStr;
+                                boolean fallbackSuccess = false;
+                                while (!fallbackSuccess &&
+                                        javaTimeFormatFallbackMap.containsKey(fallbackJavaTimeFormatStr)) {
+                                    fallbackJavaTimeFormatStr = javaTimeFormatFallbackMap.get(
+                                            fallbackJavaTimeFormatStr);
                                     if (ENABLE_DEBUG_LOG) {
-                                        log.debug("Could not parse date/time from: " + dateTime +
-                                                ".  Trying to parse only date");
+                                        log.debug("Original Java date/time format string failed: " +
+                                                javaDateFormatStr + " " + javaTimeFormatStr);
+                                        log.debug("Trying to use fallback date/time format: " +
+                                                javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
                                     }
-                                    localDateTime = LocalDate.parse(dateTime,
-                                            java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
-                                            .atStartOfDay();
-                                } catch (DateTimeParseException e2) {
-                                    throw new IllegalArgumentException(
-                                            "Date/time value (" + dateTime +
+                                    try {
+                                        localDateTime = LocalDateTime.parse(dateTime,
+                                                java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr + " "
+                                                        + fallbackJavaTimeFormatStr));
+                                        javaFormatUsed += " " + javaTimeFormatStr;
+                                        fallbackSuccess = true;
+                                    } catch (DateTimeParseException e2) {
+                                        if (ENABLE_DEBUG_LOG) {
+                                            if (ENABLE_DEBUG_LOG) {
+                                                log.debug("Failed to parse value with fallback Java format string: " +
+                                                        javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // If the fallback time formats did not succeed in parsing the date/time, try just
+                                // parsing the date component of the value.
+                                if (!fallbackSuccess) {
+
+                                    // TODO(jwinter): Consider whether we should strip out invalid time components of a
+                                    //     date/time even when a time format is provided but doesn't match the actual
+                                    //     time value.  The risk is silence errors where the user used the wrong time
+                                    //     format and it is ignored by the code here but the user never even realizes.
+                                    //     The commented out code below is the an alternative version of the code
+                                    //     actually employed which actually strips out the time part of the value before
+                                    //     trying to parse it is a date only value, rather than just trying blindly.
+
+                                    // When parsing date and time doesn't work, try just parsing out a date from the
+                                    // value as a backup plan.  Strip off extra characters from the date/time which
+                                    // represent the unparsable time component of the date/time.  Note that this will
+                                    // not work if there is white space inside the date format, but this is just a
+                                    // heuristic backup plan.
+                                    /*
+                                    String dateWithTimeStripped = dateTime;
+                                    Matcher dateTimeMatcher = DATE_TIME.matcher(dateTime);
+                                    if (dateTimeMatcher.find()) {
+                                        dateWithTimeStripped = dateTimeMatcher.group(1);
+                                        if (ENABLE_DEBUG_LOG) {
+                                            log.debug("Could not parse date/time from: " + dateTime
+                                                    + ".  Trying to strip time component and parse only date.");
+                                            log.debug("Date value after stripping trailing characters: " +
+                                                    dateWithTimeStripped);
+                                        }
+                                        try {
+                                            localDateTime = LocalDate.parse(dateWithTimeStripped,
+                                                    java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
+                                                    .atStartOfDay();
+                                        } catch (DateTimeParseException e3) {
+                                            throw new IllegalArgumentException("Date/time value (" + dateTime +
                                                     ") could not be parsed by format string: " + userDateFormatStr +
                                                     " " + userTimeFormatStr + "\nException was: " + e.toString());
+                                        }
+                                    }
+                                    */
+
+                                    // When parsing date and time doesn't work, try just parsing using only the date
+                                    // format in case the problem is that the value actually only contains a date
+                                    // component.  Obviously, this is just a heuristic backup plan.
+                                    try {
+                                        if (ENABLE_DEBUG_LOG) {
+                                            log.debug("Could not parse date/time from: " + dateTime +
+                                                    ".  Trying to parse only date");
+                                        }
+                                        localDateTime = LocalDate.parse(dateTime,
+                                                java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr))
+                                                .atStartOfDay();
+                                    } catch (DateTimeParseException e3) {
+                                        throw new IllegalArgumentException(
+                                                "Date/time value (" + dateTime +
+                                                        ") could not be parsed by format string: " + userDateFormatStr +
+                                                        " " + userTimeFormatStr + "\nException was: " + e.toString());
+                                    }
                                 }
                             }
                         } else {
@@ -495,7 +566,7 @@ public class TimeStampConvertUtils {
                                 localDateTime = LocalDate.parse(dateWithTimeStripped,
                                         java.time.format.DateTimeFormatter.ofPattern(javaDateFormatStr)).atStartOfDay();
                             } catch (DateTimeParseException e2) {
-                                throw new IllegalArgumentException("Date value (" + dateTime +
+                                throw new IllegalArgumentException("Date-only value (" + dateTime +
                                         ") could not be parsed by " + "format string: " + userDateFormatStr +
                                         "\nException was: " + e.toString());
                             }

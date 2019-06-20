@@ -85,7 +85,8 @@ public class CSVImportJob extends MRJobCustomizationBase {
             MRJobUtil.setLocalizedResources(mrJob, properties);
 
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
-            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
+            config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
+                    + " -DLOG4J_LE_LEVEL=INFO");
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");

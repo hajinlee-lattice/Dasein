@@ -364,20 +364,20 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             log.info("Bump up entity match version for environments = {}", environments);
             BumpVersionResponse response = matchProxy.bumpVersion(request);
             log.info("Current entity match versions = {}", response.getVersions());
-            putObjectInContext(NEW_ENTITY_MATCH_ENVS, environments);
+            if (updatedEnvs == null) {
+                updatedEnvs = new ArrayList<>();
+            }
+            updatedEnvs.addAll(environments);
+            putObjectInContext(NEW_ENTITY_MATCH_ENVS, updatedEnvs);
         }
     }
 
     private void setScalingMultiplier(List<Table> inputTables) {
-        long count = 0L;
+        double sizeInGb = 0.0;
         for (Table table : inputTables) {
-            count += ScalingUtils.getTableCount(table);
+            sizeInGb += ScalingUtils.getTableSizeInGb(yarnConfiguration, table);
         }
-        int multiplier = ScalingUtils.getMultiplier(count);
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on count=" + count);
-            scalingMultiplier = multiplier;
-        }
+        scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
     }
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
