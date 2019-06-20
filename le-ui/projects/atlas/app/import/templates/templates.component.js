@@ -63,8 +63,6 @@ export default class TemplatesComponent extends Component {
 
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
-
-        console.log(response.type);
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";

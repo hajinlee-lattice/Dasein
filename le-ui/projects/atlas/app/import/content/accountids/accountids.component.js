@@ -1,7 +1,7 @@
 angular.module('lp.import.wizard.accountids', [])
 .controller('ImportWizardAccountIDs', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, FeatureFlagService, ImportWizardStore, FieldDocument, UnmappedFields
+    ResourceUtility, FeatureFlagService, ImportWizardStore, FieldDocument, UnmappedFields, Banner
 ) {
     var vm = this;
 
@@ -33,6 +33,12 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.init = function() {
         var flags = FeatureFlagService.Flags();
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        if (validationStatus) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
 
         vm.UnmappedFields = UnmappedFields;
         ImportWizardStore.setUnmappedFields(UnmappedFields);

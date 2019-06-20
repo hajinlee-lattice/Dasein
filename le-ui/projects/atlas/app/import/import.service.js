@@ -52,6 +52,7 @@ angular.module('lp.import')
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
+        this.validationStatus = null;
     }
 
     this.init();
@@ -94,20 +95,25 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
-                nextLabel: 'Next, Save Template', 
+                nextLabel: 'Next, Validate Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-                    // ImportWizardStore.saveDocument(nextState, function(){
-                    //     ImportWizardStore.setValidation('jobstatus', true); 
-                    // });
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                        $state.go(nextState);
                     }, true);
                 }
             },{ 
+                label: 'Validation', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields.validation', 
+                nextLabel: 'Next, Save Template', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.setValidation('jobstatus', true);
+                    $state.go(nextState);
+                }
+            },{ 
                 label: 'Save Template', 
-                state: 'accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields.validation.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -159,20 +165,26 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
-                nextLabel: 'Next, Save Template', 
+                nextLabel: 'Next, Validate Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-                    // ImportWizardStore.saveDocument(nextState, function(){
-                    //     ImportWizardStore.setValidation('jobstatus', true); 
-                    // });
+
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                        $state.go(nextState);
                     }, true);
                 }
             },{ 
+                label: 'Validation', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', 
+                nextLabel: 'Next, Save Template', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.setValidation('jobstatus', true);  
+                    $state.go(nextState);
+                }
+            },{ 
                 label: 'Save Template', 
-                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -306,6 +318,14 @@ angular.module('lp.import')
 
     this.setValidation = function(type, value) {
         this.validation[type] = value;
+    }
+
+    this.getValidationStatus = function() {
+        return this.validationStatus;
+    }
+
+    this.setValidationStatus = function(validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     this.nextSaveGeneric = function(nextState) {
@@ -999,6 +1019,67 @@ angular.module('lp.import')
 
 	        return deferred.promise;
 	    };
+
+        this.validateTemplate = function(fieldDocument, templateData) {
+
+            console.log(templateData);
+            console.log(fieldDocument);
+
+            var deferred = $q.defer(),
+                entity = templateData.Entity,
+                displayName = templateData.TemplateName,
+                feedType = templateData.FeedType,
+                source = 'File',
+                params = { 
+                    'entity':  entity,
+                    'source': source,
+                    'displayName': displayName,
+                    'feedType': feedType
+                };
+
+            $http({
+                method: 'POST',
+                url: '/pls/models/uploadfile/validate',
+                params: params,
+                headers: { 'Content-Type': 'application/json' },
+                data: fieldDocument
+            }).then(
+                function onSuccess(response) {
+
+                    console.log("!!!!!!!!!!!!!!!!!!!!", response);
+
+                    var result = response.data;
+
+                    if (result != null && result !== "" && result.Success == true) {
+                        //////console.log("!!!!!!!!!!!!!!!!!!!", result);
+
+                        ImportUtils.setLatticeSchema(result.Result);
+                        deferred.resolve(result.Result);
+
+                    } else {
+
+                        var errors = result.Errors;
+                        var response = {
+                                success: false,
+                                errorMsg: errors[0]
+                            };
+
+                        console.log("????????????????????", response);
+                        deferred.resolve(response.errorMsg);
+                    }
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
+
+            return deferred.promise;
+        };
 
 	    this.templateDataIngestion = function(fileName, importOnly, autoImportData, postBody) {
 

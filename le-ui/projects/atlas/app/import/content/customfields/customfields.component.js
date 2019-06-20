@@ -4,7 +4,7 @@ angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
     $state, $stateParams, $scope, ResourceUtility, 
     ImportWizardStore, FieldDocument, mergedFieldDocument,
-    ImportUtils, $transition$
+    ImportUtils, $transition$, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name),
@@ -36,6 +36,13 @@ angular.module('lp.import.wizard.customfields', [])
         return vm.fieldDateTooltip;
     }
     vm.init = function() {
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        if (validationStatus) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+
         vm.size = vm.AvailableFields.length;
         if(vm.fieldMappings) { //vm.mergedFields This was the original code
             vm.fieldMappings.forEach(function(item) {

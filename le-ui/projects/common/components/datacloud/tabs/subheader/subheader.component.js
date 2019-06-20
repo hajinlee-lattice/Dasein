@@ -1,7 +1,7 @@
 angular
     .module('common.datacloud.tabs.subheader', [])
     .controller('SubHeaderTabsController', function (
-        $state, $rootScope, $stateParams, $timeout, StateHistory,
+        $state, $rootScope, $scope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
         SegmentStore, HealthService, QueryTreeService, ModelStore,
         TopPredictorService, RatingsEngineStore, Banner, EnrichmentTopAttributes
@@ -103,25 +103,21 @@ angular
                     var disabled = vm.enrichments.filter((item) => {
                         return item.ApprovedUsage[0] == 'None';
                     });                    
-                    // console.log( disabled.length );
-                    // console.log( disabled );
-
                     return disabled.length;
-                    // return vm.enrichments.filter((item) => {
-                    //     return item.ApprovedUsage[0] == 'None';
-                    // }).length;
             };
 
             return 0;
         }
 
-        vm.clickIterationFilter = function (type) {            
+        vm.clickIterationFilter = function (type) {      
             DataCloudStore.ratingIterationFilter = type;
             if (vm.section == 're.model_iteration') {
                 var presentCategories = DataCloudStore.getPresentCategories();
-                if (presentCategories.length > 0) {
-                    DataCloudStore.setMetadata('category', presentCategories[0]);
-                }
+                $scope.$watch(presentCategories, function(){
+                    if (presentCategories.length > 0) {
+                        DataCloudStore.setMetadata('category', presentCategories[0]);
+                    }
+                });                
             }
         }
 

@@ -1,7 +1,7 @@
 angular.module('lp.import.wizard.matchtoaccounts', [])
 .controller('ImportWizardMatchToAccounts', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields
+    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
@@ -48,6 +48,13 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     });
 
     vm.init = function() {
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        if (validationStatus) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+
         console.log('AvailableFields 1', angular.copy(vm.AvailableFields));
         vm.UnmappedFields = UnmappedFields;
 
