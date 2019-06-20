@@ -382,6 +382,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
     public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+        // Skip default version testing as it's already covered in other test
+        if (version == null) {
+            return;
+        }
         HdfsPodContext.changeHdfsPodId(podId);
         String path = avroDir + "/" + version;
         cleanupAvroDir(path);
