@@ -15,4 +15,10 @@ public class SparkCountRecordsConfig extends SparkJobConfig {
     public String getName() {
         return NAME;
     }
+
+    @Override
+    public int getNumTargets() {
+        return 0;
+    }
+
 }
