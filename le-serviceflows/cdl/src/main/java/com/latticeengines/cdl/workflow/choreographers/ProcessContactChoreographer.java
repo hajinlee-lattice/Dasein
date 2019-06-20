@@ -131,12 +131,12 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldUpdate() {
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!hasAccounts) {
             log.info("Should not update, since no accounts.");
             return false;
         } else {
-            return super.shouldUpdate();
+            return super.shouldUpdate(step);
         }
     }
 

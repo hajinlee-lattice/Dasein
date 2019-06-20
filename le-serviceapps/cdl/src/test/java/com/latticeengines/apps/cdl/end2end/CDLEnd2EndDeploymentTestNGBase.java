@@ -170,16 +170,32 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_1 = 900L;
     // After ProcessAccountWithAdvancedMatch
     static final Long ENTITY_MATCH_ACCOUNT_1 = 903L;
-    // After ProcessTransactionWithAdvancedMatch
-    // 191 new CustomerAccountId compared to checkpoint of
-    // ProcessAccountWithAdvancedMatch
-    static final Long ENTITY_MATCH_ACCOUNT_4 = 1094L;
+    // Number of total account after ProcessTransaction test to generate
+    // checkpoint process2 (There are 91 new CustomerAccountId in txn imports
+    // for ProcessTransaction test)
+    static final Long ENTITY_MATCH_TOTAL_ACCOUNT_P2 = 994L;
     static final Long CONTACT_1 = 900L;
-    static final Long ENTITY_MATCH_CONTACT_1 = 900L;
+    // Number of total contact after ProcessAccount to generate checkpoint
+    // process1
+    static final Long ENTITY_MATCH_CONTACT_P1 = 900L;
+    // Number of new account after ProcessTransaction test to generate
+    // checkpoint process2 (There are 91 new CustomerAccountId in txn imports
+    // for ProcessTransaction test)
+    static final Long ENTITY_MATCH_NEW_ACCOUNT_P2 = 91L;
     static final Long TRANSACTION_1 = 41156L;
-    static final Long TRANSACTION_IN_REPORT_1 = 48760L;
+    // Number of aggregated daily transaction after ProcessTransaction test to
+    // generate checkpoint process2
+    static final Long ENTITY_MATCH_DAILY_TXN_P2 = 41064L;
+    // Number of new txn after ProcessTransaction test to generate
+    // checkpoint process2
+    static final Long NEW_TRANSACTION_P2 = 48760L;
     static final Long PERIOD_TRANSACTION_1 = 62550L;
-    static final Long PURCHASE_HISTORY_1 = 5L;
+    // Number of aggregated period transaction after ProcessTransaction test to
+    // generate checkpoint process2
+    static final Long ENTITY_MATCH_PERIOD_TXN_P2 = 62037L;
+    // Number of total purchase history attributes after ProcessTransaction test
+    // to generate checkpoint process2
+    static final Long TOTAL_PURCHASE_HISTORY_P2 = 5L;
 
     static final Long ACCOUNT_2 = 100L;
     static final Long ACCOUNT_3 = 1000L;
@@ -204,9 +220,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long PRODUCT_BUNDLE = 14L;
     static final String PRODUCT_ERROR_MESSAGE = null;
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
-    static final Long BATCH_STORE_PRODUCTS = 103L;
-    static final Long SERVING_STORE_PRODUCTS = 34L;
-    static final Long SERVING_STORE_PRODUCT_HIERARCHIES = 20L;
+    // Number of products in batch store after ProcessTransaction test
+    // to generate checkpoint process2
+    static final Long BATCH_STORE_PRODUCT_P2 = 103L;
+    // Number of products in serving store after ProcessTransaction test
+    // to generate checkpoint process2
+    static final Long SERVING_STORE_PRODUCTS_P2 = 34L;
+    // Number of product hierarchy in serving store after ProcessTransaction
+    // test to generate checkpoint process2
+    static final Long SERVING_STORE_PRODUCT_HIERARCHIES_P2 = 20L;
 
     static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
@@ -981,57 +1003,54 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void verifyProcessAnalyzeReport(String appId, Map<BusinessEntity, Map<String, Object>> expectedReport) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
-        Report summaryReport = reports.get(0);
-        verifySystemActionReport(summaryReport);
-        verifyDecisionReport(summaryReport);
-        verifyConsolidateSummaryReport(summaryReport, expectedReport);
+        Report report = reports.get(0);
+        log.info("PAReport: {}", report.getJson().getPayload());
+        verifySystemActionReport(report);
+        verifyDecisionReport(report);
+        verifyConsolidateSummaryReport(report, expectedReport);
     }
 
-    private void verifyDecisionReport(Report summaryReport) {
-        log.info("DecisionReport: " + summaryReport.getJson().getPayload());
+    private void verifyDecisionReport(Report paReport) {
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ObjectNode decisionNode = (ObjectNode) report.get(ReportPurpose.PROCESS_ANALYZE_DECISIONS_SUMMARY.getKey());
             Assert.assertNotNull(decisionNode);
             for (JsonNode n : decisionNode) {
                 Assert.assertNotNull(n);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
 
     }
 
-    private void verifySystemActionReport(Report summaryReport) {
-        Assert.assertNotNull(summaryReport);
-        Assert.assertNotNull(summaryReport.getJson());
-        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
-        log.info("SystemActionReport: " + summaryReport.getJson().getPayload());
-
+    private void verifySystemActionReport(Report paReport) {
+        Assert.assertNotNull(paReport);
+        Assert.assertNotNull(paReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(paReport.getJson().getPayload()));
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ArrayNode systemActionNode = (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
             Assert.assertNotNull(systemActionNode);
             for (JsonNode n : systemActionNode) {
                 Assert.assertNotNull(n);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
     }
 
-    private void verifyConsolidateSummaryReport(Report summaryReport,
+    private void verifyConsolidateSummaryReport(Report paReport,
             Map<BusinessEntity, Map<String, Object>> expectedReport) {
-        Assert.assertNotNull(summaryReport);
-        Assert.assertNotNull(summaryReport.getJson());
-        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
-        log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
+        Assert.assertNotNull(paReport);
+        Assert.assertNotNull(paReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(paReport.getJson().getPayload()));
 
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
 
             expectedReport.forEach((entity, entityReport) -> {
@@ -1068,7 +1087,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 });
             });
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
     }
 
@@ -1440,14 +1459,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount
+                .forEach((key, value) -> log.info("Row count for batch store of {}: {}", key.getBatchStore().name(),
+                countTableRole(key.getBatchStore())));
         expectedEntityCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
+        Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {}",
+                key.getServingStore().name(), countTableRole(key.getServingStore())));
         expectedEntityCount.forEach((key, value) -> {
             Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value, key.getServingStore().name());
 //            if (key != BusinessEntity.ProductHierarchy) {
@@ -1471,8 +1495,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount
+                .forEach((key, value) -> log.info("Row count for redshift table of {}: {}", key, countInRedshift(key)));
         expectedEntityCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
+        Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
     void runCommonPAVerifications() {

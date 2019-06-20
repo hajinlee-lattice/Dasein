@@ -100,7 +100,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                PURCHASE_HISTORY_1);
+                TOTAL_PURCHASE_HISTORY_P2);
 
         Map<String, Object> contactReport = new HashMap<>();
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
@@ -119,7 +119,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_P2);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -135,7 +135,7 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_3);
         map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_P2);
         map.put(BusinessEntity.Transaction, TRANSACTION_1);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;
@@ -145,8 +145,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_3);
         map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_P2);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_P2);
         map.put(BusinessEntity.Transaction, TRANSACTION_1);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;

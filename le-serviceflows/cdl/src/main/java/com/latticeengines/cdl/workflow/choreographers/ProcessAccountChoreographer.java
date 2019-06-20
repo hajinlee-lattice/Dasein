@@ -56,6 +56,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     protected boolean dataCloudChanged = false;
     private boolean hasAttrLifeCycleChange = false;
     private boolean shouldRematch = false;
+    private boolean hasEmbeddedAccount = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -135,8 +136,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             } else if (hasAttrLifeCycleChange && !reset) {
                 log.info("Should rebuild, because detected attr life cycle change.");
                 rebuildNotForDataCloudChange = true;
-            } else if (hasEmbeddedAccounts(step) && !reset) {
-                log.info("Should rebuild, because detected embedded accounts from other entity");
+            } else if (hasEmbeddedAccounts(step) && !reset && !hasActiveServingStore) {
+                log.info(
+                        "Should rebuild, because detected embedded accounts from other entity and there is no active serving store");
                 rebuildNotForDataCloudChange = true;
             }
         }
@@ -145,6 +147,18 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             return true;
         }
         return rebuildNotForDataCloudChange;
+    }
+
+    @Override
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (super.shouldUpdate(step)) {
+            return true;
+        }
+        if (!rebuild && hasEmbeddedAccounts(step)) {
+            log.info("Should update, because detected embedded accounts from other entity");
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -161,6 +175,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         decisions.add(dataCloudChanged ? "dataCloudChanged=true" : "");
         decisions.add(hasAttrLifeCycleChange ? "hasAttrLifeCycleChange=true" : "");
         decisions.add(shouldRematch ? "shouldRematch=true" : "");
+        decisions.add(hasEmbeddedAccount ? "hasEmbeddedAccount=true" : "");
         return decisions;
     }
 
@@ -190,17 +205,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         if (step == null) {
             return false;
         }
-        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
+        hasEmbeddedAccount = StringUtils
+                .isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
                 || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
-    }
-
-    // For quicker testing purpose on local: skip account rebuild in txn end2end
-    // test with entity match enabled -- Replace hasEmbeddedAccounts() with
-    // hasEmbeddedAccountsForRebuild() in shouldRebuild()
-    private boolean hasEmbeddedAccountsForRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (step == null) {
-            return false;
-        }
-        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
+        return hasEmbeddedAccount;
     }
 }

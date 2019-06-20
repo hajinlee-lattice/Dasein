@@ -90,10 +90,10 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
-        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
-                VERIFY_DAILYTXN_AMOUNT_1, //
-                VERIFY_DAILYTXN_QUANTITY_1, //
-                VERIFY_DAILYTXN_COST);
+//        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
+//                VERIFY_DAILYTXN_AMOUNT_1, //
+//                VERIFY_DAILYTXN_QUANTITY_1, //
+//                VERIFY_DAILYTXN_COST);
         verifyPurchaseHistoryAttrs();
     }
 
@@ -136,14 +136,14 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_P2);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_P2);
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                PURCHASE_HISTORY_1);
+                TOTAL_PURCHASE_HISTORY_P2);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Transaction, transactionReport);
@@ -155,7 +155,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_P2);
         map.put(BusinessEntity.Transaction, TRANSACTION_1);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;
@@ -165,8 +165,8 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_1);
         map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_P2);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_P2);
         map.put(BusinessEntity.Transaction, TRANSACTION_1);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
         return map;

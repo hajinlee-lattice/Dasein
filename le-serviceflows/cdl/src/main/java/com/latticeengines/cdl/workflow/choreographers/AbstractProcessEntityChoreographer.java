@@ -71,7 +71,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             checkManyUpdate(step);
             reset = shouldReset(step);
             rebuild = shouldRebuild(step);
-            update = shouldUpdate();
+            update = shouldUpdate(step);
             log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
             saveDecisions(step);
             if (reset && (rebuild || update)) {
@@ -83,7 +83,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (belongsToUpdate(seq)) {
-            update = shouldUpdate();
+            update = shouldUpdate(step);
             if (!update) {
                 log.info(msg + ", because not in update mode.");
                 return true;
@@ -313,7 +313,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
-    protected boolean shouldUpdate() {
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping update.");
             return false;
