@@ -134,7 +134,6 @@ export default function () {
                             vm.setSubcategory(vm.subcategories[category][0]);
                         }
                         vm.setCategory(category);
-
                         vm.filterEmptySubcategories();
                     }
                     vm.metadata.current = 1;
