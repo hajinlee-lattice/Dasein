@@ -1,6 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -136,5 +139,42 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     @Override
     public List<S3ImportSystem> getAllS3ImportSystem(String customerSpace) {
         return s3ImportSystemEntityMgr.findAll();
+    }
+
+    @Override
+    public void updateAllS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        if (CollectionUtils.isEmpty(systemList)) {
+            return;
+        }
+        List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
+        if (currentSystems.size() != systemList.size()) {
+            throw new LedpException(LedpCode.LEDP_40062, new String[] {String.valueOf(currentSystems.size()),
+                    String.valueOf(systemList.size())});
+        }
+        Map<String, S3ImportSystem> systemMap = systemList.stream()
+                .collect(Collectors.toMap(S3ImportSystem::getName, system -> system));
+        for (S3ImportSystem importSystem : currentSystems) {
+            if (!systemMap.containsKey(importSystem.getName())) {
+                throw new LedpException(LedpCode.LEDP_40063, new String[] {importSystem.getName()});
+            }
+        }
+        Optional<S3ImportSystem> primarySystem = currentSystems.stream().filter(system -> system.getPriority() == 1).findFirst();
+        Optional<S3ImportSystem> newPrimarySystem = systemList.stream().filter(system -> system.getPriority() == 1).findFirst();
+        if (primarySystem.isPresent() && newPrimarySystem.isPresent()) {
+            if (!primarySystem.get().getName().equals(newPrimarySystem.get().getName())
+                    && (primarySystem.get().isMapToLatticeAccount() || primarySystem.get().isMapToLatticeContact())) {
+                throw new LedpException(LedpCode.LEDP_40061,
+                        new String[] {String.format("System %s already set map to lattice!",
+                                primarySystem.get().getDisplayName())});
+            }
+        }
+
+        for (S3ImportSystem importSystem : currentSystems) {
+            S3ImportSystem newSystem = systemMap.get(importSystem.getName());
+            if (newSystem.getPriority() != importSystem.getPriority()) {
+                importSystem.setPriority(newSystem.getPriority());
+                s3ImportSystemEntityMgr.update(importSystem);
+            }
+        }
     }
 }

@@ -426,6 +426,20 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public void updateAllS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/list",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<Boolean> responseDoc = post("update all import system priority", url, systemList,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            throw new RuntimeException("Cannot update all import system priority!");
+        }
+        if (!responseDoc.isSuccess()) {
+            throw new LedpException(LedpCode.LEDP_40064, responseDoc.getErrors().toArray());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public ApplicationId entityExport(String customerSpace, EntityExportRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/entityexport",
                 shortenCustomerSpace(customerSpace));

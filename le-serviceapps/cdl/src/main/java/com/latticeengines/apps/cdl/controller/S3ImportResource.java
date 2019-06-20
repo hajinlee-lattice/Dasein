@@ -80,4 +80,17 @@ public class S3ImportResource {
     public List<S3ImportSystem> getS3ImoprtSystem(@PathVariable String customerSpace) {
         return s3ImportSystemService.getAllS3ImportSystem(customerSpace);
     }
+
+    @RequestMapping(value = "/system/list", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update All System priority")
+    public ResponseDocument<Boolean> updateAllSystemPriority(@PathVariable String customerSpace,
+                                                             @RequestBody List<S3ImportSystem> systemList) {
+        try {
+            s3ImportSystemService.updateAllS3ImportSystemPriority(customerSpace, systemList);
+            return ResponseDocument.successResponse(Boolean.TRUE);
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
 }

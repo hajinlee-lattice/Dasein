@@ -15,4 +15,6 @@ public interface S3ImportSystemService {
     S3ImportSystem getS3ImportSystem(String customerSpace, String name);
 
     List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
+
+    void updateAllS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList);
 }
