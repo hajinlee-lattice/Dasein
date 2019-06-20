@@ -22,6 +22,7 @@ import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 
 public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(UpdateTransactionDeploymentTestNG.class);
 
     public static final String CHECK_POINT = "update3";
@@ -34,14 +35,11 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(resumeFromCheckPoint());
         verifyCheckPoint();
 
         // To test deprecating curated metrics & action
         setupUpdatedPurchaseHistoryMetrics();
-
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_3);
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_3);
 
         importData();
         if (isLocalEnvironment()) {
@@ -53,21 +51,31 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
-                saveCheckpoint(CHECK_POINT);
+                saveCheckpoint(saveToCheckPoint());
             }
         }
     }
 
-    private void importData() throws Exception {
+    protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Transaction, 3, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
     }
 
-    private void verifyCheckPoint() {
-        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
-                VERIFY_DAILYTXN_AMOUNT_1, //
-                VERIFY_DAILYTXN_QUANTITY_1, //
-                VERIFY_DAILYTXN_COST);
+    protected String resumeFromCheckPoint() {
+        return UpdateContactDeploymentTestNG.CHECK_POINT;
+    }
+
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
+    }
+
+    protected void verifyCheckPoint() {
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_UA);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_UC);
+        verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
+                VERIFY_DAILYTXN_AMOUNT_PT, //
+                VERIFY_DAILYTXN_QUANTITY_PT, //
+                VERIFY_DAILYTXN_COST_PT);
     }
 
     private void verifyProcess() {
@@ -78,11 +86,7 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
         verifyServingStore(getExpectedServingStoreCounts());
-
-        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_2, MIN_TRANSACTION_DATE_2, MAX_TRANSACTION_DATE_2, //
-                VERIFY_DAILYTXN_AMOUNT_1 * 2, //
-                VERIFY_DAILYTXN_QUANTITY_1 * 2, //
-                VERIFY_DAILYTXN_COST * 2);
+        verifyTxnDailyStore();
     }
 
     private void setupUpdatedPurchaseHistoryMetrics() {
@@ -103,17 +107,13 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_3);
-
-        Map<String, Object> purchaseHistoryReport = new HashMap<>();
-        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TOTAL_PURCHASE_HISTORY_P2);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_UA);
 
         Map<String, Object> contactReport = new HashMap<>();
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_3);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_UC);
 
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, 0L);
@@ -124,10 +124,14 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
 
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                TRANSACTION_IN_REPORT_2);
+                NEW_TRANSACTION_UT);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TRANSACTION_IN_REPORT_3);
+                TOTAL_TRANSACTION_UT);
+
+        Map<String, Object> purchaseHistoryReport = new HashMap<>();
+        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TOTAL_PURCHASE_HISTORY_PT);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -139,32 +143,39 @@ public class UpdateTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTestN
         return expectedReport;
     }
 
-    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_P2);
-        map.put(BusinessEntity.Transaction, TRANSACTION_3);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_3);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_UT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT);
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_P2);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_P2);
-        map.put(BusinessEntity.Transaction, TRANSACTION_3);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_3);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_UT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT);
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
         return map;
+    }
+
+    protected void verifyTxnDailyStore() {
+        verifyTxnDailyStore(DAILY_TXN_DAYS_UT, MIN_TXN_DATE_UT, MAX_TXN_DATE_UT, //
+                VERIFY_DAILYTXN_AMOUNT_PT * 2, //
+                VERIFY_DAILYTXN_QUANTITY_PT * 2, //
+                VERIFY_DAILYTXN_COST_PT * 2);
     }
 
 }

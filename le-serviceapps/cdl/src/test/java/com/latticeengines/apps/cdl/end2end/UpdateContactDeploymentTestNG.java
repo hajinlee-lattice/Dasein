@@ -24,7 +24,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateAccountDeploymentTestNG.CHECK_POINT);
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_1);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_PA);
 
         new Thread(this::createTestSegment3).start();
 
@@ -70,29 +70,29 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_P2);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
     private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_P2);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_P2);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
     private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_3);
-        map.put(BusinessEntity.Contact, CONTACT_3);
+        map.put(BusinessEntity.Account, ACCOUNT_UA);
+        map.put(BusinessEntity.Contact, CONTACT_UC);
         return map;
     }
 
@@ -102,16 +102,16 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_3);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_UA);
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, 0L);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_2);
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, UPDATED_CONTACT);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, NEW_CONTACT_UC);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, UPDATED_CONTACT_UC);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_3);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_UC);
 
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, 0L);
@@ -124,7 +124,7 @@ public class UpdateContactDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                NEW_TRANSACTION_P2);
+                NEW_TRANSACTION_PT);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);

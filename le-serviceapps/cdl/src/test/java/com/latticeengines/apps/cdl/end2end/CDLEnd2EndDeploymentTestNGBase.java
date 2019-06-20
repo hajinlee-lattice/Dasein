@@ -166,69 +166,144 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
 
-    // After ProcessAccount
-    static final Long ACCOUNT_1 = 900L;
-    // After ProcessAccountWithAdvancedMatch
-    static final Long ENTITY_MATCH_ACCOUNT_1 = 903L;
-    // Number of total account after ProcessTransaction test to generate
-    // checkpoint process2 (There are 91 new CustomerAccountId in txn imports
-    // for ProcessTransaction test)
-    static final Long ENTITY_MATCH_TOTAL_ACCOUNT_P2 = 994L;
-    static final Long CONTACT_1 = 900L;
-    // Number of total contact after ProcessAccount to generate checkpoint
-    // process1
-    static final Long ENTITY_MATCH_CONTACT_P1 = 900L;
-    // Number of new account after ProcessTransaction test to generate
-    // checkpoint process2 (There are 91 new CustomerAccountId in txn imports
-    // for ProcessTransaction test)
-    static final Long ENTITY_MATCH_NEW_ACCOUNT_P2 = 91L;
-    static final Long TRANSACTION_1 = 41156L;
-    // Number of aggregated daily transaction after ProcessTransaction test to
-    // generate checkpoint process2
-    static final Long ENTITY_MATCH_DAILY_TXN_P2 = 41064L;
-    // Number of new txn after ProcessTransaction test to generate
-    // checkpoint process2
-    static final Long NEW_TRANSACTION_P2 = 48760L;
-    static final Long PERIOD_TRANSACTION_1 = 62550L;
-    // Number of aggregated period transaction after ProcessTransaction test to
-    // generate checkpoint process2
-    static final Long ENTITY_MATCH_PERIOD_TXN_P2 = 62037L;
+    /* Expected account result */
+
+    // Number of total account after ProcessAccount test
+    static final Long ACCOUNT_PA = 900L;
+    // Number of total account after ProcessAccount entity match test
+    static final Long ACCOUNT_PA_EM = 903L;
+    // Number of total account after UpdateAccount test
+    static final Long ACCOUNT_UA = 1000L;
+    // Number of new account after UpdateAccount test
+    static final Long NEW_ACCOUNT_UA = 100L;
+    // Number of new account after ProcessTransaction entity match test (There
+    // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
+    static final Long NEW_ACCOUNT_PT_EM = 91L;
+    // Number of new account after UpdateTransaction entity match test (There
+    // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
+    static final Long NEW_ACCOUNT_UT_EM = 190L;
+    // Number of new account after UpdateAccount entity match test
+    static final Long NEW_ACCOUNT_UA_EM = 111L;
+    // Number of updated account after UpdateAccount test
+    static final Long UPDATED_ACCOUNT_UA = 100L;
+    // Number of updated account after UpdateAccount entity match test
+    static final Long UPDATED_ACCOUNT_UA_EM = 100L;
+
+    // Number of total account after ProcessTransaction entity match test (There
+    // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
+    // -- 994
+    static final Long ACCOUNT_PT_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EM;
+    // Number of total account after UpdateTransaction entity match test (There
+    // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
+    // -- 1184
+    static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
+    // Number of total account after UpdateAccount entity match test -- 1014
+    static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
+
+    /* Expected contact result */
+
+    // Number of total contact after ProcessAccount test
+    static final Long CONTACT_PA = 900L;
+    // Number of total contact after ProcessAccount entity match test
+    static final Long CONTACT_PA_EM = 900L;
+    // Number of total contact after UpdateContact test
+    static final Long CONTACT_UC = 1000L;
+    // Number of total contact after ProcessAccount entity match test
+    static final Long CONTACT_UA_EM = 1005L;
+    // Number of new contact after UpdateContact test
+    static final Long NEW_CONTACT_UC = 100L;
+    // Number of new contact after UpdateAccount entity match test
+    static final Long NEW_CONTACT_UA_EM = 105L;
+    // Number of updated contact after UpdateContact test
+    static final Long UPDATED_CONTACT_UC = 100L;
+    // Number of updated contact after ProcessAccount entity match test
+    static final Long UPDATED_CONTACT_UA_EM = 100L;
+
+
+    /* Expected transaction result */
+
+    // Number of new raw txn after ProcessTransaction test
+    static final Long NEW_TRANSACTION_PT = 48760L;
+    // Number of new raw txn after UpdateTransaction test
+    static final Long NEW_TRANSACTION_UT = 13633L;
+    // Number of total raw txn after UpdateTransaction test -- 62393
+    static final Long TOTAL_TRANSACTION_UT = NEW_TRANSACTION_PT + NEW_TRANSACTION_UT;
+    // Number of aggregated daily transaction after ProcessTransaction test
+    static final Long DAILY_TXN_PT = 41156L;
+    // Number of aggregated daily transaction after ProcessTransaction entity
+    // match test
+    static final Long DAILY_TXN_PT_EM = 41064L;
+    // Number of aggregated daily transaction after UpdateTransaction test
+    static final Long DAILY_TXN_UT = 50238L;
+    // Number of aggregated daily transaction after UpdateTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long DAILY_TXN_UT_EM = 50863L;
+    // Number of aggregated period transaction after ProcessTransaction test
+    static final Long PERIOD_TRANSACTION_PT = 62550L;
+    // Number of aggregated period transaction after ProcessTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long PERIOD_TXN_PT_EM = 62037L;
+    // Number of aggregated period transaction after UpdateTransaction test
+    static final Long PERIOD_TRANSACTION_UT = 73892L;
+    // Number of aggregated period transaction after UpdateTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
     // Number of total purchase history attributes after ProcessTransaction test
-    // to generate checkpoint process2
-    static final Long TOTAL_PURCHASE_HISTORY_P2 = 5L;
+    static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
+    // Number of total purchase history attributes after UpdateTransaction test
+    static final Long TOTAL_PURCHASE_HISTORY_UT = 6L;
 
-    static final Long ACCOUNT_2 = 100L;
-    static final Long ACCOUNT_3 = 1000L;
-    static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 111L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1014L;
-    static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
-    static final Long CONTACT_2 = 100L;
-    static final Long CONTACT_3 = 1000L;
-    static final Long UPDATED_CONTACT = 100L;
-    static final Long ENTITY_MATCH_CONTACT_2 = 105L;
-    static final Long ENTITY_MATCH_CONTACT_3 = 1005L;
-    static final Long ENTITY_MATCH_UPDATED_CONTACT = 100L;
-    static final Long TRANSACTION_2 = 39004L;
-    static final Long TRANSACTION_3 = 50238L;
-    static final Long TRANSACTION_IN_REPORT_2 = 13633L;
-    static final Long TRANSACTION_IN_REPORT_3 = 62393L;
-    static final Long PERIOD_TRANSACTION_3 = 73892L;
+    // Number of distinct days in daily txn store after ProcessTransaction test
+    static final int DAILY_TXN_DAYS_PT = 214;
+    // Number of distinct days in daily txn store after UpdateTransaction test
+    static final int DAILY_TXN_DAYS_UT = 260;
+    // Min date in daily txn store after ProcessTransaction test
+    static final String MIN_TXN_DATE_PT = "2016-03-15";
+    // Max date in daily txn store after ProcessTransaction test
+    static final String MAX_TXN_DATE_PT = "2017-10-20";
+    // Min date in daily txn store after UpdateTransaction test
+    static final String MIN_TXN_DATE_UT = "2016-03-15";
+    // Max date in daily txn store after UpdateTransaction test
+    static final String MAX_TXN_DATE_UT = "2017-12-31";
 
-    static final Long PRODUCT_ID = 40L;
-    static final Long PRODUCT_HIERARCHY = 5L;
-    static final Long PRODUCT_BUNDLE = 14L;
+    // To verify txn daily store, pick certain aid, pid and txn date
+    private static final String VERIFY_DAILYTXN_TXNDATE = "2017-09-28";
+    private static final String VERIFY_DAILYTXN_ACCOUNTID = "109";
+    private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
+    // For verified aid, pid and txn date, daily txn amount after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860;
+    // For verified aid, pid and txn date, daily txn quantity after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_QUANTITY_PT = 10;
+    // For verified aid, pid and txn date, daily txn cost after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
+
+    /* Expected product result */
+
+    // Number of product id after ProcessAccount test
+    static final Long PRODUCT_ID_PA = 40L;
+    // Number of product hierarchy after ProcessAccount test
+    static final Long PRODUCT_HIERARCHY_PA = 5L;
+    // Number of product bundle after ProcessAccount test
+    static final Long PRODUCT_BUNDLE_PA = 14L;
+    // Error message after merging product
     static final String PRODUCT_ERROR_MESSAGE = null;
+    // Warn message after merging product
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
     // Number of products in batch store after ProcessTransaction test
-    // to generate checkpoint process2
-    static final Long BATCH_STORE_PRODUCT_P2 = 103L;
+    static final Long BATCH_STORE_PRODUCT_PT = 103L;
     // Number of products in serving store after ProcessTransaction test
-    // to generate checkpoint process2
-    static final Long SERVING_STORE_PRODUCTS_P2 = 34L;
+    static final Long SERVING_STORE_PRODUCTS_PT = 34L;
     // Number of product hierarchy in serving store after ProcessTransaction
-    // test to generate checkpoint process2
-    static final Long SERVING_STORE_PRODUCT_HIERARCHIES_P2 = 20L;
+    // test
+    static final Long SERVING_STORE_PRODUCT_HIERARCHIES_PT = 20L;
+
+    /* Expected segment result */
 
     static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
@@ -258,34 +333,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
+    /* Expected rating result */
+
     static final long RATING_A_COUNT_1 = 6;
     static final long RATING_D_COUNT_1 = 5;
     static final long RATING_F_COUNT_1 = 2;
 
     static final String TARGET_PRODUCT = "A48F113437D354134E584D8886116989";
     static final String TRAINING_PRODUCT = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
-
-    static final int EARLIEST_TRANSACTION = 48033;
-    static final int LATEST_TRANSACTION = 48929;
-
-    // 1: after 1st import (rebuild); 2: after 2nd import (update)
-    static final int DAILY_TRANSACTION_DAYS_1 = 214;
-    static final int DAILY_TRANSACTION_DAYS_2 = 260;
-    static final String MIN_TRANSACTION_DATE_1 = "2016-03-15";
-    static final String MAX_TRANSACTION_DATE_1 = "2017-10-20";
-    static final String MIN_TRANSACTION_DATE_2 = "2016-03-15";
-    static final String MAX_TRANSACTION_DATE_2 = "2017-12-31";
-
-    private static final String VERIFICATION_TRANSACTION_DATE = "2017-09-28";
-    private static final String VERIFY_DAILYTXN_ACCOUNTID = "109";
-    private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
-    // After 1st import (rebuild), verify date = 2017-09-28
-    // After 2nd import (update), 3 values will be doubled because 2nd import
-    // has same transactions as 1st import for VERIFY_ACCOUNTID &
-    // VERIFY_PRODUCTID
-    static final double VERIFY_DAILYTXN_AMOUNT_1 = 1860;
-    static final double VERIFY_DAILYTXN_QUANTITY_1 = 10;
-    static final double VERIFY_DAILYTXN_COST = 1054.588389;
 
     int actionsNumber;
 
@@ -1568,7 +1623,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals((int) minMaxPeriods.getLeft(), minDay);
         Assert.assertEquals((int) minMaxPeriods.getRight(), maxDay);
         // Verify daily aggregated result
-        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFICATION_TRANSACTION_DATE);
+        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFY_DAILYTXN_TXNDATE);
         String dailyFileContainingTargetDay = dailyFiles.stream()
                 .filter(f -> f.contains(String.valueOf(dayPeriod))).findFirst().orElse(null);
         Assert.assertNotNull(dailyFileContainingTargetDay);

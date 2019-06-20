@@ -53,17 +53,17 @@ public class OutOfOrderProcessContactDeploymentTestNG extends CDLEnd2EndDeployme
 
     private Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW, CONTACT_PA);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, CONTACT_1);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, CONTACT_PA);
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Contact, contactReport);
         return expectedReport;
     }
 
     private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
-        return ImmutableMap.of(BusinessEntity.Contact, CONTACT_1);
+        return ImmutableMap.of(BusinessEntity.Contact, CONTACT_PA);
     }
 
 }
