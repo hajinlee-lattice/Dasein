@@ -28,12 +28,13 @@
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('EDIT_USER_ACCESS_LEVEL_LABEL')}}</label>
                                 <select data-ng-options="ResourceUtility.getString('ACCESS_LEVEL_' + level) for level in levelsToSelect"
-                                        class="form-control" data-ng-model="targetLevel.AccessLevel"></select>
+                                        class="form-control" data-ng-model="targetLevel.AccessLevel"
+                                        ng-disabled="showEditUserSuccess"></select>
                             </div>
                             <div class="form-group" ng-if="hasLatticeEmail">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}</label>
                                 <input type="date" class="form-control" data-ng-model="user.ExpirationDate"
-                                       ng-disabled="disableExpire()" />
+                                       ng-disabled="showEditUserSuccess || disableExpire()" />
                             </div>
                         </div>
                     </div>
