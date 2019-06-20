@@ -347,6 +347,7 @@ public enum LedpCode {
     LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"),
     LEDP_18221("User not found"),
     LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"),
+    LEDP_18223("Failed to update import system priority: {0}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -824,6 +825,9 @@ public enum LedpCode {
     LEDP_40059("Error when validating with input file, please reference {0}."),
     LEDP_40060("Invalid business calendar"),
     LEDP_40061("Cannot update Import System: {0}"),
+    LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
+    LEDP_40063("Cannot update All System Priority, missing system: {0}."),
+    LEDP_40064("Cannot update All System Priority: {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

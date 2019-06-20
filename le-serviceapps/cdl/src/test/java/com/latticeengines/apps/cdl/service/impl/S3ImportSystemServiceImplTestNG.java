@@ -61,7 +61,42 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         system3.setTenant(mainTestTenant);
         system3.setName("SYSTEM2");
         system3.setSystemType(S3ImportSystem.SystemType.Eloqua);
+        S3ImportSystem finalSystem = system3;
         Assert.expectThrows(RuntimeException.class,
-                () -> s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, system3));
+                () -> s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, finalSystem));
+
+        system3.setName("SYSTEM3");
+        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, system3);
+        allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);
+        Assert.assertEquals(allSystems.size(), 3);
+        for (S3ImportSystem importSystem : allSystems) {
+            if (importSystem.getName().equals("SYSTEM1")) {
+                importSystem.setPriority(3);
+            } else if (importSystem.getName().equals("SYSTEM2")) {
+                importSystem.setPriority(2);
+            } else {
+                importSystem.setPriority(1);
+            }
+        }
+
+        s3ImportSystemService.updateAllS3ImportSystemPriority(mainCustomerSpace, allSystems);
+        system3 = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, "SYSTEM3");
+        Assert.assertEquals(system3.getPriority(), 1);
+        system3.setMapToLatticeAccount(true);
+        s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, system3);
+
+        allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);
+        for (S3ImportSystem importSystem : allSystems) {
+            if (importSystem.getName().equals("SYSTEM1")) {
+                importSystem.setPriority(1);
+            } else if (importSystem.getName().equals("SYSTEM2")) {
+                importSystem.setPriority(2);
+            } else {
+                importSystem.setPriority(3);
+            }
+        }
+        List<S3ImportSystem> finalAllSystems = allSystems;
+        Assert.expectThrows(RuntimeException.class,
+                () -> s3ImportSystemService.updateAllS3ImportSystemPriority(mainCustomerSpace, finalAllSystems));
     }
 }

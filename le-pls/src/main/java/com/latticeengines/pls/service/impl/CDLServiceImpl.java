@@ -523,6 +523,17 @@ public class CDLServiceImpl implements CDLService {
         cdlProxy.updateS3ImportSystem(customerSpace, importSystem);
     }
 
+    @Override
+    public void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList) {
+        if (CollectionUtils.isEmpty(systemList)) {
+            return;
+        }
+        for (int i = 0; i < systemList.size(); i++) {
+            systemList.get(i).setPriority(i + 1);
+        }
+        cdlProxy.updateAllS3ImportSystemPriority(customerSpace, systemList);
+    }
+
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {
         TemplateFieldPreview fieldPreview = new TemplateFieldPreview();
         fieldPreview.setNameInTemplate(attribute.getName());
