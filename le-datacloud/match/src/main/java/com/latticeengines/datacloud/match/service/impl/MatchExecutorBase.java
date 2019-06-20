@@ -160,6 +160,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         String s3ObjectPrefix = getS3ObjectPrefix(matchContext);
+        log.debug("S3 Prefix is: " + s3ObjectPrefix);
         publishMatchHistory(s3ObjectPrefix, matchHistories);
     }
 
@@ -180,6 +181,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
+        log.debug("$JAW$ Publishing MatchHistories to stream " + deliveryStreamName + " with prefix " + s3ObjectPrefix);
         firehoseService.sendBatch(deliveryStreamName, s3ObjectPrefix, histories);
     }
 
@@ -411,23 +413,39 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     private String getS3ObjectPrefix(MatchContext matchContext) {
+        log.debug("$JAW$ Match Context Tenant is " + matchContext.getInput().getTenant());
+        if (matchContext.getInput().getTenant() != null) {
+            log.debug("$JAW$ Tenant name " + matchContext.getInput().getTenant().getName());
+            log.debug("$JAW$ Tenant id " + matchContext.getInput().getTenant().getId());
+        }
+
         if (matchContext.getInput().getTenant() != null &&
-                StringUtils.isNotBlank(matchContext.getInput().getTenant().getId()) &&
-                StringUtils.isNotBlank(matchContext.getInput().getTenant().getName())) {
+                StringUtils.isNotBlank(matchContext.getInput().getTenant().getId())) {
             Tenant tenant = matchContext.getInput().getTenant();
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-            FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
+            String tenantName = customerSpace.getTenantId();
+            log.debug("$JAW$ Match Context Tenant is " + tenantName + " with id " + tenant.getId());
+
+            if (false) {
+                FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
+            }
             try {
+                /*
                 if (flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
                         && Boolean.TRUE.equals(flags.get(
                                 LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()))) {
                     return matchContext.getInput().getTenant().getName() + "/";
                 }
+                */
+                // FOR TESTING ONLY
+                log.debug("$JAW$ S3ObjectPrefix is " + tenantName + "/");
+                return tenantName + "/";
             } catch (Exception e) {
-                log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
+                log.debug("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
                         " feature flag!", e);
             }
         }
+        log.debug("$JAW$ Match Context Tenant is null");
         return null;
     }
 }
