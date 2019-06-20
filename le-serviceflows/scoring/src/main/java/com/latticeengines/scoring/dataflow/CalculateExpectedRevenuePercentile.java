@@ -74,7 +74,7 @@ public class CalculateExpectedRevenuePercentile
             // sort based on ExpectedRevenue column (and using number of
             // rows) calculate percentile and put value in new
             // ExpectedRevenuePercentile field
-            Node calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, false);
+            Node calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, false, false);
 
             calculatePercentile = calculatePercentile.retain(retainedFields);
             log.info(String.format("percentileFieldName '%s', standardScoreField '%s'", context.percentileFieldName,
@@ -141,12 +141,11 @@ public class CalculateExpectedRevenuePercentile
     @SuppressWarnings("deprecation")
     private Node calculateFinalPercentile(FieldList retainedFields, Node calculatePercentile) {
         Node mergedScoreCount;
+
         calculatePercentile = calculatePercentile.addColumnWithFixedValue(context.percentileFieldName, null,
                 Integer.class);
-
         mergedScoreCount = mergeCount(context, calculatePercentile);
-
-        calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, true)
+        calculatePercentile = percentileCalculationHelper.calculate(context, mergedScoreCount, true, context.targetScoreDerivation)
                 .retain(retainedFields);
 
         calculatePercentile = calculatePercentile //
@@ -217,6 +216,9 @@ public class CalculateExpectedRevenuePercentile
         public String backupPredictedRevFieldName;
         public String backupProbabilityFieldName;
         public String scoreCountFieldName;
+        public boolean targetScoreDerivation;
+        public Map<String, String> targetScoreDerivationPaths;
+
         public Map<String, Double> normalizationRatioMap;
         public Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
 
@@ -230,6 +232,8 @@ public class CalculateExpectedRevenuePercentile
             maxPct = parameters.getPercentileUpperBound();
             normalizationRatioMap = parameters.getNormalizationRatioMap();
             scoreDerivationMaps = parameters.getScoreDerivationMaps();
+            targetScoreDerivation = parameters.isTargetScoreDerivation();
+            targetScoreDerivationPaths = parameters.getTargetScoreDerivationPaths();
             long timestamp = System.currentTimeMillis();
             outputPercentileFieldName = String.format("%sper_%d", PREFIX_TEMP_COL, timestamp);
             outputExpRevFieldName = String.format("%sev_%d", PREFIX_TEMP_COL, timestamp);

@@ -64,6 +64,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
+                LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, //
                 LatticeFeatureFlag.ENABLE_APS_IMPUTATION, //
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, //

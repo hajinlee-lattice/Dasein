@@ -98,6 +98,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            return this;
+        }
+        
         public GenerateRatingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("generateRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

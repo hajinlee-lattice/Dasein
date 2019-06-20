@@ -31,6 +31,9 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
 
     @JsonProperty("percentile_upper_bound")
     private Integer percentileUpperBound;
+    
+    @JsonProperty("target_score_derivation")
+    private boolean targetScoreDerivation;
 
     @JsonProperty("fit_function_parameters_map")
     private Map<String, String> fitFunctionParametersMap;
@@ -40,6 +43,10 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
 
     @JsonProperty("score_derivation_maps")
     private Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps;
+    
+    @JsonProperty("target_score_derivation_paths")
+    private Map<String, String> targetScoreDerivationPaths;
+
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -120,7 +127,23 @@ public class CalculateExpectedRevenuePercentileParameters extends DataFlowParame
     public void setScoreDerivationMaps(Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps) {
         this.scoreDerivationMaps = scoreDerivationMaps;
     }
+    
+    public boolean isTargetScoreDerivation() {
+        return targetScoreDerivation;
+    }
 
+    public void setTargetScoreDerivation(boolean targetScoreDerivation) {
+        this.targetScoreDerivation = targetScoreDerivation;
+    }
+
+    public Map<String, String> getTargetScoreDerivationPaths() {
+        return targetScoreDerivationPaths;
+    }
+
+    public void setTargetScoreDerivationPaths(Map<String, String> targetScoreDerivationPaths) {
+        this.targetScoreDerivationPaths = targetScoreDerivationPaths;
+    }
+    
     public enum ScoreDerivationType {
         EV, REVENUE, PROBABILITY
     }

@@ -46,15 +46,17 @@ public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<Recalcul
         int minPct = parameters.getPercentileLowerBound();
         int maxPct = parameters.getPercentileUpperBound();
         Map<String, String> originalScoreFieldMap = parameters.getOriginalScoreFieldMap();
-
         Node mergedScoreCount = mergeCount(inputTable, modelGuidFieldName, scoreFieldName);
 
         Node[] nodes = nodeSplitter.splitRevenue(mergedScoreCount, originalScoreFieldMap, modelGuidFieldName);
         Node model = null, evModel = null;
         if (nodes[0] != null) {
+            log.info("Use target score derivation=" + parameters.isTargetScoreDerivation());
             model = nodes[0].groupByAndBuffer(new FieldList(modelGuidFieldName), new FieldList(rawScoreFieldName),
                     new CalculatePercentile(new Fields(mergedScoreCount.getFieldNames().toArray(new String[0])), minPct,
-                            maxPct, scoreFieldName, SCORE_COUNT_FIELD_NAME, rawScoreFieldName),
+                            maxPct, scoreFieldName, SCORE_COUNT_FIELD_NAME, rawScoreFieldName,
+                            parameters.isTargetScoreDerivation(), parameters.getTargetScoreDerivationPaths(),
+                            modelGuidFieldName),
                     true, new ArrayList<>(mergedScoreCount.getSchema()));
         }
         if (nodes[1] != null) {
@@ -68,7 +70,6 @@ public class RecalculatePercentileScore extends TypesafeDataFlowBuilder<Recalcul
             output = evModel;
         }
         return output.retain(originalFields);
-
     }
 
     private Node mergeCount(Node node, String modelGuidFieldName, String scoreFieldName) {

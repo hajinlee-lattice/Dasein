@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
@@ -310,6 +311,11 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            return this;
+        }
+        
         public Builder matchQueue(String queue) {
             generateAIRating.matchYarnQueue(queue);
             matchDataCloudWorkflowBuilder.matchQueue(queue);
