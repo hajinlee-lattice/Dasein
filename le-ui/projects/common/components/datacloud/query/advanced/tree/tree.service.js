@@ -680,8 +680,10 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 return 'True';
             } if (bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] === 'No') {
                 return 'False';
+            } else {
+                bucketRestriction.bkt.Vals = [];
+                return '';
             }
-            return '';
         }
 
         function getNumericalValue(bucketRestriction, position) {
