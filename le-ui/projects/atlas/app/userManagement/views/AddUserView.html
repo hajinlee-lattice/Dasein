@@ -38,7 +38,7 @@
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_ACCESS_LEVEL_LABEL')}}</label>
                                 <select data-ng-options="ResourceUtility.getString('ACCESS_LEVEL_' + level) for level in levelsToSelect"
                                         class="form-control" data-ng-model="user.AccessLevel" name="{{ResourceUtility.getString('ADD_USER_ACCESS_LEVEL_LABEL')}}" 
-                                        ng-disabled="!allowAccessSelect()"></select>
+                                        ng-disabled="showAddUserSuccess || !allowAccessSelect()"></select>
                             </div>
                              <div class="form-group" ng-if="allowExpireSelect()">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}</label>
