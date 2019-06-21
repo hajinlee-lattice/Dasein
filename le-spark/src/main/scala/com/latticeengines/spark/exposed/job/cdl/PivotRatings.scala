@@ -31,9 +31,11 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
     val inactiveIdx = if (config.getInactiveSourceIdx == null) -1 else config.getInactiveSourceIdx.asInstanceOf[Int]
     val idAttrsMap = config.getIdAttrsMap.asScala.toMap // model id to engine id map
     val aiModelIds = if (config.getAiModelIds == null) List() else config.getAiModelIds.asScala.toList
+    val inactiveEngineIds = //
+      if (config.getInactiveEngineIds == null) List() else config.getInactiveEngineIds.asScala.toList
 
     val rulePivoted: Option[DataFrame] =
-      if (ruleIdx == -1) {
+      if (ruleIdx < 0) {
         None
       } else {
         val ruleIdAttrs = idAttrsMap.filterKeys(modelId => !aiModelIds.contains(modelId)).map(identity)
@@ -41,7 +43,7 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
       }
 
     val aiPivoted: Option[DataFrame] =
-      if (aiIdx == -1) {
+      if (aiIdx < 0) {
         None
       } else {
         val AIIdAttrs = idAttrsMap.filterKeys(modelId => aiModelIds.contains(modelId)).map(identity)
@@ -50,27 +52,31 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
       }
 
     val newRatings: Option[DataFrame] = ((aiPivoted, rulePivoted) match {
-      case (None, None) => None
       case (Some(df), None) => Some(df)
       case (None, Some(df)) => Some(df)
       case (Some(df1), Some(df2)) => Some(df1.join(df2, Seq(AccountId), "outer"))
+      case _ => None
     }) match {
-      case None => None
       case Some(df) =>
         val currentTime = System.currentTimeMillis
         Some(df.withColumn(CreateTime, lit(currentTime)).withColumn(UpdateTime, lit(currentTime)))
+      case _ => None
     }
 
-    val result: DataFrame =
-      if (inactiveIdx != -1) {
-        val oldRatings = inputs(inactiveIdx)
-        newRatings match {
-          case None => oldRatings
-          case Some(df) => MergeUtils.merge2(oldRatings, df, Seq(AccountId), Set(CreateTime), overwriteByNull = true)
-        }
+    val oldRatings: Option[DataFrame] =
+      if (inactiveEngineIds.isEmpty || inactiveIdx < 0) {
+        None
       } else {
-        newRatings.get
+        Some(extractInactiveRatings(inputs(inactiveIdx), inactiveEngineIds))
       }
+
+    val result: DataFrame = (newRatings, oldRatings) match {
+      case (Some(df), None) => df
+      case (None, Some(df)) => df
+      case (Some(df1), Some(df2)) => //
+        MergeUtils.merge2(df2, df1, Seq(AccountId), Set(CreateTime), overwriteByNull = true)
+      case _ => throw new IllegalStateException("Neither new ratings nor old ratings exist.")
+    }
 
     // finish
     lattice.output = result::Nil
@@ -88,7 +94,7 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
     val scoreSuffix = RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.Score)
     val scorePivoted = pivotScore(renamed, idAttrsMap.values.toSeq, Score, scoreSuffix)
 
-    val ratingAndScore = rating.join(scorePivoted, Seq(AccountId))
+    val ratingAndScore = rating.join(scorePivoted, Seq(AccountId), joinType = "left")
 
     if (evModelIds.nonEmpty) {
       val evEngineIds = idAttrsMap.filterKeys(modelId => evModelIds.contains(modelId)).values.toSeq
@@ -99,8 +105,8 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
       val prSuffix = RatingEngine.SCORE_ATTR_SUFFIX.get(ScoreType.PredictedRevenue)
       val prPivoted = pivotScore(renamed, evEngineIds, PredictedRevenue, prSuffix)
       // join
-      val evPivoted = erPivoted.join(prPivoted, Seq(AccountId))
-      ratingAndScore.join(evPivoted, Seq(AccountId))
+      val evPivoted = erPivoted.join(prPivoted, Seq(AccountId), joinType = "outer")
+      ratingAndScore.join(evPivoted, Seq(AccountId), joinType = "left")
     } else {
       ratingAndScore
     }
@@ -118,6 +124,7 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
   private def pivotScore(raw: DataFrame, engineIds: Seq[String], scoreCol: String, suffix: String): DataFrame = {
     val pivoted = raw //
       .select(AccountId, EngineId, scoreCol) //
+      .filter(col(scoreCol).isNotNull) //
       .groupBy(AccountId) //
       .pivot(EngineId, engineIds) //
       .agg(first(scoreCol))
@@ -127,6 +134,17 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
     } else {
       pivoted
     }
+  }
+
+  private def extractInactiveRatings(df: DataFrame, engineIds: Seq[String]): DataFrame = {
+    val inactiveAttrs: List[String] = AccountId :: CreateTime :: UpdateTime :: engineIds.flatMap(eid => {
+      eid :: RatingEngine.SCORE_ATTR_SUFFIX.values.asScala.map(suffix => eid + "_" + suffix).toList
+    }).toList intersect df.columns
+    val selected = df.select(inactiveAttrs map col: _*)
+    selected.filter(row => {
+      // keep accounts with at least one not-null rating
+      row.getValuesMap(inactiveAttrs).values.exists(v => v != null)
+    })
   }
 
 }

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +73,10 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
     protected PivotRatingsConfig configureJob(GenerateRatingStepConfiguration stepConfiguration) {
         Table ruleRawTable = getRawTable(RULE_RAW_RATING_TABLE_NAME);
         Table aiRawTable = getRawTable(AI_RAW_RATING_TABLE_NAME);
-        Table inactiveTable = getRawTable(INACTIVE_RATINGS_TABLE_NAME);
-        List<RatingModelContainer> modelContainers = getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
-        return createSparkJobConfig(aiRawTable, ruleRawTable, inactiveTable, modelContainers);
+        List<String> inactiveEngines = getListObjectFromContext(ITERATION_INACTIVE_ENGINES, String.class);
+        List<RatingModelContainer> modelContainers = //
+                getListObjectFromContext(ITERATION_RATING_MODELS, RatingModelContainer.class);
+        return createSparkJobConfig(aiRawTable, ruleRawTable, inactiveEngines, modelContainers);
     }
 
     @Override
@@ -112,8 +114,8 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         return tgtTble;
     }
 
-    private PivotRatingsConfig createSparkJobConfig(Table aiRawTable, Table ruleRawTable, Table inactiveTable, //
-                                                    List<RatingModelContainer> modelContainers) {
+    private PivotRatingsConfig createSparkJobConfig(Table aiRawTable, Table ruleRawTable, //
+                                                    List<String> inactiveEngines, List<RatingModelContainer> modelContainers) {
         Map<String, String> modelIdToEngineIdMap = new HashMap<>();
         List<String> evModelIds = new ArrayList<>();
         List<String> aiModelIds = new ArrayList<>();
@@ -144,6 +146,13 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         if (ruleRawTable != null) {
             config.setRuleSourceIdx(inputUnits.size());
             inputUnits.add(ruleRawTable.toHdfsDataUnit("rule"));
+        }
+        Table inactiveTable = null;
+        if (CollectionUtils.isNotEmpty(inactiveEngines)) {
+            config.setInactiveEngineIds(inactiveEngines);
+            DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            inactiveTable = dataCollectionProxy.getTable(customerSpace.toString(), //
+                    BusinessEntity.Rating.getServingStore(), version);
         }
         if (inactiveTable != null) {
             config.setInactiveSourceIdx(inputUnits.size());
@@ -180,7 +189,6 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
     private void cleanupTemporaryTables() {
         deleteTableNameInContext(RULE_RAW_RATING_TABLE_NAME);
         deleteTableNameInContext(AI_RAW_RATING_TABLE_NAME);
-        deleteTableNameInContext(INACTIVE_RATINGS_TABLE_NAME);
         deleteTableNameInContext(FILTER_EVENT_TARGET_TABLE_NAME);
         deleteTableNameInContext(SCORING_RESULT_TABLE_NAME);
 
