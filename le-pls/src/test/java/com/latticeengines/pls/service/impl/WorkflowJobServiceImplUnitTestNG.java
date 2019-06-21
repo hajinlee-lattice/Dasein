@@ -233,10 +233,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         log.info(String.format("actionIds=%s", actionIds));
     }
 
-    @Test(groups = "unit")
-    public void testExpandActions() {
-        List<Action> actions = generateActions();
-        List<Job> expandedJobs = workflowJobService.expandActions(actions);
+    private void verifyActionAndJobsForExpandActions(List<Action> actions, List<Job> expandedJobs) {
         Assert.assertEquals(actions.size(), 6);
         Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
@@ -254,6 +251,22 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testExpandActions() {
+        List<Action> actions = generateActions();
+        List<Job> expandedJobs = workflowJobService.expandActions(actions, null);
+        verifyActionAndJobsForExpandActions(actions, expandedJobs);
+        actions = generateActions();
+        List<Job> jobs = new ArrayList<>();
+        jobs.add(createJob(jobIds[0]));
+        jobs.add(createJob(jobIds[1]));
+        Map<String, Job> jobMap =
+                jobs.stream().filter(job -> job.getPid() != null).collect(Collectors.toMap(job -> job.getPid().toString(),
+                        Job -> Job, (key1, key2) -> key2));
+        expandedJobs = workflowJobService.expandActions(actions, jobMap);
+        verifyActionAndJobsForExpandActions(actions, expandedJobs);
+    }
+
+    @Test(groups = "unit")
     public void testFindJobsBasedOnActionIdsAndType() {
         List<Job> jobs = workflowJobService.findJobsBasedOnActionIdsAndType(Arrays.asList(1L, 2L, 3L, 4L),
                 ActionType.CDL_OPERATION_WORKFLOW);
@@ -267,26 +280,67 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertEquals(jobs.size(), 0);
     }
 
+    private List<Action> generateActionWithJobIdAndActionPids(Long jobId, Long[] actionPids) {
+        List<Action> actions = new ArrayList<>();
+        Action action1 = new Action();
+        action1.setPid(actionPids[0]);
+        action1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action1.setActionConfiguration(new ImportActionConfiguration());
+        action1.setActionInitiator(INITIATOR);
+        action1.setTrackingPid(jobId);
+        Action action2 = new Action();
+        action2.setPid(actionPids[1]);
+        action2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action2.setActionConfiguration(new ImportActionConfiguration());
+        action2.setTrackingPid(jobId);
+        Action action3 = new Action();
+        action3.setPid(actionPids[2]);
+        action3.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        action3.setActionConfiguration(new ImportActionConfiguration());
+        action3.setActionStatus(ActionStatus.CANCELED);
+        action3.setTrackingPid(jobId);
+        actions.add(action1);
+        actions.add(action2);
+        actions.add(action3);
+        return actions;
+    }
+
     @Test(groups = "unit")
     public void testUpdateJobWithSubJobsIfIsPnA() {
         Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null, null, null);
         Assert.assertNotNull(job1.getSubJobs());
         job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
         job1.setJobType("bulkmatchworkflow");
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null);
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, null, null, null);
         Assert.assertNull(job1.getSubJobs());
 
-        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
+        Map<String, Job> jobMap = new HashMap<>();
         job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
-        List<Job> jobs = new ArrayList<>();
-        jobs.add(job1);
-        Map<Long, Action> actionMap = workflowJobService.getActionMap(jobs);
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, actionMap);
+        jobMap.put(job1.getPid().toString(), job1);
+        List<Action> actions = generateActionWithJobIdAndActionPids(jobIds[0], actionPids);
+        Map<Long, Action> actionIdMap;
+        Map<Long, Action> actionJobPidMap;
+        actionIdMap =
+                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
+                        Action -> Action, (key1, key2) -> key2));
+        actionJobPidMap =
+                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
+                        Action -> Action, (key1, key2) -> key2));
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, jobMap, actionIdMap, actionJobPidMap);
         Assert.assertNotNull(job1.getSubJobs());
         job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
         job1.setJobType("bulkmatchworkflow");
-        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, actionMap);
+        jobMap = new HashMap<>();
+        jobMap.put(job1.getPid().toString(), job1);
+        actions = generateActionWithJobIdAndActionPids(jobIds[0], actionPids);
+        actionIdMap =
+                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
+                        Action -> Action, (key1, key2) -> key2));
+        actionJobPidMap =
+                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
+                        Action -> Action, (key1, key2) -> key2));
+        workflowJobService.updateJobWithSubJobsIfIsPnA(job1, jobMap, actionIdMap, actionJobPidMap);
         Assert.assertNull(job1.getSubJobs());
     }
 
@@ -299,9 +353,20 @@ public class WorkflowJobServiceImplUnitTestNG {
         jobList.add(job2);
         Assert.assertNull(job1.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
         Assert.assertNull(job2.getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
-        when(actionProxy.getActionsByJobPids(anyString(), any())).thenReturn(trackingActions());
-        workflowJobService.updateJobsWithActionId(jobList);
+        List<Action> actions = trackingActions();
+        when(actionProxy.getActionsByJobPids(anyString(), any())).thenReturn(actions);
+        workflowJobService.updateJobsWithActionId(jobList, null);
         log.info(" jobs is :" + JsonUtils.serialize(jobList));
+        Assert.assertNotNull(jobList.get(0).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+        Assert.assertNotNull(jobList.get(1).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
+
+        Map<Long, Action> actionJobPidMap =
+                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
+                        Action -> Action, (key1, key2) -> key2));
+        workflowJobService.updateJobsWithActionId(jobList, actionJobPidMap);
+        jobList = new ArrayList<>();
+        jobList.add(job1);
+        jobList.add(job2);
         Assert.assertNotNull(jobList.get(0).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
         Assert.assertNotNull(jobList.get(1).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
     }
@@ -331,31 +396,57 @@ public class WorkflowJobServiceImplUnitTestNG {
         });
     }
 
-    @Test(groups = "unit")
-    public void testUpdateAllJobs() {
+    private List<Job> getJobList(String jobType){
         Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
         Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
+        job1.setJobType(jobType);
         List<Job> jobs = new ArrayList<>();
         jobs.add(job1);
+        return jobs;
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateAllJobs() {
+        List<Job> jobs = getJobList("processAnalyzeWorkflow");
         workflowJobService.updateAllJobs(jobs);
+        Job job1 = jobs.get(0);
         Assert.assertNotNull(job1.getSubJobs());
         Assert.assertEquals(job1.getSubJobs().size(), 4);
-        job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
-        job1.setJobType("bulkmatchworkflow");
-        jobs = new ArrayList<>();
-        jobs.add(job1);
+        jobs = getJobList("bulkmatchworkflow");
+        job1 = jobs.get(0);
         workflowJobService.updateAllJobs(jobs);
         Assert.assertNull(job1.getSubJobs());
     }
 
     @Test(groups = "unit")
-    public void testGetActionMap() {
-        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
-        Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
-        List<Job> jobs = new ArrayList<>();
-        jobs.add(job1);
-        Map<Long, Action> actionMap = workflowJobService.getActionMap(jobs);
-        Assert.assertEquals(actionMap.size(), 5);
+    public void testGetActionPids() {
+        List<Job> jobs = getJobList("processAnalyzeWorkflow");
+        List<Long> actionPids = workflowJobService.getActionPids(jobs);
+        Assert.assertEquals(actionPids.size(), 5);
+        Assert.assertTrue(actionPids.containsAll(Arrays.asList(1L, 2L, 3L, 4L, 5L)));
+        jobs = getJobList("bulkmatchworkflow");
+        actionPids = workflowJobService.getActionPids(jobs);
+        Assert.assertEquals(actionPids.size(), 0);
+    }
+
+    @Test(groups = "unit")
+    public void testGetJobMap() {
+        List<Action> actions = generateActions();
+        Map<Long, Action> actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
+                Action -> Action, (key1, key2) -> key2));
+        Map<String, Job> jobMap = workflowJobService.getJobMap(actionJobPidMap);
+        Assert.assertEquals(jobMap.size(), 2);
+    }
+
+    @Test(groups = "unit")
+    public void testGetActions() {
+        List<Long> actionIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+        List<Action> actions = generateActions();
+        Map<Long, Action> actionIdMap =
+                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
+                        Action -> Action, (key1, key2) -> key2));
+        List<Action> actions2 = workflowJobService.getActions(actionIds, actionIdMap);
+        Assert.assertEquals(actions2.size(), 5);
     }
 
     @Test(groups = "unit")
@@ -432,6 +523,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         jobs.add(createJob(jobIds[1]));
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(jobs);
         when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(jobs);
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), new String[]{anyString()})).thenReturn(jobs);
     }
 
     private void mockSourceFileEntityManager() {
@@ -562,6 +654,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private Job createProcessAnalyzeJob(Long jobId, Long[] actionPids) {
         Job job = new Job();
         job.setId(jobId);
+        job.setPid(jobId);
         job.setName("processAnalyzeWorkflow");
         job.setDescription("processAnalyzeWorkflow");
         job.setJobType("processAnalyzeWorkflow");
