@@ -204,6 +204,28 @@
         <property name="jobTimeout" value="${quartz.cdl.export.job.timeout}" />
     </bean>
 
+    <bean name="cdlCampaignLaunchJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlCampaignLaunchJob"/>
+        <property name="cronTrigger" value="${quartz.cdl.campaign.launch.job.cron}"/>
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlCampaignLaunchJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.cdl.export.job.timeout}"/>
+    </bean>
+
+    <bean name="cdlDeltaCalculationJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlDeltaCalculationJob"/>
+        <property name="cronTrigger" value="${quartz.cdl.delta.calculation.job.cron}"/>
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlDeltaCalculationJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.cdl.export.job.timeout}"/>
+    </bean>
+
     <bean name="datacloudCollectionJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="datacloudCollectionJob" />
         <property name="cronTrigger" value="${quartz.datacloudcollection.job.cron:0/30 * * * * ?}" />
