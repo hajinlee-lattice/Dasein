@@ -378,55 +378,23 @@ angular
         .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.validation', {
             url: '/validatetemplate',
             resolve: {
-                FieldDocument: function($q, ImportWizardStore) {
+                FileName: function (ImportWizardStore) {
+                    return ImportWizardStore.getCsvFileName();
+                },
+                FieldDocument: function(ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();
                 },
-                TemplateData: function($q, ImportWizardStore) {
+                TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
                 },
-                Validation: function($q, ImportWizardService, FieldDocument, TemplateData) {
+                Validation: function($q, ImportWizardService, FileName, FieldDocument, TemplateData) {
                     var deferred = $q.defer();
 
-                    // ImportWizardService.validateTemplate(FieldDocument, TemplateData).then(function(result) {
-                    //     deferred.resolve(result);
-                    // });
+                    ImportWizardService.validateTemplate(FileName, TemplateData, FieldDocument).then(function(result) {
+                        console.log(result);
+                        deferred.resolve(result);
+                    });
 
-                    // var validations = [{
-                    //         "userField" : null,
-                    //         "latticeField": null,
-                    //         "status": "SUCCESS",
-                    //         "message": "All fields are successfully validated, you can save your field mappings now."
-                    //     }];
-
-                    var validations = [{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        },{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        },{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        },{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        },{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        }];
-
-                    deferred.resolve(validations);
-                    
                     return deferred.promise;
                 }
             },
@@ -703,33 +671,23 @@ angular
         .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', {
             url: '/validatetemplate',
             resolve: {
-                FieldDocument: function($q, ImportWizardStore) {
+                FileName: function (ImportWizardStore) {
+                    return ImportWizardStore.getCsvFileName();
+                },
+                FieldDocument: function(ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();
                 },
-                TemplateData: function($q, ImportWizardStore) {
+                TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
                 },
-                Validation: function($q, ImportWizardService, FieldDocument, TemplateData) {
+                Validation: function($q, ImportWizardService, FileName, FieldDocument, TemplateData) {
                     var deferred = $q.defer();
 
-                    // ImportWizardService.validateTemplate(FieldDocument, TemplateData).then(function(result) {
-                    //     deferred.resolve(result);
-                    // });
+                    ImportWizardService.validateTemplate(FileName, TemplateData, FieldDocument).then(function(result) {
+                        console.log(result);
+                        deferred.resolve(result);
+                    });
 
-                    var validations = [{
-                            "userField" : null,
-                            "latticeField": "Account ID",
-                            "status": "ERROR",
-                            "message": "Account ID is not mapped, and is a required field."
-                        },{
-                            "userField" : null,
-                            "latticeField": null,
-                            "status": "SUCCESS",
-                            "message": "All fields are successfully validated, you can save your field mappings now."
-                        }];
-
-                    deferred.resolve(validations);
-                    
                     return deferred.promise;
                 }
             },
