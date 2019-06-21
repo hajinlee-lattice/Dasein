@@ -119,6 +119,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_ENGINE_ID_TO_ACTIVATE = "RATING_ENGINE_ID_TO_ACTIVATE";
     protected static final String RULE_RAW_RATING_TABLE_NAME = "RULE_RAW_RATING_TABLE_NAME";
     protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
+    protected static final String PIVOTED_RATINGS_TABLE_NAME = "PIVOTED_RATINGS_TABLE_NAME";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";

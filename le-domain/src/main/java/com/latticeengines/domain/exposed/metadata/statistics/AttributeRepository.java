@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.metadata.statistics;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -166,6 +165,10 @@ public class AttributeRepository {
     }
 
     public void appendServingStore(BusinessEntity entity, Table table) {
+        List<AttributeLookup> toBeDeleted = cmMap.keySet().stream() //
+                .filter(attrLookup -> entity.equals(attrLookup.getEntity())) //
+                .collect(Collectors.toList());
+        toBeDeleted.forEach(cmMap::remove);
         Map<String, ColumnMetadata> attrs = expandAttrsInTable(table);
         attrs.forEach((n, md) -> cmMap.put(new AttributeLookup(entity, n), md));
         tableNameMap.put(entity.getServingStore(), table.getName());
@@ -173,13 +176,6 @@ public class AttributeRepository {
 
     public void changeServingStoreTableName(TableRoleInCollection role, String tableName) {
         tableNameMap.put(role, tableName);
-    }
-
-    public AttributeRepository getDeepCopy() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        KryoUtils.write(bos, this);
-        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        return KryoUtils.read(bis, AttributeRepository.class);
     }
 
 }

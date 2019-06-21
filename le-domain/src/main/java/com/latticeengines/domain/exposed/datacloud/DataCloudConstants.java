@@ -135,7 +135,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
     public static final String TRANSFORMER_CONTACT_NAME_CONCATENATER = "contactNameConcatenater";
-    public static final String TRANSFORMER_PIVOT_RATINGS = "pivotRatingTransformer";
     public static final String TRANSFORMER_MERGE = "MergeTransformer";
     public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 

@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
-        @Type(value = ProcessMatchResultCascadingConfiguration.class, name = "ProcessMatchResultCascadingConfiguration"),
         @Type(value = PrepareMatchDataConfiguration.class, name = "PrepareMatchDataConfiguration"), })
 public class BaseCoreDataFlowStepConfiguration extends DataFlowStepConfiguration {
 

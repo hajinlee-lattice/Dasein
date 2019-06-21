@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultCascadingConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -43,7 +42,6 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportScoreTrainingFileStepConfiguration export = new ExportScoreTrainingFileStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
-        private ProcessMatchResultCascadingConfiguration matchResultCascading = new ProcessMatchResultCascadingConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -55,13 +53,11 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomer(customerSpace.toString());
-            matchResultCascading.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            matchResultCascading.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -97,7 +93,6 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchResult.setExcludeDataCloudAttrs(exclude);
-            matchResultCascading.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 
@@ -181,7 +176,6 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
-            matchResultCascading.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
@@ -218,7 +212,6 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
 
             configuration.add(match);
             configuration.add(matchResult);
-            configuration.add(matchResultCascading);
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);

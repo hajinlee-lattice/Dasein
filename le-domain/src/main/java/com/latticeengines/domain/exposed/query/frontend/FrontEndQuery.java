@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -200,6 +203,13 @@ public class FrontEndQuery {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public FrontEndQuery getDeepCopy() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, FrontEndQuery.class);
     }
 
 }

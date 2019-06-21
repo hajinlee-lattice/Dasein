@@ -1,39 +1,37 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PivotRatingsConfig extends TransformerConfig {
+public class PivotRatingsConfig extends SparkJobConfig {
 
-    @JsonProperty("id_attrs_map")
+    public static final String NAME = "pivotRatings";
+
+    @JsonProperty("Name")
+    public String getName() {
+        return NAME;
+    }
+
+    @JsonProperty("IdAttrsMap")
     private Map<String, String> idAttrsMap; // model id to engine id mapping
 
-    @JsonProperty("rule_source_idx")
-    private Integer ruleSourceIdx;
+    @JsonProperty("RuleSourceIdx")
+    private Integer ruleSourceIdx; // which input is rule based
 
-    @JsonProperty("ai_source_idx")
-    private Integer aiSourceIdx;
+    @JsonProperty("AiSourceIdx")
+    private Integer aiSourceIdx; // which input is ai based
 
-    @JsonProperty("inactive_source_idx")
-    private Integer inactiveSourceIdx;
+    @JsonProperty("InactiveSourceIdx")
+    private Integer inactiveSourceIdx; // which input is inactive ratings
 
-    @JsonProperty("ev_model_ids")
+    @JsonProperty("EvModelIds")
     private List<String> evModelIds;
 
-    @JsonProperty("ai_model_ids")
+    @JsonProperty("AIModelIds")
     private List<String> aiModelIds;
-
-    @JsonProperty("inactive_engines")
-    private List<String> inactiveEngines;
 
     public Map<String, String> getIdAttrsMap() {
         return idAttrsMap;
@@ -81,13 +79,5 @@ public class PivotRatingsConfig extends TransformerConfig {
 
     public void setAiModelIds(List<String> aiModelIds) {
         this.aiModelIds = aiModelIds;
-    }
-
-    public List<String> getInactiveEngines() {
-        return inactiveEngines;
-    }
-
-    public void setInactiveEngines(List<String> inactiveEngines) {
-        this.inactiveEngines = inactiveEngines;
     }
 }
