@@ -10,7 +10,7 @@ public class GreedyScheduler implements Scheduler {
     public List<String> schedule(List<SchedulingPAQueue> queues) {
         Set<String> scheduledTenants = new HashSet<>();
         for (SchedulingPAQueue q : queues) {
-            q.getCanRunJobs(scheduledTenants);
+            q.fillAllCanRunJobs(scheduledTenants);
         }
         return new ArrayList<>(scheduledTenants);
     }

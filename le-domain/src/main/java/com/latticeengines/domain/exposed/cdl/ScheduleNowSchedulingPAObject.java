@@ -40,11 +40,6 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
         return compare(o.getTenantActivity());
     }
 
-    @Override
-    public Class<ScheduleNowSchedulingPAObject> getInstance() {
-        return ScheduleNowSchedulingPAObject.class;
-    }
-
     public int compare(TenantActivity o) {
         return o.getScheduleTime() - this.getTenantActivity().getScheduleTime() > 0 ? -1 : 1;
     }

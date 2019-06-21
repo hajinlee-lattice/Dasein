@@ -40,11 +40,6 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         return popConstraintList;
     }
 
-    @Override
-    public Class<RetrySchedulingPAObject> getInstance() {
-        return RetrySchedulingPAObject.class;
-    }
-
     public int compare(TenantActivity o) {
         return o.getLastFinishTime() - this.getTenantActivity().getLastFinishTime() > 0 ? -1 : 1;
     }

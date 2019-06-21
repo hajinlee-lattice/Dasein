@@ -32,11 +32,6 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
-    public Class<AutoScheduleSchedulingPAObject> getInstance() {
-        return AutoScheduleSchedulingPAObject.class;
-    }
-
-    @Override
     public int compareTo(SchedulingPAObject o) {
         return compare(o.getTenantActivity());
     }

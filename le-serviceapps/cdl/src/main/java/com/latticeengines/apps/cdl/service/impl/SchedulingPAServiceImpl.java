@@ -219,11 +219,14 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Map<String, Object> map = setSystemStatus();
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
         List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
-        SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
-        SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
-        SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(systemStatus);
+        SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
+                RetrySchedulingPAObject.class, true);
+        SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, ScheduleNowSchedulingPAObject.class);
+        SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, AutoScheduleSchedulingPAObject.class);
         SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus);
+                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class);
         for (TenantActivity tenantActivity : tenantActivityList) {
             RetrySchedulingPAObject retrySchedulingPAObject = new RetrySchedulingPAObject(tenantActivity);
             ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject =
@@ -250,14 +253,14 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> canRunJobTenantSet = new HashSet<>();
         Set<String> canRunRetryJobTenantSet = new HashSet<>();
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
-        for (SchedulingPAQueue schedulingPAQueue : schedulingPAQueues) {
+        for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             if (schedulingPAQueue.size() > 0) {
-                log.info(String.format("queue %s shows : %s", schedulingPAQueue.getObjectClassName(),
+                log.info(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
                         JsonUtils.serialize(schedulingPAQueue.getAll())));
-                if (schedulingPAQueue.getObjectClassName().equals(RetrySchedulingPAObject.class.getName())) {
-                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.getCanRunJobs(canRunJobTenantSet));
+                if (schedulingPAQueue.isRetryQueue()) {
+                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.fillAllCanRunJobs(canRunJobTenantSet));
                 } else {
-                    schedulingPAQueue.getCanRunJobs(canRunJobTenantSet);
+                    schedulingPAQueue.fillAllCanRunJobs(canRunJobTenantSet);
                 }
             }
         }
@@ -273,8 +276,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     public Map<String, List<String>> showQueue() {
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
         Map<String, List<String>> tenantMap = new HashMap<>();
-        for (SchedulingPAQueue schedulingPAQueue : schedulingPAQueues) {
-            tenantMap.put(schedulingPAQueue.getObjectClassName(), schedulingPAQueue.getAll());
+        for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
+            tenantMap.put(schedulingPAQueue.getQueueName(), schedulingPAQueue.getAll());
         }
         log.info("priority Queue : " + JsonUtils.serialize(tenantMap));
         return tenantMap;
@@ -284,10 +287,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     public String getPositionFromQueue(String tenantName) {
 
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
-        for (SchedulingPAQueue schedulingPAQueue : schedulingPAQueues) {
+        for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             int index = schedulingPAQueue.getPosition(tenantName);
             if (index != -1) {
-                return String.format("tenant %s at Queue %s Position %d", tenantName, schedulingPAQueue.getObjectClassName(), index);
+                return String.format("tenant %s at Queue %s Position %d", tenantName, schedulingPAQueue.getQueueName(),
+                        index);
             }
         }
         return "cannot find this tenant " + tenantName + " in Queue.";
