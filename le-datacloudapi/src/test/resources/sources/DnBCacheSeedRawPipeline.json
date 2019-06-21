@@ -5,11 +5,13 @@
     {
       "Transformer": "ingestedFileToSourceTransformer",
       "BaseSources": [
-        "IngestionSource"
+        "Ingestion_DnBCacheSeed"
       ],
+      "BaseIngestions": {
+        "Ingestion_DnBCacheSeed": {"IngestionName":"DnBIngestion_OrchestrationDeploymentTestNG"}
+      },
       "TargetSource": "DnBCacheSeedRaw",
-      "Configuration": {"IngestionName":"DnBIngestion_OrchestrationDeploymentTestNG",
-                        "FileNameOrExtension":".OUT",
+      "Configuration": {"FileNameOrExtension":".OUT",
                         "CompressedFileNameOrExtension":".OUT.gz",
                         "CompressType":"GZ",
                         "Delimiter":"|",
