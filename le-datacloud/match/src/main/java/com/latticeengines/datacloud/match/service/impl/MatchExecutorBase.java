@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.firehose.FirehoseService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -64,9 +63,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     protected MetricService metricService;
-
-    @Autowired
-    private BatonService batonService;
 
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
@@ -158,7 +154,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         String s3ObjectPrefix = getS3ObjectPrefix(matchContext);
-        log.error("S3 Prefix is: " + s3ObjectPrefix);
         publishMatchHistory(s3ObjectPrefix, matchHistories);
     }
 
@@ -179,8 +174,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        log.debug("$JAW$ Publishing MatchHistories to stream " + deliveryStreamName + " with prefix " + s3ObjectPrefix);
-        log.info("$JAW$ Publishing MatchHistories to stream " + deliveryStreamName + " with prefix " + s3ObjectPrefix);
+        log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory using S3 Prefix: " +
+                s3ObjectPrefix);
         firehoseService.sendBatch(deliveryStreamName, s3ObjectPrefix, histories);
     }
 
@@ -417,41 +412,15 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Tenant tenant = matchContext.getInput().getTenant();
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
             String tenantName = customerSpace.getTenantId();
-            log.error("$JAW$ MatchContext Tenant is " + tenantName + " with id " + tenant.getId());
-
             if (matchContext.getInput().isPerTenantMatchReportEnabled()) {
-                log.error("$JAW$ S3ObjectPrefix is " + tenantName + "/");
-                log.debug("$JAW$ S3ObjectPrefix is " + tenantName + "/");
+                log.debug("S3ObjectPrefix is " + tenantName + "/");
                 return tenantName + "/";
             } else {
-                log.error("$JAW$ Not using S3ObjectPrefix for " + tenantName);
-                log.debug("$JAW$ Not using S3ObjectPrefix for " + tenantName);
+                log.debug("Not using S3ObjectPrefix for " + tenantName);
             }
         } else {
-            log.warn("$JAW$ Could not find Tenant or Tenant ID from MatchContext");
+            log.warn("Could not find Tenant or Tenant ID from MatchContext");
         }
         return null;
-
-
-        /*
-        if (false) {
-            FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
-        }
-        try {
-
-            if (flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
-                    && Boolean.TRUE.equals(flags.get(
-                            LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()))) {
-                return matchContext.getInput().getTenant().getName() + "/";
-            }
-
-            // FOR TESTING ONLY
-            log.debug("$JAW$ S3ObjectPrefix is " + tenantName + "/");
-            return tenantName + "/";
-        } catch (Exception e) {
-            log.debug("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
-                    " feature flag!", e);
-        }
-        */
     }
 }

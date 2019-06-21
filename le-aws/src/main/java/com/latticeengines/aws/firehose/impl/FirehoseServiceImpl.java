@@ -55,12 +55,14 @@ public class FirehoseServiceImpl implements FirehoseService {
             data = data + "\n";
             Record record = createRecord(data);
             putRecordRequest.setRecord(record);
-            setS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
+            UpdateDestinationRequest updateDestinationRequest = setS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
             firehoseClient.putRecord(putRecordRequest);
-
+            if (updateDestinationRequest != null) {
+                resetS3ObjectPrefix(updateDestinationRequest);
+            }
         } catch (Throwable t) {
-            log.warn("Can not send message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
-                    + t.getMessage());
+            log.warn("Cannot send message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
+                    + t.getClass().getName() + ": " + t.getMessage());
         }
     }
 
@@ -82,8 +84,8 @@ public class FirehoseServiceImpl implements FirehoseService {
             }
 
         } catch (Throwable t) {
-            log.warn("Can not sendBatch message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
-                    + t.getMessage());
+            log.warn("Cannot sendBatch message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
+                    + t.getClass().getName() + ": " + t.getMessage());
         }
     }
 
@@ -110,30 +112,9 @@ public class FirehoseServiceImpl implements FirehoseService {
 
     private UpdateDestinationRequest setS3ObjectPrefix(String deliveryStreamName, String s3ObjectPrefix) {
         if (StringUtils.isBlank(deliveryStreamName) || StringUtils.isBlank(s3ObjectPrefix)) {
-            log.error("$JAW$ Firehose prefix is null");
+            log.info("Firehose prefix for " + deliveryStreamName + " is null");
             return null;
         }
-
-        //CreateDeliveryStreamRequest createDeliveryStreamRequest = new CreateDeliveryStreamRequest();
-        //S3DestinationConfiguration s3DestinationConfiguration = new S3DestinationConfiguration();
-        //s3DestinationConfiguration.setPrefix(s3ObjectPrefix);
-        //createDeliveryStreamRequest.setS3DestinationConfiguration(s3DestinationConfiguration);
-        //ExtendedS3DestinationConfiguration extendedS3DestinationConfiguration = new
-        //        ExtendedS3DestinationConfiguration();
-        //extendedS3DestinationConfiguration.setPrefix(s3ObjectPrefix);
-        //extendedS3DestinationConfiguration.setBucketARN(
-        //"arn:aws:firehose:us-east-1:260464783954:deliverystream/" + deliveryStreamName);
-        //        "arn:aws:s3:::" + deliveryStreamName);
-        //extendedS3DestinationConfiguration.setRoleARN(
-        //        "arn:aws:iam::260464783954:role/lattice_matchhistory_report");
-
-        //log.error("S3 Dest Config is: " + extendedS3DestinationConfiguration.toString());
-        //String iamRoleArn = createIamRole(s3ObjectPrefix);
-        //extendedS3DestinationConfiguration.setRoleARN(iamRoleArn);
-        //createDeliveryStreamRequest.setExtendedS3DestinationConfiguration(extendedS3DestinationConfiguration);
-        //createDeliveryStreamRequest.setDeliveryStreamName(deliveryStreamName);
-        //createDeliveryStreamRequest.setDeliveryStreamType("DirectPut");
-        //firehoseClient.createDeliveryStream(createDeliveryStreamRequest);
 
         // Get DeliveryStreamDescription for delivery stream in order to extra version ID and destinations for
         // UpdateDestination call.
@@ -151,16 +132,16 @@ public class FirehoseServiceImpl implements FirehoseService {
         updateDestinationRequest.setExtendedS3DestinationUpdate(extendedS3DestinationUpdate);
         updateDestinationRequest.setDeliveryStreamName(deliveryStreamName);
         updateDestinationRequest.setCurrentDeliveryStreamVersionId(deliveryStreamDescription.getVersionId());
-        log.error("$JAW$ Set Prefix Update Request: " + updateDestinationRequest);
+        log.info("Set Prefix Update Request: " + updateDestinationRequest);
         if (CollectionUtils.isNotEmpty(deliveryStreamDescription.getDestinations())) {
             updateDestinationRequest.setDestinationId(deliveryStreamDescription.getDestinations().get(0)
                     .getDestinationId());
             UpdateDestinationResult updateDestinationResult = firehoseClient.updateDestination(
                     updateDestinationRequest);
-            log.error("$JAW$ Set Prefix Update Result: " + updateDestinationResult);
+            log.info("Set Prefix Update Result: " + updateDestinationResult);
             return updateDestinationRequest;
         } else {
-            log.warn("$JAW$ Firehose Service found null or empty destinations for delivery stream: " +
+            log.error("Firehose Service found null or empty destinations for delivery stream: " +
                     deliveryStreamName);
             return null;
         }
@@ -168,9 +149,9 @@ public class FirehoseServiceImpl implements FirehoseService {
 
     private void resetS3ObjectPrefix(UpdateDestinationRequest updateDestinationRequest) {
         updateDestinationRequest.getExtendedS3DestinationUpdate().setPrefix(null);
-        log.error("$JAW$ Reset Prefix Update Request: " + updateDestinationRequest);
+        log.info("Reset Firehose Prefix Update Request: " + updateDestinationRequest);
         UpdateDestinationResult updateDestinationResult = firehoseClient.updateDestination(
                 updateDestinationRequest);
-        log.error("$JAW$ Reset Prefix Update Result: " + updateDestinationResult);
+        log.info("Reset Prefix Update Result: " + updateDestinationResult);
     }
 }

@@ -401,8 +401,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
+        log.info("Generating EntityMatchHistory for Match Report.");
 
-        log.warn("------------------------ Entity Match History Debug Logs ------------------------");
+        log.debug("------------------------ Entity Match History Debug Logs ------------------------");
 
         // Extract Business Entity
         if (StringUtils.isBlank(traveler.getMatchInput().getTargetEntity())) {
@@ -410,7 +411,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             return null;
         }
         history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
-        log.warn("Business Entity: " + history.getBusinessEntity());
+        log.debug("Business Entity: " + history.getBusinessEntity());
 
         // Check if DUNS was a provided MatchKey and extract Input MatchKeys
         Boolean inputHasDuns = checkDunsAndPrintInputMatchKeys(traveler, history.getBusinessEntity());
@@ -457,7 +458,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Add LeadToAccount Matching Results for Contacts.
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             String accountEntity = BusinessEntity.Account.name();
-            log.warn("+++ LeadToAccount Account Match Data +++");
+            log.debug("+++ LeadToAccount Account Match Data +++");
 
             // Check if DUNS was a provided MatchKey and extract Input MatchKeys
             inputHasDuns = checkDunsAndPrintInputMatchKeys(traveler, accountEntity);
@@ -503,7 +504,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Log extra debug information about the match.
         generateEntityMatchHistoryDebugLogs(traveler);
 
-        log.warn("------------------------ END Entity Match History Debug Logs ------------------------");
+        log.debug("------------------------ END Entity Match History Debug Logs ------------------------");
 
         return history;
     }
@@ -540,7 +541,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 }
             }
         }
-        log.warn("Input MatchKeys:\n" + columnKeys + "\n" + columnValues);
+        log.debug("Input MatchKeys:\n" + columnKeys + "\n" + columnValues);
         return inputHasDuns;
     }
 
@@ -568,8 +569,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         } else {
             matched = "MATCHED";
         }
-        log.warn("Matched: " + matched);
-        log.warn("Entity Id: " + entityId);
+        log.debug("Matched: " + matched);
+        log.debug("Entity Id: " + entityId);
         return matched;
     }
 
@@ -587,7 +588,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             log.error("EntityMatchKeyTuples has null entry for Business Entity: " + entity);
             return null;
         }
-        log.warn("Full MatchKeyTuple: " + traveler.getEntityMatchKeyTuple(entity).toString());
+        log.debug("Full MatchKeyTuple: " + traveler.getEntityMatchKeyTuple(entity).toString());
         return traveler.getEntityMatchKeyTuple(entity);
     }
 
@@ -609,7 +610,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 }
             }
         }
-        log.warn("Customer Entity ID: " + customerEntityId);
+        log.debug("Customer Entity ID: " + customerEntityId);
         return customerEntityId;
     }
 
@@ -673,25 +674,25 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                             && StringUtils.isNotBlank(lookupResultList.get(i))
                             && BusinessEntity.Account.name().equals(entity)) {
                         type = EntityMatchType.ACCOUNTID;
-                        //log.warn("MatchKeyTuple contains CustomerAccountId: " + systemId.getValue());
+                        //log.debug("MatchKeyTuple contains CustomerAccountId: " + systemId.getValue());
                         break;
                     } else if (systemId.getKey().equals(InterfaceName.CustomerContactId.name())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && StringUtils.isNotBlank(lookupResultList.get(i))
                             && BusinessEntity.Contact.name().equals(entity)) {
                         type = EntityMatchType.CONTACTID;
-                        //log.warn("MatchKeyTuple contains CustomerContactId: " + systemId.getValue());
+                        //log.debug("MatchKeyTuple contains CustomerContactId: " + systemId.getValue());
                         break;
                     } else if (systemId.getKey().equals(InterfaceName.AccountId.name())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && BusinessEntity.Contact.name().equals(entity)) {
-                        //log.warn("MatchKeyTuple contains AccountId: " + systemId.getValue());
+                        //log.debug("MatchKeyTuple contains AccountId: " + systemId.getValue());
                         hasAccountId = true;
                     } else if (StringUtils.isNotBlank(systemId.getKey())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && StringUtils.isNotBlank(lookupResultList.get(i))) {
                         type = EntityMatchType.SYSTEMID;
-                        //log.warn("MatchKeyTuple contains SystemId: " + systemId.getKey() + " with value: "
+                        //log.debug("MatchKeyTuple contains SystemId: " + systemId.getKey() + " with value: "
                         //        + systemId.getValue());
                         break;
                     }
@@ -732,8 +733,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Log the match type and matched MatchKeyTuple here for non-LDC matches.  LDC matches require additional
         // processing.
         if (!EntityMatchType.LDC_MATCH.equals(type)) {
-            log.warn("MatchType is: " + type);
-            log.warn("MatchedMatchKeyTuple: " + tuple);
+            log.debug("MatchType is: " + type);
+            log.debug("MatchedMatchKeyTuple: " + tuple);
         } else if (!BusinessEntity.Account.name().equals(entity)) {
             log.error("Found LDC Match type for entity " + entity + " which should not be possible");
             return null;
@@ -755,11 +756,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         // Iterate through the lists of LDC Match Lookup Results and LDC Match Type / MatchKeyTuple pairs, to find the
-        // the first successful result.  The record the corresponding LDC Match Type and MatchKeyTuple of that result.
+        // the first successful result.  Then record the corresponding LDC Match Type and MatchKeyTuple of that result.
         if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
             log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
                     + " and EntityLdcMatchTypeToTupleList are not the same length: "
                     + ldcMatchLookupResultList.size() + " vs " + traveler.getEntityLdcMatchTypeToTupleList().size());
+            return null;
         }
 
         EntityMatchType type = null;
@@ -813,8 +815,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             // Don't set System ID since it is not used in LDC match even if it is set.
             tuple = fixedTuple;
         }
-        log.warn("MatchType is: " + type);
-        log.warn("MatchedMatchKeyTuple: " + tuple);
+        log.debug("MatchType is: " + type);
+        log.debug("MatchedMatchKeyTuple: " + tuple);
 
         return Pair.of(type, tuple);
     }
@@ -822,39 +824,39 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     // Assumes traveler.getEntityIds(), traveler.getEntityMatchKeyTuples(), and traveler.getEntityMatchLookupResults()
     // do not return null because they were checked by generateEntityMatchHistory().
     private void generateEntityMatchHistoryDebugLogs(MatchTraveler traveler) {
-        log.warn("------------------------ Entity Match History Extra Debug Logs ------------------------");
-        log.warn("EntityIds are: ");
+        log.debug("------------------------ Entity Match History Extra Debug Logs ------------------------");
+        log.debug("EntityIds are: ");
         for (Map.Entry<String, String> entry : traveler.getEntityIds().entrySet())  {
-            log.warn("   Entity: " + entry.getKey());
-            log.warn("   EntityId: " + entry.getValue());
+            log.debug("   Entity: " + entry.getKey());
+            log.debug("   EntityId: " + entry.getValue());
         }
 
         if (MapUtils.isEmpty(traveler.getNewEntityIds())) {
-            log.warn("Found null or empty NewEntityIds Map in MatchTraveler");
+            log.debug("Found null or empty NewEntityIds Map in MatchTraveler");
         } else {
-            log.warn("NewEntityIds is: ");
+            log.debug("NewEntityIds is: ");
             for (Map.Entry<String, String> entry : traveler.getNewEntityIds().entrySet())  {
-                log.warn("    Entity: " + entry.getKey());
-                log.warn("    NewEntityId: " + entry.getValue());
+                log.debug("    Entity: " + entry.getKey());
+                log.debug("    NewEntityId: " + entry.getValue());
             }
         }
 
-        log.warn("EntityMatchKeyTuples is: ");
+        log.debug("EntityMatchKeyTuples is: ");
         for (Map.Entry<String, MatchKeyTuple> entry : traveler.getEntityMatchKeyTuples().entrySet())  {
-            log.warn("    Entity: " + entry.getKey());
-            log.warn("    MatchKeyTuple: " + entry.getValue().toString());
+            log.debug("    Entity: " + entry.getKey());
+            log.debug("    MatchKeyTuple: " + entry.getValue().toString());
         }
 
-        log.warn("Iterate through EntityMatchLookupResults:");
+        log.debug("Iterate through EntityMatchLookupResults:");
         for (Map.Entry<String, List<Pair<MatchKeyTuple, List<String>>>> entry :
                 traveler.getEntityMatchLookupResults().entrySet()) {
             boolean foundResult = false;
-            log.warn("   MatchKeyTuple Lookup Results for " + entry.getKey());
+            log.debug("   MatchKeyTuple Lookup Results for " + entry.getKey());
             for (Pair<MatchKeyTuple, List<String>> pair : entry.getValue()) {
                 if (pair.getKey() == null) {
-                    log.warn("    MatchKeyTuple: null");
+                    log.debug("    MatchKeyTuple: null");
                 } else {
-                    log.warn("    MatchKeyTuple: " + pair.getKey().toString());
+                    log.debug("    MatchKeyTuple: " + pair.getKey().toString());
                 }
 
                 String resultList = "";
@@ -871,20 +873,20 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     }
                 }
 
-                log.warn("    Results: " + resultList);
+                log.debug("    Results: " + resultList);
             }
         }
 
         if (CollectionUtils.isNotEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
-            log.warn("Iterate through EntityLdcMatchTypeToTupleList:");
+            log.debug("Iterate through EntityLdcMatchTypeToTupleList:");
             for (Pair<EntityMatchType, MatchKeyTuple> pair : traveler.getEntityLdcMatchTypeToTupleList()) {
-                log.warn("    MatchType: " + pair.getLeft() + "  MatchKeyTuple: " + pair.getRight());
+                log.debug("    MatchType: " + pair.getLeft() + "  MatchKeyTuple: " + pair.getRight());
             }
         } else {
-            log.warn("EntityLdcMatchTypeToTupleList is empty");
+            log.debug("EntityLdcMatchTypeToTupleList is empty");
         }
 
-        //log.warn("------------------------ END Entity Match History Extra Debug Logs ------------------------");
+        //log.debug("------------------------ END Entity Match History Extra Debug Logs ------------------------");
     }
 
 }
