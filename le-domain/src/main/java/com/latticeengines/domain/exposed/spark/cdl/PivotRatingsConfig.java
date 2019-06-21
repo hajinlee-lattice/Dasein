@@ -33,6 +33,9 @@ public class PivotRatingsConfig extends SparkJobConfig {
     @JsonProperty("AIModelIds")
     private List<String> aiModelIds;
 
+    @JsonProperty("InactiveEngineIds")
+    private List<String> inactiveEngineIds;
+
     public Map<String, String> getIdAttrsMap() {
         return idAttrsMap;
     }
@@ -79,5 +82,13 @@ public class PivotRatingsConfig extends SparkJobConfig {
 
     public void setAiModelIds(List<String> aiModelIds) {
         this.aiModelIds = aiModelIds;
+    }
+
+    public List<String> getInactiveEngineIds() {
+        return inactiveEngineIds;
+    }
+
+    public void setInactiveEngineIds(List<String> inactiveEngineIds) {
+        this.inactiveEngineIds = inactiveEngineIds;
     }
 }
