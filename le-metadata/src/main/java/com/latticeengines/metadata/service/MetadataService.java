@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -45,6 +46,8 @@ public interface MetadataService {
     void setStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
 
     Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes);
+
+    Boolean fixAttributes(CustomerSpace space, String tableName, List<AttributeFixer> attributeFixerList);
 
     List<Attribute> getTableAttributes(CustomerSpace customerSpace, String tableName, Pageable pageable);
 

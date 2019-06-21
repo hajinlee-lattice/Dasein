@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -135,6 +138,44 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         mdService.renameTable(CustomerSpace.parse(customerSpace1), table.getName(), newName);
         Table newTable = mdService.getTable(CustomerSpace.parse(customerSpace1), newName, true);
         assertEquals(newTable.getPid(), table.getPid());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "renameTable" })
+    public void fixTableAttribute() {
+        Table newTable = mdService.getTable(CustomerSpace.parse(customerSpace1), TABLE1 + "-rename1", true);
+        Long tablePid = newTable.getPid();
+        Assert.assertNotNull(newTable);
+        Attribute attr1 = newTable.getAttribute("OwnerId");
+        Attribute attr2 = newTable.getAttribute("CreatedDate");
+
+        Assert.assertNotNull(attr1);
+        Assert.assertNotNull(attr2);
+        Assert.assertEquals(attr1.getPhysicalDataType(), "string");
+        Assert.assertTrue(StringUtils.isEmpty(attr1.getFundamentalType()));
+        Assert.assertNull(attr2.getDateFormatString());
+        AttributeFixer attributeFixer1 = new AttributeFixer();
+        attributeFixer1.setName("OwnerId");
+        attributeFixer1.setPhysicalDataType("Int");
+        attributeFixer1.setFundamentalType(FundamentalType.NUMERIC);
+
+        AttributeFixer attributeFixer2 = new AttributeFixer();
+        attributeFixer2.setName("CreatedDate");
+        attributeFixer2.setDateFormat("MM/DD/YYYY");
+
+        mdService.fixAttributes(CustomerSpace.parse(customerSpace1), newTable.getName(),
+                Arrays.asList(attributeFixer1, attributeFixer2));
+        newTable = mdService.getTable(CustomerSpace.parse(customerSpace1), TABLE1 + "-rename1", true);
+        Assert.assertEquals(newTable.getPid(), tablePid);
+
+        attr1 = newTable.getAttribute("OwnerId");
+        attr2 = newTable.getAttribute("CreatedDate");
+
+        Assert.assertNotNull(attr1);
+        Assert.assertNotNull(attr2);
+        Assert.assertEquals(attr1.getPhysicalDataType(), "Int");
+        Assert.assertEquals(attr1.getFundamentalType(), FundamentalType.NUMERIC.name());
+        Assert.assertEquals(attr2.getDateFormatString(), "MM/DD/YYYY");
+
     }
 
     @DataProvider(name = "tableProvider")

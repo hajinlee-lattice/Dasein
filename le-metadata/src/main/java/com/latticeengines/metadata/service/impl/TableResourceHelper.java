@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -181,6 +182,11 @@ public class TableResourceHelper {
         log.info(String.format("createTableAttributes(%s, %s, %d)", customerSpace, tableName, (attributes!=null ? attributes.size() : 0)));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.addAttributes(space, tableName, attributes);
+    }
+
+    public Boolean fixTableAttributes(String customerSpace, String tableName, List<AttributeFixer> attributeFixerList) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.fixAttributes(space, tableName, attributeFixerList);
     }
 
 }
