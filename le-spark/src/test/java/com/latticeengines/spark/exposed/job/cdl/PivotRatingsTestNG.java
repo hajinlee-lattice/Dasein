@@ -76,8 +76,7 @@ public class PivotRatingsTestNG extends SparkJobFunctionalTestNGBase {
             Assert.assertFalse(attrs.contains("engine_ai4_pv"));
             Assert.assertTrue(attrs.contains("engine_ai4_score"));
         });
-        System.out.println(count.get());
-//        Assert.assertEquals(count.get(), 3);
+        Assert.assertEquals(count.get(), 56);
         return true;
     }
 
