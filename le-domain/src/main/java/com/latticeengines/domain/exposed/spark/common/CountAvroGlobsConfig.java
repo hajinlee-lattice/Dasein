@@ -3,12 +3,12 @@ package com.latticeengines.domain.exposed.spark.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class SparkCountRecordsConfig extends SparkJobConfig {
+public class CountAvroGlobsConfig extends SparkJobConfig {
 
     public static final String NAME = "sparkCount";
 
-    @JsonProperty("globs")
-    public String[] globs;
+    @JsonProperty("avroGlobs")
+    public String[] avroGlobs;
 
     @Override
     @JsonProperty("Name")

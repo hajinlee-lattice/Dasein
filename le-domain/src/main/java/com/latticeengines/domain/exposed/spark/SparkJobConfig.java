@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
-import com.latticeengines.domain.exposed.spark.common.SparkCountRecordsConfig;
+import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 
 import reactor.core.publisher.Flux;
@@ -42,7 +42,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = PivotRatingsConfig.class, name = PivotRatingsConfig.NAME), //
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
         @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //
-        @JsonSubTypes.Type(value = SparkCountRecordsConfig.class, name = SparkCountRecordsConfig.NAME), //
+        @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
 })
 public abstract class SparkJobConfig {
 

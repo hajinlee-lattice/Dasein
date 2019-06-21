@@ -1,30 +1,26 @@
 package com.latticeengines.spark.exposed.job.common;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.common.SparkCountRecordsConfig;
+import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class SparkCountRecordsJobTestNG extends SparkJobFunctionalTestNGBase {
+public class CountAvroGlobsTestNG extends SparkJobFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(SparkCountRecordsJobTestNG.class);
     @Inject
     private Configuration yarnConfiguration;
 
     @Test(groups = "functional")
-    public void testAvro() throws IOException {
+    public void testAvro() throws Exception {
         // copy local test avro file onto hdfs
         InputStream is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("com/latticeengines/common/exposed/util/SparkCountRecordsTest/compressed.avro");
@@ -45,22 +41,21 @@ public class SparkCountRecordsJobTestNG extends SparkJobFunctionalTestNGBase {
         // setup wildcard to count records in Avro files
         ArrayList<String> globs = new ArrayList<>();
         globs.add("hdfs://" + tempDir + "/*.avro");
-        SparkCountRecordsConfig config = new SparkCountRecordsConfig();
-        config.globs = globs.toArray(new String[globs.size()]);
-        Assert.assertNotNull(config.globs);
-        SparkJobResult result = runSparkJob(SparkCountRecordsJob.class, config);
+        CountAvroGlobsConfig config = new CountAvroGlobsConfig();
+        config.avroGlobs = globs.toArray(new String[globs.size()]);
+        Assert.assertNotNull(config.avroGlobs);
+        SparkJobResult result = runSparkJob(CountAvroGlobs.class, config);
         Assert.assertEquals(result.getOutput(), "384");
         // TODO - remove temp dir SparkCountAvroRecords
     }
 
-    @Test(groups = "functional", expectedExceptions = Exception.class)
-    public void testParquet() throws IOException {
-        /* should fail when file is no parquet */
+    @Test(groups = "functional", expectedExceptions = {RuntimeException.class})
+    public void testParquet() throws RuntimeException {
+        /* should fail when file is not Avro */
         String[] globs = {"some/meaningless/directory/file.with.invalid.extension"};
-        SparkCountRecordsConfig config = new SparkCountRecordsConfig();
-        config.globs = globs;
-        Assert.assertNotNull(config.globs);
-        SparkJobResult result = runSparkJob(SparkCountRecordsJob.class, config);
-        Assert.assertTrue(true);
+        CountAvroGlobsConfig config = new CountAvroGlobsConfig();
+        config.avroGlobs = globs;
+        Assert.assertNotNull(config.avroGlobs);
+        runSparkJob(CountAvroGlobs.class, config);
     }
 }
