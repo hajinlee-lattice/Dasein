@@ -1020,14 +1020,11 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-        this.validateTemplate = function(fieldDocument, templateData) {
-
-            console.log(templateData);
-            console.log(fieldDocument);
+        this.validateTemplate = function(fileName, templateData, fieldDocument) {
 
             var deferred = $q.defer(),
                 entity = templateData.Entity,
-                displayName = templateData.TemplateName,
+                displayName = fileName,
                 feedType = templateData.FeedType,
                 source = 'File',
                 params = { 
@@ -1045,17 +1042,10 @@ angular.module('lp.import')
                 data: fieldDocument
             }).then(
                 function onSuccess(response) {
-
-                    console.log("!!!!!!!!!!!!!!!!!!!!", response);
-
+                    console.log(response);
                     var result = response.data;
-
-                    if (result != null && result !== "" && result.Success == true) {
-                        //////console.log("!!!!!!!!!!!!!!!!!!!", result);
-
-                        ImportUtils.setLatticeSchema(result.Result);
-                        deferred.resolve(result.Result);
-
+                    if (result.length == 0) {
+                        deferred.resolve(result);
                     } else {
 
                         var errors = result.Errors;
