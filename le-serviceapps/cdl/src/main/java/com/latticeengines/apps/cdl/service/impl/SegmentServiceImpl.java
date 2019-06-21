@@ -33,11 +33,13 @@ import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
@@ -213,10 +215,20 @@ public class SegmentServiceImpl implements SegmentService {
             FrontEndRestriction contactRestriction) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        if (accountRestriction != null) {
-            frontEndQuery.setAccountRestriction(accountRestriction);
+        Restriction accountExists = Restriction.builder() //
+                .let(BusinessEntity.Account, InterfaceName.AccountId.name()).isNotNull().build();
+        if (accountRestriction != null && accountRestriction.getRestriction() != null) {
+            if (BusinessEntity.Contact.equals(entity)) {
+                Restriction combined = Restriction.builder() //
+                        .and(accountRestriction.getRestriction(), accountExists).build();
+                frontEndQuery.setAccountRestriction(new FrontEndRestriction(combined));
+            } else {
+                frontEndQuery.setAccountRestriction(accountRestriction);
+            }
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountExists));
         }
-        if (contactRestriction != null) {
+        if (contactRestriction != null && contactRestriction.getRestriction() != null) {
             frontEndQuery.setContactRestriction(contactRestriction);
         }
         frontEndQuery.setMainEntity(entity);

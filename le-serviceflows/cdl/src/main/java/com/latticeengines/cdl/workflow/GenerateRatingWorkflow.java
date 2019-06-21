@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.rating.ExtractInactiveRatings;
 import com.latticeengines.cdl.workflow.steps.rating.ExtractRuleBasedRatings;
 import com.latticeengines.cdl.workflow.steps.rating.PivotRatingStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
@@ -27,9 +26,6 @@ public class GenerateRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkf
     private ExtractRuleBasedRatings extractRuleBasedRatings;
 
     @Inject
-    private ExtractInactiveRatings extractInactiveRatings;
-
-    @Inject
     private PivotRatingStep pivotRatingStep;
 
     @Override
@@ -37,7 +33,6 @@ public class GenerateRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(generateAIRatingWorkflow) //
                 .next(extractRuleBasedRatings) //
-                .next(extractInactiveRatings) //
                 .next(pivotRatingStep) //
                 .build();
     }
