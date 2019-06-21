@@ -92,4 +92,15 @@ public class FeatureFlagUtils {
         }
         return false;
     }
+
+    public static boolean isPerTenantMatchReportEnabled(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
+                    " feature flag!", e);
+            return false;
+        }
+    }
 }

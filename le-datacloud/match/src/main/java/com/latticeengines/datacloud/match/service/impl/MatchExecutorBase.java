@@ -30,9 +30,7 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -182,6 +180,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
         log.debug("$JAW$ Publishing MatchHistories to stream " + deliveryStreamName + " with prefix " + s3ObjectPrefix);
+        log.info("$JAW$ Publishing MatchHistories to stream " + deliveryStreamName + " with prefix " + s3ObjectPrefix);
         firehoseService.sendBatch(deliveryStreamName, s3ObjectPrefix, histories);
     }
 
@@ -413,39 +412,46 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     private String getS3ObjectPrefix(MatchContext matchContext) {
-        log.debug("$JAW$ Match Context Tenant is " + matchContext.getInput().getTenant());
-        if (matchContext.getInput().getTenant() != null) {
-            log.debug("$JAW$ Tenant name " + matchContext.getInput().getTenant().getName());
-            log.debug("$JAW$ Tenant id " + matchContext.getInput().getTenant().getId());
-        }
-
         if (matchContext.getInput().getTenant() != null &&
                 StringUtils.isNotBlank(matchContext.getInput().getTenant().getId())) {
             Tenant tenant = matchContext.getInput().getTenant();
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
             String tenantName = customerSpace.getTenantId();
-            log.debug("$JAW$ Match Context Tenant is " + tenantName + " with id " + tenant.getId());
+            log.debug("$JAW$ MatchContext Tenant is " + tenantName + " with id " + tenant.getId());
 
-            if (false) {
-                FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
-            }
-            try {
-                /*
-                if (flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
-                        && Boolean.TRUE.equals(flags.get(
-                                LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()))) {
-                    return matchContext.getInput().getTenant().getName() + "/";
-                }
-                */
-                // FOR TESTING ONLY
+            if (matchContext.getInput().isPerTenantMatchReportEnabled()) {
+                log.error("$JAW$ S3ObjectPrefix is " + tenantName + "/");
                 log.debug("$JAW$ S3ObjectPrefix is " + tenantName + "/");
                 return tenantName + "/";
-            } catch (Exception e) {
-                log.debug("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
-                        " feature flag!", e);
+            } else {
+                log.error("$JAW$ Not using S3ObjectPrefix for " + tenantName);
+                log.debug("$JAW$ Not using S3ObjectPrefix for " + tenantName);
             }
+        } else {
+            log.warn("$JAW$ Could not find Tenant or Tenant ID from MatchContext");
         }
-        log.debug("$JAW$ Match Context Tenant is null");
         return null;
+
+
+        /*
+        if (false) {
+            FeatureFlagValueMap flags = batonService.getFeatureFlags(customerSpace);
+        }
+        try {
+
+            if (flags.containsKey(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName())
+                    && Boolean.TRUE.equals(flags.get(
+                            LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName()))) {
+                return matchContext.getInput().getTenant().getName() + "/";
+            }
+
+            // FOR TESTING ONLY
+            log.debug("$JAW$ S3ObjectPrefix is " + tenantName + "/");
+            return tenantName + "/";
+        } catch (Exception e) {
+            log.debug("Error when retrieving " + LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName() +
+                    " feature flag!", e);
+        }
+        */
     }
 }

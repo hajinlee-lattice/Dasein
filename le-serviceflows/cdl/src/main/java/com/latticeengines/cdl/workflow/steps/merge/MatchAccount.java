@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component(MatchAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountStepConfiguration> {
-
     private static final Logger log = LoggerFactory.getLogger(MatchAccount.class);
 
     static final String BEAN_NAME = "matchAccount";
@@ -84,6 +83,8 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
+        matchInput.setPerTenantMatchReportEnabled(configuration.isPerTenantMatchReportEnabled());
+        log.info("MatchAccount: PerTenantMatchReportEnabled=" + configuration.isPerTenantMatchReportEnabled());
         Set<String> columnNames = getInputTableColumnNames(0);
         if (configuration.isEntityMatchEnabled()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
