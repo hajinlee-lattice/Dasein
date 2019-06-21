@@ -75,6 +75,8 @@ class SystemsComponent extends Component {
             actions.fetchRatings([playstore.play.ratingEngine.id], false);
         }
 
+        actions.fetchLookupIdMapping();
+
         if(playstore.play.name) {
             if(!playstore.connections) {
                 actions.fetchConnections(playstore.play.name);
