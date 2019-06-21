@@ -348,6 +348,7 @@ public enum LedpCode {
     LEDP_18221("User not found"),
     LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"),
     LEDP_18223("Failed to update import system priority: {0}"),
+    LEDP_18224("AWS credentials have not been generated yet. Please ask your administrator to generate one first."),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
