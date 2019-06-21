@@ -1,3 +1,4 @@
+
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
-import com.latticeengines.cdl.workflow.steps.merge.RematchAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -36,9 +36,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private MergeAccount mergeAccount;
-
-    @Inject
-    private RematchAccount rematchAccount;
 
     @Inject
     private CloneAccount cloneAccount;
@@ -122,11 +119,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return super.shouldMerge(step) || hasEmbeddedAccounts(step);
-    }
-
-    @Override
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         rebuildNotForDataCloudChange = super.shouldRebuild(step);
         if (!rebuildNotForDataCloudChange) {
@@ -136,10 +128,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             } else if (hasAttrLifeCycleChange && !reset) {
                 log.info("Should rebuild, because detected attr life cycle change.");
                 rebuildNotForDataCloudChange = true;
-            } else if (hasEmbeddedAccounts(step) && !reset && !hasActiveServingStore) {
-                log.info(
-                        "Should rebuild, because detected embedded accounts from other entity and there is no active serving store");
-                rebuildNotForDataCloudChange = true;
             }
         }
         if (!rebuildNotForDataCloudChange && (dataCloudChanged && !reset)) {
@@ -147,26 +135,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             return true;
         }
         return rebuildNotForDataCloudChange;
-    }
-
-    @Override
-    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (super.shouldUpdate(step)) {
-            return true;
-        }
-        if (!rebuild && hasEmbeddedAccounts(step)) {
-            log.info("Should update, because detected embedded accounts from other entity");
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (hasEmbeddedAccounts(step)) {
-            return false;
-        }
-        return super.shouldReset(step);
     }
 
     @Override
@@ -198,16 +166,17 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return rebuild || update;
     }
 
-    /*
-     * check whether we have embedded accounts created by matching other entities
-     */
-    private boolean hasEmbeddedAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
+    @Override
+    protected boolean hasEmbeddedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
         if (step == null) {
             return false;
         }
         hasEmbeddedAccount = StringUtils
                 .isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
                 || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
+        log.info("Found embedded account from contact: {}, from transaction: {}",
+                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE)),
+                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)));
         return hasEmbeddedAccount;
     }
 }
