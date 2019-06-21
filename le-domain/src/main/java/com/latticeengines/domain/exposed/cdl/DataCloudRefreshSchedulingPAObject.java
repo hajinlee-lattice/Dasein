@@ -45,11 +45,6 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
     }
 
     @Override
-    public Class<DataCloudRefreshSchedulingPAObject> getInstance() {
-        return DataCloudRefreshSchedulingPAObject.class;
-    }
-
-    @Override
     public int compareTo(SchedulingPAObject o) {
         return super.compareTo(o);
     }

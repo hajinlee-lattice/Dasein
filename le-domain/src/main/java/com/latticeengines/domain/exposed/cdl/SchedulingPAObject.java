@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.security.TenantType;
         @JsonSubTypes.Type(value = AutoScheduleSchedulingPAObject.class, name = "AutoScheduleSchedulingPAObject"),
         @JsonSubTypes.Type(value = DataCloudRefreshSchedulingPAObject.class, name = "DataCloudRefreshSchedulingPAObject"),
 })
-public abstract class SchedulingPAObject<T extends SchedulingPAObject> implements Comparable<SchedulingPAObject> {
+public abstract class SchedulingPAObject implements Comparable<SchedulingPAObject> {
 
     /**
      * tenantActivity contains all information we used to sort or check Constraint
@@ -23,8 +23,6 @@ public abstract class SchedulingPAObject<T extends SchedulingPAObject> implement
     abstract List<Constraint> getPushConstraints();
 
     abstract List<Constraint> getPopConstraints();
-
-    public abstract Class<T> getInstance();
 
     public SchedulingPAObject(TenantActivity tenantActivity) {
         this.tenantActivity = tenantActivity;
