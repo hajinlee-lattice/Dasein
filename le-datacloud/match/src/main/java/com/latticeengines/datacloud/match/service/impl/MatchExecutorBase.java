@@ -112,7 +112,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void processMatchHistory(MatchContext matchContext) {
         if (!isMatchHistoryEnabled) {
-            log.debug("MatchHistory not enabled, returning.");
+            log.info("MatchHistory not enabled, returning.");
             return;
         }
         List<InternalOutputRecord> records = matchContext.getInternalResults();
@@ -158,13 +158,13 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         String s3ObjectPrefix = getS3ObjectPrefix(matchContext);
-        log.debug("S3 Prefix is: " + s3ObjectPrefix);
+        log.error("S3 Prefix is: " + s3ObjectPrefix);
         publishMatchHistory(s3ObjectPrefix, matchHistories);
     }
 
     private void publishMatchHistory(String s3ObjectPrefix, List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
-            log.debug("MatchHistory not enabled, returning.");
+            log.info("MatchHistory not enabled, returning.");
             return;
         }
         if (CollectionUtils.isEmpty(matchHistories)) {
@@ -417,7 +417,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             Tenant tenant = matchContext.getInput().getTenant();
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
             String tenantName = customerSpace.getTenantId();
-            log.debug("$JAW$ MatchContext Tenant is " + tenantName + " with id " + tenant.getId());
+            log.error("$JAW$ MatchContext Tenant is " + tenantName + " with id " + tenant.getId());
 
             if (matchContext.getInput().isPerTenantMatchReportEnabled()) {
                 log.error("$JAW$ S3ObjectPrefix is " + tenantName + "/");
