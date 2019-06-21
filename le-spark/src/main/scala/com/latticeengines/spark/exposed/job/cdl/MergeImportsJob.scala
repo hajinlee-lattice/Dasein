@@ -7,6 +7,7 @@ import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, lit, row_number, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
@@ -20,6 +21,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
     val merged = processedInputs.zipWithIndex.reduce((l, r) => {
       val lhsDf = l._1
+      val lhsIdx = l._2
       val rhsDf = r._1
       val rhsIdx = r._2
       val merge2 =
@@ -29,7 +31,14 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         } else {
           MergeUtils.concat2(lhsDf, rhsDf)
         }
-      (merge2, rhsIdx)
+      if (lhsIdx % 100 == 0 && lhsIdx > 0) {
+        lhsDf.unpersist(blocking = false)
+      }
+      if (rhsIdx % 100 == 0) {
+        (merge2.persist(StorageLevel.DISK_ONLY).checkpoint(), rhsIdx)
+      } else {
+        (merge2, rhsIdx)
+      }
     })._1
 
     val result =
