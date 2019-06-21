@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
-import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
 import com.latticeengines.cdl.workflow.steps.rating.ExtractScoringTarget;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
@@ -33,9 +32,6 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
 
     @Inject
     private ExtractScoringTarget extractScoringTarget;
-
-    @Inject
-    private CreateScoringTargetTable createScoringTargetTable;
 
     @Inject
     private CreateCdlEventTableStep createCdlEventTable;
@@ -77,7 +73,6 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         if (!isLPI) {
             builder //
                     .next(extractScoringTarget) //
-//                    .next(createScoringTargetTable) //
                     .next(createCdlEventTable); //
         }
         builder.next(matchDataCloud) //

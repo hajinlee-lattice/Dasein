@@ -32,8 +32,7 @@ import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 
 @Component("processMatchResult")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, //
-        ParseMatchResultJobConfig, ParseMatchResultJob> {
+public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, ParseMatchResultJobConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
 

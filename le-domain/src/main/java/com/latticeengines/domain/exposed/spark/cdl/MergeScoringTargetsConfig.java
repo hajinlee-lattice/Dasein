@@ -13,6 +13,9 @@ public class MergeScoringTargetsConfig extends SparkJobConfig {
     @JsonProperty("Containers")
     private List<RatingModelContainer> containers;
 
+    @JsonProperty("IsRuleBased")
+    private boolean ruleBased;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -25,6 +28,14 @@ public class MergeScoringTargetsConfig extends SparkJobConfig {
 
     public void setContainers(List<RatingModelContainer> containers) {
         this.containers = containers;
+    }
+
+    public boolean isRuleBased() {
+        return ruleBased;
+    }
+
+    public void setRuleBased(boolean ruleBased) {
+        this.ruleBased = ruleBased;
     }
 
 }

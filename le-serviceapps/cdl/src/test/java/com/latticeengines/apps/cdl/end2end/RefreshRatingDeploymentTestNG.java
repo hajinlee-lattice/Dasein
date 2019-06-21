@@ -51,7 +51,7 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1559890354442"; // "JLM1533618545277";
+    private static final String EXISTING_TENANT = "LETest1561082636718"; // "JLM1533618545277";
 
     private static final String LOADING_CHECKPOINT = UpdateTransactionDeploymentTestNG.CHECK_POINT;
 

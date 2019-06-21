@@ -56,7 +56,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("saveAtlasExportCSV")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguration, ConvertToCSVConfig, ConvertToCSVJob> {
+public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguration, ConvertToCSVConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(SaveAtlasExportCSV.class);
     private static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm'Z'"; // default date format

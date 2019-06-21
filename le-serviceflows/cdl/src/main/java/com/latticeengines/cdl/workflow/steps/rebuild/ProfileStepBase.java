@@ -114,12 +114,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return configureBucketStep(step, outputTablePrefix);
     }
 
-    protected TransformationStepConfig bucket(int profileStep, int inputStep, String outputTablePrefix) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(profileStep, inputStep));
-        return configureBucketStep(step, outputTablePrefix);
-    }
-
     private TransformationStepConfig configureBucketStep(TransformationStepConfig step, String outputTablePrefix) {
         step.setTransformer(TRANSFORMER_BUCKETER);
 

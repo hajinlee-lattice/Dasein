@@ -847,7 +847,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isNumericAttr(Field field, ProfileConfig config, ProfileParameters paras) {
-            Schema.Type type = field.schema().getTypes().get(0).getType();
+            Schema.Type type = AvroUtils.getType(field);
             if (NUM_TYPES.contains(type)) {
                 // Skip numerical attributes that are actually Date timestamps since they are processed separately.
                 if (field.getProp("logicalType") != null && field.getProp("logicalType").equals("Date")) {
@@ -875,7 +875,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
         private static boolean isBooleanAttr(Field field, Map<String, ProfileArgument> amAttrConfig,
                 ProfileParameters paras) {
-            Schema.Type type = field.schema().getTypes().get(0).getType();
+            Schema.Type type = AvroUtils.getType(field);
             if (BOOL_TYPES.contains(type)
                     || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
                 log.debug(String.format("Boolean bucketed attr %s (type %s encode)", field.name(), type.getName()));
@@ -891,7 +891,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isCategoricalAttr(Field field, ProfileConfig config, ProfileParameters paras) {
-            Schema.Type type = field.schema().getTypes().get(0).getType();
+            Schema.Type type = AvroUtils.getType(field);
             if (CAT_TYPES.contains(type)) {
                 switch (config.getStage()) {
                 case DataCloudConstants.PROFILE_STAGE_SEGMENT:
@@ -921,7 +921,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return false;
             }
 
-            Schema.Type type = field.schema().getTypes().get(0).getType();
+            Schema.Type type = AvroUtils.getType(field);
             // Make sure the schema type is Long which is the only supported type for dates.
             if (DATE_TYPES.contains(type)) {
                 // Check that the field has Logical Type "Date" set.

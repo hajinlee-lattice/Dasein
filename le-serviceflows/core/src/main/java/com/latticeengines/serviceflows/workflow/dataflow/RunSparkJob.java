@@ -23,17 +23,17 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
-public abstract class RunSparkJob<S extends BaseStepConfiguration, //
-        C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
+public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends SparkJobConfig> //
+        extends BaseSparkStep<S> { //
 
     private static final Logger log = LoggerFactory.getLogger(RunSparkJob.class);
 
     @Inject
     protected SparkJobService sparkJobService;
 
-    protected C jobConfig;
+    private C jobConfig;
 
-    protected abstract Class<J> getJobClz();
+    protected abstract Class<? extends AbstractSparkJob<C>> getJobClz();
     /**
      * Set job config except jobName and workspace.
      */

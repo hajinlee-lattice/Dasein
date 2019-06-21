@@ -29,7 +29,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
-public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConfiguration> extends RunSparkJob<T, UpsertConfig, UpsertJob> {
+public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConfiguration> //
+        extends RunSparkJob<T, UpsertConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseMergeTableRoleDiff.class);
 
