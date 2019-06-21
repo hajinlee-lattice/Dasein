@@ -19,6 +19,10 @@ section.import-jobs {
             padding: 10px;
             color: #F16A24;
         }
+        .icon-warning{
+            @extend .icon-failed;
+            color: #FFBD48;
+        }
         .partial {
             color: #F16A24;
             ;
@@ -152,7 +156,8 @@ section.import-jobs {
           flex: 1;
       }
       .text-icon-tooltip-container{
-        width: 50%;
+        width: 0;
+        padding-left: 8px;
         height: 100%;
         display: flex;
         justify-content: center;
