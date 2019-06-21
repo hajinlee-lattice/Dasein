@@ -988,7 +988,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Select Segment'
+                    pageTitle: 'Models'
                 },
                 resolve: {
                     Segments: function (SegmentService) {
@@ -1020,7 +1020,7 @@ angular
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Add Attributes',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
@@ -1128,7 +1128,7 @@ angular
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Add Attributes',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
@@ -1144,7 +1144,7 @@ angular
                 url: '/rules',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Create Rules'
+                    pageTitle: 'Models'
                 },
                 onEnter: ['$stateParams', 'RatingsEngineService', function($stateParams, RatingsEngineService) {
                     var id = $stateParams.rating_id;
@@ -1220,7 +1220,7 @@ angular
                 url: '/summary',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Review Summary',
+                    pageTitle: 'Models',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
