@@ -54,6 +54,14 @@ function chron(frequency) {
     return schedule[frequency];
 }
 
+function isAudience(externalSystemName, showlist) {
+    let list = ['Marketo'];
+    if(showlist) {
+        return list;
+    }
+    return (list.indexOf(externalSystemName) !== -1);
+}
+
 class LaunchComponent extends Component {
     constructor(props) {
         super(props);
@@ -64,6 +72,7 @@ class LaunchComponent extends Component {
 
         this.state = {
             play: props.play,
+            externalSystemName: (connection && connection.lookupIdMap && connection.lookupIdMap.externalSystemName ? connection.lookupIdMap.externalSystemName : null),
             ratings: null,
             coverage: null,
             // FIXME crappy hack to select all buckets because of setState recursion
@@ -76,13 +85,14 @@ class LaunchComponent extends Component {
             destinationAccountId: null,
             launchAccountsCoverage: null,
             launchSchedule: null,
-            launchingState: 'unlaunching'
+            launchingState: 'unlaunching',
+            programs: null
         };
-
     }
 
     componentDidMount() {
-        let playstore = store.getState()['playbook'];
+        let playstore = store.getState()['playbook'],
+            vm = this;
         
         this.setState({launchLoading: playstore.launchLoading});
 
@@ -92,6 +102,19 @@ class LaunchComponent extends Component {
             } else {
                 this.setState({ratings: playstore.ratings});
             }
+        }
+
+        if(this.state.externalSystemName && isAudience(this.state.externalSystemName)) {
+            actions.fetchUserDocument({}, function() {
+                actions.fetchPrograms({ // get the programs list
+                    externalSystemName: vm.state.externalSystemName
+                }, function() {
+                    let playstore = store.getState()['playbook'];
+
+                    vm.state.programs = playstore.programs || [];
+                    vm.setState(vm.state);
+                });
+            });
         }
 
         this.getLaunchAccountsCoverage(this.state.play.name, {
@@ -259,6 +282,26 @@ class LaunchComponent extends Component {
         }
     }
 
+    makeProgramsList(programs) {
+        if(programs && programs.length) {
+            return (
+                <div className={'launch-section programs'}>
+                    <h2>{this.state.externalSystemName} Destination List</h2>
+                    <select>
+                        <option>Program</option>
+                        <option>Program 2</option>
+                        <option>Program 3</option>
+                    </select>
+                    <select>
+                        <option>Program list</option>
+                        <option>Program list 2</option>
+                        <option>Program list 3</option>
+                    </select>
+                </div>
+            );
+        }
+    }
+
     launch = (play, connection, opts) => {
         // FIXME crappy hack to select all buckets because of setState recursion
         var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
@@ -270,7 +313,6 @@ class LaunchComponent extends Component {
             play = opts.play || store.getState().playbook.play,
             ratings = store.getState().playbook.ratings,
             launchObj = opts.launchObj || {
-                //id: (connection.playLaunch ? connection.playLaunch.id : ''), // FIXME just a hack for now to unblock me, this shouldn't be needed
                 bucketsToLaunch: this.state.selectedBuckets,
                 destinationOrgId: connection.lookupIdMap.orgId,
                 destinationSysType: connection.lookupIdMap.externalSystemType,
@@ -385,7 +427,15 @@ class LaunchComponent extends Component {
     }
 
     render() {
-        if(this.state.launchAccountsCoverage) {
+        var loaded = (this.state.launchAccountsCoverage);
+        if(isAudience(this.state.externalSystemName)) {
+            /**
+             * I set this.state.programs to an empty array, from null, if the API doesn't send anything back 
+             * so the modal will wait for the response in this case, but it will still load even if it's empty
+             */
+            loaded = loaded && (this.state.programs);
+        }
+        if(loaded) {
             var play = this.state.play,
                 connection = this.props.connection,
                 config = this.props.config,
@@ -445,6 +495,7 @@ class LaunchComponent extends Component {
                                 </li>
                             </ul>
                         </div>
+                        {this.makeProgramsList(this.state.programs)}
                         <div className="launch-section schedule">
                             <h2>Launch Schedule</h2>
                             <label for="schedule">Launch</label> 
