@@ -71,7 +71,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             checkManyUpdate(step);
             reset = shouldReset(step);
             rebuild = shouldRebuild(step);
-            update = shouldUpdate();
+            update = shouldUpdate(step);
             log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
             saveDecisions(step);
             if (reset && (rebuild || update)) {
@@ -83,7 +83,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (belongsToUpdate(seq)) {
-            update = shouldUpdate();
+            update = shouldUpdate(step);
             if (!update) {
                 log.info(msg + ", because not in update mode.");
                 return true;
@@ -201,7 +201,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = step.getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
-        hasImports = MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(mainEntity());
+        hasImports = (MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(mainEntity()))
+                || hasEmbeddedEntity(step);
         if (hasImports) {
             log.info("Found imports for " + mainEntity().name());
         } else {
@@ -313,7 +314,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
-    protected boolean shouldUpdate() {
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping update.");
             return false;
@@ -361,5 +362,16 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("No account batch store.");
         }
         return hasAccounts;
+    }
+
+    /**
+     * Currently only Account entity could have embedded account from
+     * contact/transaction import when entity match is turned on
+     *
+     * @param step
+     * @return
+     */
+    protected boolean hasEmbeddedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
+        return false;
     }
 }

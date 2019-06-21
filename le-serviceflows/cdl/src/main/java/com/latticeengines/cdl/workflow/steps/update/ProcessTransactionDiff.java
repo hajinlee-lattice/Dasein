@@ -96,7 +96,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
         entityMatchEnabled = configuration.isEntityMatchEnabled();
         if (entityMatchEnabled) {
-            log.info("Entity match is enabled for transaction rebuild");
+            log.info("Entity match is enabled for transaction update");
         }
     }
 
@@ -260,13 +260,23 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.TotalQuantity.name()));
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
-        config.setGroupByFields(Arrays.asList( //
+        List<String> groupByFields = new ArrayList<>();
+        if (entityMatchEnabled) {
+            // In the future, Transaction could have more account fields, need
+            // to consider:
+            // 1. Are they needed in transaction store
+            // 2. How to properly and efficiently retain them -- Keeping adding
+            // in group fields could have performance concern; Add a join?
+            groupByFields.add(InterfaceName.CustomerAccountId.name());
+        }
+        groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
+        config.setGroupByFields(groupByFields);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -297,13 +307,23 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
-        config.setGroupByFields(Arrays.asList( //
+        List<String> groupByFields = new ArrayList<>();
+        if (entityMatchEnabled) {
+            // In the future, Transaction could have more account fields, need
+            // to consider:
+            // 1. Are they needed in transaction store
+            // 2. How to properly and efficiently retain them -- Keeping adding
+            // in group fields could have performance concern; Add a join?
+            groupByFields.add(InterfaceName.CustomerAccountId.name());
+        }
+        groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.PeriodId.name(), //
                 InterfaceName.PeriodName.name()));
+        config.setGroupByFields(groupByFields);
         step.setConfiguration(JsonUtils.serialize(config));
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
