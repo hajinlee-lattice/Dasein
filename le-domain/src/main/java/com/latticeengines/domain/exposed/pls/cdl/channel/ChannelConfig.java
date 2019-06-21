@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
         @Type(value = SalesforceChannelConfig.class, name = "salesforce"), //
         @Type(value = MarketoChannelConfig.class, name = "marketo"), //
         @Type(value = EloquaChannelConfig.class, name = "eloqua"), //
-        @Type(value = S3ChannelConfig.class, name = "s3"), //
+        @Type(value = S3ChannelConfig.class, name = "aws_s3"), //
 })
 public interface ChannelConfig {
 
