@@ -166,8 +166,6 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
             final int jobManagerPort = localCluster.getClusterInformation().getBlobServerPort();
             config.setString(JobManagerOptions.ADDRESS, clusterHostName);
             config.setInteger(JobManagerOptions.PORT, jobManagerPort);
-//            config.setString(AkkaOptions.ASK_TIMEOUT, "600s");
-//            config.setString(AkkaOptions.FRAMESIZE, "1g");
             flowStep.logWarn("Using local cluster at " + clusterHostName + " JM port: " + jobManagerPort);
 
             client = new MiniClusterClient(config, localCluster);
