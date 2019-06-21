@@ -168,7 +168,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         List<String> tableNames = new ArrayList<>();
         for (String tablePrefix : tablePrefixes) {
-            Table table = SchemaRepository.instance().getSchema(schema);
+            Table table = SchemaRepository.instance().getSchema(schema, false, entityMatchEnabled);
             String tableName = tablePrefix + NamingUtils.timestamp(role.name());
             table.setName(tableName);
             String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")

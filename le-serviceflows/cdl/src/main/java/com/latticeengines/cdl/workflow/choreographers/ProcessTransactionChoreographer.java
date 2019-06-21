@@ -235,8 +235,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected boolean shouldUpdate() {
-        boolean should = super.shouldUpdate();
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean should = super.shouldUpdate(step);
 
         log.info(String.format("Important flag to decide transaction update: hasProducts=%b", hasProducts));
 

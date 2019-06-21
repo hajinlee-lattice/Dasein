@@ -74,7 +74,7 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldUpdate() {
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         // product should never enter update mode
         return false;
     }

@@ -147,7 +147,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
         // Create a test segment to verify proper behavior of the Curated Attributes step and resulting table.
         createTestSegmentCuratedAttr();
-        verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_1));
+        verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_PA));
     }
 
     void verifyProcessAccount() {
@@ -237,25 +237,25 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
-                ACCOUNT_1);
+                ACCOUNT_PA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 6L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_1);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_PA);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_PA);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_1);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_PA);
 
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID,
-                PRODUCT_ID);
+                PRODUCT_ID_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY,
-                PRODUCT_HIERARCHY);
+                PRODUCT_HIERARCHY_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE,
-                PRODUCT_BUNDLE);
+                PRODUCT_BUNDLE_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE,
                 PRODUCT_WARN_MESSAGE);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE,
@@ -271,31 +271,31 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1, //
-                BusinessEntity.Product, BATCH_STORE_PRODUCTS);
+                BusinessEntity.Account, ACCOUNT_PA, //
+                BusinessEntity.Contact, CONTACT_PA, //
+                BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
     }
 
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         return map;
     }
 
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_1, //
-                TableRoleInCollection.AccountExport, ACCOUNT_1 //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA //
         );
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_1, //
-                BusinessEntity.Contact, CONTACT_1);
+                BusinessEntity.Account, ACCOUNT_PA, //
+                BusinessEntity.Contact, CONTACT_PA);
     }
 
     protected String saveToCheckPoint() {

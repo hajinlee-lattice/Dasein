@@ -1,3 +1,4 @@
+
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
-import com.latticeengines.cdl.workflow.steps.merge.RematchAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -38,9 +38,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     private MergeAccount mergeAccount;
 
     @Inject
-    private RematchAccount rematchAccount;
-
-    @Inject
     private CloneAccount cloneAccount;
 
     @Inject
@@ -56,6 +53,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     protected boolean dataCloudChanged = false;
     private boolean hasAttrLifeCycleChange = false;
     private boolean shouldRematch = false;
+    private boolean hasEmbeddedAccount = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -121,11 +119,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return super.shouldMerge(step) || hasEmbeddedAccounts(step);
-    }
-
-    @Override
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         rebuildNotForDataCloudChange = super.shouldRebuild(step);
         if (!rebuildNotForDataCloudChange) {
@@ -134,9 +127,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
                 rebuildNotForDataCloudChange = true;
             } else if (hasAttrLifeCycleChange && !reset) {
                 log.info("Should rebuild, because detected attr life cycle change.");
-                rebuildNotForDataCloudChange = true;
-            } else if (hasEmbeddedAccounts(step) && !reset) {
-                log.info("Should rebuild, because detected embedded accounts from other entity");
                 rebuildNotForDataCloudChange = true;
             }
         }
@@ -148,19 +138,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
-    protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (hasEmbeddedAccounts(step)) {
-            return false;
-        }
-        return super.shouldReset(step);
-    }
-
-    @Override
     protected Set<String> getExtraDecisions() {
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(dataCloudChanged ? "dataCloudChanged=true" : "");
         decisions.add(hasAttrLifeCycleChange ? "hasAttrLifeCycleChange=true" : "");
         decisions.add(shouldRematch ? "shouldRematch=true" : "");
+        decisions.add(hasEmbeddedAccount ? "hasEmbeddedAccount=true" : "");
         return decisions;
     }
 
@@ -183,24 +166,17 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return rebuild || update;
     }
 
-    /*
-     * check whether we have embedded accounts created by matching other entities
-     */
-    private boolean hasEmbeddedAccounts(AbstractStep<? extends BaseStepConfiguration> step) {
+    @Override
+    protected boolean hasEmbeddedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
         if (step == null) {
             return false;
         }
-        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
+        hasEmbeddedAccount = StringUtils
+                .isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
                 || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
-    }
-
-    // For quicker testing purpose on local: skip account rebuild in txn end2end
-    // test with entity match enabled -- Replace hasEmbeddedAccounts() with
-    // hasEmbeddedAccountsForRebuild() in shouldRebuild()
-    private boolean hasEmbeddedAccountsForRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (step == null) {
-            return false;
-        }
-        return StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
+        log.info("Found embedded account from contact: {}, from transaction: {}",
+                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE)),
+                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)));
+        return hasEmbeddedAccount;
     }
 }

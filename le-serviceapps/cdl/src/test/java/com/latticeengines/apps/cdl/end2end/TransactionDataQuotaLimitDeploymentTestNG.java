@@ -123,7 +123,7 @@ public class TransactionDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploym
         Restriction restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         Long count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count, ACCOUNT_1);
+        Assert.assertEquals(count, ACCOUNT_PA);
 
         bkt = Bucket.dateBkt(TimeFilter.isEmpty());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
