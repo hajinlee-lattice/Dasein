@@ -300,12 +300,28 @@ def update_contact(contacts):
             update_scenario(contact, 'Contact match: First Name + Last Name + Phone Number;')
             
 
-# For txn.aid, if it's in range of [aid_range[0], aid_range[1]], update txn.aid += aid_inc
-def update_account_in_txn(txns, aid_range, aid_inc):
+# For ProcessTxn test:
+# 1. Update CustomerAccountId in range [901, 1000] to be [10901, 11000] by adding 10000
+#    Reason: Expect CustomerAccountId in range [10901, 11000] becomes NEW account created by ProcessTxn test
+#            Expect CustomerAccountId in range [901, 1000] becomes NEW account created by UpdateAccount test which runs after ProcessTxn
+# 2. Update CustomerAccountId in range [1001, ) to be [0, 899] by mod 900
+#    Reason: To avoid trigger profiling account in ProcessTxn test, new CustomerAccountId cannot be more than 30% of accounts created by ProcessAccount test
+def update_account_in_txn_for_process(txns):
     for txn in txns:
-        if (aid_range[0] is None or int(txn[CUSTOMER_ACCOUNT_ID]) >= aid_range[0]) \
-            and (aid_range[1] is None or int(txn[CUSTOMER_ACCOUNT_ID]) <= aid_range[1]):
-            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) + aid_inc
+        if (int(txn[CUSTOMER_ACCOUNT_ID]) >= 901 and int(txn[CUSTOMER_ACCOUNT_ID]) <= 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) + 10000
+        elif (int(txn[CUSTOMER_ACCOUNT_ID]) > 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) % 900
+
+
+# For UpdateTxn test:
+# 1. Update CustomerAccountId in range [1001, ) to be [20000, 20899] by mod 900 and adding 20000
+#    Reason: Expect CustomerAccountId originally in range [20000, 20899] become NEW account created by UpdateTxn test
+#            Also to avoid trigger profiling account in UpdateTxn test, new CustomerAccountId cannot be more than 30% of accounts created by all the previous end2end tests
+def update_account_in_txn_for_update(txns):
+    for txn in txns:
+        if (int(txn[CUSTOMER_ACCOUNT_ID]) > 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) % 900 + 20000
 
 
 def update_scenario(contact, msg):
@@ -361,13 +377,9 @@ if __name__ == '__main__':
     txn2 = split(txns, 25000, 50000)
     # For UpdateTxn test
     txn3 = split(txns, 46000, 60000)
-    # For ProcessTxn test, update CustomerAccountId which in range [901, 1000] to be [1901, 2000].
-    # Reason: Expect CustomerAccountId in range [901, 1000] is NEW account created by UpdateAccount test which runs after ProcessTxn
-    update_account_in_txn(txn1, (901, 1000), 1000)
-    update_account_in_txn(txn2, (901, 1000), 1000)
-    # For UpdateTxn test, update CustomerAccountId which in range [1001, ) (current max AID in txn is 2996) to be [11001, )
-    # Reason: Expect CustomerAccountId originally in range [1001, ) become NEW account created by UpdateTxn test
-    update_account_in_txn(txn3, (1001, None), 10000)
+    update_account_in_txn_for_process(txn1)
+    update_account_in_txn_for_process(txn2)
+    update_account_in_txn_for_update(txn3)
     output(txn1, 'EntityMatch_Transaction_1_25K.csv', txn_schema)
     output(txn2, 'EntityMatch_Transaction_25K_50K.csv', txn_schema)
     output(txn3, 'EntityMatch_Transaction_46K_60K.csv', txn_schema)

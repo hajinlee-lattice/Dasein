@@ -7,36 +7,49 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 
 public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
-    private SystemStatus systemStatus;
+    private final SystemStatus systemStatus;
 
-    private PriorityQueue<T> priorityQueue;
+    private final PriorityQueue<T> priorityQueue;
 
-    private String objectClassName;
+    private final Class<T> clz;
 
-    public SchedulingPAQueue(SystemStatus systemStatus) {
-        this.systemStatus = systemStatus;
-        priorityQueue = new PriorityQueue<>();
+    private final boolean isRetryQueue;
+
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz) {
+        this(systemStatus, clz, false);
     }
 
-    public void setSystemStatus(SystemStatus systemStatus) {
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, boolean isRetryQueue) {
         this.systemStatus = systemStatus;
+        this.clz = clz;
+        this.isRetryQueue = isRetryQueue;
+        priorityQueue = new PriorityQueue<>();
     }
 
     public List<String> getAll() {
         return getAllMemberFromQueue(priorityQueue);
     }
 
-    public String getObjectClassName() {
-        return objectClassName;
+    public String getQueueName() {
+        return clz.getName();
     }
 
-    public int getPosition(String tenantName) {
-        return getPositionFromQueue(priorityQueue, tenantName);
+    public boolean isRetryQueue() {
+        return isRetryQueue;
+    }
+
+    /**
+     * Return tenant location (index start at 1 instead of 0).
+     *
+     * @param tenantId
+     *            which we want to find the position in current queue
+     * @return the tenant location, if not find, return -1.
+     */
+    public int getPosition(String tenantId) {
+        return getPositionFromQueue(priorityQueue, tenantId);
     }
 
     public String peek(Set<String> canRunJobSet) {
@@ -54,19 +67,24 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     public void add(T priorityObject) {
         if (checkConstraint(systemStatus, null, priorityObject.getTenantActivity(),
                 priorityObject.getPushConstraints())) {
-            if (StringUtils.isEmpty(objectClassName)) {
-                objectClassName = priorityObject.getInstance().getName();
-            }
             priorityQueue.add(priorityObject);
         }
     }
 
     /**
-     * @return a list of tenantIds to run PA
+     * Retrieve all tenants that should be scheduled jobs for and add them to the
+     * input set.
+     *
+     * @param canRunJobSet
+     *            set of tenants that we already decide to schedule job.
+     * @return set of tenantIds to run PA for, all elements in this set will also be
+     *         added to canRunJobSet
      */
-    public Set<String> getCanRunJobs(Set<String> canRunJobSet) {
+    public Set<String> fillAllCanRunJobs(Set<String> canRunJobSet) {
         String tenantId;
         Set<String> canRunJobSetInQueue = new HashSet<>();
+        // FIXME @Joy should NOT break when tenant is null since later tenants in queue
+        // can still be scheduled. Better to use size() > 0 as while loop condition.
         do {
             tenantId = poll(canRunJobSet);
             if (tenantId == null) {
@@ -102,14 +120,10 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return memberList;
     }
 
-    /**
-     *
-     * @param priorityQueue which contains all valid priority Object
-     * @param tenantId which we want to find the position in priority Queue
-     * @return the tenant location in Queue, if not find, return -1.
+    /*
+     * helper to retrieve tenant location in given priority queue
      */
-    private int getPositionFromQueue(PriorityQueue<T> priorityQueue,
-                                                                String tenantId) {
+    private int getPositionFromQueue(PriorityQueue<T> priorityQueue, String tenantId) {
         List<T> priorityObjectList = new LinkedList<>();
         int index = 1;
         while (priorityQueue.peek() != null) {
@@ -132,6 +146,8 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * @return According to popConstraintList and canRunJobSet peek the priority Object which obey the Constraint.
      */
     private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
+        // FIXME @Joy you should peek the first object that doesn't violate constraint.
+        // I would recommend just pop invalid objects since they'll be popped anyways.
         T priorityObject = priorityQueue.peek();
         return (priorityObject != null && checkConstraint(systemStatus, canRunJobSet,
                 priorityObject.getTenantActivity(), priorityObject.getPopConstraints())) ?
@@ -145,6 +161,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * @return According to popConstraintList and canRunJobSet pop the priority Object which obey the Constraint.
      */
     private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
+        // FIXME @Joy if some object violated constraint, it will never be popped.
         T priorityObject = priorityQueue.peek();
         if (priorityObject != null && checkConstraint(systemStatus, canRunJobSet, priorityObject.getTenantActivity(),
                 priorityObject.getPopConstraints()

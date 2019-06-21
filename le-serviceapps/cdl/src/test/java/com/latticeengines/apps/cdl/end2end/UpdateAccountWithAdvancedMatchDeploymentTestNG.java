@@ -77,7 +77,7 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
 
     @Override
     protected Long getPrePAAccountCount() {
-        return ENTITY_MATCH_ACCOUNT_1;
+        return ACCOUNT_PA_EM;
     }
 
     @Override
@@ -127,18 +127,18 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         String summaryPrefix = ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_";
 
         Map<String, Object> accountReport = new HashMap<>();
-        accountReport.put(summaryPrefix + ReportConstants.NEW, ENTITY_MATCH_ACCOUNT_2);
-        accountReport.put(summaryPrefix + ReportConstants.UPDATE, ENTITY_MATCH_UPDATED_ACCOUNT);
+        accountReport.put(summaryPrefix + ReportConstants.NEW, NEW_ACCOUNT_UA_EM);
+        accountReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_ACCOUNT_UA_EM);
         accountReport.put(summaryPrefix + ReportConstants.UNMATCH, 1L);
         accountReport.put(summaryPrefix + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ENTITY_MATCH_ACCOUNT_3);
-        accountReport.put(ReportPurpose.ENTITY_MATCH_SUMMARY.name() + "_" + ReportConstants.PUBLISH_SEED, ENTITY_MATCH_UPDATED_ACCOUNT);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_UA_EM);
+        accountReport.put(ReportPurpose.ENTITY_MATCH_SUMMARY.name() + "_" + ReportConstants.PUBLISH_SEED, UPDATED_ACCOUNT_UA_EM);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(summaryPrefix + ReportConstants.NEW, ENTITY_MATCH_CONTACT_2);
-        contactReport.put(summaryPrefix + ReportConstants.UPDATE, ENTITY_MATCH_UPDATED_CONTACT);
+        contactReport.put(summaryPrefix + ReportConstants.NEW, NEW_CONTACT_UA_EM);
+        contactReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_CONTACT_UA_EM);
         contactReport.put(summaryPrefix + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ENTITY_MATCH_CONTACT_3);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_UA_EM);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -155,30 +155,30 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_3, //
-                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_3);
+                BusinessEntity.Account, ACCOUNT_UA_EM, //
+                BusinessEntity.Contact, CONTACT_UA_EM);
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_3, //
-                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_3);
+                BusinessEntity.Account, ACCOUNT_UA_EM, //
+                BusinessEntity.Contact, CONTACT_UA_EM);
     }
 
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ENTITY_MATCH_ACCOUNT_3, //
-                TableRoleInCollection.AccountExport, ENTITY_MATCH_ACCOUNT_3 //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_UA_EM, //
+                TableRoleInCollection.AccountExport, ACCOUNT_UA_EM //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_3, //
-                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_3);
+                BusinessEntity.Account, ACCOUNT_UA_EM, //
+                BusinessEntity.Contact, CONTACT_UA_EM);
     }
 
     @Override

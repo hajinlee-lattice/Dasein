@@ -55,7 +55,7 @@ public class PeriodDataDistributor
             Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
                     config.getPeriodField());
             for (Integer period : periods) {
-                log.info("Period to distribute " + period);
+                log.debug("Period to distribute " + period);
             }
             TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, transactionDir, periods,
                     config.getPeriodField());

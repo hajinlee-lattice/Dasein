@@ -14,7 +14,10 @@ var CONST = {
     EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID: 'EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID',
     DESTINATION_ACCOUNT_ID: 'DESTINATION_ACCOUNT_ID',
     ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE',
-    FETCH_TYPES: 'FETCH_TYPES'
+    FETCH_TYPES: 'FETCH_TYPES',
+    FETCH_LOOKUP_ID_MAPPING: 'FETCH_LOOKUP_ID_MAPPING',
+    FETCH_USER_DOCUMENT: 'FETCH_USER_DOCUMENT',
+    FETCH_PROGRAMS: 'FETCH_PROGRAMS'
 }
 
 const initialState = {
@@ -27,7 +30,10 @@ const initialState = {
     excludeItemsWithoutSalesforceId: null,
     destinationAccountId: null,
     playbookWizardStore: null,
-    types: null
+    types: null,
+    lookupIdMapping: null,
+    userDocument: null,
+    programs: null
 };
 
 export const actions = {
@@ -122,6 +128,96 @@ export const actions = {
         );
         httpService.get('/pls/playtypes', observer, {});
     },
+    fetchLookupIdMapping: (cb, deferred) => {
+        let playstore = store.getState()['playbook'];
+        if(playstore.lookupIdMapping) {
+            return false;
+        }
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_LOOKUP_ID_MAPPING,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.get('/pls/lookup-id-mapping', observer, {});
+    },
+    fetchUserDocument: (opts, cb) => {
+        var opts = opts || {};
+
+        http.get('/tray/userdocument').then((response) => {
+            /**
+             * {
+             *     accessToken: <useraccesstoken> for getMarketoPrograms header
+             *     externalId: <external id>
+             *     id: <id>
+             *     name  <name>
+             * }
+             */
+            store.dispatch({
+                type: CONST.FETCH_USER_DOCUMENT,
+                payload: response.data
+            });
+            if(cb && typeof cb === 'function') {
+                cb();
+            }
+        });
+    },
+    // trayAuthenticationId is from lookup-id-mapping api when it's marketo gets externalAuthentication object which has trayAuthenticationId
+    // useraccesstoken is from getTrayAuthorizationToken
+    // this.getMarketoPrograms = function(trayAuthenticationId, useraccesstoken) {
+    //         method: 'GET',
+    //         url: '../tray/marketo/programs?trayAuthenticationId=' + trayAuthenticationId,
+    //         headers: {
+    //             'useraccesstoken': useraccesstoken
+    //         }``
+    fetchPrograms: (opts, cb) => {
+        // Q: what happens if nothign is returned, do we show the launch without it?
+        var opts = opts || {};
+
+        let playstore = store.getState()['playbook'];
+        if(playstore && (playstore.lookupIdMapping && playstore.lookupIdMapping.MAP) && (playstore.userDocument && playstore.userDocument.accessToken)) {
+            let map = playstore.lookupIdMapping.MAP.find(function(system) { return system.externalSystemName === opts.externalSystemName }),
+                trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
+                useraccesstoken = playstore.userDocument.accessToken;
+
+            http.get('tray/marketo/programs', {
+                    params: {
+                        trayAuthenticationId: trayAuthenticationId
+                    }, 
+                    headers: {
+                        useraccesstoken: useraccesstoken
+                    }
+                }).then((response) => {
+                store.dispatch({
+                    type: CONST.FETCH_PROGRAMS,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
+            });
+        }
+    },
+
+    // this.getMarketoStaticLists = function(trayAuthenticationId, useraccesstoken, programName) {
+    //         method: 'GET',
+    //         url: '../tray/marketo/staticlists',
+    //         headers: {
+    //             useraccesstoken: useraccesstoken
+    //         },
+    //         params: {
+    //             trayAuthenticationId: trayAuthenticationId,
+    //             programName: programName
+    //         }
+
     savePlay: (opts, cb) => {
         http.post('/pls/play/', opts).then((response) => {
             store.dispatch({
@@ -168,6 +264,11 @@ export const actions = {
         //     “isAlwaysOn”:true //auto launch
         // }
         
+    // this.marketoProgramName = ""; folder level (first api call gets a list of these)
+    // this.audienceId = ""; // if it's from the api list (second call) it'll have an id, otherwise pass enpty string
+    // this.audienceName = ""; // static lit display name (can also be user input, but will not have id)
+      
+
         var opts = opts || {},
             id = opts.id || '',
             isAlwaysOn = opts.isAlwaysOn || false,
@@ -307,6 +408,21 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 types: action.payload
+            }
+        case CONST.FETCH_LOOKUP_ID_MAPPING:
+            return {
+                ...state,
+                lookupIdMapping: action.payload
+            }
+        case CONST.FETCH_USER_DOCUMENT:
+            return {
+                ...state,
+                userDocument: action.payload
+            }
+        case CONST.FETCH_FETCH_PROGRAMS:
+            return {
+                ...state,
+                programs: action.payload
             }
         case CONST.SAVE_LAUNCH:
             return {

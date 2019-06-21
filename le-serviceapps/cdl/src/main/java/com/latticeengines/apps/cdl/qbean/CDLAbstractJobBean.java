@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
+import com.latticeengines.apps.cdl.service.DeltaCalculationService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
@@ -30,15 +32,20 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     @Inject
     private S3ImportService s3ImportService;
 
+    @Inject
+    private CampaignLaunchTriggerService campaignLaunchTriggerService;
+
+    @Inject
+    private DeltaCalculationService deltaCalculationService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
-        builder.cdlJobType(cdlJobType)
-                .cdlJobService(cdlJobService)
+        builder.cdlJobType(cdlJobType).cdlJobService(cdlJobService)
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
-                .redshiftCleanupService(redShiftCleanupService)
-                .s3ImportService(s3ImportService)
-                .jobArguments(jobArguments);
+                .redshiftCleanupService(redShiftCleanupService).s3ImportService(s3ImportService)
+                .campaignLaunchTriggerService(campaignLaunchTriggerService)
+                .deltaCalculationService(deltaCalculationService).jobArguments(jobArguments);
         return new CDLQuartzJobCallable(builder);
     }
 

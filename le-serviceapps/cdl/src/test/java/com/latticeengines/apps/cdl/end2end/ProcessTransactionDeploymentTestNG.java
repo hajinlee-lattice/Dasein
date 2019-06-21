@@ -90,10 +90,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
-        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
-                VERIFY_DAILYTXN_AMOUNT_1, //
-                VERIFY_DAILYTXN_QUANTITY_1, //
-                VERIFY_DAILYTXN_COST);
+        verifyTxnDailyStore();
         verifyPurchaseHistoryAttrs();
     }
 
@@ -111,7 +108,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Restriction restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         Long count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count, ACCOUNT_1);
+        Assert.assertEquals(count, ACCOUNT_PA);
 
         bkt = Bucket.dateBkt(TimeFilter.isEmpty());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
@@ -125,7 +122,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         count = entityProxy.getCount(mainCustomerSpace, query);
         log.info("count " + count);
         Assert.assertTrue(count > 0);
-        Assert.assertTrue(count < ACCOUNT_1);
+        Assert.assertTrue(count < ACCOUNT_PA);
         log.info("verify date done");
     }
 
@@ -136,14 +133,14 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_PT);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_PT);
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                PURCHASE_HISTORY_1);
+                TOTAL_PURCHASE_HISTORY_PT);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Transaction, transactionReport);
@@ -153,29 +150,29 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
         return map;
     }
 
@@ -196,6 +193,13 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 Assert.assertEquals(cm.getFundamentalType(), FundamentalType.NUMERIC);
             }
         });
+    }
+
+    protected void verifyTxnDailyStore() {
+        verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
+                VERIFY_DAILYTXN_AMOUNT_PT, //
+                VERIFY_DAILYTXN_QUANTITY_PT, //
+                VERIFY_DAILYTXN_COST_PT);
     }
 
 }
