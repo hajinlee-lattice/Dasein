@@ -87,7 +87,7 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
 
     @Column(name = "RETRY_COUNT")
     @JsonProperty("retry_count")
-    private int retryCount = 0;
+    private Integer retryCount;
 
     @Override
     public Long getPid() {
@@ -183,10 +183,11 @@ public class DataFeedExecution implements HasPid, HasAuditingFields, Serializabl
     }
 
     public int getRetryCount() {
-        return retryCount;
+        // default to 0
+        return retryCount == null ? 0 : retryCount;
     }
 
-    public void setRetryCount(int retryCount) {
+    public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
     }
 
