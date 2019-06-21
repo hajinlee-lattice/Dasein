@@ -33,6 +33,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -443,6 +444,20 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Attribute> findAttributesByTable_Pid(Long tablePid, Pageable pageable) {
         return attributeDao.findByTablePid(tablePid, pageable);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void fixAttributes(String name, List<AttributeFixer> attributeFixerList) {
+        Table table = tableDao.findByName(name);
+        TableEntityMgr.inflateTable(table, true);
+        for (AttributeFixer attributeFixer : attributeFixerList) {
+            Attribute attribute = table.getAttribute(attributeFixer.getName());
+            if (attribute != null) {
+                attributeFixer.copyToAttribute(attribute);
+                attributeDao.update(attribute);
+            }
+        }
     }
 
     private void deleteExtractsInBackend(List<String> extractPaths) {

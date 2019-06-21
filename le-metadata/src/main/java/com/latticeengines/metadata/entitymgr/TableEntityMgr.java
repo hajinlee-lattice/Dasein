@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -56,5 +57,7 @@ public interface TableEntityMgr {
     Long countAttributesByTable_Pid(Long tablePid);
 
     List<Attribute> findAttributesByTable_Pid(Long tablePid, Pageable pageable);
+
+    void fixAttributes(String name, List<AttributeFixer> attributeFixerList);
 
 }

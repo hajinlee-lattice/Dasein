@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -204,6 +206,15 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes) {
         tableEntityMgr.addAttributes(tableName, attributes);
+        return true;
+    }
+
+    @Override
+    public Boolean fixAttributes(CustomerSpace space, String tableName, List<AttributeFixer> attributeFixerList) {
+        if (CollectionUtils.isEmpty(attributeFixerList)) {
+            return true;
+        }
+        tableEntityMgr.fixAttributes(tableName, attributeFixerList);
         return true;
     }
 
