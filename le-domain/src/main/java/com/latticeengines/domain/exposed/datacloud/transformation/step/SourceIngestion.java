@@ -15,6 +15,11 @@ public class SourceIngestion {
         this.ingestionName = ingestionName;
     }
 
+    // for jackson
+    @SuppressWarnings("unused")
+    private SourceIngestion() {
+    }
+
     public String getIngestionName() {
         return ingestionName;
     }
