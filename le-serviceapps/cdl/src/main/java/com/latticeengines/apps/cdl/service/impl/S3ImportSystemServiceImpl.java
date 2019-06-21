@@ -79,18 +79,26 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         }
         List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
         // check if we can set current system as primary
-        if (importSystem.getPriority() > 1 &&
-                (importSystem.isMapToLatticeAccount() || importSystem.isMapToLatticeContact())) {
+        if (importSystem.getPriority() > 1 && importSystem.isMapToLatticeAccount()) {
             for (S3ImportSystem system : currentSystems) {
                 if (system.getPriority() == 1) {
-                    if (system.isMapToLatticeAccount() || system.isMapToLatticeContact()) {
+                    if (system.isMapToLatticeAccount()) {
                         throw new LedpException(LedpCode.LEDP_40061,
-                                new String[] {String.format("System %s already set map to lattice!",
+                                new String[] {String.format("System %s already set map to lattice Account!",
                                         system.getDisplayName())});
                     }
                 }
             }
             importSystem.setPriority(1);
+        }
+        if (importSystem.isMapToLatticeContact()) {
+            for (S3ImportSystem system : currentSystems) {
+                if (!system.getName().equals(importSystem.getName()) && system.isMapToLatticeContact()) {
+                    throw new LedpException(LedpCode.LEDP_40061,
+                            new String[] {String.format("System %s already set map to lattice Contact!",
+                                    system.getDisplayName())});
+                }
+            }
         }
 
         s3ImportSystem.setDisplayName(importSystem.getDisplayName());
