@@ -22,15 +22,13 @@ export default class PriorityElementComponent extends Component {
 
     render() {
         return (
-            <li
+            <li 
                 className="draggable"
                 data-id={this.props.priority}
-                key={this.props.priority}
                 draggable="true"
                 onDragEnd={this.onDragEndHandler}
-                onDragStart={this.onDragStartHandler}
-            >
-                {this.props.item}
+                onDragStart={this.onDragStartHandler}>
+                {this.props.item.display_name}
             </li>
         );
     }
