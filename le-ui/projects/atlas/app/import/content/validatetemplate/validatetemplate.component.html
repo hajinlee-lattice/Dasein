@@ -1,15 +1,19 @@
 <div class="import-validatetemplate container file-import-content">
   <div class="header">
     <h2>Validation</h2>
-    <p ng-if="vm.validation[0].status == 'ERROR'">
+    <p ng-if="vm.validation.length > 0">
       We have found {{ vm.validation.length }} fields that require review. The data in your file does not match the field types that you have indicated, and will cause the import job to fail. Please go back to the previous steps to make sure they are mapped correctly.
     </p>
     <ul>
-      <li ng-repeat="validation in vm.validation">
-        <i 
-          class="fa" 
-          ng-class="{'fa-check': validation.status == 'SUCCESS', 'fa-exclamation-triangle': validation.status == 'ERROR'}"></i>
-        <strong ng-if="validation.status == 'ERROR'">{{ validation.latticeField }}: </strong>{{ validation.message }}
+      <li ng-if="vm.validation.length == 0">
+        <i class="fa fa-check"></i>
+        All fields are successfully validated, you can save your field mappings now.
+      </li>
+      <li 
+        ng-if="vm.validation.length > 0"
+        ng-repeat="validation in vm.validation">
+        <i class="fa fa-exclamation-triangle"></i>
+        <strong>{{ validation.latticeField }}: </strong>{{ validation.message }}
       </li>
     </ul>
   </div>
