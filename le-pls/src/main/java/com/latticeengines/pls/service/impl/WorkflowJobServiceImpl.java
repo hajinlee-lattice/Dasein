@@ -475,12 +475,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Expand actions=%s", JsonUtils.serialize(actions)));
         }
-
         log.debug(String.format("Expanding %d actions", actions.size()));
 
         List<Job> jobList = new ArrayList<>();
-        Set<String> workflowJobPidSet = new HashSet<>();
         List<String> canceled_workflowJobPids = new ArrayList<>();
+        List<String> workflowJobPids = new ArrayList<>();
         for (Action action : actions) {
             // this action is a workflow job
             if (action.getTrackingPid() != null) {
@@ -488,7 +487,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         ActionStatus.CANCELED) {
                     canceled_workflowJobPids.add(action.getTrackingPid().toString());
                 }
-                workflowJobPidSet.add(action.getTrackingPid().toString());
+                workflowJobPids.add(action.getTrackingPid().toString());
             } else if (isVisibleAction(action)) {
                 Job job = new Job();
                 job.setName(action.getType().getDisplayName());
@@ -507,7 +506,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobList.add(job);
             }
         }
-        List<String> workflowJobPids = new ArrayList<>(workflowJobPidSet);
+
         log.debug("workflowJobPids: " + workflowJobPids.toString());
         log.debug("canceled_workflowJobPids: " + canceled_workflowJobPids.toString());
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
