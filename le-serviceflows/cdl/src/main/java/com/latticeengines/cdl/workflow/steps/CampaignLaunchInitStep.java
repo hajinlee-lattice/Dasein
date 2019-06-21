@@ -105,6 +105,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     // 2. get DataFrame for Account and Contact
                     HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                     HdfsDataUnit contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
+                    log.info("accountDataUnit: " + accountDataUnit.toString());
+                    log.info("contactDataUnit: " + contactDataUnit.toString());
                     // 3. join Contact DF with Account DF
                     SparkJobResult joinedresult = executeSparkJob(JoinJob.class,
                             generateJoinJobConfig(accountDataUnit, contactDataUnit));

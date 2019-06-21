@@ -16,10 +16,12 @@ class JoinJob extends AbstractSparkJob[JoinConfig] {
     val contactTable: DataFrame = lattice.input(1)
 
     // join
-    val df = accountTable.join(contactTable, accountTable(s"$joinKey") === contactTable(s"$joinKey"), "left")
-
+    val df = accountTable.join(contactTable, joinKey::Nil, "left").groupBy(joinKey)
+    val out1 = df.count().withColumnRenamed("count", "Cnt")
+	
     // finish
-    //lattice.output = df::Nil
+    lattice.output = out1::Nil
+    lattice.outputStr = "This is my recommendation!"
   }
 
 }
