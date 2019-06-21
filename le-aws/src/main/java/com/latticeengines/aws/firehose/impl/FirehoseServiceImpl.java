@@ -55,10 +55,11 @@ public class FirehoseServiceImpl implements FirehoseService {
             data = data + "\n";
             Record record = createRecord(data);
             putRecordRequest.setRecord(record);
-            UpdateDestinationRequest updateDestinationRequest = setS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
+
+            boolean addedPrefix = addS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
             firehoseClient.putRecord(putRecordRequest);
-            if (updateDestinationRequest != null) {
-                resetS3ObjectPrefix(updateDestinationRequest);
+            if (addedPrefix) {
+                removeS3ObjectPrefix(deliveryStreamName);
             }
         } catch (Throwable t) {
             log.warn("Cannot send message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
@@ -99,10 +100,11 @@ public class FirehoseServiceImpl implements FirehoseService {
             recordList.add(record);
         }
         putRecordBatchRequest.setRecords(recordList);
-        UpdateDestinationRequest updateDestinationRequest = setS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
+
+        boolean addedPrefix = addS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
         firehoseClient.putRecordBatch(putRecordBatchRequest);
-        if (updateDestinationRequest != null) {
-            resetS3ObjectPrefix(updateDestinationRequest);
+        if (addedPrefix) {
+            removeS3ObjectPrefix(deliveryStreamName);
         }
     }
 
@@ -110,12 +112,22 @@ public class FirehoseServiceImpl implements FirehoseService {
         return new Record().withData(ByteBuffer.wrap(data.getBytes()));
     }
 
-    private UpdateDestinationRequest setS3ObjectPrefix(String deliveryStreamName, String s3ObjectPrefix) {
-        if (StringUtils.isBlank(deliveryStreamName) || StringUtils.isBlank(s3ObjectPrefix)) {
-            log.info("Firehose prefix for " + deliveryStreamName + " is null");
-            return null;
+    private boolean addS3ObjectPrefix(String deliveryStreamName, String s3ObjectPrefix) {
+        if (StringUtils.isBlank(deliveryStreamName)) {
+            log.warn("Firehose deliveryStreamName not provided.  Can't change prefix");
+            return false;
+        } else if (StringUtils.isBlank(s3ObjectPrefix)) {
+            log.info("Firehose prefix for " + deliveryStreamName + " is null.  No need to change prefix");
+            return false;
         }
+        return setS3ObjectPrefix(deliveryStreamName, s3ObjectPrefix);
+    }
 
+    private boolean removeS3ObjectPrefix(String deliveryStreamName) {
+        return setS3ObjectPrefix(deliveryStreamName, "");
+    }
+
+    private boolean setS3ObjectPrefix(String deliveryStreamName, String s3ObjectPrefix) {
         // Get DeliveryStreamDescription for delivery stream in order to extra version ID and destinations for
         // UpdateDestination call.
         DescribeDeliveryStreamRequest describeDeliveryStreamRequest = new DescribeDeliveryStreamRequest();
@@ -132,26 +144,17 @@ public class FirehoseServiceImpl implements FirehoseService {
         updateDestinationRequest.setExtendedS3DestinationUpdate(extendedS3DestinationUpdate);
         updateDestinationRequest.setDeliveryStreamName(deliveryStreamName);
         updateDestinationRequest.setCurrentDeliveryStreamVersionId(deliveryStreamDescription.getVersionId());
-        log.info("Set Prefix Update Request: " + updateDestinationRequest);
+        log.debug("Set Firehose S3 Object Prefix UpdateDestinationRequest: " + updateDestinationRequest);
         if (CollectionUtils.isNotEmpty(deliveryStreamDescription.getDestinations())) {
             updateDestinationRequest.setDestinationId(deliveryStreamDescription.getDestinations().get(0)
                     .getDestinationId());
             UpdateDestinationResult updateDestinationResult = firehoseClient.updateDestination(
                     updateDestinationRequest);
-            log.info("Set Prefix Update Result: " + updateDestinationResult);
-            return updateDestinationRequest;
+            return true;
         } else {
             log.error("Firehose Service found null or empty destinations for delivery stream: " +
                     deliveryStreamName);
-            return null;
+            return false;
         }
-    }
-
-    private void resetS3ObjectPrefix(UpdateDestinationRequest updateDestinationRequest) {
-        updateDestinationRequest.getExtendedS3DestinationUpdate().setPrefix(null);
-        log.info("Reset Firehose Prefix Update Request: " + updateDestinationRequest);
-        UpdateDestinationResult updateDestinationResult = firehoseClient.updateDestination(
-                updateDestinationRequest);
-        log.info("Reset Prefix Update Result: " + updateDestinationResult);
     }
 }
