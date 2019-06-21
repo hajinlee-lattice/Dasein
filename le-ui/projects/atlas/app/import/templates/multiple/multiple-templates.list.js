@@ -101,7 +101,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "ImportSystem.priority",
+                    name: "Priority",
                     displayName: "Priority",
                     sortable: false
                 },
@@ -154,19 +154,18 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1
+                    colSpan: 1,
+                    onlyTemplate: true,
+                    template: cell => {
+                        return (<span>{cell.props.rowData.ImportSystem.priority}</span>);
+                    }
                 },
                 {
                     colSpan: 2,
+                    onlyTemplate: true,
                     template: cell => {
                         if (!cell.state.saving && !cell.state.editing) {
-                            if (cell.props.rowData.Exist) {
-                                return (
-                                    null
-                                );
-                            } else {
-                                return null;
-                            }
+                            return (<span>{cell.props.rowData.ImportSystem.display_name}</span>);
                         }
                         if (cell.state.editing && !cell.state.saving) {
                             if (cell.props.rowData.Exist) {
@@ -189,7 +188,11 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1
+                    colSpan: 1,
+                    onlyTemplate: true,
+                    template: cell => {
+                        return (<span>{cell.props.rowData.ImportSystem.system_type}</span>);
+                    }
                 },
                 {
                     colSpan: 1

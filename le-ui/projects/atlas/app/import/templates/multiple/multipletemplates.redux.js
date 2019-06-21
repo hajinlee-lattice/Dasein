@@ -27,25 +27,11 @@ export const actions = {
     fetchPriorities: () => {
         let observer = new Observer(response => {
             httpService.unsubscribeObservable(observer)
-            console.log(response);
             return store.dispatch({
                 type: CONST.FETCH_PRIORITIES,
                 payload: response.data,
             });
         });
-        setTimeout(() => {
-            observer.next({
-                data: [
-                    'System A',
-                    'System C',
-                    'System D',
-                    'System Z',
-                    'System F',
-                    'System B',
-                    'System U',
-                ],
-            });
-        }, 3000);
         httpService.get('/pls/cdl/s3import/system/list', observer, {})
     },
     resetPriorities: () => {
@@ -56,17 +42,13 @@ export const actions = {
     },
     savePriorities: (newList) => {
         let observer = new Observer(response => {
-            // httpService.unsubscribeObservable(observer);
+            httpService.unsubscribeObservable(observer);
             return store.dispatch({
                 type: CONST.SAVE_PRIORITIES,
                 payload: { saved: true },
             });
         });
-        setTimeout(() => {
-            observer.next();
-        }, 3000);
-       
-        // httpService.get('/pls/cdl/s3import/template', observer, {});
+        httpService.post('pls/cdl/s3import/system/list', newList, observer, {});
     },
 };
 
