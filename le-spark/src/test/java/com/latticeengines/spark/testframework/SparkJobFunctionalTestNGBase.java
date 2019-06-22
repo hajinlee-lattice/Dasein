@@ -158,7 +158,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
                 resources = resolver.getResources(dataRoot + "/*/*.avro");
                 log.info("Resolved resources for " + dataRoot);
             } catch (Exception e) {
-                log.warn("Cannot resolve resource for " + dataRoot);
+                log.warn("Cannot resolve resource for " + dataRoot, e);
             }
 
             Map<String, String> dataSetPaths = new HashMap<>();
