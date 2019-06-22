@@ -28,12 +28,12 @@ public class DebugGatewayWatcherUnitTestNG {
         CamilleTestEnvironment.stop();
     }
 
-    @Test(groups = "unit", priority = 1)
+    @Test(groups = "unit")
     public void testSimpleCheck() {
-        simpleCheck("T6", "PT5S", 5000).run();
+        simpleCheck("T0", "PT5S", 5000).run();
     }
 
-    @Test(groups = "unit", priority = 2)
+    @Test(groups = "unit")
     public void testDebugGateway() {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(simpleCheck("T1", "PT3S", 3000));
