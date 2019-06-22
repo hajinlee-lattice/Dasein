@@ -30,7 +30,7 @@ public class DebugGatewayWatcherUnitTestNG {
 
     @Test(groups = "unit")
     public void testSimpleCheck() {
-        simpleCheck("T6", "PT5S", 5000).run();
+        simpleCheck("T0", "PT5S", 5000).run();
     }
 
     @Test(groups = "unit")
