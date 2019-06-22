@@ -30,6 +30,16 @@
         &:last-child {
             margin-bottom: 0;
         }
+        &.schedule {
+            label {
+                margin-right: 5px;
+            }
+        }
+        &.programs {
+            label, select {
+                margin-right: 5px;
+            }
+        }
     }
     .rating-buckets {
         margin-bottom: 10px;
