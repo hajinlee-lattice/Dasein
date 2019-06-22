@@ -74,7 +74,10 @@ export default class PrioritiesLitComponent extends Component {
     render() {
         return (
             <LeVPanel hstretch={'true'} className={`${'dd-list'}`}>
-                {this.getListContainer()}
+                <div className="with-border" >
+                    <span>System Priority</span>
+                    {this.getListContainer()}
+                </div>
             </LeVPanel>
         );
     }
