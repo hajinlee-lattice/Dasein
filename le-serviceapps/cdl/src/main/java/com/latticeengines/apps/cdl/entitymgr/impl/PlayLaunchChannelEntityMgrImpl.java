@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
+import com.latticeengines.proxy.exposed.quartz.QuartzSchedulerProxy;
 
 @Component("playLaunchChannelEntityMgr")
 public class PlayLaunchChannelEntityMgrImpl
@@ -44,6 +45,9 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Inject
     private PlayLaunchChannelEntityMgrImpl _self;
+
+    @Inject
+    private QuartzSchedulerProxy quartzSchedulerProxy;
 
     @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
@@ -108,6 +112,10 @@ public class PlayLaunchChannelEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel createPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         verifyNewPlayLaunchChannel(playLaunchChannel);
+        if (playLaunchChannel.getCronScheduleExpression() != null) {
+            playLaunchChannel.setNextScheduledLaunch(
+                    quartzSchedulerProxy.getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
+        }
         playLaunchChannelDao.create(playLaunchChannel);
         return playLaunchChannel;
     }
@@ -133,6 +141,8 @@ public class PlayLaunchChannelEntityMgrImpl
         }
         if (playLaunchChannel.getCronScheduleExpression() != null) {
             existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
+            existingPlayLaunchChannel.setNextScheduledLaunch(
+                    quartzSchedulerProxy.getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
         }
 
         if (playLaunchChannel.getChannelConfig() != null) {
