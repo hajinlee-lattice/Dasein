@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,6 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
@@ -45,8 +47,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
-
-import reactor.core.publisher.ParallelFlux;
 
 @Component("patchBookValidator")
 public class PatchBookValidatorImpl implements PatchBookValidator {
@@ -67,6 +67,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     @Autowired
     @Qualifier("sourceAttributeEntityMgr")
     private SourceAttributeEntityMgr sourceAttributeEntityMgr;
+
+    @Inject
+    private DataCloudVersionEntityMgr datacloudVersionEntityMgr;
 
     private volatile LoadingCache<String, List<AccountMasterColumn>> amColumnCache;
     private volatile LoadingCache<String, List<SourceAttribute>> srcAttrCache;
@@ -480,8 +483,29 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                         .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
                         .build((dataCloudVersion) -> {
                             log.info("Loading AM columns for datacloud version {}", dataCloudVersion);
-                            ParallelFlux<AccountMasterColumn> amCols = columnEntityMgr.findAll(dataCloudVersion);
-                            return amCols.sequential().collectList().block();
+                            List<AccountMasterColumn> amCols = columnEntityMgr.findAll(dataCloudVersion) //
+                                    .sequential().collectList().block();
+                            // Temporary solution to solve issue:
+                            // When we build new AccountMaster with PatchBook,
+                            // AccountMasterColumn table in production doesn't
+                            // have new DataCloud version yet, so fall back to
+                            // use current approved version -- For now, PM is
+                            // not likely to patch an attribute which is not
+                            // approved in current AccountMaster in production
+                            // TODO: Final solution could be create a new
+                            // AccountMasterColumn staging table which could be
+                            // added with new DataCloud version during AM
+                            // rebuild process without impacting application in
+                            // production
+                            if (CollectionUtils.isEmpty(amCols)) {
+                                String currentVersion = datacloudVersionEntityMgr.currentApprovedVersionAsString();
+                                log.info(
+                                        "DataCloud version {} doesn't exist in AccountMasterColumn table in production, fall back to load AM columns for version {}",
+                                        dataCloudVersion, currentVersion);
+                                amCols = columnEntityMgr.findAll(currentVersion) //
+                                        .sequential().collectList().block();
+                            }
+                            return amCols;
                         });
             }
         }
