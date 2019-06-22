@@ -14,14 +14,20 @@ angular.module('lp.import.wizard.validatetemplate', [])
     });
 
     vm.init = function() {
-        // console.log(vm.fieldDocument);
-        // console.log(vm.templateData);
-        // console.log(vm.validation);
-
         if (vm.validation.length == 0) {
             ImportWizardStore.setValidation('validation', true);
         } else {
-            ImportWizardStore.setValidationStatus(vm.validation);
+
+            const validationResponse = vm.validation;
+            const filterErrors = validationResponse.filter(response => response.status == 'ERROR');
+            vm.hasErrors = filterErrors.length == 0 ? false : true;
+
+            if (vm.hasErrors) {
+                console.log(vm.validation);
+                ImportWizardStore.setValidationStatus(vm.validation);
+            } else {
+                ImportWizardStore.setValidation('validation', true);
+            }
         }
     };
 
