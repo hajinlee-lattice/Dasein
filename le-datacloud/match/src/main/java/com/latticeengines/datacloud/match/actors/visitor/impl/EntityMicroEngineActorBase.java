@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.toMatchKeyTuple;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -169,6 +172,12 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         if (response.getResult() instanceof EntityAssociationResponse) {
             EntityAssociationResponse associationResponse = (EntityAssociationResponse) response.getResult();
+
+            // Add EntityRawSeeds that existing before assocation to MatchTraveler for Match Report.  These seeds
+            // show what data was available in Atlas about the entity object being matched.
+            processSeedBeforeAssociation(associationResponse.getSeedBeforeAssociation(),
+                    associationResponse.getEntity(), traveler);
+
             if (StringUtils.isNotBlank(associationResponse.getAssociatedEntityId())) {
                 traveler.setMatched(true);
                 traveler.setResult(associationResponse.getAssociatedEntityId());
@@ -310,5 +319,16 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         // see if we find any entity ID in the list
         Optional<String> entityId = response.getEntityIds().stream().filter(Objects::nonNull).findAny();
         return entityId.isPresent();
+    }
+
+    private void processSeedBeforeAssociation(EntityRawSeed seedBeforeAssociation, String entity,
+                                              MatchTraveler traveler) {
+        if (seedBeforeAssociation == null) {
+            return;
+        }
+
+        for (EntityLookupEntry entry : seedBeforeAssociation.getLookupEntries()) {
+            traveler.addEntityExistingLookupEntryMap(entity, entry.getType(), toMatchKeyTuple(entry));
+        }
     }
 }
