@@ -101,7 +101,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -111,12 +111,12 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
                 .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
-        double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
-        Assert.assertTrue(difference < 0.1);
+        double difference = Math.abs(scoreResponse.getProbability() - 0.0539923d);
+        Assert.assertTrue(difference < 0.1, "debug score=" + scoreResponse.getProbability());
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -133,7 +133,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -144,14 +144,14 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
                 .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
-        double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
-        Assert.assertTrue(difference < 0.1);
+        double difference = Math.abs(scoreResponse.getProbability() - 0.0539923d);
+        Assert.assertTrue(difference < 0.1, "debug score=" + scoreResponse.getProbability());
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -167,9 +167,9 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
                 customerSpace.toString(), true, false);
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_89);
-        Assert.assertTrue(scoreResponse.getProbability() > 0.27);
+        Assert.assertTrue(scoreResponse.getProbability() > 0.09, "debug score=" + scoreResponse.getProbability());
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.B.toValue());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
