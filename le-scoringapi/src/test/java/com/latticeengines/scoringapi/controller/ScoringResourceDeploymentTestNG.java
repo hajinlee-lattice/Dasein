@@ -90,9 +90,9 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
                 ScoreResponse.class);
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -104,11 +104,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                 DebugScoreResponse.class);
 
         DebugScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
-        double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
-        Assert.assertTrue(difference < 0.1);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
+        double difference = Math.abs(scoreResponse.getProbability() - 0.0539923d);
+        Assert.assertTrue(difference < 0.1, "debug score=" + scoreResponse.getProbability());
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -125,10 +125,10 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
 
         DebugScoreResponse scoreResponse = response.getBody();
         System.out.println(JsonUtils.serialize(scoreResponse));
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
-        Assert.assertTrue(scoreResponse.getProbability() > 0.27);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_89);
+        Assert.assertTrue(scoreResponse.getProbability() > 0.09, "debug score=" + scoreResponse.getProbability());
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.B.toValue());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })

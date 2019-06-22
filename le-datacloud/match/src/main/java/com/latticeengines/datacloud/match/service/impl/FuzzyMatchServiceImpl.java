@@ -401,6 +401,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
+        log.info("Generating EntityMatchHistory for Match Report.");
 
         log.debug("------------------------ Entity Match History Debug Logs ------------------------");
 
@@ -755,11 +756,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         // Iterate through the lists of LDC Match Lookup Results and LDC Match Type / MatchKeyTuple pairs, to find the
-        // the first successful result.  The record the corresponding LDC Match Type and MatchKeyTuple of that result.
+        // the first successful result.  Then record the corresponding LDC Match Type and MatchKeyTuple of that result.
         if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
             log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
                     + " and EntityLdcMatchTypeToTupleList are not the same length: "
                     + ldcMatchLookupResultList.size() + " vs " + traveler.getEntityLdcMatchTypeToTupleList().size());
+            return null;
         }
 
         EntityMatchType type = null;

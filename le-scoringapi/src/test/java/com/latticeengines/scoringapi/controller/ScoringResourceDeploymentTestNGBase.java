@@ -55,6 +55,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected static final long MIN_UPPER_BOUND = TimeUnit.SECONDS.toMillis(80);
     protected static final long MAX_UPPER_BOUND = TimeUnit.SECONDS.toMillis(120);
     protected static final int EXPECTED_SCORE_99 = 99;
+    protected static final int EXPECTED_SCORE_67 = 67;
+    protected static final int EXPECTED_SCORE_89 = 89;
     protected static final int MAX_THREADS = 1;
     protected static final int RECORD_MODEL_CARDINALITY = 3;
     protected static final int MAX_MODELS = 4;
@@ -202,7 +204,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 }
 
                 for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
-                    Assert.assertEquals(result.getScores().get(j).getScore().intValue(), EXPECTED_SCORE_99);
+                    Assert.assertEquals(result.getScores().get(j).getScore().intValue(), EXPECTED_SCORE_67);
                     if (isInternalScoring) {
                         Assert.assertNotNull(result.getScores().get(j).getProbability());
                     } else {

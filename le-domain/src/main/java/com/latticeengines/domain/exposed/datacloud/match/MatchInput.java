@@ -184,6 +184,9 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("PartialMatchEnabled")
     private boolean partialMatchEnabled;
 
+    @JsonProperty("PerTenantMatchReportEnabled")
+    private boolean perTenantMatchReportEnabled = false;
+
     // ====================
     // END FLAGS
     // ====================
@@ -515,6 +518,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setPartialMatchEnabled(boolean partialMatchEnabled) {
         this.partialMatchEnabled = partialMatchEnabled;
+    }
+
+    public boolean isPerTenantMatchReportEnabled() {
+        return perTenantMatchReportEnabled;
+    }
+
+    public void setPerTenantMatchReportEnabled(boolean perTenantMatchReportEnabled) {
+        this.perTenantMatchReportEnabled = perTenantMatchReportEnabled;
     }
 
     public Boolean getUseRealTimeProxy() {

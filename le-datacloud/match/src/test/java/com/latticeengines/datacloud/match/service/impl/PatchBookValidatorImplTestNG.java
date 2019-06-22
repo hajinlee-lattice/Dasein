@@ -56,6 +56,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -96,6 +97,9 @@ public class PatchBookValidatorImplTestNG extends DataCloudMatchFunctionalTestNG
 
     @Inject
     private PatchBookValidatorImpl validator;
+
+    @Inject
+    private DataCloudVersionService datacloudVersionService;
 
     @Test(groups = "functional", dataProvider = "patchBookValidation")
     private void testPatchBookValidation(
@@ -207,6 +211,14 @@ public class PatchBookValidatorImplTestNG extends DataCloudMatchFunctionalTestNG
         errors.forEach(error -> verifyValidationError(error, expectedErrorList));
         // all expected errors are matched
         // Assert.assertTrue(expectedErrorList.isEmpty());
+
+        // Test datacloud version which doesn't exist, should fall back to use
+        // current datacloud version
+        String nextVersion = datacloudVersionService.nextMinorVersion(currentDataCloudVersion);
+        List<PatchBookValidationError> errors2 = validator.validatePatchKeyItemAndStandardize(Arrays.asList(books),
+                nextVersion);
+        Assert.assertNotNull(errors2);
+        Assert.assertEquals(errors.size(), errors2.size());
     }
 
     @Test(groups = "functional", dataProvider = "patchBookMatchKeyConflict")
