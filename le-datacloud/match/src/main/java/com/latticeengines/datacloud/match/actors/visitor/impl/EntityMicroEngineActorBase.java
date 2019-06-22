@@ -324,7 +324,6 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     private void processSeedBeforeAssociation(EntityRawSeed seedBeforeAssociation, String entity,
                                               MatchTraveler traveler) {
         if (seedBeforeAssociation == null) {
-            log.warn("$JAW$ SeedBeforeAssocation was null");
             return;
         }
 
