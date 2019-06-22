@@ -17,7 +17,8 @@ var CONST = {
     FETCH_TYPES: 'FETCH_TYPES',
     FETCH_LOOKUP_ID_MAPPING: 'FETCH_LOOKUP_ID_MAPPING',
     FETCH_USER_DOCUMENT: 'FETCH_USER_DOCUMENT',
-    FETCH_PROGRAMS: 'FETCH_PROGRAMS'
+    FETCH_PROGRAMS: 'FETCH_PROGRAMS',
+    FETCH_STATIC_LISTS: 'FETCH_STATIC_LISTS'
 }
 
 const initialState = {
@@ -33,7 +34,8 @@ const initialState = {
     types: null,
     lookupIdMapping: null,
     userDocument: null,
-    programs: null
+    programs: null,
+    staticLists: null
 };
 
 export const actions = {
@@ -166,7 +168,7 @@ export const actions = {
                 payload: response.data
             });
             if(cb && typeof cb === 'function') {
-                cb();
+                cb(response.data);
             }
         });
     },
@@ -188,25 +190,24 @@ export const actions = {
                 trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
                 useraccesstoken = playstore.userDocument.accessToken;
 
-            http.get('tray/marketo/programs', {
-                    params: {
-                        trayAuthenticationId: trayAuthenticationId
-                    }, 
-                    headers: {
-                        useraccesstoken: useraccesstoken
-                    }
-                }).then((response) => {
+            http.get('/tray/marketo/programs', {
+                params: {
+                    trayAuthenticationId: trayAuthenticationId
+                }, 
+                headers: {
+                    useraccesstoken: useraccesstoken
+                }
+            }).then((response) => {
                 store.dispatch({
                     type: CONST.FETCH_PROGRAMS,
-                    payload: response.data
+                    payload: (response.data && response.data.result ? response.data.result : [])
                 });
                 if(cb && typeof cb === 'function') {
-                    cb();
+                    cb(response.data);
                 }
             });
         }
     },
-
     // this.getMarketoStaticLists = function(trayAuthenticationId, useraccesstoken, programName) {
     //         method: 'GET',
     //         url: '../tray/marketo/staticlists',
@@ -217,7 +218,35 @@ export const actions = {
     //             trayAuthenticationId: trayAuthenticationId,
     //             programName: programName
     //         }
+    fetchStaticLists: (programName, opts, cb) => {
+        var opts = opts || {};
 
+        let playstore = store.getState()['playbook'];
+        if(playstore && (playstore.lookupIdMapping && playstore.lookupIdMapping.MAP) && (playstore.userDocument && playstore.userDocument.accessToken)) {
+            let map = playstore.lookupIdMapping.MAP.find(function(system) { return system.externalSystemName === opts.externalSystemName }),
+                trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
+                programName = programName,
+                useraccesstoken = playstore.userDocument.accessToken;
+
+            http.get('/tray/marketo/staticlists', {
+                params: {
+                    trayAuthenticationId: trayAuthenticationId,
+                    programName: programName
+                }, 
+                headers: {
+                    useraccesstoken: useraccesstoken
+                }
+            }).then((response) => {
+                store.dispatch({
+                    type: CONST.FETCH_STATIC_LISTS,
+                    payload: (response.data && response.data.result ? response.data.result : [])
+                });
+                if(cb && typeof cb === 'function') {
+                    cb(response.data);
+                }
+            });
+        }
+    },
     savePlay: (opts, cb) => {
         http.post('/pls/play/', opts).then((response) => {
             store.dispatch({
@@ -280,7 +309,8 @@ export const actions = {
             launchUnscored = opts.launchUnscored,
             topNCount = opts.topNCount,
             launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
-            launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''); // ?launch-now=true (if once is selected from schedule)
+            launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''), // ?launch-now=true (if once is selected from schedule)
+            channelConfig = opts.channelConfig || {};
 
         var channelObj = {
             id: id,
@@ -291,9 +321,10 @@ export const actions = {
             excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId,
             launchUnscored: launchUnscored,
             topNCount: topNCount,
-            launchType: launchType
+            launchType: launchType,
+            channelConfig: channelConfig
         };
-
+        
         http[method](`/pls/play/${play_name}/channels/${id}${launchNow}`, channelObj).then((response) => {
             let playstore = store.getState()['playbook'],
                 connections = playstore.connections,
@@ -419,10 +450,15 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 userDocument: action.payload
             }
-        case CONST.FETCH_FETCH_PROGRAMS:
+        case CONST.FETCH_PROGRAMS:
             return {
                 ...state,
                 programs: action.payload
+            }
+        case CONST.FETCH_STATIC_LISTS:
+            return {
+                ...state,
+                staticLists: action.payload
             }
         case CONST.SAVE_LAUNCH:
             return {

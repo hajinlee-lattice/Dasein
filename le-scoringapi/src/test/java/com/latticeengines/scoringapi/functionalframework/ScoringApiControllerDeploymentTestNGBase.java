@@ -385,8 +385,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected List<Integer> getExpectedScoresForScoreCorrectness() {
         List<Integer> expectedScores = new ArrayList<>();
-        expectedScores.add(99);
-        expectedScores.add(60);
+        expectedScores.add(90);
+        expectedScores.add(71);
         // (YSong) When cutting M25 release RC, this was changed from 89 to 91.
         // The reason for the score change is still unknown, might be DC 2.0.16
         // release.

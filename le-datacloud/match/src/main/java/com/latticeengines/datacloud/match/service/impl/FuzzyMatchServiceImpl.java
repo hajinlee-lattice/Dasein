@@ -401,6 +401,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
+        log.info("Generating EntityMatchHistory for Match Report.");
 
         log.debug("------------------------ Entity Match History Debug Logs ------------------------");
 
@@ -454,7 +455,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             history.setMatchedMatchKeyTuple(typeTuplePair.getRight());
         }
 
+        // Generate list of all Existing Entity Lookup Keys.
+        history.setExistingLookupKeyList(extractExistingLookupKeyList(traveler, history.getBusinessEntity()));
+
+        //
         // Add LeadToAccount Matching Results for Contacts.
+        //
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             String accountEntity = BusinessEntity.Account.name();
             log.debug("+++ LeadToAccount Account Match Data +++");
@@ -498,6 +504,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 history.setL2aMatchType(typeTuplePair.getLeft());
                 history.setL2aMatchedMatchKeyTuple(typeTuplePair.getRight());
             }
+
+            // Generate list of all Existing Entity Lookup Keys.
+            history.setL2aExistingLookupKeyList(extractExistingLookupKeyList(traveler, accountEntity));
         }
 
         // Log extra debug information about the match.
@@ -596,12 +605,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         String customerEntityId = null;
         if (tuple != null && CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
             for (Pair<String, String> systemId : tuple.getSystemIds()) {
-                if (systemId.getKey().equals(InterfaceName.CustomerAccountId.name())
+                if (InterfaceName.CustomerAccountId.name().equals(systemId.getKey())
                         && StringUtils.isNotBlank(systemId.getValue())
                         && BusinessEntity.Account.name().equals(entity)) {
                     customerEntityId = systemId.getValue();
                     break;
-                } else if (systemId.getKey().equals(InterfaceName.CustomerContactId.name())
+                } else if (InterfaceName.CustomerContactId.name().equals(systemId.getKey())
                         && StringUtils.isNotBlank(systemId.getValue())
                         && BusinessEntity.Contact.name().equals(entity)) {
                     customerEntityId = systemId.getValue();
@@ -668,21 +677,21 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 }
                 int i = 0;
                 for (Pair<String, String> systemId : tuple.getSystemIds()) {
-                    if (systemId.getKey().equals(InterfaceName.CustomerAccountId.name())
+                    if (InterfaceName.CustomerAccountId.name().equals(systemId.getKey())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && StringUtils.isNotBlank(lookupResultList.get(i))
                             && BusinessEntity.Account.name().equals(entity)) {
                         type = EntityMatchType.ACCOUNTID;
                         //log.debug("MatchKeyTuple contains CustomerAccountId: " + systemId.getValue());
                         break;
-                    } else if (systemId.getKey().equals(InterfaceName.CustomerContactId.name())
+                    } else if (InterfaceName.CustomerContactId.name().equals(systemId.getKey())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && StringUtils.isNotBlank(lookupResultList.get(i))
                             && BusinessEntity.Contact.name().equals(entity)) {
                         type = EntityMatchType.CONTACTID;
                         //log.debug("MatchKeyTuple contains CustomerContactId: " + systemId.getValue());
                         break;
-                    } else if (systemId.getKey().equals(InterfaceName.AccountId.name())
+                    } else if (InterfaceName.AccountId.name().equals(systemId.getKey())
                             && StringUtils.isNotBlank(systemId.getValue())
                             && BusinessEntity.Contact.name().equals(entity)) {
                         //log.debug("MatchKeyTuple contains AccountId: " + systemId.getValue());
@@ -755,11 +764,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         // Iterate through the lists of LDC Match Lookup Results and LDC Match Type / MatchKeyTuple pairs, to find the
-        // the first successful result.  The record the corresponding LDC Match Type and MatchKeyTuple of that result.
+        // the first successful result.  Then record the corresponding LDC Match Type and MatchKeyTuple of that result.
         if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
             log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
                     + " and EntityLdcMatchTypeToTupleList are not the same length: "
                     + ldcMatchLookupResultList.size() + " vs " + traveler.getEntityLdcMatchTypeToTupleList().size());
+            return null;
         }
 
         EntityMatchType type = null;
@@ -817,6 +827,28 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         log.debug("MatchedMatchKeyTuple: " + tuple);
 
         return Pair.of(type, tuple);
+    }
+
+    private List<Pair<String, MatchKeyTuple>> extractExistingLookupKeyList(MatchTraveler traveler, String entity) {
+        if (MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap())) {
+            log.debug("EntityExistingLookupEntryMap is null or empty");
+            return null;
+        } else if (!traveler.getEntityExistingLookupEntryMap().containsKey(entity) ||
+                MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap().get(entity))) {
+            log.debug("EntityExistingLookupEntryMap for entity " + entity + " is null or empty");
+            return new ArrayList<>();
+        }
+        List<Pair<String, MatchKeyTuple>> existingLookupList = new ArrayList<>();
+        for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry :
+                traveler.getEntityExistingLookupEntryMap().get(entity).entrySet()) {
+            if (CollectionUtils.isEmpty(typeEntry.getValue())) {
+                continue;
+            }
+            for (MatchKeyTuple tuple : typeEntry.getValue()) {
+                existingLookupList.add(Pair.of(typeEntry.getKey().name(), tuple));
+            }
+        }
+        return existingLookupList;
     }
 
     // Assumes traveler.getEntityIds(), traveler.getEntityMatchKeyTuples(), and traveler.getEntityMatchLookupResults()
@@ -884,7 +916,39 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             log.debug("EntityLdcMatchTypeToTupleList is empty");
         }
 
+        generateDebugExistingMatchKeyLookups(traveler);
+
         //log.debug("------------------------ END Entity Match History Extra Debug Logs ------------------------");
     }
+
+    private void generateDebugExistingMatchKeyLookups(MatchTraveler traveler) {
+
+        log.debug("Iterate through existing Entity Match Lookup Keys");
+        if (MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap())) {
+            log.debug("   EntityExistingLookupEntryMap is null or empty");
+            return;
+        }
+
+        for (Map.Entry<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityEntry :
+                traveler.getEntityExistingLookupEntryMap().entrySet()) {
+            log.debug("  " + entityEntry.getKey() + " - Existing Lookup Entries");
+            if (MapUtils.isEmpty(entityEntry.getValue())) {
+                log.debug("    <empty>");
+                continue;
+            }
+            for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry : entityEntry.getValue().entrySet()) {
+                log.debug("    " + typeEntry.getKey() + ":");
+                if (CollectionUtils.isEmpty(typeEntry.getValue())) {
+                    log.debug("      <empty> (for " + typeEntry.getKey() + ")");
+                    continue;
+                }
+                for (MatchKeyTuple tuple : typeEntry.getValue()) {
+                    log.debug("      " + tuple);
+                }
+            }
+        }
+
+    }
+
 
 }

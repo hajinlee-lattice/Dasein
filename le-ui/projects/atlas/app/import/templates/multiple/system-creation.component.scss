@@ -28,9 +28,47 @@
     &:hover {
       cursor: pointer;
     }
-    .system-image {
-      max-height: 50px;
-      // border: 1px solid red;
+    .le-card-image-container{
+      height: 100%;
+      .system-image {
+        max-height: 30px;
+        // border: 1px solid red;
+      }
     }
+    
+  }
+}
+
+.system-creation{
+    padding: 10px 6px;
+  .wizard-container{
+      border: 1px solid rgb(201, 201, 201);
+      margin-top: 20px;
+
+      .sub-header{
+          width: 100%;
+          font-size: 18px;
+          border-bottom: 1px solid rgb(201, 201, 201);
+          padding: 1rem;
+      }
+      .left{
+          display: flex;
+          flex: 0.5;
+          max-width: 350px;
+          padding: 1rem;
+          justify-content: center;
+      }
+
+      .info{
+          display: flex;
+          max-width: 350px;
+          padding: 0.5rem;
+          justify-content: center;
+      }
+      .wizard-controlls{
+          padding: 0.5rem;
+          border-top: 1px solid rgb(201, 201, 201);
+          justify-content: space-between;
+      }
   }
 }

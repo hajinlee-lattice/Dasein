@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.quartz;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -12,8 +13,7 @@ import com.latticeengines.network.exposed.quartz.QuartzSchedulerInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component
-public class QuartzSchedulerProxy extends BaseRestApiProxy implements
-        QuartzSchedulerInterface {
+public class QuartzSchedulerProxy extends BaseRestApiProxy implements QuartzSchedulerInterface {
 
     public QuartzSchedulerProxy() {
         super(PropertyUtils.getProperty("common.microservice.url"), "quartz/scheduler");
@@ -33,8 +33,7 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
 
     @Override
     public Boolean deleteJob(String tenantId, String jobName) {
-        String url = constructUrl("/jobs/{tenantId}/{jobName}",
-                tenantId, jobName);
+        String url = constructUrl("/jobs/{tenantId}/{jobName}", tenantId, jobName);
         delete("deleteJob", url);
         return true;
     }
@@ -57,6 +56,12 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
     public JobInfoDetail getJobDetail(String tenantId, String jobName) {
         String url = constructUrl("/jobs/{tenantId}/{jobName}", tenantId, jobName);
         return get("getJobDetails", url, JobInfoDetail.class);
+    }
+
+    @Override
+    public Date getNextDateFromCronExpression(String cronExpression) {
+        String url = constructUrl("/nextDate");
+        return get("nextDate", url, Date.class);
     }
 
 }

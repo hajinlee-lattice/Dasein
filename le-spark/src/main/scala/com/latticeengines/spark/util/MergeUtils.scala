@@ -12,7 +12,8 @@ private[spark] object MergeUtils {
   private val lhsMarker = "__merge_marker_lhs__"
   private val rhsMarker = "__merge_marker_rhs__"
 
-  def merge2(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], overwriteByNull: Boolean): DataFrame = {
+  def merge2(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
+             overwriteByNull: Boolean): DataFrame = {
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
     val uniqueColsFromLhs = lhs.columns.diff(joinKeys.union(intersectCols))
     val uniqueColsFromRhs = rhs.columns.diff(joinKeys.union(intersectCols))
@@ -42,12 +43,12 @@ private[spark] object MergeUtils {
       // need to compute row by row
 
       val outputSchema = getOutputSchema(lhs, rhs, joinKeys)
-      val join = joinWithMarkders(lhs, rhs, joinKeys)
+      val join = joinWithMarkers(lhs, rhs, joinKeys)
       val (lhsColPos, rhsColPos) = getColPosOnBothSides(join)
       join.map(row => {
         val inLhs = row.getAs(lhsMarker) != null
         val inRhs = row.getAs(rhsMarker) != null
-        val vals: Seq[Any] = outputSchema.fieldNames map (attr => {
+        val values: Seq[Any] = outputSchema.fieldNames map (attr => {
           if (joinKeys.contains(attr)) {
             row.get(lhsColPos(attr))
           } else if (uniqueColsFromLhs.contains(attr)) {
@@ -81,7 +82,7 @@ private[spark] object MergeUtils {
             }
           }
         })
-        Row.fromSeq(vals)
+        Row.fromSeq(values)
       })(RowEncoder(outputSchema))
 
     }
@@ -120,7 +121,7 @@ private[spark] object MergeUtils {
     }
   }
 
-  private def joinWithMarkders(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
+  private def joinWithMarkers(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
     val lhsWithMarker = lhs.withColumn(lhsMarker, lit(true))
     val rhsWithMarker = rhs.withColumn(rhsMarker, lit(true))
     lhsWithMarker.join(rhsWithMarker, joinKeys, "outer")
@@ -137,14 +138,14 @@ private[spark] object MergeUtils {
   private def expand(df: DataFrame, expandedSchema: StructType): DataFrame = {
     val colPos = df.columns.view.zipWithIndex.toMap
     df.map(row => {
-      val vals: Seq[Any] = expandedSchema.fieldNames map (attr => {
+      val values: Seq[Any] = expandedSchema.fieldNames map (attr => {
         if (colPos.contains(attr)) {
           row.get(colPos(attr))
         } else {
           null
         }
       })
-      Row.fromSeq(vals)
+      Row.fromSeq(values)
     })(RowEncoder(expandedSchema))
   }
 

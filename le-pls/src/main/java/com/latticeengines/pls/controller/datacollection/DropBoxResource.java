@@ -26,6 +26,8 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
@@ -69,10 +71,6 @@ public class DropBoxResource {
     public static final String GENERATE_DROPBOX_WARNING_TITLE = "Warning";
     private static final String GENERATE_DROPBOX_WARNING_MSG = "<p>Credentials have already been granted.</p><p>Your Access Key is <strong>%s</strong></p><br>"
             + "<p>Are you sure you want to generate new credential? The existing key will expire immediately, and all admins will be notified.</p>";
-
-    public static final String GET_DROPBOX_WARNING_TITLE = "Warning";
-    private static final String GET_DROPBOX_WARNING_MSG = "<p>Credentials have not been generated yet.</p><br>"
-            + "<p>Please ask your administrator to generate one first.</p>";
 
     private static final String UNAVAILABLE_SECRET_KEY_MESSAGE = "The secret key can be requested from your administrator.";
 
@@ -179,10 +177,7 @@ public class DropBoxResource {
                     response.getRegion(), response.getBucket(), response.getDropBox(),
                     MultiTenantContext.getShortTenantId(), MultiTenantContext.getEmailAddress()));
         } else {
-            uiAction.setTitle(GET_DROPBOX_WARNING_TITLE);
-            uiAction.setView(View.Modal);
-            uiAction.setStatus(Status.Warning);
-            uiAction.setMessage(GET_DROPBOX_WARNING_MSG);
+            throw new LedpException(LedpCode.LEDP_18224);
         }
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }

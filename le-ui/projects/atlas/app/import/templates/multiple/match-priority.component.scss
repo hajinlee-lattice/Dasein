@@ -2,13 +2,13 @@
 .match-priority{
     
     .wizard-container{
-        border: 1px solid gray;
+        border: 1px solid rgb(201, 201, 201);
         margin-top: 20px;
 
         .sub-header{
             width: 100%;
             font-size: 18px;
-            border-bottom: 1px solid gray;
+            border-bottom: 1px solid rgb(201, 201, 201);
             padding: 1rem;
         }
         .left{
@@ -27,7 +27,7 @@
         }
         .priorities-controlls{
             padding: 0.5rem;
-            border-top: 1px solid gray;
+            border-top: 1px solid rgb(201, 201, 201);
         }
     }
 }

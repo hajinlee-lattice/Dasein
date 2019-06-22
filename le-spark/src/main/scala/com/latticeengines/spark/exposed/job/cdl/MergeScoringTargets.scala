@@ -15,13 +15,18 @@ class MergeScoringTargets extends AbstractSparkJob[MergeScoringTargetsConfig] {
     val config: MergeScoringTargetsConfig = lattice.config
     val inputDfs = lattice.input
     val containers: List[RatingModelContainer] = config.getContainers.asScala.toList
+    val isRuleBased = config.isRuleBased
 
     val expandedDfs = (inputDfs zip containers) map { t =>
       val df = t._1
       val container = t._2
       val modelId = container.getModel.getId
-      val modelGuid = container.getModel.asInstanceOf[AIModel].getModelSummaryId
-      expand(df, modelId, modelGuid)
+      if (isRuleBased) {
+        expand(df, modelId, None)
+      } else {
+        val modelGuid = Some(container.getModel.asInstanceOf[AIModel].getModelSummaryId)
+        expand(df, modelId, modelGuid)
+      }
     }
 
     val merged = expandedDfs.reduce((d1, d2) => {
@@ -32,29 +37,32 @@ class MergeScoringTargets extends AbstractSparkJob[MergeScoringTargetsConfig] {
     lattice.output = merged :: Nil
   }
 
-  def expand(df: DataFrame, modelId: String, modelGuid: String): DataFrame = {
-    val currentTime = System.currentTimeMillis()
+  private def expand(df: DataFrame, modelId: String, modelGuid: Option[String]): DataFrame = {
     val expanded = df
       .withColumn("__Composite_Key__", concat(col("AccountId"), lit("_" + modelId)))
       .withColumn("ModelId", lit(modelId))
-      .withColumn("Model_GUID", lit(modelGuid))
-      .withColumn("CDLUpdatedTime", lit(currentTime))
 
-    val withPeriodId =
-      if (df.columns.contains("PeriodId")) {
-        expanded.withColumn("PeriodId", col("PeriodId").cast("long"))
-      } else {
-        expanded.withColumn("PeriodId", lit(0L).cast("long"))
-      }
+    val expandModelGuid = modelGuid match {
+      case Some(guid) => expanded.withColumn("Model_GUID", lit(guid))
+      case _ => expanded
+    }
 
-    withPeriodId.select( //
-      col("__Composite_Key__"), //
-      col("AccountId"), //
-      col("PeriodId"), //
-      col("ModelId"), //
-      col("Model_GUID"), //
-      col("CDLUpdatedTime") //
-    )
+    val withPeriodId = modelGuid match {
+      case Some(_) =>
+        if (df.columns.contains("PeriodId")) {
+          expandModelGuid.withColumn("PeriodId", col("PeriodId").cast("long"))
+        } else {
+          expandModelGuid.withColumn("PeriodId", lit(0L).cast("long"))
+        }
+      case _ => expandModelGuid
+    }
+
+    val selections: Seq[String] = modelGuid match {
+      case Some(_) => List("__Composite_Key__", "AccountId", "PeriodId", "ModelId", "Model_GUID")
+      case _ => List("__Composite_Key__", "AccountId", "ModelId", "Rating")
+    }
+
+    withPeriodId.select(selections map col: _*)
   }
 
 }

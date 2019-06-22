@@ -20,6 +20,7 @@ public class DebugGatewayWatcherUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
+        DebugGatewayWatcher.initialize();
     }
 
     @AfterClass(groups = "unit")
@@ -27,7 +28,12 @@ public class DebugGatewayWatcherUnitTestNG {
         CamilleTestEnvironment.stop();
     }
 
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
+    public void testSimpleCheck() {
+        simpleCheck("T0", "PT5S", 5000).run();
+    }
+
+    @Test(groups = "unit")
     public void testDebugGateway() {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(simpleCheck("T1", "PT3S", 3000));

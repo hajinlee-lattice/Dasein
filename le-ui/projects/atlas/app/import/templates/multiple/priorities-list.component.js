@@ -53,11 +53,11 @@ export default class PrioritiesLitComponent extends Component {
             var listItems = this.props.items.map((item, i) => {
                 return (
                     <PriorityElementComponent
+                        key={i}
                         item={item}
                         priority={i}
                         dragEnd={this.dragEnd}
-                        dragStart={this.dragStart}
-                    />
+                        dragStart={this.dragStart}/>
                 );
             });
             return (
@@ -74,7 +74,10 @@ export default class PrioritiesLitComponent extends Component {
     render() {
         return (
             <LeVPanel hstretch={'true'} className={`${'dd-list'}`}>
-                {this.getListContainer()}
+                <div className="with-border" >
+                    <span>System Priority</span>
+                    {this.getListContainer()}
+                </div>
             </LeVPanel>
         );
     }

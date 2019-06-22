@@ -81,6 +81,8 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
+        matchInput.setPerTenantMatchReportEnabled(configuration.isPerTenantMatchReportEnabled());
+        log.info("MatchTransaction: PerTenantMatchReportEnabled=" + configuration.isPerTenantMatchReportEnabled());
         Set<String> columnNames = getInputTableColumnNames(0);
         return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                 Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);

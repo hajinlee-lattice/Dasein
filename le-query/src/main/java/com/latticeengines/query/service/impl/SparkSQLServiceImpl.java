@@ -87,9 +87,9 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         String tenantId = attrRepo.getCustomerSpace().getTenantId();
         String jobName;
         if (StringUtils.isNotBlank(secondaryJobName)) {
-            jobName = tenantId + "~SparkSQL~" + secondaryJobName;
+            jobName = String.format("%s~SparkSQL~%s", tenantId, secondaryJobName);
         } else {
-            jobName = tenantId + "~SparkSQL";
+            jobName = String.format("%s~SparkSQL", tenantId);
         }
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {

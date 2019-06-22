@@ -1,5 +1,6 @@
 package com.latticeengines.quartz.entitymanager;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.quartz.JobConfig;
@@ -24,5 +25,7 @@ public interface SchedulerEntityMgr {
     Boolean resumeAllJobs();
 
     void addPredefinedJob(JobConfig jobConfig);
+
+    Date getNextDateFromCronExpression(String cronExpression);
 
 }

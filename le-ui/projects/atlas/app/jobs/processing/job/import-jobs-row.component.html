@@ -32,11 +32,23 @@
             </div>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
-    <span>
+    <div class="tooltip-cell">
+        <div class="text-ellipsis text-container " ng-class="job.jobStatus == 'Failed' ? 'failed' : ''"><span>{{getJobStatus(job)}}</span></div>
+        <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="isJobRunning(job)"></i>
+        <div ng-if="getJobMessage(job) != '' && !isJobRunning(job)" class="text-icon-tooltip-container">
+            <span class="tooltip-container-text">
+                <li class="show-tooltip title-tooltip top delay">
+                    <div class="tooltip_"><div class="cover warning"><p>{{getJobMessage(job)}}</p></div></div>
+                    <i class="fa fa-exclamation-triangle" ng-class="'icon-'+getJobMsgType(job)" aria-hidden="true"></i>
+                </li>
+            </span>
+        </div>
+    </div>
+    <!-- <span>
         <span>{{getJobStatus(job)}}</span>
         <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="isJobRunning(job)"></i>
         <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="isJobFailed(job) && !isJobRunning(job)"></i>
-    </span>
+    </span> -->
 </div>
 <div class="le-cell le-col-start-7 le-col-span-2">
     <span ng-if="showScheduleTime(job)" class="contact">
