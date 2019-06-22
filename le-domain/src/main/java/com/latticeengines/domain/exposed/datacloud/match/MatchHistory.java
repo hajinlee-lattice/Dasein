@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.List;
+
 import org.apache.avro.reflect.AvroName;
 import org.apache.avro.reflect.Nullable;
 import org.apache.avro.reflect.Union;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
@@ -265,6 +268,10 @@ public class MatchHistory implements HasId<String> {
     @AvroName("MatchType")
     private String matchType;
 
+    @Nullable
+    @AvroName("ExistingLookupKeyList")
+    private List<Pair<String, MatchKeyTuple>> existingLookupKeyList;
+
     // Lead to Account (l2a) Results when main entity is Contact.
     @Nullable
     @AvroName("L2AEntityMatched")
@@ -289,6 +296,10 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("L2AMatchType")
     private String l2aMatchType;
+
+    @Nullable
+    @AvroName("L2AExistingLookupKeyList")
+    private List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList;
 
     @Override
     @Union({})
@@ -1187,6 +1198,16 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
+    public void setExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> existingLookupKeyList) {
+        this.existingLookupKeyList = existingLookupKeyList;
+    }
+
+    @Union({})
+    public List<Pair<String, MatchKeyTuple>> getExistingLookupKeyList() {
+        return existingLookupKeyList;
+    }
+
+    @Union({})
     public void setL2aEntityMatched(String l2aEntityMatched) {
         this.l2aEntityMatched = l2aEntityMatched;
     }
@@ -1247,6 +1268,16 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
+    public void setL2aExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList) {
+        this.l2aExistingLookupKeyList = l2aExistingLookupKeyList;
+    }
+
+    @Union({})
+    public List<Pair<String, MatchKeyTuple>> getL2aExistingLookupKeyList() {
+        return l2aExistingLookupKeyList;
+    }
+
+    @Union({})
     public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
         if (entityMatchHistory != null) {
             businessEntity = entityMatchHistory.getBusinessEntity();
@@ -1256,12 +1287,14 @@ public class MatchHistory implements HasId<String> {
             fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
             matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
             matchType = entityMatchHistory.getMatchType();
+            existingLookupKeyList = entityMatchHistory.getExistingLookupKeyList();
             l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
             l2aEntityId = entityMatchHistory.getL2aEntityId();
             l2aCustomerEntityId = entityMatchHistory.getL2aCustomerEntityId();
             l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
             l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
             l2aMatchType = entityMatchHistory.getL2aMatchType();
+            l2aExistingLookupKeyList = entityMatchHistory.getL2aExistingLookupKeyList();
         }
         return this;
     }

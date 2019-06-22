@@ -455,10 +455,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             history.setMatchedMatchKeyTuple(typeTuplePair.getRight());
         }
 
-        // List all existing Lookup Entries before match.
+        // Generate list of all Existing Entity Lookup Keys.
+        history.setExistingLookupKeyList(extractExistingLookupKeyList(traveler, history.getBusinessEntity()));
 
-
+        //
         // Add LeadToAccount Matching Results for Contacts.
+        //
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             String accountEntity = BusinessEntity.Account.name();
             log.debug("+++ LeadToAccount Account Match Data +++");
@@ -502,6 +504,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 history.setL2aMatchType(typeTuplePair.getLeft());
                 history.setL2aMatchedMatchKeyTuple(typeTuplePair.getRight());
             }
+
+            // Generate list of all Existing Entity Lookup Keys.
+            history.setL2aExistingLookupKeyList(extractExistingLookupKeyList(traveler, accountEntity));
         }
 
         // Log extra debug information about the match.
@@ -824,6 +829,28 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return Pair.of(type, tuple);
     }
 
+    private List<Pair<String, MatchKeyTuple>> extractExistingLookupKeyList(MatchTraveler traveler, String entity) {
+        if (MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap())) {
+            log.debug("EntityExistingLookupEntryMap is null or empty");
+            return null;
+        } else if (!traveler.getEntityExistingLookupEntryMap().containsKey(entity) ||
+                MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap().get(entity))) {
+            log.debug("EntityExistingLookupEntryMap for entity " + entity + " is null or empty");
+            return new ArrayList<>();
+        }
+        List<Pair<String, MatchKeyTuple>> existingLookupList = new ArrayList<>();
+        for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry :
+                traveler.getEntityExistingLookupEntryMap().get(entity).entrySet()) {
+            if (CollectionUtils.isEmpty(typeEntry.getValue())) {
+                continue;
+            }
+            for (MatchKeyTuple tuple : typeEntry.getValue()) {
+                existingLookupList.add(Pair.of(typeEntry.getKey().name(), tuple));
+            }
+        }
+        return existingLookupList;
+    }
+
     // Assumes traveler.getEntityIds(), traveler.getEntityMatchKeyTuples(), and traveler.getEntityMatchLookupResults()
     // do not return null because they were checked by generateEntityMatchHistory().
     private void generateEntityMatchHistoryDebugLogs(MatchTraveler traveler) {
@@ -912,7 +939,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry : entityEntry.getValue().entrySet()) {
                 log.debug("    " + typeEntry.getKey() + ":");
                 if (CollectionUtils.isEmpty(typeEntry.getValue())) {
-                    log.debug("      <empty>");
+                    log.debug("      <empty> (for " + typeEntry.getKey() + ")");
                     continue;
                 }
                 for (MatchKeyTuple tuple : typeEntry.getValue()) {
