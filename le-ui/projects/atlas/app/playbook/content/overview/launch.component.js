@@ -62,6 +62,14 @@ function isAudience(externalSystemName, showlist) {
     return (list.indexOf(externalSystemName) !== -1);
 }
 
+function audienceParamsDefault() { // Oh, you'll be immutable alright.  I'll make you immutable
+    return {
+        audienceName: '',
+        audienceId: '',
+        folderName: ''
+    }
+}
+
 class LaunchComponent extends Component {
     constructor(props) {
         super(props);
@@ -86,7 +94,10 @@ class LaunchComponent extends Component {
             launchAccountsCoverage: null,
             launchSchedule: null,
             launchingState: 'unlaunching',
-            programs: null
+            programs: null,
+            staticList: null,
+            showNewFolderName: true,
+            audienceParams: audienceParamsDefault()
         };
     }
 
@@ -108,11 +119,19 @@ class LaunchComponent extends Component {
             actions.fetchUserDocument({}, function() {
                 actions.fetchPrograms({ // get the programs list
                     externalSystemName: vm.state.externalSystemName
-                }, function() {
-                    let playstore = store.getState()['playbook'];
-
-                    vm.state.programs = playstore.programs || [];
+                }, function(data) {
+                    let programs = (data && data.result ? data.result : []);
+                    vm.state.programs = programs;
+                    vm.state.audienceParams.audienceName = programs[0].name;
                     vm.setState(vm.state);
+
+                    actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
+                        if(data && data.result) {
+                            let staticList = (data && data.result ? data.result : []);
+                            vm.state.staticList = staticList;
+                            vm.setState(vm.state);
+                        }
+                    });
                 });
             });
         }
@@ -283,23 +302,91 @@ class LaunchComponent extends Component {
     }
 
     makeProgramsList(programs) {
+        var vm = this,
+            list = [];
+
+        var newFolderNameInput = [];
+        if(this.state.showNewFolderName) {
+            newFolderNameInput.push(<input name={'newFolderName'} onBlur={(event) => {
+                this.state.audienceParams.folderName = event.target.value;
+                this.setState(this.state);
+            }} />);
+        }
+
         if(programs && programs.length) {
+            programs.forEach(function(program) {
+                list.push(<option>{program.name}</option>);
+            });
             return (
                 <div className={'launch-section programs'}>
                     <h2>{this.state.externalSystemName} Destination List</h2>
-                    <select>
-                        <option>Program</option>
-                        <option>Program 2</option>
-                        <option>Program 3</option>
-                    </select>
-                    <select>
-                        <option>Program list</option>
-                        <option>Program list 2</option>
-                        <option>Program list 3</option>
-                    </select>
+                    <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                            <label for={'programName'}>Program name</label>
+                            <select id={'programName'} onChange={(event) => { 
+                                this.getStaticList(event.target.value);
+                            }}>
+                                {list}
+                            </select>
+                        </LeHPanel>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                            <label for={'staticList'}>Static list name</label>
+                            {vm.makeStaticList(this.state.staticList)}
+                            {newFolderNameInput}
+                        </LeHPanel>
+                    </LeVPanel>
+
                 </div>
             );
         }
+    }
+
+    makeStaticList(list) {
+        var options = [];
+
+        if(!list[0].loadingState) {
+            options.push(<option value={''}>-- Create new list --</option>);
+        }
+        list.forEach(function(item) {
+            options.push(<option value={item.id}>{item.name}</option>);
+        });
+
+        return(
+            <select id={'staticList'} onChange={(event) => {
+                if(!this.state.showNewListInput && event.target.value === '') {
+                    this.state.showNewFolderName = true;
+                } else {
+                    let item = list.find(function(_item) { return (_item.id == event.target.value) });
+                    this.state.showNewFolderName = false;
+                    this.state.audienceParams.folderName = (item && item.name ? item.name : '');
+                }
+                this.state.audienceParams.audienceId = event.target.value;
+                this.setState(this.state);
+            }}>
+                {options}
+            </select>
+        );
+    }
+
+    getStaticList(programName) {
+        var vm = this;
+
+        vm.state.staticList = [{name: 'loading...', loadingState: true}];
+        vm.state.showNewFolderName = false;
+
+        vm.state.audienceParams = audienceParamsDefault(); // reset this
+        vm.state.audienceParams.audienceName = programName;
+
+        vm.setState(vm.state);
+
+        actions.fetchStaticLists(programName, {externalSystemName: vm.state.externalSystemName}, function(data) {
+            if(data && data.result) {
+                let staticList = (data && data.result ? data.result : []);
+                vm.state.showNewFolderName = true;
+                vm.state.staticList = staticList;
+                vm.setState(vm.state);
+            }
+        });
     }
 
     launch = (play, connection, opts) => {
@@ -327,7 +414,13 @@ class LaunchComponent extends Component {
             },
             save = opts.save || false,
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
-            lastIncompleteLaunch = opts.lastIncompleteLaunch || null;
+            lastIncompleteLaunch = opts.lastIncompleteLaunch || null,
+            channelConfig = {};
+
+console.log(Object.keys(this.state.audienceParams).length, this.state.audienceParams);
+        if(this.state.audienceParams && this.state.audienceParams.audienceName && this.state.audienceParams.folderName) {
+            channelConfig[this.state.externalSystemName.toLowerCase()] = this.state.audienceParams;
+        }
 
         if(play) {
             let vm = this,
@@ -354,7 +447,8 @@ class LaunchComponent extends Component {
                 excludeItemsWithoutSalesforceId: launchObj.excludeItemsWithoutSalesforceId,
                 launchUnscored: launchObj.launchUnscored,
                 topNCount: launchObj.topNCount,
-                launchType: 'FULL'
+                launchType: 'FULL',
+                channelConfig: channelConfig
             }, closeModal);
         }
     }
@@ -433,7 +527,7 @@ class LaunchComponent extends Component {
              * I set this.state.programs to an empty array, from null, if the API doesn't send anything back 
              * so the modal will wait for the response in this case, but it will still load even if it's empty
              */
-            loaded = loaded && (this.state.programs);
+            loaded = loaded && (this.state.programs && this.state.staticList);
         }
         if(loaded) {
             var play = this.state.play,
