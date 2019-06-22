@@ -26,6 +26,8 @@ import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
@@ -79,6 +81,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // A list of pairs of EntityMatchType enums and corresponding MatchKeyTuples, used to track the progress through
     // the Lattice Data Cloud decision graph.
     private List<Pair<EntityMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
+
+    // Entity -> (Lookup Type -> List of MatchKeyTuples)
+    private Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityExistingLookupEntryMap = new HashMap<>();
 
     private Set<String> fieldsToClear = new HashSet<>();
 
@@ -380,6 +385,35 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void addEntityLdcMatchTypeToTupleList(Pair<EntityMatchType, MatchKeyTuple> pair) {
         entityLdcMatchTypeToTupleList.add(pair);
+    }
+
+    public void addEntityExistingLookupEntryMap(String entity, EntityLookupEntry.Type lookupType, MatchKeyTuple tuple) {
+        EntityMatchType matchType = MatchKeyUtils.getEntityMatchType(lookupType, tuple);
+        if (matchType == null) {
+            log.error("Could not add Existing Lookup Entry, EntityLookupEntry.Type is invalid");
+            return;
+        }
+
+        Map<EntityMatchType, List<MatchKeyTuple>> existingLookupEntryMap;
+        if (entityExistingLookupEntryMap.containsKey(entity)) {
+            existingLookupEntryMap = entityExistingLookupEntryMap.get(entity);
+        } else {
+            existingLookupEntryMap = new HashMap<>();
+            entityExistingLookupEntryMap.put(entity, existingLookupEntryMap);
+        }
+
+        List<MatchKeyTuple> matchKeyTupleList;
+        if (existingLookupEntryMap.containsKey(matchType)) {
+            matchKeyTupleList = existingLookupEntryMap.get(matchType);
+        } else {
+            matchKeyTupleList = new ArrayList<>();
+            existingLookupEntryMap.put(matchType, matchKeyTupleList);
+        }
+        matchKeyTupleList.add(tuple);
+    }
+
+    public Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> getEntityExistingLookupEntryMap() {
+        return entityExistingLookupEntryMap;
     }
 
     public Set<String> getFieldsToClear() {
