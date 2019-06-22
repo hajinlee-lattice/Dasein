@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ContactNameConcatenateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactStepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(MatchContact.class);
 
     static final String BEAN_NAME = "matchContact";
 
@@ -109,7 +113,10 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
-        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+        MatchInput matchInput = getBaseMatchInput();
+        matchInput.setPerTenantMatchReportEnabled(configuration.isPerTenantMatchReportEnabled());
+        log.info("MatchContact: PerTenantMatchReportEnabled=" + configuration.isPerTenantMatchReportEnabled());
+        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                 getInputTableColumnNames(0), getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
                 newAccountTableName);
         step.setConfiguration(configStr);

@@ -40,6 +40,7 @@ public enum LatticeFeatureFlag {
     ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
     BETA_FEATURE("BetaFeature", "Allows beta features"), //
     ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
+    ENABLE_PER_TENANT_MATCH_REPORT("EnablePerTenantMatchReport", "Redirects Firehose Output to Tenant Folders"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

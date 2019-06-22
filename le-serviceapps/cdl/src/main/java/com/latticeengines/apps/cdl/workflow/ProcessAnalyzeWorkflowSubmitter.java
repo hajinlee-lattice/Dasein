@@ -432,6 +432,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
+        boolean perTenantMatchReportEnabled = FeatureFlagUtils.isPerTenantMatchReportEnabled(flags);
+        log.info("Per Tenant Match Report Enabled=" + perTenantMatchReportEnabled);
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         boolean alwaysOnCampain = FeatureFlagUtils.isAlwaysOnCampaign(flags);
         log.info("Entity Match Enabled=" + entityMatchEnabled);
@@ -474,6 +476,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .perTenantMatchReportEnabled(perTenantMatchReportEnabled) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
