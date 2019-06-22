@@ -1045,21 +1045,9 @@ angular.module('lp.import')
                 data: fieldDocument
             }).then(
                 function onSuccess(response) {
-                    console.log(response);
+
                     var result = response.data;
-                    if (result.length == 0) {
-                        deferred.resolve(result);
-                    } else {
-
-                        var errors = result.Errors;
-                        var response = {
-                                success: false,
-                                errorMsg: errors[0]
-                            };
-
-                        console.log("????????????????????", response);
-                        deferred.resolve(response.errorMsg);
-                    }
+                    deferred.resolve(result);
 
                 }, function onError(response) {
                     if (!response.data) {
