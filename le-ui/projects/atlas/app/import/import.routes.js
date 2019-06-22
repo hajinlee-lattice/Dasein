@@ -391,7 +391,6 @@ angular
                     var deferred = $q.defer();
 
                     ImportWizardService.validateTemplate(FileName, TemplateData, FieldDocument).then(function(result) {
-                        console.log(result);
                         deferred.resolve(result);
                     });
 
