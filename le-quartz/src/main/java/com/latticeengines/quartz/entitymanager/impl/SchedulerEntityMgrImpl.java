@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -124,7 +126,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                 added = false;
             } else {
                 if (!checkUrl(jobConfig.getDestUrl())) {
-                    throw new LedpException(LedpCode.LEDP_30000, new String[]{jobConfig.getDestUrl()});
+                    throw new LedpException(LedpCode.LEDP_30000, new String[] { jobConfig.getDestUrl() });
                 }
 
                 String jobArgs = jobConfig.getJobArguments();
@@ -138,7 +140,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                     quartzJobArgs.setJobName(jobConfig.getJobName());
                     quartzJobArgs.setPredefinedJobType(jobType);
                     if (!checkJobBean(jobConfig.getCheckJobBeanUrl(), quartzJobArgs)) {
-                        throw new LedpException(LedpCode.LEDP_30001, new String[]{jobType});
+                        throw new LedpException(LedpCode.LEDP_30001, new String[] { jobType });
                     }
                 }
                 if (jsonNode instanceof ObjectNode) {
@@ -147,28 +149,24 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                 }
                 String jobArguments = jsonNode.toString();
                 log.info(String.format("Adding job with arguments: %s", jobArguments));
-                JobDetail jobDetail = JobBuilder
-                        .newJob(com.latticeengines.quartz.service.CustomQuartzJob.class)
-                        .withIdentity(jobKey)
-                        .build();
+                JobDetail jobDetail = JobBuilder.newJob(com.latticeengines.quartz.service.CustomQuartzJob.class)
+                        .withIdentity(jobKey).build();
                 jobDetail.getJobDataMap().put(CustomQuartzJob.DESTURL, jobConfig.getDestUrl());
                 jobDetail.getJobDataMap().put(CustomQuartzJob.SECONDARYDESTURL, jobConfig.getSecondaryDestUrl());
                 jobDetail.getJobDataMap().put(CustomQuartzJob.QUERYAPI, jobConfig.getQueryApi());
                 jobDetail.getJobDataMap().put(CustomQuartzJob.TIMEOUT, jobConfig.getJobTimeout());
                 jobDetail.getJobDataMap().put(CustomQuartzJob.JOBTYPE, jobType);
                 jobDetail.getJobDataMap().put(CustomQuartzJob.JOBARGUMENTS, jobArguments);
-                CronTrigger trigger = TriggerBuilder
-                        .newTrigger()
+                CronTrigger trigger = TriggerBuilder.newTrigger()
                         .withIdentity(jobConfig.getJobName() + TRIGGER_SUFFIX, tenantId)
-                        .withSchedule(CronScheduleBuilder
-                                .cronSchedule(jobConfig.getCronTrigger())
+                        .withSchedule(CronScheduleBuilder.cronSchedule(jobConfig.getCronTrigger())
                                 .withMisfireHandlingInstructionDoNothing())
                         .build();
                 scheduler.scheduleJob(jobDetail, trigger);
                 updateJobSource(tenantId, jobConfig.getJobName(), sourceType);
                 added = true;
             }
-        } catch (SchedulerException|IOException e) {
+        } catch (SchedulerException | IOException e) {
             added = false;
             log.error("Failed to add job.", e);
         }
@@ -343,16 +341,12 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                 scheduler.deleteJob(jobKey);
                 log.info("Job history clean up job already exists, delete the job and add again.");
             }
-            JobDetail jobDetail = JobBuilder
-                    .newJob(com.latticeengines.quartz.service.JobHistoryCleanupJob.class)
-                    .withIdentity(jobKey)
-                    .build();
+            JobDetail jobDetail = JobBuilder.newJob(com.latticeengines.quartz.service.JobHistoryCleanupJob.class)
+                    .withIdentity(jobKey).build();
             jobDetail.getJobDataMap().put(JobHistoryCleanupJob.RETAININGDAYS, jobHistoryRetainingDays);
-            CronTrigger trigger = TriggerBuilder
-                    .newTrigger()
+            CronTrigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("jobHistoryCleanupJob" + TRIGGER_SUFFIX, BACKGROUND_JOB_GROUP)
-                    .withSchedule(CronScheduleBuilder
-                            .cronSchedule(jobHistoryCleanupJobCronTrigger)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobHistoryCleanupJobCronTrigger)
                             .withMisfireHandlingInstructionDoNothing())
                     .build();
             scheduler.scheduleJob(jobDetail, trigger);
@@ -411,5 +405,16 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             jobSource.setSourceType(sourceType);
         }
         jobSourceEntityMgr.saveJobSource(jobSource);
+    }
+
+    @Override
+    public Date getNextDateFromCronExpression(String cronExpression) {
+        Date nextDate = null;
+        try {
+            nextDate = new CronExpression(cronExpression).getNextValidTimeAfter(new Date());
+        } catch (Exception e) {
+            log.error("Unable to parse the given cron expression: " + cronExpression, e);
+        }
+        return nextDate;
     }
 }
