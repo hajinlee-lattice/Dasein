@@ -319,22 +319,16 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
                         .getModelSummary().getPredefinedSelection();
 
                 Assert.assertEquals(modelIdSelectionMap.get(modelId), columnSelection);
-
                 if (columnSelection == Predefined.Model) {
-                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_CustomerOrderManagement"));
-                    Assert.assertNotNull(matchedResult.get("AlexaGBUsers"));
-                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_WCMS"));
-                    Assert.assertNotNull(matchedResult.get("AlexaAUUsers"));
-                    Assert.assertNotNull(matchedResult.get("HPA_New_Pivoted_Source_IsMatched"));
-                    Assert.assertNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
-                    Assert.assertNull(matchedResult.get("Bmbr30_FinanceIT_Total"));
+                    Assert.assertTrue(matchedResult.containsKey("CloudTechnologies_CustomerOrderManagement"));
+                    Assert.assertTrue(matchedResult.containsKey("AlexaGBUsers"));
+                    Assert.assertTrue(matchedResult.containsKey("CloudTechnologies_WCMS"));
+                    Assert.assertTrue(matchedResult.containsKey("AlexaAUUsers"));
                 } else if (columnSelection == Predefined.RTS) {
-                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_CustomerOrderManagement"));
-                    Assert.assertNotNull(matchedResult.get("AlexaGBUsers"));
-                    Assert.assertNotNull(matchedResult.get("CloudTechnologies_WCMS"));
-                    Assert.assertNotNull(matchedResult.get("AlexaAUUsers"));
-                    Assert.assertNull(matchedResult.get("Bmbr30_RecruitmentHiringOnb_UniUsrPctCh"));
-                    Assert.assertNull(matchedResult.get("HPA_New_Pivoted_Source_IsMatched"));
+                    Assert.assertTrue(matchedResult.containsKey("CloudTechnologies_CustomerOrderManagement"));
+                    Assert.assertTrue(matchedResult.containsKey("AlexaGBUsers"));
+                    Assert.assertTrue(matchedResult.containsKey("CloudTechnologies_WCMS"));
+                    Assert.assertTrue(matchedResult.containsKey("AlexaAUUsers"));
                 } else {
                     Assert.assertTrue(false, columnSelection.toString());
                 }
