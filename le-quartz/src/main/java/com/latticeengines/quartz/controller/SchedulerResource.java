@@ -1,5 +1,6 @@
 package com.latticeengines.quartz.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +33,7 @@ public class SchedulerResource {
     @RequestMapping(value = "/status", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Set quartz scheduler status")
-    public Boolean setSchedulerStatus(@RequestParam(value = "status") String status,
-            HttpServletRequest request) {
+    public Boolean setSchedulerStatus(@RequestParam(value = "status") String status, HttpServletRequest request) {
         switch (status) {
         case "Pause":
             return schedulerEntityMgr.pauseAllJobs();
@@ -47,8 +47,7 @@ public class SchedulerResource {
     @RequestMapping(value = "/jobs/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add a job for certain tenant")
-    public Boolean addJob(@PathVariable String tenantId,
-            @RequestBody JobConfig jobConfig, HttpServletRequest request) {
+    public Boolean addJob(@PathVariable String tenantId, @RequestBody JobConfig jobConfig, HttpServletRequest request) {
         return schedulerEntityMgr.addJob(tenantId, jobConfig);
     }
 
@@ -62,8 +61,8 @@ public class SchedulerResource {
     @RequestMapping(value = "/jobs/{tenantId}/{jobName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a certain job with tenantId & job name")
-    public Boolean deleteJob(@PathVariable String tenantId,
-            @PathVariable(value = "jobName") String jobName, HttpServletRequest request) {
+    public Boolean deleteJob(@PathVariable String tenantId, @PathVariable(value = "jobName") String jobName,
+            HttpServletRequest request) {
         return schedulerEntityMgr.deleteJob(tenantId, jobName);
     }
 
@@ -84,9 +83,16 @@ public class SchedulerResource {
     @RequestMapping(value = "/jobs/{tenantId}/{jobName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get certain job details")
-    public JobInfoDetail getJobDetail(@PathVariable String tenantId,
-            @PathVariable String jobName, HttpServletRequest request) {
+    public JobInfoDetail getJobDetail(@PathVariable String tenantId, @PathVariable String jobName,
+            HttpServletRequest request) {
         return schedulerEntityMgr.getJobDetail(tenantId, jobName);
+    }
+
+    @RequestMapping(value = "/nextDate", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get next date from cron schedule")
+    public Date getNextDateFromCronExpression(@PathVariable String cronExpression, HttpServletRequest request) {
+        return schedulerEntityMgr.getNextDateFromCronExpression(cronExpression);
     }
 
 }
