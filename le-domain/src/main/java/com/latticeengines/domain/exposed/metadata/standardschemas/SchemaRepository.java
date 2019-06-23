@@ -347,7 +347,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
 
@@ -991,7 +991,7 @@ public class SchemaRepository {
                 .required() //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
@@ -1108,7 +1108,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
@@ -1254,7 +1254,7 @@ public class SchemaRepository {
                 .notNull() //
                 .interfaceName(InterfaceName.TotalAmount) //
                 .logicalType(LogicalDataType.Metric) //
-                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalCost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST", "TOTAL COST")) //
