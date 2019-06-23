@@ -11,7 +11,7 @@
     <parent>
         <artifactId>le-parent</artifactId>
         <groupId>com.latticeengines</groupId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-parent/pom.xml</relativePath>
     </parent>
 
