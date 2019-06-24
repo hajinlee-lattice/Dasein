@@ -88,7 +88,7 @@ public class SchedulerResource {
         return schedulerEntityMgr.getJobDetail(tenantId, jobName);
     }
 
-    @RequestMapping(value = "/nextDate", method = RequestMethod.GET)
+    @RequestMapping(value = "/nextDate/{cronExpression}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get next date from cron schedule")
     public Date getNextDateFromCronExpression(@PathVariable String cronExpression, HttpServletRequest request) {
