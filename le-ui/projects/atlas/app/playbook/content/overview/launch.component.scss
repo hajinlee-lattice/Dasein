@@ -39,6 +39,15 @@
             label, select {
                 margin-right: 5px;
             }
+            select, input {
+                padding: 2px;
+            }
+            label {
+                min-width: 100px;
+            }
+            .programName-container {
+                margin-bottom: 5px;
+            }
         }
     }
     .rating-buckets {

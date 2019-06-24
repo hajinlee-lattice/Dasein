@@ -321,7 +321,7 @@ class LaunchComponent extends Component {
                 <div className={'launch-section programs'}>
                     <h2>{this.state.externalSystemName} Destination List</h2>
                     <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'programName-container'}>
                             <label for={'programName'}>Program name</label>
                             <select id={'programName'} onChange={(event) => { 
                                 this.getStaticList(event.target.value);
@@ -329,7 +329,7 @@ class LaunchComponent extends Component {
                                 {list}
                             </select>
                         </LeHPanel>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'statucList-container'}>
                             <label for={'staticList'}>Static list name</label>
                             {vm.makeStaticList(this.state.staticList)}
                             {newFolderNameInput}
