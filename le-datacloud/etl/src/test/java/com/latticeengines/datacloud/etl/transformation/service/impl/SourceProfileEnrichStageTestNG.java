@@ -114,7 +114,7 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
         conf.setMaxCat(10);
         conf.setMaxCatLength(20);
         conf.setDataCloudVersion(dataCloudVersion);
-        return setDataFlowEngine(JsonUtils.serialize(conf), "TEZ");
+        return JsonUtils.serialize(conf);
     }
 
     private Object[][] amData = new Object[][] { //

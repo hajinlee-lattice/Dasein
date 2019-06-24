@@ -100,7 +100,7 @@ public class SourceDifferTestNG extends PipelineTransformationTestNGBase {
         baseSources.add(src1.getSourceName());
         step0.setBaseSources(baseSources);
         step0.setTransformer(Diff.TRANSFORMER_NAME);
-        step0.setConfiguration(setDataFlowEngine(getDifferConfigWithVersionSet(), "TEZ"));
+        step0.setConfiguration(getDifferConfigWithVersionSet());
         step0.setTargetSource(source0.getSourceName());
 
         // ----------
@@ -109,7 +109,7 @@ public class SourceDifferTestNG extends PipelineTransformationTestNGBase {
         baseSources.add(src2.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(Diff.TRANSFORMER_NAME);
-        step1.setConfiguration(setDataFlowEngine(getDifferConfigNoVersionSet(), "TEZ"));
+        step1.setConfiguration(getDifferConfigNoVersionSet());
         step1.setTargetSource(source1.getSourceName());
 
         // ----------
@@ -119,7 +119,7 @@ public class SourceDifferTestNG extends PipelineTransformationTestNGBase {
         baseSources.add(src3.getSourceName());
         step2.setBaseSources(baseSources);
         step2.setTransformer(Diff.TRANSFORMER_NAME);
-        step2.setConfiguration(setDataFlowEngine(getDifferConfigTwoSources(), "TEZ"));
+        step2.setConfiguration(getDifferConfigTwoSources());
         step2.setTargetSource(source.getSourceName());
 
         // -----------
