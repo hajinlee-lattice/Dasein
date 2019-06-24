@@ -138,6 +138,8 @@ public class AttributeFixer {
         }
         if (Boolean.TRUE.equals(required)) {
             attribute.setRequired(true);
+        } else {
+            attribute.setRequired(false);
         }
     }
 }
