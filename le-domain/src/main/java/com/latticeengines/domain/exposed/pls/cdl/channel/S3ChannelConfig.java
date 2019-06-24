@@ -14,6 +14,9 @@ public class S3ChannelConfig implements ChannelConfig {
     @JsonProperty("accountLimit")
     private Long accountLimit;
 
+    @JsonProperty("isIncludeExportAttributes")
+    private Boolean isIncludeExportAttributes = false;
+
     @JsonProperty("supressAccountWithoutAccountId")
     private Boolean supressAccountWithoutAccountId = false;
 
@@ -34,6 +37,14 @@ public class S3ChannelConfig implements ChannelConfig {
 
     public void setAudienceType(AudienceType audienceType) {
         this.audienceType = audienceType;
+    }
+
+    public Boolean isIncludeExportAttributes() {
+        return isIncludeExportAttributes;
+    }
+
+    public void setIsIncludeExportAttributes(boolean isIncludeExportAttributes) {
+        this.isIncludeExportAttributes = isIncludeExportAttributes;
     }
 
     public Boolean isSupressAccountWithoutAccountId() {
@@ -58,6 +69,7 @@ public class S3ChannelConfig implements ChannelConfig {
         S3ChannelConfig newS3ChannelConfig = (S3ChannelConfig) config;
         s3ChannelConfig.setAudienceType(newS3ChannelConfig.getAudienceType());
         s3ChannelConfig.setAccountLimit(newS3ChannelConfig.getAccoutLimit());
+        s3ChannelConfig.setIsIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
         s3ChannelConfig.setSupressAccountWithoutAccountId(newS3ChannelConfig.isSupressAccountWithoutAccountId());
         s3ChannelConfig.setSupressAccountWithoutContacts(newS3ChannelConfig.isSupressAccountWithoutContacts());
         return this;
