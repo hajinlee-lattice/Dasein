@@ -415,9 +415,8 @@ class LaunchComponent extends Component {
             save = opts.save || false,
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null,
-            channelConfig = {};
+            channelConfig = connection.channelConfig || {};
 
-console.log(Object.keys(this.state.audienceParams).length, this.state.audienceParams);
         if(this.state.audienceParams && this.state.audienceParams.audienceName && this.state.audienceParams.folderName) {
             channelConfig[this.state.externalSystemName.toLowerCase()] = this.state.audienceParams;
         }
