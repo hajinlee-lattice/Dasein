@@ -81,8 +81,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
-    private static int QUERY_COUNT_BYID = 1000;
-
     @Inject
     private WorkflowProxy workflowProxy;
 
@@ -189,11 +187,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return actions;
         } else {
             String tenantId = MultiTenantContext.getShortTenantId();
-            if (actionPids.size() > QUERY_COUNT_BYID) {
-                return null;
-            } else {
-                return actionProxy.getActionsByPids(tenantId, actionPids);
-            }
+            return actionProxy.getActionsByPids(tenantId, actionPids);
         }
     }
 
@@ -244,20 +238,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (jobs == null) {
             return Collections.emptyList();
         }
-
         if (filterNonUiJobs != null && filterNonUiJobs) {
             jobs.removeIf(job -> (job == null) || (job.getJobType() == null)
                     || (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase())));
         }
         updateAllJobs(jobs);
-
         if (generateEmptyPAJob != null && generateEmptyPAJob) {
             Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
             if (unstartedPnAJob != null) {
                 jobs.add(unstartedPnAJob);
             }
         }
-
         return jobs;
     }
 

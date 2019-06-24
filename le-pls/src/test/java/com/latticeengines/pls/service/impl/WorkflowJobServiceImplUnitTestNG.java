@@ -233,7 +233,8 @@ public class WorkflowJobServiceImplUnitTestNG {
         log.info(String.format("actionIds=%s", actionIds));
     }
 
-    private void verifyActionAndJobsForExpandActions(List<Job> expandedJobs) {
+    private void verifyActionAndJobsForExpandActions(List<Action> actions, int actionSize, List<Job> expandedJobs) {
+        Assert.assertEquals(actions.size(), actionSize);
         Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
         Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName());
@@ -253,8 +254,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testExpandActions() {
         List<Action> actions = generateActions();
         List<Job> expandedJobs = workflowJobService.expandActions(actions, null);
-        Assert.assertEquals(actions.size(), 6);
-        verifyActionAndJobsForExpandActions(expandedJobs);
+        verifyActionAndJobsForExpandActions(actions, 6, expandedJobs);
         actions = generateActions();
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
@@ -264,8 +264,7 @@ public class WorkflowJobServiceImplUnitTestNG {
                         Job -> Job, (key1, key2) -> key2));
         actions.remove(5);
         expandedJobs = workflowJobService.expandActions(actions, jobMap);
-        Assert.assertEquals(actions.size(), 5);
-        verifyActionAndJobsForExpandActions(expandedJobs);
+        verifyActionAndJobsForExpandActions(actions, 5, expandedJobs);
     }
 
     @Test(groups = "unit")
