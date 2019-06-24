@@ -10,8 +10,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.JoinConfig;
+import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.spark.testframework.TestJoinTestNGBase;
 
 public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
@@ -19,9 +20,11 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     @Test(groups = "functional")
     public void runTest() {
         uploadInputAvro();
-        JoinConfig joinConfig = new JoinConfig();
-        joinConfig.setJoinKey("Field1");
-        SparkJobResult result = runSparkJob(JoinJob.class, joinConfig);
+        CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
+        PlayLaunchSparkContext playLaunchContext = new PlayLaunchSparkContext();
+        playLaunchContext.setJoinKey("Field1");
+        createRecConfig.setPlayLaunchSparkContext(playLaunchContext);
+        SparkJobResult result = runSparkJob(JoinJob.class, createRecConfig);
         verifyResult(result);
     }
 

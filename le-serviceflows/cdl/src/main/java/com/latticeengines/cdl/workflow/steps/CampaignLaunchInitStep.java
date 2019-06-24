@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -37,7 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.JoinConfig;
+import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.spark.exposed.job.cdl.JoinJob;
@@ -109,7 +108,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     log.info("contactDataUnit: " + contactDataUnit.toString());
                     // 3. join Contact DF with Account DF
                     SparkJobResult joinedresult = executeSparkJob(JoinJob.class,
-                            generateJoinJobConfig(accountDataUnit, contactDataUnit));
+                            generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
 
                     // 4. generate avro out of DataFrame with predefined format
                     // for Recommendations
@@ -137,12 +136,13 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         }
     }
 
-    private JoinConfig generateJoinJobConfig(HdfsDataUnit accountDataUnit, HdfsDataUnit contactDataUnit) {
-        JoinConfig joinConfig = new JoinConfig();
-        joinConfig.setJoinKey(InterfaceName.AccountId.name());
-        joinConfig.setWorkspace(getRandomWorkspace());
-        joinConfig.setInput(Arrays.asList(accountDataUnit, contactDataUnit));
-        return joinConfig;
+    private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
+            HdfsDataUnit contactDataUnit, PlayLaunchContext playLaunchContext) {
+        CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
+        createRecConfig.setWorkspace(getRandomWorkspace());
+        createRecConfig.setInput(Arrays.asList(accountDataUnit, contactDataUnit));
+        createRecConfig.setPlayLaunchSparkContext(playLaunchContext.toPlayLaunchSparkContext());
+        return createRecConfig;
     }
 
     private void failureUpdates(CustomerSpace customerSpace, String playName, String playLaunchId, Exception ex) {
