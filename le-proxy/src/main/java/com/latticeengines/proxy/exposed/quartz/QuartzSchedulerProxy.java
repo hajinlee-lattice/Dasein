@@ -60,7 +60,7 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements QuartzSche
 
     @Override
     public Date getNextDateFromCronExpression(String cronExpression) {
-        String url = constructUrl("/nextDate");
+        String url = constructUrl("/nextDate/{cronExpression}", cronExpression);
         return get("nextDate", url, Date.class);
     }
 
