@@ -159,7 +159,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(3));
         step.setTransformer(AMStatsReport.TRANSFORMER_NAME);
-        step.setConfiguration(setDataFlowEngine("{}", "TEZ"));
+        step.setConfiguration("{}");
         step.setTargetSource("AccountMasterReport");
         return step;
     }
