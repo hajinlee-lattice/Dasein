@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -179,7 +180,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     List<Action> getActions(List<Long> actionPids, Map<Long, Action> actionMap) {
-        if (actionMap != null && !actionMap.isEmpty()) {
+        if (MapUtils.isNotEmpty(actionMap)) {
             List<Action> actions = new ArrayList<>();
             for (Long actionPid : actionPids) {
                 actions.add(actionMap.get(actionPid));
@@ -502,7 +503,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.debug("canceled_workflowJobPids: " + canceled_workflowJobPids.toString());
         if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             List<Job> workflowJobs;
-            if (jobMap != null && !jobMap.isEmpty()) {
+            if (MapUtils.isNotEmpty(jobMap)) {
                 workflowJobs = new ArrayList<>();
                 for (String jobPid : workflowJobPids) {
                     Job job = jobMap.get(jobPid);
@@ -575,16 +576,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     Map<String, Job> getJobMap(Map<Long, Action> actionIdMap) {
-        Set<Map.Entry<Long, Action>> entrySet = actionIdMap.entrySet();
-        List<String> workflowJobPids = new ArrayList<>();
-        for (Map.Entry<Long, Action> entry : entrySet) {
-            Action action = entry.getValue();
-            if (action.getTrackingPid() != null) {
-                workflowJobPids.add(action.getTrackingPid().toString());
-            }
+        List<String> workflowJobPids = null;
+        if (MapUtils.isNotEmpty(actionIdMap)) {
+            workflowJobPids =
+                    actionIdMap.values().stream().filter(action -> action.getTrackingPid() != null).map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
         }
         List<Job> workflowJobs;
-        if (!workflowJobPids.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(workflowJobPids)) {
             workflowJobs = workflowProxy.getWorkflowExecutionsByJobPids(workflowJobPids,
                     new String[]{MultiTenantContext.getCustomerSpace().toString()});
         } else {
@@ -736,7 +734,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (CollectionUtils.isNotEmpty(jobPids)) {
             String tenantId = MultiTenantContext.getShortTenantId();
             List<Action> actions;
-            if (actionJobPidMap != null && !actionJobPidMap.isEmpty()) {
+            if (MapUtils.isNotEmpty(actionJobPidMap)) {
                 actions = new ArrayList<>();
                 for (Long jobPid : jobPids) {
                     Action action = actionJobPidMap.get(jobPid);
