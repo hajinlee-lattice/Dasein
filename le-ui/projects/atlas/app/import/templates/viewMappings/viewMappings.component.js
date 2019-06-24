@@ -30,7 +30,8 @@ export default class ViewMappings extends Component {
             object: '',
             allMappings: [],
             latticeMappings: [],
-            customMappings: []
+            customMappings: [],
+            downloadData: []
         };
     }
 
@@ -43,8 +44,12 @@ export default class ViewMappings extends Component {
 
         let ImportWizardStore = this.ImportWizardStore;
         let postBody = ImportWizardStore.getTemplateData();
+        let feedType = {
+            FeedType: postBody.FeedType
+        };
         let latticeMappings = [];
         let customMappings = [];
+        
         httpService.post(
             "/pls/cdl/s3import/template/preview",
             postBody,
@@ -72,6 +77,28 @@ export default class ViewMappings extends Component {
                 }
             )
         );
+
+        httpService.post(
+            "/pls/cdl/s3import/template/downloadcsv?source=File",
+            feedType,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                        let data = response.data;
+                        this.setState({
+                            downloadData: data
+                        });
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
+
+
+        console.log(this.state.allMappings);
+        console.log(this.state.downloadData);
     }
 
     handleChange = () => {
@@ -200,38 +227,18 @@ export default class ViewMappings extends Component {
         let ImportWizardStore = this.ImportWizardStore;
         let object = ImportWizardStore.getObject();
         let fileName = object.toLowerCase() + "-mappings.csv";
-        let allMappings = this.state.allMappings;
-        let csv;
+        let downloadData = this.state.downloadData;
 
-        // Loop the array of objects
-        for(let row = 0; row < allMappings.length; row++){
-            let keysAmount = Object.keys(allMappings[row]).length
-            let keysCounter = 0
-            // If this is the first row, generate the headings
-            if(row === 0){
-               // Loop each property of the object
-               for(let key in allMappings[row]){
-                   // This is to not add a comma at the last cell
-                   // The '\r\n' adds a new line
-                   csv += key + (keysCounter+1 < keysAmount ? ',' : '\r\n' )
-                   keysCounter++
-               }
-            }else{
-               for(let key in allMappings[row]){
-                   csv += allMappings[row][key] + (keysCounter+1 < keysAmount ? ',' : '\r\n' )
-                   keysCounter++
-               }
-            }
-            keysCounter = 0
-        }
-
-        // Once we are done looping, download the .csv by creating a link
-        let link = document.createElement('a')
-        link.id = 'download-csv'
-        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link)
-        document.querySelector('#download-csv').click()
+        var element = document.createElement("a"); 
+        element.download = fileName; 
+        var file = new Blob([downloadData], { 
+            type: "text/csv;charset=utf-8;" 
+        }); 
+        var fileURL = window.URL.createObjectURL(file); 
+        element.href = fileURL; 
+        document.body.appendChild(element); 
+        element.click(); 
+        document.body.removeChild(element); 
     }
 
     render() {
