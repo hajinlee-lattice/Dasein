@@ -1,10 +1,12 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -114,7 +116,7 @@ public class PlayLaunchChannelEntityMgrImpl
         verifyNewPlayLaunchChannel(playLaunchChannel);
         if (playLaunchChannel.getCronScheduleExpression() != null) {
             playLaunchChannel.setNextScheduledLaunch(
-                    quartzSchedulerProxy.getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
+                    getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
         }
         playLaunchChannelDao.create(playLaunchChannel);
         return playLaunchChannel;
@@ -142,7 +144,7 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getCronScheduleExpression() != null) {
             existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
             existingPlayLaunchChannel.setNextScheduledLaunch(
-                    quartzSchedulerProxy.getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
+                    getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
         }
 
         if (playLaunchChannel.getChannelConfig() != null) {
@@ -159,6 +161,16 @@ public class PlayLaunchChannelEntityMgrImpl
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);
         return existingPlayLaunchChannel;
+    }
+
+    private Date getNextDateFromCronExpression(String cronExpression) {
+        Date nextDate = null;
+        try {
+            nextDate = new CronExpression(cronExpression).getNextValidTimeAfter(new Date());
+        } catch (Exception e) {
+            log.error("Unable to parse the given cron expression: " + cronExpression, e);
+        }
+        return nextDate;
     }
 
     private PlayLaunchChannel verifyNewPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {

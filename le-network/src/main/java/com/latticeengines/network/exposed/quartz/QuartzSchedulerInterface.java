@@ -1,6 +1,5 @@
 package com.latticeengines.network.exposed.quartz;
 
-import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.quartz.JobConfig;
@@ -19,6 +18,4 @@ public interface QuartzSchedulerInterface {
     List<JobInfo> listAllJobs();
 
     JobInfoDetail getJobDetail(String tenantId, String jobName);
-
-    Date getNextDateFromCronExpression(String cronExpression);
 }
