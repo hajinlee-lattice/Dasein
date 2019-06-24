@@ -9,16 +9,19 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
      * this list of constraint is used when schedulingPAObject push into queue. check if this object can push into
      * queue or not.
      */
-    private List<Constraint> pushConstraintList;
+    private static List<Constraint> pushConstraintList;
     /**
      * this list of constraint is used when schedulingPAObject pop from queue. check if this object can pop queue or not.
      */
-    private List<Constraint> popConstraintList;
+    private static List<Constraint> popConstraintList;
+
+    static {
+        initPopContraint();
+        initPushContraint();
+    }
 
     public RetrySchedulingPAObject(TenantActivity tenantActivity) {
         super(tenantActivity);
-        initPushContraint();
-        initPopContraint();
     }
 
     @Override
@@ -44,13 +47,13 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         return o.getLastFinishTime() - this.getTenantActivity().getLastFinishTime() > 0 ? -1 : 1;
     }
 
-    private void initPushContraint() {
+    private static void initPushContraint() {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new RetryExist());
         pushConstraintList.add(new LastFinishTimePending());
     }
 
-    private void initPopContraint() {
+    private static void initPopContraint() {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxPA());
         popConstraintList.add(new MaxLargePA());
