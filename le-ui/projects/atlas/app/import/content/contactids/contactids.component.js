@@ -1,3 +1,5 @@
+import {actions, reducer} from '../../templates/multiple/multipletemplates.redux';
+import { store, injectAsyncReducer } from 'store';
 angular.module('lp.import.wizard.contactids', [])
 .controller('ImportWizardContactIDs', function(
     $state, $stateParams, $scope, $timeout, 
@@ -26,12 +28,19 @@ angular.module('lp.import.wizard.contactids', [])
         keyMap: {},
         saveMap: {},
         entityMatchEnabled: entityMatchEnabled,
-        matchIdItems: []
+        matchIdItems: [],
+        systems: []
     });
 
     vm.init = function() {
         vm.UnmappedFields = UnmappedFields;
-
+        injectAsyncReducer(store, 'multitemplates.contactids', reducer);
+        this.unsubscribe = store.subscribe(() => {
+            const data = store.getState()['multitemplates.contactids'];
+            vm.systems = data;
+        });
+       
+        actions.fetchSystems({Contact: true});
         let validationStatus = ImportWizardStore.getValidationStatus();
         if (validationStatus) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
