@@ -47,11 +47,15 @@
                             <strong>is</strong>
                         </span>
 
-                        <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
-                            <option value="Yes">true</option>
-                            <option value="No">false</option>
-                            <option value="Present" ng-if="vm.showEmptyOption()">present</option>
-                            <option value="Empty" ng-if="vm.showEmptyOption()">empty</option>
+                        <select ng-click="vm.changeBooleanValue($event)">
+                            <option value="Yes" ng-selected="vm.checkBoolOpSelected('Yes')">
+                                true</option>
+                            <option value="No" ng-selected="vm.checkBoolOpSelected('No')">
+                                false</option>
+                            <option value="Present" ng-selected="vm.checkBoolOpSelected('Present')">
+                                present</option>
+                            <option value="Empty" ng-selected="vm.checkBoolOpSelected('Empty')">empty
+                            </option>
                         </select>
                     </span>
 
