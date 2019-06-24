@@ -1,6 +1,5 @@
 package com.latticeengines.quartz.controller;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -86,13 +85,6 @@ public class SchedulerResource {
     public JobInfoDetail getJobDetail(@PathVariable String tenantId, @PathVariable String jobName,
             HttpServletRequest request) {
         return schedulerEntityMgr.getJobDetail(tenantId, jobName);
-    }
-
-    @RequestMapping(value = "/nextDate/{cronExpression}", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Get next date from cron schedule")
-    public Date getNextDateFromCronExpression(@PathVariable String cronExpression, HttpServletRequest request) {
-        return schedulerEntityMgr.getNextDateFromCronExpression(cronExpression);
     }
 
 }
