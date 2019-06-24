@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.quartz;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -56,12 +55,6 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements QuartzSche
     public JobInfoDetail getJobDetail(String tenantId, String jobName) {
         String url = constructUrl("/jobs/{tenantId}/{jobName}", tenantId, jobName);
         return get("getJobDetails", url, JobInfoDetail.class);
-    }
-
-    @Override
-    public Date getNextDateFromCronExpression(String cronExpression) {
-        String url = constructUrl("/nextDate/{cronExpression}", cronExpression);
-        return get("nextDate", url, Date.class);
     }
 
 }

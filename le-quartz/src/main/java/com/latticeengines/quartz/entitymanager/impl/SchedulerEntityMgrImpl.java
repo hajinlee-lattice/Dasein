@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -16,7 +15,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.logging.log4j.core.util.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -405,16 +403,5 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             jobSource.setSourceType(sourceType);
         }
         jobSourceEntityMgr.saveJobSource(jobSource);
-    }
-
-    @Override
-    public Date getNextDateFromCronExpression(String cronExpression) {
-        Date nextDate = null;
-        try {
-            nextDate = new CronExpression(cronExpression).getNextValidTimeAfter(new Date());
-        } catch (Exception e) {
-            log.error("Unable to parse the given cron expression: " + cronExpression, e);
-        }
-        return nextDate;
     }
 }
