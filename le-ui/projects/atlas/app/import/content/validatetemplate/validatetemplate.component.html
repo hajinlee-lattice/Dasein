@@ -1,20 +1,29 @@
 <div class="import-validatetemplate container file-import-content">
   <div class="header">
     <h2>Validation</h2>
-    <p ng-if="vm.hasErrors">
-      We have found {{ vm.validation.length }} fields that require review. The data in your file does not match the field types that you have indicated, and will cause the import job to fail. Please go back to the previous steps to make sure they are mapped correctly.
-    </p>
-    <ul>
-      <li ng-if="!vm.hasErrors">
-        <i class="fa fa-check"></i>
-        All fields are successfully validated, you can save your field mappings now.
-      </li>
-      <li 
-        ng-if="vm.hasErrors"
-        ng-repeat="validation in vm.validation">
-        <i class="fa fa-exclamation-triangle"></i>
-        <strong>{{ validation.latticeField }}: </strong>{{ validation.message }}
-      </li>
-    </ul>
+
+    <div ng-if="vm.validating">
+      <span class="fa fa-spinner fa-spin fa-fw"></span>
+      Validating Template...
+    </div>
+
+    <div ng-if="!vm.validating">
+      <p ng-if="vm.hasErrors">
+        We have found {{ vm.validation.length }} fields that require review. The data in your file does not match the field types that you have indicated, and will cause the import job to fail. Please go back to the previous steps to make sure they are mapped correctly.
+      </p>
+      <ul>
+        <li ng-if="!vm.hasErrors">
+          <i class="fa fa-check"></i>
+          All fields are successfully validated, you can save your field mappings now.
+        </li>
+        <li 
+          ng-if="vm.hasErrors"
+          ng-repeat="validation in vm.validation">
+          <i class="fa fa-exclamation-triangle"></i>
+          <strong>{{ validation.latticeField }}: </strong>{{ validation.message }}
+        </li>
+      </ul>
+    </div>
+
   </div>
 </div>
