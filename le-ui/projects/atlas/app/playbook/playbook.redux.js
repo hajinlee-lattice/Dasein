@@ -174,12 +174,6 @@ export const actions = {
     },
     // trayAuthenticationId is from lookup-id-mapping api when it's marketo gets externalAuthentication object which has trayAuthenticationId
     // useraccesstoken is from getTrayAuthorizationToken
-    // this.getMarketoPrograms = function(trayAuthenticationId, useraccesstoken) {
-    //         method: 'GET',
-    //         url: '../tray/marketo/programs?trayAuthenticationId=' + trayAuthenticationId,
-    //         headers: {
-    //             'useraccesstoken': useraccesstoken
-    //         }``
     fetchPrograms: (opts, cb) => {
         // Q: what happens if nothign is returned, do we show the launch without it?
         var opts = opts || {};
@@ -208,16 +202,6 @@ export const actions = {
             });
         }
     },
-    // this.getMarketoStaticLists = function(trayAuthenticationId, useraccesstoken, programName) {
-    //         method: 'GET',
-    //         url: '../tray/marketo/staticlists',
-    //         headers: {
-    //             useraccesstoken: useraccesstoken
-    //         },
-    //         params: {
-    //             trayAuthenticationId: trayAuthenticationId,
-    //             programName: programName
-    //         }
     fetchStaticLists: (programName, opts, cb) => {
         var opts = opts || {};
 
@@ -293,10 +277,18 @@ export const actions = {
         //     “isAlwaysOn”:true //auto launch
         // }
         
-    // this.marketoProgramName = ""; folder level (first api call gets a list of these)
-    // this.audienceId = ""; // if it's from the api list (second call) it'll have an id, otherwise pass enpty string
-    // this.audienceName = ""; // static lit display name (can also be user input, but will not have id)
+        // this.marketoProgramName = ""; folder level (first api call gets a list of these)
+        // this.audienceId = ""; // if it's from the api list (second call) it'll have an id, otherwise pass enpty string
+        // this.audienceName = ""; // static lit display name (can also be user input, but will not have id)
+        // channel specific settings:
+        // eloqua: contactLimit, supressContactsWithoutEmails, supressAccountWithoutContacts
+        // marketo: contactLimit, supressContactsWithoutEmails, supressAccountWithoutContacts, audienceId, audienceName, folderName
+        // aws_s3: audienceType, accountLimit, supressAccountWithoutAccountId, supressAccountWithoutContacts
+        // salesforce: accountLimit, supressAccountWithoutAccountId
       
+        // notes: 
+        // for both accountLimit and contactLimit just sending topNCount for now is fine
+        // can ignore audienceType for now too
 
         var opts = opts || {},
             id = opts.id || '',

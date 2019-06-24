@@ -264,9 +264,9 @@ class SystemsComponent extends Component {
     activateButtonClickHandler(connection, play) {
         actions.saveChannel(play.name, {
             id: connection.id,
-            //playLaunch: connection.playLaunch,
             lookupIdMap: connection.lookupIdMap,
-            isAlwaysOn: !connection.isAlwaysOn
+            isAlwaysOn: !connection.isAlwaysOn,
+            channelConfig: connection.channelConfig
         });
     }
 
