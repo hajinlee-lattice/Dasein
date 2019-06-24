@@ -111,9 +111,27 @@ export default class OverviewSummaryContainer extends Component {
         );
     }
 
-    constrainText(event, limit) {
+    constrainText(event, limit, debug) {
+        var allowedKeys = [
+            8, //backspace
+            46, //delete
+            37, // left
+            39, //right
+        ],
+        debug = debug || false;
         if(event.target.innerText && limit) {
-            //event.target.innerText = event.target.innerText.substring(0, limit);
+            let disallow = (event.target.innerText.length >= limit && allowedKeys.indexOf(event.which) === -1); // too long && key is not one in the allowed lists
+            if(debug) {
+                console.log({
+                    length: event.target.innerText.length,
+                    keycode: event.which, 
+                    indexOf: allowedKeys.indexOf(event.which),
+                    if: disallow
+                });
+            }
+            if(disallow) {
+                event.preventDefault();
+            }
         }
     }
 
@@ -132,7 +150,9 @@ export default class OverviewSummaryContainer extends Component {
                                             {this.makeTypeOptions(play, types)}
                                         </div>
                                         <div className={'play-name'}>
-                                            <span contenteditable="true" onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
+                                            <span contenteditable="true" 
+                                                onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } 
+                                                onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
                                                 {play.displayName}
                                             </span>
                                         </div>
@@ -151,7 +171,9 @@ export default class OverviewSummaryContainer extends Component {
                                     </LeVPanel>
                                 </p>
                                 <p className="description">
-                                    <span contenteditable="true" data-default="Add a description" onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
+                                    <span contenteditable="true" data-default="Add a description" 
+                                        onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } 
+                                        onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
                                         {play.description}
                                     </span>
                                 </p>
