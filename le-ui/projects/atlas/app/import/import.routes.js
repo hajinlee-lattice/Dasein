@@ -386,15 +386,6 @@ angular
                 },
                 TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
-                },
-                Validation: function($q, ImportWizardService, FileName, FieldDocument, TemplateData) {
-                    var deferred = $q.defer();
-
-                    ImportWizardService.validateTemplate(FileName, TemplateData, FieldDocument).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
                 }
             },
             views: {
@@ -678,16 +669,6 @@ angular
                 },
                 TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
-                },
-                Validation: function($q, ImportWizardService, FileName, FieldDocument, TemplateData) {
-                    var deferred = $q.defer();
-
-                    ImportWizardService.validateTemplate(FileName, TemplateData, FieldDocument).then(function(result) {
-                        console.log(result);
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
                 }
             },
             views: {
