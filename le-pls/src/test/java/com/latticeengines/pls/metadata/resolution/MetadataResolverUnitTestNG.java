@@ -35,6 +35,7 @@ public class MetadataResolverUnitTestNG {
         booleanTest.add("1");
         booleanTest.add("0");
         Assert.assertFalse(metadataResolver.isBooleanTypeColumn(booleanTest));
+        Assert.assertTrue(metadataResolver.isBooleanTypeColumn(Arrays.asList("true", "False", "YeS", "No")));
 
         // case 1: for unified date format
         MutableTriple<String, String, String> formatForDateAndTime = new MutableTriple<>();
@@ -80,9 +81,12 @@ public class MetadataResolverUnitTestNG {
         Assert.assertNull(formatForDateAndTime.getRight());
 
         // case 8: add some time zone, legal time zone has T&Z
-        Assert.assertFalse(metadataResolver.isDateTypeColumn(
+        Assert.assertTrue(metadataResolver.isDateTypeColumn(
                 Arrays.asList("11/4/2016 PM+0800", "02/01/2019 3:20:55 PM+0800", "04/01/2019 3:20:55 PM+0000"),
                 formatForDateAndTime));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "MM/DD/YYYY");
+        Assert.assertEquals(formatForDateAndTime.getMiddle(), "00:00:00 12H");
+        Assert.assertEquals(formatForDateAndTime.getRight(), TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
 
         // case 9: for unified date time format M/d/yyyy H:m:s => MM/DD/YYYY 00:00:00 24H
         Assert.assertTrue(metadataResolver.isDateTypeColumn(Arrays.asList("11/4/2016 4:20:10", "12/05/2018 20:10:20"),

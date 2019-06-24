@@ -305,12 +305,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
                     String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
                             fieldMapping.getDateFormatString() :
-                            fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                            fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                     + fieldMapping.getTimeFormatString();
                     String correctFormat = StringUtils
                             .isBlank(bestEffortMapping.getTimeFormatString()) ?
                             bestEffortMapping.getDateFormatString() :
-                            bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_SEPARATOR
+                            bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                     + bestEffortMapping.getTimeFormatString();
                     String message = String
                             .format("%s is set as %s but appears to be %s in your file.", userField,
