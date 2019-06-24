@@ -221,7 +221,8 @@ const Queries = {
             };        
       }
     },
-    getMarketoPrograms(authenticationId){
+    getMarketoPrograms(authenticationId, date){
+      if (!date) {
         return {
               auth_id: authenticationId,
               message: "list_programs",
@@ -244,6 +245,34 @@ const Queries = {
                   }
               }
           };
+      } else {
+        return {
+              auth_id: authenticationId,
+              message: "list_programs",
+              step_settings: {
+                  client_id: {
+                      type: "jsonpath",
+                      value: "$.auth.client_id"
+                  },
+                  client_secret: {
+                      type: "jsonpath",
+                      value: "$.auth.client_secret"
+                  },
+                  endpoint: {
+                      type: "jsonpath",
+                      value: "$.auth.endpoint"
+                  },
+                  max_return: {
+                      type: "integer",
+                      value: 200
+                  },
+                  earliest_updated_at: {
+                      type: "string",
+                      value: date
+                  }
+              }
+          };
+      }
     }
 
 

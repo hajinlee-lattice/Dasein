@@ -366,7 +366,14 @@ class TrayRouter {
         this.router.get('/marketo/programs', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
             let options = this.getEphemeralApiOptions(req, true);
-            options.json = Queries.getMarketoPrograms(authenticationId);
+            if (req.query.includeDateFilter == true) {
+                var date = new Date();
+                date.setFullYear(date.getFullYear() - 1);
+                options.json = Queries.getMarketoPrograms(authenticationId, date.toISOString());
+            } else {
+                options.json = Queries.getMarketoPrograms(authenticationId);
+            }
+
             this.request(options, function(error, response, body){
                 var errorMessage = GraphQLParser.getErrorMessage(body);
 
@@ -375,8 +382,19 @@ class TrayRouter {
                     res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
                     return;
                 }
-                res.send(body);
-            });
+
+                if (body.result && body.result.length == 200 && req.query.includeDateFilter == undefined) {
+                    console.log('Filter by date for trayAuthenticationId' + authenticationId);
+                    req.url = "/marketo/programs";
+                    req.method = 'GET'
+                    req.query.trayAuthenticationId = req.query.trayAuthenticationId;
+                    req.query.includeDateFilter = true;
+                    req.headers.useraccesstoken = req.headers.useraccesstoken;
+                    this.router.handle(req, res);
+                } else {
+                    res.send(body);
+                }
+            }.bind(this));
         }.bind(this));
 
         return this.router;
