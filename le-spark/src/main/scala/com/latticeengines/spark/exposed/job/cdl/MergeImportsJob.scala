@@ -31,10 +31,10 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         } else {
           MergeUtils.concat2(lhsDf, rhsDf)
         }
-      if (lhsIdx % 50 == 0 && lhsIdx > 0) {
+      if (lhsIdx % 20 == 0 && lhsIdx > 0) {
         lhsDf.unpersist(blocking = false)
       }
-      if (rhsIdx % 50 == 0) {
+      if (rhsIdx % 20 == 0 && rhsIdx > 0) {
         (merge2.persist(StorageLevel.DISK_ONLY).checkpoint(), rhsIdx)
       } else {
         (merge2, rhsIdx)
