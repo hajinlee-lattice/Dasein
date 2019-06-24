@@ -22,9 +22,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
+                    console.log('[tree-edit] init start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                     vm.initVariables();
                     vm.resetCmp();
-                    console.log('[tree-edit] init', vm.item.ColumnId, vm.item.FundamentalType + '/' + vm.type, vm);
+                    console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                 }
 
                 vm.initVariables = function () {
@@ -64,26 +65,46 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (vm.showItem('Date')) { }
                 };
 
-                vm.changeBooleanValue = function () {
+                vm.changeBooleanValue = function ($event) {
                     vm.booleanChanged = true;
 
-                    let value = vm.booleanValue;
+                    let value = $event.currentTarget.value;
                     let fn = (operation) => {
                         vm.tree.bucketRestriction.bkt.Cmp = vm.operation = operation;
                         QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
                         return '';
                     };
 
+                    vm.booleanValue = value;
+
                     switch (value) {
                         case "Present":
-                            value = fn('IS_NOT_NULL'); break;
+                            value = fn('IS_NOT_NULL');
+                            break;
                         case "Empty":
-                            value = fn('IS_NULL'); break;
-                        default:
+                            value = fn('IS_NULL');
+                            break;
+                        case "Yes":
                             fn('EQUAL');
+                            break;
+                        case "No":
+                            fn('EQUAL');
+                            break;
                     }
 
                     QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, value);
+                }
+
+                vm.checkBoolOpSelected = function (value) {
+                    let bkt = vm.tree.bucketRestriction.bkt;
+
+                    switch (bkt.Cmp) {
+                        case "EQUAL": return value == (bkt.Vals.length > 0 ? bkt.Vals[0] : '');
+                        case "IS_NULL": return value == 'Empty';
+                        case "IS_NOT_NULL": return value == 'Present';
+                    }
+
+                    return false;
                 }
 
                 vm.changeVals = function () {
