@@ -5,6 +5,7 @@ import { store } from 'store';
 var CONST = {
     FETCH_TEMPLATES: 'FETCH_TEMPLATES',
     FETCH_PRIORITIES: 'FETCH_PRIORITIES',
+    FETCH_SYSTEMS: 'FETCH_SYSTEMS',
     RESET_PRIORITIES: 'RESET_PRIORITIES',
     SAVE_PRIORITIES: 'SAVE_PRIORITIES',
 };
@@ -50,6 +51,24 @@ export const actions = {
         });
         httpService.post('pls/cdl/s3import/system/list', newList, observer, {});
     },
+    fetchSystems: (optionsObj) => {
+        let observer = new Observer(response => {
+            httpService.unsubscribeObservable(observer);
+            return store.dispatch({
+                type: CONST.FETCH_SYSTEMS,
+                payload: response.data,
+            });
+        });
+        let options = ''
+        Object.keys(optionsObj).forEach((option, index) => {
+            options = options.concat(`${option}${'='}${optionsObj[option]}`);
+            if(index < Object.keys.length -1){
+                options = options.concat('&');
+            }
+        });
+        let url = `${'../pls/cdl/s3import/system/list?'}${options}`;
+        httpService.get(url, observer, {});
+    }
 };
 
 export const reducer = (state = initialState, action) => {
@@ -73,6 +92,11 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 saved: action.payload.saved,
+            };
+            case CONST.FETCH_SYSTEMS:
+            return {
+                ...state,
+                systems: action.payload,
             };
         default:
             return state;

@@ -76,12 +76,12 @@ export default class MultipleTemplatesList extends Component {
     componentDidMount() {
         injectAsyncReducer(store, 'multitemplates', reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
-        actions.fetchTemplates();
         this.setState({
             forceReload: false,
             showEmpty: false,
             showLoading: true
         });
+        actions.fetchTemplates();
     }
 
     saveTemplateNameHandler(cell, value) {

@@ -58,7 +58,6 @@ export default class MatchPriorityComponent extends Component {
     render() {
         return (
             <ReactMainContainer className="match-priority">
-                <h2>Updating Match Priority​</h2>
                 <LeVPanel
                     hstretch={true}
                     vstretch={true}

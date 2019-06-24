@@ -83,8 +83,9 @@ export default class SystemCreationComponent extends Component {
   render() {
     return (
       <ReactMainContainer className="system-creation">
-          <p className="le-header">Import Data: Add System</p>
+          
         <LeVPanel hstretch={true} vstretch={true} className="wizard-container">
+        <p className="sub-header">Import Data: Add System</p>
           <LeVPanel
             vstretch={"true"}
             hstretch={"true"}
