@@ -25,7 +25,7 @@ public class PivotRatingsTestNG extends SparkJobFunctionalTestNGBase {
 
     @Override
     protected String getScenarioName() {
-        return "CDL";
+        return "cdl";
     }
 
     @Override

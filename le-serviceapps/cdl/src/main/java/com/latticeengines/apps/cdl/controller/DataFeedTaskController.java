@@ -149,8 +149,8 @@ public class DataFeedTaskController {
     @PostMapping(value = "/diagnostic/{taskIdentifier}")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSapce,
+    public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSpace,
                                                                          @PathVariable String taskIdentifier) {
-        return ResponseDocument.successResponse(dataFeedTaskManagerService.diagnostic(customerSapce, taskIdentifier));
+        return ResponseDocument.successResponse(dataFeedTaskManagerService.diagnostic(customerSpace, taskIdentifier));
     }
 }
