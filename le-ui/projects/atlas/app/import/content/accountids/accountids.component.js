@@ -98,6 +98,17 @@ angular.module('lp.import.wizard.accountids', [])
                         originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
                         append: false
                     };
+                // leaving this here because maybe a hack for PLS-13927, I never tested this though
+                // if you see this after july 2019, please remove
+                // console.log(map);
+                // if(vm.entityMatchEnabled) {
+                //     map = Object.assign({
+                //         idType: 'Account',
+                //         systemName: 'DefaultSystem',
+                //         mapToLatticeId: true 
+                //     }, map);
+                // }
+                // console.log(map);
                 mapped.push(map);
                 if(userField) {
                     vm.unavailableFields.push(userField);

@@ -113,7 +113,7 @@ export default class OverviewSummaryContainer extends Component {
 
     constrainText(event, limit) {
         if(event.target.innerText && limit) {
-            event.target.innerText = event.target.innerText.substring(0, limit);
+            //event.target.innerText = event.target.innerText.substring(0, limit);
         }
     }
 

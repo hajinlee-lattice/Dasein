@@ -22,7 +22,7 @@ angular.module('lp.playbook.wizard.preview', [])
             vm.published = results;
             vm.showPublishingSpinner = false;
             if(vm.alwaysOnCampaigns) { 
-                $state.go('home.playbook.overview', {play_name: play.name} );
+                $state.go('home.playbook.overview', {play_name: vm.play.name} );
             } else {
                 $state.go('home.playbook.dashboard', {play_name: vm.play.name});
             }
