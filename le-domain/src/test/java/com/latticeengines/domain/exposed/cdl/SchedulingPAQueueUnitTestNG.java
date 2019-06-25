@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.testng.collections.Lists;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
