@@ -319,7 +319,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains) throws Exception {
+    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains) throws Exception {
 
         long ret = 0;
         String domainField = vendorConfigService.getDomainField(vendor);
@@ -343,12 +343,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 for (CSVRecord rec : parser) {
 
                     ++ret;
+                    String domain = rec.get(domainIdx);
 
                     if (!rec.get(domainChkIdx).equals("")) {
 
-                        domains.add(rec.get(domainIdx));
+                        domains.add(domain);
+
+                    } else {
+
+                        errDomains.add(domain);
 
                     }
+
 
                 }
 
@@ -422,18 +428,19 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }*/
 
         //parse csv
-        HashSet<String> domains = new HashSet<>();
+        Set<String> domains = new HashSet<>();
+        Set<String> errDomains = new HashSet<>();
         long recordsCollected = 0;
 
         for (File tmpFile : tmpFiles) {
 
-            recordsCollected += getDomainFromCsvEx(vendor, tmpFile, domains);
+            recordsCollected += getDomainFromCsvEx(vendor, tmpFile, domains, errDomains);
 
         }
 
         worker.setRecordsCollected(recordsCollected);
 
-        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected);
+        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected + "," + errDomains.size());
 
         //consumeFinished reqs
         collectionRequestService.consumeFinished(workerId, domains);
