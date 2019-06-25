@@ -121,6 +121,10 @@ public class PlayServiceImpl implements PlayService {
         }
 
         if (shouldCreateNew) {
+            if (StringUtils.isBlank(play.getDisplayName())) {
+                throw new LedpException(LedpCode.LEDP_40065);
+            }
+
             play.setName(play.generateNameStr());
             retrievedPlay = playEntityMgr.createPlay(play);
         } else {
@@ -228,12 +232,10 @@ public class PlayServiceImpl implements PlayService {
                     log.info("Trying to build bucket metadata for rule based rating engine ids: "
                             + JsonUtils.serialize(rulesTypeRatingEngineIds));
                     rulesTypeRatingEngineIds //
-                            .stream() //
                             .forEach(pair -> {
                                 String reId = pair.getLeft();
                                 List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
-                                ratingEngines.stream() //
-                                        .forEach(r -> {
+                                ratingEngines.forEach(r -> {
                                             Map<String, Long> counts = r.getCountsAsMap();
                                             if (counts != null) {
                                                 r.setBucketMetadata(counts.keySet().stream() //
@@ -256,8 +258,7 @@ public class PlayServiceImpl implements PlayService {
                                         String reId = pair.getLeft();
                                         List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
                                         try {
-                                            ratingEngines.stream() //
-                                                    .forEach(r -> r.setBucketMetadata(bucketedScoreProxy
+                                            ratingEngines.forEach(r -> r.setBucketMetadata(bucketedScoreProxy
                                                             .getPublishedBucketMetadataByModelGuid(tenant.getId(),
                                                                     ((AIModel) r.getPublishedIteration())
                                                                             .getModelSummaryId())));
@@ -420,7 +421,7 @@ public class PlayServiceImpl implements PlayService {
             Long playPid = playEntityMgr.getPlayByName(name, false).getPid();
             List<PlayLaunch> launches = playLaunchService.findByPlayId(playPid, null);
             if (CollectionUtils.isNotEmpty(launches)) {
-                launches.stream().forEach(l -> playLaunchService.deleteByLaunchId(l.getId(), false));
+                launches.forEach(l -> playLaunchService.deleteByLaunchId(l.getId(), false));
             }
         }
 
@@ -463,7 +464,7 @@ public class PlayServiceImpl implements PlayService {
         if (CollectionUtils.isNotEmpty(plays)) {
             Date lastRefreshedDate = findLastRefreshedDate();
             plays //
-                    .stream().forEach(play -> {
+                    .forEach(play -> {
                         if (play.getRatingEngine() != null) {
                             play.getRatingEngine().setLastRefreshedDate(lastRefreshedDate);
                         }

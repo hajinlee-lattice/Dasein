@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;

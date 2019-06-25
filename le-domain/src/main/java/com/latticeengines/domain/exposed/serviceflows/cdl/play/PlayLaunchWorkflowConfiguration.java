@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.cdl;
+package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -7,12 +7,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesToS3Configuration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportPublishToSNSConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 
-public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class    PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
