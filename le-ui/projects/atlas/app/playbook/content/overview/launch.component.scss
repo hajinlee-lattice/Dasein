@@ -15,8 +15,10 @@
         }
     }
     input {
-        position: relative;
-        top: 2px;
+        &[type="checkbox"] {
+            position: relative;
+            top: 2px;
+        }
         &.required.empty {
             border: 1px solid red;
         }
@@ -35,6 +37,11 @@
             margin-bottom: 0;
         }
         &.recommendations {
+            h2 {
+                strong {
+                    margin-left: 10px;
+                }
+            }
             label {
                 input {
                     margin: 0 10px;
@@ -63,6 +70,7 @@
         }
     }
     .rating-buckets {
+        margin-bottom: 10px;
         .bucket {
             flex: 1 1 auto;
             max-width: 150px;
