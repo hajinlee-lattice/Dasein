@@ -183,8 +183,10 @@
 .launch-modal {
     .le-modal-body {
         margin-bottom: 50px;
+        padding: 26px 47px;
     }
     .le-title-container {
+        width: 100%;
         & > img {
             height: 37px;
         }
