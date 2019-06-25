@@ -192,7 +192,9 @@ public class PlayResource {
     @ApiOperation(value = "Create play launch channel")
     public PlayLaunchChannel createPlayLaunchChannel( //
             @PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, @RequestBody PlayLaunchChannel playLaunchChannel) {
+            @PathVariable("playName") String playName, //
+            @RequestBody PlayLaunchChannel playLaunchChannel, //
+            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow) {
         if (playLaunchChannel == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play launch channel object is null" });
         }
@@ -214,6 +216,9 @@ public class PlayResource {
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         playLaunchChannelService.create(playLaunchChannel);
+        if (launchNow) {
+            playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel);
+        }
         return playLaunchChannel;
     }
 

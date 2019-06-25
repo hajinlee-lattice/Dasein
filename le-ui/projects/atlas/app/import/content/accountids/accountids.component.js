@@ -29,7 +29,8 @@ angular.module('lp.import.wizard.accountids', [])
         initialMapping: {},
         keyMap: {},
         saveMap: {},
-        matchIdItems: []
+        matchIdItems: [],
+        match: false
     });
 
     vm.init = function() {
@@ -81,7 +82,23 @@ angular.module('lp.import.wizard.accountids', [])
         vm.AvailableFields = vm.AvailableFields.filter(function(item) {
             return (item.userField);
         });
+
+        if(vm.isMultipleTemplates()){
+            vm.setMapToContactId();
+        }
     };
+
+    vm.setMapToContactId = () => {
+        // vm.fieldMappings[0].mapToLatticeId = true;
+        // console.log(vm.fieldMappings);
+
+        for(var i = 0; i < vm.fieldMappings.length; i++) {
+            if(vm.fieldMappings[i].mapToLatticeId){
+                vm.match = vm.fieldMappings[i].mapToLatticeId;
+                break;
+            }
+        }
+    }
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
@@ -109,6 +126,9 @@ angular.module('lp.import.wizard.accountids', [])
                 //     }, map);
                 // }
                 // console.log(map);
+                if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
+                    map.mapToLatticeId = vm.match;
+                }
                 mapped.push(map);
                 if(userField) {
                     vm.unavailableFields.push(userField);

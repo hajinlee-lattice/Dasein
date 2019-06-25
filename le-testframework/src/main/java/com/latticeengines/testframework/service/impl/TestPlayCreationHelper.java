@@ -498,7 +498,7 @@ public class TestPlayCreationHelper {
         channel.setLaunchType(LaunchType.FULL);
         channel.setIsAlwaysOn(true);
         channel.setCronScheduleExpression("0 0 12 ? * THU *");
-        playProxy.createPlayLaunchChannel(tenant.getId(), play.getName(), channel);
+        playProxy.createPlayLaunchChannel(tenant.getId(), play.getName(), channel, false);
 
     }
 

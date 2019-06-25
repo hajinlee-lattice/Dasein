@@ -94,6 +94,11 @@ export default class MultipleTemplatesList extends Component {
     getConfig() {
         let config = {
             name: "import-templates",
+            selectable: true,
+            sorting:{
+                initial: 'System',
+                direction: 'desc'
+            },
             header: [
                 {
                     name: "Active",
@@ -101,7 +106,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "Priority",
+                    name: "ImportSystem.priority",
                     displayName: "Priority",
                     sortable: false
                 },
@@ -113,7 +118,7 @@ export default class MultipleTemplatesList extends Component {
                 {
                     name: "System",
                     displayName: "System",
-                    sortable: false
+                    sortable: true
                 },
                 {
                     name: "Object",

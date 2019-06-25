@@ -49,7 +49,7 @@ export const actions = {
                 payload: { saved: true },
             });
         });
-        httpService.post('pls/cdl/s3import/system/list', newList, observer, {});
+        httpService.post('../pls/cdl/s3import/system/list', newList, observer, {});
     },
     fetchSystems: (optionsObj) => {
         let observer = new Observer(response => {

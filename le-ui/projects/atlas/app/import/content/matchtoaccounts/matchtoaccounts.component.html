@@ -25,6 +25,19 @@
                    </select>
                 </div>
             </div>
+            <div class="system-options-item">
+                <div ng-if="vm.isMultipleTemplates()">
+                    <label for="dedupeField">System Name</label>
+                    <select class="form-control"> 
+                        <option value="">-- Select System --</option>
+                        <option
+                            ng-repat="system in vm.systems"
+                            value="system.name"
+                            ng-required="true"
+                        >{{system.display_name}}</option>
+                    </select>
+                </div>
+            </div>
         </div>
         
         <div class="matching-fields" ng-if="vm.entityMatchEnabled">

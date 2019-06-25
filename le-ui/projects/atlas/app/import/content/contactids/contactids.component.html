@@ -95,6 +95,7 @@
           ng-init="vm.checkValidDelay(form)"
           ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
         >
+          <option value="">{{ vm.ignoredFieldLabel }}</option>
           <option
             ng-repeat="AvailableField in vm.AvailableFields"
             value="{{ AvailableField.userField }}"
@@ -110,7 +111,11 @@
       </div>
       <br />
       <label class="match-contact">
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          ng-model="vm.match"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+        />
         Match this ID to Contact ID field in Lattice
       </label>
       <p>
@@ -149,8 +154,6 @@
                 class="form-control"
                 ng-model="vm.fieldMapping[field.name].userField"
                 ng-change="vm.changeMatchingFields(vm.fieldMapping, form)"
-                ng-required="field.required"
-                ng-class="{'required': field.required}"
               >
                 <option value="">{{ vm.ignoredFieldLabel }}</option>
                 <option
@@ -164,7 +167,14 @@
               </select>
             </li>
             <li class="system-type">
-              <select class="form-control"> </select>
+              <select class="form-control"> 
+                <option value="">-- Select System --</option>
+                <option
+                  ng-repat="system in vm.systems"
+                  value="system.name"
+                  ng-required="true"
+                >{{system.display_name}}</option>
+              </select>
             </li>
             <li class="remove-button" ng-click="vm.removeMatchId($index)">
               <span title="remove mapping"><i class="fa fa-times"></i></span>
@@ -178,7 +188,7 @@
       type="button"
       ng-click="vm.addMatchId()"
     >
-      Add another ID
+      Add match ID
     </button>
   </div>
 </div>
