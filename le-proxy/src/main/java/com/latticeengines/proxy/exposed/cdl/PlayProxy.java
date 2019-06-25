@@ -374,14 +374,9 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunchChannel createPlayLaunchChannel(String customerSpace, String playName,
-            PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
+            PlayLaunchChannel playLaunchChannel) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
-        List<String> params = new ArrayList<>();
-        params.add("launch-now=" + launchNow);
-        if (!params.isEmpty()) {
-            url += "?" + StringUtils.join(params, "&");
-        }
         return post("create play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 

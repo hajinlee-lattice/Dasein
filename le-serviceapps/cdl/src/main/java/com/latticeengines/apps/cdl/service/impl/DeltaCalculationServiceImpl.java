@@ -1,11 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -15,28 +10,86 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("deltaCalculationService")
 public class DeltaCalculationServiceImpl implements DeltaCalculationService {
     private static final Logger log = LoggerFactory.getLogger(DeltaCalculationServiceImpl.class);
 
     @Inject
-    PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
+    private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
-    private static int count = 1;
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Inject
+    private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
 
     public Boolean triggerScheduledCampaigns() {
-        log.info("Delta calc running here : " + count);
-        List<Callable<String>> fileExporters = new ArrayList<>();
-        Date fileExportTime = new Date();
-        // fileExporters.add(new CsvFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
-        // fileExporters.add(new JsonFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
+        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllScheduledChannels();
 
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("playlaunch-export", 2);
-        List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
-                (int) TimeUnit.DAYS.toMinutes(1), 30);
+        log.info("Found " + channels.size() + " channels scheduled for launch");
+
+        channels.forEach(c -> {
+            String appId = campaignDeltaCalculationWorkflowSubmitter
+                    .submit(c.getTenant().getId(), c.getPlay().getName(), c.getId()).toString();
+            log.info("Queued a Launch for campaignId " + c.getId() + " : " + appId);
+            waitForWorkflowStatus(c.getTenant().getId(), appId);
+        });
+        // List<Callable<String>> fileExporters = new ArrayList<>();
+        // Date fileExportTime = new Date();
+        // // fileExporters.add(new CsvFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
+        // // fileExporters.add(new JsonFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
+        //
+        // ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("playlaunch-export", 2);
+        // List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
+        // (int) TimeUnit.DAYS.toMinutes(1), 30);
 
         return null;
+    }
+
+    protected JobStatus waitForWorkflowStatus(String tenantId, String applicationId) {
+        int retryOnException = 4;
+        Job job;
+        while (true) {
+            try {
+                job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                        CustomerSpace.parse(tenantId).toString());
+            } catch (Exception e) {
+                log.error(String.format("Workflow job exception: %s", e.getMessage()), e);
+
+                job = null;
+                if (--retryOnException == 0)
+                    throw new RuntimeException(e);
+            }
+
+            if ((job != null) && job.getJobStatus().isTerminated()) {
+                if (job.getJobStatus() == JobStatus.FAILED) {
+                    log.error(applicationId + " Failed with ErrorCode " + job.getErrorCode() + ". \n"
+                            + job.getErrorMsg());
+                }
+                if (job.getJobStatus() == JobStatus.CANCELLED) {
+                    log.error(
+                            applicationId + " Cancelled, Errorcode " + job.getErrorCode() + ". \n" + job.getErrorMsg());
+                }
+                if (job.getJobStatus() == JobStatus.SKIPPED) {
+                    log.error(applicationId + " Skipped, Errorcode " + job.getErrorCode() + ". \n" + job.getErrorMsg());
+                }
+                if (job.getJobStatus() == JobStatus.COMPLETED) {
+                    log.info(applicationId + " Completed!");
+                }
+                return job.getJobStatus();
+            }
+            try {
+                Thread.sleep(30000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

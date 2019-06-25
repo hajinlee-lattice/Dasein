@@ -1,10 +1,13 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -167,7 +170,13 @@ public class PlayLaunchChannelEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<PlayLaunchChannel> getAllScheduledChannels() {
-        return readerRepository.findByIsAlwaysOnTrue();
+        List<PlayLaunchChannel> channels = readerRepository.findAlwaysOnChannelsByNextScheduledTime(true,
+                new Date(Long.MIN_VALUE), DateUtils.addMinutes(new Date(), 15));
+        channels.forEach(c -> {
+            Hibernate.initialize(c.getTenant());
+            Hibernate.initialize(c.getPlay());
+        });
+        return channels;
     }
 
     private PlayLaunchChannel verifyNewPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {

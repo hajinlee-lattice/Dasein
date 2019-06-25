@@ -231,12 +231,11 @@ public class PlayResource {
     public PlayLaunchChannel createPlayLaunchChannel( //
             @PathVariable("playName") String playName, //
             @RequestBody PlayLaunchChannel playLaunchChannel, //
-            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setCreatedBy(MultiTenantContext.getEmailAddress());
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel, launchNow);
+        return playProxy.createPlayLaunchChannel(tenant.getId(), playName, playLaunchChannel);
     }
 
     @RequestMapping(value = "/{playName}/channels/{channelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
