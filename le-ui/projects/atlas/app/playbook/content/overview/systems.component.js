@@ -64,6 +64,14 @@ class SystemsComponent extends Component {
                     img: '/atlas/assets/images/eloqua.png', 
                     text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to Eloqua' 
                 }
+            },
+            AWS_S3:  {
+                name: 'AWS_S3',
+                config: { 
+                    name: 'AWS S3',
+                    img: '/atlas/assets/images/logo_aws_s3.png', 
+                    text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to AWS S3' 
+                }
             }
         };
     }
@@ -176,7 +184,7 @@ class SystemsComponent extends Component {
             launching =  (launchState === 'Launching' ? true : false),
             active = false;
 
-        var activeState = (true ? 'Active' : 'Inactive');
+        var activeState = (connection.isAlwaysOn ? 'Active' : 'Inactive');
         if(connection.isAlwaysOn) {
             button.push(
                 <LeButton
@@ -242,10 +250,11 @@ class SystemsComponent extends Component {
                 launched = (launchState === 'Launching' ? true : false);
 
             var configObj = this._connectors[connection.lookupIdMap.externalSystemName],
-                config = (configObj ? configObj.config : {});
+                config = (configObj ? configObj.config : {}),
+                activeState = (connection.isAlwaysOn ? 'Active' : 'Inactive');
 
             return (
-                <LeHPanel hstretch={"true"} className={'connection-card'}>
+                <LeHPanel hstretch={"true"} className={`connection-card ${activeState}`}>
                     <div class="connection-logo">
                         <img src={config.img} />
                         <h2 title={connection.lookupIdMap.orgName}>{connection.lookupIdMap.orgName}</h2>
