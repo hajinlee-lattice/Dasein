@@ -26,14 +26,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -119,21 +117,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     }
 
     private AttributeRepository constructAttrRepo() {
-        AttributeRepository attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
-        Table accountExportTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                TableRoleInCollection.AccountExport, version);
-        if (accountExportTable != null) {
-            log.info("Overwriting account attr repo by account export table");
-            attrRepo.appendServingStore(BusinessEntity.Account, accountExportTable);
-        }
-
-        Table purchaseHistoryTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                TableRoleInCollection.CalculatedPurchaseHistory, version);
-        if (purchaseHistoryTable != null) {
-            log.info("Insert PH attr repo");
-            attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, purchaseHistoryTable);
-        }
-        return attrRepo;
+        return dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
     }
 
     void extractAllContainers() {
@@ -143,12 +127,14 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
             }
             try {
-                startSparkSQLSession(getHdfsPaths(attrRepo));
-                containers.forEach(container -> {
-                    if (container.getExtractedTarget() == null) {
-                        extractOneContainer(container);
-                    }
-                });
+                List<RatingModelContainer> round = containers.stream() //
+                        .filter(container -> container.getExtractedTarget() == null) //
+                        .collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(round)) {
+                    boolean persistOnDisk = round.size() > 2;
+                    startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
+                    round.forEach(this::extractOneContainer);
+                }
                 return true;
             } finally {
                 stopSparkSQLSession();
