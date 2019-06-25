@@ -223,7 +223,7 @@ public class PlayResource {
     public String schedule(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
-        return campaignDeltaCalculationWorkflowSubmitter.submit(playName, channelId).toString();
+        return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
     }
 
     @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")

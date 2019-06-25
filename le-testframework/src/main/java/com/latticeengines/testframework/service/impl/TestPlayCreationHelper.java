@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -64,6 +66,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -253,12 +259,14 @@ public class TestPlayCreationHelper {
         if (playLaunchConfig.isMockRatingTable()) {
             cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
         }
-        createDefaultPlayAndTestCrud(playLaunchConfig);
-        createPlayLaunch(playLaunchConfig);
+        // setup Lattice_S3 lookupIdMapping
+        lookupIdMappingProxy.getLookupIdsMapping(CustomerSpace.parse(tenant.getId()).getTenantId(), null, null, false);
 
         if (playLaunchConfig.getTrayAuthenticationId() != null) {
             createLookupIdMapping(playLaunchConfig);
         }
+        createDefaultPlayAndTestCrud(playLaunchConfig);
+        createPlayLaunch(playLaunchConfig);
 
         Assert.assertNotNull(play);
         Assert.assertNotNull(playLaunch);
@@ -266,8 +274,6 @@ public class TestPlayCreationHelper {
         if (playLaunchConfig.isLaunchPlay()) {
             launchPlayWorkflow(playLaunchConfig);
         }
-        // setup Lattice_S3 lookupIdMapping
-        lookupIdMappingProxy.getLookupIdsMapping(CustomerSpace.parse(tenant.getId()).getTenantId(), null, null, false);
     }
 
     public void setupRatingEngineAndSegment() throws Exception {
@@ -398,7 +404,7 @@ public class TestPlayCreationHelper {
     private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         Assert.assertNotNull(playLaunch.getBucketsToLaunch());
         Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
-        Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
+        // Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
         for (RatingBucketName bucket : bucketsToLaunch) {
             Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
         }
@@ -408,6 +414,12 @@ public class TestPlayCreationHelper {
         List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
         Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), createdPlay1.getName(),
+                true);
+
+        channels.stream().filter(c -> StringUtils.isEmpty(c.getId()))
+                .forEach(c -> createChannel(playLaunchConfig, createdPlay1, c));
+
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
@@ -431,6 +443,10 @@ public class TestPlayCreationHelper {
 
         Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
         Assert.assertNotNull(createdPlay2);
+        channels = playProxy.getPlayLaunchChannels(tenant.getId(), createdPlay2.getName(), true);
+
+        channels.stream().filter(c -> StringUtils.isEmpty(c.getId()))
+                .forEach(c -> createChannel(playLaunchConfig, createdPlay2, c));
 
         dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
@@ -453,6 +469,37 @@ public class TestPlayCreationHelper {
         String jsonValue = JsonUtils.serialize(retrievedPlay);
         Assert.assertNotNull(jsonValue);
         this.play = retrievedPlay;
+    }
+
+    private void createChannel(PlayLaunchConfig config, Play play, PlayLaunchChannel channel) {
+        channel.setBucketsToLaunch(config.getBucketsToLaunch());
+        switch (channel.getLookupIdMap().getExternalSystemName()) {
+            case Salesforce:
+                channel.setChannelConfig(new SalesforceChannelConfig());
+                break;
+            case Marketo:
+                channel.setChannelConfig(new MarketoChannelConfig());
+                break;
+            case AWS_S3:
+                channel.setChannelConfig(new S3ChannelConfig());
+                break;
+            case Eloqua:
+                channel.setChannelConfig(new EloquaChannelConfig());
+                break;
+            default:
+                channel.setChannelConfig(new SalesforceChannelConfig());
+                break;
+        }
+        channel.setTenant(tenant);
+        channel.setTenantId(tenant.getPid());
+        channel.setCreatedBy("ga_dev@lattice-engines.com");
+        channel.setUpdatedBy("ga_dev@lattice-engines.com");
+        channel.setPlay(play);
+        channel.setLaunchType(LaunchType.FULL);
+        channel.setIsAlwaysOn(true);
+        channel.setCronScheduleExpression("0 0 12 ? * THU *");
+        playProxy.createPlayLaunchChannel(tenant.getId(), play.getName(), channel);
+
     }
 
     private List<TalkingPointDTO> getTestTalkingPoints(String playName) {
