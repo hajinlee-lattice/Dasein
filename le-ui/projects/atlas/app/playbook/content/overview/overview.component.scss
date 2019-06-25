@@ -11,12 +11,16 @@
         padding: 10px;
         margin-bottom: 40px;
         h1 {
-            font-size: 1.5em;
-            font-weight: bold;
+            font-size: 18px;
             float: left;
             padding-left: 35px;
             background: url(/assets/images/campaignoverview/dashboard-ico.png) no-repeat left center;
             background-size: contain;
+        }
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
         }
     }
     .panel {

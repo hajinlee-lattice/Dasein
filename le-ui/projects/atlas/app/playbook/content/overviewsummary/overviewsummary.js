@@ -146,27 +146,29 @@ export default class OverviewSummaryContainer extends Component {
                             <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-header'}>
                                 <p className="title">
                                     <LeVPanel hstretch={"true"} className={'title-container'}>
-                                        <div className={'play-type'}>
-                                            {this.makeTypeOptions(play, types)}
-                                        </div>
                                         <div className={'play-name'}>
-                                            <span contenteditable="true" 
-                                                onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } 
-                                                onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
-                                                {play.displayName}
-                                            </span>
-                                        </div>
-                                        <div className={'play-created'}>
-                                            <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
-                                                <span>
-                                                    Created: {moment(play.created).format('MMM D, YYYY')} 
-                                                    <i title={play.createdBy} class="fa fa-user"></i>
+                                            <div className={'play-type'}>
+                                                {this.makeTypeOptions(play, types)}
+                                            </div>
+                                            <h1>
+                                                <span contenteditable="true" 
+                                                    onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } 
+                                                    onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
+                                                    {play.displayName}
                                                 </span>
-                                                <span>
-                                                    Edited: {moment(play.updated).format('MMM D, YYYY')}
-                                                    <i title={play.updatedBy} class="fa fa-user"></i>
-                                                </span>
-                                            </LeHPanel>
+                                            </h1>
+                                            <div className={'play-created'}>
+                                                <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
+                                                    <span>
+                                                        Created: {moment(play.created).format('MMM D, YYYY')} 
+                                                        <i title={play.createdBy} class="user-ico"></i>
+                                                    </span>
+                                                    <span>
+                                                        Edited: {moment(play.updated).format('MMM D, YYYY')}
+                                                        <i title={play.updatedBy} class="user-ico"></i>
+                                                    </span>
+                                                </LeHPanel>
+                                            </div>
                                         </div>
                                     </LeVPanel>
                                 </p>

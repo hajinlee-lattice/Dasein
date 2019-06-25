@@ -10,35 +10,42 @@
     color: $pearl-white;
     width: 100%;
     margin-top: 0.3em;
+    padding-bottom: 15px;
     overflow: hidden;
     justify-content: space-between;
     align-items: center;
     .le-summary-container {
         margin: 0 auto;
-        max-width: 1200px;;
+        max-width: 1200px;
         background: none;
         .le-summary-header {
             margin: 1em;
+            margin-bottom: 0;
             & > p,
             span {
                 color: $pearl-white;
-                padding: 0 .5em;
+                padding: 0;
             }
             & > .title {
                 padding: 0;
                 margin: 0;
                 padding: 0 0.7%;
-                width: 350px;
+                max-width: 350px;
+                padding-right: 30px;
+                position: relative;
+                &:after {
+                    position: absolute;
+                    content: '';
+                    display: block;
+                    top: 20%;
+                    bottom: 20%;
+                    right: -1px;
+                    border-right: 1px solid rgba(255,255,255,.5);
+                }
                 .play-type {
+                    opacity: .7;
                     select {
-                        border: none;
                         padding: 0;
-                        // -webkit-appearance: none;
-                        // -moz-appearance: none;
-                        // appearance: none;
-                        // -ms-appearance: none;
-                        background: none;
-                        color: white;
                         & > option {
                             color: black;
                         }
@@ -46,24 +53,52 @@
                     }
                 }
                 .play-name {
-                    font-size: 20px;
-                    padding-left: 30px;
-                    background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
-                    background-size: contain;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
+                    position: relative;
+                    padding-left: 45px;
+                    &:after {
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        content: '';
+                        display: block;
+                        height: 36px;
+                        width: 27px;
+                        background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
+                        background-size: contain;
+                    }
+                    h1 {
+                        font-size: 24px;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        span {
+                            padding: 0;
+                        }
+                    }
                 }
                 .play-created {
+                    opacity: .7;
+                    position: relative;
+                    top: -10px;
                     .le-summary-times {
                         font-size: 12px;
                         span {
                             white-space: nowrap;
-                            border-right: 1px solid rgba(255,255,255,.5);
+                            border-right: 1px solid rgba(255,255,255,0.5);
+                            padding-right: 6px;
+                            margin-right: 6px;
                             &:last-child {
                                 border-right: none;
+                                margin: 0;
+                                padding: 0;
                             }
                             & > i {
+                                display: inline-block;
                                 margin-left: 5px;
+                                height: 12px;
+                                width: 12px;
+                                background: url(/assets/images/campaignoverview/user-ico.png) no-repeat 0.7% center;
+                                background-size: contain;
                             }
                         }
                     }
@@ -74,7 +109,10 @@
                 margin: 0;
                 padding: 0 0.7%;
                 padding-left: 30px;
-                border-left: 1px solid rgba(255,255,255,.5);
+                opacity: .7;
+                span {
+                    padding: 0;
+                }
             }
         }
     }
@@ -88,7 +126,7 @@
             font-weight: normal;
             text-decoration: inherit;
             font-size: 12px;
-            opacity: 0.4;
+            opacity: 0;
             margin-left: 10px;
             // position: absolute;
             // top: 0px;

@@ -247,10 +247,12 @@ class LaunchComponent extends Component {
                     selected = (vm.state.selectedBuckets.indexOf(bucket.bucket) >= 0);
 
                 _buckets.push(
-                    <span className={`${(selected ? 'selected' : '')}`} disabled={(bucket.count <= 0)} onClick={() => { if(bucket.count) { vm.bucketClick(bucket, coverage, play) } }}>
-                        <h3>{bucket.bucket}</h3>
-                        {bucket.count} ({percent}%)
-                    </span>
+                    <div className={`bucket ${(selected ? 'selected' : '')}`} disabled={(bucket.count <= 0)} onClick={() => { if(bucket.count) { vm.bucketClick(bucket, coverage, play) } }}>
+                        <div className={'bucket-text'}>
+                            <h3>{bucket.bucket}</h3>
+                            <em>{bucket.count} ({percent}%)</em>
+                        </div>
+                    </div>
                 );
             });
         }
@@ -283,19 +285,27 @@ class LaunchComponent extends Component {
         }],
         unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
         hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
-        noBuckets = (hasBuckets ? null : _noBuckets);
+        noBuckets = (hasBuckets ? null : _noBuckets),
+        littleBuckets = false;
 
         if(coverage) {
             return (
                 <Aux>
                     <h2>Model Ratings</h2>
-                    <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
+                    <LeHPanel 
+                        hstretch={!littleBuckets} 
+                        halignment={LEFT} 
+                        valignment={CENTER} 
+                        className={`rating-buckets ${littleBuckets ? 'little-buckets' : ''}`}
+                    >
                         {this.makeBuckets(coverage, play, noBuckets, opts)}
                     </LeHPanel>
-                    <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
-                    <label for="unscored">
-                        Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
-                    </label>
+                    <div className={'unscored-accounts-container'}>
+                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
+                        <label for="unscored">
+                            Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
+                        </label>
+                    </div>
                 </Aux>
             );
         }
