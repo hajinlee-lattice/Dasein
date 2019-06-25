@@ -167,7 +167,14 @@
               </select>
             </li>
             <li class="system-type">
-              <select class="form-control"> </select>
+              <select class="form-control"> 
+                <option value="">-- Select System --</option>
+                <option
+                  ng-repat="system in vm.systems"
+                  value="system.name"
+                  ng-required="true"
+                >{{system.display_name}}</option>
+              </select>
             </li>
             <li class="remove-button" ng-click="vm.removeMatchId($index)">
               <span title="remove mapping"><i class="fa fa-times"></i></span>

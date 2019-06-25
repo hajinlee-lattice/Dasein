@@ -1,7 +1,10 @@
+import {actions, reducer} from '../../templates/multiple/multipletemplates.redux';
+import { store, injectAsyncReducer } from 'store';
+
 angular.module('lp.import.wizard.matchtoaccounts', [])
 .controller('ImportWizardMatchToAccounts', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields, Banner
+    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields, Banner, FeatureFlagService
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
@@ -45,10 +48,17 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         ignoredFieldLabel: ignoredFieldLabel,
         matchingFieldsList: angular.copy(matchingFieldsList),
         matchingFields: MatchingFields,
+        systems: []
     });
 
     vm.init = function() {
-
+        injectAsyncReducer(store, 'multitemplates.contactids', reducer);
+        this.unsubscribe = store.subscribe(() => {
+            const data = store.getState()['multitemplates.contactids'];
+            vm.systems = data;
+        });
+       
+        actions.fetchSystems({Contact: true});
         let validationStatus = ImportWizardStore.getValidationStatus();
         if (validationStatus) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
@@ -216,6 +226,12 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
 
     vm.checkValid = function(form) {
         ImportWizardStore.setValidation('matchtoaccounts', form.$valid);
+    }
+
+    vm.isMultipleTemplates = () => {
+        var flags = FeatureFlagService.Flags();
+        var multipleTemplates = FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT);
+        return multipleTemplates;
     }
 
 
