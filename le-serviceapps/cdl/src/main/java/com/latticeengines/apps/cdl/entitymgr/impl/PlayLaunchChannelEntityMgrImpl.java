@@ -1,12 +1,10 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.core.util.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -115,8 +113,8 @@ public class PlayLaunchChannelEntityMgrImpl
     public PlayLaunchChannel createPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         verifyNewPlayLaunchChannel(playLaunchChannel);
         if (playLaunchChannel.getCronScheduleExpression() != null) {
-            playLaunchChannel.setNextScheduledLaunch(
-                    getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
+            playLaunchChannel
+                    .setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(playLaunchChannel));
         }
         playLaunchChannelDao.create(playLaunchChannel);
         return playLaunchChannel;
@@ -141,12 +139,15 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(playLaunchChannel.getLaunchType());
         }
-        if (playLaunchChannel.getCronScheduleExpression() != null) {
-            existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
-            existingPlayLaunchChannel.setNextScheduledLaunch(
-                    getNextDateFromCronExpression(playLaunchChannel.getCronScheduleExpression()));
+        if (playLaunchChannel.getNextScheduledLaunch() != null) {
+            existingPlayLaunchChannel.setNextScheduledLaunch(playLaunchChannel.getNextScheduledLaunch());
         }
-
+        if (playLaunchChannel.getCronScheduleExpression() != null && !playLaunchChannel.getCronScheduleExpression()
+                .equals(existingPlayLaunchChannel.getCronScheduleExpression())) {
+            existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
+            existingPlayLaunchChannel
+                    .setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(existingPlayLaunchChannel));
+        }
         if (playLaunchChannel.getChannelConfig() != null) {
             LookupIdMap lookupIdMap = findLookupIdMap(playLaunchChannel);
             verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, playLaunchChannel);
@@ -163,14 +164,10 @@ public class PlayLaunchChannelEntityMgrImpl
         return existingPlayLaunchChannel;
     }
 
-    private Date getNextDateFromCronExpression(String cronExpression) {
-        Date nextDate = null;
-        try {
-            nextDate = new CronExpression(cronExpression).getNextValidTimeAfter(new Date());
-        } catch (Exception e) {
-            log.error("Unable to parse the given cron expression: " + cronExpression, e);
-        }
-        return nextDate;
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<PlayLaunchChannel> getAllScheduledChannels() {
+        return readerRepository.findByIsAlwaysOnTrue();
     }
 
     private PlayLaunchChannel verifyNewPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
@@ -189,35 +186,35 @@ public class PlayLaunchChannelEntityMgrImpl
     private void verifyChannelConfigHasSameDestinationAsLookupIdMap(LookupIdMap lookupIdMap,
             PlayLaunchChannel playLaunchChannel) {
         CDLExternalSystemName systemName = lookupIdMap.getExternalSystemName();
-        switch (systemName.getDisplayName()) {
-        case "Marketo":
-            if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
-                throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                systemName.getDisplayName() });
-            }
-            break;
-        case "Eloqua":
-            if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
-                throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                systemName.getDisplayName() });
-            }
-            break;
-        case "Salesforce":
-            if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
-                throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                systemName.getDisplayName() });
-            }
-            break;
-        case "AWS S3":
-            if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
-                throw new LedpException(LedpCode.LEDP_18222,
-                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                systemName.getDisplayName() });
-            }
-            break;
+        switch (systemName) {
+            case Marketo:
+                if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
+                    throw new LedpException(LedpCode.LEDP_18222,
+                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                    systemName.getDisplayName() });
+                }
+                break;
+            case Eloqua:
+                if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
+                    throw new LedpException(LedpCode.LEDP_18222,
+                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                    systemName.getDisplayName() });
+                }
+                break;
+            case Salesforce:
+                if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
+                    throw new LedpException(LedpCode.LEDP_18222,
+                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                    systemName.getDisplayName() });
+                }
+                break;
+            case AWS_S3:
+                if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
+                    throw new LedpException(LedpCode.LEDP_18222,
+                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                    systemName.getDisplayName() });
+                }
+                break;
         }
     }
 

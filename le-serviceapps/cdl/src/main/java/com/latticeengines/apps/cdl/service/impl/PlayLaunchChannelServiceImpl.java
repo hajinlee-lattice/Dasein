@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -14,12 +15,17 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
@@ -34,6 +40,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public PlayLaunchChannel create(PlayLaunchChannel playLaunchChannel) {
@@ -90,6 +99,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
         playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
         playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
+        playLaunch.setTableName(createTable());
 
         if (playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig) {
             MarketoChannelConfig channelConfig = (MarketoChannelConfig) playLaunchChannel.getChannelConfig();
@@ -100,6 +110,19 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
         }
+
+        Long totalAvailableRatedAccounts = playLaunchChannel.getPlay().getTargetSegment().getAccounts();
+        Long totalAvailableContacts = playLaunchChannel.getPlay().getTargetSegment().getContacts();
+
+        playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
+        playLaunch.setAccountsSuppressed(0L);
+        playLaunch.setAccountsErrored(0L);
+        playLaunch.setAccountsLaunched(0L);
+        playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
+        playLaunch.setContactsLaunched(0L);
+        playLaunch.setContactsSuppressed(0L);
+        playLaunch.setContactsErrored(0L);
+
         playLaunchEntityMgr.create(playLaunch);
         return playLaunch;
     }
@@ -122,6 +145,27 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         PlayLaunchChannel newChannel = new PlayLaunchChannel();
         newChannel.setLookupIdMap(mapping);
         channels.add(newChannel);
+    }
+
+    private String createTable() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Tenant tenant = MultiTenantContext.getTenant();
+        com.latticeengines.domain.exposed.metadata.Table generatedRecommendationTable = new com.latticeengines.domain.exposed.metadata.Table();
+        generatedRecommendationTable.addAttributes(Recommendation.getSchemaAttributes());
+
+        String tableName = "play_launch_" + UUID.randomUUID().toString().replaceAll("-", "_");
+        generatedRecommendationTable.setName(tableName);
+        generatedRecommendationTable.setTableType(TableType.DATATABLE);
+
+        generatedRecommendationTable.setDisplayName("Play Launch recommendation");
+        generatedRecommendationTable.setTenant(tenant);
+        generatedRecommendationTable.setTenantId(tenant.getPid());
+        generatedRecommendationTable.setMarkedForPurge(false);
+        metadataProxy.createTable(customerSpace.toString(), tableName, generatedRecommendationTable);
+
+        generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+
+        return generatedRecommendationTable.getName();
     }
 
 }

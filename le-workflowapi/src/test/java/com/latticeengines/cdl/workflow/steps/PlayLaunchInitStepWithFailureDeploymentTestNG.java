@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -155,7 +155,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
 
     // TODO - enable when we have a way to simulate full/partial failure
     @AfterClass(groups = { "deployment" }, enabled = false)
-    public void teardown() throws Exception {
+    public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
     }
 
@@ -181,7 +181,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
             Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Failed);
             Assert.assertEquals(updatedPlayLaunch.getAccountsLaunched().longValue(), 0L);
             Assert.assertEquals(updatedPlayLaunch.getContactsLaunched().longValue(), 0L);
-            Assert.assertTrue(updatedPlayLaunch.getAccountsErrored().longValue() > 0L);
+            Assert.assertTrue(updatedPlayLaunch.getAccountsErrored() > 0L);
             Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
         }
     }
