@@ -730,10 +730,9 @@ public class MetadataResolver {
         double dateThreshold = 0.1 * columnFields.size();
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
-                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", TimeStampConvertUtils.SYSTEM_DELIMITER);
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
-                boolean isDateTime = TimeStampConvertUtils.isDateTime(columnField);
-                if (isDateTime) {
+                if (TimeStampConvertUtils.isDateTime(columnField)) {
                     conformingDateCount++;
                     if (conformingDateCount >= dateThreshold) {
                         break;
@@ -754,6 +753,7 @@ public class MetadataResolver {
         return true;
     }
 
+
     @VisibleForTesting
     MutableTriple<String, String, String> distinguishDateAndTime(List<String> columnFields) {
         List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
@@ -762,7 +762,7 @@ public class MetadataResolver {
         // iterate every value, generate number for supported format
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
-                columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
+                columnField = columnField.trim().replaceFirst("(\\s\\s+)", TimeStampConvertUtils.SYSTEM_DELIMITER);
                 String trimmedColumnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
                 List<String> conformingFormats = TimeStampConvertUtils.generateSupportedFormats(trimmedColumnField);
                 for (String format : conformingFormats) {
@@ -782,7 +782,6 @@ public class MetadataResolver {
                     useTimeZone = true;
                 }
             }
-
         }
         if (MapUtils.isEmpty(hitMap)) {
             return null;
@@ -795,17 +794,16 @@ public class MetadataResolver {
                                 supportedDateTimeFormat.indexOf(entry2.getKey()))
                         : entry2.getValue().compareTo(entry1.getValue()));
         String expectedFormat = entries.get(0).getKey();
-
         // legal date time formats are delimited by space in TimeStampConvertUtils
-        int index = expectedFormat.indexOf(" ");
+        int index = expectedFormat.indexOf(TimeStampConvertUtils.SYSTEM_DELIMITER);
         if (index == -1) {
-            return new MutableTriple<String, String, String>(expectedFormat, null, null);
+            return new MutableTriple<>(expectedFormat, null, null);
         } else {
             if (useTimeZone) {
-                return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
+                return new MutableTriple<>(expectedFormat.substring(0, index),
                         expectedFormat.substring(index + 1), TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE);
             } else {
-                return new MutableTriple<String, String, String>(expectedFormat.substring(0, index),
+                return new MutableTriple<>(expectedFormat.substring(0, index),
                     expectedFormat.substring(index + 1), null);
             }
         }

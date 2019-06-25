@@ -21,6 +21,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -58,7 +59,7 @@ public class TimeStampConvertUtils {
     // Regular expression pattern to match date/time formats with ISO 8601 format include "T" between date and time
     // and optional "Z" at the end.
     public static final Pattern TZ_DATE_TIME = Pattern.compile(
-            "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt ]"
+            "((\\d{1,4}|[a-zA-Z]{3})[-/.](\\d{1,4}|[a-zA-Z]{3})[-/.]\\d{1,4})[Tt]"
                     + "(\\d{1,2}((:\\d{1,2}(:\\d{1,2}(\\.\\d{3})?)?)|(-\\d{1,2}(-\\d{1,2}(\\.\\d{3})?)?)|"
                     + "( \\d{1,2}( \\d{1,2}(\\.\\d{3})?)?))(\\s+[aApP][mM])?)[Zz]?");
 
@@ -96,9 +97,6 @@ public class TimeStampConvertUtils {
 
     // Reserve mapping from separators to java 8 time format
     private static final Map<Character, List<String>> separatorToJavaTimeFormatGroup = new HashMap<>();
-
-    // Reserve mapping from java 8 date/time formats to regex expression
-    private static final Map<String, String> javaDateTimeFormatToRegexMap = new HashMap<>();
 
     // Set up static mappings from user exposed date and time format to Java 8 formats.
     static {
@@ -157,62 +155,6 @@ public class TimeStampConvertUtils {
         userToJavaTimeFormatMap.put("00-00 24H", "H-m");
         userToJavaTimeFormatMap.put("00 00 12H", "h m a");
         userToJavaTimeFormatMap.put("00 00 24H", "H m");
-
-        javaDateTimeFormatToRegexMap.put("M/d/yyyy", "([01]\\d|\\d)/([0-3]\\d|\\d)/\\d{4}");
-        javaDateTimeFormatToRegexMap.put("M/d/yy", "([01]\\d|\\d)/([0-3]\\d|\\d)/\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d/M/yyyy", "([0-3]\\d|\\d)/([01]\\d|\\d)/\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d/M/yy", "([0-3]\\d|\\d)/([01]\\d|\\d)/\\d{2}");
-        javaDateTimeFormatToRegexMap.put("yyyy/M/d", "\\d{4}/([01]\\d|\\d)/([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("M-d-yyyy", "([01]\\d|\\d)-([0-3]\\d|\\d)-\\d{4}");
-        javaDateTimeFormatToRegexMap.put("M-d-yy", "([01]\\d|\\d)-([0-3]\\d|\\d)-\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d-M-yyyy", "([0-3]\\d|\\d)-([01]\\d|\\d)-\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d-M-yy", "([0-3]\\d|\\d)-([01]\\d|\\d)-\\d{4}");
-        javaDateTimeFormatToRegexMap.put("yyyy-M-d", "\\d{4}-([01]\\d|\\d)-([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("M.d.yyyy", "([01]\\d|\\d).([0-3]\\d|\\d).\\d{4}");
-        javaDateTimeFormatToRegexMap.put("M.d.yy", "([01]\\d|\\d).([0-3]\\d|\\d).\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d.M.yyyy", "([0-3]\\d|\\d).([01]\\d|\\d).\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d.M.yy", "([0-3]\\d|\\d).([01]\\d|\\d).\\d{4}");
-        javaDateTimeFormatToRegexMap.put("yyyy.M.d", "\\d{4}.([01]\\d|\\d).([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("MMM/d/yyyy", "\\w{3}/([0-3]\\d|\\d)/\\d{4}");
-        javaDateTimeFormatToRegexMap.put("MMM/d/yy", "\\w{3}/([0-3]\\d|\\d)/\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d/MMM/yyyy", "([0-3]\\d|\\d)/\\w{3}/\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d/MMM/yy", "([0-3]\\d|\\d)/\\w{3}/\\d{2}");
-        javaDateTimeFormatToRegexMap.put("yyyy/MMM/d", "\\d{4}/\\w{3}/([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("MMM-d-yyyy", "\\w{3}-([0-3]\\d|\\d)-\\d{4}");
-        javaDateTimeFormatToRegexMap.put("MMM-d-yy", "\\w{3}-([0-3]\\d|\\d)-\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d-MMM-yyyy", "([0-3]\\d|\\d)-\\w{3}-\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d-MMM-yy", "([0-3]\\d|\\d)-\\w{3}-\\d{2}");
-        javaDateTimeFormatToRegexMap.put("yyyy-MMM-d", "\\d{4}-\\w{3}-([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("MMM.d.yyyy", "\\w{3}.([0-3]\\d|\\d).\\d{4}");
-        javaDateTimeFormatToRegexMap.put("MMM.d.yy", "\\w{3}.([0-3]\\d|\\d).\\d{2}");
-        javaDateTimeFormatToRegexMap.put("d.MMM.yyyy", "([0-3]\\d|\\d).\\w{3}.\\d{4}");
-        javaDateTimeFormatToRegexMap.put("d.MMM.yy", "([0-3]\\d|\\d).\\w{3}.\\d{2}");
-        javaDateTimeFormatToRegexMap.put("yyyy.MMM.d", "\\d{4}.\\w{3}.([0-3]\\d|\\d)");
-
-        javaDateTimeFormatToRegexMap.put("h:m:s a", "([01]\\d|\\d):([0-5]\\d|\\d):([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H:m:s", "([0-2]\\d|\\d):([0-5]\\d|\\d):([0-5]\\d|\\d)");
-        javaDateTimeFormatToRegexMap.put("h:m:s.SSS a", "([01]\\d|\\d):([0-5]\\d|\\d):([0-5]\\d|\\d).\\d{3} [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H:m:s.SSS", "([0-2]\\d|\\d):([0-5]\\d|\\d):([0-5]\\d|\\d).\\d{3}");
-        javaDateTimeFormatToRegexMap.put("h-m-s a", "([01]\\d|\\d)-([0-5]\\d|\\d)-([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H-m-s", "([0-2]\\d|\\d)-([0-5]\\d|\\d)-([0-5]\\d|\\d)");
-        javaDateTimeFormatToRegexMap.put("h-m-s.SSS a", "([01]\\d|\\d)-([0-5]\\d|\\d)-([0-5]\\d|\\d).\\d{3} [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H-m-s.SSS", "([0-2]\\d|\\d)-([0-5]\\d|\\d)-([0-5]\\d|\\d).\\d{3}");
-        javaDateTimeFormatToRegexMap.put("h m s a", "([01]\\d|\\d) ([0-5]\\d|\\d) ([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H m s", "([0-2]\\d|\\d) ([0-5]\\d|\\d) ([0-5]\\d|\\d)");
-        javaDateTimeFormatToRegexMap.put("h m s.SSS a", "([01]\\d|\\d) ([0-5]\\d|\\d) ([0-5]\\d|\\d).\\d{3} [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H m s.SSS", "([0-2]\\d|\\d) ([0-5]\\d|\\d) ([0-5]\\d|\\d).\\d{3}");
-
-        javaDateTimeFormatToRegexMap.put("h:m a", "([01]\\d|\\d):([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H:m", "([0-2]\\d|\\d):([0-5]\\d|\\d)");
-        javaDateTimeFormatToRegexMap.put("h-m a", "([01]\\d|\\d)-([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H-m", "([0-2]\\d|\\d)-([0-5]\\d|\\d)");
-        javaDateTimeFormatToRegexMap.put("h m a", "([01]\\d|\\d) ([0-5]\\d|\\d) [AP][M]");
-        javaDateTimeFormatToRegexMap.put("H m", "([0-2]\\d|\\d) ([0-5]\\d|\\d)");
 
         separatorToJavaDateFormatGroup.put('/', Arrays.asList("M/d/yyyy", "M/d/yy", "d/M/yyyy", "d/M/yy", "yyyy/M/d", "MMM/d/yyyy",
                 "MMM/d/yy","d/MMM/yyyy", "d/MMM/yy", "yyyy/MMM/d" ));
@@ -765,91 +707,34 @@ public class TimeStampConvertUtils {
      * the val respectively, finally use java date time formatter to parse value
      */
     public static boolean isDateTime(String value) {
-        Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(value);
-        String dateVal, timeVal;
-        Character dateChar = null, timeChar = null;
-        boolean hasTime = dateTimeMatcher.find();
-        if (hasTime) {
-            dateVal = dateTimeMatcher.group(1);
-            timeVal = dateTimeMatcher.group(4);
+        List<String> formats = generateSupportedFormats(value);
+        for(String format : formats) {
+            java.time.format.DateTimeFormatter formatter =
+                    java.time.format.DateTimeFormatter.ofPattern(format);
+            TemporalAccessor temporalAccessor = null;
             try {
-                dateChar = STANDARD_DATE_DELIMITERS.stream().filter(e -> dateVal.indexOf(e) != -1).findFirst().get();
-                timeChar = STANDARD_TIME_DELIMITERS.stream().filter(e -> timeVal.indexOf(e) != -1).findFirst().get();
-            } catch(NoSuchElementException e) {
-                return false;
+                temporalAccessor = formatter.parse(value);
+            } catch(Exception e) {
             }
-            List<String> dateFormats = separatorToJavaDateFormatGroup.get(dateChar);
-            List<String> timeFormats = separatorToJavaTimeFormatGroup.get(timeChar);
-            List<String> conformingDateList = new ArrayList<>();
-            List<String> conformingTimeList = new ArrayList<>();
-            // seek for matched formats according to regex
-            for (String dateFormat : dateFormats) {
-                String dateRegex = javaDateTimeFormatToRegexMap.get(dateFormat);
-                Pattern datePattern = Pattern.compile(dateRegex);
-                Matcher isDateMatch = datePattern.matcher(dateVal);
-                if (isDateMatch.find()) {
-                    conformingDateList.add(dateFormat);
-                }
-            }
-            for (String timeFormat : timeFormats) {
-                String timeRegex = javaDateTimeFormatToRegexMap.get(timeFormat);
-                Pattern timePattern = Pattern.compile(timeRegex);
-                Matcher isTimeMatch = timePattern.matcher(timeVal);
-                if (isTimeMatch.find()) {
-                    conformingTimeList.add(timeFormat);
-                }
-            }
-            // date time formatter parse value at last
-            for (String dateFormat: conformingDateList) {
-                for(String timeFormat: conformingTimeList) {
-                    java.time.format.DateTimeFormatter formatter =
-                            java.time.format.DateTimeFormatter.ofPattern(dateFormat + SYSTEM_DELIMITER + timeFormat);
-                    // verify the combined format can parse value
-                    TemporalAccessor temporalAccessor = null;
-                    try {
-                        temporalAccessor = formatter.parse(dateVal + SYSTEM_DELIMITER + timeVal);
-                    } catch (Exception e) {
-                    }
-                    if (temporalAccessor != null) {
-                        return true;
-                    }
-                }
-            }
-        } else {
-            dateVal = value;
-            try {
-                dateChar = STANDARD_DATE_DELIMITERS.stream().filter(e -> dateVal.indexOf(e) != -1).findFirst().get();
-            } catch(NoSuchElementException e) {
-                return false;
-            }
-            List<String> dateFormats = separatorToJavaDateFormatGroup.get(dateChar);
-            for (String dateFormat : dateFormats) {
-                String dateRegex = javaDateTimeFormatToRegexMap.get(dateFormat);
-                Pattern datePattern = Pattern.compile(dateRegex);
-                Matcher isDateMatch = datePattern.matcher(dateVal);
-                if (isDateMatch.find()) {
-                    java.time.format.DateTimeFormatter formatter =
-                            java.time.format.DateTimeFormatter.ofPattern(dateFormat);
-                    // verify the combined format can parse value
-                    TemporalAccessor temporalAccessor = null;
-                    try {
-                        temporalAccessor = formatter.parse(dateVal);
-                    } catch(Exception e) {
-                    }
-                    if(temporalAccessor != null) {
-                        return true;
-                    }
-                }
+            if(temporalAccessor != null) {
+                return true;
             }
         }
         return false;
     }
 
+    /*
+     * generate legal date time format for one specific value
+     */
     public static List<String> generateSupportedFormats(String value) {
         Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(value);
+        boolean hasTime = dateTimeMatcher.find();
+        if (!hasTime) {
+            dateTimeMatcher = DATE_TIME.matcher(value);
+            hasTime = dateTimeMatcher.find();
+        }
         String dateVal, timeVal;
         Character dateChar = null, timeChar = null;
-        boolean hasTime = dateTimeMatcher.find();
         if (hasTime) {
             dateVal = dateTimeMatcher.group(1);
             timeVal = dateTimeMatcher.group(4);
@@ -860,34 +745,44 @@ public class TimeStampConvertUtils {
                 return Collections.EMPTY_LIST;
             }
             List<String> dateFormats = separatorToJavaDateFormatGroup.get(dateChar);
-            List<String> timeFormats = separatorToJavaTimeFormatGroup.get(timeChar);
-            List<String> conformingDateList = new ArrayList<>();
-            List<String> conformingTimeList = new ArrayList<>();
-            // seek for matched formats according to regex
+            List<String> conformingDateFormats = new ArrayList<>();
             for (String dateFormat : dateFormats) {
-                String dateRegex = javaDateTimeFormatToRegexMap.get(dateFormat);
-                Pattern datePattern = Pattern.compile(dateRegex);
-                Matcher isDateMatch = datePattern.matcher(dateVal);
-                if (isDateMatch.find()) {
-                    conformingDateList.add(dateFormat);
+                java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern(dateFormat);
+                TemporalAccessor temporalAccessor = null;
+                try {
+                    temporalAccessor = formatter.parse(dateVal);
+                } catch(Exception e) {
+                }
+                if(temporalAccessor != null) {
+                    conformingDateFormats.add(dateFormat);
                 }
             }
+            List<String> timeFormats = separatorToJavaTimeFormatGroup.get(timeChar);
+            List<String> conformingTimeFormats = new ArrayList<>();
             for (String timeFormat : timeFormats) {
-                String timeRegex = javaDateTimeFormatToRegexMap.get(timeFormat);
-                Pattern timePattern = Pattern.compile(timeRegex);
-                Matcher isTimeMatch = timePattern.matcher(timeVal);
-                if (isTimeMatch.find()) {
-                    conformingTimeList.add(timeFormat);
+                java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern(timeFormat);
+                TemporalAccessor temporalAccessor = null;
+                try {
+                    temporalAccessor = formatter.parse(timeVal);
+                } catch(Exception e) {
+                }
+                if(temporalAccessor != null) {
+                    conformingTimeFormats.add(timeFormat);
                 }
             }
-            List<String> formats = new ArrayList<String>();
-            // date time formatter parse value at last
-            for (String dateFormat : conformingDateList) {
-                for(String timeFormat : conformingTimeList) {
-                    formats.add(dateFormat + SYSTEM_DELIMITER + timeFormat);
+            List<String> formats = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(dateFormats) && CollectionUtils.isNotEmpty(timeFormats)) {
+                for(String dateFormat : conformingDateFormats) {
+                    for (String timeFormat : conformingTimeFormats) {
+                        formats.add(dateFormat + SYSTEM_DELIMITER + timeFormat);
+                    }
                 }
+                return formats;
+            } else {
+                return Collections.EMPTY_LIST;
             }
-            return formats;
         } else {
             dateVal = value;
             try {
@@ -896,16 +791,20 @@ public class TimeStampConvertUtils {
                 return Collections.EMPTY_LIST;
             }
             List<String> dateFormats = separatorToJavaDateFormatGroup.get(dateChar);
-            List<String> conformingDateList = new ArrayList<>();
+            List<String> conformingDateFormats = new ArrayList<>();
             for (String dateFormat : dateFormats) {
-                String dateRegex = javaDateTimeFormatToRegexMap.get(dateFormat);
-                Pattern datePattern = Pattern.compile(dateRegex);
-                Matcher isDateMatch = datePattern.matcher(dateVal);
-                if (isDateMatch.find()) {
-                    conformingDateList.add(dateFormat);
+                java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern(dateFormat);
+                TemporalAccessor temporalAccessor = null;
+                try {
+                    temporalAccessor = formatter.parse(dateVal);
+                } catch(Exception e) {
+                }
+                if(temporalAccessor != null) {
+                    conformingDateFormats.add(dateFormat);
                 }
             }
-            return conformingDateList;
+            return conformingDateFormats;
         }
     }
 
