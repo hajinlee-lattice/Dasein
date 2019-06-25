@@ -252,24 +252,31 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Override
     public Map<String, Set<String>> getCanRunJobTenantList() {
-        Set<String> canRunJobTenantSet = new HashSet<>();
         Set<String> canRunRetryJobTenantSet = new HashSet<>();
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
+        Set<String> canRunJobTenantSet = null;
         for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
+            if (canRunJobTenantSet == null) {
+                canRunJobTenantSet = schedulingPAQueue.getScheduleTenants();
+            }
             if (schedulingPAQueue.size() > 0) {
                 log.info(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
                         JsonUtils.serialize(schedulingPAQueue.getAll())));
                 if (schedulingPAQueue.isRetryQueue()) {
-                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.fillAllCanRunJobs(canRunJobTenantSet));
+                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.fillAllCanRunJobs());
                 } else {
-                    schedulingPAQueue.fillAllCanRunJobs(canRunJobTenantSet);
+                    schedulingPAQueue.fillAllCanRunJobs();
                 }
             }
         }
         Map<String, Set<String>> canRunJobTenantMap = new HashMap<>();
         canRunJobTenantMap.put(RETRY_KEY, canRunRetryJobTenantSet);
-        canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
+        log.info(JsonUtils.serialize(canRunJobTenantMap));
+        if (canRunJobTenantSet != null) {
+            canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
+        }
         canRunJobTenantMap.put(OTHER_KEY, canRunJobTenantSet);
+        log.info(JsonUtils.serialize(canRunJobTenantMap));
         log.info("can run PA job tenant list is : " + JsonUtils.serialize(canRunJobTenantMap));
         return canRunJobTenantMap;
     }
