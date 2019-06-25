@@ -65,6 +65,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 7);
+        //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
     }
 
@@ -90,6 +91,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 2);
+        //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
     }
 
@@ -103,6 +105,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 5);
+        //QA tenant has limit, can not poll from queue.
+        Assert.assertFalse(canRunJobTenantMap.get(OTHER_KEY).contains("tenant11"));
     }
 
     @Test(groups = "unit")
@@ -115,7 +119,10 @@ public class SchedulingPAServiceImplUnitTestNG {
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 2);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 3);
+        //Retry invalid, last finish time < 15min, can not poll from queue
         Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        //QA tenant has limit, can not poll from queue.
+        Assert.assertFalse(canRunJobTenantMap.get(OTHER_KEY).contains("tenant2"));
     }
 
     private SystemStatus getNoRunningSystemStatus() {

@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AutoScheduleSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.DataCloudRefreshSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.RetrySchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.ScheduleNowSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
@@ -59,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -71,8 +73,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPAServiceImpl.class);
 
-    private static final String RETRY_KEY = "RETRY_KEY";
-    private static final String OTHER_KEY = "OTHER_KEY";
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
 
@@ -269,6 +269,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 systemStatus, AutoScheduleSchedulingPAObject.class);
         SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue =
                 new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class);
+        SchedulingPAQueue<ScheduleNowSchedulingPAObject> nonCustomerScheduleNowSchedulingPAQueue =
+                new SchedulingPAQueue<>(systemStatus, ScheduleNowSchedulingPAObject.class);
+        SchedulingPAQueue<AutoScheduleSchedulingPAObject> nonCustomerAutoScheduleSchedulingPAQueue =
+                new SchedulingPAQueue<>(systemStatus, AutoScheduleSchedulingPAObject.class);
+        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> nonDataCloudRefreshSchedulingPAQueue =
+                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class);
         for (TenantActivity tenantActivity : tenantActivityList) {
             RetrySchedulingPAObject retrySchedulingPAObject = new RetrySchedulingPAObject(tenantActivity);
             ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject =
@@ -278,47 +284,32 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             DataCloudRefreshSchedulingPAObject dataCloudRefreshSchedulingPAObject =
                     new DataCloudRefreshSchedulingPAObject(tenantActivity);
             retrySchedulingPAQueue.add(retrySchedulingPAObject);
-            scheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
-            autoScheduleSchedulingPAQueue.add(autoScheduleSchedulingPAObject);
-            dataCloudRefreshSchedulingPAQueue.add(dataCloudRefreshSchedulingPAObject);
+            if (tenantActivity.getTenantType() == TenantType.CUSTOMER) {
+                scheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
+                autoScheduleSchedulingPAQueue.add(autoScheduleSchedulingPAObject);
+                dataCloudRefreshSchedulingPAQueue.add(dataCloudRefreshSchedulingPAObject);
+            } else {
+                nonCustomerScheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
+                nonCustomerAutoScheduleSchedulingPAQueue.add(autoScheduleSchedulingPAObject);
+                nonDataCloudRefreshSchedulingPAQueue.add(dataCloudRefreshSchedulingPAObject);
+            }
         }
         schedulingPAQueues.add(retrySchedulingPAQueue);
         schedulingPAQueues.add(scheduleNowSchedulingPAQueue);
         schedulingPAQueues.add(autoScheduleSchedulingPAQueue);
         schedulingPAQueues.add(dataCloudRefreshSchedulingPAQueue);
-
+        schedulingPAQueues.add(nonCustomerScheduleNowSchedulingPAQueue);
+        schedulingPAQueues.add(nonCustomerAutoScheduleSchedulingPAQueue);
+        schedulingPAQueues.add(nonDataCloudRefreshSchedulingPAQueue);
+        log.info(JsonUtils.serialize(scheduleNowSchedulingPAQueue));
         return schedulingPAQueues;
     }
 
     @Override
     public Map<String, Set<String>> getCanRunJobTenantList() {
-        Set<String> canRunRetryJobTenantSet = new HashSet<>();
         List<SchedulingPAQueue> schedulingPAQueues = initQueue();
-        Set<String> canRunJobTenantSet = null;
-        for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
-            if (canRunJobTenantSet == null) {
-                canRunJobTenantSet = schedulingPAQueue.getScheduleTenants();
-            }
-            if (schedulingPAQueue.size() > 0) {
-                log.info(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
-                        JsonUtils.serialize(schedulingPAQueue.getAll())));
-                if (schedulingPAQueue.isRetryQueue()) {
-                    canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.fillAllCanRunJobs());
-                } else {
-                    schedulingPAQueue.fillAllCanRunJobs();
-                }
-            }
-        }
-        Map<String, Set<String>> canRunJobTenantMap = new HashMap<>();
-        canRunJobTenantMap.put(RETRY_KEY, canRunRetryJobTenantSet);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        if (canRunJobTenantSet != null) {
-            canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
-        }
-        canRunJobTenantMap.put(OTHER_KEY, canRunJobTenantSet);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        log.info("can run PA job tenant list is : " + JsonUtils.serialize(canRunJobTenantMap));
-        return canRunJobTenantMap;
+        GreedyScheduler greedyScheduler = new GreedyScheduler();
+        return greedyScheduler.schedule(schedulingPAQueues);
     }
 
     @Override
