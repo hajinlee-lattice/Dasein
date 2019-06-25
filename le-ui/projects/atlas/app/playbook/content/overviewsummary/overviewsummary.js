@@ -127,7 +127,7 @@ export default class OverviewSummaryContainer extends Component {
             <div class="types">
                 <h4 onClick={toggle}>
                     {play.playType.displayName} 
-                    <i class="fa fa-chevron-down"></i>
+                    <i class="ico caret-down"></i>
                 </h4>
                 <ul className={`${this.state.showType ? 'show-type' : ''}`} onMouseLeave={() => {
                     setTimeout(function() {
