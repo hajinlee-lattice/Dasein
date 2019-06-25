@@ -2,11 +2,15 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,6 +52,15 @@ public class PlayLaunchSparkContext {
     @JsonProperty("PublishedIteration")
     private RatingModel publishedIteration;
 
+    @JsonProperty("SynchronizationDestination")
+    private String synchronizationDestination;
+
+    @JsonProperty("DestinationSysType")
+    private String destinationSysType;
+
+    @JsonProperty("DestinationOrgId")
+    private String destinationOrgId;
+
     @JsonProperty("Counter")
     private Counter counter;
 
@@ -67,6 +80,7 @@ public class PlayLaunchSparkContext {
         this.ratingId = ratingId;
         this.publishedIteration = publishedIteration;
         this.counter = counter;
+        setSyncDestination(this.playLaunch);
     }
 
     public String getJoinKey() {
@@ -105,6 +119,18 @@ public class PlayLaunchSparkContext {
         return publishedIteration;
     }
 
+    public String getSynchronizationDestination() {
+        return this.synchronizationDestination;
+    }
+
+    public String getDestinationSysType() {
+        return this.destinationSysType;
+    }
+
+    public String getDestinationOrgId() {
+        return this.destinationOrgId;
+    }
+
     public String getRatingId() {
         return ratingId;
     }
@@ -136,6 +162,31 @@ public class PlayLaunchSparkContext {
 
         public AtomicLong getContactErrored() {
             return contactErrored;
+        }
+    }
+
+    private void setSyncDestination(PlayLaunch playLaunch) {
+        String synchronizationDestination;
+        String destinationSysType;
+        if (playLaunch.getDestinationSysType() == null
+                || playLaunch.getDestinationSysType() == CDLExternalSystemType.CRM) {
+            synchronizationDestination = SynchronizationDestinationEnum.SFDC.name();
+            destinationSysType = CDLExternalSystemType.CRM.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.MAP) {
+            synchronizationDestination = SynchronizationDestinationEnum.MAP.name();
+            destinationSysType = CDLExternalSystemType.MAP.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.FILE_SYSTEM) {
+            synchronizationDestination = SynchronizationDestinationEnum.FILE_SYSTEM.name();
+            destinationSysType = CDLExternalSystemType.FILE_SYSTEM.name();
+        } else {
+            throw new RuntimeException(String.format("Destination type %s is not supported yet",
+                    playLaunch.getDestinationSysType().name()));
+        }
+
+        this.synchronizationDestination = synchronizationDestination;
+        if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
+            this.destinationOrgId = playLaunch.getDestinationOrgId();
+            this.destinationSysType = destinationSysType;
         }
     }
 

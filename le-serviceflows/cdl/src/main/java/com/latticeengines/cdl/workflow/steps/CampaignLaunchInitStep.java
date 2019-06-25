@@ -202,5 +202,4 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         }
         return attrRepo;
     }
-
 }

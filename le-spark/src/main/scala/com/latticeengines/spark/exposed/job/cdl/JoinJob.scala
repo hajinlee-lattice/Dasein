@@ -5,6 +5,11 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext
 import com.latticeengines.domain.exposed.pls.Play
 import com.latticeengines.domain.exposed.pls.PlayLaunch
 import com.latticeengines.domain.exposed.security.Tenant
+import com.latticeengines.domain.exposed.metadata.InterfaceName
+
+import java.util.UUID
+import java.util.Date;
+
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.col
@@ -38,23 +43,40 @@ class JoinJob extends AbstractSparkJob[CreateRecommendationConfig] {
 	                          TENANT_ID: Long, //
 	                          DELETED: Boolean)
 
+  def createRec(account: Row, playLaunchContext: PlayLaunchSparkContext): Recommendation = {
+  
+    val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
+	val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
+	val playName: String = playLaunchContext.getPlayName
+	val playLaunchId: String = playLaunchContext.getPlayLaunchId
+	val tenant: Tenant = playLaunchContext.getTenant
+	
+	val accountId :String = a.getString(a.fieldIndex(InterfaceName.AccountId.name()))
+	val uuid: String = UUID.randomUUID().toString()
+	val description: String = playLaunch.getPlay().getDescription()
+	
+	val launchTime: Long
+    if (playLaunch.getCreated() != null) {
+        launchTime = playLaunch.getCreated().getTime();
+    } else {
+    	launchTime = launchTimestampMillis;
+    }
+	
+	Recommendation(hi = "hahaha" + bbb, account_id = account.account_id)
+  }
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[CreateRecommendationConfig]): Unit = {
     val config: CreateRecommendationConfig = lattice.config
     val playLaunchContext: PlayLaunchSparkContext = config.getPlayLaunchSparkContext
     val joinKey: String = playLaunchContext.getJoinKey
 	println(s"joinKey is: $joinKey");
 	
-	val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
-	val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
-	val playName: String = playLaunchContext.getPlayName
-	val playLaunchId: String = playLaunchContext.getPlayLaunchId
-	val tenant: Tenant = playLaunchContext.getTenant
-	
 	// read input
     val accountTable: DataFrame = lattice.input.head
     val contactTable: DataFrame = lattice.input(1)
     
-    val derivedAccount = accountTable.rdd.map { a => getBBB(a, "AccountId") }.toDF("AccountId", "destinationAccountId").show()
+    // TODO change the Recommendation schema
+    val derivedAccount = accountTable.rdd.map { a => createRec(a, playLaunchContext) }.toDF("AccountId", "destinationAccountId").show()
 
 	// manupulate contact table
 	spark.udf.register("flatten", new Flatten)
