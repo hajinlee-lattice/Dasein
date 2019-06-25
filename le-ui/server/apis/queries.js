@@ -87,6 +87,14 @@ const Queries = {
                 }
               }
             }
+            authentications {
+              edges {
+                node {
+                  id
+                  name
+                }
+              }
+            }
           }
         }`
         return { query: q };
