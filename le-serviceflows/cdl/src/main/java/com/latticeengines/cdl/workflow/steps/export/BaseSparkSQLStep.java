@@ -96,7 +96,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         return pathMap;
     }
 
-    protected void startSparkSQLSession(Map<String, String> hdfsPathMap) {
+    protected void startSparkSQLSession(Map<String, String> hdfsPathMap, boolean persistOnDisk) {
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         QueryServiceUtils.setAttrRepo(attrRepo);
         QueryServiceUtils.toLocalAttrRepoMode();
@@ -104,8 +104,9 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 .mapToDouble(path -> ScalingUtils.getHdfsPathSizeInGb(yarnConfiguration, path)) //
                 .sum();
         int scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
+        String storageLevel = persistOnDisk ? "DISK_ONLY" : null;
         livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
-                scalingMultiplier, false, getClass().getSimpleName());
+                scalingMultiplier, storageLevel, getClass().getSimpleName());
     }
 
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
