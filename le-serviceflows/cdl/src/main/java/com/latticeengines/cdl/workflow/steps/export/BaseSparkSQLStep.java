@@ -196,6 +196,8 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     private void setCustomerSpace() {
         if (customerSpace == null) {
             customerSpace = parseCustomerSpace(configuration);
+        }
+        if (MultiTenantContext.getTenant() == null) {
             Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
             if (tenant == null) {
                 tenant = tenantService.findByTenantId(customerSpace.getTenantId());
