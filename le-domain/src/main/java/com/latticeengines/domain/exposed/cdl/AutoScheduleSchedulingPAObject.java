@@ -9,16 +9,19 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
      * this list of constraint is used when schedulingPAObject push into queue. check if this object can push into
      * queue or not.
      */
-    private List<Constraint> pushConstraintList;
+    private static List<Constraint> pushConstraintList;
     /**
      * this list of constraint is used when schedulingPAObject pop from queue. check if this object can pop queue or not.
      */
-    private List<Constraint> popConstraintList;
+    private static List<Constraint> popConstraintList;
+
+    static {
+        initPopConstraint();
+        initPushConstraint();
+    }
 
     public AutoScheduleSchedulingPAObject(TenantActivity tenantActivity) {
         super(tenantActivity);
-        initPopConstraint();
-        initPushConstraint();
     }
 
     @Override
@@ -40,14 +43,15 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
         return o.getInvokeTime() != null && o.getInvokeTime() - this.getTenantActivity().getInvokeTime() > 0 ? -1 : 1;
     }
 
-    private void initPushConstraint() {
+    private static void initPushConstraint() {
         pushConstraintList = new LinkedList<>();
+        pushConstraintList.add(new AutoScheduleExist());
         pushConstraintList.add(new FirstActionTimePending());
         pushConstraintList.add(new LastActionTimePending());
         pushConstraintList.add(new RetryNotExist());
     }
 
-    private void initPopConstraint() {
+    private static void initPopConstraint() {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxLargePA());
         popConstraintList.add(new MaxPA());

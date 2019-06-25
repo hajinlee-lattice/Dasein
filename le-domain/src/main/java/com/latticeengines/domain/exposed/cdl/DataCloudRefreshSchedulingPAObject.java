@@ -9,25 +9,28 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
      * this list of constraint is used when schedulingPAObject push into queue. check if this object can push into
      * queue or not.
      */
-    private List<Constraint> pushConstraintList;
+    private static List<Constraint> pushConstraintList;
     /**
      * this list of constraint is used when schedulingPAObject pop from queue. check if this object can pop queue or not.
      */
-    private List<Constraint> popConstraintList;
+    private static List<Constraint> popConstraintList;
 
-    public DataCloudRefreshSchedulingPAObject(TenantActivity tenantActivity) {
-        super(tenantActivity);
+    static {
         initPopConstraint();
         initPushConstraint();
     }
 
-    private void initPushConstraint() {
+    public DataCloudRefreshSchedulingPAObject(TenantActivity tenantActivity) {
+        super(tenantActivity);
+    }
+
+    private static void initPushConstraint() {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new DataCloudRefreshExist());
         pushConstraintList.add(new RetryNotExist());
     }
 
-    private void initPopConstraint() {
+    private static void initPopConstraint() {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxLargePA());
         popConstraintList.add(new MaxPA());

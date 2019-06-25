@@ -1,13 +1,13 @@
 package com.latticeengines.domain.exposed.cdl;
 
-public class ScheduleNowExist implements Constraint {
+public class AutoScheduleExist implements Constraint {
     @Override
     public boolean checkViolated(SystemStatus currentState, TenantActivity target) {
-        return !target.isScheduledNow();
+        return !target.isAutoSchedule();
     }
 
     @Override
     public String getName() {
-        return ScheduleNowExist.class.getName();
+        return AutoScheduleExist.class.getName();
     }
 }

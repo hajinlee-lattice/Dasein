@@ -52,7 +52,7 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 8);
+        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 10);
     }
 
     @Test(groups = "unit")
@@ -113,8 +113,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         doReturn(map).when(schedulingPAService).setSystemStatus();
         Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
         log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 1);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 4);
+        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 2);
+        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 3);
         Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
     }
 

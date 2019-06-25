@@ -1,13 +1,12 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Date;
-import java.util.Set;
 
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class FirstActionTimePending implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, Set<String> scheduledTenants, TenantActivity target) {
+    public boolean checkViolated(SystemStatus currentState, TenantActivity target) {
         if (target.getFirstActionTime() == null || target.getFirstActionTime() == 0L) {
             return true;
         }
