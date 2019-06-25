@@ -132,6 +132,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         } else {
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
+            String systemName = cdlService.getSystemNameFromFeedType(feedType);
+            if (StringUtils.isNotEmpty(systemName)) {
+                S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                if (s3ImportSystem != null) {
+                    for (FieldMapping fieldMapping : fieldMappingFromTemplate.getFieldMappings()) {
+                        if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
+                            if (Boolean.TRUE.equals(s3ImportSystem.isMapToLatticeAccount())) {
+                                fieldMapping.setMapToLatticeId(true);
+                            }
+                        }
+                        if (InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
+                            if (Boolean.TRUE.equals(s3ImportSystem.isMapToLatticeContact())) {
+                                fieldMapping.setMapToLatticeId(true);
+                            }
+                        }
+                    }
+                }
+            }
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true,
                             withoutId, enableEntityMatch));
@@ -491,146 +509,148 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             return;
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        // 1. set system related mapping
-        List<FieldMapping> customerLatticeIdList = new ArrayList<>();
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getIdType() != null) {
-                String systemName = cdlService.getSystemNameFromFeedType(feedType);
-                if (StringUtils.isNotEmpty(systemName)) {
-                    if (StringUtils.isEmpty(fieldMapping.getSystemName()) || systemName.equals(fieldMapping.getSystemName())) {
-                        fieldMapping.setFieldType(UserDefinedType.TEXT);
-                        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-                        switch (fieldMapping.getIdType()) {
-                            case Account:
-                                String accountSystemId = importSystem.getAccountSystemId();
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    importSystem.setMapToLatticeAccount(true);
-                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
-                                    importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-                                }
-                                if (StringUtils.isEmpty(accountSystemId)) {
-                                    accountSystemId = importSystem.generateAccountSystemId();
-                                    importSystem.setAccountSystemId(accountSystemId);
-                                    importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
-                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+        // 1. set system related mapping //only apply to Account / Contact
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            List<FieldMapping> customerLatticeIdList = new ArrayList<>();
+            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                if (fieldMapping.getIdType() != null) {
+                    String systemName = cdlService.getSystemNameFromFeedType(feedType);
+                    if (StringUtils.isNotEmpty(systemName)) {
+                        if (StringUtils.isEmpty(fieldMapping.getSystemName()) || systemName.equals(fieldMapping.getSystemName())) {
+                            fieldMapping.setFieldType(UserDefinedType.TEXT);
+                            S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                            switch (fieldMapping.getIdType()) {
+                                case Account:
+                                    String accountSystemId = importSystem.getAccountSystemId();
+                                    if (fieldMapping.isMapToLatticeId()) {
+                                        importSystem.setMapToLatticeAccount(true);
+                                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                                    }
+                                    if (StringUtils.isEmpty(accountSystemId)) {
+                                        accountSystemId = importSystem.generateAccountSystemId();
+                                        importSystem.setAccountSystemId(accountSystemId);
+                                        importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
+                                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        fieldMapping.setMappedToLatticeField(false);
+                                    }
+                                    fieldMapping.setMappedField(accountSystemId);
+                                    if (importSystem.isMapToLatticeAccount()) {
+                                        FieldMapping customerLatticeId = new FieldMapping();
+                                        customerLatticeId.setUserField(fieldMapping.getUserField());
+                                        customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
+                                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                        customerLatticeIdList.add(customerLatticeId);
+                                    }
+                                    break;
+                                case Contact:
+                                    String contactSystemId = importSystem.getContactSystemId();
+                                    if (fieldMapping.isMapToLatticeId()) {
+                                        importSystem.setMapToLatticeContact(true);
+                                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                                    }
+                                    if (StringUtils.isEmpty(contactSystemId)) {
+                                        contactSystemId = importSystem.generateContactSystemId();
+                                        importSystem.setContactSystemId(contactSystemId);
+                                        importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
+                                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                    }
+                                    fieldMapping.setMappedField(contactSystemId);
+                                    if (importSystem.isMapToLatticeContact()) {
+                                        FieldMapping customerLatticeId = new FieldMapping();
+                                        customerLatticeId.setUserField(fieldMapping.getUserField());
+                                        customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                        customerLatticeIdList.add(customerLatticeId);
+                                    }
+                                    break;
+                                default:
+                                    throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
+                            }
+                        } else {
+                            S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
+                                    fieldMapping.getSystemName());
+                            if (importSystem == null) {
+                                throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
+                            }
+                            switch (fieldMapping.getIdType()) {
+                                case Account:
+                                    if (StringUtils.isEmpty(importSystem.getAccountSystemId())) {
+                                        throw new IllegalArgumentException(String.format("System %s does not have system " +
+                                                "account id!", importSystem.getDisplayName()));
+                                    }
+                                    fieldMapping.setFieldType(UserDefinedType.TEXT);
+                                    fieldMapping.setMappedField(importSystem.getAccountSystemId());
                                     fieldMapping.setMappedToLatticeField(false);
-                                }
-                                fieldMapping.setMappedField(accountSystemId);
-                                if (importSystem.isMapToLatticeAccount()) {
-                                    FieldMapping customerLatticeId = new FieldMapping();
-                                    customerLatticeId.setUserField(fieldMapping.getUserField());
-                                    customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
-                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                                    customerLatticeIdList.add(customerLatticeId);
-                                }
-                                break;
-                            case Contact:
-                                String contactSystemId = importSystem.getContactSystemId();
-                                if (fieldMapping.isMapToLatticeId()) {
-                                    importSystem.setMapToLatticeContact(true);
-                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
-                                    importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-                                }
-                                if (StringUtils.isEmpty(contactSystemId)) {
-                                    contactSystemId = importSystem.generateContactSystemId();
-                                    importSystem.setContactSystemId(contactSystemId);
-                                    importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
-                                    cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
-                                }
-                                fieldMapping.setMappedField(contactSystemId);
-                                if (importSystem.isMapToLatticeContact()) {
-                                    FieldMapping customerLatticeId = new FieldMapping();
-                                    customerLatticeId.setUserField(fieldMapping.getUserField());
-                                    customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
-                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                                    customerLatticeIdList.add(customerLatticeId);
-                                }
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
-                        }
-                    } else {
-                        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
-                                fieldMapping.getSystemName());
-                        if (importSystem == null) {
-                            throw new IllegalArgumentException("Cannot find Import System: " + fieldMapping.getSystemName());
-                        }
-                        switch (fieldMapping.getIdType()) {
-                            case Account:
-                                if (StringUtils.isEmpty(importSystem.getAccountSystemId())) {
-                                    throw new IllegalArgumentException(String.format("System %s does not have system " +
-                                            "account id!", importSystem.getDisplayName()));
-                                }
-                                fieldMapping.setFieldType(UserDefinedType.TEXT);
-                                fieldMapping.setMappedField(importSystem.getAccountSystemId());
-                                fieldMapping.setMappedToLatticeField(false);
-                                if (importSystem.isMapToLatticeAccount()) {
-                                    FieldMapping customerLatticeId = new FieldMapping();
-                                    customerLatticeId.setUserField(fieldMapping.getUserField());
-                                    customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
-                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                                    customerLatticeIdList.add(customerLatticeId);
-                                }
-                                break;
-                            case Contact:
-                                if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
-                                    throw new IllegalArgumentException(String.format("System %s does not have system " +
-                                            "contact id!", importSystem.getDisplayName()));
-                                }
-                                fieldMapping.setFieldType(UserDefinedType.TEXT);
-                                fieldMapping.setMappedField(importSystem.getContactSystemId());
-                                fieldMapping.setMappedToLatticeField(false);
-                                if (importSystem.isMapToLatticeContact()) {
-                                    FieldMapping customerLatticeId = new FieldMapping();
-                                    customerLatticeId.setUserField(fieldMapping.getUserField());
-                                    customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
-                                    customerLatticeId.setFieldType(fieldMapping.getFieldType());
-                                    customerLatticeIdList.add(customerLatticeId);
-                                }
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
+                                    if (importSystem.isMapToLatticeAccount()) {
+                                        FieldMapping customerLatticeId = new FieldMapping();
+                                        customerLatticeId.setUserField(fieldMapping.getUserField());
+                                        customerLatticeId.setMappedField(InterfaceName.CustomerAccountId.name());
+                                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                        customerLatticeIdList.add(customerLatticeId);
+                                    }
+                                    break;
+                                case Contact:
+                                    if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
+                                        throw new IllegalArgumentException(String.format("System %s does not have system " +
+                                                "contact id!", importSystem.getDisplayName()));
+                                    }
+                                    fieldMapping.setFieldType(UserDefinedType.TEXT);
+                                    fieldMapping.setMappedField(importSystem.getContactSystemId());
+                                    fieldMapping.setMappedToLatticeField(false);
+                                    if (importSystem.isMapToLatticeContact()) {
+                                        FieldMapping customerLatticeId = new FieldMapping();
+                                        customerLatticeId.setUserField(fieldMapping.getUserField());
+                                        customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                                        customerLatticeIdList.add(customerLatticeId);
+                                    }
+                                    break;
+                                default:
+                                    throw new IllegalArgumentException("Unrecognized idType: " + fieldMapping.getIdType());
+                            }
                         }
                     }
                 }
             }
-        }
-        // map customer lattice id
-        if (CollectionUtils.isNotEmpty(customerLatticeIdList)) {
-            boolean customerAccountExists = false;
-            boolean customerContactExists = false;
-            for (FieldMapping customerLatticeId : customerLatticeIdList) {
-                boolean existFromTemplate = false;
-                for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                    if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
-                        fieldMapping.setUserField(customerLatticeId.getUserField());
-                        fieldMapping.setFieldType(customerLatticeId.getFieldType());
-                        existFromTemplate = true;
+            // map customer lattice id
+            if (CollectionUtils.isNotEmpty(customerLatticeIdList)) {
+                boolean customerAccountExists = false;
+                boolean customerContactExists = false;
+                for (FieldMapping customerLatticeId : customerLatticeIdList) {
+                    boolean existFromTemplate = false;
+                    for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                        if (customerLatticeId.getMappedField().equals(fieldMapping.getMappedField())) {
+                            fieldMapping.setUserField(customerLatticeId.getUserField());
+                            fieldMapping.setFieldType(customerLatticeId.getFieldType());
+                            existFromTemplate = true;
+                        }
+                    }
+                    if (!existFromTemplate) {
+                        customerLatticeId.setMappedToLatticeField(false);
+                        fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+                    }
+                    if (InterfaceName.CustomerAccountId.name().equals(customerLatticeId.getMappedField())) {
+                        customerAccountExists = true;
+                    } else if (InterfaceName.CustomerContactId.name().equals(customerLatticeId.getMappedField())) {
+                        customerContactExists = true;
                     }
                 }
-                if (!existFromTemplate) {
-                    customerLatticeId.setMappedToLatticeField(false);
-                    fieldMappingDocument.getFieldMappings().add(customerLatticeId);
+                if (!customerAccountExists) {
+                    fieldMappingDocument.getFieldMappings()
+                            .removeIf(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()));
                 }
-                if (InterfaceName.CustomerAccountId.name().equals(customerLatticeId.getMappedField())) {
-                    customerAccountExists = true;
-                } else if (InterfaceName.CustomerContactId.name().equals(customerLatticeId.getMappedField())) {
-                    customerContactExists = true;
+                if (!customerContactExists) {
+                    fieldMappingDocument.getFieldMappings()
+                            .removeIf(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
                 }
-            }
-            if (!customerAccountExists) {
-                fieldMappingDocument.getFieldMappings()
-                        .removeIf(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()));
-            }
-            if (!customerContactExists) {
-                fieldMappingDocument.getFieldMappings()
-                        .removeIf(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
-            }
 
-        } else {
-            fieldMappingDocument.getFieldMappings().removeIf(fieldMapping ->
-                    InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
-                    || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
+            } else {
+                fieldMappingDocument.getFieldMappings().removeIf(fieldMapping ->
+                        InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
+                                || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
+            }
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
