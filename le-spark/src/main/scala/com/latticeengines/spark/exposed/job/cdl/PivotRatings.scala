@@ -147,7 +147,7 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
       val selected = df.select(inactiveAttrs map col: _*)
       Some(selected.filter(row => {
         // keep accounts with at least one not-null rating
-        row.getValuesMap(inactiveRatingAttrs).values.exists(v => v.asInstanceOf[Any] != null)
+        row.getValuesMap[Any](inactiveRatingAttrs).values.exists(v => v != null)
       }))
     }
   }
