@@ -189,10 +189,6 @@ class LaunchComponent extends Component {
     makeRecommendationCounts(coverage, play) {
         var vm = this; // placeholder
 
-        if(!coverage || !coverage.bucketCoverageCounts) {
-            this.state.recommendationCounts = null;
-            return false;
-        }
         var sections = {
                 total: 0,
                 selected: 0,
@@ -202,6 +198,10 @@ class LaunchComponent extends Component {
             },
             buckets = {};
 
+        if(!coverage || !coverage.bucketCoverageCounts) {
+            this.state.recommendationCounts = null;
+            return sections;
+        }
         sections.total = play.targetSegment.accounts;
 
         var _contacts = 0;
@@ -227,6 +227,8 @@ class LaunchComponent extends Component {
         sections.suppressed = sections.total >= sections.launched ? sections.total - sections.launched : sections.total;
 
         sections.contacts = _contacts + (this.state.unscored ? (coverage.unscoredContactCount ? coverage.unscoredContactCount  : 0) : 0);
+
+console.log(22222, sections);
 
         return sections;
     }
@@ -553,6 +555,7 @@ class LaunchComponent extends Component {
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
                 canLaunch = recommendationCounts.launched;
 
+
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
                     if(bucketsToLaunch == null) {
@@ -565,7 +568,7 @@ class LaunchComponent extends Component {
                 });
                 //PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
             }
-
+            
             return (
                 <LeVPanel className={`campaign-launch ${this.state.launchingState}`} hstretch={true}>
                     <div className="campaign-launch-container">

@@ -288,7 +288,6 @@ export const actions = {
         // notes: 
         // for both accountLimit and contactLimit just sending topNCount for now is fine
         // can ignore audienceType for now too
-
         var opts = opts || {},
             id = opts.id || '',
             isAlwaysOn = opts.isAlwaysOn || false,
@@ -301,7 +300,11 @@ export const actions = {
             topNCount = opts.topNCount,
             launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
             launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''), // ?launch-now=true (if once is selected from schedule)
-            channelConfig = opts.channelConfig || {};
+            channelConfig = opts.channelConfig || null;
+
+        if(channelConfig && Object.keys(channelConfig).length === 0) {
+            channelConfig = null;
+        }
 
         var channelObj = {
             id: id,
@@ -311,7 +314,7 @@ export const actions = {
             cronSchedule: cronSchedule,
             excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId,
             launchUnscored: launchUnscored,
-            topNCount: topNCount,
+            maxAccountsToLaunch: topNCount,
             launchType: launchType,
             channelConfig: channelConfig
         };
