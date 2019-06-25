@@ -319,6 +319,7 @@ public class MetadataResolver {
         Set<String> headerFields = getHeaderFields();
         List<Attribute> attributes = result.metadata.getAttributes();
         Iterator<Attribute> attrIterator = attributes.iterator();
+        Set<String> pickedHeaders = new HashSet<>();
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
             if (headerFields.contains(attribute.getDisplayName())) {
@@ -351,7 +352,7 @@ public class MetadataResolver {
                     knownColumn.setMappedToDateBefore(true);
                 }
                 result.fieldMappings.add(knownColumn);
-                headerFields.remove(attribute.getDisplayName());
+                pickedHeaders.add(attribute.getDisplayName());
             } else {
                 Iterator<String> headerIterator = headerFields.iterator();
                 FieldMapping knownColumn = new FieldMapping();
@@ -359,7 +360,7 @@ public class MetadataResolver {
                     String header = headerIterator.next();
                     if (isUserFieldMatchWithAttribute(header, attribute)) {
                         attribute.setDisplayName(header);
-                        headerIterator.remove();
+                        pickedHeaders.add(header);
                         knownColumn.setUserField(header);
 
                         knownColumn.setMappedField(attribute.getName());
@@ -393,6 +394,7 @@ public class MetadataResolver {
                 }
             }
         }
+        headerFields.removeAll(pickedHeaders);
 
         for (final String headerField : headerFields) {
             FieldMapping unknownColumn = new FieldMapping();

@@ -48,9 +48,13 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
     public void testImport() {
         prepareBaseData(ENTITY_ACCOUNT);
         getDataFeedTask(ENTITY_ACCOUNT);
+        prepareBaseData(ENTITY_TRANSACTION);
+        getDataFeedTask(ENTITY_TRANSACTION);
 
         Table accountTemplate = accountDataFeedTask.getImportTemplate();
         Assert.assertNull(accountTemplate.getAttribute(InterfaceName.AccountId));
+        Table transactionTemplate = transactionDataFeedTask.getImportTemplate();
+        Assert.assertNotNull(transactionTemplate.getAttribute(InterfaceName.CustomerAccountId));
     }
 
     @Test(groups = "deployment", enabled = false)
