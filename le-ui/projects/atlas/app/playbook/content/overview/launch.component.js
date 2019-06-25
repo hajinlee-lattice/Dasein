@@ -339,7 +339,7 @@ class LaunchComponent extends Component {
                                 {list}
                             </select>
                         </LeHPanel>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'statucList-container'}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
                             <label for={'staticList'}>Static list name</label>
                             {vm.makeStaticList(this.state.staticList)}
                             {newFolderNameInput}

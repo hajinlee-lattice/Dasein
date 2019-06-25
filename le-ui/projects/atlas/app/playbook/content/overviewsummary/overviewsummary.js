@@ -28,7 +28,8 @@ export default class OverviewSummaryContainer extends Component {
         this.state = {
             loading: false,
             play: null,
-            types: null
+            types: null,
+            showType: false
         };
     }
 
@@ -69,7 +70,7 @@ export default class OverviewSummaryContainer extends Component {
         return boxes;
     }
 
-    savePlay(play, opts) {
+    savePlay(play, opts, cb) {
         for(var i in opts) {
             if(opts[i] === play[i]) {
                 delete opts[i];
@@ -85,29 +86,58 @@ export default class OverviewSummaryContainer extends Component {
         });
 
         var vm = this;
-        actions.savePlay(savePlay, function() {
+        actions.savePlay(savePlay, function(data) {
             let playstore = store.getState()['playbook'];
             vm.state.play = playstore.play;
             vm.setState(vm.state);
+            if(cb && typeof cb === 'function') {
+                cb(data);
+            }
         });
     }
 
     makeTypeOptions(play, types) {
         let options = [],
-            _types = {};
+            _types = {},
+            delay = 300,
+            vm = this;
+
+
         types.forEach(function(type) {
             _types[type.displayName] = type;
             var selected = false;
             if(type.displayName === play.playType.displayName) {
                 selected = true;
             }
-            options.push(<option selected={selected}>{type.displayName}</option>);
+            options.push(<li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>{type.displayName}</li>);
         });
 
+        let toggle = () => {
+                this.state.showType = !this.state.showType;
+                this.setState(this.state);
+            },
+            save = (type) => {
+                this.savePlay(play, {playType: type}, function(data) {
+                    vm.state.showType = false;
+                    vm.setState(vm.state);
+                });
+            }
+
         return (
-            <select id="type" onChange={ (e) => { this.savePlay(play, {playType: _types[event.target.value]}) } }>
-                {options}
-            </select>
+            <div class="types">
+                <h4 onClick={toggle}>
+                    {play.playType.displayName} 
+                    <i class="fa fa-chevron-down"></i>
+                </h4>
+                <ul className={`${this.state.showType ? 'show-type' : ''}`} onMouseLeave={() => {
+                    setTimeout(function() {
+                        vm.state.showType = false;
+                        vm.setState(vm.state);
+                    }, delay);
+                }}>
+                    {options}
+                </ul>
+            </div>
         );
     }
 
