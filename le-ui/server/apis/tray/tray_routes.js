@@ -312,20 +312,6 @@ class TrayRouter {
             });
         }.bind(this));
 
-        this.router.get('/solutionInstances/:id', function(req, res){
-            var solutionInstanceId = req.params.id;
-            let options = this.getApiOptions(req, true);
-            options.json = Queries.getSolutionInstanceByIdQuery(solutionInstanceId);
-            this.request(options, function(error, response, body){
-                if (error || !body.data) {
-                    res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
-                    return;
-                }
-                res.send(GraphQLParser.getSolutionInstance(body.data));
-                
-            });
-        }.bind(this));
-
 
         this.router.put('/solutionInstances/:id', function(req, res){
             var solutionInstanceId = req.params.id;
