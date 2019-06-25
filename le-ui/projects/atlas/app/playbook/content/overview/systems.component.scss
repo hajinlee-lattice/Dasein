@@ -58,7 +58,7 @@
                         position: relative;
                         top: .5em;
                         min-height: 29px;
-                        min-width: 68px;
+                        min-width: 72px;
                         border: 1px solid transparent;
                         & > span {
                             display: block;
@@ -69,18 +69,21 @@
                             font-size: 12px;
                         }
                         &.activate {
-                            & > span {
-                                margin-top: 19px;
-                            }
                             &.Active {
                                 background: url(/assets/images/campaignoverview/campaign-button-active.png) top center no-repeat;
                                 span {
                                     color: #5db547;
                                 }
+                                &:hover {
+                                    background-image: url(/assets/images/campaignoverview/campaign-button-active-hover.png);
+                                }
                             }
                         }
                         &.launch {
                             background: url(/assets/images/campaignoverview/campaign-button-ready-to-launch.png) top center no-repeat;
+                                &:hover {
+                                    background-image: url(/assets/images/campaignoverview/campaign-button-ready-to-launch-hover.png);
+                                }
                         }
                         &:hover {
                             & > span {
