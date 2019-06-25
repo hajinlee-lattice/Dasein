@@ -154,7 +154,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     execution = null;
                 }
                 tenantActivity.setRetry(retryProcessAnalyze(execution));
-                tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
+                if (execution != null && execution.getUpdated() != null) {
+                    tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
+                }
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(tenantActivity.isScheduledNow() ?
                         simpleDataFeed.getScheduleTime().getTime() : null);
