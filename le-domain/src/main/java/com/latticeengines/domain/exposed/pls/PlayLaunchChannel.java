@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.OnDelete;
@@ -40,6 +42,8 @@ import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -137,7 +141,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private LookupIdMap lookupIdMap;
 
     @JsonProperty("isAlwaysOn")
-    @Column(name = "ALWAYS_ON", nullable = true)
+    @Column(name = "ALWAYS_ON")
     private Boolean isAlwaysOn = Boolean.FALSE;
 
     public PlayLaunchChannel() {
@@ -316,6 +320,17 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setChannelConfig(ChannelConfig channelConfig) {
         this.channelConfig = JsonUtils.serialize(channelConfig);
+    }
+
+    public static Date getNextDateFromCronExpression(PlayLaunchChannel channel) {
+        try {
+            return new CronExpression(channel.getCronScheduleExpression()).getNextValidTimeAfter(
+                    channel.getNextScheduledLaunch() == null ? new Date() : channel.getNextScheduledLaunch());
+        } catch (ParseException e) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format("Invalid Cron Schedule %s in Channel for channel id: %s",
+                            channel.getCronScheduleExpression(), channel.getId()) });
+        }
     }
 
 }

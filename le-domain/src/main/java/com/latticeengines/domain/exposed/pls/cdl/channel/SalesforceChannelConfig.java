@@ -11,8 +11,8 @@ public class SalesforceChannelConfig implements ChannelConfig {
     @JsonProperty("accountLimit")
     private Long accountLimit;
 
-    @JsonProperty("supressAccountWithoutAccountId")
-    private Boolean supressAccountWithoutAccountId = false;
+    @JsonProperty("supressAccountsWithoutLookupId")
+    private Boolean supressAccountsWithoutLookupId = false;
 
     public Long getAccoutLimit() {
         return accountLimit;
@@ -23,11 +23,11 @@ public class SalesforceChannelConfig implements ChannelConfig {
     }
 
     public Boolean isSupressAccountWithoutAccountId() {
-        return supressAccountWithoutAccountId;
+        return supressAccountsWithoutLookupId;
     }
 
-    public void setSupressAccountWithoutAccountId(boolean supressAccountWithoutAccountId) {
-        this.supressAccountWithoutAccountId = supressAccountWithoutAccountId;
+    public void setSupressAccountsWithoutLookupId(boolean supressAccountsWithoutLookupId) {
+        this.supressAccountsWithoutLookupId = supressAccountsWithoutLookupId;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class SalesforceChannelConfig implements ChannelConfig {
         SalesforceChannelConfig newSalesforceChannelConfig = (SalesforceChannelConfig) config;
         salesforceChannelConfig.setAccountLimit(newSalesforceChannelConfig.getAccoutLimit());
         salesforceChannelConfig
-                .setSupressAccountWithoutAccountId(newSalesforceChannelConfig.isSupressAccountWithoutAccountId());
+                .setSupressAccountsWithoutLookupId(newSalesforceChannelConfig.isSupressAccountWithoutAccountId());
         return this;
 
     }

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -246,19 +247,20 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
             @RequestBody PlayLaunchChannel playLaunchChannel, //
-            @RequestParam(value = "launch-now", required = false, defaultValue = "false") Boolean launchNow,
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
-        return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel, launchNow);
+        return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel);
     }
 
-    @RequestMapping(value = "/launch-always-on", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "launch all play launches that are always on for a given tenant")
-    public PlayLaunchChannel launchAlwaysOn(HttpServletResponse response) {
+    @ApiOperation(value = "Queue a new Play launch for a given play and channel")
+    public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
+                                                     @PathVariable("playName") String playName, //
+                                                     @PathVariable("channelId") String channelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return playProxy.launchAlwaysOn(tenant.getId());
+        return playProxy.queueNewLaunchByPlayAndChannel(tenant.getId(), playName, channelId);
     }
 
     @RequestMapping(value = "/{playName}/launches/{launchId}", method = RequestMethod.GET)

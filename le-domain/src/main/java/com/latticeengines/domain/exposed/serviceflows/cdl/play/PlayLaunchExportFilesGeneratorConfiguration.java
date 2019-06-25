@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
 import java.util.Map;
 
