@@ -19,6 +19,9 @@
         max-width: 1200px;
         background: none;
         .le-summary-header {
+            &.le-nowrap {
+                overflow: initial;
+            }
             margin: 1em;
             margin-bottom: 0;
             & > p,
@@ -40,16 +43,45 @@
                     top: 20%;
                     bottom: 20%;
                     right: -1px;
-                    border-right: 1px solid rgba(255,255,255,.5);
+                    border-right: 1px solid rgba(255,255,255,.55);
                 }
                 .play-type {
-                    opacity: .7;
-                    select {
-                        padding: 0;
-                        & > option {
-                            color: black;
+                    position: relative;
+                    color: white;
+                    user-select: none;
+                    h4 {
+                        opacity: .7;
+                        color: inherit;
+                        font-size: 12px;
+                        cursor: pointer;
+                        & > i {
+                            position: relative;
+                            top: -1px;
+                            margin-left: 10px;
                         }
-                        position: relative;
+                    }
+                    ul {
+                        display: none;
+                        position: absolute;
+                        top: 1.3em;
+                        left: -15px;
+                        padding: 0;
+                        font-size: 12px;
+                        color: black;
+                        background: rgba(255,255,255,1);
+                        box-shadow: 0px 0px 6px -1px rgba(0,0,0,0.75);
+                        z-index: 1000;
+                        &.show-type {
+                            display: initial;
+                        }
+                        & > li {
+                            padding: 5px 15px;
+                            cursor: pointer;
+                            &.selected,
+                            &:hover {
+                                background: rgba(0,0,0,0.1);
+                            }
+                        }
                     }
                 }
                 .play-name {
@@ -84,7 +116,7 @@
                         font-size: 12px;
                         span {
                             white-space: nowrap;
-                            border-right: 1px solid rgba(255,255,255,0.5);
+                            border-right: 1px solid rgba(255,255,255,0.55);
                             padding-right: 6px;
                             margin-right: 6px;
                             &:last-child {

@@ -237,9 +237,8 @@ export const actions = {
                 type: CONST.SAVE_PLAY,
                 payload: response.data
             });
-            
             if(cb && typeof cb === 'function') {
-                cb();
+                cb(response.data);
             }
         });
     },
