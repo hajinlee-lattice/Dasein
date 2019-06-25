@@ -9,7 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -18,17 +21,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.ActionStatService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,6 +45,7 @@ import com.latticeengines.domain.exposed.cdl.ScheduleNowSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
@@ -69,6 +76,19 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
 
+    private static final Set<String> TEST_TENANT_PREFIX = Sets.newHashSet("LETest", "letest",
+            "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG",
+            "CDLComponentDeploymentTestNG");
+    // action types that are auto schedulable (excluding import & delete)
+    private static final Set<ActionType> AUTO_SCHEDULABLE_TYPES = new HashSet<>();
+
+    static {
+        // TODO find the exact types we care about
+        AUTO_SCHEDULABLE_TYPES.addAll(ActionType.getNonWorkflowActions());
+        // FIXME old code seems to count these as well, not sure if needed
+        AUTO_SCHEDULABLE_TYPES.addAll(ActionType.getDataCloudRelatedTypes());
+    }
+
     @Inject
     private DataFeedService dataFeedService;
 
@@ -77,6 +97,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Inject
     private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
+
+    @Lazy
+    @Inject
+    private ActionStatService actionStatService;
 
     @Inject
     private ActionService actionService;
@@ -124,7 +148,18 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
         log.debug(String.format("Current build number is : %s.", currentBuildNumber));
 
+        Map<Long, ActionStat> actionStats = getActionStats();
+        Set<String> skippedTestTenants = new HashSet<>();
+        log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
+        log.debug("Action stats = {}", actionStats);
+
         for (DataFeed simpleDataFeed : allDataFeeds) {
+            if (isTestTenant(simpleDataFeed)) {
+                // not scheduling for test tenants
+                skippedTestTenants.add(simpleDataFeed.getTenant().getId());
+                continue;
+            }
+
             if (simpleDataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
                 runningTotalCount++;
                 if (simpleDataFeed.isScheduleNow()) {
@@ -160,21 +195,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(tenantActivity.isScheduledNow() ?
                         simpleDataFeed.getScheduleTime().getTime() : null);
-                List<Action> actions = getActions();
-                if (CollectionUtils.isNotEmpty(actions)) {
-                    Long firstActionTime = new Date().getTime();
-                    Long lastActionTime = 0L;
-                    for (Action action : actions) {
-                        Long actionTime = action.getCreated().getTime();
-                        if (firstActionTime - actionTime > 0) {
-                            firstActionTime = actionTime;
-                        }
-                        if (actionTime - lastActionTime > 0) {
-                            lastActionTime = actionTime;
-                        }
-                    }
-                    log.info("tenant " + tenant.getName() + " firstActionTime = " + firstActionTime + ", " +
-                            "lastActionTime = " + lastActionTime);
+
+                // auto scheduling
+                if (actionStats.containsKey(tenant.getPid())) {
                     Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, execution);
                     if (invokeTime != null) {
                         if (simpleDataFeed.getNextInvokeTime() == null || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
@@ -182,16 +205,33 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         }
                         tenantActivity.setAutoSchedule(true);
                         tenantActivity.setInvokeTime(invokeTime.getTime());
-                        tenantActivity.setFirstActionTime(firstActionTime);
-                        tenantActivity.setLastActionTime(lastActionTime);
+                        ActionStat stat = actionStats.get(tenant.getPid());
+                        if (stat.getFirstActionTime() != null) {
+                            tenantActivity.setFirstActionTime(stat.getFirstActionTime().getTime());
+                        }
+                        if (stat.getLastActionTime() != null) {
+                            tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
+                        }
                     }
-                    DataCollectionStatus status =
-                            dataCollectionProxy.getOrCreateDataCollectionStatus(MultiTenantContext.getShortTenantId(), null);
-                    tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, status));
+
+                    // dc refresh TODO not sure why only set dc refresh when there are actions
+                    try {
+                        DataCollectionStatus status = dataCollectionProxy
+                                .getOrCreateDataCollectionStatus(MultiTenantContext.getShortTenantId(), null);
+                        tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, status));
+                    } catch (Exception e) {
+                        log.error("Failed to check data cloud refresh for tenant = {}, e = {}", tenant.getId(), e);
+                    }
                 }
+
+                // add to list
                 tenantActivityList.add(tenantActivity);
             }
         }
+
+        log.debug("Skipped test tenants = {}", skippedTestTenants);
+        log.info("Number of skipped test tenants = {}", skippedTestTenants.size());
+
         int canRunJobCount = concurrentProcessAnalyzeJobs -runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
         int canRunLargeJobCount = maxLargeJobCount - runningLargeJobCount;
@@ -335,6 +375,53 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             default:
                 return false;
         }
+    }
+
+    /*
+     * helper from testframework utils. FIXME move the utils to a central location
+     */
+    private boolean isTestTenant(@NotNull DataFeed feed) {
+        if (feed.getTenant() == null || feed.getTenant().getId() == null) {
+            return false;
+        }
+
+        String tenantId = CustomerSpace.parse(feed.getTenant().getId()).getTenantId();
+        boolean findMatch = false;
+        for (String prefix : TEST_TENANT_PREFIX) {
+            Pattern pattern = Pattern
+                    .compile(prefix + "\\d+" + "|" + prefix + "_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_UTC" + "|"
+                            + prefix + "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+            Matcher matcher = pattern.matcher(tenantId);
+            if (matcher.find()) {
+                findMatch = true;
+                break;
+            }
+        }
+
+        return findMatch;
+    }
+
+    /*
+     * Retrieve all action related stats for scheduling
+     */
+    private Map<Long, ActionStat> getActionStats() {
+        // TODO get mock completed import actions as well
+        List<ActionStat> ingestActions = actionStatService.getNoOwnerCompletedIngestActionStats();
+        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerActionStatsByTypes(AUTO_SCHEDULABLE_TYPES);
+
+        return Stream.concat(ingestActions.stream(), nonIngestActions.stream())
+                .collect(Collectors.toMap(ActionStat::getTenantPid, stat -> stat, (s1, s2) -> {
+                    // merge two stats (compare first/last action time)
+                    Date first = s1.getFirstActionTime();
+                    if (first == null || (s2.getFirstActionTime() != null && s2.getFirstActionTime().before(first))) {
+                        first = s2.getFirstActionTime();
+                    }
+                    Date last = s1.getLastActionTime();
+                    if (last == null || (s2.getLastActionTime() != null && s2.getLastActionTime().after(last))) {
+                        last = s2.getLastActionTime();
+                    }
+                    return new ActionStat(s1.getTenantPid(), first, last);
+                }));
     }
 
     private List<Action> getActions() {
