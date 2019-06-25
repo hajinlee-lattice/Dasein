@@ -9,15 +9,16 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
@@ -30,50 +31,60 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class SourceToS3PublisherDeploymentTestNG extends PipelineTransformationTestNGBase {
+public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(SourceToS3PublisherDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceToS3PublisherTestNG.class);
 
-    private GeneralSource baseSourceAccMaster1 = new GeneralSource("TestSource1");
+    private GeneralSource baseSourceAccMaster1 = new GeneralSource("baseSrc1");
     // S3 already exist
-    private GeneralSource baseSourceAccMaster2 = new GeneralSource("TestSource2");
+    private GeneralSource baseSourceAccMaster2 = new GeneralSource("baseSrc2");
     // no schema
-    private GeneralSource baseSourceAccMaster3 = new GeneralSource("TestSource3");
+    private GeneralSource baseSourceAccMaster3 = new GeneralSource("baseSrc3");
     // multiple files in Snapshot
-    private GeneralSource baseSourceAccMaster4 = new GeneralSource("TestSource4");
+    private GeneralSource baseSourceAccMaster4 = new GeneralSource("baseSrc4");
 
-    @Autowired
+
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
 
-    private String existingSourceVersion = "2019-06-23_18-45-42_UTC";
+    private String preparedSourceVersion = "2019-06-23_18-45-42_UTC";
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws IOException {
         prepareData();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
-        Assert.assertTrue(VerifyPublishExists3(progress));
+        verifyPublishExistS3(progress);
         cleanupProgressTables();
     }
 
-    private void prepareData() throws IOException {
 
-        uploadBaseSourceFile(baseSourceAccMaster1.getSourceName(), "AccountMaster206", baseSourceVersion);
-        uploadBaseSourceFile(baseSourceAccMaster2.getSourceName(), "AccountMaster206", existingSourceVersion);
-        uploadBaseSourceFile(baseSourceAccMaster3.getSourceName(), "AccountMaster206", baseSourceVersion);
-        uploadBaseSourceDir(baseSourceAccMaster4.getSourceName(), "", baseSourceVersion);
+    private void prepareData() throws IOException {
+        s3FilePrepare();
+        uploadBaseSourceFile(baseSourceAccMaster1, "AccountMaster206", baseSourceVersion);
+        uploadBaseSourceFile(baseSourceAccMaster2, "AccountMaster206", preparedSourceVersion);
+        uploadBaseSourceFile(baseSourceAccMaster3, "AccountMaster206", baseSourceVersion);
+        uploadBaseSourceDir(baseSourceAccMaster4.getSourceName(), "TestSource", baseSourceVersion);
 
 
         createSchema(baseSourceAccMaster1, baseSourceVersion);
-        createSchema(baseSourceAccMaster2, existingSourceVersion);
+        createSchema(baseSourceAccMaster2, preparedSourceVersion);
         createSchema(baseSourceAccMaster4, baseSourceVersion);
+    }
+
+    private void s3FilePrepare() {
+        String resource = "sources/" + "AccountTable1.avro";
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+        String s3Key = "Pods/pipelineSource/Services/PropData/Sources/baseSrc2/Snapshot/2019-06-23_18-45-42_UTC" + "/"
+                + "AccountTable1.avro";
+        s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
     }
 
     @Override
@@ -83,7 +94,7 @@ public class SourceToS3PublisherDeploymentTestNG extends PipelineTransformationT
             configuration.setName("WeeklyHdfsToS3Publish");
             configuration.setVersion(targetVersion);
 
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            List<TransformationStepConfig> steps = new ArrayList<>();
 
             TransformationStepConfig step1 = createStep(baseSourceAccMaster1);
             TransformationStepConfig step2 = createStep(baseSourceAccMaster2);
@@ -103,9 +114,10 @@ public class SourceToS3PublisherDeploymentTestNG extends PipelineTransformationT
         }
     }
 
+
     @Override
     protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSourceAccMaster1.getSourceName(), baseSourceVersion).toString();
+        return null;
     }
 
     protected String getSnapshotPathForResult(Source baseSourceAccMaster, String baseSourceVersion) {
@@ -123,46 +135,51 @@ public class SourceToS3PublisherDeploymentTestNG extends PipelineTransformationT
 
 
 
-    private boolean VerifyPublishExists3(TransformationProgress progress) {
+    private void cleanupHdfsDir(String hdfsDir) throws IOException {
+        if (s3Service.isNonEmptyDirectory(s3Bucket, hdfsDir)) {
+            s3Service.cleanupPrefix(s3Bucket, hdfsDir);
+        }
+    }
+
+    private void verifyPublishExistS3(TransformationProgress progress) {
         try {
-            Source baseSource1 = sourceService.findBySourceName(baseSourceAccMaster1.getSourceName());
-            Source baseSource2 = sourceService.findBySourceName(baseSourceAccMaster2.getSourceName());
-            Source baseSource3 = sourceService.findBySourceName(baseSourceAccMaster3.getSourceName());
-            Source baseSource4 = sourceService.findBySourceName(baseSourceAccMaster3.getSourceName());
-
-            stepSuccessValidate(baseSource1, baseSourceVersion);
-            stepSuccessValidate(baseSource2, existingSourceVersion);
-            stepSuccessValidate(baseSource3, baseSourceVersion);
-            stepSuccessValidate(baseSource4, baseSourceVersion);
-
-            return true;
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster1, baseSourceVersion));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster2, preparedSourceVersion));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster3, baseSourceVersion));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster4, baseSourceVersion));
+            String SchemaPath = getSchemaPathForResult(baseSourceAccMaster2, preparedSourceVersion);
+            cleanupHdfsDir(SchemaPath);
         } catch (Exception e) {
             throw new RuntimeException("S3 Publish fail:" + e.getMessage());
         }
     }
 
-    private void stepSuccessValidate(Source baseSource, String baseSourceVersion) throws IOException {
+    private boolean stepSuccessValidate(Source baseSource, String baseSourceVersion) throws IOException {
+        try {
+            String s3SnapshotPath = getSnapshotPathForResult(baseSource, baseSourceVersion);
+            String s3SchemaPath = getSchemaPathForResult(baseSource, baseSourceVersion);
+            String s3VersionFilePath = getVerFilePathForResult(baseSource, baseSourceVersion);
 
-        String s3SnapshotPath = getSnapshotPathForResult(baseSource, baseSourceVersion);
-        String s3SchemaPath = getSchemaPathForResult(baseSource, baseSourceVersion);
-        String s3VersionFilePath = getVerFilePathForResult(baseSource, baseSourceVersion);
-
-        validateCopySucseess(s3SnapshotPath);
-        if (HdfsUtils.isDirectory(yarnConfiguration, s3SchemaPath)) {
-            validateCopySucseess(s3SchemaPath);
+            validateCopySucseess(s3SnapshotPath);
+            if (HdfsUtils.fileExists(yarnConfiguration, s3SchemaPath)) {
+                validateCopySucseess(s3SchemaPath);
+            }
+            validateCopySucseess(s3VersionFilePath);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        validateCopySucseess(s3VersionFilePath);
     }
 
     private void validateCopySucseess(String Prefix) throws IOException {
-            System.out.println("Checking the objects of Prefix:" + Prefix);
+        log.info("Checking the objects of Prefix: {}", Prefix);
             String filepath;
 
             List<String> files = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, Prefix,
                     (HdfsFileFilter) null, false);
             for (String key : files) {
                 filepath = key.substring(key.indexOf(Prefix));
-                System.out.println("Key : " + filepath);
+            log.info("Check key : {} ", filepath);
                 if (!s3Service.objectExist(s3Bucket, filepath)) {
                     throw new RuntimeException("File not Exist in S3:" + filepath);
                 }
@@ -184,6 +201,7 @@ public class SourceToS3PublisherDeploymentTestNG extends PipelineTransformationT
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s",
                     baseSourceAccMaster.getSourceName(), baseSourceVersion));
+            throw new RuntimeException(e);
         }
     }
 
