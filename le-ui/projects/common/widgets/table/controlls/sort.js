@@ -12,8 +12,10 @@ let sortCheckGreater = null;
 let sortCheckLessThan = null;
 
 const compare = (a, b) => {
-    sortingType = typeof a[sortingName];
-
+    // sortingType = typeof a[sortingName];
+    if(!isNaN(a[sortingName])){
+      sortingType = 'number';
+    }
     console.log(a[sortingName]);
     console.log(sortingType);
 
