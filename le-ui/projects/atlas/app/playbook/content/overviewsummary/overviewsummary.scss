@@ -59,6 +59,11 @@
                             top: -1px;
                             margin-left: 10px;
                         }
+                        i.ico.caret-down {  
+                            background: url(/assets/images/campaignoverview/caret-down.png) center center no-repeat;
+                            width: 9px;
+                            height: 4px;
+                        }
                     }
                     ul {
                         display: none;
@@ -125,6 +130,8 @@
                                 padding: 0;
                             }
                             & > i {
+                                position: relative;
+                                top: 2px;
                                 display: inline-block;
                                 margin-left: 5px;
                                 height: 12px;
