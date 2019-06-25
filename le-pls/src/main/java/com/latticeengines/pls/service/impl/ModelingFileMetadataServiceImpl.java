@@ -293,7 +293,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             // skip user field mapped to standard attribute or user ignored fields
             if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
                 FieldMapping fieldMapping = userFieldMap.get(userField);
-                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                if (fieldMapping == null || standardAttrNames.contains(fieldMapping.getMappedField())) {
                     continue;
                 }
                 if (bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {

@@ -218,7 +218,7 @@ public class TimeStampConvertUtils {
                 "MMM/d/yy","d/MMM/yyyy", "d/MMM/yy", "yyyy/MMM/d" ));
         separatorToJavaDateFormatGroup.put('-', Arrays.asList("M-d-yyyy", "M-d-yy", "d-M-yyyy", "d-M-yy", "yyyy-M-d", "MMM-d-yyyy",
                 "MMM-d-yy", "d-MMM-yyyy", "d-MMM-yy", "yyyy-MMM-d"));
-        separatorToJavaDateFormatGroup.put('.', Arrays.asList("M-d-yyyy", "M.d.yy", "d.M.yyyy", "d.M.yy", "yyyy.M.d", "MMM.d.yyyy",
+        separatorToJavaDateFormatGroup.put('.', Arrays.asList("M.d.yyyy", "M.d.yy", "d.M.yyyy", "d.M.yy", "yyyy.M.d", "MMM.d.yyyy",
                 "MMM.d.yy", "d.MMM.yyyy", "d.MMM.yy", "yyyy.MMM.d"));
         separatorToJavaTimeFormatGroup.put(':', Arrays.asList("h:m:s a", "H:m:s", "h:m:s.SSS a", "H:m:s.SSS", "h:m a", "H:m"));
         separatorToJavaTimeFormatGroup.put('-', Arrays.asList("h-m-s a", "H-m-s", "h-m-s.SSS a", "H-m-s.SSS", "h-m a", "H-m"));
@@ -764,7 +764,7 @@ public class TimeStampConvertUtils {
      * split value into two parts: date and time, use regex defined in system to match
      * the val respectively, finally use java date time formatter to parse value
      */
-    public static boolean parseDateTime(String value) {
+    public static boolean isDateTime(String value) {
         Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(value);
         String dateVal, timeVal;
         Character dateChar = null, timeChar = null;

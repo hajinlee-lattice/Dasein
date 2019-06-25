@@ -732,7 +732,7 @@ public class MetadataResolver {
             if (StringUtils.isNotBlank(columnField)) {
                 columnField = columnField.trim().replaceFirst("(\\s\\s+)", " ");
                 columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
-                boolean isDateTime = TimeStampConvertUtils.parseDateTime(columnField);
+                boolean isDateTime = TimeStampConvertUtils.isDateTime(columnField);
                 if (isDateTime) {
                     conformingDateCount++;
                     if (conformingDateCount >= dateThreshold) {
