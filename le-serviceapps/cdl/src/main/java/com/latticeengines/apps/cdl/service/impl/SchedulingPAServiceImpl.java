@@ -150,13 +150,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 try {
                     execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(simpleDataFeed,
                             DataFeedExecutionJobType.PA);
-                    tenantActivity.setRetry(retryProcessAnalyze(execution));
-                    tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
                 } catch (Exception e) {
                     execution = null;
-                    tenantActivity.setRetry(false);
                 }
-
+                tenantActivity.setRetry(retryProcessAnalyze(execution));
+                if (execution != null) {
+                    tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
+                }
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
                 tenantActivity.setScheduleTime(tenantActivity.isScheduledNow() ?
                         simpleDataFeed.getScheduleTime().getTime() : null);
