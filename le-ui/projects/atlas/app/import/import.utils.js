@@ -8,7 +8,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
 .service('ImportUtils', function($state){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
-    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId'}};
+    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId', CustomerAccountId:'CustomerAccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId', CustomerContactId: 'CustomerContactId'}};
     var latticeSchema = {};
 
     function setFields(fieldObj, field){
@@ -200,35 +200,39 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
     }
     
-    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap){
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId){
         if(uniqueId && fieldName){
-            Object.keys(fieldsMapping).forEach(index => {
-                let field = fieldsMapping[index];
+            let keys = Object.keys(fieldsMapping);
+            for(var i = 0; i < keys.length; i++){
+                let field = fieldsMapping[keys[i]];
                 if(field.userField == fieldName){
                     switch(unmap){
                         case true:
                             if(field.mappedField == uniqueId){
                                 field.mappedToLatticeField = false;
+                                field.mapToLatticeId = false;
                                 delete field.mappedField;
                             }
                             break;
                         case false:
                             if(!field.fieldMapped){
                                 field.mappedToLatticeField = true;
+                                field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
                                 field.mappedField = uniqueId;
                             }
                             break;
                     }
+                    return;
                 }
-            });
+            }
         }
     }
     function updateUniqueIdsMapping(entity, fieldsMapping, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
             let saved = savedObj[index];
             if(saved.originalUserField && saved.append != true){
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true);
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId);
             }
         });
     }
