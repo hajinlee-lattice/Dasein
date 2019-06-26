@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,9 +15,6 @@ public class GreedyScheduler implements Scheduler {
 
     private static final Logger log = LoggerFactory.getLogger(GreedyScheduler.class);
 
-    private static final String RETRY_KEY = "RETRY_KEY";
-    private static final String OTHER_KEY = "OTHER_KEY";
-
     @Override
     public Map<String, Set<String>> schedule(List<SchedulingPAQueue> schedulingPAQueues) {
         Set<String> canRunRetryJobTenantSet = new HashSet<>();
@@ -28,7 +25,7 @@ public class GreedyScheduler implements Scheduler {
                 canRunJobTenantSet = schedulingPAQueue.getScheduleTenants();
             }
             if (schedulingPAQueue.size() > 0) {
-                log.info(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
+                log.debug(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
                         JsonUtils.serialize(schedulingPAQueue.getAll())));
                 if (schedulingPAQueue.isRetryQueue()) {
                     canRunRetryJobTenantSet = new HashSet<>(schedulingPAQueue.fillAllCanRunJobs());

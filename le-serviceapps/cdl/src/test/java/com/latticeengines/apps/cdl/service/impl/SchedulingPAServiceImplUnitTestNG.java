@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.mockito.Mockito.doReturn;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,8 +20,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.SystemStatus;
-import com.latticeengines.domain.exposed.cdl.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAServiceImplUnitTestNG {
@@ -37,6 +37,8 @@ public class SchedulingPAServiceImplUnitTestNG {
     private static final String OTHER_KEY = "OTHER_KEY";
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
+
+    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     @BeforeClass(groups = "unit")
     public void setup() {
@@ -538,7 +540,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity15 = new TenantActivity();
         tenantActivity15.setRetry(true);
-        tenantActivity15.setLastFinishTime(new Date().getTime() - 1000000);
+        tenantActivity15.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 1000000);
         tenantActivity15.setDataCloudRefresh(true);
         tenantActivity15.setScheduledNow(false);
         tenantActivity15.setTenantType(TenantType.CUSTOMER);
@@ -549,7 +551,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity16 = new TenantActivity();
         tenantActivity16.setRetry(true);
-        tenantActivity16.setLastFinishTime(new Date().getTime() - 9000000);
+        tenantActivity16.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
         tenantActivity16.setDataCloudRefresh(false);
         tenantActivity16.setScheduledNow(false);
         tenantActivity16.setTenantType(TenantType.CUSTOMER);
@@ -560,7 +562,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity17 = new TenantActivity();
         tenantActivity17.setRetry(true);
-        tenantActivity17.setLastFinishTime(new Date().getTime() - 9000000);
+        tenantActivity17.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
         tenantActivity17.setDataCloudRefresh(false);
         tenantActivity17.setScheduledNow(false);
         tenantActivity17.setTenantType(TenantType.CUSTOMER);
@@ -571,7 +573,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity18 = new TenantActivity();
         tenantActivity18.setRetry(true);
-        tenantActivity18.setLastFinishTime(new Date().getTime());
+        tenantActivity18.setLastFinishTime(schedulingPATimeClock.getCurrentTime());
         tenantActivity18.setDataCloudRefresh(false);
         tenantActivity18.setScheduledNow(false);
         tenantActivity18.setTenantType(TenantType.CUSTOMER);
@@ -582,7 +584,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity19 = new TenantActivity();
         tenantActivity19.setRetry(true);
-        tenantActivity17.setLastFinishTime(new Date().getTime() - 9000000);
+        tenantActivity17.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
         tenantActivity19.setDataCloudRefresh(false);
         tenantActivity19.setScheduledNow(false);
         tenantActivity19.setTenantType(TenantType.QA);
