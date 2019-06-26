@@ -9,7 +9,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +110,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
                 String appIdStr = progress.getApplicationId();
                 try {
                     ApplicationReport report = YarnUtils.getApplicationReport(yarnClient,
-                            ConverterUtils.toApplicationId(appIdStr));
+                            ApplicationId.fromString(appIdStr));
                     if (YarnApplicationState.FAILED.equals(report.getYarnApplicationState())) {
                         log.info("Found a running progress which is already failed.");
                         publicationProgressService.update(progress).fail("Yarn application failed.").commit();
