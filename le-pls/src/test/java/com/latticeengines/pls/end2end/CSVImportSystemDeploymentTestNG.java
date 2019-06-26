@@ -302,4 +302,13 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertTrue(hasCustomerAccountId);
         Assert.assertTrue(idMappingCount > 1);
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testMapToLatticeIdFlag")
+    public void testPriorityList() {
+        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        Assert.assertEquals(allSystems.size(), 3);
+        Assert.assertEquals(allSystems.get(0).getPriority(), 1);
+        Assert.assertEquals(allSystems.get(1).getPriority(), 2);
+        Assert.assertEquals(allSystems.get(2).getPriority(), 3);
+    }
 }
