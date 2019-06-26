@@ -12,6 +12,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.publish.SourceToS3Publisher;
@@ -55,6 +55,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private String preparedSourceVersion = "2019-06-23_18-45-42_UTC";
 
+    private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
+
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws IOException {
         prepareData();
@@ -68,15 +70,15 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private void prepareData() throws IOException {
         s3FilePrepare();
-        uploadBaseSourceFile(baseSourceAccMaster1, "AccountMaster206", baseSourceVersion);
+        uploadBaseSourceFile(baseSourceAccMaster1, "AccountMaster206", basedSourceVersion);
         uploadBaseSourceFile(baseSourceAccMaster2, "AccountMaster206", preparedSourceVersion);
-        uploadBaseSourceFile(baseSourceAccMaster3, "AccountMaster206", baseSourceVersion);
-        uploadBaseSourceDir(baseSourceAccMaster4.getSourceName(), "TestSource", baseSourceVersion);
+        uploadBaseSourceFile(baseSourceAccMaster3, "AccountMaster206", basedSourceVersion);
+        uploadBaseSourceDir(baseSourceAccMaster4.getSourceName(), "TestSource", basedSourceVersion);
 
 
-        createSchema(baseSourceAccMaster1, baseSourceVersion);
+        createSchema(baseSourceAccMaster1, basedSourceVersion);
         createSchema(baseSourceAccMaster2, preparedSourceVersion);
-        createSchema(baseSourceAccMaster4, baseSourceVersion);
+        createSchema(baseSourceAccMaster4, basedSourceVersion);
     }
 
     private void s3FilePrepare() {
@@ -152,39 +154,38 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private void verifyPublishExistS3(TransformationProgress progress) {
         try {
-            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster1, baseSourceVersion));
-            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster2, preparedSourceVersion));
-            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster3, baseSourceVersion));
-            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster4, baseSourceVersion));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster1, basedSourceVersion, "src1"));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster2, preparedSourceVersion, "src2"));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster3, basedSourceVersion, "src3"));
+            Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster4, basedSourceVersion, "src4"));
             cleanupSourcePathsS3(baseSourceAccMaster2, preparedSourceVersion);
         } catch (Exception e) {
             throw new RuntimeException("S3 Publish fail:" + e.getMessage());
         }
     }
 
-    private boolean stepSuccessValidate(Source baseSource, String baseSourceVersion) throws IOException {
+    private boolean stepSuccessValidate(Source baseSource, String baseSourceVersion, String src) throws IOException {
         try {
             String s3SnapshotPath = getSnapshotPathForResult(baseSource, baseSourceVersion);
             String s3SchemaPath = getSchemaPathForResult(baseSource, baseSourceVersion);
             String s3VersionFilePath = getVerFilePathForResult(baseSource, baseSourceVersion);
 
-            validateCopySucseess(s3SnapshotPath);
+            validateCopySucseess(s3SnapshotPath, "Snapshot", src);
             if (HdfsUtils.fileExists(yarnConfiguration, s3SchemaPath)) {
-                validateCopySucseess(s3SchemaPath);
+                validateCopySucseess(s3SchemaPath, "Schema", src);
             }
-            validateCopySucseess(s3VersionFilePath);
+            validateCopySucseess(s3VersionFilePath, "_CURRENT_VERSION", src);
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void validateCopySucseess(String Prefix) throws IOException {
+    private void validateCopySucseess(String Prefix, String dir, String src) throws IOException {
         log.info("Checking the objects of Prefix: {}", Prefix);
             String filepath;
 
-            List<String> files = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, Prefix,
-                    (HdfsFileFilter) null, false);
+        List<String> files = fileListPrepare(Prefix, dir, src);
             for (String key : files) {
                 filepath = key.substring(key.indexOf(Prefix));
             log.info("Check key : {} ", filepath);
@@ -193,6 +194,41 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
                 }
             }
     }
+
+    private List<String> fileListPrepare(String prefix, String dir, String src) throws IOException {
+        List<String> files = new ArrayList<>();
+        if (StringUtils.equals(dir, "_CURRENT_VERSION")) {
+            files.add(prefix);
+        }
+        if (StringUtils.equals(dir, "Schema")) {
+            String schema = null;
+            if (StringUtils.equals(src, "src1")) {
+                schema = prefix + "/baseSrc1.avsc";
+            }
+            if (StringUtils.equals(src, "src2")) {
+                schema = prefix + "/baseSrc2.avsc";
+            }
+            if (StringUtils.equals(src, "src4")) {
+                schema = prefix + "/baseSrc4.avsc";
+            }
+            if (!StringUtils.equals(src, "src3")) {
+                files.add(schema);
+            }
+        }
+        if (StringUtils.equals(dir, "Snapshot")) {
+            if (StringUtils.equals(src, "src4")) {
+                files.add(prefix + "/" + "_SUCCESS");
+                files.add(prefix + "/" + "part-0000.avro");
+                files.add(prefix + "/" + "part-0001.avro");
+            } else {
+                files.add(prefix + "/" + "_SUCCESS");
+                files.add(prefix + "/" + "AccountMaster206.avro");
+            }
+
+        }
+        return files;
+    }
+
 
     private TransformationStepConfig createStep(Source baseSourceAccMaster) {
         TransformationStepConfig step = new TransformationStepConfig();
