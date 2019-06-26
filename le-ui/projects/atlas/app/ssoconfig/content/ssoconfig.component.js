@@ -69,6 +69,7 @@ angular.module('lp.ssoconfig.configure', [])
                 xml = 'data:text/xml;charset=utf-8,' + xml;
             }
             data = encodeURI(xml);
+            data = data.replace(/#/g, '%23');
 
             link = document.createElement('a');
             link.setAttribute('href', data);
