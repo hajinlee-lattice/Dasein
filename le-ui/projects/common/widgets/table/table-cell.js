@@ -2,6 +2,7 @@ import React, { Component } from "common/react-vendor";
 import propTypes from "prop-types";
 import "./table.scss";
 import CellContent from "./cell-content";
+import {getColumnData} from './controlls/sort';
 
 export default class LeTableCell extends Component {
     constructor(props) {
@@ -47,8 +48,15 @@ export default class LeTableCell extends Component {
         }
     }
     getCellContent() {
-        let displayName = this.props.rowData[this.props.colName];
+        let displayName = getColumnData(this.props.rowData, this.props.colName.split('.'))//this.props.rowData[this.props.colName];
+        
         if (displayName && !this.state.editing && this.props.columnsMapping[this.props.colName].onlyTemplate != true) {
+            // console.log('================');
+            // // console.log(displayName);
+            // console.log(this.props.rowData);
+            // // console.log(this.props.colName);
+            // // console.log(this.props.columnsMapping);
+            // console.log('================');
             return (
                 <CellContent
                     value={displayName}
@@ -56,6 +64,11 @@ export default class LeTableCell extends Component {
                 />
             );
         } else {
+            // console.log('================');
+            // console.log(displayName);
+            // console.log(this.props.rowData);
+            // console.log(this.props.colName);
+            // console.log('================');
             return null;
         }
     }
