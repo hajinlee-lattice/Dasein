@@ -61,8 +61,11 @@ public class TestRegisterModels {
     private ModelSummary createModel(Tenant tenant, TestModelConfiguration modelConfiguration,
             CustomerSpace customerSpace, TestModelSummaryParser testModelSummaryParser,
             ModelSummaryProxy modelSummaryProxy, ColumnMetadataProxy columnMetadataProxy) throws IOException {
+        // TOTO: Replace with the following after changing all model files.
+//        ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
+//                modelConfiguration.getModelSummaryJsonLocalpath());
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
-                modelConfiguration.getModelSummaryJsonLocalpath());
+                modelConfiguration.getModelJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
         modelSummary.setEventTableName(modelConfiguration.getEventTable());
         modelSummary.setId(modelConfiguration.getModelId());
@@ -72,14 +75,14 @@ public class TestRegisterModels {
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
-// called for getting latest data cloud version
+        // called for getting latest data cloud version
         String dataCloudVersion = columnMetadataProxy
                 .latestVersion(//
                         null)//
                 .getVersion();
         modelSummary.setDataCloudVersion(dataCloudVersion);
 
-        testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelSummaryJsonLocalpath());
+        testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelJsonLocalpath());
 
         ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(),
                 modelConfiguration.getModelId());
@@ -107,7 +110,7 @@ public class TestRegisterModels {
                 .getResourceAsStream(modelConfiguration.getLocalModelPath() + "eventtable-"
                         + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         InputStream modelJsonUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getModelSummaryJsonLocalpath());
+                .getResourceAsStream(modelConfiguration.getModelJsonLocalpath());
         InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
         InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //

@@ -87,6 +87,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     public static final String MODEL_JSON_SUFFIX = "_model.json";
     public static final String MODEL_JSON = "model.json";
+    public static final String MODEL_SUMMARY_JSON = "modelsummary.json";
     public static final String MODEL_PMML = "rfpmml.xml";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
