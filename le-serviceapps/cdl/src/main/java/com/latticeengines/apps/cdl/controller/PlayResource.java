@@ -155,10 +155,6 @@ public class PlayResource {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Play is null" });
         }
-        if (StringUtils.isEmpty(play.getDisplayName())) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Play's Display Name cannot be blank is null" });
-        }
 
         return playService.createOrUpdate(play, shouldLoadCoverage, tenant.getId());
     }
