@@ -417,7 +417,9 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public List<S3ImportSystem> getAllS3ImportSystem(String customerSpace) {
         List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(customerSpace);
-        allSystems.sort(Comparator.comparing(S3ImportSystem::getPriority));
+        if (CollectionUtils.isNotEmpty(allSystems)) {
+            allSystems.sort(Comparator.comparing(S3ImportSystem::getPriority));
+        }
         return allSystems;
     }
 
