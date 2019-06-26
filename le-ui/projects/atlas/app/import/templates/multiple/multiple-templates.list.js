@@ -36,7 +36,7 @@ export default class MultipleTemplatesList extends Component {
         this.state = {
             forceReload: false,
             showEmpty: false,
-            showLoading: false,
+            showLoading: true,
             data: []
         };
     }
@@ -59,17 +59,20 @@ export default class MultipleTemplatesList extends Component {
     handleChange = () => {
 
         const data = store.getState()['multitemplates'];
+       
         let templates = data.templates;
+        let tmp = !templates.loaded;
         this.setState({
-            forceReload: true,
-            showEmpty: templates && templates.length == 0,
-            showLoading: false,
-            data: templates
+            showEmpty: templates.data && templates.data.length == 0,
+            showLoading: tmp,
+            data: templates.data,
+            forceReload: true
         });
         this.setState({ forceReload: false });
     }
 
     componentWillUnmount() {
+        actions.resetTemplates();
         this.unsubscribe();
     }
 
@@ -77,9 +80,9 @@ export default class MultipleTemplatesList extends Component {
         injectAsyncReducer(store, 'multitemplates', reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
         this.setState({
-            forceReload: false,
+            showLoading: true,
             showEmpty: false,
-            showLoading: true
+            forceReload: true
         });
         actions.fetchTemplates();
     }
@@ -272,7 +275,6 @@ export default class MultipleTemplatesList extends Component {
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
 
-        console.log(response.type);
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";

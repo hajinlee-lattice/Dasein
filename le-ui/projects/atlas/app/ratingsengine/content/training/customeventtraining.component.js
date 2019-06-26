@@ -25,7 +25,6 @@ angular.module('lp.ratingsengine.wizard.training')
 
     vm.init = function () {
         RatingsEngineStore.setValidation("training", false);
-
     }
 
     vm.fileLoad = function(headers) {

@@ -14,12 +14,16 @@ import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
@@ -33,6 +37,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
     @Inject
+    private PlayService playService;
+
+    @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
     @Inject
@@ -43,6 +50,38 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Override
+    public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
+            Boolean launchNow) {
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
+        }
+        playLaunchChannel.setPlay(play);
+        playLaunchChannel.setTenant(MultiTenantContext.getTenant());
+        playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
+        create(playLaunchChannel);
+        if (launchNow) {
+            createPlayLaunchFromChannel(playLaunchChannel, play);
+        }
+        return playLaunchChannel;
+    }
+
+    @Override
+    public PlayLaunchChannel updatePlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
+            Boolean launchNow) {
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
+        }
+        playLaunchChannel.setPlay(play);
+        playLaunchChannel = update(playLaunchChannel);
+        if (launchNow) {
+            createPlayLaunchFromChannel(playLaunchChannel, play);
+        }
+        return playLaunchChannel;
+    }
 
     @Override
     public PlayLaunchChannel create(PlayLaunchChannel playLaunchChannel) {
@@ -85,13 +124,13 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel) {
+    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
         playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
-        playLaunch.setPlay(playLaunchChannel.getPlay());
+        playLaunch.setPlay(play);
         playLaunch.setLaunchState(LaunchState.Queued);
         playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
@@ -111,8 +150,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
         }
 
-        Long totalAvailableRatedAccounts = playLaunchChannel.getPlay().getTargetSegment().getAccounts();
-        Long totalAvailableContacts = playLaunchChannel.getPlay().getTargetSegment().getContacts();
+        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+        Long totalAvailableContacts = play.getTargetSegment().getContacts();
 
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
         playLaunch.setAccountsSuppressed(0L);
