@@ -68,7 +68,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         return playLaunchDao.findByPlayId(playId, states);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
@@ -81,11 +81,16 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         return playLaunchDao.findLatestByPlayAndSysOrg(playId, orgId);
     }
 
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchDao.findByState(state);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
+        return playLaunchDao.getByStateAcrossTenants(state, max);
     }
 
     @Override
@@ -108,8 +113,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
-        return playLaunchDao.findByPlayStatesAndPagination(playId, states,
-                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
+        return playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp, offset, max, sortby,
+                descending, endTimestamp, orgId, externalSysType);
     }
 
     @Override
