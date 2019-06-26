@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.orchestration.dao.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
@@ -62,14 +62,14 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
     }
 
     @Override
-    public boolean hasJobInProgress(Orchestration orch) {
+    public boolean hasJobInProgress(String orchName) {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
         String queryStr = String.format(
                 "from %s p where p.orchestration.name = :name and p.status in (:ProgressStatus) ",
                 entityClz.getSimpleName());
         Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
-        query.setParameter("name", orch.getName());
+        query.setParameter("name", orchName);
         query.setParameterList("ProgressStatus", new Object[] { ProgressStatus.PROCESSING, ProgressStatus.NEW });
         return CollectionUtils.isNotEmpty(query.list());
     }
@@ -100,4 +100,15 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         return query.list();
     }
 
+    @Override
+    public boolean hasTriggeredSince(String orchName, Date since) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<OrchestrationProgress> entityClz = getEntityClass();
+        String queryStr = String.format("from %s p where p.orchestration.name = :name and p.startTime >= :since",
+                entityClz.getSimpleName());
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
+        query.setParameter("name", orchName);
+        query.setParameter("since", since);
+        return CollectionUtils.isNotEmpty(query.list());
+    }
 }

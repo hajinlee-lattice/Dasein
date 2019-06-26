@@ -96,6 +96,13 @@ public class OrchestrationProgressServiceImpl implements OrchestrationProgressSe
             return this;
         }
 
+        // Only for testing purpose. In application, start time should not be
+        // updated.
+        public OrchestrationProgressUpdater startTime(Date startTime) {
+            this.progress.setStartTime(startTime);
+            return this;
+        }
+
         public OrchestrationProgress commit(boolean persistent) {
             progress.setLatestUpdateTime(new Date());
             if (persistent) {
