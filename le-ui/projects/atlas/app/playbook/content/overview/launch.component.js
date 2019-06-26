@@ -228,8 +228,6 @@ class LaunchComponent extends Component {
 
         sections.contacts = _contacts + (this.state.unscored ? (coverage.unscoredContactCount ? coverage.unscoredContactCount  : 0) : 0);
 
-console.log(22222, sections);
-
         return sections;
     }
 
@@ -427,10 +425,24 @@ console.log(22222, sections);
             save = opts.save || false,
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null,
-            channelConfig = connection.channelConfig || {};
+            channelConfigKey = (this.state.externalSystemName ? this.state.externalSystemName.toLowerCase() : null);
+
+
+        var channelConfigDefault = {};
+        channelConfigDefault[channelConfigKey] = {
+            supressAccountWithoutAccountId: this.state.excludeItemsWithoutSalesforceId,
+            audienceId: '',
+            audienceName: '',
+            folderName: ''
+        };
+
+        var channelConfig = connection.channelConfig || channelConfigDefault;
+
 
         if(this.state.audienceParams && this.state.audienceParams.audienceName && this.state.audienceParams.folderName) {
-            channelConfig[this.state.externalSystemName.toLowerCase()] = this.state.audienceParams;
+            channelConfig[channelConfigKey].audienceId = this.state.audienceParams.audienceId;
+            channelConfig[channelConfigKey].audienceName = this.state.audienceParams.audienceName;
+            channelConfig[channelConfigKey].folderName = this.state.audienceParams.folderName;
         }
 
         if(play) {
