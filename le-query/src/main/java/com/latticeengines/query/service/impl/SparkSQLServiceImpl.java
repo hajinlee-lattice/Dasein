@@ -102,7 +102,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
             LivySession session = null;
             try {
                 session = livySessionService.startSession(livyHost, jobName, //
-                        getLivyConf(), getSparkConf(scalingFactor));
+                        getLivyConf(storageLevel), getSparkConf(scalingFactor, storageLevel));
                 bootstrapAttrRepo(session, hdfsPathMap, storageLevel);
             } catch (Exception e) {
                 log.warn("Failed to launch a new livy session.", e);
@@ -205,16 +205,23 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return sparkScript;
     }
 
-    private Map<String, Object> getLivyConf() {
+    private Map<String, Object> getLivyConf(String storageLevel) {
         Map<String, Object> conf = new HashMap<>();
         conf.put("driverCores", driverCores);
         conf.put("driverMemory", driverMem);
         conf.put("executorCores", executorCores);
-        conf.put("executorMemory", executorMem);
+        String execMem = executorMem;
+        if (Boolean.TRUE.equals(useEmr) && storageLevel.contains("MEMORY")) {
+            String unit = execMem.substring(execMem.length() - 1);
+            int val = Integer.parseInt(execMem.replace(unit, ""));
+            val = (int) (0.8 * val);
+            execMem = String.format("%d%s", val, unit);
+        }
+        conf.put("executorMemory", execMem);
         return conf;
     }
 
-    private Map<String, String> getSparkConf(int scalingFactor) {
+    private Map<String, String> getSparkConf(int scalingFactor, String storageLevel) {
         scalingFactor = Math.max(scalingFactor, 1);
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingFactor;
@@ -228,6 +235,9 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
         int partitions = Math.max(maxExe * executorCores * 2, 200);
+        if (Boolean.TRUE.equals(useEmr) && storageLevel.contains("MEMORY")) {
+            conf.put("spark.yarn.executor.memoryOverheadFactor", "0.25");
+        }
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         conf.put("spark.driver.maxResultSize", "4g");
