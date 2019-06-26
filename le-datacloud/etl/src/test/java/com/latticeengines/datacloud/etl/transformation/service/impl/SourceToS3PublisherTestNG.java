@@ -135,10 +135,19 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
 
 
-    private void cleanupHdfsDir(String hdfsDir) throws IOException {
+    private void cleanupS3Path(String hdfsDir) throws IOException {
         if (s3Service.isNonEmptyDirectory(s3Bucket, hdfsDir)) {
             s3Service.cleanupPrefix(s3Bucket, hdfsDir);
         }
+    }
+
+    private void cleanupSourcePathsS3(Source baseSource, String baseSourceVersion) throws IOException {
+        String s3SnapshotPath = getSnapshotPathForResult(baseSource, baseSourceVersion);
+        String s3SchemaPath = getSchemaPathForResult(baseSource, baseSourceVersion);
+        String s3VersionFilePath = getVerFilePathForResult(baseSource, baseSourceVersion);
+        cleanupS3Path(s3SnapshotPath);
+        cleanupS3Path(s3SchemaPath);
+        cleanupS3Path(s3VersionFilePath);
     }
 
     private void verifyPublishExistS3(TransformationProgress progress) {
@@ -147,8 +156,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster2, preparedSourceVersion));
             Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster3, baseSourceVersion));
             Assert.assertTrue(stepSuccessValidate(baseSourceAccMaster4, baseSourceVersion));
-            String SchemaPath = getSchemaPathForResult(baseSourceAccMaster2, preparedSourceVersion);
-            cleanupHdfsDir(SchemaPath);
+            cleanupSourcePathsS3(baseSourceAccMaster2, preparedSourceVersion);
         } catch (Exception e) {
             throw new RuntimeException("S3 Publish fail:" + e.getMessage());
         }

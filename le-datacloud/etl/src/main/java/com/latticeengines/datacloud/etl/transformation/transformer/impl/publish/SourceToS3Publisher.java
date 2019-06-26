@@ -80,15 +80,15 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             String s3SchemaPrefix = gets3nPath(s3Bucket, hdfsSchemaDir);
             String s3VersionFilePrefix = gets3nPath(s3Bucket, hdfsVersionFilePath);
 
-            copyToS3(sourceName, hdfsSnapshotDir, s3SnapshotPrefix, true, false);
+            copyToS3(sourceName, hdfsSnapshotDir, s3SnapshotPrefix, true);
             validateCopySuccess(hdfsSnapshotDir);
 
-            copyToS3(sourceName, hdfsSchemaDir, s3SchemaPrefix, true, true);
-            if (hdfsSchemaDir != null && HdfsUtils.fileExists(distCpConfiguration, hdfsSchemaDir)) {///
+            if (hdfsSchemaDir != null && HdfsUtils.fileExists(distCpConfiguration, hdfsSchemaDir)) {
+                copyToS3(sourceName, hdfsSchemaDir, s3SchemaPrefix, true);
                 validateCopySuccess(hdfsSchemaDir);
             }
 
-            copyToS3(sourceName, hdfsVersionFilePath, s3VersionFilePrefix, false, false);
+            copyToS3(sourceName, hdfsVersionFilePath, s3VersionFilePrefix, false);
             validateCopySuccess(hdfsVersionFilePath);
 
             step.setTarget(null);
@@ -102,7 +102,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
 
-    private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir, boolean isSchema) {
+    private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir) {
         try {
             cleanupS3Path(hdfsDir);
 
@@ -118,10 +118,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 if (HdfsUtils.fileExists(distcpConfiguration, hdfsDir)) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
-                    if (isSchema) {
-                    } else {
-                        throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);///
-                    }
+                    throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);
                 }
             } else {
                 if (HdfsUtils.fileExists(distcpConfiguration, hdfsDir)) {
