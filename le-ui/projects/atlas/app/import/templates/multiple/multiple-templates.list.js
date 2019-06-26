@@ -94,9 +94,9 @@ export default class MultipleTemplatesList extends Component {
     getConfig() {
         let config = {
             name: "import-templates",
-            selectable: true,
+            selectable: false,
             sorting:{
-                initial: 'System',
+                initial: 'ImportSystem.system_type',
                 direction: 'desc'
             },
             header: [
@@ -116,7 +116,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "System",
+                    name: "ImportSystem.system_type",
                     displayName: "System",
                     sortable: true
                 },
@@ -139,6 +139,7 @@ export default class MultipleTemplatesList extends Component {
             columns: [
                 {
                     colSpan: 1,
+                    onlyTemplate: true,
                     template: cell => {
 
                         let rowData = cell.props.rowData;
@@ -159,11 +160,7 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1,
-                    onlyTemplate: true,
-                    template: cell => {
-                        return (<span>{cell.props.rowData.ImportSystem.priority}</span>);
-                    }
+                    colSpan: 1
                 },
                 {
                     colSpan: 2,
@@ -193,11 +190,7 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1,
-                    onlyTemplate: true,
-                    template: cell => {
-                        return (<span>{cell.props.rowData.ImportSystem.system_type}</span>);
-                    }
+                    colSpan: 1
                 },
                 {
                     colSpan: 1
@@ -232,6 +225,7 @@ export default class MultipleTemplatesList extends Component {
                 },
                 {
                     colSpan: 3,
+                    onlyTemplate: true,
                     template: cell => {
                         let lastEditedDate = '';
                         let lastEditedDateNumeric = null;
