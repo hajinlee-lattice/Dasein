@@ -30,7 +30,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     @Override
     protected void verifyOutput(String output) {
-        Assert.assertEquals(output, "This is my recommendation!");
+        Assert.assertEquals(output, "These are my recommendations!");
     }
 
     @Override

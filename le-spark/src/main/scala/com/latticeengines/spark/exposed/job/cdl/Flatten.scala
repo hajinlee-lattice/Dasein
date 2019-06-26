@@ -1,19 +1,16 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import org.apache.spark.sql.expressions.MutableAggregationBuffer
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.Row
+import org.apache.spark.sql._
 import scala.collection.mutable.Map
-import org.apache.spark.sql.types._
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import java.io.StringWriter;
 
-class Flatten extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
+
   // This is the input fields for your aggregate function.
-  override def inputSchema: org.apache.spark.sql.types.StructType =
-    StructType(List(StructField("ID", StringType), StructField("Field2", StringType)))
+  override def inputSchema: org.apache.spark.sql.types.StructType = schema
 
   // This is the internal fields you keep for computing your aggregate.
   override def bufferSchema: StructType = StructType(

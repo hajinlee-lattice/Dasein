@@ -61,6 +61,9 @@ public class PlayLaunchSparkContext {
     @JsonProperty("DestinationOrgId")
     private String destinationOrgId;
 
+    @JsonProperty("SfdcAccountID")
+    private String sfdcAccountID;
+
     @JsonProperty("Counter")
     private Counter counter;
 
@@ -131,6 +134,10 @@ public class PlayLaunchSparkContext {
         return this.destinationOrgId;
     }
 
+    public String getSfdcAccountID() {
+        return this.sfdcAccountID;
+    }
+
     public String getRatingId() {
         return ratingId;
     }
@@ -187,6 +194,12 @@ public class PlayLaunchSparkContext {
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();
             this.destinationSysType = destinationSysType;
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
+            String destinationAccountId = playLaunch.getDestinationAccountId().trim();
+            this.sfdcAccountID = destinationAccountId;
+        } else {
+            this.sfdcAccountID = null;
         }
     }
 
