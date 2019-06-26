@@ -128,6 +128,7 @@ angular.module('lp.import.wizard.accountids', [])
                 // console.log(map);
                 if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
                     map.mapToLatticeId = vm.match;
+                    map.IdType = map.mapToLatticeId == true ?'Account' : null;
                 }
                 mapped.push(map);
                 if(userField) {
