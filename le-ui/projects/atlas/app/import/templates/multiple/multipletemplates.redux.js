@@ -4,23 +4,30 @@ import { store } from 'store';
 
 var CONST = {
     FETCH_TEMPLATES: 'FETCH_TEMPLATES',
+    RESET_TEMPLATES: 'RESET_TEMPLATES',
     FETCH_PRIORITIES: 'FETCH_PRIORITIES',
     FETCH_SYSTEMS: 'FETCH_SYSTEMS',
     RESET_PRIORITIES: 'RESET_PRIORITIES',
     SAVE_PRIORITIES: 'SAVE_PRIORITIES',
 };
 const initialState = {
-    templates: [],
+    templates: {loaded: false, data: []},
     priorities: [],
 };
 
 export const actions = {
+    resetTemplates: () =>{
+        return store.dispatch({
+            type: CONST.RESET_TEMPLATES,
+            payload: {data : [], loaded: false},
+        });
+    },
     fetchTemplates: () => {
         let observer = new Observer(response => {
             httpService.unsubscribeObservable(observer);
             return store.dispatch({
                 type: CONST.FETCH_TEMPLATES,
-                payload: response.data,
+                payload: {data : response.data, loaded: true},
             });
         });
         httpService.get('/pls/cdl/s3import/template', observer, {});
@@ -76,8 +83,19 @@ export const reducer = (state = initialState, action) => {
         case CONST.FETCH_TEMPLATES:
             return {
                 ...state,
-                templates: action.payload,
+                templates: {
+                    data: action.payload.data,
+                    loaded: action.payload.loaded ? action.payload.loaded : false
+                }
             };
+        case CONST.RESET_TEMPLATES:
+        return {
+            ...state,
+            templates: {
+                data: action.payload.data,
+                loaded: action.payload.loaded ? action.payload.loaded : false
+            }
+        };
         case CONST.FETCH_PRIORITIES:
             return {
                 ...state,
@@ -91,7 +109,7 @@ export const reducer = (state = initialState, action) => {
         case CONST.SAVE_PRIORITIES:
             return {
                 ...state,
-                saved: action.payload.saved,
+                saved: action.payload.saved
             };
             case CONST.FETCH_SYSTEMS:
             return {
