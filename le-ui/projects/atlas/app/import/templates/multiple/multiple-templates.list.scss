@@ -2,6 +2,9 @@
 @import "common/widgets/colors.scss";
 .multitemplates-toolbar {
   overflow: hidden;
+  .manage-priorities{
+    margin-right: 6px;
+  }
 }
 .multiple-templates {
   .no-name {

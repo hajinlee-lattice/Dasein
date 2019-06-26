@@ -254,7 +254,7 @@ export default class MultipleTemplatesList extends Component {
 
                         return (
                             <div>
-                                {/* {lastEditedDate} */}
+                                {lastEditedDate}
                                 <TemplatesRowActions
                                     rowData={cell.props.rowData}
                                     callback={this.setDataTypes}
@@ -351,7 +351,8 @@ export default class MultipleTemplatesList extends Component {
                         <LeButton
                             name="matchpriority"
                             config={{
-                                classNames: "borderless-button",
+                                label: "Manage Priorities",
+                                classNames: "blue-button manage-priorities",
                                 iconside: RIGHT,
                                 icon: 'fa fa-list-ol'
                             }}
