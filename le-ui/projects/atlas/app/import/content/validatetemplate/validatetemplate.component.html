@@ -8,21 +8,37 @@
     </div>
 
     <div ng-if="!vm.validating">
-      <p ng-if="vm.hasErrors">
-        We have found {{ vm.validation.length }} fields that require review. The data in your file does not match the field types that you have indicated, and will cause the import job to fail. Please go back to the previous steps to make sure they are mapped correctly.
+
+      <p ng-if="!vm.hasErrors">
+        <i class="fa fa-check"></i>
+        All fields are successfully validated, you can save your field mappings now.
       </p>
-      <ul>
-        <li ng-if="!vm.hasErrors">
-          <i class="fa fa-check"></i>
-          All fields are successfully validated, you can save your field mappings now.
-        </li>
-        <li 
-          ng-if="vm.hasErrors"
-          ng-repeat="validation in vm.validation">
-          <i class="fa fa-exclamation-triangle"></i>
-          <strong>{{ validation.latticeField }}: </strong>{{ validation.message }}
-        </li>
-      </ul>
+
+      <div ng-if="vm.hasErrors">
+        <h4>Template Errors</h4>
+        <p>
+          We have found {{ vm.validation.length }} fields that require review. The data in your file does not match the field types that you have indicated, and will cause the import job to fail. Please go back to the previous steps to make sure they are mapped correctly.
+        </p>
+        <ul>
+          <li 
+            ng-repeat="validation in vm.validation">
+            <i class="fa fa-exclamation-triangle"></i>
+            {{ validation.message }}
+          </li>
+        </ul>
+      </div>
+
+      <div ng-if="vm.hasWarnings">
+        <h4>Template Warnings</h4>
+        <p>We have found {{ vm.warnings.length }} fields with warnings. Warnings will not cause your data import to fail, however, you may want to review.</p>
+        <ul>
+          <li
+            ng-repeat="warning in vm.warnings">
+            <i class="fa fa-exclamation-triangle warning"></i>
+            {{ warning.message }}
+          </li>
+        </ul>
+      </div>
     </div>
 
   </div>

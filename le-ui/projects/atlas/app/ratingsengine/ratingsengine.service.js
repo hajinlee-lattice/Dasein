@@ -57,7 +57,7 @@ angular.module('lp.ratingsengine')
         this.modelTrainingOptions = {
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
-            "transformationGroup": null
+            "transformationGroup": 'none'
         },
         this.customEventModelingType = "";
         this.FieldDocument = {};

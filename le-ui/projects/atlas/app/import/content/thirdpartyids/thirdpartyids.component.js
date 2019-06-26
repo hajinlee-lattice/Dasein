@@ -1,7 +1,7 @@
 angular.module('lp.import.wizard.thirdpartyids', [])
 .controller('ImportWizardThirdPartyIDs', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
+    ResourceUtility, ImportWizardStore, Identifiers, FieldDocument, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
