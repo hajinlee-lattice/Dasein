@@ -177,27 +177,42 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
     }
 
     private void verifyDateAttrs() {
-        Table table = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Account.getBatchStore());
-        Assert.assertNotNull(table);
-        Attribute attribute = table.getAttribute("user_Test_Date");
-        Assert.assertNotNull(attribute);
-        Assert.assertTrue(StringUtils.isNotBlank(attribute.getLastDataRefresh()), JsonUtils.serialize(attribute));
+        Table accountTable = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Account.getBatchStore());
+        Assert.assertNotNull(accountTable);
+        Attribute attr1 = accountTable.getAttribute("user_Test_Date");
+        Assert.assertNotNull(attr1);
+        Assert.assertTrue(StringUtils.isNotBlank(attr1.getLastDataRefresh()), JsonUtils.serialize(attr1));
+
+        Table contactTable = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Contact.getBatchStore());
+        Assert.assertNotNull(contactTable);
+        Attribute attr2 = contactTable.getAttribute("user_Last_Communication_Date");
+        Assert.assertNotNull(attr2);
+        Assert.assertTrue(StringUtils.isNotBlank(attr2.getLastDataRefresh()), JsonUtils.serialize(attr2));
 
         StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());
         Assert.assertNotNull(container);
         Map<String, StatsCube> cubes = container.getStatsCubes();
         Assert.assertTrue(MapUtils.isNotEmpty(cubes));
+
         Assert.assertTrue(cubes.containsKey(BusinessEntity.Account.name()));
-        StatsCube cube = cubes.get(BusinessEntity.Account.name());
-        Map<String, AttributeStats> attrStats = cube.getStatistics();
+        StatsCube accountCube = cubes.get(BusinessEntity.Account.name());
+        verifyDateAttrStats(accountCube, "user_Test_Date");
+
+        Assert.assertTrue(cubes.containsKey(BusinessEntity.Contact.name()));
+        StatsCube contactCube = cubes.get(BusinessEntity.Contact.name());
+        verifyDateAttrStats(contactCube, "user_Last_Communication_Date");
+    }
+
+    private void verifyDateAttrStats(StatsCube contactCube, String attrName) {
+        Map<String, AttributeStats> attrStats = contactCube.getStatistics();
         Assert.assertTrue(MapUtils.isNotEmpty(attrStats));
-        Assert.assertTrue(attrStats.containsKey("user_Test_Date"));
-        AttributeStats attrStat = attrStats.get("user_Test_Date");
+        Assert.assertTrue(attrStats.containsKey(attrName));
+        AttributeStats attrStat = attrStats.get(attrName);
         Assert.assertNotNull(attrStat.getBuckets());
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrStat.getBuckets().getBucketList()));
         Bucket bucket = attrStat.getBuckets().getBucketList().get(0);
         Assert.assertTrue("Ever".equals(bucket.getLabel()) || //
-                (bucket.getLabel().contains("Last") && bucket.getLabel().contains("Days")), //
+                        (bucket.getLabel().contains("Last") && bucket.getLabel().contains("Days")), //
                 JsonUtils.serialize(attrStat));
     }
 

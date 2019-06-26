@@ -89,25 +89,44 @@
   <form name="form">
     <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
       <div class="id-options-item">
-          <select class="form-control">
-            <option>
-              System 1.ContactID
-            </option>
-          </select>
-          <span class="info">
-              This field will be available as 'your system name'.Contact ID in My
-              Attributes​
-          </span>
+        <select
+          class="form-control"
+          ng-model="vm.fieldMapping.contact"
+          ng-init="vm.checkValidDelay(form)"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+        >
+          <option value="">{{ vm.ignoredFieldLabel }}</option>
+          <option
+            ng-repeat="AvailableField in vm.AvailableFields"
+            value="{{ AvailableField.userField }}"
+            ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+          >
+            {{ AvailableField.userField }}
+          </option>
+        </select>
+        <span class="info">
+          This field will be available as 'your system name'.Contact ID in My
+          Attributes​
+        </span>
       </div>
-      <br>
+      <br />
       <label class="match-contact">
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          ng-model="vm.match"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+        />
         Match this ID to Contact ID field in Lattice
       </label>
-      <p><strong>Only one of your systems can map to Account ID. Once enabled, this cannot be changed or removed.​</strong> </p>
+      <p>
+        <strong
+          >Only one of your systems can map to Account ID. Once enabled, this
+          cannot be changed or removed.​</strong
+        >
+      </p>
     </div>
   </form>
-<!--  -->
+  <!--  -->
   <!-- MATCH IDs -->
   <div class="match-ids-multi-templates">
     <div class="header">
@@ -128,23 +147,33 @@
             <li class="system-type">Use ID from System</li>
           </ul>
         </li>
-        <li
-          class="field"
-          ng-repeat="field in vm.matchIdItems track by $index"
-        >
+        <li class="field" ng-repeat="field in vm.matchIdItems track by $index">
           <ul class="match-ids">
             <li class="system-name">
-                <select
+              <select
                 class="form-control"
-                
+                ng-model="vm.fieldMapping[field.name].userField"
+                ng-change="vm.changeMatchingFields(vm.fieldMapping, form)"
               >
+                <option value="">{{ vm.ignoredFieldLabel }}</option>
+                <option
+                  ng-repeat="AvailableField in vm.AvailableFields"
+                  value="{{ field.name }}^/{{ AvailableField.userField }}"
+                  ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+                  ng-init="(AvailableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + AvailableField.userField : '')"
+                >
+                  {{ AvailableField.userField }}
+                </option>
               </select>
             </li>
             <li class="system-type">
-              <select
-                class="form-control"
-                
-              >
+              <select class="form-control"> 
+                <option value="">-- Select System --</option>
+                <option
+                  ng-repat="system in vm.systems"
+                  value="system.name"
+                  ng-required="true"
+                >{{system.display_name}}</option>
               </select>
             </li>
             <li class="remove-button" ng-click="vm.removeMatchId($index)">
@@ -159,7 +188,7 @@
       type="button"
       ng-click="vm.addMatchId()"
     >
-      Add another ID
+      Add match ID
     </button>
   </div>
 </div>

@@ -279,4 +279,36 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                         finalFieldMappingDocument, ENTITY_ACCOUNT, SOURCE, defaultFeedType));
 
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testImportSystem")
+    public void testMapToLatticeIdFlag() {
+        SourceFile sfAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+        String sfFeedType = getFeedTypeByEntity("Test_SalesforceSystem", ENTITY_ACCOUNT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, sfFeedType);
+        boolean hasCustomerAccountId = false;
+        int idMappingCount = 0;
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
+                Assert.assertTrue(fieldMapping.isMapToLatticeId());
+                hasCustomerAccountId = true;
+            }
+            if (fieldMapping.getUserField().equals("ID")) {
+                idMappingCount++;
+            }
+        }
+        Assert.assertTrue(hasCustomerAccountId);
+        Assert.assertTrue(idMappingCount > 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testMapToLatticeIdFlag")
+    public void testPriorityList() {
+        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        Assert.assertEquals(allSystems.size(), 3);
+        Assert.assertEquals(allSystems.get(0).getPriority(), 1);
+        Assert.assertEquals(allSystems.get(1).getPriority(), 2);
+        Assert.assertEquals(allSystems.get(2).getPriority(), 3);
+    }
 }

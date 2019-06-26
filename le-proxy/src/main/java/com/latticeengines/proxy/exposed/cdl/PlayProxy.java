@@ -374,33 +374,48 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunchChannel createPlayLaunchChannel(String customerSpace, String playName,
-            PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
+            PlayLaunchChannel playLaunchChannel, boolean launchNow) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels", shortenCustomerSpace(customerSpace), playName);
-        log.info("url is " + url);
         List<String> params = new ArrayList<>();
         params.add("launch-now=" + launchNow);
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }
+        log.info("url is " + url);
         return post("create play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 
     public PlayLaunchChannel updatePlayLaunchChannel(String customerSpace, String playName, String channelId,
-            PlayLaunchChannel playLaunchChannel, Boolean launchNow) {
+            PlayLaunchChannel playLaunchChannel, boolean launchNow) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
                 playName, channelId);
-        log.info("url is " + url);
         List<String> params = new ArrayList<>();
         params.add("launch-now=" + launchNow);
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }
-        return put("updae play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
+        log.info("url is " + url);
+        return put("update play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 
+    @Deprecated
     public PlayLaunchChannel launchAlwaysOn(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/launch-always-on", shortenCustomerSpace(customerSpace));
         log.info("url is " + url);
-        return post("updae play launch channel", url, null, null);
+        return post("Always on play launches", url, null, null);
+    }
+
+    public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
+                shortenCustomerSpace(customerSpace), playName, channelId);
+        log.info("url is " + url);
+        return post("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunch.class);
+    }
+
+    public PlayLaunchChannel setNextScheduledTimeForChannel(String customerSpace, String playName, String channelId) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
+                playName, channelId);
+        log.info("url is " + url);
+        return patch("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunchChannel.class);
     }
 }

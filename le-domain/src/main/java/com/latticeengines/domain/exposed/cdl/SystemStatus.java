@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,6 +30,9 @@ public class SystemStatus {
 
     @JsonProperty("running_pa_tenant_id")
     private  Set<String> runningPATenantId;
+
+    @JsonProperty("schedule_tenants")
+    private Set<String> scheduleTenants;//set of tenants that we already decide to schedule job.
 
 
     public int getCanRunJobCount() {
@@ -108,5 +112,16 @@ public class SystemStatus {
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount - 1;
         }
+    }
+
+    public Set<String> getScheduleTenants() {
+        if (scheduleTenants == null) {
+            scheduleTenants = new HashSet<>();
+        }
+        return scheduleTenants;
+    }
+
+    public void setScheduleTenants(Set<String> scheduleTenants) {
+        this.scheduleTenants = scheduleTenants;
     }
 }

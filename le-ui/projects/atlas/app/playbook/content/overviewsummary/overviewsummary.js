@@ -28,7 +28,8 @@ export default class OverviewSummaryContainer extends Component {
         this.state = {
             loading: false,
             play: null,
-            types: null
+            types: null,
+            showType: false
         };
     }
 
@@ -69,7 +70,7 @@ export default class OverviewSummaryContainer extends Component {
         return boxes;
     }
 
-    savePlay(play, opts) {
+    savePlay(play, opts, cb) {
         for(var i in opts) {
             if(opts[i] === play[i]) {
                 delete opts[i];
@@ -85,35 +86,82 @@ export default class OverviewSummaryContainer extends Component {
         });
 
         var vm = this;
-        actions.savePlay(savePlay, function() {
+        actions.savePlay(savePlay, function(data) {
             let playstore = store.getState()['playbook'];
             vm.state.play = playstore.play;
             vm.setState(vm.state);
+            if(cb && typeof cb === 'function') {
+                cb(data);
+            }
         });
     }
 
     makeTypeOptions(play, types) {
         let options = [],
-            _types = {};
+            _types = {},
+            delay = 300,
+            vm = this;
+
+
         types.forEach(function(type) {
             _types[type.displayName] = type;
             var selected = false;
             if(type.displayName === play.playType.displayName) {
                 selected = true;
             }
-            options.push(<option selected={selected}>{type.displayName}</option>);
+            options.push(<li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>{type.displayName}</li>);
         });
 
+        let toggle = () => {
+                this.state.showType = !this.state.showType;
+                this.setState(this.state);
+            },
+            save = (type) => {
+                this.savePlay(play, {playType: type}, function(data) {
+                    vm.state.showType = false;
+                    vm.setState(vm.state);
+                });
+            }
+
         return (
-            <select id="type" onChange={ (e) => { this.savePlay(play, {playType: _types[event.target.value]}) } }>
-                {options}
-            </select>
+            <div class="types">
+                <h4 onClick={toggle}>
+                    {play.playType.displayName} 
+                    <i class="ico caret-down"></i>
+                </h4>
+                <ul className={`${this.state.showType ? 'show-type' : ''}`} onMouseLeave={() => {
+                    setTimeout(function() {
+                        vm.state.showType = false;
+                        vm.setState(vm.state);
+                    }, delay);
+                }}>
+                    {options}
+                </ul>
+            </div>
         );
     }
 
-    constrainText(event, limit) {
+    constrainText(event, limit, debug) {
+        var allowedKeys = [
+            8, //backspace
+            46, //delete
+            37, // left
+            39, //right
+        ],
+        debug = debug || false;
         if(event.target.innerText && limit) {
-            event.target.innerText = event.target.innerText.substring(0, limit);
+            let disallow = (event.target.innerText.length >= limit && allowedKeys.indexOf(event.which) === -1); // too long && key is not one in the allowed lists
+            if(debug) {
+                console.log({
+                    length: event.target.innerText.length,
+                    keycode: event.which, 
+                    indexOf: allowedKeys.indexOf(event.which),
+                    if: disallow
+                });
+            }
+            if(disallow) {
+                event.preventDefault();
+            }
         }
     }
 
@@ -128,30 +176,36 @@ export default class OverviewSummaryContainer extends Component {
                             <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-header'}>
                                 <p className="title">
                                     <LeVPanel hstretch={"true"} className={'title-container'}>
-                                        <div className={'play-type'}>
-                                            {this.makeTypeOptions(play, types)}
-                                        </div>
                                         <div className={'play-name'}>
-                                            <span contenteditable="true" onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
-                                                {play.displayName}
-                                            </span>
-                                        </div>
-                                        <div className={'play-created'}>
-                                            <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
-                                                <span>
-                                                    Created: {moment(play.created).format('MMM D, YYYY')} 
-                                                    <i title={play.createdBy} class="fa fa-user"></i>
+                                            <div className={'play-type'}>
+                                                {this.makeTypeOptions(play, types)}
+                                            </div>
+                                            <h1>
+                                                <span contenteditable="true" 
+                                                    onBlur={ (e) => { this.savePlay(play, {displayName: e.target.innerText}) } } 
+                                                    onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={0}>
+                                                    {play.displayName}
                                                 </span>
-                                                <span>
-                                                    Edited: {moment(play.updated).format('MMM D, YYYY')}
-                                                    <i title={play.updatedBy} class="fa fa-user"></i>
-                                                </span>
-                                            </LeHPanel>
+                                            </h1>
+                                            <div className={'play-created'}>
+                                                <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
+                                                    <span>
+                                                        Created: {moment(play.created).format('MMM D, YYYY')} 
+                                                        <i title={play.createdBy} class="user-ico"></i>
+                                                    </span>
+                                                    <span>
+                                                        Edited: {moment(play.updated).format('MMM D, YYYY')}
+                                                        <i title={play.updatedBy} class="user-ico"></i>
+                                                    </span>
+                                                </LeHPanel>
+                                            </div>
                                         </div>
                                     </LeVPanel>
                                 </p>
                                 <p className="description">
-                                    <span contenteditable="true" data-default="Add a description" onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
+                                    <span contenteditable="true" data-default="Add a description" 
+                                        onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } 
+                                        onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
                                         {play.description}
                                     </span>
                                 </p>

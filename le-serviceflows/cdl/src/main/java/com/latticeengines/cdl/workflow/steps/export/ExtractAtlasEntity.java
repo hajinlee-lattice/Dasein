@@ -75,7 +75,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             }
             Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
             try {
-                startSparkSQLSession(getHdfsPaths(attrRepo));
+                startSparkSQLSession(getHdfsPaths(attrRepo), false);
                 configuration.getExportEntities().forEach(exportEntity -> {
                     BusinessEntity mainEntity = null;
                     if (ExportEntity.Account.equals(exportEntity)) {

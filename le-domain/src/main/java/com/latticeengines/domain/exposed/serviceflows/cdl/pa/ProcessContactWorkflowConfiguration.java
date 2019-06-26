@@ -52,6 +52,7 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            rebuildContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 

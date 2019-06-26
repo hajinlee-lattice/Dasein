@@ -1,3 +1,5 @@
+import {actions, reducer} from '../../templates/multiple/multipletemplates.redux';
+import { store, injectAsyncReducer } from 'store';
 angular.module('lp.import.wizard.contactids', [])
 .controller('ImportWizardContactIDs', function(
     $state, $stateParams, $scope, $timeout, 
@@ -5,7 +7,7 @@ angular.module('lp.import.wizard.contactids', [])
     UnmappedFields, Banner, FeatureFlagService
 ) {
     var vm = this;
-
+    vm.ignoredFieldLabel = '-- Unmapped Field --';
     var entityMatchEnabled = ImportWizardStore.entityMatchEnabled;
 
     angular.extend(vm, {
@@ -26,12 +28,20 @@ angular.module('lp.import.wizard.contactids', [])
         keyMap: {},
         saveMap: {},
         entityMatchEnabled: entityMatchEnabled,
-        matchIdItems: []
+        matchIdItems: [],
+        systems: [],
+        match: false
     });
 
     vm.init = function() {
         vm.UnmappedFields = UnmappedFields;
-
+        injectAsyncReducer(store, 'multitemplates.contactids', reducer);
+        this.unsubscribe = store.subscribe(() => {
+            const data = store.getState()['multitemplates.contactids'];
+            vm.systems = data;
+        });
+       
+        actions.fetchSystems({Contact: true});
         let validationStatus = ImportWizardStore.getValidationStatus();
         if (validationStatus) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
@@ -73,9 +83,25 @@ angular.module('lp.import.wizard.contactids', [])
         vm.AvailableFields = vm.AvailableFields.filter(function(item) {
             return (item.userField);
         });
+        if(vm.isMultipleTemplates()){
+            vm.setMapToContactId();
+        }
     };
 
+    vm.setMapToContactId = () => {
+        // vm.fieldMappings[0].mapToLatticeId = true;
+        // console.log(vm.fieldMappings);
+
+        for(var i = 0; i < vm.fieldMappings.length; i++) {
+            if(vm.fieldMappings[i].mapToLatticeId){
+                vm.match = vm.fieldMappings[i].mapToLatticeId;
+                break;
+            }
+        }
+    }
+
     vm.changeLatticeField = function(mapping, form) {
+        console.log('MMM ==> ',mapping);
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
@@ -90,6 +116,11 @@ angular.module('lp.import.wizard.contactids', [])
                         originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
                         append: false
                     };
+                // console.log(' <===> ',map, vm.fieldMapping.contact);
+                if(vm.isMultipleTemplates() && map.mappedField == "CustomerContactId"){
+                    map.mapToLatticeId = vm.match;
+                    map.IdType = map.mapToLatticeId == true ?'Contact' : null;
+                }
                 mapped.push(map);
                 if(userField) {
                     vm.unavailableFields.push(userField);

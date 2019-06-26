@@ -37,7 +37,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return PlayLaunch.class;
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByLaunchId(String launchId) {
         if (StringUtils.isBlank(launchId)) {
@@ -59,7 +59,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
         if (playId == null) {
@@ -83,7 +83,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId) {
         if (playId == null) {
@@ -110,7 +110,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         if (playId == null) {
@@ -144,7 +144,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByState(LaunchState state) {
         if (state == null) {
@@ -162,6 +162,27 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
+        if (state == null) {
+            throw new RuntimeException("Valid launch state is needed");
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                " FROM %s " //
+                        + " WHERE state = :state " //
+                        + " ORDER BY created DESC ", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("state", state.name());
+        if (max != null) {
+            query.setMaxResults(max.intValue());
+        }
+        return query.list();
+    }
+
     @Override
     public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
         List<PlayLaunch> playLaunchList = findByPlayId(playId, states);
@@ -172,7 +193,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
@@ -187,7 +208,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
@@ -202,7 +223,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -215,7 +236,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> states,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -244,7 +265,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Stats findTotalCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -292,7 +313,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return val == null ? 0L : (Long) val;
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType) {
@@ -300,15 +321,15 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType);
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,
             String externalSysType) {
 
-
-        queryStr += String.format(" FROM %s pl"//
-                + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+        queryStr += String.format(
+                " FROM %s pl"//
+                        + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
                 entityClz.getSimpleName());
 
         if (endTimestamp != null) {

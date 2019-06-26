@@ -83,7 +83,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
-                                             int scalingFactor, boolean persist, String secondaryJobName) {
+                                             int scalingFactor, String storageLevel, String secondaryJobName) {
         String tenantId = attrRepo.getCustomerSpace().getTenantId();
         String jobName;
         if (StringUtils.isNotBlank(secondaryJobName)) {
@@ -103,7 +103,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
             try {
                 session = livySessionService.startSession(livyHost, jobName, //
                         getLivyConf(), getSparkConf(scalingFactor));
-                bootstrapAttrRepo(session, hdfsPathMap, persist);
+                bootstrapAttrRepo(session, hdfsPathMap, storageLevel);
             } catch (Exception e) {
                 log.warn("Failed to launch a new livy session.", e);
                 if (session != null) {
@@ -145,14 +145,16 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return result.getTargets().get(0);
     }
 
-    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, boolean persist) {
+    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, String storageLevel) {
         InputStreamSparkScript sparkScript = getAttrRepoScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         params.put("TABLE_MAP", hdfsPathMap);
         params.put("TABLE_FORMAT", getTableFormat(hdfsPathMap));
-        params.put("PERSIST_RAW_TABLES", persist);
+        if (StringUtils.isNotBlank(storageLevel)) {
+            params.put("STORAGE_LEVEL", storageLevel);
+        }
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         log.info("Output: " + result.getOutput());

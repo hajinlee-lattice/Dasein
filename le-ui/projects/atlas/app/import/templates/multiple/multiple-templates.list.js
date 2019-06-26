@@ -36,7 +36,7 @@ export default class MultipleTemplatesList extends Component {
         this.state = {
             forceReload: false,
             showEmpty: false,
-            showLoading: false,
+            showLoading: true,
             data: []
         };
     }
@@ -59,29 +59,32 @@ export default class MultipleTemplatesList extends Component {
     handleChange = () => {
 
         const data = store.getState()['multitemplates'];
+       
         let templates = data.templates;
+        let tmp = !templates.loaded;
         this.setState({
-            forceReload: true,
-            showEmpty: templates && templates.length == 0,
-            showLoading: false,
-            data: templates
+            showEmpty: templates.data && templates.data.length == 0,
+            showLoading: tmp,
+            data: templates.data,
+            forceReload: true
         });
         this.setState({ forceReload: false });
     }
 
     componentWillUnmount() {
+        actions.resetTemplates();
         this.unsubscribe();
     }
 
     componentDidMount() {
         injectAsyncReducer(store, 'multitemplates', reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
-        actions.fetchTemplates();
         this.setState({
-            forceReload: false,
+            showLoading: true,
             showEmpty: false,
-            showLoading: true
+            forceReload: true
         });
+        actions.fetchTemplates();
     }
 
     saveTemplateNameHandler(cell, value) {
@@ -94,6 +97,11 @@ export default class MultipleTemplatesList extends Component {
     getConfig() {
         let config = {
             name: "import-templates",
+            selectable: false,
+            sorting:{
+                initial: 'none',
+                direction: 'none'
+            },
             header: [
                 {
                     name: "Active",
@@ -101,7 +109,7 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "Priority",
+                    name: "ImportSystem.priority",
                     displayName: "Priority",
                     sortable: false
                 },
@@ -111,9 +119,9 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "System",
+                    name: "ImportSystem.system_type",
                     displayName: "System",
-                    sortable: false
+                    sortable: true
                 },
                 {
                     name: "Object",
@@ -134,6 +142,7 @@ export default class MultipleTemplatesList extends Component {
             columns: [
                 {
                     colSpan: 1,
+                    onlyTemplate: true,
                     template: cell => {
 
                         let rowData = cell.props.rowData;
@@ -154,11 +163,7 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1,
-                    onlyTemplate: true,
-                    template: cell => {
-                        return (<span>{cell.props.rowData.ImportSystem.priority}</span>);
-                    }
+                    colSpan: 1
                 },
                 {
                     colSpan: 2,
@@ -188,11 +193,7 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 1,
-                    onlyTemplate: true,
-                    template: cell => {
-                        return (<span>{cell.props.rowData.ImportSystem.system_type}</span>);
-                    }
+                    colSpan: 1
                 },
                 {
                     colSpan: 1
@@ -227,6 +228,7 @@ export default class MultipleTemplatesList extends Component {
                 },
                 {
                     colSpan: 3,
+                    onlyTemplate: true,
                     template: cell => {
                         let lastEditedDate = '';
                         let lastEditedDateNumeric = null;
@@ -255,7 +257,7 @@ export default class MultipleTemplatesList extends Component {
 
                         return (
                             <div>
-                                {/* {lastEditedDate} */}
+                                {lastEditedDate}
                                 <TemplatesRowActions
                                     rowData={cell.props.rowData}
                                     callback={this.setDataTypes}
@@ -273,7 +275,6 @@ export default class MultipleTemplatesList extends Component {
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
 
-        console.log(response.type);
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
@@ -352,7 +353,8 @@ export default class MultipleTemplatesList extends Component {
                         <LeButton
                             name="matchpriority"
                             config={{
-                                classNames: "borderless-button",
+                                label: "Manage Priorities",
+                                classNames: "blue-button manage-priorities",
                                 iconside: RIGHT,
                                 icon: 'fa fa-list-ol'
                             }}

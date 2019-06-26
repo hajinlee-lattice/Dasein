@@ -817,8 +817,7 @@ public enum LedpCode {
     LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
     LEDP_40052("Could not find External System Authentication ID: {0}"),
     LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"),
-    LEDP_40054(
-            "We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
+    LEDP_40054("We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
     LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
@@ -829,6 +828,7 @@ public enum LedpCode {
     LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
     LEDP_40063("Cannot update All System Priority, missing system: {0}."),
     LEDP_40064("Cannot update All System Priority: {0}"),
+    LEDP_40065("Cannot create a new Campaign without a Display Name"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

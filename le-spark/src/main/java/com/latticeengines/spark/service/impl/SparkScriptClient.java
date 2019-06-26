@@ -65,9 +65,9 @@ class SparkScriptClient {
             params = om.createObjectNode();
         }
         String workspace = config.getWorkspace();
-        String checkpointDir = "/spark-checkpoints";
+        String checkpointDir = "hdfs:///spark-checkpoints";
         if (StringUtils.isNotBlank(workspace)) {
-            checkpointDir = workspace + File.separator + "checkpoints";
+            checkpointDir = "hdfs://" + workspace + File.separator + "checkpoints";
         }
         String statement = getInitializeTemplate( //
                 JsonUtils.serialize(targets), //

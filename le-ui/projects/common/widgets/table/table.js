@@ -74,7 +74,6 @@ export default class LeTable extends Component {
                     this.state.sortingDirection
                 );
 
-                console.log(newData);
                 this.setColumnsSorting();
                 this.setState({ data: newData, showLoading: false });
             }
@@ -184,7 +183,7 @@ export default class LeTable extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.forceReload) {
-            return { data: nextProps.data };
+            return { data: nextProps.data, showLoading: nextProps.showLoading, showEmpty: nextProps.showEmpty};
         } else {
             return null;
         }

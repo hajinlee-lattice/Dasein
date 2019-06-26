@@ -67,7 +67,7 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
       if (inactiveEngineIds.isEmpty || inactiveIdx < 0) {
         None
       } else {
-        Some(extractInactiveRatings(inputs(inactiveIdx), inactiveEngineIds))
+        extractInactiveRatings(inputs(inactiveIdx), inactiveEngineIds)
       }
 
     val result: DataFrame = (newRatings, oldRatings) match {
@@ -136,15 +136,20 @@ class PivotRatings extends AbstractSparkJob[PivotRatingsConfig] {
     }
   }
 
-  private def extractInactiveRatings(df: DataFrame, engineIds: Seq[String]): DataFrame = {
-    val inactiveAttrs: List[String] = AccountId :: CreateTime :: UpdateTime :: engineIds.flatMap(eid => {
+  private def extractInactiveRatings(df: DataFrame, engineIds: Seq[String]): Option[DataFrame] = {
+    val inactiveRatingAttrs = engineIds.flatMap(eid => {
       eid :: RatingEngine.SCORE_ATTR_SUFFIX.values.asScala.map(suffix => eid + "_" + suffix).toList
     }).toList intersect df.columns
-    val selected = df.select(inactiveAttrs map col: _*)
-    selected.filter(row => {
-      // keep accounts with at least one not-null rating
-      row.getValuesMap(inactiveAttrs).values.exists(v => v != null)
-    })
+    if (inactiveRatingAttrs.isEmpty) {
+      None
+    } else {
+      val inactiveAttrs: List[String] = AccountId :: CreateTime :: UpdateTime :: inactiveRatingAttrs
+      val selected = df.select(inactiveAttrs map col: _*)
+      Some(selected.filter(row => {
+        // keep accounts with at least one not-null rating
+        row.getValuesMap[Any](inactiveRatingAttrs).values.exists(v => v != null)
+      }))
+    }
   }
 
 }

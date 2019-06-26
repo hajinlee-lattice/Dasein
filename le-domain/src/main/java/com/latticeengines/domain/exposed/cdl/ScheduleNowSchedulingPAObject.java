@@ -9,16 +9,19 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
      * this list of constraint is used when schedulingPAObject push into queue. check if this object can push into
      * queue or not.
      */
-    private List<Constraint> pushConstraintList;
+    private static List<Constraint> pushConstraintList;
     /**
      * this list of constraint is used when schedulingPAObject pop from queue. check if this object can pop queue or not.
      */
-    private List<Constraint> popConstraintList;
+    private static List<Constraint> popConstraintList;
+
+    static {
+        initPushConstraint();
+        initPopConstraint();
+    }
 
     public ScheduleNowSchedulingPAObject(TenantActivity tenantActivity) {
         super(tenantActivity);
-        initPushConstraint();
-        initPopConstraint();
     }
 
     @Override
@@ -44,13 +47,13 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
         return o.getScheduleTime() - this.getTenantActivity().getScheduleTime() > 0 ? -1 : 1;
     }
 
-    private void initPushConstraint() {
+    private static void initPushConstraint() {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new ScheduleNowExist());
         pushConstraintList.add(new RetryNotExist());
     }
 
-    private void initPopConstraint() {
+    private static void initPopConstraint() {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxScheduleNowPA());
         popConstraintList.add(new MaxPA());

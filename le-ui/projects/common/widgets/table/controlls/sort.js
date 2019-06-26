@@ -1,65 +1,102 @@
 import React, { Component } from "../../../react-vendor";
 import "./sort.scss";
 
-export const DIRECTION_ASC = 'asc';
-export const DIRECTION_DESC = 'desc';
-export const DIRECTION_NONE = 'none';
+export const DIRECTION_ASC = "asc";
+export const DIRECTION_DESC = "desc";
+export const DIRECTION_NONE = "none";
 
-let sortingName = '';
-let sortingDirection = '';
-let sortingType = 'string';
+let sortingName = "";
+let sortingDirection = "";
+let sortingType = "string";
 let sortCheckGreater = null;
 let sortCheckLessThan = null;
 
+const createDataObj = (arrayKeys, value) => {
+  if (arrayKeys.length > 1) {
+    let newArray = [...arrayKeys];
+    let obj = {};
+    obj[newArray[newArray.length - 1]] = value;
+    newArray.pop();
+    return createDataObj(newArray, obj);
+  }
+  var theKey = arrayKeys[0];
+  let ret = {};
+  ret[theKey] = value;
+  // console.log(ret);
+  return ret;
+};
+
+export const createColumnData = (mapping, fieldName) => {
+  let ret = {};
+  let keys = {};
+
+  Object.keys(mapping).forEach(key => {
+    let splitKeys = key.split(".");
+    let obj = createDataObj(splitKeys, mapping[key][fieldName]);
+    ret = Object.assign({}, ret, obj);
+  });
+  return ret;
+};
+
+export const getColumnData = (obj, arrayKeys) => {
+  if (arrayKeys.length > 0 && obj) {
+    let newObj = obj[arrayKeys[0]];
+    arrayKeys.splice(0, 1);
+    return getColumnData(newObj, arrayKeys);
+  }
+  return obj;
+};
+
 const compare = (a, b) => {
-    sortingType = typeof a[sortingName];
+  let valA = getColumnData(a, sortingName.split("."));
+  if (!isNaN(valA)) {
+    sortingType = "number";
+  }
 
-    console.log(a[sortingName]);
-    console.log(sortingType);
+  let valB = getColumnData(b, sortingName.split("."));
+  switch (sortingType) {
+    case "string": {
+      sortCheckGreater = (valA + "").toLowerCase() < (valB + "").toLowerCase();
+      sortCheckLessThan = (valA + "").toLowerCase() > (valB + "").toLowerCase();
 
-    switch (sortingType) {
-      case 'string': {
-        sortCheckGreater = (((a[sortingName])+'').toLowerCase() < ((b[sortingName])+'').toLowerCase());
-        sortCheckLessThan = (((a[sortingName])+'').toLowerCase() > ((b[sortingName])+'').toLowerCase());
-
-        switch (sortingDirection) {
-          case DIRECTION_ASC: {
-            if (sortCheckGreater) {
-              return -1;
-            }
-            if (sortCheckLessThan) {
-              return 1;
-            }
-            return 0;
+      switch (sortingDirection) {
+        case DIRECTION_ASC: {
+          if (sortCheckGreater) {
+            return -1;
           }
-          case DIRECTION_DESC:
-            if (sortCheckLessThan) {
-              return -1;
-            }
-            if (sortCheckGreater) {
-              return 1;
-            }
-            return 0;
-        }
-      }
-      case 'number': {
-        switch (sortingDirection) {
-          case DIRECTION_ASC: {
-            return a[sortingName] - b[sortingName];
+          if (sortCheckLessThan) {
+            return 1;
           }
-          case DIRECTION_DESC:
-            return b[sortingName] - a[sortingName];
+          return 0;
         }
+        case DIRECTION_DESC:
+          if (sortCheckLessThan) {
+            return -1;
+          }
+          if (sortCheckGreater) {
+            return 1;
+          }
+          return 0;
       }
     }
-}
+    case "number": {
+      switch (sortingDirection) {
+        case DIRECTION_ASC: {
+          return valA - valB;
+        }
+        case DIRECTION_DESC:
+          return valB - valA;
+      }
+    }
+  }
+};
 
 export const SortUtil = {
-    sortAray : (array, name, direction) => {
-      sortingName = name;
-      sortingDirection = direction;
-      return array.sort(compare);
-    }
+  sortAray: (array, name, direction) => {
+    sortingName = name;
+    sortingDirection = direction;
+    return array.sort(compare);
+  }
 };
 
 export default class Sort extends Component {
@@ -82,7 +119,7 @@ export default class Sort extends Component {
         newDirection = DIRECTION_ASC;
     }
     this.setState({ direction: newDirection }, () => {
-        this.props.callback(this.props.colName, this.state.direction);
+      this.props.callback(this.props.colName, this.state.direction);
     });
   }
 
@@ -109,10 +146,7 @@ export default class Sort extends Component {
   render() {
     return (
       <div className="sort-container" onClick={this.sortHandler}>
-        <i
-          className={this.getSortIcon()}
-          aria-hidden="true"
-        />
+        <i className={this.getSortIcon()} aria-hidden="true" />
       </div>
     );
   }

@@ -52,12 +52,12 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return getPositionFromQueue(priorityQueue, tenantId);
     }
 
-    public String peek(Set<String> canRunJobSet) {
-        return peekFromPriorityQueue(priorityQueue, canRunJobSet);
+    public String peek() {
+        return peekFromPriorityQueue(priorityQueue);
     }
 
-    public String poll(Set<String> canRunJobSet) {
-        return pollFromPriorityQueue(priorityQueue, canRunJobSet);
+    public String poll() {
+        return pollFromPriorityQueue(priorityQueue);
     }
 
     /**
@@ -65,7 +65,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * @param priorityObject which want to push into queue.
      */
     public void add(T priorityObject) {
-        if (checkConstraint(systemStatus, null, priorityObject.getTenantActivity(),
+        if (checkConstraint(systemStatus, priorityObject.getTenantActivity(),
                 priorityObject.getPushConstraints())) {
             priorityQueue.add(priorityObject);
         }
@@ -75,24 +75,19 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * Retrieve all tenants that should be scheduled jobs for and add them to the
      * input set.
      *
-     * @param canRunJobSet
-     *            set of tenants that we already decide to schedule job.
      * @return set of tenantIds to run PA for, all elements in this set will also be
      *         added to canRunJobSet
      */
-    public Set<String> fillAllCanRunJobs(Set<String> canRunJobSet) {
+    public Set<String> fillAllCanRunJobs() {
         String tenantId;
         Set<String> canRunJobSetInQueue = new HashSet<>();
-        // FIXME @Joy should NOT break when tenant is null since later tenants in queue
-        // can still be scheduled. Better to use size() > 0 as while loop condition.
         do {
-            tenantId = poll(canRunJobSet);
-            if (tenantId == null) {
-                break;
+            tenantId = poll();
+            if (tenantId != null) {
+                canRunJobSetInQueue.add(tenantId);
             }
-            canRunJobSet.add(tenantId);
-            canRunJobSetInQueue.add(tenantId);
-        }while (true);
+        }while (size() > 0);
+        systemStatus.getScheduleTenants().addAll(canRunJobSetInQueue);
         return canRunJobSetInQueue;
     }
 
@@ -104,6 +99,9 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return priorityQueue.size();
     }
 
+    public Set<String> getScheduleTenants() {
+        return systemStatus.getScheduleTenants();
+    }
 
     /**
      * get all element from priorityQueue.
@@ -142,47 +140,48 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     /**
      *
      * @param priorityQueue which contains all valid priority Object
-     * @param canRunJobSet which was used for check popConstraint
      * @return According to popConstraintList and canRunJobSet peek the priority Object which obey the Constraint.
      */
-    private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
-        // FIXME @Joy you should peek the first object that doesn't violate constraint.
-        // I would recommend just pop invalid objects since they'll be popped anyways.
+    private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue) {
         T priorityObject = priorityQueue.peek();
-        return (priorityObject != null && checkConstraint(systemStatus, canRunJobSet,
-                priorityObject.getTenantActivity(), priorityObject.getPopConstraints())) ?
-                priorityObject.getTenantActivity().getTenantId() : null;
+        while (priorityObject != null && !checkConstraint(systemStatus,
+                priorityObject.getTenantActivity(), priorityObject.getPopConstraints())) {
+            priorityQueue.poll();
+            priorityObject = priorityQueue.peek();
+        }
+        return priorityObject == null ? null : priorityObject.getTenantActivity().getTenantId();
     }
 
     /**
      *
      * @param priorityQueue which contains all valid priority Object
-     * @param canRunJobSet which was used for check popConstraint
      * @return According to popConstraintList and canRunJobSet pop the priority Object which obey the Constraint.
      */
-    private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue, Set<String> canRunJobSet) {
-        // FIXME @Joy if some object violated constraint, it will never be popped.
-        T priorityObject = priorityQueue.peek();
-        if (priorityObject != null && checkConstraint(systemStatus, canRunJobSet, priorityObject.getTenantActivity(),
+    private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue) {
+        T priorityObject = priorityQueue.poll();
+        while (priorityObject != null && !checkConstraint(systemStatus,
+                priorityObject.getTenantActivity(),
                 priorityObject.getPopConstraints()
                 )) {
-            systemStatus.changeSystemState(priorityObject.getTenantActivity());
-            priorityQueue.poll();
-            return priorityObject.getTenantActivity().getTenantId();
+            priorityObject = priorityQueue.poll();
         }
-        return null;
+        if (priorityObject == null) {
+            return null;
+        }
+        systemStatus.changeSystemState(priorityObject.getTenantActivity());
+        return priorityObject.getTenantActivity().getTenantId();
     }
 
     /**
      * this method is used when schedulingPAObject push into queue (pop from queue). check if this object can push into
      * queue(pop from queue) or not.
      */
-    private boolean checkConstraint(SystemStatus systemStatus, Set<String> scheduledTenants,
+    private boolean checkConstraint(SystemStatus systemStatus,
                                     TenantActivity tenantActivity,
                               List<Constraint> constraintList) {
         boolean violated = false;
         for (Constraint constraint : constraintList) {
-            if (constraint.checkViolated(systemStatus, scheduledTenants, tenantActivity)) {
+            if (constraint.checkViolated(systemStatus, tenantActivity)) {
                 violated = true;
                 break;
             }

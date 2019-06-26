@@ -5,15 +5,21 @@ import "./table.scss";
 import LeTableRow from "./table-row";
 import Aux from "widgets/hoc/_Aux";
 
+import {createColumnData} from './controlls/sort';
 export default class LeTableHeader extends Component {
     constructor(props) {
         super(props);
-        this.data = {};
-        Object.keys(this.props.headerMapping).forEach(key => {
-            this.data[key] = this.props.headerMapping[key].displayName
-                ? this.props.headerMapping[key].displayName
-                : "";
-        });
+        // this.data = {};
+        this.data = createColumnData(this.props.headerMapping, 'displayName');
+        // console.log('THE DATA ', this.data);
+        // Object.keys(this.props.headerMapping).forEach(key => {
+        //     // console.log(key.split('.'));
+        //     // let val = getColumnData(this.props.headerMapping, key.split('.'));
+        //     // // console.log('==> ', key, val);
+        //     this.data[key] = this.props.headerMapping[key].displayName
+        //         ? this.props.headerMapping[key].displayName
+        //         : "";
+        // });
     }
 
     getHeader() {

@@ -189,10 +189,6 @@ class LaunchComponent extends Component {
     makeRecommendationCounts(coverage, play) {
         var vm = this; // placeholder
 
-        if(!coverage || !coverage.bucketCoverageCounts) {
-            this.state.recommendationCounts = null;
-            return false;
-        }
         var sections = {
                 total: 0,
                 selected: 0,
@@ -202,6 +198,10 @@ class LaunchComponent extends Component {
             },
             buckets = {};
 
+        if(!coverage || !coverage.bucketCoverageCounts) {
+            this.state.recommendationCounts = null;
+            return sections;
+        }
         sections.total = play.targetSegment.accounts;
 
         var _contacts = 0;
@@ -247,10 +247,12 @@ class LaunchComponent extends Component {
                     selected = (vm.state.selectedBuckets.indexOf(bucket.bucket) >= 0);
 
                 _buckets.push(
-                    <span className={`${(selected ? 'selected' : '')}`} disabled={(bucket.count <= 0)} onClick={() => { if(bucket.count) { vm.bucketClick(bucket, coverage, play) } }}>
-                        <h3>{bucket.bucket}</h3>
-                        {bucket.count} ({percent}%)
-                    </span>
+                    <div className={`bucket ${(selected ? 'selected' : '')}`} disabled={(bucket.count <= 0)} onClick={() => { if(bucket.count) { vm.bucketClick(bucket, coverage, play) } }}>
+                        <div className={'bucket-text'}>
+                            <h3>{bucket.bucket}</h3>
+                            <em>{bucket.count} ({percent}%)</em>
+                        </div>
+                    </div>
                 );
             });
         }
@@ -283,19 +285,27 @@ class LaunchComponent extends Component {
         }],
         unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
         hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
-        noBuckets = (hasBuckets ? null : _noBuckets);
+        noBuckets = (hasBuckets ? null : _noBuckets),
+        littleBuckets = false;
 
         if(coverage) {
             return (
                 <Aux>
                     <h2>Model Ratings</h2>
-                    <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'rating-buckets'}>
+                    <LeHPanel 
+                        hstretch={!littleBuckets} 
+                        halignment={LEFT} 
+                        valignment={CENTER} 
+                        className={`rating-buckets ${littleBuckets ? 'little-buckets' : ''}`}
+                    >
                         {this.makeBuckets(coverage, play, noBuckets, opts)}
                     </LeHPanel>
-                    <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
-                    <label for="unscored">
-                        Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
-                    </label>
+                    <div className={'unscored-accounts-container'}>
+                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
+                        <label for="unscored">
+                            Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
+                        </label>
+                    </div>
                 </Aux>
             );
         }
@@ -321,7 +331,7 @@ class LaunchComponent extends Component {
                 <div className={'launch-section programs'}>
                     <h2>{this.state.externalSystemName} Destination List</h2>
                     <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'programName-container'}>
                             <label for={'programName'}>Program name</label>
                             <select id={'programName'} onChange={(event) => { 
                                 this.getStaticList(event.target.value);
@@ -329,7 +339,7 @@ class LaunchComponent extends Component {
                                 {list}
                             </select>
                         </LeHPanel>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER}>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
                             <label for={'staticList'}>Static list name</label>
                             {vm.makeStaticList(this.state.staticList)}
                             {newFolderNameInput}
@@ -415,11 +425,24 @@ class LaunchComponent extends Component {
             save = opts.save || false,
             lastIncompleteLaunchId = (play.launchHistory.lastIncompleteLaunch ? play.launchHistory.lastIncompleteLaunch.launchId : ''),
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null,
-            channelConfig = {};
+            channelConfigKey = (this.state.externalSystemName ? this.state.externalSystemName.toLowerCase() : null);
 
-console.log(Object.keys(this.state.audienceParams).length, this.state.audienceParams);
+
+        var channelConfigDefault = {};
+        channelConfigDefault[channelConfigKey] = {
+            supressAccountWithoutAccountId: this.state.excludeItemsWithoutSalesforceId,
+            audienceId: '',
+            audienceName: '',
+            folderName: ''
+        };
+
+        var channelConfig = connection.channelConfig || channelConfigDefault;
+
+
         if(this.state.audienceParams && this.state.audienceParams.audienceName && this.state.audienceParams.folderName) {
-            channelConfig[this.state.externalSystemName.toLowerCase()] = this.state.audienceParams;
+            channelConfig[channelConfigKey].audienceId = this.state.audienceParams.audienceId;
+            channelConfig[channelConfigKey].audienceName = this.state.audienceParams.audienceName;
+            channelConfig[channelConfigKey].folderName = this.state.audienceParams.folderName;
         }
 
         if(play) {
@@ -544,6 +567,7 @@ console.log(Object.keys(this.state.audienceParams).length, this.state.audiencePa
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
                 canLaunch = recommendationCounts.launched;
 
+
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
                     if(bucketsToLaunch == null) {
@@ -556,7 +580,7 @@ console.log(Object.keys(this.state.audienceParams).length, this.state.audiencePa
                 });
                 //PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
             }
-
+            
             return (
                 <LeVPanel className={`campaign-launch ${this.state.launchingState}`} hstretch={true}>
                     <div className="campaign-launch-container">
@@ -566,7 +590,9 @@ console.log(Object.keys(this.state.audienceParams).length, this.state.audiencePa
                                 <li>
                                     <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
                                     <label for="limitRecommendations"> 
-                                        Limit to only <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> recommendations
+                                        Limit to only 
+                                        <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> 
+                                        accounts
                                     </label>
                                 </li>
                             </ul>

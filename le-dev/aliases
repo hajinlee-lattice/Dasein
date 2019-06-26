@@ -6,7 +6,7 @@ alias hdp-stop='bash $WSHOME/le-dev/scripts/stop-cluster.sh'
 
 alias createpod='cd $WSHOME/le-baton && mvn -f pom-batontool.xml -DskipTests clean install && java -jar target/le-baton-tool-*-shaded.jar --podId Default --connectionString localhost:2181 createPod'
 
-alias clearlogs='for i in `find /var/log/ledp -name "le-*.log" -type f`; do echo $i; > $i; done'
+alias clearlogs='for i in `find /var/log/ledp -name "le-*.log" -type f`; do echo $i; > $i; done; rm /var/log/ledp/le-*.log.gz;'
 
 alias dfdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dataflow'
 alias dfdpl='dirs -c && pushd $WSHOME/le-dataflow && mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld && popd'
