@@ -54,9 +54,10 @@ public class ActionStatServiceImpl implements ActionStatService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ActionStat> getNoOwnerCompletedIngestActionStats() {
         String queryStr = String.format(
-                "SELECT NEW com.latticeengines.domain.exposed.cdl.scheduling.ActionStat("
-                    + "a.tenant.pid, MIN(a.created), MAX(a.created)) " + //
-                "FROM %s as a, %s as w " + //
+                "SELECT NEW com.latticeengines.domain.exposed.cdl.scheduling.ActionStat(" + //
+                        "a.tenant.pid, MIN(a.created), MAX(a.created)) " + //
+                        "FROM %s as a JOIN %s as w " + //
+                        "ON a.trackingPid = w.pid " + //
                 "WHERE a.type in (:actionTypes) " + //
                 "AND a.actionStatus = :actionStatus " + //
                 "AND a.ownerId IS NULL " + //
