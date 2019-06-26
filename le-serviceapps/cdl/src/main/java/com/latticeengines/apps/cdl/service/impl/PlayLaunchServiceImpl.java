@@ -113,6 +113,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
+    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
+        return playLaunchEntityMgr.getByStateAcrossTenants(state, max);
+    }
+
+    @Override
     public PlayLaunch update(PlayLaunch playLaunch) {
         playLaunchEntityMgr.update(playLaunch);
         return playLaunchEntityMgr.findByKey(playLaunch);
@@ -160,9 +165,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
         launchSummaries.forEach(ls -> {
             if (ls.getIntegrationStatusMonitor() != null)
-                ls.getIntegrationStatusMonitor()
-                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
-                                : s3CustomerBucket);
+                ls.getIntegrationStatusMonitor().setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP
+                        ? s3CustomerExportBucket : s3CustomerBucket);
         });
     }
 
@@ -204,8 +208,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (MapUtils.isNotEmpty(allLookupIdMapping)) {
             allLookupIdMapping.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream().filter(mapping -> uniqueOrgIdSet //
-                            .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream()
+                            .filter(mapping -> uniqueOrgIdSet //
+                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
                             .forEach(mapping -> {
                                 if (!uniqueLookupIdMapping.containsKey(k)) {
                                     uniqueLookupIdMapping.put(k, new ArrayList<>());
