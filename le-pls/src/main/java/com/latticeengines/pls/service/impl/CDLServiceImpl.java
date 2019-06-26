@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -415,7 +416,11 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public List<S3ImportSystem> getAllS3ImportSystem(String customerSpace) {
-        return cdlProxy.getS3ImportSystemList(customerSpace);
+        List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(customerSpace);
+        if (CollectionUtils.isNotEmpty(allSystems)) {
+            allSystems.sort(Comparator.comparing(S3ImportSystem::getPriority));
+        }
+        return allSystems;
     }
 
     @Override
