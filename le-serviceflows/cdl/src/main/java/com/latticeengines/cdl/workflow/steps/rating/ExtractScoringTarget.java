@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -41,6 +42,7 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
     @Override
     public void execute() {
         setupExtractStep();
+        containers.sort(Comparator.comparing(container -> container.getEngineSummary().getType()));
         containers.forEach(container -> {
             RatingEngineType ratingEngineType = container.getEngineSummary().getType();
             if (!hasCrossSellModel && RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
