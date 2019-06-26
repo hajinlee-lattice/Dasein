@@ -200,7 +200,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
     }
     
-    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId){
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId, IdType){
         if(uniqueId && fieldName){
             let keys = Object.keys(fieldsMapping);
             for(var i = 0; i < keys.length; i++){
@@ -211,6 +211,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                             if(field.mappedField == uniqueId){
                                 field.mappedToLatticeField = false;
                                 field.mapToLatticeId = false;
+                                field.IdType = null;
                                 delete field.mappedField;
                             }
                             break;
@@ -219,6 +220,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                                 field.mappedToLatticeField = true;
                                 field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
                                 field.mappedField = uniqueId;
+                                field.IdType = IdType;
                             }
                             break;
                     }
@@ -231,8 +233,8 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         Object.keys(savedObj).forEach(index => {
             let saved = savedObj[index];
             if(saved.originalUserField && saved.append != true){
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false);
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
             }
         });
     }

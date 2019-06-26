@@ -96,8 +96,8 @@ export default class MultipleTemplatesList extends Component {
             name: "import-templates",
             selectable: false,
             sorting:{
-                initial: 'ImportSystem.system_type',
-                direction: 'desc'
+                initial: 'none',
+                direction: 'none'
             },
             header: [
                 {

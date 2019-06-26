@@ -11,7 +11,7 @@ export default class LeTableHeader extends Component {
         super(props);
         // this.data = {};
         this.data = createColumnData(this.props.headerMapping, 'displayName');
-        console.log('THE DATA ', this.data);
+        // console.log('THE DATA ', this.data);
         // Object.keys(this.props.headerMapping).forEach(key => {
         //     // console.log(key.split('.'));
         //     // let val = getColumnData(this.props.headerMapping, key.split('.'));
