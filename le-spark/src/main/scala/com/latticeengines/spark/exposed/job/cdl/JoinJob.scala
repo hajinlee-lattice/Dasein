@@ -179,27 +179,27 @@ class JoinJob extends AbstractSparkJob[CreateRecommendationConfig] {
     val joinKey: String = playLaunchContext.getJoinKey
 	println(s"joinKey is: $joinKey")
 	
-	// read input
+	// Read Input
     val accountTable: DataFrame = lattice.input.head
     val contactTable: DataFrame = lattice.input(1)
     
-    val recommendations = accountTable.rdd.map { a => createRec(a, playLaunchContext) }
-    val derivedAccount = spark.createDataFrame(recommendations).toDF("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID", "DESCRIPTION"
+    // Manipulate Account Table with PlayLaunchContext
+    val accountAndplayLaunch = accountTable.rdd.map { a => createRec(a, playLaunchContext) }
+    val derivedAccounts = spark.createDataFrame(accountAndplayLaunch).toDF("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID", "DESCRIPTION"
     , "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID", "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", 
-    "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED").show()
+    "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
 
-	// manipulate contact table
-	spark.udf.register("flatten", new Flatten(contactTable.schema))
-	val f = new Flatten(contactTable.schema)
-	val result = contactTable.groupBy(joinKey).agg(f(col("ID"), col("Field2")).as("result"))
-	result.show()
+	// Manipulate Contact Table
+	val contactWithoutJoinKey = contactTable.drop(joinKey)
+	spark.udf.register("flatten", new Flatten(contactWithoutJoinKey.schema))
+	val f = new Flatten(contactWithoutJoinKey.schema)
+	val aggregatedContacts = contactTable.groupBy(joinKey).agg(f(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"))
 
     // join
-    val df = accountTable.join(contactTable, joinKey::Nil, "left").groupBy(joinKey)
-    val out1 = df.count().withColumnRenamed("count", "Cnt")
+    val recommendations = derivedAccounts.join(aggregatedContacts, joinKey::Nil, "left")
 	
     // finish
-    lattice.output = out1::Nil
+    lattice.output = recommendations::Nil
     lattice.outputStr = "These are my recommendations!"
   }
 

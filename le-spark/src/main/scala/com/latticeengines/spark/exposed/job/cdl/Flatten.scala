@@ -1,6 +1,13 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
+import com.latticeengines.domain.exposed.metadata.InterfaceName
+
+import org.apache.spark.sql.expressions.MutableAggregationBuffer
+import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql._
+import org.apache.spark.sql.types._
+
 import scala.collection.mutable.Map
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -15,7 +22,6 @@ class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
   // This is the internal fields you keep for computing your aggregate.
   override def bufferSchema: StructType = StructType(
     StructField("list", ArrayType(DataTypes.createMapType(StringType, StringType))) :: Nil)
- //   override def bufferSchema: StructType = ArrayType(inputSchema(), true)
 
   // This is the output type of your aggregatation function.
   override def dataType: DataType = StringType
@@ -29,11 +35,19 @@ class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
 
   // This is how to update your buffer schema given an input.
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-//     val ele = Map(input.getAs[String](0) -> input.getAs[String](1))
-    val ele = Map("ID" -> input.getAs[String](0), "Field2" -> input.getAs[String](1))
+    val currentMap = input.getValuesMap[Any](input.schema.fieldNames)
+    val ele = Map(PlaymakerConstants.Email -> currentMap.getOrElse(InterfaceName.Email.name(), null), //
+    			  PlaymakerConstants.Address -> currentMap.getOrElse(InterfaceName.Address_Street_1.name(), null), //
+    			  PlaymakerConstants.Phone -> currentMap.getOrElse(InterfaceName.PhoneNumber.name(), null), //
+    			  PlaymakerConstants.State -> currentMap.getOrElse(InterfaceName.State.name(), null), //
+    			  PlaymakerConstants.ZipCode -> currentMap.getOrElse(InterfaceName.PostalCode.name(), null), //
+    			  PlaymakerConstants.Country -> currentMap.getOrElse(InterfaceName.Country.name(), null), //
+    			  PlaymakerConstants.SfdcContactID -> "", //
+    			  PlaymakerConstants.City -> currentMap.getOrElse(InterfaceName.City.name(), null), //
+    			  PlaymakerConstants.ContactID -> currentMap.getOrElse(InterfaceName.ContactId.name(), null), //
+    			  PlaymakerConstants.Name -> currentMap.getOrElse(InterfaceName.ContactName.name(), null))
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
-    buffer(0) = cur :+ ele
-      
+    buffer(0) = cur :+ ele   
   }
 
   // This is how to merge two objects with the bufferSchema type.
