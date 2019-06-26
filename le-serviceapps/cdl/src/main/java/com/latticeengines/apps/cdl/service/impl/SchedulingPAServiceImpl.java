@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,9 +27,9 @@ import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.ActionStatService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
-import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -53,18 +52,10 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionStatus;
-import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("SchedulingPAService")
 public class SchedulingPAServiceImpl implements SchedulingPAService {
@@ -79,21 +70,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final Set<String> TEST_TENANT_PREFIX = Sets.newHashSet("LETest", "letest",
             "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG",
             "CDLComponentDeploymentTestNG");
-    // action types that are auto schedulable (excluding import & delete)
-    private static final Set<ActionType> AUTO_SCHEDULABLE_TYPES = new HashSet<>();
-
-    static {
-        // TODO find the exact types we care about
-        AUTO_SCHEDULABLE_TYPES.addAll(ActionType.getNonWorkflowActions());
-        // FIXME old code seems to count these as well, not sure if needed
-        AUTO_SCHEDULABLE_TYPES.addAll(ActionType.getDataCloudRelatedTypes());
-    }
 
     @Inject
     private DataFeedService dataFeedService;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
@@ -103,16 +85,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private ActionStatService actionStatService;
 
     @Inject
-    private ActionService actionService;
-
-    @Inject
     private BatonService batonService;
 
     @Inject
     private ZKConfigService zkConfigService;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -154,32 +130,45 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         log.debug("Action stats = {}", actionStats);
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
+            if (simpleDataFeed.getTenant() == null) {
+                // check just in case
+                continue;
+            }
             if (isTestTenant(simpleDataFeed)) {
                 // not scheduling for test tenants
                 skippedTestTenants.add(simpleDataFeed.getTenant().getId());
                 continue;
             }
 
+            // configure the context
+            Tenant tenant = simpleDataFeed.getTenant();
+            MultiTenantContext.setTenant(tenant);
+            String tenantId = MultiTenantContext.getShortTenantId();
+
+            // retrieve data collection status
+            DataCollectionStatus dcStatus = null;
+            try {
+                dcStatus = dataCollectionService.getOrCreateDataCollectionStatus(tenantId, null);
+            } catch (Exception e) {
+                log.error("Failed to get or create data collection status for tenant {}", tenantId);
+            }
+
             if (simpleDataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
                 runningTotalCount++;
+                runningPATenantId.add(tenantId);
                 if (simpleDataFeed.isScheduleNow()) {
                     runningScheduleNowCount++;
                 }
-                String customerSpace = simpleDataFeed.getTenant().getId();
-                runningPATenantId.add(customerSpace);
-                if (isLarge(customerSpace)) {
+                if (isLarge(dcStatus)) {
                     runningLargeJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
-                Tenant tenant = simpleDataFeed.getTenant();
-                MultiTenantContext.setTenant(tenant);
-
                 TenantActivity tenantActivity = new TenantActivity();
-                tenantActivity.setTenantId(tenant.getId());
+                tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
-                tenantActivity.setLarge(isLarge(MultiTenantContext.getShortTenantId()));
+                tenantActivity.setLarge(isLarge(dcStatus));
                 if (tenantActivity.isLarge()) {
-                    largeJobTenantId.add(tenant.getId());
+                    largeJobTenantId.add(tenantId);
                 }
                 DataFeedExecution execution;
                 try {
@@ -213,16 +202,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                             tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
                         }
                     }
-
-                    // dc refresh TODO not sure why only set dc refresh when there are actions
-                    try {
-                        DataCollectionStatus status = dataCollectionProxy
-                                .getOrCreateDataCollectionStatus(MultiTenantContext.getShortTenantId(), null);
-                        tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, status));
-                    } catch (Exception e) {
-                        log.error("Failed to check data cloud refresh for tenant = {}, e = {}", tenant.getId(), e);
-                    }
                 }
+
+                // dc refresh
+                tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, dcStatus));
 
                 // add to list
                 tenantActivityList.add(tenantActivity);
@@ -232,7 +215,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         log.debug("Skipped test tenants = {}", skippedTestTenants);
         log.info("Number of skipped test tenants = {}", skippedTestTenants.size());
 
-        int canRunJobCount = concurrentProcessAnalyzeJobs -runningTotalCount;
+        int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
         int canRunLargeJobCount = maxLargeJobCount - runningLargeJobCount;
 
@@ -245,11 +228,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         systemStatus.setRunningScheduleNowCount(runningScheduleNowCount);
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         systemStatus.setRunningPATenantId(runningPATenantId);
-        log.info("running PA tenant is : " + JsonUtils.serialize(runningPATenantId));
-        log.info("running PA job count : " + runningTotalCount);
-        log.info("running ScheduleNow PA job count : " + runningScheduleNowCount);
-        log.info("running large PA job count : " + runningLargeJobCount);
-        log.info("large PA Job tenant is : " + JsonUtils.serialize(largeJobTenantId));
+        log.info("There are {} running PAs({} ScheduleNow PAs, {} large PAs). Tenants = {}. Large PA Tenants = {}",
+                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningPATenantId, largeJobTenantId);
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, systemStatus);
         map.put(TENANT_ACTIVITY_LIST, tenantActivityList);
@@ -346,15 +326,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return "cannot find this tenant " + tenantName + " in Queue.";
     }
 
-    private boolean isLarge(String customerSpace) {
-        DataCollectionStatus status =
-                dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, null);
-        return isLarge(status);
-    }
-
     private boolean isLarge(DataCollectionStatus status) {
+        if (status == null || status.getDetail() == null) {
+            return false;
+        }
         DataCollectionStatusDetail detail = status.getDetail();
-        return detail.getAccountCount() > largeAccountCountLimit;
+        return detail.getAccountCount() != null && detail.getAccountCount() > largeAccountCountLimit;
     }
 
     private boolean retryProcessAnalyze(DataFeedExecution execution) {
@@ -405,9 +382,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
      * Retrieve all action related stats for scheduling
      */
     private Map<Long, ActionStat> getActionStats() {
-        // TODO get mock completed import actions as well
         List<ActionStat> ingestActions = actionStatService.getNoOwnerCompletedIngestActionStats();
-        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerActionStatsByTypes(AUTO_SCHEDULABLE_TYPES);
+        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerNonIngestActionStats();
 
         return Stream.concat(ingestActions.stream(), nonIngestActions.stream())
                 .collect(Collectors.toMap(ActionStat::getTenantPid, stat -> stat, (s1, s2) -> {
@@ -422,73 +398,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     }
                     return new ActionStat(s1.getTenantPid(), first, last);
                 }));
-    }
-
-    private List<Action> getActions() {
-        String customerSpace = MultiTenantContext.getShortTenantId();
-        List<Action> actions = actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE);
-        Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
-                ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
-                ActionType.CDL_OPERATION_WORKFLOW);
-        List<String> importAndDeleteJobPidStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null)
-                .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
-        List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
-                customerSpace);
-        List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
-                ? Collections.emptyList()
-                : importAndDeleteJobs.stream().filter(
-                job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
-                .map(Job::getPid).collect(Collectors.toList());
-
-        List<Action> completedActions = actions.stream()
-                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobPids))
-                .collect(Collectors.toList());
-
-        List<Action> attrManagementActions = actions.stream()
-                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(attrManagementActions)) {
-            completedActions.addAll(attrManagementActions);
-        }
-
-        List<Action> businessCalendarChangeActions = actions.stream()
-                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE))
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(businessCalendarChangeActions)) {
-            completedActions.addAll(businessCalendarChangeActions);
-        }
-
-        List<Action> ratingEngineActions = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(ratingEngineActions)) {
-            completedActions.addAll(ratingEngineActions);
-        }
-        return completedActions;
-    }
-
-    private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-                                     List<Long> completedImportAndDeleteJobPids) {
-        boolean isComplete = true; // by default every action is valid
-        if (selectedTypes.contains(action.getType())) {
-            // special check if is selected type
-            isComplete = false;
-            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                isComplete = true;
-            } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
-                        .getActionConfiguration();
-                if (importActionConfiguration == null) {
-                    log.error("Import action configuration is null!");
-                    return false;
-                }
-                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
-                    isComplete = true;
-                }
-            }
-        }
-        return isComplete;
     }
 
     private Date getInvokeTime(DataFeedExecution execution, int invokeHour, Date tenantCreateDate) {
@@ -559,8 +468,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private Boolean checkDataCloudChange(String currentBuildNumber, String customerSpace, DataCollectionStatus status) {
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-        String accountTableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedAccount, activeVersion);
+        DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
+        List<String> tableNames = dataCollectionService.getTableNames(customerSpace, null,
+                TableRoleInCollection.ConsolidatedAccount, activeVersion);
+        // try to get the first one if exist
+        String accountTableName = CollectionUtils.isEmpty(tableNames) ? null : tableNames.get(0);
 
         return (status != null
                 && (status.getDataCloudBuildNumber() == null
@@ -575,11 +487,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             boolean allowAutoDataCloudRefresh =  batonService.isEnabled(customerSpace,
                     LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY);
             if (allowAutoDataCloudRefresh) {
-
                 return checkDataCloudChange(currentBuildNumber, customerSpace.toString(), status);
             }
         } catch (Exception e) {
-            log.warn("get 'allow auto data cloud refresh' value failed: " + e.getMessage());
+            log.error("Unable to check datacloud refresh for tenant {}. Error = {}", tenant.getId(), e);
         }
         return false;
     }

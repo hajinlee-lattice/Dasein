@@ -20,6 +20,13 @@ public interface ActionStatService {
     List<ActionStat> getNoOwnerCompletedIngestActionStats();
 
     /**
+     * Retrieve action that has no owner and is not an ingestion action.
+     *
+     * @return list of stats, will not be {@literal null}
+     */
+    List<ActionStat> getNoOwnerNonIngestActionStats();
+
+    /**
      * Retrieve all actions that has any one of target types and no owner (not
      * attached to any job)
      *
