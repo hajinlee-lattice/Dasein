@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.cdl.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 
 public interface SchedulingPAService {
 

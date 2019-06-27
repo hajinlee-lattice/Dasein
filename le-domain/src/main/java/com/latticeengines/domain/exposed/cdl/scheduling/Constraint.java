@@ -1,6 +1,8 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 public interface Constraint {
+
+    SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     /**
      * Take current system state,  tenantActivity we already plan to run PA .

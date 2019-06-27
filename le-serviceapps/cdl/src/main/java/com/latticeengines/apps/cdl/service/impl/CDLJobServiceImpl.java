@@ -197,11 +197,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 if (!systemCheck()) {
-                    if (isActivityBasedPA) {
-                        schedulePAJob();
-                    } else {
-                        orchestrateJob();
-                    }
+                    orchestrateJob();
                 }
             } catch (Exception e) {
                 log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed: ", e);
@@ -212,6 +208,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                 exportScheduleJob();
             } catch (Exception e) {
                 log.error("schedule CDLJobType.EXPORT failed" + e.getMessage());
+                throw e;
+            }
+        } else if (cdlJobType == CDLJobType.SCHEDULINGPA) {
+            try {
+                schedulePAJob();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.SCHEDULINGPA failed" + e.getMessage());
                 throw e;
             }
         }
@@ -358,17 +361,23 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
-                    cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
+                    if (isActivityBasedPA) {
+                        cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
+                    }
                 } catch (Exception e) {
                     log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
-                    updateRetryCount(needRunJobTenantId);
+                    if (isActivityBasedPA) {
+                        updateRetryCount(needRunJobTenantId);
+                    }
                 }
             }
         }
         Set<String> canRunJobSet = canRunJobTenantMap.get(OTHER_KEY);
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String needRunJobTenantId : canRunJobSet) {
-                submitProcessAnalyzeJob(needRunJobTenantId);
+                if (isActivityBasedPA) {
+                    submitProcessAnalyzeJob(needRunJobTenantId);
+                }
             }
         }
     }
