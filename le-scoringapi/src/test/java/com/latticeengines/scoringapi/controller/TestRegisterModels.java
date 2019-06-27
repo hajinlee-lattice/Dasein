@@ -61,11 +61,11 @@ public class TestRegisterModels {
     private ModelSummary createModel(Tenant tenant, TestModelConfiguration modelConfiguration,
             CustomerSpace customerSpace, TestModelSummaryParser testModelSummaryParser,
             ModelSummaryProxy modelSummaryProxy, ColumnMetadataProxy columnMetadataProxy) throws IOException {
-        // TOTO: Replace with the following after changing all model files.
-//        ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
-//                modelConfiguration.getModelSummaryJsonLocalpath());
+//         TOTO: Replace with the following after changing all model files.
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
-                modelConfiguration.getModelJsonLocalpath());
+                modelConfiguration.getModelSummaryJsonLocalpath());
+//        ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant,
+//                modelConfiguration.getModelJsonLocalpath());
         modelSummary.setApplicationId(modelConfiguration.getApplicationId());
         modelSummary.setEventTableName(modelConfiguration.getEventTable());
         modelSummary.setId(modelConfiguration.getModelId());
