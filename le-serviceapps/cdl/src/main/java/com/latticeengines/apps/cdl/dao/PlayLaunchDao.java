@@ -27,6 +27,8 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
 
+    PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState state);
+
     List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType);

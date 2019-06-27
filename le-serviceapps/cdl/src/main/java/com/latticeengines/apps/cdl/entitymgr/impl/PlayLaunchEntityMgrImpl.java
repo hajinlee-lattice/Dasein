@@ -94,6 +94,11 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     }
 
     @Override
+    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState launchState) {
+        return playLaunchDao.updatePlayLaunchState(playLaunch, appId, launchState);
+    }
+
+    @Override
     @Modifying
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByLaunchId(String launchId, boolean hardDelete) {

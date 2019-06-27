@@ -33,6 +33,8 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
     List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
 
+    PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState launchState);
+
     List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType);
 
