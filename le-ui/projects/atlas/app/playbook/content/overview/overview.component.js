@@ -55,16 +55,23 @@ export default class OverviewComponent extends Component {
     goto = (route, params) => {
         //ngState.getAngularState().go(route, params)
     }
+
+    makeTalkingpointsText(play) {
+        if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
+            return 'Create Talking Points';
+        } else {
+            return 'Edit Talking Points';
+        }
+    }
+
     makeTalkingpoints(play) {
         if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
-            this.state.talkingPointsText = 'Create Talking Points';
             return (
                 <div className="talking-points-count">
                     No talking points
                 </div>
             );
         } else {
-            this.state.talkingPointsText = 'Edit Talking Points';
             return (
                 <div className="talking-points-count">
                     {play.talkingPoints.length} talking points have been created
@@ -108,7 +115,7 @@ export default class OverviewComponent extends Component {
                                         <strong>SFDC Talking Points</strong>
                                         <a href="javascript:void(0);" onClick={() => {
                                             NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: this.state.play.name}); 
-                                        }}>{this.state.talkingPointsText}</a>
+                                        }}>{this.makeTalkingpointsText(this.state.play)}</a>
                                     </h2>
                                     {this.makeTalkingpoints(this.state.play)}
                                 </span>
