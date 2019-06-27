@@ -66,13 +66,13 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
-            String sourceName = step.getTarget().getSourceName();
+            String sourceName = step.getBaseSources()[0].getSourceName();
 
             String hdfsSnapshotDir = getSourceHdfsDir(step, 0);
             String hdfsSchemaDir;
             try {
                 hdfsSchemaDir = getBaseSourceSchemaDir(step, 0);
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 hdfsSchemaDir = null;
             }
             String hdfsVersionFilePath = getBaseSourceVersionFilePath(step, 0);
@@ -115,7 +115,8 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             log.info("Copying from {} to {}", hdfsDir, s3nDir);
 
             if (isDir) {
-                if (HdfsUtils.fileExists(distcpConfiguration, hdfsDir)) {
+                if (!HdfsUtils.onlyGetFilesForDirRecursive(distcpConfiguration, hdfsDir, (HdfsFileFilter) null, false)
+                        .isEmpty()) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
                     throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);
@@ -139,12 +140,11 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                     (HdfsFileFilter) null, false);
 
             for (String key : files) {
-                String filepath;
-                filepath = key.substring(key.indexOf(hdfsDir));
+                String filepath = key.substring(key.indexOf(hdfsDir));
                 s3Service.objectExist(s3Bucket, filepath);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Missing file in S3 copy from: " + hdfsDir, e);
+            throw new RuntimeException("Fail to validate copy of " + hdfsDir, e);
         }
     }
 
