@@ -427,14 +427,22 @@ public class CDLServiceImpl implements CDLService {
     public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable) {
         List<TemplateFieldPreview> templatePreview =
                 templateTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
+        List<TemplateFieldPreview> standardPreview =
+                standardTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
         Set<String> standardAttrNames = standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
         for (TemplateFieldPreview fieldPreview : templatePreview) {
             if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                standardPreview.removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
             } else {
                 fieldPreview.setFieldCategory(FieldCategory.CustomField);
             }
         }
+        standardPreview.forEach(preview -> {
+            preview.setUnmapped(true);
+            preview.setFieldCategory(FieldCategory.LatticeField);
+        });
+        templatePreview.addAll(standardPreview);
         return templatePreview;
     }
 
