@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -50,7 +48,7 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         values.add("abcdwrwr");
 
         Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
-//        expectedWarningCodeAndMessageValues.put(WarningCode.NO_MATCH.getExternalCode(), values);
+        // expectedWarningCodeAndMessageValues.put(WarningCode.NO_MATCH.getExternalCode(), values);
 
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
@@ -64,7 +62,7 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         values.add("gmail.com");
 
         Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
-//        expectedWarningCodeAndMessageValues.put(WarningCode.PUBLIC_DOMAIN.getExternalCode(), values);
+        // expectedWarningCodeAndMessageValues.put(WarningCode.PUBLIC_DOMAIN.getExternalCode(), values);
 
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
@@ -114,15 +112,17 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         for (Warning warning : warnings) {
             observedWarningCodes.put(warning.getWarning(), warning.getDescription());
         }
-//        Assert.assertTrue(
-//                SetUtils.isEqualSet(observedWarningCodes.keySet(), expectedWarningCodeAndMessageValues.keySet()),
-//                String.format("oberved Keys=%s, expectedKeys=%s", observedWarningCodes.keySet(), expectedWarningCodeAndMessageValues.keySet()));
-//        for (String warningCode : expectedWarningCodeAndMessageValues.keySet()) {
-//            String observedDescription = observedWarningCodes.get(warningCode);
-//            for (String warningValue : expectedWarningCodeAndMessageValues.get(warningCode)) {
-//                Assert.assertTrue(observedDescription.toUpperCase().contains(warningValue.toUpperCase()), "*****Expecting warning:::" + warningValue.toUpperCase());
-//            }
-//        }
+        // Assert.assertTrue(
+        // SetUtils.isEqualSet(observedWarningCodes.keySet(), expectedWarningCodeAndMessageValues.keySet()),
+        // String.format("oberved Keys=%s, expectedKeys=%s", observedWarningCodes.keySet(),
+        // expectedWarningCodeAndMessageValues.keySet()));
+        // for (String warningCode : expectedWarningCodeAndMessageValues.keySet()) {
+        // String observedDescription = observedWarningCodes.get(warningCode);
+        // for (String warningValue : expectedWarningCodeAndMessageValues.get(warningCode)) {
+        // Assert.assertTrue(observedDescription.toUpperCase().contains(warningValue.toUpperCase()), "*****Expecting
+        // warning:::" + warningValue.toUpperCase());
+        // }
+        // }
         // TODO - removed after replacing data models
     }
 }
