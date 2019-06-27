@@ -363,7 +363,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                     log.info("Deleting job key " + jobKey + " before adding it.");
                     scheduler.deleteJob(jobKey);
                 }
-                log.info("Adding predeifined job with configuration " + JsonUtils.serialize(jobConfig));
+                log.info("Adding predefined job with configuration " + JsonUtils.serialize(jobConfig));
                 addJob(PREDEFINED_JOB_GROUP, jobConfig, JobSourceType.DEFAULT, false);
                 return;
             } else {
