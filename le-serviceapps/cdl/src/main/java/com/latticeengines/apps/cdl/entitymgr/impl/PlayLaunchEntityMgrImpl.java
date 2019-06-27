@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
@@ -90,7 +91,13 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
-        return playLaunchDao.getByStateAcrossTenants(state, max);
+        List<PlayLaunch> launches = playLaunchDao.getByStateAcrossTenants(state, max);
+
+        launches.forEach(launch -> {
+            Hibernate.initialize(launch.getPlay());
+            Hibernate.initialize(launch.getTenant());
+        });
+        return launches;
     }
 
     @Override
