@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
@@ -90,9 +89,6 @@ public class PlayResource {
     private RatingCoverageService ratingCoverageService;
 
     @Inject
-    private CampaignLaunchTriggerService campaignLaunchTriggerService;
-
-    @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
             PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter,
             PlayLaunchChannelService playLaunchChannelService) {
@@ -115,10 +111,7 @@ public class PlayResource {
             @RequestParam(value = "rating-engine-id", required = false) String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
-        // return playService.getAllFullPlays(shouldLoadCoverage,
-        // ratingEngineId);
-        campaignLaunchTriggerService.triggerQueuedLaunches();
-        return null;
+        return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
     }
 
     @GetMapping(value = "/deleted-play-ids", headers = "Accept=application/json")
