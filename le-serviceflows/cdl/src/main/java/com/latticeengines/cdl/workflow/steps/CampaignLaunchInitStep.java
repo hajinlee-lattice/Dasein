@@ -3,8 +3,6 @@ package com.latticeengines.cdl.workflow.steps;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -24,7 +22,6 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -33,13 +30,13 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.spark.exposed.job.cdl.JoinJob;
+import com.latticeengines.spark.exposed.job.cdl.CreateRecommendationsJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
@@ -91,43 +88,59 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
+            PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+            campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
+            SparkJobResult createRecJobResult = retry.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
                     log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                    log.warn("Previous failure:", ctx.getLastThrowable());
                 }
-                Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
                 try {
-                    startSparkSQLSession(getHdfsPaths(attrRepo));
+                    startSparkSQLSession(getHdfsPaths(attrRepo), false);
                     // 1. form FrontEndQuery for Account and Contact
-                    PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
-                    campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
                     // 2. get DataFrame for Account and Contact
                     HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                     HdfsDataUnit contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("accountDataUnit: " + accountDataUnit.toString());
                     log.info("contactDataUnit: " + contactDataUnit.toString());
-                    // 3. join Contact DF with Account DF
-                    SparkJobResult joinedresult = executeSparkJob(JoinJob.class,
-                            generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
-
-                    // 4. generate avro out of DataFrame with predefined format
+                    // 3. generate avro out of DataFrame with predefined format
                     // for Recommendations
-
+                    return executeSparkJob(CreateRecommendationsJob.class,
+                            generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
                 } finally {
                     stopSparkSQLSession();
                 }
-
-                /*
-                 * 4. export to mysql database using sqoop
-                 */
-                return resultForCurrentAttempt;
             });
 
-            putObjectInContext(ATLAS_EXPORT_DATA_UNIT, resultMap);
+            /*
+             * 4. export to mysql database using sqoop
+             */
+            log.info(createRecJobResult.getOutput());
+            long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
+            log.info("Account#: " + launchedAccountNum);
+            String targetPath = createRecJobResult.getTargets().get(0).getPath();
+            log.info("Target HDFS path: " + targetPath);
+            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH, targetPath);
+            campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext, System.currentTimeMillis(),
+                    targetPath);
 
-            String recAvroHdfsFilePath = campaignLaunchProcessor.launchPlay(tenant, config);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
-                    recAvroHdfsFilePath);
+            // TODO update the suppressed number
+            // PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+            // long suppressedAccounts = (totalAccountsAvailableForLaunch -
+            // playLaunch.getAccountsLaunched()
+            // - playLaunch.getAccountsErrored());
+            // playLaunch.setAccountsSuppressed(suppressedAccounts);
+            // long suppressedContacts = (totalContactsAvailableForLaunch -
+            // playLaunch.getContactsLaunched()
+            // - playLaunch.getContactsErrored());
+            // playLaunch.setContactsSuppressed(suppressedContacts);
+            // campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+            // log.info(String.format("Total launched accounts count: %d",
+            // playLaunch.getAccountsLaunched()));
+            // log.info(String.format("Total errored accounts count: %d",
+            // playLaunch.getAccountsErrored()));
+            // log.info(String.format("Total suppressed account count for
+            // launch: %d", suppressedAccounts));
 
             successUpdates(customerSpace, playName, playLaunchId);
         } catch (Exception ex) {

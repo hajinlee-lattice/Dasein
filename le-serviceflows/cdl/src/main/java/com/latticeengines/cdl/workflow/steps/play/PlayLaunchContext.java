@@ -87,8 +87,7 @@ public class PlayLaunchContext {
 
     public PlayLaunchSparkContext toPlayLaunchSparkContext() {
         return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
-                this.launchTimestampMillis, this.ratingId, this.publishedIteration,
-                new PlayLaunchSparkContext.Counter());
+                this.launchTimestampMillis, this.ratingId, this.publishedIteration);
     }
 
     public CustomerSpace getCustomerSpace() {

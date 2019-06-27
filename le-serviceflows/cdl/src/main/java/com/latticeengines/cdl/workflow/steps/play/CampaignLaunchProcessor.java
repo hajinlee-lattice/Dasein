@@ -1,23 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -48,15 +35,12 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -69,15 +53,6 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public class CampaignLaunchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(CampaignLaunchProcessor.class);
-
-    @Autowired
-    private AccountFetcher accountFetcher;
-
-    @Autowired
-    private ContactFetcher contactFetcher;
-
-    @Autowired
-    private RecommendationCreator recommendationCreator;
 
     @Autowired
     private FrontEndQueryCreator frontEndQueryCreator;
@@ -95,13 +70,7 @@ public class CampaignLaunchProcessor {
     private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
     private JobService jobService;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -134,167 +103,31 @@ public class CampaignLaunchProcessor {
     @Inject
     private PlayProxy playProxy;
 
-    public String launchPlay(Tenant tenant, CampaignLaunchInitStepConfiguration config) throws IOException {
-        // initialize play launch context
-        PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
-        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-
-        try {
-            long totalAccountsAvailableForLaunch = playLaunch.getAccountsSelected();
-            long totalContactsAvailableForLaunch = playLaunch.getContactsSelected();
-            log.info(String.format("Total available accounts available for Launch: %d",
-                    totalAccountsAvailableForLaunch));
-
-            DataCollection.Version version = dataCollectionProxy
-                    .getActiveVersion(playLaunchContext.getCustomerSpace().toString());
-            log.info(String.format("Using DataCollection.Version %s", version));
-
-            long totalAccountsCount = prepareQueriesAndCalculateAccCountForLaunch(playLaunchContext, version);
-
-            Long currentTimeMillis = System.currentTimeMillis();
-
-            String avroFileName = String.format("%s.avro", playLaunchContext.getPlayLaunchId());
-
-            File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
-
-            if (totalAccountsCount > 0) {
-                // process accounts that exists in segment
-                long processedSegmentAccountsCount = 0;
-                // find total number of pages needed
-                int pages = (int) Math.ceil((totalAccountsCount * 1.0D) / pageSize);
-                log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
-
-                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(
-                        new GenericDatumWriter<>(playLaunchContext.getSchema()))) {
-                    dataFileWriter.create(playLaunchContext.getSchema(), localFile);
-
-                    // loop over to required number of pages
-                    for (int pageNo = 0; pageNo < pages; pageNo++) {
-                        // fetch and process a single page
-                        processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
-                                processedSegmentAccountsCount, pageNo, dataFileWriter, version);
-                    }
-                }
-
-            }
-
-            // as per PM requirement, we need to fail play launch if 0
-            // recommendations were created. In future this may be enhanced for
-            // %based failure rate to decide if play launch failed or not
-            if (playLaunch.getAccountsLaunched() == null || playLaunch.getAccountsLaunched() == 0L) {
-                throw new LedpException(LedpCode.LEDP_18159,
-                        new Object[] { playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored() });
-            } else {
-                String recAvroHdfsFilePath = runSqoopExportRecommendations(tenant, playLaunchContext, currentTimeMillis,
-                        avroFileName, localFile);
-                long suppressedAccounts = (totalAccountsAvailableForLaunch - playLaunch.getAccountsLaunched()
-                        - playLaunch.getAccountsErrored());
-                playLaunch.setAccountsSuppressed(suppressedAccounts);
-                long suppressedContacts = (totalContactsAvailableForLaunch - playLaunch.getContactsLaunched()
-                        - playLaunch.getContactsErrored());
-                playLaunch.setContactsSuppressed(suppressedContacts);
-                updateLaunchProgress(playLaunchContext);
-                log.info(String.format("Total launched accounts count: %d", playLaunch.getAccountsLaunched()));
-                log.info(String.format("Total errored accounts count: %d", playLaunch.getAccountsErrored()));
-                log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
-                return recAvroHdfsFilePath;
-            }
-        } catch (Exception ex) {
-            log.info(String.format("Setting all counts to 0L as we encountered critical exception: %s",
-                    ex.getMessage()));
-
-            playLaunch.setAccountsSuppressed(0L);
-            playLaunch.setAccountsErrored(0L);
-            playLaunch.setAccountsLaunched(0L);
-            playLaunch.setContactsLaunched(0L);
-            updateLaunchProgress(playLaunchContext);
-
-            throw ex;
-        }
-    }
-
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
         // prepare basic account and contact front end queries
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
         applyEmailFilterToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
-        handleTopNLimit(playLaunchContext);
     }
 
-    private long prepareQueriesAndCalculateAccCountForLaunch(PlayLaunchContext playLaunchContext,
-            DataCollection.Version version) {
-        long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
+    public void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
+            Long currentTimeMillis, String recAvroHdfsFilePath) throws IOException {
 
-        applyEmailFilterToQueries(playLaunchContext);
-
-        totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
-
-        totalAccountsCount = handleTopNLimit(playLaunchContext, totalAccountsCount);
-
-        log.info(String.format("Total accounts count for launch: %d", totalAccountsCount));
-        return totalAccountsCount;
-    }
-
-    private long handleBasicConfigurationAndBucketSelection(PlayLaunchContext playLaunchContext,
-            DataCollection.Version version) {
-        // prepare account and contact front end queries
-        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
-        return accountFetcher.getCount(playLaunchContext, version);
-    }
-
-    private void handleTopNLimit(PlayLaunchContext playLaunchContext) {
-        Long topNCount = playLaunchContext.getPlayLaunch().getTopNCount();
-        if (topNCount != null) {
-            log.info(String.format("Handling Top N Count: %d", topNCount));
-            playLaunchContext.getAccountFrontEndQuery().setPageFilter(new PageFilter(0, topNCount));
-        }
-    }
-
-    private long handleTopNLimit(PlayLaunchContext playLaunchContext, long totalAccountsCount) {
-        Long topNCount = playLaunchContext.getPlayLaunch().getTopNCount();
-
-        if (topNCount != null) {
-            log.info(String.format("Handling Top N Count: %d", topNCount));
-            // if top n count is smaller than count in segment then update the
-            // count for launch
-            if (topNCount < totalAccountsCount) {
-                totalAccountsCount = topNCount;
-            }
-        }
-        return totalAccountsCount;
-    }
-
-    private String runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
-            Long currentTimeMillis, String avroFileName, File localFile) throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-        String path = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
-        path = path.endsWith("/") ? path : path + "/";
-        path += currentTimeMillis + "/";
-
-        String avroPath = path + "avro/";
-        String recAvroHdfsFilePath = avroPath + avroFileName;
-
-        try {
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), recAvroHdfsFilePath);
-        } finally {
-            FileUtils.deleteQuietly(localFile);
-        }
-
+        String extractPath = PathUtils.toAvroGlob(recAvroHdfsFilePath);
+        log.info("extractPath: " + extractPath);
         Extract extract = new Extract();
         extract.setExtractionTimestamp(currentTimeMillis);
         extract.setName("recommendationGeneration");
-        extract.setPath(avroPath + "*.avro");
+        extract.setPath(extractPath);
         extract.setTable(playLaunchContext.getRecommendationTable());
         extract.setTenant(tenant);
         playLaunchContext.getRecommendationTable().addExtract(extract);
         metadataProxy.updateTable(tenant.getId(), playLaunchContext.getPlayLaunch().getTableName(),
                 playLaunchContext.getRecommendationTable());
 
-        if (!export(playLaunchContext, avroPath)) {
+        if (!export(playLaunchContext, extractPath)) {
             throw new LedpException(LedpCode.LEDP_18168);
         }
-
-        return recAvroHdfsFilePath;
     }
 
     private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {
@@ -345,29 +178,6 @@ public class CampaignLaunchProcessor {
         }
     }
 
-    private long handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext, long totalAccountsCount,
-            DataCollection.Version version) {
-        // do handling of SFDC id based suppression
-
-        long effectiveAccountCount = totalAccountsCount;
-        PlayLaunch launch = playLaunchContext.getPlayLaunch();
-        if (launch.getExcludeItemsWithoutSalesforceId()) {
-            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
-
-            Restriction accountRestriction = accountFrontEndQuery.getAccountRestriction().getRestriction();
-            Restriction nonNullLookupIdRestriction = Restriction.builder()
-                    .let(BusinessEntity.Account, launch.getDestinationAccountId()).isNotNull().build();
-
-            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
-                    .and(accountRestriction, nonNullLookupIdRestriction).build();
-            accountFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
-
-            effectiveAccountCount = accountFetcher.getCount(playLaunchContext, version);
-        }
-
-        return effectiveAccountCount;
-    }
-
     private void applyEmailFilterToQueries(PlayLaunchContext playLaunchContext) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
@@ -390,24 +200,6 @@ public class CampaignLaunchProcessor {
         Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
                 .isNotNull().build();
         return Restriction.builder().and(contactRestriction, emailFilter).build();
-    }
-
-    private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
-            long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter,
-            DataCollection.Version version) {
-        log.info(String.format("Loop #%d", pageNo));
-
-        // fetch accounts in current page
-        DataPage accountsPage = //
-                accountFetcher.fetch(//
-                        playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount, version);
-
-        // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter, version);
-
-        // update launch progress
-        updateLaunchProgress(playLaunchContext, processedSegmentAccountsCount, segmentAccountsCount);
-        return processedSegmentAccountsCount;
     }
 
     public PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
@@ -484,7 +276,7 @@ public class CampaignLaunchProcessor {
         return playLaunchContextBuilder.build();
     }
 
-    private void updateLaunchProgress(PlayLaunchContext playLaunchContext, long processedSegmentAccountsCount,
+    public void updateLaunchProgress(PlayLaunchContext playLaunchContext, long processedSegmentAccountsCount,
             long segmentAccountsCount) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
@@ -497,36 +289,7 @@ public class CampaignLaunchProcessor {
         log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
     }
 
-    private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
-            DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
-        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
-                .getModifiableAccountIdCollectionForContacts();
-
-        List<Map<String, Object>> accountList = accountsPage.getData();
-
-        if (CollectionUtils.isNotEmpty(accountList)) {
-
-            List<Object> accountIds = getAccountsIds(accountList);
-
-            // make sure to clear list of account Ids in contact query and then
-            // insert list of accounts ids from current account page
-            modifiableAccountIdCollectionForContacts.clear();
-            modifiableAccountIdCollectionForContacts.addAll(accountIds);
-
-            // fetch corresponding contacts and prepare map of accountIds vs
-            // list of contacts
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList = //
-                    contactFetcher.fetch(playLaunchContext, version);
-
-            // generate recommendations using list of accounts in page and
-            // corresponding account/contacts map
-            recommendationCreator.generateRecommendations(playLaunchContext, //
-                    accountList, mapForAccountAndContactList, dataFileWriter);
-        }
-        return accountList.size();
-    }
-
-    private void updateLaunchProgress(PlayLaunchContext playLaunchContext) {
+    public void updateLaunchProgress(PlayLaunchContext playLaunchContext) {
         try {
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
@@ -540,38 +303,9 @@ public class CampaignLaunchProcessor {
         }
     }
 
-    private List<Object> getAccountsIds(List<Map<String, Object>> accountList) {
-        List<Object> accountIds = //
-                accountList//
-                        .stream().parallel() //
-                        .map( //
-                                account -> account.get(InterfaceName.AccountId.name()) //
-                        ) //
-                        .collect(Collectors.toList());
-
-        log.info(String.format("Extracting contacts for accountIds: %s",
-                Arrays.deepToString(accountIds.toArray(new Object[accountIds.size()]))));
-        return accountIds;
-    }
-
     @VisibleForTesting
     void setPageSize(long pageSize) {
         this.pageSize = pageSize;
-    }
-
-    @VisibleForTesting
-    void setAccountFetcher(AccountFetcher accountFetcher) {
-        this.accountFetcher = accountFetcher;
-    }
-
-    @VisibleForTesting
-    void setContactFetcher(ContactFetcher contactFetcher) {
-        this.contactFetcher = contactFetcher;
-    }
-
-    @VisibleForTesting
-    void setRecommendationCreator(RecommendationCreator recommendationCreator) {
-        this.recommendationCreator = recommendationCreator;
     }
 
     @VisibleForTesting
@@ -605,18 +339,8 @@ public class CampaignLaunchProcessor {
     }
 
     @VisibleForTesting
-    void setYarnConfiguration(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
-
-    @VisibleForTesting
     void setJobService(JobService jobService) {
         this.jobService = jobService;
-    }
-
-    @VisibleForTesting
-    void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
-        this.dataCollectionProxy = dataCollectionProxy;
     }
 
     @VisibleForTesting

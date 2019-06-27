@@ -21,10 +21,10 @@ import org.apache.commons.lang3.EnumUtils
 
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-class JoinJob extends AbstractSparkJob[CreateRecommendationConfig] {
+class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConfig] {
 
 	case class Recommendation(PID: Option[Long], //
 	                          EXTERNAL_ID: String, //
@@ -176,6 +176,8 @@ class JoinJob extends AbstractSparkJob[CreateRecommendationConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[CreateRecommendationConfig]): Unit = {
     val config: CreateRecommendationConfig = lattice.config
     val playLaunchContext: PlayLaunchSparkContext = config.getPlayLaunchSparkContext
+    val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
+    val topNCount = playLaunch.getTopNCount()
     val joinKey: String = playLaunchContext.getJoinKey
 	println(s"joinKey is: $joinKey")
 	
@@ -189,18 +191,25 @@ class JoinJob extends AbstractSparkJob[CreateRecommendationConfig] {
     , "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID", "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", 
     "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
 
+	var limitedAccountTable = derivedAccounts
+    if (topNCount != null) {
+    	limitedAccountTable = derivedAccounts.limit(topNCount.toString.toInt)
+    }
+
 	// Manipulate Contact Table
 	val contactWithoutJoinKey = contactTable.drop(joinKey)
 	spark.udf.register("flatten", new Flatten(contactWithoutJoinKey.schema))
 	val f = new Flatten(contactWithoutJoinKey.schema)
-	val aggregatedContacts = contactTable.groupBy(joinKey).agg(f(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"))
+	val aggregatedContacts = contactTable.groupBy(joinKey).agg(f(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), count(lit(1)).as("CONTACT_NUM"))
 
     // join
-    val recommendations = derivedAccounts.join(aggregatedContacts, joinKey::Nil, "left")
+    val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey::Nil, "left")
+    val contactCount = recommendations.agg(sum("CONTACT_NUM").cast("long")).first.getLong(0)
+    recommendations.drop("CONTACT_NUM")
 	
     // finish
     lattice.output = recommendations::Nil
-    lattice.outputStr = "These are my recommendations!"
+    lattice.outputStr = contactCount.toString()
   }
 
 }

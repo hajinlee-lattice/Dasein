@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -64,14 +62,11 @@ public class PlayLaunchSparkContext {
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
 
-    @JsonProperty("Counter")
-    private Counter counter;
-
     public PlayLaunchSparkContext() {
     }
 
     public PlayLaunchSparkContext(Tenant tenant, String playName, String playLaunchId, PlayLaunch playLaunch, Play play,
-            long launchTimestampMillis, String ratingId, RatingModel publishedIteration, Counter counter) {
+            long launchTimestampMillis, String ratingId, RatingModel publishedIteration) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenant = tenant;
@@ -82,7 +77,6 @@ public class PlayLaunchSparkContext {
         this.launchTimestampMillis = launchTimestampMillis;
         this.ratingId = ratingId;
         this.publishedIteration = publishedIteration;
-        this.counter = counter;
         setSyncDestination(this.playLaunch);
     }
 
@@ -140,36 +134,6 @@ public class PlayLaunchSparkContext {
 
     public String getRatingId() {
         return ratingId;
-    }
-
-    public static class Counter {
-        private AtomicLong accountLaunched;
-        private AtomicLong contactLaunched;
-        private AtomicLong accountErrored;
-        private AtomicLong contactErrored;
-
-        public Counter() {
-            accountLaunched = new AtomicLong();
-            contactLaunched = new AtomicLong();
-            accountErrored = new AtomicLong();
-            contactErrored = new AtomicLong();
-        }
-
-        public AtomicLong getAccountLaunched() {
-            return accountLaunched;
-        }
-
-        public AtomicLong getContactLaunched() {
-            return contactLaunched;
-        }
-
-        public AtomicLong getAccountErrored() {
-            return accountErrored;
-        }
-
-        public AtomicLong getContactErrored() {
-            return contactErrored;
-        }
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {
