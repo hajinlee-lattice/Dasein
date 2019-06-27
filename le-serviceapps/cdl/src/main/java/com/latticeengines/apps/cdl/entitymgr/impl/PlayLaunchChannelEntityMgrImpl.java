@@ -101,6 +101,12 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunchChannel> findByPlayName(String playName) {
+        return readerRepository.findByPlayName(playName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playName, String lookupId) {
         return readerRepository.findByPlayNameAndLookupIdMapId(playName, lookupId);
     }
@@ -196,34 +202,34 @@ public class PlayLaunchChannelEntityMgrImpl
             PlayLaunchChannel playLaunchChannel) {
         CDLExternalSystemName systemName = lookupIdMap.getExternalSystemName();
         switch (systemName) {
-            case Marketo:
-                if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
-                    throw new LedpException(LedpCode.LEDP_18222,
-                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                    systemName.getDisplayName() });
-                }
-                break;
-            case Eloqua:
-                if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
-                    throw new LedpException(LedpCode.LEDP_18222,
-                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                    systemName.getDisplayName() });
-                }
-                break;
-            case Salesforce:
-                if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
-                    throw new LedpException(LedpCode.LEDP_18222,
-                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                    systemName.getDisplayName() });
-                }
-                break;
-            case AWS_S3:
-                if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
-                    throw new LedpException(LedpCode.LEDP_18222,
-                            new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
-                                    systemName.getDisplayName() });
-                }
-                break;
+        case Marketo:
+            if (!(playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case Eloqua:
+            if (!(playLaunchChannel.getChannelConfig() instanceof EloquaChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case Salesforce:
+            if (!(playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
+        case AWS_S3:
+            if (!(playLaunchChannel.getChannelConfig() instanceof S3ChannelConfig)) {
+                throw new LedpException(LedpCode.LEDP_18222,
+                        new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
+                                systemName.getDisplayName() });
+            }
+            break;
         }
     }
 
