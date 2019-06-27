@@ -93,9 +93,13 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         PlayLaunchChannel retrievedPlayLaunchChannel = findById(playLaunchChannel.getId());
         if (retrievedPlayLaunchChannel == null) {
             throw new NullPointerException("Cannot find Play Launch Channel for given play channel id");
-        } else {
-            playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
         }
+        if (retrievedPlayLaunchChannel.getPlay() != playLaunchChannel.getPlay()) {
+            throw new LedpException(LedpCode.LEDP_18225, new String[] { retrievedPlayLaunchChannel.getPlay().getName(),
+                    playLaunchChannel.getPlay().getName() });
+        }
+        playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
+
         return retrievedPlayLaunchChannel;
     }
 
