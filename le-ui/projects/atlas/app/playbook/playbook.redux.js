@@ -312,7 +312,7 @@ export const actions = {
             isAlwaysOn: isAlwaysOn,
             bucketsToLaunch: bucketsToLaunch,
             cronSchedule: cronSchedule,
-            excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId,
+            //excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId, // now in channelConfig
             launchUnscored: launchUnscored,
             maxAccountsToLaunch: topNCount,
             launchType: launchType,
