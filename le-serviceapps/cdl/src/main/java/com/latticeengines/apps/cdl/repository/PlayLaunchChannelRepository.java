@@ -14,6 +14,7 @@ public interface PlayLaunchChannelRepository extends BaseJpaRepository<PlayLaunc
 
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playId, String lookupId);
 
+    @EntityGraph(value = "PlayLaunchChannel.play", type = EntityGraphType.LOAD)
     PlayLaunchChannel findById(String channelId);
 
     @EntityGraph(value = "PlayLaunchChannel.play", type = EntityGraphType.LOAD)
