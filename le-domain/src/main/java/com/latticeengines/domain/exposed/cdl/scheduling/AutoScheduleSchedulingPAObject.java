@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +40,12 @@ public class AutoScheduleSchedulingPAObject extends SchedulingPAObject {
     }
 
     public int compare(TenantActivity o) {
-        return o.getInvokeTime() != null && o.getInvokeTime() - this.getTenantActivity().getInvokeTime() > 0 ? -1 : 1;
+        if (this.getTenantActivity().getInvokeTime() == null || o.getInvokeTime() == null || o.getInvokeTime() - this.getTenantActivity().getInvokeTime() == 0) {
+            return o.getFirstActionTime() - this.getTenantActivity().getFirstActionTime() > 0 ? -1 : 1;
+        } else {
+            return o.getInvokeTime() == null || (this.getTenantActivity().getInvokeTime() != null && o.getInvokeTime() != null && o.getInvokeTime() - this.getTenantActivity().getInvokeTime() > 0) ? -1
+                    : 1;
+        }
     }
 
     private static void initPushConstraint() {

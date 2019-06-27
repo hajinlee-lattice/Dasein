@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,8 +16,8 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
     private static List<Constraint> popConstraintList;
 
     static {
-        initPopContraint();
-        initPushContraint();
+        initPopConstraint();
+        initPushConstraint();
     }
 
     public RetrySchedulingPAObject(TenantActivity tenantActivity) {
@@ -47,13 +47,14 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         return o.getLastFinishTime() - this.getTenantActivity().getLastFinishTime() > 0 ? -1 : 1;
     }
 
-    private static void initPushContraint() {
+    private static void initPushConstraint() {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new RetryExist());
         pushConstraintList.add(new LastFinishTimePending());
+        pushConstraintList.add(new RetryPendingTime());
     }
 
-    private static void initPopContraint() {
+    private static void initPopConstraint() {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxPA());
         popConstraintList.add(new MaxLargePA());

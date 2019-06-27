@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.HashSet;
 import java.util.Set;
