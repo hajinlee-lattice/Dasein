@@ -209,13 +209,12 @@ export const actions = {
         if(playstore && (playstore.lookupIdMapping && playstore.lookupIdMapping.MAP) && (playstore.userDocument && playstore.userDocument.accessToken)) {
             let map = playstore.lookupIdMapping.MAP.find(function(system) { return system.externalSystemName === opts.externalSystemName }),
                 trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
-                programName = programName,
                 useraccesstoken = playstore.userDocument.accessToken;
 
             http.get('/tray/marketo/staticlists', {
                 params: {
-                    trayAuthenticationId: trayAuthenticationId,
-                    programName: programName
+                    programName: programName,
+                    trayAuthenticationId: trayAuthenticationId
                 }, 
                 headers: {
                     useraccesstoken: useraccesstoken
