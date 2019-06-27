@@ -48,8 +48,6 @@ public class ActionStatServiceImpl implements ActionStatService {
     @Inject
     protected SessionFactory sessionFactory;
 
-    // TODO add method to query mock completed imports
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ActionStat> getNoOwnerCompletedIngestActionStats() {
@@ -66,6 +64,19 @@ public class ActionStatServiceImpl implements ActionStatService {
         Query<ActionStat> query = getBaseQuery(queryStr, INGESTION_TYPES);
         query.setParameter("runningWorkflowStatuses", RUNNING_STATUSES);
         return query.list();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ActionStat> getNoOwnerNonIngestActionStats() {
+        String queryStr = String.format("SELECT NEW com.latticeengines.domain.exposed.cdl.scheduling.ActionStat("
+                + "tenant.pid, MIN(created), MAX(created)) " + //
+                "FROM %s " + //
+                "WHERE type NOT IN (:actionTypes) AND type IS NOT NULL " + //
+                "AND actionStatus = :actionStatus " + //
+                "AND ownerId IS NULL " + //
+                "GROUP BY tenant.pid", Action.class.getSimpleName());
+        return getBaseQuery(queryStr, INGESTION_TYPES).list();
     }
 
     @Override

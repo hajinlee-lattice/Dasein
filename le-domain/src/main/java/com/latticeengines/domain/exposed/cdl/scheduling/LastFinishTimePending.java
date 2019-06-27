@@ -1,6 +1,4 @@
-package com.latticeengines.domain.exposed.cdl;
-
-import java.util.Date;
+package com.latticeengines.domain.exposed.cdl.scheduling;
 
 public class LastFinishTimePending implements Constraint {
     @Override
@@ -8,7 +6,7 @@ public class LastFinishTimePending implements Constraint {
         if (target.getLastFinishTime() == null) {
             return true;
         }
-        Long currentTime = new Date().getTime();
+        Long currentTime = schedulingPATimeClock.getCurrentTime();
         currentTime = (currentTime - target.getLastFinishTime()) / 60000;
         return target.getLastFinishTime() == 0L || currentTime < 15;
     }

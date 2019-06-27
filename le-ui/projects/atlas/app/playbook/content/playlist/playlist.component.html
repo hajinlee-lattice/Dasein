@@ -87,7 +87,7 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
                         <!-- Created Play with no previous launch history -->
-                        <div ng-if="play.launchHistory.lastCompletedLaunch === null || ['UnLaunched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) >= 0">This campaign was started but not launched.</div>
+                        <div ng-if="(play.launchHistory.lastCompletedLaunch === null || ['UnLaunched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) >= 0) && vm.current.tileStates[play.name].launching != true">This campaign was started but not launched.</div>
 
                         <!-- Created Play with no previous launch history -->
                         <!-- <div ng-if="

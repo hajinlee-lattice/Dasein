@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,15 +13,27 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.AutoScheduleSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.DataCloudRefreshSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAObject;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAQueueUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueueUnitTestNG.class);
 
+    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+    private long timestamp = 3600000;
+
     @Test(groups = "unit", dataProvider = "fillAllCanRunJobs")
     private void testGetCanRunJobs(SchedulingPAQueue<SchedulingPAObject> queue, List<SchedulingPAObject> input,
-            int expectedSizeAfterPush, Set<String> expectedTenants) {
+                                   int expectedSizeAfterPush, Set<String> expectedTenants) {
         for (SchedulingPAObject obj : input) {
             queue.add(obj);
         }
@@ -53,14 +64,19 @@ public class SchedulingPAQueueUnitTestNG {
                 {
                         new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class), //
                         Arrays.asList(
-                                newRetryObj("t1", true, false, 1L, TenantType.QA),
+                                newRetryObj("t1", true, false, schedulingPATimeClock.getCurrentTime() - timestamp,
+                        TenantType.QA),
                                 // not retry, will be skipped during push
-                                newRetryObj("t2", false, true, 2L, TenantType.CUSTOMER),
-                                newRetryObj("t3", true, true, new Date().getTime(), TenantType.CUSTOMER),
-                                newRetryObj("t4", true, true, 3L, TenantType.CUSTOMER),
-                                newRetryObj("t5", true, true, 4L, TenantType.CUSTOMER),
+                                newRetryObj("t2", false, true, schedulingPATimeClock.getCurrentTime() - 5 * timestamp,
+                        TenantType.CUSTOMER),
+                                newRetryObj("t3", true, true, schedulingPATimeClock.getCurrentTime(), TenantType.CUSTOMER),
+                                newRetryObj("t4", true, true, schedulingPATimeClock.getCurrentTime() - 4 * timestamp,
+                                        TenantType.CUSTOMER),
+                                newRetryObj("t5", true, true, schedulingPATimeClock.getCurrentTime() - 3 * timestamp,
+                                        TenantType.CUSTOMER),
                                 // large tenant, will violate large tenant limit since it is set to 0
-                                newRetryObj("t6", true, true, 5L, TenantType.CUSTOMER)
+                                newRetryObj("t6", true, true, schedulingPATimeClock.getCurrentTime() - 2 * timestamp,
+                                        TenantType.CUSTOMER)
                         ), 4, Sets.newHashSet("t1", "t4", "t5") //
                 },
                 {
@@ -69,9 +85,9 @@ public class SchedulingPAQueueUnitTestNG {
                                 newAutoScheduleObj("t1", true, false, 1L, 1L, 1L, TenantType.QA),
                                 // not auto schedule, will be skipped during push
                                 newAutoScheduleObj("t2", false, true, 2L, 2L, 2L, TenantType.CUSTOMER),
-                                newAutoScheduleObj("t3", true, true, 3L, new Date().getTime() - 6, 3L,
+                                newAutoScheduleObj("t3", true, true, 3L, schedulingPATimeClock.getCurrentTime() - 6, 3L,
                                         TenantType.CUSTOMER),
-                                newAutoScheduleObj("t4", true, true, 4L, 4L, new Date().getTime() - 6,
+                                newAutoScheduleObj("t4", true, true, 4L, 4L, schedulingPATimeClock.getCurrentTime() - 6,
                                         TenantType.CUSTOMER),
                                 newAutoScheduleObj("t5", true, true, 5L, 5L, 5L,
                                         TenantType.CUSTOMER),

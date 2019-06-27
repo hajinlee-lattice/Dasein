@@ -36,8 +36,7 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
     }
 
     protected String getExclusionColumns() {
-        return ScoreResultField.Probability.displayName + ";" //
-                + ScoreResultField.NormalizedScore.displayName + ";" //
+        return  ScoreResultField.NormalizedScore.displayName + ";" //
                 + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
                 + ScoreResultField.ExpectedRevenuePercentile.displayName;
     }
