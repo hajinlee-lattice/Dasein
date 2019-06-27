@@ -19,7 +19,7 @@ public class ScoringResourceWithAppIDDeploymentTestNG extends ScoringResourceDep
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
                 ScoreResponse.class);
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
     }
 
     @Override
