@@ -9,6 +9,8 @@ public interface PlayLaunchChannelEntityMgr extends BaseEntityMgrRepository<Play
 
     List<PlayLaunchChannel> findByIsAlwaysOnTrue();
 
+    List<PlayLaunchChannel> findByPlayName(String playName);
+
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playName, String lookupId);
 
     PlayLaunchChannel findById(String channelId);

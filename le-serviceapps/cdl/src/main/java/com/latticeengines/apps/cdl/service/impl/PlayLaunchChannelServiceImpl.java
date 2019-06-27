@@ -116,7 +116,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
-        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findAll();
+        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findByPlayName(playName);
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
         }
