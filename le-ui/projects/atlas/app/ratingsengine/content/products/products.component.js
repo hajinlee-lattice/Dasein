@@ -177,8 +177,9 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     function getPurchasedBeforePeriod() {
-        var configFilters = RatingsEngineStore.getConfigFilters() 
-        if (configFilters && configFilters.PURCHASED_BEFORE_PERIOD && configFilters.PURCHASED_BEFORE_PERIOD.value) {
+        var configFilters = RatingsEngineStore.getConfigFilters();
+
+        if (configFilters && configFilters.PURCHASED_BEFORE_PERIOD) {
             return configFilters.PURCHASED_BEFORE_PERIOD.value;
         } else {
             return 6;
