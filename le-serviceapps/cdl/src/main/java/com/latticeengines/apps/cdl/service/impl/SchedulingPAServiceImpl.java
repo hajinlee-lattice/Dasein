@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -241,20 +242,21 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Map<String, Object> map = setSystemStatus();
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
         List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
+        SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
         SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
-                RetrySchedulingPAObject.class, true);
+                RetrySchedulingPAObject.class, schedulingPATimeClock, true);
         SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(
-                systemStatus, ScheduleNowSchedulingPAObject.class);
+                systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(
-                systemStatus, AutoScheduleSchedulingPAObject.class);
+                systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class);
+                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<ScheduleNowSchedulingPAObject> nonCustomerScheduleNowSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, ScheduleNowSchedulingPAObject.class);
+                new SchedulingPAQueue<>(systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<AutoScheduleSchedulingPAObject> nonCustomerAutoScheduleSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, AutoScheduleSchedulingPAObject.class);
+                new SchedulingPAQueue<>(systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> nonDataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class);
+                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
         for (TenantActivity tenantActivity : tenantActivityList) {
             RetrySchedulingPAObject retrySchedulingPAObject = new RetrySchedulingPAObject(tenantActivity);
             ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject =

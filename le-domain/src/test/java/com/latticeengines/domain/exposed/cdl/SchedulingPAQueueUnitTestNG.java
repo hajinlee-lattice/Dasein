@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATestTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -28,7 +28,7 @@ public class SchedulingPAQueueUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueueUnitTestNG.class);
 
-    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+    private SchedulingPATestTimeClock schedulingPATestTimeClock = new SchedulingPATestTimeClock("2018-10-29 15:31:43");
     private long timestamp = 3600000;
 
     @Test(groups = "unit", dataProvider = "fillAllCanRunJobs")
@@ -50,7 +50,7 @@ public class SchedulingPAQueueUnitTestNG {
     private Object[][] provideFillAllCanRunJobsTestCases() {
         return new Object[][] { //
                 { //
-                        new SchedulingPAQueue<>(newStatus(5, 6, 1), ScheduleNowSchedulingPAObject.class), //
+                        new SchedulingPAQueue<>(newStatus(5, 6, 1), ScheduleNowSchedulingPAObject.class, schedulingPATestTimeClock), //
                         Arrays.asList( //
                                 newScheduleNowObj("t1", true, false, 1L, TenantType.QA),
                                 // not schedule now, will be skipped during push
@@ -62,32 +62,32 @@ public class SchedulingPAQueueUnitTestNG {
                         4, Sets.newHashSet("t1", "t3", "t4") //
                 }, //
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class), //
+                        new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class, schedulingPATestTimeClock), //
                         Arrays.asList(
-                                newRetryObj("t1", true, false, schedulingPATimeClock.getCurrentTime() - timestamp,
+                                newRetryObj("t1", true, false, schedulingPATestTimeClock.getCurrentTime() - timestamp,
                         TenantType.QA),
                                 // not retry, will be skipped during push
-                                newRetryObj("t2", false, true, schedulingPATimeClock.getCurrentTime() - 5 * timestamp,
+                                newRetryObj("t2", false, true, schedulingPATestTimeClock.getCurrentTime() - 5 * timestamp,
                         TenantType.CUSTOMER),
-                                newRetryObj("t3", true, true, schedulingPATimeClock.getCurrentTime(), TenantType.CUSTOMER),
-                                newRetryObj("t4", true, true, schedulingPATimeClock.getCurrentTime() - 4 * timestamp,
+                                newRetryObj("t3", true, true, schedulingPATestTimeClock.getCurrentTime(), TenantType.CUSTOMER),
+                                newRetryObj("t4", true, true, schedulingPATestTimeClock.getCurrentTime() - 4 * timestamp,
                                         TenantType.CUSTOMER),
-                                newRetryObj("t5", true, true, schedulingPATimeClock.getCurrentTime() - 3 * timestamp,
+                                newRetryObj("t5", true, true, schedulingPATestTimeClock.getCurrentTime() - 3 * timestamp,
                                         TenantType.CUSTOMER),
                                 // large tenant, will violate large tenant limit since it is set to 0
-                                newRetryObj("t6", true, true, schedulingPATimeClock.getCurrentTime() - 2 * timestamp,
+                                newRetryObj("t6", true, true, schedulingPATestTimeClock.getCurrentTime() - 2 * timestamp,
                                         TenantType.CUSTOMER)
                         ), 4, Sets.newHashSet("t1", "t4", "t5") //
                 },
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 7, 2), AutoScheduleSchedulingPAObject.class),
+                        new SchedulingPAQueue<>(newStatus(5, 7, 2), AutoScheduleSchedulingPAObject.class, schedulingPATestTimeClock),
                         Arrays.asList(
                                 newAutoScheduleObj("t1", true, false, 1L, 1L, 1L, TenantType.QA),
                                 // not auto schedule, will be skipped during push
                                 newAutoScheduleObj("t2", false, true, 2L, 2L, 2L, TenantType.CUSTOMER),
-                                newAutoScheduleObj("t3", true, true, 3L, schedulingPATimeClock.getCurrentTime() - 6, 3L,
+                                newAutoScheduleObj("t3", true, true, 3L, schedulingPATestTimeClock.getCurrentTime() - 6, 3L,
                                         TenantType.CUSTOMER),
-                                newAutoScheduleObj("t4", true, true, 4L, 4L, schedulingPATimeClock.getCurrentTime() - 6,
+                                newAutoScheduleObj("t4", true, true, 4L, 4L, schedulingPATestTimeClock.getCurrentTime() - 6,
                                         TenantType.CUSTOMER),
                                 newAutoScheduleObj("t5", true, true, 5L, 5L, 5L,
                                         TenantType.CUSTOMER),
@@ -99,7 +99,7 @@ public class SchedulingPAQueueUnitTestNG {
                         ), 4, Sets.newHashSet("t1", "t5", "t6")
                 },
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 7, 2), DataCloudRefreshSchedulingPAObject.class),
+                        new SchedulingPAQueue<>(newStatus(5, 7, 2), DataCloudRefreshSchedulingPAObject.class, schedulingPATestTimeClock),
                         Arrays.asList(
                                 newDataCloudRefreshObj("t1", true, false, TenantType.QA),
                                 // not dataCloud refresh, will be skipped during push
@@ -112,7 +112,7 @@ public class SchedulingPAQueueUnitTestNG {
                         ), 5, Sets.newHashSet("t1", "t3", "t5", "t6")
                 },
                 { //
-                        new SchedulingPAQueue<>(newStatus(2, 6, 1), ScheduleNowSchedulingPAObject.class), //
+                        new SchedulingPAQueue<>(newStatus(2, 6, 1), ScheduleNowSchedulingPAObject.class, schedulingPATestTimeClock), //
                         Arrays.asList( //
                                 newScheduleNowObj("t1", true, false, 1L, TenantType.QA),
                                 // not schedule now, will be skipped during push
