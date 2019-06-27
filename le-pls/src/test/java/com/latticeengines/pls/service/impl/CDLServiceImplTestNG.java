@@ -30,7 +30,7 @@ public class CDLServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void testTemplatePreview() {
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact);
         Table templateTable = TableUtils.clone(standardTable, "tempalte");
         Attribute attr = new Attribute("TestAttr");
         attr.setDisplayName("TestDisplay");
@@ -38,6 +38,8 @@ public class CDLServiceImplTestNG extends PlsFunctionalTestNGBase {
         attr.setDateFormatString("MM/DD/YY");
         attr.setTimeFormatString("00-00-00 12H");
         templateTable.addAttribute(attr);
+        templateTable.removeAttribute("Website");
+        templateTable.removeAttribute("Email");
         List<TemplateFieldPreview> templatePreview = cdlService.getTemplatePreview(mainTestTenant.getId(), templateTable,
                 standardTable);
         Assert.assertNotNull(templatePreview);
@@ -45,5 +47,13 @@ public class CDLServiceImplTestNG extends PlsFunctionalTestNGBase {
         TemplateFieldPreview fieldPreview =
                 templatePreview.stream().filter(preview -> preview.getNameInTemplate().equals("TestAttr")).findFirst().get();
         Assert.assertEquals(fieldPreview.getFieldCategory(), FieldCategory.CustomField);
+        TemplateFieldPreview website =
+                templatePreview.stream().filter(preview -> preview.getNameInTemplate().equals("Website")).findFirst().get();
+        TemplateFieldPreview email =
+                templatePreview.stream().filter(preview -> preview.getNameInTemplate().equals("Email")).findFirst().get();
+        Assert.assertTrue(website.isUnmapped());
+        Assert.assertTrue(email.isUnmapped());
+        Assert.assertEquals(website.getFieldCategory(), FieldCategory.LatticeField);
+        Assert.assertEquals(email.getFieldCategory(), FieldCategory.LatticeField);
     }
 }
