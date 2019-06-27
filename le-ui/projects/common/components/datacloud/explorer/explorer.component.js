@@ -155,14 +155,6 @@ export default function (
                 }
             });
 
-            $scope.$watch(DataCloudStore.getMetadata('category'), function(){
-                let category = DataCloudStore.getMetadata('category');
-
-                console.log(category);
-                vm.category = category;
-                // DataCloudStore.setMetadata('category', category);
-            }); 
-
         }
 
         vm.processCategories();
@@ -194,12 +186,6 @@ export default function (
         }
 
         DataCloudStore.setMetadata('current', 1);
-
-        $scope.$watch(DataCloudStore.getMetadata('category'), function () {
-            if (DataCloudStore.getMetadata('category')) {
-                vm.category = DataCloudStore.getMetadata('category');
-            }
-        });
 
     }
 

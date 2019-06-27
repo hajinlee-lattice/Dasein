@@ -206,7 +206,7 @@ public class PlayResource {
         return playLaunchChannelService.createPlayLaunchChannel(playName, playLaunchChannel, launchNow);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/schedule", headers = "Accept=application/json")
+    @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
     public String schedule(@PathVariable String customerSpace, //
@@ -256,9 +256,43 @@ public class PlayResource {
         return channel;
     }
 
+    @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Queue a new Play launch for a given play and channel")
+    public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId) {
+        if (StringUtils.isEmpty(playName)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Channel Id" });
+        }
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
+        }
+        PlayUtils.validatePlay(playName, play);
+
+        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No channel found by channel id: " + channelId });
+        }
+
+        if (play.getRatingEngine() != null) {
+            validatePlayAndChannelBeforeLaunch(customerSpace, play, channel);
+        }
+        channel.setPlay(play);
+        channel.setTenant(MultiTenantContext.getTenant());
+        channel.setTenantId(MultiTenantContext.getTenant().getPid());
+        return playLaunchChannelService.createPlayLaunchFromChannel(channel, play);
+    }
+    // -------------
+    // Channels
+    // -------------
+
     // -------------
     // Play Launches
     // -------------
+
     @GetMapping(value = "/{playName}/launches")
     @ResponseBody
     @ApiOperation(value = "Get list of launches for a given play")
@@ -339,14 +373,14 @@ public class PlayResource {
         return playLaunchService.update(playLaunch);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
+    @PostMapping(value = "/{playName}/launches/{launchId}/kickoff-launch", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Queue a new Play launch for a given play and channel")
-    public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
+    @ApiOperation(value = "Launch a play launch for a given play")
+    public String kickOffLaunch(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
+            @PathVariable("launchId") String launchId) {
         if (StringUtils.isEmpty(playName)) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Channel Id" });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank play Id" });
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
@@ -354,19 +388,21 @@ public class PlayResource {
         }
         PlayUtils.validatePlay(playName, play);
 
-        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
-        if (channel == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No channel found by channel id: " + channelId });
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        if (playLaunch == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
-
+        playLaunch.setPlay(play);
+        PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
         if (play.getRatingEngine() != null) {
-            validatePlayAndChannelBeforeLaunch(customerSpace, play, channel);
+            validateNonEmptyTargetsForLaunch(customerSpace, play, playLaunch);
         }
-        channel.setPlay(play);
-        channel.setTenant(MultiTenantContext.getTenant());
-        channel.setTenantId(MultiTenantContext.getTenant().getPid());
-        return playLaunchChannelService.createPlayLaunchFromChannel(channel, play);
+        if (playLaunch.getLaunchState() != LaunchState.Queued) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { String
+                    .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
+        }
+        return playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+
     }
 
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
@@ -601,8 +637,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (playLaunch.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
@@ -646,8 +685,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (channel.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

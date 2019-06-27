@@ -4,21 +4,24 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
-import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
+import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("deltaCalculationService")
-public class DeltaCalculationServiceImpl implements DeltaCalculationService {
+public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements DeltaCalculationService {
     private static final Logger log = LoggerFactory.getLogger(DeltaCalculationServiceImpl.class);
 
     @Inject
@@ -27,33 +30,42 @@ public class DeltaCalculationServiceImpl implements DeltaCalculationService {
     @Inject
     private WorkflowProxy workflowProxy;
 
-    @Inject
-    private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
+    @Value("common.internal.app.url")
+    private String internalAppUrl;
+
+    private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation";
+
+    public DeltaCalculationServiceImpl() {
+        super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
+    }
 
     public Boolean triggerScheduledCampaigns() {
+        if (StringUtils.isBlank(internalAppUrl)) {
+            log.warn("Common internal app url not found, ignoring this job");
+            return false;
+        }
+
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllScheduledChannels();
 
         log.info("Found " + channels.size() + " channels scheduled for launch");
 
-        channels.forEach(c -> {
-            String appId = campaignDeltaCalculationWorkflowSubmitter
-                    .submit(c.getTenant().getId(), c.getPlay().getName(), c.getId()).toString();
-            log.info("Queued a Launch for campaignId " + c.getId() + " : " + appId);
-            waitForWorkflowStatus(c.getTenant().getId(), appId);
-        });
-        // List<Callable<String>> fileExporters = new ArrayList<>();
-        // Date fileExportTime = new Date();
-        // // fileExporters.add(new CsvFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
-        // // fileExporters.add(new JsonFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
-        //
-        // ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("playlaunch-export", 2);
-        // List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
-        // (int) TimeUnit.DAYS.toMinutes(1), 30);
+        // ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("delta-calculation", 5);
 
-        return null;
+        channels.forEach(c -> {
+            try {
+                String url = constructUrl(campaignDeltaCalculationUrlPrefix,
+                        CustomerSpace.parse(c.getTenant().getId()).getTenantId(), c.getPlay().getName(), c.getId());
+                String appId = post("Kicking off delta calculation", url, null, String.class);
+                log.info("Queued a delta calculation for campaignId " + c.getId() + " : " + appId);
+                waitForWorkflowStatus(c.getTenant().getId(), appId);
+            } catch (Exception e) {
+                log.error("Failed to Kick off delta calculation", e);
+            }
+        });
+        return true;
     }
 
-    protected JobStatus waitForWorkflowStatus(String tenantId, String applicationId) {
+    private JobStatus waitForWorkflowStatus(String tenantId, String applicationId) {
         int retryOnException = 4;
         Job job;
         while (true) {
