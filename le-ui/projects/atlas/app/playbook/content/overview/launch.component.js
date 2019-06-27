@@ -466,7 +466,7 @@ class LaunchComponent extends Component {
                 lookupIdMap: connection.lookupIdMap,
                 isAlwaysOn: (!launchObj.launchSchedule ? false : !connection.isAlwaysOn),
                 bucketsToLaunch: launchObj.bucketsToLaunch,
-                cronSchedule: launchObj.launchSchedule, //cronSchedule, //?
+                cronScheduleExpression: launchObj.launchSchedule, //cronSchedule, //?
                 excludeItemsWithoutSalesforceId: launchObj.excludeItemsWithoutSalesforceId,
                 launchUnscored: launchObj.launchUnscored,
                 topNCount: launchObj.topNCount,

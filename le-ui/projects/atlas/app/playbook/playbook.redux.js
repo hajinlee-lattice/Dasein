@@ -293,12 +293,12 @@ export const actions = {
             lookupIdMap = opts.lookupIdMap || {},
             method = (id ? 'put' : 'post'),
             bucketsToLaunch = opts.bucketsToLaunch,
-            cronSchedule = opts.cronSchedule,
+            cronScheduleExpression = opts.cronScheduleExpression,
             excludeItemsWithoutSalesforceId = opts.excludeItemsWithoutSalesforceId,
             launchUnscored = opts.launchUnscored,
             topNCount = opts.topNCount,
             launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
-            launchNow = (!cronSchedule && bucketsToLaunch ? '?launch-now=true' : ''), // ?launch-now=true (if once is selected from schedule)
+            launchNow = (!cronScheduleExpression && bucketsToLaunch ? '?launch-now=true' : ''), // ?launch-now=true (if once is selected from schedule)
             channelConfig = opts.channelConfig || null;
 
         if(channelConfig && Object.keys(channelConfig).length === 0) {
@@ -310,7 +310,7 @@ export const actions = {
             lookupIdMap: lookupIdMap,
             isAlwaysOn: isAlwaysOn,
             bucketsToLaunch: bucketsToLaunch,
-            cronSchedule: cronSchedule,
+            cronScheduleExpression: cronScheduleExpression,
             //excludeItemsWithoutSalesforceId: excludeItemsWithoutSalesforceId, // now in channelConfig
             launchUnscored: launchUnscored,
             maxAccountsToLaunch: topNCount,
