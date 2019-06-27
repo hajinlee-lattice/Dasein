@@ -184,6 +184,32 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
+    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState state) {
+        if (state == null) {
+            throw new RuntimeException("Valid launch state is needed");
+        }
+        if (appId == null) {
+            throw new RuntimeException("Valid applicationID is needed");
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                " UPDATE %s " //
+                        + " SET STATE = :state, APPLICATION_ID = :appId" //
+                        + " WHERE LAUNCH_ID = :launchId ", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("state", state.name());
+        query.setString("appId", appId);
+        query.setString("launchId", playLaunch.getId());
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (PlayLaunch) list.get(0);
+    }
+
+    @Override
     public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
         List<PlayLaunch> playLaunchList = findByPlayId(playId, states);
         if (playLaunchList != null && playLaunchList.size() > 0) {
