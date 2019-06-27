@@ -38,9 +38,9 @@ angular.module('lp.import.wizard.contactids', [])
         injectAsyncReducer(store, 'multitemplates.contactids', reducer);
         this.unsubscribe = store.subscribe(() => {
             const data = store.getState()['multitemplates.contactids'];
-            vm.systems = data;
+            // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
         });
-       
+       //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
         actions.fetchSystems({Contact: true});
         let validationStatus = ImportWizardStore.getValidationStatus();
         if (validationStatus) {
@@ -169,11 +169,22 @@ angular.module('lp.import.wizard.contactids', [])
     vm.addMatchId = () => {
         vm.matchIdItems.push({
             userField: '-- Select Field --',
-            system: '-- Select System --'
+            system: { displayName: '-- Select System --', name: 'select'}
         });
     }
     vm.removeMatchId = (index) => {
         vm.matchIdItems.splice(index, 1);
+    }
+
+    vm.updateSystem = ($index) => {
+        let item = vm.matchIdItems[$index];
+        console.log('ITEM ', item);
+
+    }
+    vm.changeMatchingFields = (index, newVal, oldVal) => {
+        console.log(index, ' NEW => ', newVal, " == OLD => ",  oldVal);
+        console.log('MAPPING ==> ', vm.fieldMapping);
+        
     }
 
     vm.init();

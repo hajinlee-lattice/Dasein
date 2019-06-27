@@ -139,7 +139,7 @@
       <br />
     </div>
 
-    <form name="form">
+    <form name="form-matching">
       <ul class="field-mapping multi-templates">
         <li class="header">
           <ul class="match-id-header">
@@ -152,28 +152,27 @@
             <li class="system-name">
               <select
                 class="form-control"
-                ng-model="vm.fieldMapping[field.name].userField"
-                ng-change="vm.changeMatchingFields(vm.fieldMapping, form)"
+                ng-model="vm.matchIdItems[$index].userField"
+                ng-change="vm.changeMatchingFields($index, (vm.matchIdItems[$index]), {{vm.matchIdItems[$index]}})"
               >
                 <option value="">{{ vm.ignoredFieldLabel }}</option>
                 <option
                   ng-repeat="AvailableField in vm.AvailableFields"
                   value="{{ field.name }}^/{{ AvailableField.userField }}"
                   ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
-                  ng-init="(AvailableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + AvailableField.userField : '')"
                 >
                   {{ AvailableField.userField }}
                 </option>
               </select>
             </li>
             <li class="system-type">
-              <select class="form-control"> 
-                <option value="">-- Select System --</option>
+              <select class="form-control" ng-model="vm.matchIdItems[$index].system" ng-change="vm.updateSystem($index)"> 
+                <!-- <option value="select">-- Select System --</option> -->
                 <option
-                  ng-repat="system in vm.systems"
-                  value="system.name"
+                  ng-repeat="s in vm.systems"
+                  ng-selected="s == vm.systems"
                   ng-required="true"
-                >{{system.display_name}}</option>
+                >{{s.displayName}}</option>
               </select>
             </li>
             <li class="remove-button" ng-click="vm.removeMatchId($index)">
