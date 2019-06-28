@@ -61,7 +61,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     private EMRCacheService emrCacheService;
 
     @Inject
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Inject
     private SparkJobService sparkJobService;
@@ -100,12 +100,14 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     // override this to enforce ordering between inputs
-    protected List<String> getInputOrder() { return null; }
+    protected List<String> getInputOrder() {
+        return null;
+    }
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupLivyEnvironment();
-//        reuseLivyEnvironment(7);
+        // reuseLivyEnvironment(7);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
@@ -200,7 +202,6 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
             });
         }
     }
-
 
     protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
