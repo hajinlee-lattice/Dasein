@@ -304,9 +304,10 @@ public class CDLResource {
     @GetMapping(value = "/s3import/template")
     @ResponseBody
     @ApiOperation("get template table fields")
-    public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries() {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries(
+            @RequestParam(required = false, defaultValue = "SystemDisplay") String sortBy) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        return cdlService.getS3ImportTemplate(customerSpace.toString());
+        return cdlService.getS3ImportTemplate(customerSpace.toString(), sortBy);
     }
 
     @GetMapping(value = "/s3import/fileList")
