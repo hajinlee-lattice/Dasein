@@ -88,6 +88,19 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
+    public void cancelIfNonTerminal(String launchId) {
+        if (StringUtils.isBlank(launchId)) {
+            throw new LedpException(LedpCode.LEDP_18146);
+        }
+        PlayLaunch playLaunch = playLaunchEntityMgr.findByLaunchId(launchId);
+        LaunchState state = playLaunch.getLaunchState();
+        if (state == LaunchState.Queued || state == LaunchState.UnLaunched || state == LaunchState.Launching) {
+            playLaunch.setLaunchState(LaunchState.Canceled);
+            playLaunchEntityMgr.update(playLaunch);
+        }
+    }
+
+    @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp) {
         return playLaunchEntityMgr.findByPlayAndTimestamp(playId, timestamp);
     }
