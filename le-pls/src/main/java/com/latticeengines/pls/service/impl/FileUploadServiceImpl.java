@@ -219,7 +219,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     public SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
             CleanupOperationType cleanupOperationType) {
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null, false, false);
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null, false, false, false);
 
         List<FieldMapping> fieldMappings = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -228,7 +228,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         }
         fieldMappingDocument.setFieldMappings(fieldMappings);
-        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, false, false);
 
         sourceFile = getSourceFilewithRetry(sourceFile.getName(), true);
         Table template = getMetadata(sourceFile.getName());
