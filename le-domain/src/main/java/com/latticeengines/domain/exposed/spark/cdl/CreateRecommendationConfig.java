@@ -6,6 +6,11 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class CreateRecommendationConfig extends SparkJobConfig {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 822194165143246260L;
+
     public static final String NAME = "createRecommendation";
 
     @JsonProperty("PlayLaunchSparkContext")

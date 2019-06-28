@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,12 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
 })
-public abstract class SparkJobConfig {
+public abstract class SparkJobConfig implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 6562316419718067155L;
 
     @JsonProperty("Input")
     private List<DataUnit> input;
