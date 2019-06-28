@@ -1454,7 +1454,9 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
         Attribute postalCode = attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet("ZIP", "POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE", "BILLINGPOSTALCODE", "BILLING_POSTAL_CODE", "BILLING_POSTALCODE", "BILLING_ZIP_CODE")) //
+                .allowedDisplayNames(Sets.newHashSet("ZIP", "POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE"
+                        , "BILLINGPOSTALCODE", "BILLING_POSTAL_CODE", "BILLING_POSTALCODE", "BILLING_ZIP_CODE",
+                        "ZIPCODE","ZIP_CODE", "BILLING_ZIPCODE", "BILLINGZIPCODE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1462,7 +1464,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1470,7 +1472,7 @@ public class SchemaRepository {
                 .build();
 
         Attribute accountCompanyName = attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("NAME", "COMPANY_NAME", "ACCOUNT_NAME", "DISPLAY_NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("NAME", "COMPANY_NAME", "ACCOUNT_NAME", "DISPLAY_NAME", "COMPANY")) //
                 .type(Schema.Type.STRING) //
                 .defaultValueStr("").interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
