@@ -106,7 +106,7 @@ angular.module('lp.import.wizard.contactids', [])
     }
 
     vm.getMapped = (mapping) => {
-        console.log('MMM ==> ',mapping);
+        // console.log('MMM ==> ',mapping);
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
@@ -140,7 +140,7 @@ angular.module('lp.import.wizard.contactids', [])
         if(vm.isMultipleTemplates()){
             vm.changeMatchIds(mapped);
         }
-        console.log('Saving', mapped);
+        // console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };
@@ -222,7 +222,7 @@ angular.module('lp.import.wizard.contactids', [])
 
     vm.updateSystem = (index) => {
         let item = vm.matchIdItems[index];
-        console.log('ITEM ', item);
+        // console.log('ITEM ', item);
         let ufName = item.userField.replace('^/', '');
         let sysName = item.system.name;
         if(ufName != '' && sysName != ''){
@@ -235,7 +235,7 @@ angular.module('lp.import.wizard.contactids', [])
         let item = vm.matchIdItems[index];
         let ufName = item.userField.replace('^/', '');
         if(ufName != ''){
-            console.log(vm.form);
+            // console.log(vm.form);
             vm.changeLatticeField(vm.fieldMapping, vm.form);
         }
     }
