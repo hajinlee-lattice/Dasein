@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -128,7 +129,6 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     @SuppressWarnings("unchecked")
     protected boolean transformInternal(TransformationProgress progress, String workflowDir,
                                         TransformStep step) {
-        LivySession session = null;
         try {
             sparkJobConfig = getSparkJobConfig(step.getConfig());
 
@@ -139,26 +139,31 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             configuration = getConfiguration(step.getConfig());
             modifySparkJobConfig(sparkJobConfig, configuration);
 
-            Map<String, String> sparkProps = getSparkProps(step.getConfig());
-            if (sparkProps == null) {
-                sparkProps = new HashMap<>();
+            final Map<String, String> sparkProps = new HashMap<>();
+            Map<String, String> extraProps = getSparkProps(step.getConfig());
+            if (MapUtils.isNotEmpty(extraProps)) {
+                sparkProps.putAll(extraProps);
             }
-            session = createLivySession(step, progress, sparkProps);
+            ThreadLocal<LivySession> sessionHolder = new ThreadLocal<>();
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            SparkJobResult sparkJobResult = retry.execute(ctx -> {
+                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
+                        + getSparkJobClz().getSimpleName());
+                log.warn("Previous failure:",  ctx.getLastThrowable());
+                if (sessionHolder.get() != null) {
+                    livySessionService.stopSession(sessionHolder.get());
+                }
+                LivySession session = createLivySession(step, progress, sparkProps);
+                return sparkJobService.runJob(session, getSparkJobClz(), sparkJobConfig);
+            });
 
-            SparkJobResult sparkJobResult = sparkJobService.runJob(session, getSparkJobClz(), sparkJobConfig);
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
             step.setCount(output.getCount());
-
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(output, sparkJobConfig, configuration, baseSchemas));
-
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
-        } finally {
-            if (session != null) {
-                livySessionService.stopSession(session);
-            }
         }
         return true;
     }

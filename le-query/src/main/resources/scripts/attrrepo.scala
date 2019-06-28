@@ -15,8 +15,10 @@ for ((tbl, path) <- tableMap) {
   val fmt = tableFmt(tbl).toLowerCase
   val read = spark.read.format(fmt).load("hdfs://" + path)
   storageLevel match {
-    case Some(lvl) => read.persist(lvl).createOrReplaceTempView(tbl)
-    case _ => read.createOrReplaceTempView(tbl)
+    case Some(lvl) =>
+      read.persist(lvl).createOrReplaceTempView(tbl)
+    case _ =>
+      read.createOrReplaceTempView(tbl)
   }
 }
 

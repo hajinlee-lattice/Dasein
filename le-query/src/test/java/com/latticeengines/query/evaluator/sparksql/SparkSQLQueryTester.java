@@ -81,7 +81,7 @@ public class SparkSQLQueryTester {
 
     private void setupLivyEnvironment() {
         session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, //
-                "MEMORY_AND_DISK", null);
+                "MEMORY_AND_DISK_SER", null);
     }
 
     private void reuseLivyEnvironment(int sessionId) {
