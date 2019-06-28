@@ -315,7 +315,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     String message = String
                             .format("%s is set as %s but appears to be %s in your file.", userField,
                                     userFormat, correctFormat);
-                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.ERROR,
+                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
                             message));
                 }
             }
