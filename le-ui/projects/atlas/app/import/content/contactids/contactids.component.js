@@ -39,6 +39,8 @@ angular.module('lp.import.wizard.contactids', [])
         injectAsyncReducer(store, 'multitemplates.contactids', reducer);
         this.unsubscribe = store.subscribe(() => {
             const data = store.getState()['multitemplates.contactids'];
+            // console.log("DATA ", data.systems);
+            vm.systems = data.systems;
             // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
         });
        //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
