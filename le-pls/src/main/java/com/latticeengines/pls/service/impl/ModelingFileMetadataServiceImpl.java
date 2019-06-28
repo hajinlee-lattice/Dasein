@@ -94,8 +94,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId,
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel, boolean withoutId,
             boolean enableEntityMatch) {
+        schemaInterpretation = isModel && enableEntityMatch && schemaInterpretation.equals(SchemaInterpretation.Account) ?
+                SchemaInterpretation.ModelAccount : schemaInterpretation;
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
@@ -414,10 +416,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
+    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, boolean isModel,
+            boolean enableEntityMatch) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), false, false);
+        SchemaInterpretation schemaInterpretation = sourceFile.getSchemaInterpretation();
+        schemaInterpretation = enableEntityMatch && isModel && schemaInterpretation.equals(SchemaInterpretation.Account) ? SchemaInterpretation.ModelAccount : schemaInterpretation;
+        Table table = getTableFromParameters(schemaInterpretation, false, enableEntityMatch);
         resolveMetadata(sourceFile, fieldMappingDocument, table, false, null, null);
     }
 

@@ -99,7 +99,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 new FileInputStream(dataFile));
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false,
+                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false, false,
                         false);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -107,7 +107,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 fieldMapping.setMappedToLatticeField(true);
             }
         }
-        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument);
+        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument, false, false);
     }
 
     @Test(groups = "deployment")

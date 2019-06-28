@@ -147,7 +147,7 @@ public class SchemaRepository {
         Table table = null;
         switch (entity) {
         case Account:
-            table = getAccountSchema(cdlSchema, enableEntityMatch);
+            table = getAccountSchema(cdlSchema, false, enableEntityMatch);
             break;
         case Contact:
             table = getContactSchema(cdlSchema, enableEntityMatch);
@@ -198,7 +198,10 @@ public class SchemaRepository {
             table = getSalesforceLeadSchema();
             break;
         case Account:
-            table = getAccountSchema(false, enableEntityMatch);
+            table = getAccountSchema(false, false, enableEntityMatch);
+            break;
+        case ModelAccount:
+            table = getAccountSchema(false, true, enableEntityMatch);
             break;
         case Contact:
             table = getContactSchema(false, enableEntityMatch);
@@ -576,24 +579,36 @@ public class SchemaRepository {
     }
 
     private Table getAccountSchema() {
-        return getAccountSchema(false, false);
+        return getAccountSchema(false, false, false);
     }
 
-    private Table getAccountSchema(boolean cdlSchema, boolean enableEntityMatch) {
+    private Table getAccountSchema(boolean cdlSchema, boolean isModel, boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.Account);
         if (!enableEntityMatch) {
             table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
         }
 
         if (enableEntityMatch) {
-            table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
-                    .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
-                    .type(Schema.Type.STRING) //
-                    .interfaceName(InterfaceName.CustomerAccountId) //
-                    .logicalType(LogicalDataType.Id) //
-                    .fundamentalType(FundamentalType.ALPHA.name()) //
-                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                    .build());
+            if (!isModel) {
+                table.addAttribute(attr(InterfaceName.CustomerAccountId.name()) //
+                        .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+                        .type(Schema.Type.STRING) //
+                        .interfaceName(InterfaceName.CustomerAccountId) //
+                        .logicalType(LogicalDataType.Id) //
+                        .fundamentalType(FundamentalType.ALPHA.name()) //
+                        .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                        .build());
+            } else {
+                table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                        .allowedDisplayNames(Sets.newHashSet("ATLAS ACCOUNT ID", "ACCOUNT ID", "ACCOUNTID")) //
+                        .type(Schema.Type.STRING) //
+                        .required() //
+                        .interfaceName(InterfaceName.AccountId) //
+                        .logicalType(LogicalDataType.Id) //
+                        .fundamentalType(FundamentalType.ALPHA.name()) //
+                        .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                        .build());
+            }
         } else {
             table.addAttribute(attr(InterfaceName.AccountId.name()) //
                     .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
