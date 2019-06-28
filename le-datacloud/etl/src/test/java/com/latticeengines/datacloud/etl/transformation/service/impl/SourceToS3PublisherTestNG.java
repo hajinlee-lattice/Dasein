@@ -182,41 +182,26 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private boolean stepSuccessValidate(Source baseSource, String baseSourceVersion) throws IOException {
         try {
-            String s3SnapshotPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion)
-                    .toString();
+            String sourceName = baseSource.getSourceName();
+
+            log.info("Checking the objects of Source: {} ", sourceName);
+
             String s3SchemaPath = hdfsPathBuilder.constructSchemaDir(baseSource.getSourceName(), baseSourceVersion)
                     .toString();
             String s3VersionFilePath = hdfsPathBuilder.constructVersionFile(baseSource.getSourceName()).toString();
 
-            String sourceName = baseSource.getSourceName();
-
-            validateCopySucseess(s3SnapshotPath, "Snapshot", sourceName);
+            validateCopySucseess(getSnapshotFileList(sourceName));
             if (HdfsUtils.fileExists(yarnConfiguration, s3SchemaPath)) {
-                validateCopySucseess(s3SchemaPath, "Schema", sourceName);
+                validateCopySucseess(getSchemaFileList(sourceName));
             }
-            validateCopySucseess(s3VersionFilePath, "_CURRENT_VERSION", sourceName);
+            validateCopySucseess(getCurrentVerFileList(s3VersionFilePath));
             return true;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void validateCopySucseess(String Prefix, String dir, String sourceName) throws IOException {
-        log.info("Checking the objects of Prefix: {}", Prefix);
-
-        List<String> files = new ArrayList<>();
-        
-        switch (dir) {
-        case "_CURRENT_VERSION":
-            files = getCurrentVerFileList(Prefix);
-            break;
-        case "Schema":
-            files = getSchemaFileList(sourceName);
-            break;
-        case "Snapshot":
-            files = getSnapshotFileList(sourceName);
-            break;
-        }
+    private void validateCopySucseess(List<String> files) throws IOException {
         for (String key : files) {
             log.info("Check key : {} ", key);
             if (!s3Service.objectExist(s3Bucket, key)) {
