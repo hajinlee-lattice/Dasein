@@ -103,12 +103,12 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 offset: vm.offset,
                 max: 10,
                 orgId: vm.orgId,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 externalSysType: vm.externalSystemType
             },
             countParams = {
                 playName: vm.playName || $stateParams.play_name,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 offset: 0,
                 startTimestamp: 0,
                 orgId: vm.orgId,
