@@ -17,6 +17,7 @@ import ReactMainContainer from "../../../react/react-main-container";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import { CENTER } from "../../../../../common/widgets/container/le-alignments";
+import LeSimpleInputText from "../../../../../common/widgets/inputs/le-simple-input-text";
 export default class SystemCreationComponent extends Component {
   constructor(props) {
     super(props);
@@ -104,19 +105,6 @@ export default class SystemCreationComponent extends Component {
             <LeHPanel hstretch={true} halignment={CENTER} className="systems-grid">
               {this.getSystemSupported()}
             </LeHPanel>
-
-            <LeHPanel className="system-info">
-              {/* <span className="le-label">Select System</span> */}
-              <LeInputText
-                config={{
-                  label: "System Name"
-                }}
-                callback={val => {
-                  // console.log('VALUE ', val);
-                  this.setState({ newSystemName: val }, this.validate);
-                }}
-              />
-            </LeHPanel>
             <p className="le-description">
               The system will automatically create default field mappings
               between Lattice and Salesforce. The system will automatically
@@ -127,6 +115,22 @@ export default class SystemCreationComponent extends Component {
               These field mappings are here to help you get you started quickly
               and can be edited anytime.
             </p>
+
+            <LeHPanel className="system-info" hstretch={true}>
+              {/* <span className="le-label">Select System</span> */}
+              {/* <LeInputText
+                config={{
+                  label: "System Name"
+                }}
+                callback={val => {
+                  // console.log('VALUE ', val);
+                  this.setState({ newSystemName: val }, this.validate);
+                }}
+              /> */}
+              <LeSimpleInputText config={{label: 'System Name'}} callback={val => {
+                this.setState({ newSystemName: val }, this.validate);
+              }}/>
+            </LeHPanel>
           </LeVPanel>
           <LeHPanel
             hstretch={true}

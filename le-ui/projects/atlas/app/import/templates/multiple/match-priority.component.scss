@@ -7,7 +7,6 @@
 
         .sub-header{
             width: 100%;
-            font-size: 18px;
             border-bottom: 1px solid rgb(201, 201, 201);
             padding: 1rem;
         }
@@ -23,7 +22,11 @@
             display: flex;
             max-width: 350px;
             padding: 0.5rem;
+            margin-top: 10px;
             justify-content: center;
+            & > p {
+                font-weight: bold;
+            }
         }
         .priorities-controlls{
             padding: 0.5rem;
