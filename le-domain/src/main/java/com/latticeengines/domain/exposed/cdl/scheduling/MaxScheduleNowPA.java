@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 
 public class MaxScheduleNowPA implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target) {
+    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         return currentState.getCanRunScheduleNowJobCount() < 1 && target.isScheduledNow();
     }
 

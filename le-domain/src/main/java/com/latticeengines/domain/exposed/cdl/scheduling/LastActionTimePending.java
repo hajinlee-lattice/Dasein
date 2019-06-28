@@ -2,11 +2,11 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 
 public class LastActionTimePending implements Constraint {
     @Override
-    public boolean checkViolated(SystemStatus currentState, TenantActivity target) {
+    public boolean checkViolated(SystemStatus currentState, TenantActivity target, TimeClock timeClock) {
         if (target.getLastActionTime() == null || target.getLastActionTime() == 0L) {
             return true;
         }
-        long currentTime = schedulingPATimeClock.getCurrentTime();
+        long currentTime = timeClock.getCurrentTime();
         long lastMinute = (currentTime - target.getLastActionTime()) / 60000;
         return lastMinute < 10;
     }

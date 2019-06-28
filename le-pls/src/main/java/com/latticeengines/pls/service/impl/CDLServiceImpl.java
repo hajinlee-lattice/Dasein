@@ -332,7 +332,7 @@ public class CDLServiceImpl implements CDLService {
      * template according to data feed task
      */
     @Override
-    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
         List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
         log.info("folderNames is : " + folderNames.toString());
@@ -385,6 +385,25 @@ public class CDLServiceImpl implements CDLService {
         }
         // ensure there exists 5 templates at least in the returned list
         populateDefaultTemplate(templates);
+
+        if (StringUtils.isNotEmpty(sortBy)) {
+            Comparator<S3ImportTemplateDisplay> compareBySystemType =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
+                            s.getS3ImportSystem().getSystemType().name());
+            Comparator<S3ImportTemplateDisplay> compareBySystemName =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
+                            s.getS3ImportSystem().getDisplayName() == null ? "" : s.getS3ImportSystem().getDisplayName());
+            Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType.thenComparing(compareBySystemName);
+
+            Comparator<S3ImportTemplateDisplay> compareBySystemPriority =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1 :
+                            s.getS3ImportSystem().getPriority());
+            if (sortBy.equalsIgnoreCase("SystemDisplay")) {
+                templates.sort(compareBySystem);
+            } else if (sortBy.equalsIgnoreCase("SystemPriority")) {
+                templates.sort(compareBySystemPriority);
+            }
+        }
         return templates;
     }
 
