@@ -146,6 +146,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
                         .append(String.format("part-%04d.avro", fileIdx)).toString();
                 log.info("Upload " + resource.getURI().toString() + " to " + targetPath);
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, targetPath);
+                fileIdx++;
             }
         }
         String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
