@@ -32,7 +32,6 @@ import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubm
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -45,7 +44,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -206,15 +204,6 @@ public class PlayResource {
         return playLaunchChannelService.createPlayLaunchChannel(playName, playLaunchChannel, launchNow);
     }
 
-    @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update a play launch channel for a given play and channel id")
-    public String schedule(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
-        return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
-    }
-
     @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
@@ -263,13 +252,12 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
         if (StringUtils.isEmpty(playName)) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Channel Id" });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Play Id" });
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
-        PlayUtils.validatePlay(playName, play);
 
         PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
         if (channel == null) {
@@ -277,13 +265,19 @@ public class PlayResource {
                     new String[] { "No channel found by channel id: " + channelId });
         }
 
-        if (play.getRatingEngine() != null) {
-            validatePlayAndChannelBeforeLaunch(customerSpace, play, channel);
-        }
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
         return playLaunchChannelService.createPlayLaunchFromChannel(channel, play);
+    }
+
+    @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a play launch channel for a given play and channel id")
+    public String schedule(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId) {
+        return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
     }
     // -------------
     // Channels
@@ -384,9 +378,9 @@ public class PlayResource {
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
-        PlayUtils.validatePlay(playName, play);
+        PlayUtils.validatePlay(play);
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         if (playLaunch == null) {
@@ -418,9 +412,9 @@ public class PlayResource {
         }
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found by play Id: " + playName });
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
-        PlayUtils.validatePlay(playName, play);
+        PlayUtils.validatePlay(play);
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         if (playLaunch == null) {
@@ -645,51 +639,4 @@ public class PlayResource {
         }
     }
 
-    private void validatePlayAndChannelBeforeLaunch(String customerSpace, Play play, PlayLaunchChannel channel) {
-        RatingEngine ratingEngine = play.getRatingEngine();
-        ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
-        play.setRatingEngine(ratingEngine);
-
-        if (channel.getLookupIdMap() == null || channel.getLookupIdMap().getExternalSystemType() == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No destination system selected for the channel for play: " + play.getName() });
-        }
-
-        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM
-                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId()
-                && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
-        }
-
-        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
-        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
-        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
-            coverageRequest.setRestrictNullLookupId(
-                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId());
-        coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
-        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService
-                .getRatingCoveragesForSegment(customerSpace, play.getTargetSegment().getName(), coverageRequest);
-
-        if (coverageResponse == null || MapUtils.isNotEmpty(coverageResponse.getErrorMap())) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] {
-                    "Unable to validate validity of launch targets due to internal Error, please retry later" });
-        }
-
-        Long accountsToLaunch = coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                .getBucketCoverageCounts().stream()
-                .filter(ratingBucket -> channel.getBucketsToLaunch()
-                        .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
-                .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
-
-        accountsToLaunch = accountsToLaunch
-                + (channel.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
-
-        if (accountsToLaunch <= 0L) {
-            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
-        }
-    }
 }
