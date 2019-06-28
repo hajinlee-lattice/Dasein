@@ -204,9 +204,6 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                         log.info("(Attemp=" + ctx.getRetryCount() + ") write dummy record for " + engineId);
                     }
                     String avroPath = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob).get(0);
-                    if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
-                        HdfsUtils.rmdir(yarnConfiguration, avroPath);
-                    }
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
                     String accountId = "__Dummy__Account__";
                     builder.set(InterfaceName.AccountId.name(), accountId);
@@ -214,7 +211,8 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                         builder.set(InterfaceName.PeriodId.name(), 0L);
                     }
                     GenericRecord record = builder.build();
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroPath, Collections.singletonList(record), true);
+                    log.info("Appending a dummy record to " + avroPath);
+                    AvroUtils.appendToHdfsFile(yarnConfiguration, avroPath, Collections.singletonList(record), true);
                     return true;
                 });
             } catch (Exception e) {
