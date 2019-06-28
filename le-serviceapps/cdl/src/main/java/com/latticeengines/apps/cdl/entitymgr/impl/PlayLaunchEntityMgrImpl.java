@@ -95,7 +95,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
         launches.forEach(launch -> {
             Hibernate.initialize(launch.getPlay());
-            Hibernate.initialize(launch.getTenant());
         });
         return launches;
     }
