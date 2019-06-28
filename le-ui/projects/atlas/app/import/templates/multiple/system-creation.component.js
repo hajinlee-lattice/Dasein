@@ -41,7 +41,7 @@ export default class SystemCreationComponent extends Component {
         text: "Text" 
       },
       {
-        name: "Others",
+        name: "Other",
         img: "/atlas/assets/images/other_systems.png",
         img_select: "/atlas/assets/images/other_systems_white.png",
         text: "Text"
