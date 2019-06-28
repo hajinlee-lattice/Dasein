@@ -14,6 +14,14 @@ export default class LeMenu extends Component {
         this.mouseMainOverHandler = this.mouseMainOverHandler.bind(this);
     }
 
+    componentDidMount() {
+        document.addEventListener('mousedown', this.handleClick);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.handleClick);
+    }
+
     getContent() {
         if (this.props.image) {
             const classes = `${this.props.image} item-img`;
@@ -76,6 +84,21 @@ export default class LeMenu extends Component {
         }, 2000);
     }
 
+    handleClick = (e)  => {
+        if (this.node.contains(e.target)) {
+            return;
+        }
+        this.handleClickOutside();
+    }
+
+    handleClickOutside() {
+        this.setState({
+            outmain: true
+        }, () => {
+            this.updateShowClass();
+        });
+    }
+
     clickHandler(event) {
         this.setState((prevState, props) => {
             this.showMenu(!prevState.opened);
@@ -115,14 +138,13 @@ export default class LeMenu extends Component {
         return (
             <div className={this.menuClass} onClick={(event) => { this.clickHandler(event) }}
                 onMouseEnter={this.mouseMainEnterHandler}
-                onMouseLeave={this.mouseMainLeaveHandler}
-                onMouseOver={this.mouseMainOverHandler}>
+                onMouseOver={this.mouseMainOverHandler}
+                ref={node => this.node = node}>
                 <div className="menu-container">
                     {this.getContent()}
                 </div>
                 <div className={`menu-content ${this.props.menuClass ? this.props.menuClass : ''}`}
-                    onMouseEnter={this.mouseMenuEnterHandler}
-                    onMouseLeave={this.mouseMenuLeaveHandler} >
+                    onMouseEnter={this.mouseMenuEnterHandler}>
                     {this.props.children}
                 </div>
             </div>
