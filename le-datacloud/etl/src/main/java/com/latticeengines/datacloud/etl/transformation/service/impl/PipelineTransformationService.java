@@ -616,6 +616,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             Source baseSource = baseSources[j];
             baseSourceNames = baseSourceNames + baseSource.getSourceName();
             baseSourceVersions = baseSourceVersions + baseVersions.get(j);
+            if (baseSourceNames.length() > 1000 || baseSourceVersions.length() > 1000) {
+                break;
+            }
         }
         stepReport.setBaseSources(baseSourceNames);
         stepReport.setBaseVersions(baseSourceVersions);

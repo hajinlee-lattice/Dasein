@@ -153,8 +153,8 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                 if (sessionHolder.get() != null) {
                     livySessionService.stopSession(sessionHolder.get());
                 }
-                LivySession session = createLivySession(step, progress, sparkProps);
-                return sparkJobService.runJob(session, getSparkJobClz(), sparkJobConfig);
+                sessionHolder.set(createLivySession(step, progress, sparkProps));
+                return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
             });
 
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
