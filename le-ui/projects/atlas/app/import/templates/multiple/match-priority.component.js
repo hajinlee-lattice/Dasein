@@ -63,7 +63,7 @@ export default class MatchPriorityComponent extends Component {
                     vstretch={true}
                     className="wizard-container"
                 >
-                    <p className="sub-header">Update Match Priority​</p>
+                    <h2 className="sub-header">Update Match Priority​</h2>
 
                     <LeHPanel hstretch={'true'}>
                         <PrioritiesLitComponent
