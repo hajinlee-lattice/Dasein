@@ -103,7 +103,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         double totalSizeInGb = hdfsPathMap.values().stream() //
                 .mapToDouble(path -> ScalingUtils.getHdfsPathSizeInGb(yarnConfiguration, path)) //
                 .sum();
-        int scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
+        int scalingMultiplier = scaleBySize(totalSizeInGb);
         String storageLevel = persistOnDisk ? "DISK_ONLY" : null;
         livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
                 scalingMultiplier, storageLevel, getClass().getSimpleName());
@@ -209,6 +209,10 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 throw new RuntimeException("Cannot set multi-tenant context for customer " + customerSpace.toString());
             }
         }
+    }
+
+    protected int scaleBySize(double totalSizeInGb) {
+        return ScalingUtils.getMultiplier(totalSizeInGb);
     }
 
 }

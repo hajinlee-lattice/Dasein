@@ -4,6 +4,7 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.spark.exposed.job.cdl.MergeScoringTargets;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
@@ -55,6 +57,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     private String evaluationDate;
     private AttributeRepository attrRepo;
     protected List<RatingModelContainer> containers;
+    private List<RatingModelContainer> round;
 
     protected abstract List<RatingEngineType> getTargetEngineTypes();
     protected abstract HdfsDataUnit extractTargets(RatingModelContainer container);
@@ -127,11 +130,11 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
             }
             try {
-                List<RatingModelContainer> round = containers.stream() //
+                round = containers.stream() //
                         .filter(container -> container.getExtractedTarget() == null) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(round)) {
-                    boolean persistOnDisk = round.size() > 2;
+                    boolean persistOnDisk = getTotalRatingWeights() > 8;
                     startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
                     round.forEach(this::extractOneContainer);
                 }
@@ -191,7 +194,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         long count = result.getCount();
         if (count == 0) {
             String engineId = container.getEngineSummary().getId();
-            log.info("Engine " + engineId + " has empty scoring target, writing a dummy record.");
+            log.info("Engine " + engineId + " has empty scoring target, writing a dummy record to " + result.getPath());
             String avroGlob = PathUtils.toAvroGlob(result.getPath());
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
@@ -220,6 +223,33 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         } else {
             return false;
         }
+    }
+
+    protected int scaleBySize(double totalSizeInGb) {
+        int ratingWeights = getTotalRatingWeights();
+        int scalingByWeights = (int) Math.floor(ratingWeights / 40.) + 1;
+        int scalingFactor = Math.min(4, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
+        log.info("Adjust scaling factor to " + scalingFactor + " based on rating weights " + ratingWeights);
+        return scalingFactor;
+    }
+
+    private int getTotalRatingWeights() {
+        AtomicInteger weights = new AtomicInteger(0);
+        if (CollectionUtils.isNotEmpty(round)) {
+            round.forEach(container -> {
+                switch (container.getEngineSummary().getType()) {
+                    case CROSS_SELL:
+                        weights.addAndGet(4);
+                        break;
+                    case RULE_BASED:
+                        weights.addAndGet(2);
+                        break;
+                    default:
+                        weights.addAndGet(1);
+                }
+            });
+        }
+        return weights.get();
     }
 
 }
