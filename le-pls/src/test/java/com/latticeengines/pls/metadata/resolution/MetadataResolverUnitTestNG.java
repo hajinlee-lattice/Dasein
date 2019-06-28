@@ -226,5 +226,13 @@ public class MetadataResolverUnitTestNG {
         Assert.assertEquals(formatForDateAndTime.getLeft(), "YYYY-MM-DD");
         Assert.assertEquals(formatForDateAndTime.getMiddle(), "00-00-00 24H");
         Assert.assertNull(formatForDateAndTime.getRight());
+
+        // Bug PLS-14024
+        Assert.assertNotNull(formatForDateAndTime = metadataResolver.distinguishDateAndTime(
+                Arrays.asList("28.Jun.2019 11 01 PM", "28.Jun.2019 11 02 PM", "28.Jun.2019 11 03 PM")
+        ));
+        Assert.assertEquals(formatForDateAndTime.getLeft(), "DD.MMM.YYYY");
+        Assert.assertEquals(formatForDateAndTime.getMiddle(), "00 00 12H");
+        Assert.assertNull(formatForDateAndTime.getRight());
     }
 }
