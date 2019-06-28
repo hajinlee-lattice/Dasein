@@ -55,18 +55,11 @@ public class LivySessionManager {
         if (session != null) {
             killSession();
         }
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
         Runtime.getRuntime().addShutdownHook(new Thread(this::killSession));
         if (StringUtils.isBlank(jobName)) {
             jobName = "Workflow";
         }
-        session = sessionService.startSession(livyHost, jobName, //
-                getLivyConf(scalingMultiplier), getSparkConf(scalingMultiplier));
+        session = sessionService.startSession(jobName, getLivyConf(scalingMultiplier), getSparkConf(scalingMultiplier));
         livySessionHolder.set(session);
         return session;
     }

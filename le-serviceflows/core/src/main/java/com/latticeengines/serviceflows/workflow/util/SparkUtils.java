@@ -51,14 +51,14 @@ public final class SparkUtils {
     }
 
     public static Long countRecordsInGlobs(LivySessionService sessionService, SparkJobService sparkJobService,
-            Configuration yarnConfig, String livyHost, String... globs) {
+            Configuration yarnConfig, String... globs) {
         if (globs[0].endsWith(".parquet")) { // assuming all paths in the array have the same file type
             return ParquetUtils.countParquetFiles(yarnConfig, globs);
         } else {
             if (shouldCountWithAvroUtils(yarnConfig, globs)) {
                 return AvroUtils.count(yarnConfig, globs);
             }
-            LivySession session = sessionService.startSession(livyHost, CountAvroGlobs.class.getSimpleName(),
+            LivySession session = sessionService.startSession(CountAvroGlobs.class.getSimpleName(),
                     Collections.emptyMap(), Collections.emptyMap());
             CountAvroGlobsConfig config = new CountAvroGlobsConfig();
             SparkJobResult result = sparkJobService.runJob(session, CountAvroGlobs.class, config);

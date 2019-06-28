@@ -35,6 +35,9 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
@@ -49,6 +52,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private LivySessionService sessionService;
+
+    @Autowired
+    private SparkJobService sparkJobService;
 
     @Value("${datacloud.match.fetch.concurrent.blocks.max}")
     private Integer maxFetchConcurrentBlocks;
@@ -99,7 +108,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         }
 
         avroGlobs = MatchUtils.toAvroGlobs(avroDir);
-        Long count = AvroUtils.count(yarnConfiguration, avroGlobs);
+        Long count = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, avroGlobs);
         schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlobs);
         Integer[] blocks = determineBlockSizes(count);
         List<DataCloudJobConfiguration> configurations = readAndSplitInputAvro(blocks);
@@ -132,8 +141,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For 2.0 DataCloud based fuzzy match (Non-FetchOnly mode)
      *
-     * Determine total number of blocks and set maximum concurrent #block into
-     * executionContext
+     * Determine total number of blocks and set maximum concurrent #block into executionContext
      *
      * @param count
      * @param input
@@ -179,11 +187,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For 2.0 DataCloud based fuzzy match (FetchOnly mode)
      *
-     * Determine total number of blocks and set maximum concurrent #block into
-     * executionContext
+     * Determine total number of blocks and set maximum concurrent #block into executionContext
      *
      * @param count
-     * @param input
      * @return
      */
     private Integer determineNumBlocksForFetchOnly(Long count) {
@@ -194,8 +200,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     /**
      * For V1.0 DerivedColumnsCache based SQL lookup match
      *
-     * Determine total number of blocks and set maximum concurrent #block into
-     * executionContext
+     * Determine total number of blocks and set maximum concurrent #block into executionContext
      *
      * @param count
      * @return
@@ -275,8 +280,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private void writeMatchInput(DataCloudJobConfiguration jobConfiguration) {
         String avroPath = jobConfiguration.getAvroPath();
-        String matchInputFile = FilenameUtils.getFullPath(avroPath)
-                + "MatchInput_" + jobConfiguration.getRootOperationUid() + ".json";
+        String matchInputFile = FilenameUtils.getFullPath(avroPath) + "MatchInput_"
+                + jobConfiguration.getRootOperationUid() + ".json";
         try {
             MatchInput matchInput = jobConfiguration.getMatchInput();
             if (matchInput.getInputBuffer() != null) {

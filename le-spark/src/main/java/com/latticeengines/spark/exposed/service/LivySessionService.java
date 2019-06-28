@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 
 public interface LivySessionService {
 
-    LivySession startSession(String host, String name, Map<String, Object> livyConf, Map<String, String> sparkConf);
+    LivySession startSession(String name, Map<String, Object> livyConf, Map<String, String> sparkConf);
 
     LivySession getSession(LivySession session);
 
