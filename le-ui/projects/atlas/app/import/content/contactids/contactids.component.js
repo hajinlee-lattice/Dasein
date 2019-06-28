@@ -30,7 +30,7 @@ angular.module('lp.import.wizard.contactids', [])
         saveMap: {},
         entityMatchEnabled: entityMatchEnabled,
         matchIdItems: ImportWizardStore.getMatchIdsItems(FieldDocument.fieldMappings),
-        systems: [{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
+        systems: [],
         match: false
     });
 
