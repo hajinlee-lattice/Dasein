@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+
 public enum LaunchState {
     UnLaunched, //
     Queued, //
@@ -58,5 +60,23 @@ public enum LaunchState {
             return true;
         }
         return false;
+    }
+
+    public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
+        switch (jobStatus) {
+            case FAILED:
+                return Failed;
+            case READY:
+            case PENDING:
+            case RUNNING:
+                return Launching;
+            case SKIPPED:
+            case CANCELLED:
+                return Canceled;
+            case COMPLETED:
+                return Launched;
+            default:
+                return UnLaunched;
+        }
     }
 }
