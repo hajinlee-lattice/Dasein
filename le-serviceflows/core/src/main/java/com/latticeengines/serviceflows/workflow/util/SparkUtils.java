@@ -61,6 +61,7 @@ public final class SparkUtils {
             LivySession session = sessionService.startSession(CountAvroGlobs.class.getSimpleName(),
                     Collections.emptyMap(), Collections.emptyMap());
             CountAvroGlobsConfig config = new CountAvroGlobsConfig();
+            config.avroGlobs = globs;
             SparkJobResult result = sparkJobService.runJob(session, CountAvroGlobs.class, config);
             sessionService.stopSession(session);
             return Long.parseLong(result.getOutput());
