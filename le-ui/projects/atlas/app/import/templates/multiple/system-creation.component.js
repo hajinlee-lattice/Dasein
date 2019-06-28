@@ -1,7 +1,7 @@
 import React, { Component } from "common/react-vendor";
 import "./system-creation.component.scss";
 import LeVPanel, { SPACEBETWEEN } from "common/widgets/container/le-v-panel";
-import LeHPanel from "common/widgets/container/le-h-panel";
+import LeHPanel, {SPACEAROUND} from "common/widgets/container/le-h-panel";
 import GridLayout, {
   MIN_GAP
 } from "common/widgets/container/grid-layout.component";
@@ -16,6 +16,7 @@ import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
+import { CENTER } from "../../../../../common/widgets/container/le-alignments";
 export default class SystemCreationComponent extends Component {
   constructor(props) {
     super(props);
@@ -23,18 +24,26 @@ export default class SystemCreationComponent extends Component {
     this.systemsObj = [
       {
         name: "Salesforce",
-        img: "/atlas/assets/images/logo_salesForce_2.png",
+        img: "/atlas/assets/images/salesforce_small.png",
+        img_select: '/atlas/assets/images/salesforce_small_white.png',
         text: "Text"
       },
       {
         name: "Marketo",
-        img: "/atlas/assets/images/logo_marketo_2.png",
+        img: "/atlas/assets/images/marketo_small.png",
+        img_select: "/atlas/assets/images/marketo_small_white.png",
         text: "Text"
       },
-      { name: "Eloqua", img: "/atlas/assets/images/eloqua.png", text: "Text" },
+      { 
+        name: "Eloqua", 
+        img: "/atlas/assets/images/eloqua_small.png",
+        img_select: "/atlas/assets/images/eloqua_small_white.png", 
+        text: "Text" 
+      },
       {
         name: "Others",
         img: "/atlas/assets/images/other_systems.png",
+        img_select: "/atlas/assets/images/other_systems_white.png",
         text: "Text"
       }
     ];
@@ -56,23 +65,22 @@ export default class SystemCreationComponent extends Component {
     this.systemsObj.forEach(system => {
       console.log(system);
       systems.push(
-        <LeCard
-          classNames={`${"system-creation"} ${
-            (this.state.systemSelected && this.state.systemSelected.name) ==
-            system.name
-              ? "selected"
-              : ""
-          }`}
-          clickHandler={() => {
-            // console.log('CLIKC');
-            this.setState({ systemSelected: system }, this.validate);
-          }}
+        <div onClick={() =>{
+          this.setState({ systemSelected: system }, this.validate);
+        }} className={`${"system-card-fix"} ${
+          (this.state.systemSelected && this.state.systemSelected.name) ==
+          system.name
+            ? "selected"
+            : ""
+        }`}>
+          <LeCard
+          classNames={`${"system-card"}`}
         >
-          <LeCardImg src={system.img} classNames="system-image" />
-          {/* <LeCardBody contentAlignment={CENTER}>
-                        <p>{system.text}</p>
-                    </LeCardBody> */}
+          <LeCardImg src={`${(this.state.systemSelected && this.state.systemSelected.name) ==
+          system.name ?system.img_select: system.img}`} classNames="system-image" />
+        
         </LeCard>
+        </div>
       );
     }, this);
 
@@ -93,9 +101,9 @@ export default class SystemCreationComponent extends Component {
           >
             
             <p className="le-sub-header">Select System</p>
-            <GridLayout gap={MIN_GAP} classNames="systems-grid">
+            <LeHPanel hstretch={true} halignment={CENTER} className="systems-grid">
               {this.getSystemSupported()}
-            </GridLayout>
+            </LeHPanel>
 
             <LeHPanel className="system-info">
               {/* <span className="le-label">Select System</span> */}
