@@ -58,7 +58,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             vm.systems = data;
         });
        
-        actions.fetchSystems({Contact: true});
+        actions.fetchSystems({Account: true});
         let validationStatus = ImportWizardStore.getValidationStatus();
         if (validationStatus) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
@@ -108,6 +108,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
+        // console.log('Mapping ',mapping);
         vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,

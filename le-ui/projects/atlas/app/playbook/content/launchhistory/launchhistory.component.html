@@ -241,6 +241,7 @@
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">
                         <span class="fa fa-check" ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'"></span>
                         <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'"></span>
+                        <span class="fa fa-hourglass-start gray-text" ng-if="launch.launchState === 'Queued'"></span>
                         <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'Failed'"></span>
                         {{launch.launchState}}
                     </td>
