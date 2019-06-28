@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,7 +19,9 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("campaignLaunchTriggerService")
 public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implements CampaignLaunchTriggerService {
@@ -32,6 +35,9 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
     @Inject
     private PlayLaunchService playLaunchService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     private final String baseLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/launches/{launchId}";
     private final String kickoffLaunchPrefix = baseLaunchUrlPrefix + "/kickoff-launch";
@@ -56,6 +62,13 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
         log.info("Found " + queuedPlayLaunches.size() + " queued launches");
 
         List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+
+        // Attempt to clear out stuck/failed jobs
+        if (CollectionUtils.isNotEmpty(launchingPlayLaunches) && launchingPlayLaunches.size() > maxToLaunch
+                && clearStuckOrFailedLaunches(launchingPlayLaunches)) {
+            launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+        }
+
         if (launchingPlayLaunches.size() > maxToLaunch) {
             log.info(String.format("%s Launch jobs are currently running, no new jobs can be kicked off ",
                     launchingPlayLaunches.size()));
@@ -82,6 +95,57 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
             i++;
         }
         return true;
+    }
+
+    private boolean clearStuckOrFailedLaunches(List<PlayLaunch> launchingPlayLaunches) {
+        boolean launchesProcessed = false;
+
+        // Case 1) Launches are Launching state but have no applicationId
+        List<PlayLaunch> launchesToProcess = launchingPlayLaunches.stream()
+                .filter(launch -> StringUtils.isBlank(launch.getApplicationId())).collect(Collectors.toList());
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but no ApplicationId assigned, marking them Cancelled");
+            launchesToProcess.forEach(l -> {
+                l.setLaunchState(LaunchState.Canceled);
+                playLaunchService.update(l);
+            });
+            launchesProcessed = true;
+        }
+
+        // Case 2) Launches have an ApplicationId but the application ID doesn't exist in Workflowjob
+        launchesToProcess = launchingPlayLaunches.stream()
+                .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId()))
+                .filter(launch -> workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId()) == null)
+                .collect(Collectors.toList());
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but orphan ApplicationIds assigned, marking them Cancelled");
+            launchesToProcess.forEach(l -> {
+                l.setLaunchState(LaunchState.Canceled);
+                playLaunchService.update(l);
+            });
+            launchesProcessed = true;
+        }
+
+        // Case 3) Launches are Launching State but WorkflowJob has terminated -> set pl to Failed
+        launchesToProcess = launchingPlayLaunches.stream()
+                .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId())).filter(launch -> {
+                    Job job = workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId());
+                    if (job != null && job.getJobStatus().isTerminated()) {
+                        launch.setLaunchState(LaunchState.translateFromJobStatus(job.getJobStatus()));
+                        return true;
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found with state Launching but a terminated workflowjob status");
+            launchesToProcess.forEach(playLaunchService::update);
+            launchesProcessed = true;
+        }
+        return launchesProcessed;
     }
 
 }
