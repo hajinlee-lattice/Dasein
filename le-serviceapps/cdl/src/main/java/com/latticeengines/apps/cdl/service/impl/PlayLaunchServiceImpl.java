@@ -137,11 +137,6 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState launchState) {
-        return playLaunchEntityMgr.updatePlayLaunchState(playLaunch, appId, launchState);
-    }
-
-    @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType, boolean skipLoadingAllLookupIdMapping) {
@@ -183,8 +178,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
         launchSummaries.forEach(ls -> {
             if (ls.getIntegrationStatusMonitor() != null)
-                ls.getIntegrationStatusMonitor().setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP
-                        ? s3CustomerExportBucket : s3CustomerBucket);
+                ls.getIntegrationStatusMonitor()
+                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
+                                : s3CustomerBucket);
         });
     }
 
@@ -226,9 +222,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (MapUtils.isNotEmpty(allLookupIdMapping)) {
             allLookupIdMapping.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream()
-                            .filter(mapping -> uniqueOrgIdSet //
-                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream().filter(mapping -> uniqueOrgIdSet //
+                            .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
                             .forEach(mapping -> {
                                 if (!uniqueLookupIdMapping.containsKey(k)) {
                                     uniqueLookupIdMapping.put(k, new ArrayList<>());

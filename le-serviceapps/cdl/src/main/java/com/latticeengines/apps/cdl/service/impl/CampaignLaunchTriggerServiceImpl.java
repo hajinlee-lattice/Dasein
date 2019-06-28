@@ -100,20 +100,16 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
     private boolean clearStuckOrFailedLaunches(List<PlayLaunch> launchingPlayLaunches) {
         boolean launchesProcessed = false;
 
-        // Case 1) Launches are Launching state but have no applicationId
+        // Case 1) Launches are Launching state but have no applicationId -> set pl to cancelled
         List<PlayLaunch> launchesToProcess = launchingPlayLaunches.stream()
                 .filter(launch -> StringUtils.isBlank(launch.getApplicationId())).collect(Collectors.toList());
         if (launchesToProcess.size() > 0) {
             log.info(launchesToProcess.size()
                     + " PlayLaunches found with state Launching but no ApplicationId assigned, marking them Cancelled");
-            launchesToProcess.forEach(l -> {
-                l.setLaunchState(LaunchState.Canceled);
-                playLaunchService.update(l);
-            });
-            launchesProcessed = true;
+            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
 
-        // Case 2) Launches have an ApplicationId but the application ID doesn't exist in Workflowjob
+        // Case 2) Launches have an ApplicationId but applicationId doesn't exist in Workflowjob -> set pl to cancelled
         launchesToProcess = launchingPlayLaunches.stream()
                 .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId()))
                 .filter(launch -> workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId()) == null)
@@ -121,11 +117,7 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
         if (launchesToProcess.size() > 0) {
             log.info(launchesToProcess.size()
                     + " PlayLaunches found with state Launching but orphan ApplicationIds assigned, marking them Cancelled");
-            launchesToProcess.forEach(l -> {
-                l.setLaunchState(LaunchState.Canceled);
-                playLaunchService.update(l);
-            });
-            launchesProcessed = true;
+            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
 
         // Case 3) Launches are Launching State but WorkflowJob has terminated -> set pl to Failed
@@ -142,10 +134,31 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
         if (launchesToProcess.size() > 0) {
             log.info(launchesToProcess.size()
                     + " PlayLaunches found with state Launching but a terminated workflowjob status");
-            launchesToProcess.forEach(playLaunchService::update);
-            launchesProcessed = true;
+            launchesProcessed = processInvalidLaunches(launchesToProcess, null);
+        }
+
+        // Case 4) Launches are queued but the play has been soft deleted -> mark pl to Cancelled
+        launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getPlay().getDeleted())
+                .collect(Collectors.toList());
+        if (launchesToProcess.size() > 0) {
+            log.info(launchesToProcess.size()
+                    + " PlayLaunches found where the Play was deleted but PlayLaunch was not, marking them Cancelled");
+            launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
         return launchesProcessed;
+    }
+
+    private boolean processInvalidLaunches(List<PlayLaunch> launchesToProcess, LaunchState launchState) {
+        if (launchesToProcess.size() > 0) {
+            launchesToProcess.forEach(l -> {
+                if (launchState != null) {
+                    l.setLaunchState(launchState);
+                }
+                playLaunchService.update(l);
+            });
+            return true;
+        }
+        return false;
     }
 
 }
