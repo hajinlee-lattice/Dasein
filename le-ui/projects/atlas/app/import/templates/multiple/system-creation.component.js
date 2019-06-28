@@ -1,18 +1,11 @@
 import React, { Component } from "common/react-vendor";
 import "./system-creation.component.scss";
 import LeVPanel, { SPACEBETWEEN } from "common/widgets/container/le-v-panel";
-import LeHPanel, {SPACEAROUND} from "common/widgets/container/le-h-panel";
-import GridLayout, {
-  MIN_GAP
-} from "common/widgets/container/grid-layout.component";
+import LeHPanel from "common/widgets/container/le-h-panel";
 import LeCard from "common/widgets/container/card/le-card";
 import LeCardImg from "common/widgets/container/card/le-card-img";
-// import LeCardBody from 'common/widgets/container/card/le-card-body';
-// import { CENTER } from 'common/widgets/container/le-alignments';
-// import { LeToolBar, SPACE_BETWEEN } from "../../../../../common/widgets/toolbar/le-toolbar";
 import LeButton from "../../../../../common/widgets/buttons/le-button";
 import ReactRouter from "atlas/react/router";
-import LeInputText from "../../../../../common/widgets/inputs/le-input-text";
 import ReactMainContainer from "../../../react/react-main-container";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
@@ -117,16 +110,6 @@ export default class SystemCreationComponent extends Component {
             </p>
 
             <LeHPanel className="system-info" hstretch={true}>
-              {/* <span className="le-label">Select System</span> */}
-              {/* <LeInputText
-                config={{
-                  label: "System Name"
-                }}
-                callback={val => {
-                  // console.log('VALUE ', val);
-                  this.setState({ newSystemName: val }, this.validate);
-                }}
-              /> */}
               <LeSimpleInputText config={{label: 'System Name'}} callback={val => {
                 this.setState({ newSystemName: val }, this.validate);
               }}/>

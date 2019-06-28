@@ -218,8 +218,9 @@ angular.module('lp.import.wizard.contactids', [])
 
     vm.updateSystem = (index) => {
         let item = vm.matchIdItems[index];
+        console.log('ITEM ', item);
         let ufName = item.userField.replace('^/', '');
-        let sysName = item.system;
+        let sysName = item.system.name;
         if(ufName != '' && sysName != ''){
             vm.changeLatticeField(vm.fieldMapping, vm.form);
         }
