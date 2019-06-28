@@ -20,7 +20,8 @@ angular.module('lp.import.wizard.contactids', [])
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             contact: (entityMatchEnabled ? 'CustomerContactId' : 'ContactId'),
-            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
+            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId'),
+
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
@@ -28,8 +29,8 @@ angular.module('lp.import.wizard.contactids', [])
         keyMap: {},
         saveMap: {},
         entityMatchEnabled: entityMatchEnabled,
-        matchIdItems: [],
-        systems: [],
+        matchIdItems: ImportWizardStore.getMatchIdsItems(FieldDocument.fieldMappings),
+        systems: [{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
         match: false
     });
 
@@ -100,7 +101,7 @@ angular.module('lp.import.wizard.contactids', [])
         }
     }
 
-    vm.changeLatticeField = function(mapping, form) {
+    vm.getMapped = (mapping) => {
         console.log('MMM ==> ',mapping);
         var mapped = [];
         vm.unavailableFields = [];
@@ -127,9 +128,36 @@ angular.module('lp.import.wizard.contactids', [])
                 }
             }
         }
+        return mapped;
+    }
+
+    vm.changeLatticeField = function(mapping, form) {
+        let mapped = vm.getMapped(mapping);
+        if(vm.isMultipleTemplates()){
+            vm.changeMatchIds(mapped);
+        }
+        console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        vm.checkValid(form);
+        vm.checkValid(form); 
     };
+    
+    vm.changeMatchIds = (mapped) => {
+        vm.matchIdItems.forEach(item => {
+            let name = item.userField;
+            if(name!= ''){
+                name = name.replace('^/','');
+            }
+            let sysName = item.system;
+            if(name != '' && sysName != ''){
+                mapped.push({
+                    userField: name,
+                    IdType: 'Contact',
+                    SystemName: sysName
+                })
+            }
+
+        });
+    }
 
     vm.checkFieldsDelay = function(form) {
         var mapped = [];
@@ -168,23 +196,43 @@ angular.module('lp.import.wizard.contactids', [])
 
     vm.addMatchId = () => {
         vm.matchIdItems.push({
-            userField: '-- Select Field --',
-            system: { displayName: '-- Select System --', name: 'select'}
+            userField: '',
+            system: { displayName: '', name: ''}
         });
     }
     vm.removeMatchId = (index) => {
+        let ufName = vm.matchIdItems[index].userField.replace('^/', '');
+        let sName = vm.matchIdItems[index].syatem;
+        let mapped = vm.getMapped(vm.fieldMapping);
         vm.matchIdItems.splice(index, 1);
-    }
-
-    vm.updateSystem = ($index) => {
-        let item = vm.matchIdItems[$index];
-        console.log('ITEM ', item);
-
-    }
-    vm.changeMatchingFields = (index, newVal, oldVal) => {
-        console.log(index, ' NEW => ', newVal, " == OLD => ",  oldVal);
-        console.log('MAPPING ==> ', vm.fieldMapping);
+        for(var i = 0; i< mapped.length - 1; i++){
+            if(mapped[i].userField == ufName && mapped[i].SystemName == sName){
+                mapped.splice(i, 1);
+                return;
+            }
+        }
+        // console.log('Saving R ', mapped);
+        ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         
+    }
+
+    vm.updateSystem = (index) => {
+        let item = vm.matchIdItems[index];
+        let ufName = item.userField.replace('^/', '');
+        let sysName = item.system;
+        if(ufName != '' && sysName != ''){
+            vm.changeLatticeField(vm.fieldMapping, vm.form);
+        }
+    }
+
+    
+    vm.changeMatchingFields = (index, newVal, oldVal) => {
+        let item = vm.matchIdItems[index];
+        let ufName = item.userField.replace('^/', '');
+        if(ufName != ''){
+            console.log(vm.form);
+            vm.changeLatticeField(vm.fieldMapping, vm.form);
+        }
     }
 
     vm.init();

@@ -578,9 +578,6 @@ public class PlayResource {
         playService.publishTalkingPoints(playName, customerSpace);
     }
 
-    // --------------
-    // Private Methods
-    // --------------
     private String createTable(PlayLaunch playLaunch) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
 

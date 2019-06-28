@@ -846,6 +846,16 @@ angular.module('lp.import')
         info.modeDisplayName = StringUtility.TitleCase(info.mode);
         return info;
     }
+
+    this.getMatchIdsItems = (fieldsMappings) => {
+        let items = [];
+        fieldsMappings.forEach( field => {
+            if(field.SystemName && field.IdType && !field.mappedField){
+                items.push({userField: field.userField, system: field.SystemName});
+            }
+        });
+        return items;
+    }   
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils, ReduxService) {
 

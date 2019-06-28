@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 
 public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
 
-    private List<String> inputs;
+    protected List<String> inputs;
 
     @Override
     protected void verifyOutput(String output) {
@@ -36,17 +36,17 @@ public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
             String key = record.get("Field1").toString();
             Long cnt = (Long) record.get("Cnt");
             switch (key) {
-                case "1":
-                    Assert.assertEquals(cnt.longValue(), 2);
-                    break;
-                case "2":
-                    Assert.assertEquals(cnt.longValue(), 1);
-                    break;
-                case "3":
-                    Assert.assertEquals(cnt.longValue(), 1);
-                    break;
-                default:
-                    Assert.fail("Unexpected group by key value: " + key);
+            case "1":
+                Assert.assertEquals(cnt.longValue(), 2);
+                break;
+            case "2":
+                Assert.assertEquals(cnt.longValue(), 1);
+                break;
+            case "3":
+                Assert.assertEquals(cnt.longValue(), 1);
+                break;
+            default:
+                Assert.fail("Unexpected group by key value: " + key);
             }
         });
         Assert.assertEquals(count.get(), 3);
@@ -61,20 +61,20 @@ public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
             Integer max1 = (Integer) record.get("Max1");
             Integer max2 = (Integer) record.get("Max2");
             switch (key) {
-                case "1":
-                    Assert.assertEquals(max1.intValue(), 2);
-                    Assert.assertEquals(max2.intValue(), 1);
-                    break;
-                case "2":
-                    Assert.assertEquals(max1.intValue(), 3);
-                    Assert.assertEquals(max2.intValue(), 2);
-                    break;
-                case "3":
-                    Assert.assertNull(max1);
-                    Assert.assertEquals(max2.intValue(), 3);
-                    break;
-                default:
-                    Assert.fail("Unexpected group by key value: " + key);
+            case "1":
+                Assert.assertEquals(max1.intValue(), 2);
+                Assert.assertEquals(max2.intValue(), 1);
+                break;
+            case "2":
+                Assert.assertEquals(max1.intValue(), 3);
+                Assert.assertEquals(max2.intValue(), 2);
+                break;
+            case "3":
+                Assert.assertNull(max1);
+                Assert.assertEquals(max2.intValue(), 3);
+                break;
+            default:
+                Assert.fail("Unexpected group by key value: " + key);
             }
         });
         Assert.assertEquals(count.get(), 3);
@@ -88,9 +88,9 @@ public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
                 Pair.of("Field2", Integer.class) //
         );
         Object[][] data = new Object[][] { //
-                { 0L, "1", 1}, //
-                { 1L, "1", 2}, //
-                { 2L, "2", 3}, //
+                { 0L, "1", 1 }, //
+                { 1L, "1", 2 }, //
+                { 2L, "2", 3 }, //
         };
         String data1 = uploadHdfsDataUnit(data, fields);
 
@@ -100,9 +100,9 @@ public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
                 Pair.of("Field2", Integer.class) //
         );
         data = new Object[][] { //
-                { 0L, "1", 1},    //
-                { 1L, "2", 2},    //
-                { 2L, "3", 3},    //
+                { 0L, "1", 1 }, //
+                { 1L, "2", 2 }, //
+                { 2L, "3", 3 }, //
         };
         String data2 = uploadHdfsDataUnit(data, fields);
 

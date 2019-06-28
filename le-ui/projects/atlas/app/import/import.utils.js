@@ -194,6 +194,10 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 if(savedObj.cdlExternalSystemType){
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
+                if(savedObj.IdType || savedObj.SystemName){
+                    fieldsMapped[mapped].IdType = savedObj.IdType;
+                    fieldsMapped[mapped].SystemName = savedObj.SystemName;
+                }
                 updateFieldDate(fieldsMapped[mapped], savedObj, entity);
             }
             
