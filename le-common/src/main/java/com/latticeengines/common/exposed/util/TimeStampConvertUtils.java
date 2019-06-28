@@ -195,7 +195,7 @@ public class TimeStampConvertUtils {
                 {"yyyy.M.d", java.time.format.DateTimeFormatter.ofPattern("yyyy.M.d")},
                 {"MMM.d.yyyy", java.time.format.DateTimeFormatter.ofPattern("MMM.d.yyyy")},
                 {"MMM.d.yy", java.time.format.DateTimeFormatter.ofPattern("MMM.d.yy")},
-                {"d.MMM.yyyy", java.time.format.DateTimeFormatter.ofPattern("d.MMM.yy")},
+                {"d.MMM.yyyy", java.time.format.DateTimeFormatter.ofPattern("d.MMM.yyyy")},
                 {"d.MMM.yy", java.time.format.DateTimeFormatter.ofPattern("d.MMM.yy")},
                 {"yyyy.MMM.d", java.time.format.DateTimeFormatter.ofPattern("yyyy.MMM.d")}
         }).collect(Collectors.toMap(data -> (String) data[0], data -> (java.time.format.DateTimeFormatter) data[1])));
