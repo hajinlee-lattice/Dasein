@@ -48,14 +48,17 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         ignoredFieldLabel: ignoredFieldLabel,
         matchingFieldsList: angular.copy(matchingFieldsList),
         matchingFields: MatchingFields,
+        systemName: '',
         systems: []
     });
 
     vm.init = function() {
-        injectAsyncReducer(store, 'multitemplates.contactids', reducer);
+        injectAsyncReducer(store, 'multitemplates.matchaccount', reducer);
         this.unsubscribe = store.subscribe(() => {
-            const data = store.getState()['multitemplates.contactids'];
-            vm.systems = data;
+            const data = store.getState()['multitemplates.matchaccount'];
+            // console.log("DATA ", data.systems);
+            vm.systems = data.systems;
+            // [{ displayName: '-- Select System --', name: 'select'},{name: 't4', displayName: 'Test 4'}, {name: 't5', displayName: 'Test 5'}]
         });
        
         actions.fetchSystems({Account: true});
@@ -108,7 +111,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         console.log('AvailableFields 2', angular.copy(vm.AvailableFields));
     };
 
-    vm.changeLatticeField = function(mapping, form) {
+    vm.getMapped = (mapping) => {
         var mapped = [];
         // console.log('Mapping ',mapping);
         vm.unavailableFields = [];
@@ -128,11 +131,50 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
                 vm.unavailableFields.push(userField);
             }
         }
+        return mapped;
+    }
+
+    vm.changeLatticeField = function(mapping, form) {
+        // var mapped = [];
+        // // console.log('Mapping ',mapping);
+        // vm.unavailableFields = [];
+        // for(var i in mapping) {
+        //     var key = i,
+        //         userField = mapping[key],
+        //         map = {
+        //             userField: userField, 
+        //             mappedField: vm.mappedFieldMap[key],
+        //             // removing the following 3 lines makes it update instead of append
+        //             originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
+        //             originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
+        //             append: false
+        //         };
+        //     mapped.push(map);
+        //     if(userField) {
+        //         vm.unavailableFields.push(userField);
+        //     }
+        // }
+        let mapped = vm.getMapped(mapping);
+        if(vm.isMultipleTemplates()){
+            vm.changeSystem(mapped);
+        }
+        console.log('MMMMMMMMMAAAAAAAA ', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        vm.checkValid(form);
+        // vm.checkValid(form);
     };
 
-
+    vm.changeSystem = (mapped) => {
+        mapped.forEach(item => {
+            
+            if(item.mappedField == "CustomerAccountId"){
+                item.SystemName = vm.systemName;
+                item.IdType = 'Contact'
+            }else{
+                item.SystemName = null;
+                item.IdType = null;
+            }
+        });
+    }
     /**
      * NOTE: The delimiter could cause a problem if the column name has : as separator 
      * @param {*} string 
@@ -237,6 +279,9 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         return multipleTemplates;
     }
 
+    vm.updateSystem = () => {
+        vm.changeLatticeField(vm.fieldMapping, vm.form)
+    }
 
     vm.init();
 });
