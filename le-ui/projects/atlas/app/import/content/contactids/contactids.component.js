@@ -43,8 +43,10 @@ angular.module('lp.import.wizard.contactids', [])
         });
        //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
         actions.fetchSystems({Contact: true});
+        
         let validationStatus = ImportWizardStore.getValidationStatus();
-        if (validationStatus) {
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
             Banner.error({ message: messageArr });
         }
