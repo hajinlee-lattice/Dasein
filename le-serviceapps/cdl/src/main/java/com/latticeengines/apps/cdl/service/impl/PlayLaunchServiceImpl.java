@@ -88,19 +88,6 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public void cancelIfNonTerminal(String launchId) {
-        if (StringUtils.isBlank(launchId)) {
-            throw new LedpException(LedpCode.LEDP_18146);
-        }
-        PlayLaunch playLaunch = playLaunchEntityMgr.findByLaunchId(launchId);
-        LaunchState state = playLaunch.getLaunchState();
-        if (state == LaunchState.Queued || state == LaunchState.UnLaunched || state == LaunchState.Launching) {
-            playLaunch.setLaunchState(LaunchState.Canceled);
-            playLaunchEntityMgr.update(playLaunch);
-        }
-    }
-
-    @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp) {
         return playLaunchEntityMgr.findByPlayAndTimestamp(playId, timestamp);
     }
@@ -178,9 +165,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
         launchSummaries.forEach(ls -> {
             if (ls.getIntegrationStatusMonitor() != null)
-                ls.getIntegrationStatusMonitor()
-                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
-                                : s3CustomerBucket);
+                ls.getIntegrationStatusMonitor().setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP
+                        ? s3CustomerExportBucket : s3CustomerBucket);
         });
     }
 
@@ -222,8 +208,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (MapUtils.isNotEmpty(allLookupIdMapping)) {
             allLookupIdMapping.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream().filter(mapping -> uniqueOrgIdSet //
-                            .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream()
+                            .filter(mapping -> uniqueOrgIdSet //
+                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
                             .forEach(mapping -> {
                                 if (!uniqueLookupIdMapping.containsKey(k)) {
                                     uniqueLookupIdMapping.put(k, new ArrayList<>());

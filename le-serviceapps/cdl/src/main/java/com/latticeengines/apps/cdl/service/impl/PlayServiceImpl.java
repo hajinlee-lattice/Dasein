@@ -417,15 +417,12 @@ public class PlayServiceImpl implements PlayService {
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
-
-        Long playPid = playEntityMgr.getPlayByName(name, false).getPid();
-        List<PlayLaunch> launches = playLaunchService.findByPlayId(playPid, null);
-        if (CollectionUtils.isNotEmpty(launches)) {
-            if (hardDelete != Boolean.TRUE) {
-                // soft delete all related launches first
+        if (hardDelete != Boolean.TRUE) {
+            // soft delete all related launches first
+            Long playPid = playEntityMgr.getPlayByName(name, false).getPid();
+            List<PlayLaunch> launches = playLaunchService.findByPlayId(playPid, null);
+            if (CollectionUtils.isNotEmpty(launches)) {
                 launches.forEach(l -> playLaunchService.deleteByLaunchId(l.getId(), false));
-            } else {
-                launches.forEach(l -> playLaunchService.cancelIfNonTerminal(l.getId()));
             }
         }
 
