@@ -65,7 +65,7 @@ export default class MatchPriorityComponent extends Component {
                 >
                     <h2 className="sub-header">Update Match Priority​</h2>
 
-                    <LeHPanel hstretch={'true'}>
+                    <LeHPanel hstretch={'true'} className="wizard-body">
                         <PrioritiesLitComponent
                             changeHandler={this.updateList}
                             loading={this.state.loading}
