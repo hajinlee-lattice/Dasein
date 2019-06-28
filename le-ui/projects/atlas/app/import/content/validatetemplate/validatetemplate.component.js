@@ -29,15 +29,14 @@ angular.module('lp.import.wizard.validatetemplate', [])
 
                 const validationResponse = vm.validation;
 
-                const filterErrors = validationResponse.filter(response => response.status == 'ERROR');
-                vm.hasErrors = filterErrors.length == 0 ? false : true;
+                vm.errors = validationResponse.filter(response => response.status == 'ERROR');
+                vm.hasErrors = vm.errors.length == 0 ? false : true;
 
                 vm.warnings = validationResponse.filter(response => response.status == 'WARNING');
                 vm.hasWarnings = vm.warnings.length == 0 ? false : true;
 
                 if (vm.hasErrors) {
-                    console.log(vm.validation);
-                    ImportWizardStore.setValidationStatus(vm.validation);
+                    ImportWizardStore.setValidationStatus(vm.errors);
                 } else {
                     ImportWizardStore.setValidation('validation', true);
                 }
