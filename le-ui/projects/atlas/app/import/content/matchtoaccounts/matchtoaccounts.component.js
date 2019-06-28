@@ -59,8 +59,10 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         });
        
         actions.fetchSystems({Account: true});
+        
         let validationStatus = ImportWizardStore.getValidationStatus();
-        if (validationStatus) {
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
             Banner.error({ message: messageArr });
         }
