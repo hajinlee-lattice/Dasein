@@ -46,12 +46,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
-        String queryStr = String.format(
-                " FROM %s " //
-                        + " WHERE launch_id = :launchId ", //
+        String queryStr = String.format(" FROM %s " //
+                + " WHERE launch_id = :launchId ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("launchId", launchId);
+        query.setParameter("launchId", launchId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -68,14 +67,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
-        String queryStr = String.format(
-                " FROM %s "//
-                        + " WHERE fk_play_id = :playId "//
-                        + " AND created = :created ", //
+        String queryStr = String.format(" FROM %s "//
+                + " WHERE fk_play_id = :playId "//
+                + " AND created = :created ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
-        query.setDate("created", created);
+        query.setParameter("playId", playId);
+        query.setParameter("created", created);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -92,17 +90,16 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
-        String queryStr = String.format(
-                " FROM %s "//
-                        + " WHERE fk_play_id = :playId "//
-                        + " AND destination_org_id = :orgId ", //
+        String queryStr = String.format(" FROM %s "//
+                + " WHERE fk_play_id = :playId "//
+                + " AND destination_org_id = :orgId ", //
                 entityClz.getSimpleName());
 
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
-        query.setString("orgId", orgId.trim());
+        query.setParameter("playId", playId);
+        query.setParameter("orgId", orgId.trim());
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -120,9 +117,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         Session session = getSessionFactory().getCurrentSession();
         Class<PlayLaunch> entityClz = getEntityClass();
 
-        String queryStr = String.format(
-                " FROM %s "//
-                        + " WHERE fk_play_id = :playId ", //
+        String queryStr = String.format(" FROM %s "//
+                + " WHERE fk_play_id = :playId ", //
                 entityClz.getSimpleName());
 
         if (CollectionUtils.isNotEmpty(states)) {
@@ -132,7 +128,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
+        query.setParameter("playId", playId);
 
         if (CollectionUtils.isNotEmpty(states)) {
             List<String> statesNameList = states.stream()//
@@ -152,13 +148,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format(
-                " FROM %s " //
-                        + " WHERE state = :state " //
-                        + " ORDER BY created DESC ", //
+        String queryStr = String.format(" FROM %s " //
+                + " WHERE state = :state " //
+                + " ORDER BY created DESC ", //
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("state", state.name());
+        query.setParameter("state", state.name());
         return query.list();
     }
 
@@ -170,43 +165,17 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format(
-                " FROM %s " //
-                        + " WHERE state = :state " //
-                        + " ORDER BY created DESC ", //
+        String queryStr = String.format(" FROM %s " //
+                + " WHERE state = :state and deleted = :deleted" //
+                + " ORDER BY created DESC ", //
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("state", state.name());
+        query.setParameter("state", state.name());
+        query.setParameter("deleted", Boolean.FALSE);
         if (max != null) {
             query.setMaxResults(max.intValue());
         }
         return query.list();
-    }
-
-    @Override
-    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState state) {
-        if (state == null) {
-            throw new RuntimeException("Valid launch state is needed");
-        }
-        if (appId == null) {
-            throw new RuntimeException("Valid applicationID is needed");
-        }
-
-        Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format(
-                " UPDATE %s " //
-                        + " SET STATE = :state, APPLICATION_ID = :appId" //
-                        + " WHERE LAUNCH_ID = :launchId ", //
-                getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setString("state", state.name());
-        query.setString("appId", appId);
-        query.setString("launchId", playLaunch.getId());
-        List list = query.list();
-        if (list.size() == 0) {
-            return null;
-        }
-        return (PlayLaunch) list.get(0);
     }
 
     @Override
@@ -275,7 +244,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         List<Pair<String, String>> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(queryResult)) {
-            queryResult.stream().forEach(org -> {
+            queryResult.forEach(org -> {
                 List<Object> obj = JsonUtils.convertList(JsonUtils.deserialize(JsonUtils.serialize(org), List.class),
                         Object.class);
                 Object orgIdObj = obj.get(0);
@@ -283,7 +252,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 Object sysTypeObj = obj.get(1);
                 String extractedSysType = sysTypeObj == null ? null : sysTypeObj.toString();
                 if (StringUtils.isNotBlank(extractedOrgId) && StringUtils.isNotBlank(extractedSysType)) {
-                    result.add(new ImmutablePair<String, String>(extractedOrgId, extractedSysType));
+                    result.add(new ImmutablePair<>(extractedOrgId, extractedSysType));
                 }
             });
         }
@@ -353,9 +322,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,
             String externalSysType) {
 
-        queryStr += String.format(
-                " FROM %s pl"//
-                        + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+        queryStr += String.format(" FROM %s pl"//
+                + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
                 entityClz.getSimpleName());
 
         if (endTimestamp != null) {
@@ -416,8 +384,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         if (orgIdFilterNeeded) {
-            query.setString(DEST_ORG_ID, orgId.trim());
-            query.setString(DEST_SYS_TYPE, externalSysType.trim());
+            query.setParameter(DEST_ORG_ID, orgId.trim());
+            query.setParameter(DEST_SYS_TYPE, externalSysType.trim());
         }
 
         if (CollectionUtils.isNotEmpty(states)) {
