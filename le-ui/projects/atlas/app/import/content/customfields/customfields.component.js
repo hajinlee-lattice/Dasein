@@ -38,7 +38,8 @@ angular.module('lp.import.wizard.customfields', [])
     vm.init = function() {
 
         let validationStatus = ImportWizardStore.getValidationStatus();
-        if (validationStatus) {
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
             let messageArr = validationStatus.map(function(error) { return error['message']; });
             Banner.error({ message: messageArr });
         }
