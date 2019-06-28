@@ -29,9 +29,11 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -44,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -79,6 +82,9 @@ public class PlayResource {
 
     @Inject
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
+
+    @Inject
+    private CampaignLaunchWorkflowSubmitter campaignLaunchWorkflowSubmitter;
 
     @Inject
     private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
@@ -395,7 +401,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
-        return playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
     }
 
@@ -406,7 +412,9 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
-            boolean isDryRunMode) {
+            boolean isDryRunMode, //
+            @RequestParam(value = "use-spark", required = false, defaultValue = "false") //
+            boolean useSpark) {
         if (StringUtils.isEmpty(playName)) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank play Id" });
         }
@@ -427,7 +435,12 @@ public class PlayResource {
         }
         // this dry run flag is useful in writing robust testcases
         if (!isDryRunMode) {
-            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            String appId;
+            if (useSpark) {
+                appId = campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            } else {
+                appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            }
             playLaunch.setApplicationId(appId);
         }
 
@@ -628,15 +641,56 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (playLaunch.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }
 
+    private void validatePlayAndChannelBeforeLaunch(String customerSpace, Play play, PlayLaunchChannel channel) {
+        RatingEngine ratingEngine = play.getRatingEngine();
+        ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
+        play.setRatingEngine(ratingEngine);
+
+        if (channel.getLookupIdMap() == null || channel.getLookupIdMap().getExternalSystemType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No destination system selected for the channel for play: " + play.getName() });
+        }
+
+        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM
+                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId()
+                && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
+        }
+
+        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
+        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
+        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
+            coverageRequest.setRestrictNullLookupId(
+                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId());
+        coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
+        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService
+                .getRatingCoveragesForSegment(customerSpace, play.getTargetSegment().getName(), coverageRequest);
+
+        if (coverageResponse == null || MapUtils.isNotEmpty(coverageResponse.getErrorMap())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Unable to validate validity of launch targets due to internal Error, please retry later" });
+        }
+
+        Long accountsToLaunch = coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                .getBucketCoverageCounts().stream()
+                .filter(ratingBucket -> channel.getBucketsToLaunch()
+                        .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
+                .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
+
+        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+
+        if (accountsToLaunch <= 0L) {
+            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
+        }
+    }
 }
