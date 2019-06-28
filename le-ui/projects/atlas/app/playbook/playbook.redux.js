@@ -39,6 +39,34 @@ const initialState = {
 };
 
 export const actions = {
+    /**
+     * [clears your initialState]
+     * @param  {[array]} constnames [what you want to clear, if empty it clears everything]
+     * @param  {[type]} donotclear [what you don't want to clear]
+     */
+    clearInitialState: (constnames, donotclear) => {
+        var donotclear = donotclear || [];
+        if(constnames) {
+            if(typeof constnames === 'object') {
+                constnames.forEach(function(constname) {
+                    store.dispatch({
+                        type: CONST[constname],
+                        payload: null
+                    });
+                });
+            }
+        } else {
+            for(var i in CONST) {
+                var constname = CONST[i];
+                if(donotclear.indexOf(constname) === -1) {
+                    store.dispatch({
+                        type: CONST[constname],
+                        payload: null
+                    });
+                }
+            }
+        }
+    },
     addPlaybookWizardStore: (playbookWizardStore) => {
         store.dispatch({
             type: CONST.ADD_PLAYBOOKWIZARDSTORE,
@@ -73,7 +101,7 @@ export const actions = {
         );
         httpService.get('/pls/play', observer, {});
     },
-    fetchConnections: (play_name, force, deferred) => {
+    fetchConnections: (play_name, force, cb, deferred) => {
         let playstore = store.getState()['playbook'];
         if(playstore.connections && !force) {
             return false;
@@ -86,6 +114,9 @@ export const actions = {
                     type: CONST.FETCH_CONNECTIONS,
                     payload: response.data
                 });
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
                 return deferred.resolve(response.data);
             }
         );
@@ -263,27 +294,7 @@ export const actions = {
         // pls/play/{playname}/channels/{channelID} 
         // post creates new (no id)
         // put creates/updates (has id, use id as channleID)
-        // to launch also send launchObj same way as previous method
-        // launch automatically is always on, send always on true, otherwise false
-        // {
-        //     “playLaunch”: LaunchObj
-        //     “lookupIdMap”:{ // this comes in channels api
-        //       “configId”:“943d854a-ef58-4377-b002-7b3748eb6bb3",
-        //       “orgId”: “Lattice_S3",
-        //       “externalSystemType”: “FILE_SYSTEM”
-        //     },
-        //     “isAlwaysOn”:true //auto launch
-        // }
         
-        // this.marketoProgramName = ""; folder level (first api call gets a list of these)
-        // this.audienceId = ""; // if it's from the api list (second call) it'll have an id, otherwise pass enpty string
-        // this.audienceName = ""; // static lit display name (can also be user input, but will not have id)
-        // channel specific settings:
-        // eloqua: contactLimit, supressContactsWithoutEmails, supressAccountWithoutContacts
-        // marketo: contactLimit, supressContactsWithoutEmails, supressAccountWithoutContacts, audienceId, audienceName, folderName
-        // aws_s3: audienceType, accountLimit, supressAccountWithoutAccountId, supressAccountWithoutContacts
-        // salesforce: accountLimit, supressAccountWithoutAccountId
-      
         // notes: 
         // for both accountLimit and contactLimit just sending topNCount for now is fine
         // can ignore audienceType for now too
@@ -298,7 +309,7 @@ export const actions = {
             launchUnscored = opts.launchUnscored,
             topNCount = opts.topNCount,
             launchType = opts.launchType, //FULL vs DELTA (always send FULL for now, DELTA is coming)
-            launchNow = (!cronScheduleExpression && bucketsToLaunch ? '?launch-now=true' : ''), // ?launch-now=true (if once is selected from schedule)
+            launchNow = (bucketsToLaunch ? '?launch-now=true' : ''), // this gets sent unless it's a de-activate
             channelConfig = opts.channelConfig || null;
 
         if(channelConfig && Object.keys(channelConfig).length === 0) {
@@ -317,23 +328,26 @@ export const actions = {
             launchType: launchType,
             channelConfig: channelConfig
         };
-        
+
         http[method](`/pls/play/${play_name}/channels/${id}${launchNow}`, channelObj).then((response) => {
-            let playstore = store.getState()['playbook'],
-                connections = playstore.connections,
-                connectionIndex = connections.findIndex(function(connection) {
-                    return connection.id === id;
+            if(id) {
+                let playstore = store.getState()['playbook'],
+                    connections = playstore.connections,
+                    connectionIndex = connections.findIndex(function(connection) {
+                        return connection.id === id;
+                    });
+
+                connections[connectionIndex] = response.data;
+
+                store.dispatch({
+                    type: CONST.FETCH_CONNECTIONS,
+                    payload: connections
                 });
-
-            connections[connectionIndex] = response.data;
-
-            store.dispatch({
-                type: CONST.FETCH_CONNECTIONS,
-                payload: connections
-            });
-            
-            if(cb && typeof cb === 'function') {
-                cb();
+                if(cb && typeof cb === 'function') {
+                    cb();
+                }
+            } else { // since no id we can't replace just the one channel, so get the whole list again
+                actions.fetchConnections(play_name, true, cb);
             }
         });
     },

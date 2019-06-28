@@ -9,7 +9,9 @@
         { "Node": "Bombora", "Data": {"Type": "number", "Required": false}},
         { "Node": "WebsiteKeywords", "Data": {"Type": "number", "Required": false}},
         { "Node": "CompanyProfile", "Data": {"Type": "number", "Required": false}},
-        { "Node": "Enrichment", "Data": {"Type": "number", "Required": false}}
+        { "Node": "Enrichment", "Data": {"Type": "number", "Required": false}},
+        { "Node": "Account", "Data": {"Type": "number", "Required": false}},
+        { "Node": "Contact", "Data": {"Type": "number", "Required": false}}
       ]
     }
   ]

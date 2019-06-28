@@ -38,6 +38,7 @@
     .launch-history {
         float: right;
         a {
+            font-size: 12px;
             padding-left: 25px;
             background: url(/assets/images/campaignoverview/launch-history-ico.png) no-repeat left center;
             background-size: contain;
@@ -55,6 +56,7 @@
                 padding: 0;
                 margin-bottom: 50px;
                 .lift-chart {
+                    font-size: 12px;
                     width: 390px;
                     .bar-labels {
                         & > strong {
