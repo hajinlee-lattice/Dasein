@@ -106,6 +106,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             if (hardDelete) {
                 playLaunchDao.delete(playLaunch);
             } else {
+                playLaunch.setLaunchState(
+                        playLaunch.getLaunchState().isTerminal() ? playLaunch.getLaunchState() : LaunchState.Canceled);
                 playLaunch.setDeleted(true);
                 playLaunchDao.update(playLaunch);
             }
