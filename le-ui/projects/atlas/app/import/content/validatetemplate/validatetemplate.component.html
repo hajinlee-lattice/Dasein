@@ -21,9 +21,9 @@
         </p>
         <ul>
           <li 
-            ng-repeat="validation in vm.validation">
+            ng-repeat="error in vm.errors">
             <i class="fa fa-exclamation-triangle"></i>
-            {{ validation.message }}
+            {{ error.message }}
           </li>
         </ul>
       </div>
