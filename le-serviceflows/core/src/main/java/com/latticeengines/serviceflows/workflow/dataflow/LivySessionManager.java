@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Component
 public class LivySessionManager {
+
+    private static final Logger log = LoggerFactory.getLogger(LivySessionManager.class);
 
     @Inject
     private LivySessionService sessionService;
@@ -61,24 +65,33 @@ public class LivySessionManager {
         if (StringUtils.isBlank(jobName)) {
             jobName = "Workflow";
         }
-        session = sessionService.startSession(livyHost, jobName, getLivyConf(), getSparkConf(scalingMultiplier));
+        session = sessionService.startSession(livyHost, jobName, //
+                getLivyConf(scalingMultiplier), getSparkConf(scalingMultiplier));
         livySessionHolder.set(session);
         return session;
     }
 
-    private Map<String, Object> getLivyConf() {
+    private Map<String, Object> getLivyConf(int scalingMultiplier) {
         Map<String, Object> conf = new HashMap<>();
         conf.put("driverCores", driverCores);
         conf.put("driverMemory", driverMem);
         conf.put("executorCores", executorCores);
         conf.put("executorMemory", executorMem);
+        if (scalingMultiplier > 1) {
+            // scale up first
+            String unit = executorMem.substring(executorMem.length()-1);
+            int val = Integer.parseInt(executorMem.replace(unit, ""));
+            String newMem = String.format("%d%s", 2 * val, unit);
+            log.info("Double executor memory to " + newMem + " based on scalingFactor=" + scalingMultiplier);
+            conf.put("executorMemory", newMem);
+        }
         return conf;
     }
 
     private Map<String, String> getSparkConf(int scalingMultiplier) {
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingMultiplier;
-        int maxExe = maxExecutors * scalingMultiplier;
+        int maxExe = Math.max((int) (maxExecutors * scalingMultiplier * 0.5), minExe);
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
