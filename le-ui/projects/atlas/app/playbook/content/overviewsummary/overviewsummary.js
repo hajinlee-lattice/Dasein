@@ -189,7 +189,7 @@ export default class OverviewSummaryContainer extends Component {
                                             </h1>
                                             <div className={'play-created'}>
                                                 <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
-                                                    <span>
+                                                    <span className={'right-border'}>
                                                         Created: {moment(play.created).format('MMM D, YYYY')} 
                                                         <i title={play.createdBy} class="user-ico"></i>
                                                     </span>

@@ -84,7 +84,7 @@ class LaunchComponent extends Component {
             ratings: null,
             coverage: null,
             // FIXME crappy hack to select all buckets because of setState recursion
-            selectedBuckets: (type === 'salesforce' ? ['A','B','C','D','E','F'] : []),
+            selectedBuckets: [], // removing, getLaunchAccountsCoverage now pre-selects // old (type === 'salesforce' ? ['A','B','C','D','E','F'] : []),
             recommendationCounts: {},
             unscored: false,
             limitRecommendations: false,
@@ -168,22 +168,19 @@ class LaunchComponent extends Component {
 
             vm.state.unscored = !hasBuckets;
             vm.state.launchAccountsCoverage = response;
+
+            var coverageObj = vm.getCoverage(response),
+                coverage = coverageObj.coverage,
+                coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
+
+            if(coverageBuckets) { // this pre-selects all the buckets
+                coverageBuckets.forEach(function(bucket) {
+                    vm.state.selectedBuckets.push(bucket.bucket);
+                });
+            }
+
             vm.setState(vm.state);
         });
-    }
-
-    bucketClick = (bucket, coverage, play) => {
-        var selectedBuckets = this.state.selectedBuckets,
-            index = selectedBuckets.indexOf(bucket.bucket);
-
-        if (index > -1) {
-            selectedBuckets.splice( index, 1 );
-        } else {
-            selectedBuckets.push( bucket.bucket );
-        }
-
-        this.state.selectedBuckets = selectedBuckets;
-        this.setState(this.state);
     }
 
     makeRecommendationCounts(coverage, play) {
@@ -231,7 +228,21 @@ class LaunchComponent extends Component {
         return sections;
     }
 
-    makeBuckets(coverage, play, buckets) {
+    bucketClick = (bucket, coverage, play) => {
+        var selectedBuckets = this.state.selectedBuckets,
+            index = selectedBuckets.indexOf(bucket.bucket);
+
+        if (index > -1) {
+            selectedBuckets.splice( index, 1 );
+        } else {
+            selectedBuckets.push( bucket.bucket );
+        }
+
+        this.state.selectedBuckets = selectedBuckets;
+        this.setState(this.state);
+    }
+
+    makeBuckets(coverage, play, buckets, opts) {
         var _buckets = [],
             total = 0,
             vm = this,
@@ -248,7 +259,7 @@ class LaunchComponent extends Component {
 
                 _buckets.push(
                     <div className={`bucket ${(selected ? 'selected' : '')}`} disabled={(bucket.count <= 0)} onClick={() => { if(bucket.count) { vm.bucketClick(bucket, coverage, play) } }}>
-                        <div className={'bucket-text'}>
+                        <div className={'bucket-text'} title={`${bucket.count} accounts (${percent}%)`}>
                             <h3>{bucket.bucket}</h3>
                             <em>{bucket.count} ({percent}%)</em>
                         </div>
@@ -265,33 +276,33 @@ class LaunchComponent extends Component {
          */
         let vm = this,
             _noBuckets = [{
-            bucket: 'A',
-            count: 0,
-        },{
-            bucket: 'B',
-            count: 0,
-        },{
-            bucket: 'C',
-            count: 0,
-        },{
-            bucket: 'D',
-            count: 0,
-        },{
-            bucket: 'E',
-            count: 0,
-        },{
-            bucket: 'F',
-            count: 0,
-        }],
-        unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
-        hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
-        noBuckets = (hasBuckets ? null : _noBuckets),
-        littleBuckets = false;
+                bucket: 'A',
+                count: 0,
+            },{
+                bucket: 'B',
+                count: 0,
+            },{
+                bucket: 'C',
+                count: 0,
+            },{
+                bucket: 'D',
+                count: 0,
+            },{
+                bucket: 'E',
+                count: 0,
+            },{
+                bucket: 'F',
+                count: 0,
+            }],
+            unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
+            hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
+            noBuckets = (hasBuckets ? null : _noBuckets),
+            littleBuckets = true;
 
         if(coverage) {
             return (
                 <Aux>
-                    <h2>Model Ratings</h2>
+                    <h2>Ratings</h2>
                     <LeHPanel 
                         hstretch={!littleBuckets} 
                         halignment={LEFT} 
@@ -303,7 +314,7 @@ class LaunchComponent extends Component {
                     <div className={'unscored-accounts-container'}>
                         <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
                         <label for="unscored">
-                            Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> Unscored Accounts
+                            Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> unscored accounts
                         </label>
                     </div>
                 </Aux>
@@ -354,28 +365,30 @@ class LaunchComponent extends Component {
     makeStaticList(list) {
         var options = [];
 
-        if(!list[0].loadingState) {
-            options.push(<option value={''}>-- Create new list --</option>);
-        }
-        list.forEach(function(item) {
-            options.push(<option value={item.id}>{item.name}</option>);
-        });
+        if(list) {
+            if(!list[0].loadingState) {
+                options.push(<option value={''}>-- Create new list --</option>);
+            }
+            list.forEach(function(item) {
+                options.push(<option value={item.id}>{item.name}</option>);
+            });
 
-        return(
-            <select id={'staticList'} onChange={(event) => {
-                if(!this.state.showNewListInput && event.target.value === '') {
-                    this.state.showNewFolderName = true;
-                } else {
-                    let item = list.find(function(_item) { return (_item.id == event.target.value) });
-                    this.state.showNewFolderName = false;
-                    this.state.audienceParams.folderName = (item && item.name ? item.name : '');
-                }
-                this.state.audienceParams.audienceId = event.target.value;
-                this.setState(this.state);
-            }}>
-                {options}
-            </select>
-        );
+            return(
+                <select id={'staticList'} onChange={(event) => {
+                    if(!this.state.showNewListInput && event.target.value === '') {
+                        this.state.showNewFolderName = true;
+                    } else {
+                        let item = list.find(function(_item) { return (_item.id == event.target.value) });
+                        this.state.showNewFolderName = false;
+                        this.state.audienceParams.folderName = (item && item.name ? item.name : '');
+                    }
+                    this.state.audienceParams.audienceId = event.target.value;
+                    this.setState(this.state);
+                }}>
+                    {options}
+                </select>
+            );
+        }
     }
 
     getStaticList(programName) {
@@ -603,7 +616,6 @@ class LaunchComponent extends Component {
                             })}
                         </div>
                         <div className={'launch-section account-options'}>
-                            <h2>Account Options</h2>
                             <ul>
                                 <li>
                                     <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
@@ -617,7 +629,6 @@ class LaunchComponent extends Component {
                         </div>
                         {this.makeProgramsList(this.state.programs)}
                         <div className="launch-section schedule">
-                            <h2>Launch Schedule</h2>
                             <label for="schedule">Launch</label> 
                             <select id="schedule" onChange={this.clickLaunchSchedule}>
                                 <option>Once</option>

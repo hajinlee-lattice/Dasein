@@ -35,6 +35,7 @@
                 padding: 0 0.7%;
                 max-width: 350px;
                 padding-right: 30px;
+                padding-left: 45px;
                 position: relative;
                 &:after {
                     position: absolute;
@@ -45,10 +46,23 @@
                     right: -1px;
                     border-right: 1px solid rgba(255,255,255,.55);
                 }
+                &:before {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    content: '';
+                    display: block;
+                    height: 36px;
+                    width: 27px;
+                    background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
+                    background-size: contain;
+                }
                 .play-type {
                     position: relative;
                     color: white;
                     user-select: none;
+                    margin-bottom: 2px;
                     h4 {
                         opacity: .7;
                         color: inherit;
@@ -90,24 +104,11 @@
                     }
                 }
                 .play-name {
-                    position: relative;
-                    padding-left: 45px;
-                    &:after {
-                        position: absolute;
-                        left: 0;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        content: '';
-                        display: block;
-                        height: 36px;
-                        width: 27px;
-                        background: url(/assets/images/campaignoverview/campaign-ico.png) no-repeat 0.7% center;
-                        background-size: contain;
-                    }
                     h1 {
                         font-size: 24px;
                         white-space: nowrap;
                         text-overflow: ellipsis;
+                        margin-bottom: 2px;
                         span {
                             padding: 0;
                         }
@@ -121,11 +122,21 @@
                         font-size: 12px;
                         span {
                             white-space: nowrap;
-                            border-right: 1px solid rgba(255,255,255,0.55);
-                            padding-right: 6px;
-                            margin-right: 6px;
+                            padding-right: 10px;
+                            margin-right: 10px;
+                            &.right-border {
+                                position: relative;
+                                &:after {
+                                    position: absolute;
+                                    content: '';
+                                    display: block;
+                                    top: 5%;
+                                    bottom: 15%;
+                                    right: -1px;
+                                    border-right: 1px solid rgba(255,255,255,.25);
+                                }
+                            }
                             &:last-child {
-                                border-right: none;
                                 margin: 0;
                                 padding: 0;
                             }

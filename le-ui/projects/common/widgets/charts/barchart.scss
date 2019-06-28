@@ -63,7 +63,7 @@
                     display: flex;
                     span {
                         flex: 1 1 auto;
-                        text-align: center;
+                        text-align: right;
                     }
                 }
                 &.bar-container {
@@ -252,7 +252,7 @@
                         & > .bar-lifts {
                             & > li {
                                 & > span {
-                                    bottom: -15px;
+                                    bottom: -21px;
                                 }
                             }
                         }

@@ -43,7 +43,8 @@ export default class OverviewComponent extends Component {
     }
 
     componentWillUnmount() {
-      this.unsubscribe();
+        actions.clearInitialState();
+        this.unsubscribe();
     }
 
     handleChange = () => {
