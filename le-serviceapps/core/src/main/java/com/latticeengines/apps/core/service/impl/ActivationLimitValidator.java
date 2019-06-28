@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -64,7 +63,6 @@ public class ActivationLimitValidator extends AttrValidator {
         List<AttrConfig> inactiveConfigs = LimitValidatorUtils.generateInterceptionConfig(existingActiveConfigs,
                 userSelectedInactiveConfigs);
         checkDataLicense(activeConfigs, inactiveConfigs, userSelectedActiveConfigs, validation);
-        checkSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs, validation);
     }
 
     private void checkDataLicense(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
@@ -94,36 +92,6 @@ public class ActivationLimitValidator extends AttrValidator {
                         license.getDescription(), limit, validation);
             }
 
-        }
-    }
-
-    // check category limit
-    private void checkSystemLimit(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
-            List<AttrConfig> userSelectedActiveConfigs, AttrValidation validation) {
-        checkDetailSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs,
-                Category.ACCOUNT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT, validation);
-        checkDetailSystemLimit(activeConfigs, inactiveConfigs, userSelectedActiveConfigs,
-                Category.CONTACT_ATTRIBUTES, (int) AbstractAttrConfigService.DEFAULT_LIMIT, validation);
-    }
-
-    private void checkDetailSystemLimit(List<AttrConfig> activeConfigs, List<AttrConfig> inactiveConfigs,
-            List<AttrConfig> userSelectedActiveConfigs, Category category, int limit, AttrValidation validation) {
-        List<AttrConfig> list = activeConfigs.stream()
-                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
-                .collect(Collectors.toList());
-        List<AttrConfig> inactiveList = inactiveConfigs.stream()
-                .filter(e -> category.equals(e.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class)))
-                .collect(Collectors.toList());
-        int number = list.size() - inactiveList.size();
-        Type type = ValidationErrors.Type.EXCEED_SYSTEM_LIMIT;
-        String pattern = ValidationMsg.Errors.EXCEED_LIMIT;
-        if (number > limit) {
-            userSelectedActiveConfigs.forEach(config -> {
-                if (category.equals(config.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))) {
-                    addErrorMsg(type, String.format(pattern, number, category.name(), limit), config);
-                }
-            });
-            writeSingleValidation(userSelectedActiveConfigs, type, pattern, number, category.name(), limit, validation);
         }
     }
 
