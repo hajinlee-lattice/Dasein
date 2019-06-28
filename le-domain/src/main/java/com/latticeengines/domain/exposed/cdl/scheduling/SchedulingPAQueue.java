@@ -16,15 +16,18 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     private final Class<T> clz;
 
+    private final TimeClock timeClock;
+
     private final boolean isRetryQueue;
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz) {
-        this(systemStatus, clz, false);
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock) {
+        this(systemStatus, clz, timeClock, false);
     }
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, boolean isRetryQueue) {
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, boolean isRetryQueue) {
         this.systemStatus = systemStatus;
         this.clz = clz;
+        this.timeClock = timeClock;
         this.isRetryQueue = isRetryQueue;
         priorityQueue = new PriorityQueue<>();
     }
@@ -181,7 +184,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
                               List<Constraint> constraintList) {
         boolean violated = false;
         for (Constraint constraint : constraintList) {
-            if (constraint.checkViolated(systemStatus, tenantActivity)) {
+            if (constraint.checkViolated(systemStatus, tenantActivity, timeClock)) {
                 violated = true;
                 break;
             }
