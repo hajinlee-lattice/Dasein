@@ -86,14 +86,14 @@
       Select your unique IDs to de-duplicate your contact records.
     </p>
   </div>
-  <form name="form">
-    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
+  <ng-form name="vm.form">
+    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(vm.form)">
       <div class="id-options-item">
         <select
           class="form-control"
           ng-model="vm.fieldMapping.contact"
-          ng-init="vm.checkValidDelay(form)"
-          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+          ng-init="vm.checkValidDelay(vm.form)"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, vm.form)"
         >
           <option value="">{{ vm.ignoredFieldLabel }}</option>
           <option
@@ -114,7 +114,7 @@
         <input
           type="checkbox"
           ng-model="vm.match"
-          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, vm.form)"
         />
         Match this ID to Contact ID field in Lattice
       </label>
@@ -125,7 +125,7 @@
         >
       </p>
     </div>
-  </form>
+  <!-- </form> -->
   <!--  -->
   <!-- MATCH IDs -->
   <div class="match-ids-multi-templates">
@@ -139,7 +139,7 @@
       <br />
     </div>
 
-    <form name="form-matching">
+    <!-- <form name="form-matching"> -->
       <ul class="field-mapping multi-templates">
         <li class="header">
           <ul class="match-id-header">
@@ -167,10 +167,10 @@
             </li>
             <li class="system-type">
               <select class="form-control" ng-model="vm.matchIdItems[$index].system" ng-change="vm.updateSystem($index)"> 
-                <!-- <option value="select">-- Select System --</option> -->
+                <!-- <option value="">-- Select System --</option> -->
                 <option
                   ng-repeat="s in vm.systems"
-                  ng-selected="s == vm.systems"
+                  value="{{s.name}}"
                   ng-required="true"
                 >{{s.displayName}}</option>
               </select>
@@ -181,7 +181,7 @@
           </ul>
         </li>
       </ul>
-    </form>
+    </ng-form>
     <button
       class="button gray-button match-id-add"
       type="button"
