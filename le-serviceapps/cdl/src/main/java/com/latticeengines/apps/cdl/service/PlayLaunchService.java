@@ -15,8 +15,6 @@ public interface PlayLaunchService {
 
     void deleteByLaunchId(String launchId, boolean hardDelete);
 
-    void cancelIfNonTerminal(String launchId);
-
     PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp);
 
     List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> launchStates);

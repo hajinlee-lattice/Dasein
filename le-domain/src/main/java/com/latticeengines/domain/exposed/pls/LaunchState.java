@@ -64,19 +64,26 @@ public enum LaunchState {
 
     public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
         switch (jobStatus) {
-            case FAILED:
-                return Failed;
-            case READY:
-            case PENDING:
-            case RUNNING:
-                return Launching;
-            case SKIPPED:
-            case CANCELLED:
-                return Canceled;
-            case COMPLETED:
-                return Launched;
-            default:
-                return UnLaunched;
+        case FAILED:
+            return Failed;
+        case READY:
+        case PENDING:
+        case RUNNING:
+            return Launching;
+        case SKIPPED:
+        case CANCELLED:
+            return Canceled;
+        case COMPLETED:
+            return Launched;
+        default:
+            return UnLaunched;
         }
+    }
+
+    public Boolean isTerminal() {
+        if (this == Queued || this == UnLaunched || this == Launching) {
+            return false;
+        }
+        return true;
     }
 }
