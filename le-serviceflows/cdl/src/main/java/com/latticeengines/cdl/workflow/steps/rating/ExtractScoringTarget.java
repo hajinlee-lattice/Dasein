@@ -7,10 +7,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -81,6 +84,17 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
             result = getEventScoringTarget(frontEndQuery);
         }
         return result;
+    }
+
+    @Override
+    protected Schema getDummyRecordSchema() {
+        return AvroUtils.constructSchema("dummyScoringTarget", Arrays.asList(
+                Pair.of(InterfaceName.__Composite_Key__.name(), String.class),
+                Pair.of(InterfaceName.AccountId.name(), String.class),
+                Pair.of(InterfaceName.PeriodId.name(), Long.class),
+                Pair.of(InterfaceName.ModelId.name(), String.class),
+                Pair.of("Model_GUID", String.class)
+        ));
     }
 
     private FrontEndQuery customEventQuery(RatingEngineSummary engineSummary) {
