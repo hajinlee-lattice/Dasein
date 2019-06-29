@@ -4,14 +4,13 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
@@ -61,7 +59,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     protected abstract List<RatingEngineType> getTargetEngineTypes();
     protected abstract HdfsDataUnit extractTargets(RatingModelContainer container);
     protected abstract boolean isRuleBased();
-    protected abstract Schema getDummyRecordSchema();
+    protected abstract GenericRecord getDummyRecord();
 
     void setupExtractStep() {
         customerSpace = parseCustomerSpace(configuration);
@@ -194,26 +192,14 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         long count = result.getCount();
         if (count == 0) {
             String engineId = container.getEngineSummary().getId();
-            String modelId = container.getModel().getId();
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             try {
                 return retry.execute(ctx -> {
-                    String avroPath = result.getPath() + "/part-00000.avro";
+                    String avroPath = result.getPath() + "/part-" + UUID.randomUUID().toString() + ".avro";
                     log.info("(Attempt=" + ctx.getRetryCount() + ") write dummy record for " + engineId //
                             + " at " + avroPath);
-                    Schema schema = getDummyRecordSchema();
-                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                    String accountId = "__Dummy__Account__";
-                    builder.set(InterfaceName.__Composite_Key__.name(), accountId + "_" + modelId);
-                    builder.set(InterfaceName.AccountId.name(), accountId);
-                    builder.set(InterfaceName.ModelId.name(), modelId);
-                    if (!isRuleBased()) {
-                        builder.set(InterfaceName.PeriodId.name(), 0L);
-                        String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
-                        builder.set("Model_GUID", modelGuid);
-                    }
-                    GenericRecord record = builder.build();
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroPath, //
+                    GenericRecord record = getDummyRecord();
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, record.getSchema(), avroPath, //
                             Collections.singletonList(record), true);
                     return true;
                 });
