@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -79,6 +80,9 @@ public class PlayResource {
 
     @Inject
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
+
+    @Inject
+    private CampaignLaunchWorkflowSubmitter campaignLaunchWorkflowSubmitter;
 
     @Inject
     private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
@@ -395,7 +399,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
-        return playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
     }
 
@@ -406,7 +410,9 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
-            boolean isDryRunMode) {
+            boolean isDryRunMode, //
+            @RequestParam(value = "use-spark", required = false, defaultValue = "false") //
+            boolean useSpark) {
         if (StringUtils.isEmpty(playName)) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank play Id" });
         }
@@ -427,7 +433,12 @@ public class PlayResource {
         }
         // this dry run flag is useful in writing robust testcases
         if (!isDryRunMode) {
-            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            String appId;
+            if (useSpark) {
+                appId = campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            } else {
+                appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            }
             playLaunch.setApplicationId(appId);
         }
 
@@ -628,15 +639,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (playLaunch.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }
-
 }
