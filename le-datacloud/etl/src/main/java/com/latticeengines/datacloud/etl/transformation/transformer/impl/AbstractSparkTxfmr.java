@@ -129,6 +129,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     @SuppressWarnings("unchecked")
     protected boolean transformInternal(TransformationProgress progress, String workflowDir,
                                         TransformStep step) {
+        ThreadLocal<LivySession> sessionHolder = new ThreadLocal<>();
         try {
             sparkJobConfig = getSparkJobConfig(step.getConfig());
 
@@ -144,7 +145,6 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             if (MapUtils.isNotEmpty(extraProps)) {
                 sparkProps.putAll(extraProps);
             }
-            ThreadLocal<LivySession> sessionHolder = new ThreadLocal<>();
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             SparkJobResult sparkJobResult = retry.execute(ctx -> {
                 log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
@@ -164,6 +164,10 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
+        } finally {
+            if (sessionHolder.get() != null) {
+                livySessionService.stopSession(sessionHolder.get());
+            }
         }
         return true;
     }
