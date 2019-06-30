@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFiel
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.metadata.entitymgr.AttributeEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.hive.util.HiveUtils;
@@ -71,6 +72,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Value("${metadata.hive.enabled:false}")
     private boolean hiveEnabled;
+
+    @Autowired
+    protected AttributeEntityMgr attributeEntityMgr;
 
     @Autowired
     protected TableEntityMgr tableEntityMgr;

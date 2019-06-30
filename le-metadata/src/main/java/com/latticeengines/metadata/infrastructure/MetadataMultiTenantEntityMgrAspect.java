@@ -1,7 +1,10 @@
 package com.latticeengines.metadata.infrastructure;
 
+import java.util.Arrays;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,6 +12,8 @@ import org.aspectj.lang.annotation.Before;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
@@ -27,6 +32,10 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Inject
     private TableTypeHolder tableTypeHolder;
+
+    @Autowired
+    @Qualifier(value = "entityManagerFactoryReader")
+    private EntityManager entityManagerReader;
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..))")
     public void allTableMethods(JoinPoint joinPoint) {
@@ -54,6 +63,12 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.RowRuleResultEntityMgrImpl.*(..))")
     public void allRowRuleMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.AttributeEntityMgrImpl.*(..)) && " +
+            " !execution(* com.latticeengines.metadata.entitymgr.impl.AttributeEntityMgrImpl.*ByTablePid(..))")
+    public void allAttributeMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManagerReader));
     }
 
 }
