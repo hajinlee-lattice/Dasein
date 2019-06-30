@@ -35,19 +35,22 @@ class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
 
   // This is how to update your buffer schema given an input.
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val currentMap = input.getValuesMap[Any](input.schema.fieldNames)
-    val ele = Map(PlaymakerConstants.Email -> currentMap.getOrElse(InterfaceName.Email.name(), null), //
-    			  PlaymakerConstants.Address -> currentMap.getOrElse(InterfaceName.Address_Street_1.name(), null), //
-    			  PlaymakerConstants.Phone -> currentMap.getOrElse(InterfaceName.PhoneNumber.name(), null), //
-    			  PlaymakerConstants.State -> currentMap.getOrElse(InterfaceName.State.name(), null), //
-    			  PlaymakerConstants.ZipCode -> currentMap.getOrElse(InterfaceName.PostalCode.name(), null), //
-    			  PlaymakerConstants.Country -> currentMap.getOrElse(InterfaceName.Country.name(), null), //
+    val ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
+    			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
+    			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
+    			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
+    			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
+    			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
     			  PlaymakerConstants.SfdcContactID -> "", //
-    			  PlaymakerConstants.City -> currentMap.getOrElse(InterfaceName.City.name(), null), //
-    			  PlaymakerConstants.ContactID -> currentMap.getOrElse(InterfaceName.ContactId.name(), null), //
-    			  PlaymakerConstants.Name -> currentMap.getOrElse(InterfaceName.ContactName.name(), null))
+    			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
+    			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
+    			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()))
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele   
+  }
+  
+  private def getInputValue(input: Row, key: String): String = {
+      return Option(input.getAs[Any](inputSchema.fieldIndex(key))).map(_.toString).getOrElse(null)
   }
 
   // This is how to merge two objects with the bufferSchema type.
