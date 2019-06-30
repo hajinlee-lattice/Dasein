@@ -18,8 +18,8 @@ public interface AttributeRepository extends BaseJpaRepository<Attribute, Long> 
 
     List<Attribute> findByTable_Pid(Long tablePid);
 
-    @Query("select att from Attribute att where att.name = ?1 and att.table.name = ?2")
-    List<Attribute> getByNameAndTableName(String attributeName, String tableName);
+    @Query("select att from Attribute att where att.name in ?1 and att.table.name = ?2 and att.table.tableTypeCode = ?3")
+    List<Attribute> getByNamesAndTableName(List<String> attributeNames, String tableName, int tableTypeCode);
 
     List<Attribute> findByName(String name);
 

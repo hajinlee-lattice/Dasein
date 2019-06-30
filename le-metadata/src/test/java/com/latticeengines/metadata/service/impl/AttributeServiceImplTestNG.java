@@ -15,8 +15,9 @@ public class AttributeServiceImplTestNG extends AttributeEntityMgrImplTestNG {
     @Inject
     private AttributeService attributeService;
 
-    protected List<Attribute> getAttributesByNameAndTableName(String attributeName, String tableName) {
-        return attributeService.getAttributesByNameAndTableName(attributeName, tableName);
+    protected List<Attribute> getAttributesByNamesAndTableName(List<String> attributeNames, String tableName,
+                                                               int tableTypeCode) {
+        return attributeService.getAttributesByNamesAndTableName(attributeNames, tableName, tableTypeCode);
     }
 
     protected long countByTablePid(Long tablePid) {

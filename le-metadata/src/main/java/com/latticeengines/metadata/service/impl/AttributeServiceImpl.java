@@ -17,8 +17,9 @@ public class AttributeServiceImpl implements AttributeService {
     private AttributeEntityMgr attributeEntityMgr;
 
     @Override
-    public List<Attribute> getAttributesByNameAndTableName(String attributeName, String tableName) {
-        return attributeEntityMgr.getAttributesByNameAndTableName(attributeName, tableName);
+    public List<Attribute> getAttributesByNamesAndTableName(List<String> attributeNames, String tableName,
+                                                            int tableTypeCode) {
+        return attributeEntityMgr.getAttributesByNamesAndTableName(attributeNames, tableName, tableTypeCode);
     }
 
     @Override

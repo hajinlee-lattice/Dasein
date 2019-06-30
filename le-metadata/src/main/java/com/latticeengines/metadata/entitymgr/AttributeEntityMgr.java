@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public interface AttributeEntityMgr extends BaseEntityMgrRepository<Attribute, Long> {
 
-    List<Attribute> getAttributesByNameAndTableName(String attributeName, String tableName);
+    List<Attribute> getAttributesByNamesAndTableName(List<String> attributeNames, String tableName, int tableTypeCode);
 
     long countByTablePid(Long tablePid);
 

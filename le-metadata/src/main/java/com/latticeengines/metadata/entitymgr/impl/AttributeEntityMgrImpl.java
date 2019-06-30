@@ -32,8 +32,9 @@ public class AttributeEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Attribut
 
     @Override
     @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Attribute> getAttributesByNameAndTableName(String attributeName, String tableName) {
-        return attributeRepository.getByNameAndTableName(attributeName, tableName);
+    public List<Attribute> getAttributesByNamesAndTableName(List<String> attributeNames, String tableName,
+                                                            int tableTypeCode) {
+        return attributeRepository.getByNamesAndTableName(attributeNames, tableName, tableTypeCode);
     }
 
     @Override
