@@ -28,6 +28,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Filter;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -48,6 +49,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_ATTRIBUTE")
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect( //
