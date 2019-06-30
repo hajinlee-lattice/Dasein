@@ -181,7 +181,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
     val topNCount = playLaunch.getTopNCount
     val joinKey: String = playLaunchContext.getJoinKey
-    println(s"joinKey is: $joinKey")
+    println("----- BEGIN SCRIPT OUTPUT -----")
+	println(s"joinKey is: $joinKey")
+	println("----- END SCRIPT OUTPUT -----")
 
     // Read Input
     val accountTable: DataFrame = lattice.input.head
@@ -234,10 +236,16 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       count(lit(1)).as("CONTACT_NUM") //
     )
     //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
+    println("----- BEGIN SCRIPT OUTPUT -----")
+	aggregatedContacts.printSchema
+	println("----- END SCRIPT OUTPUT -----")
 
     // join
     val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
     //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
+    println("----- BEGIN SCRIPT OUTPUT -----")
+	recommendations.printSchema
+	println("----- END SCRIPT OUTPUT -----")
     val contactCount = recommendations.agg( //
     	sum("CONTACT_NUM")
     ).first.get(0)
