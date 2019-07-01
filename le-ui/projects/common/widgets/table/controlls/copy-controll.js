@@ -27,7 +27,6 @@ class CopyComponent extends Component {
     }
   }
   render() {
-    console.log('TEST');
     return (
       <li
         className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
