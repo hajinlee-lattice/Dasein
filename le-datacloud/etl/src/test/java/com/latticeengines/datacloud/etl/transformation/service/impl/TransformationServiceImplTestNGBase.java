@@ -14,13 +14,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
@@ -49,22 +50,22 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     private static final int MAX_LOOPS = 100;
 
-    @Autowired
+    @Inject
     TransformationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     protected PipelineTransformationService pipelineTransformationService;
 
-    @Autowired
+    @Inject
     protected SourceService sourceService;
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     Source source;
