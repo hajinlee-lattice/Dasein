@@ -93,10 +93,10 @@ public class PurchaseHistoryResource {
                                 maxAndMinTransactionDates.get(0), maxAndMinTransactionDates.get(1))));
             }
         } catch (LedpException le) {
-            log.error("Failed to populate purchase history for account: " + crmAccountId, le);
+            log.warn("Failed to populate purchase history for account: " + crmAccountId, le.getMessage());
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to populate purchase history for account: " + crmAccountId, e);
+            log.error("Failed to populate purchase history for account: " + crmAccountId, e.getMessage());
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
 
@@ -128,10 +128,10 @@ public class PurchaseHistoryResource {
                     JsonUtils.convertList(periodTransactions, PeriodTransaction.class),
                     maxAndMinTransactionDates.get(0), maxAndMinTransactionDates.get(1))));
         } catch (LedpException le) {
-            log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, le);
+            log.warn("Failed to populate purchase history for segment: " + spendAnalyticsSegment, le.getMessage());
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, e);
+            log.error("Failed to populate purchase history for segment: " + spendAnalyticsSegment, e.getMessage());
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
 

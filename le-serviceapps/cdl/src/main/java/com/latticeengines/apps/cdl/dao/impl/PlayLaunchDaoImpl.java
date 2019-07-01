@@ -18,6 +18,7 @@ import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -385,7 +386,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         if (orgIdFilterNeeded) {
             query.setParameter(DEST_ORG_ID, orgId.trim());
-            query.setParameter(DEST_SYS_TYPE, externalSysType.trim());
+            query.setParameter(DEST_SYS_TYPE, CDLExternalSystemType.valueOf(externalSysType.trim()));
         }
 
         if (CollectionUtils.isNotEmpty(states)) {
