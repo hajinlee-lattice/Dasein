@@ -19,7 +19,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -34,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
+@Component
 public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SourceToS3PublisherTestNG.class);
@@ -77,6 +80,10 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         finish(progress);
         verifyPublishExistS3(progress);
         cleanupProgressTables();
+    }
+
+    @AfterClass
+    private void destroy() {
         cleanupS3();
     }
 
@@ -224,22 +231,11 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
      *****************/
 
     private void cleanupS3() {
-        cleanupSourcesOnS3(baseSrc1, basedSourceVersion);
-        cleanupSourcesOnS3(baseSrc2, basedSourceVersion);
-        cleanupSourcesOnS3(baseSrc3, basedSourceVersion);
-        cleanupSourcesOnS3(baseSrc4, basedSourceVersion);
-    }
-
-    private void cleanupSourcesOnS3(Source baseSource, String version) {
+        String podDir = hdfsPathBuilder.podDir().toString();
         try {
-            String snapshotPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), version).toString();
-            String schemaPath = hdfsPathBuilder.constructSchemaDir(baseSource.getSourceName(), version).toString();
-            String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource.getSourceName()).toString();
-            cleanupS3Path(snapshotPath);
-            cleanupS3Path(schemaPath);
-            cleanupS3Path(versionFilePath);
-        } catch (Exception ex) {
-            throw new RuntimeException("Fail to cleanup sources on S3", ex);
+            cleanupS3Path(podDir);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to clean up pod " + podDir, e);
         }
     }
 
