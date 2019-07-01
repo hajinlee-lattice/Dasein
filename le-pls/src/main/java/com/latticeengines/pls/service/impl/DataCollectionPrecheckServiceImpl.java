@@ -93,7 +93,6 @@ public class DataCollectionPrecheckServiceImpl implements DataCollectionPrecheck
 
         for (Table clpTable : transactionTemplateTables) {
             for (String attribute : clpTable.getAttributeNames()) {
-                log.info(JsonUtils.serialize(clpTable));
                 if (attribute.equalsIgnoreCase(InterfaceName.Cost.name())) {
                     prechecks.setDisableMargin(false);
                     break;

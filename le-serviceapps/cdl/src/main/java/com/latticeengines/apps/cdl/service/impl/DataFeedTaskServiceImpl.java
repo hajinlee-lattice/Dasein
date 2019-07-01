@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -201,9 +202,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         List<Table> tables = new LinkedList<>();
         if (!CollectionUtils.isEmpty(datafeedTasks)) {
             for (DataFeedTask dataFeedTask : datafeedTasks) {
-                Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace),
-                        dataFeedTask.getImportTemplate().getName(), true);
-                tables.add(metaData);
+                tables.add(dataFeedTask.getImportTemplate());
             }
         }
         return tables;
