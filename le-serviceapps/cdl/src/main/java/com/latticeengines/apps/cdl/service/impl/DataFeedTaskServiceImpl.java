@@ -15,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
