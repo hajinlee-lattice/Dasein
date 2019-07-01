@@ -47,6 +47,10 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     // Source with multiple files in snapshot folder
     private GeneralSource baseSrc4 = new GeneralSource("TestSource4");
 
+    // Place holder of target source whose name is used as pod
+    private GeneralSource source = new GeneralSource(
+            SourceToS3PublisherTestNG.class.getSimpleName() + UUID.randomUUID().toString());
+
     // Sources with schema directory
     private Set<String> expectedSrcWithSchema = ImmutableSet.of( //
             baseSrc1.getSourceName(), //
@@ -246,8 +250,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     }
 
     @Override
+    protected Source getSource() {
+        return source;
+    }
+
+    @Override
     protected String getTargetSourceName() {
-        return SourceToS3PublisherTestNG.class.getSimpleName() + UUID.randomUUID().toString();
+        return source.getSourceName();
     }
 
     @Override
