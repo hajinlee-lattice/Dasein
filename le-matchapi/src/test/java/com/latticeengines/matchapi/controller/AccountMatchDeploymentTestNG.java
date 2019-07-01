@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -142,7 +145,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
      *********************************************************************/
     // TODO: Change to duns = 079942718 when parent duns feature is
     // enabled.
-    // Schema:Domain, DUNS, Name, Country, State, City, AccountId, SfdcId
+    // Schema:Domain, DUNS, Name, Country, State, City, CustomerAccountId, SfdcId
     private static final Object[][] DATA_ALL_KEYS = {
             { "C0_01", "google.com", "060902413", "google", "usa", "ca", "mountain view", "acc_id", "sfdc_id" }, //
             { "C0_02", "amazon.com", "884745530", "amazon", "usa", "washington", "seattle", "acc_id_02", "sfdc_id_02" }, //
@@ -153,7 +156,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
      ************************************************************************/
     // TODO: Change to duns = 079942718 when parent duns feature is
     // enabled
-    // Schema: TestId, Domain, DUNS, Name, Country, State, City, AccountId,
+    // Schema: TestId, Domain, DUNS, Name, Country, State, City, CustomerAccountId,
     // SfdcId
     private static final Object[][] DATA_PARTIAL_KEYS = {
             // case 1: duns only
@@ -349,6 +352,17 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C13_09", null, "google.com", null, "public@aol.com" }, //
     };
 
+    // make sure system ID match is case insensitive.
+    // Schema:Domain, DUNS, Name, Country, State, City, CustomerAccountId, SfdcId
+    private static final Object[][] DATA_ID_CASEINSENSITIVE_MATCH = {
+            // all the rows will match to the same account, no conflict in both IDs
+            { "C14_01", null, null, null, null, null, null, " AabBcd123fGHijkl11xYZ  ", "   AbC124" }, //
+            { "C14_02", null, null, null, null, null, null, "aabbcd123fghijkl11xyz  ", "aBC124" }, //
+            { "C14_03", null, null, null, null, null, null, " AABBCD123FGHIJKL11XYZ", "ABC124   " }, //
+            { "C14_04", null, null, null, null, null, null, "AabbCd123FghiJKL11XYz", "abc124" }, //
+            { "C14_05", null, null, null, null, null, null, "aABBcd123FGHIjkl11xyz", "ABc124   " }, //
+    };
+
 
     // prepare in the run time because it needs EntityId got from non-fetch-only
     // mode test
@@ -359,12 +373,13 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String CASE_PARTIAL_KEYS = "PARTIAL_KEYS";
     private static final String CASE_LEAD_TO_ACCT = "LEAD_TO_ACCT";
     private static final String CASE_LEAD_TO_ACCT_NOAID = "LEAD_TO_ACCT_NOAID";
+    private static final String CASE_ID_CASEINSENSITIVE_MATCH = "SYSTEM_ID_CASE_INSENSITIVE";
 
     private String googleEntityId = null;
 
     // FIXME: Disable all the deployment tests related to Entity Match to tune
     // Decision Graph in QA with PM
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment")
     public void init() {
         HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
@@ -375,7 +390,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         tenant = tenantService.findByTenantId(tenant.getId());
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment")
     public void destroy() {
         tenantService.discardTenant(tenant);
     }
@@ -421,6 +436,12 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         MatchInput input = prepareBulkMatchInputLeadToAcct(CASE_LEAD_TO_ACCT_NOAID, false,
                 MatchKey.Email.name(), true);
         runAndVerify(input, CASE_LEAD_TO_ACCT_NOAID);
+    }
+
+    @Test(groups = "deployment", priority = 6)
+    public void testSystemIdCaseInsensitiveMatch() {
+        MatchInput input = prepareBulkMatchInput(CASE_ID_CASEINSENSITIVE_MATCH);
+        verifySystemIdCaseInsensitiveMatch(runAndVerifyBulkMatch(input, this.getClass().getSimpleName()));
     }
 
     private void publishBaseSet() {
@@ -571,6 +592,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         case CASE_LEAD_TO_ACCT_NOAID:
             uploadAvroData(DATA_LEAD_TO_ACCT_NOAID, Arrays.asList(FIELDS_LEAD_TO_ACCT_NOAID), SCHEMA_LEAD_TO_ACCT_NOAID,
                     avroDir, CASE_LEAD_TO_ACCT_NOAID + ".avro");
+            break;
+        case CASE_ID_CASEINSENSITIVE_MATCH:
+            uploadAvroData(DATA_ID_CASEINSENSITIVE_MATCH, Arrays.asList(FIELDS), SCHEMA, avroDir,
+                    CASE_ID_CASEINSENSITIVE_MATCH + ".avro");
             break;
         default:
             throw new UnsupportedOperationException("Unknown test scenario " + scenario);
@@ -734,6 +759,52 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID));
             Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_ACCOUNTID).longValue(), 0L);
         }
+    }
+
+    /*
+     * verify that all records match to the same account and system IDs in output
+     * are exactly the same as input.
+     */
+    private void verifySystemIdCaseInsensitiveMatch(@NotNull MatchCommand command) {
+        Assert.assertNotNull(command);
+        Assert.assertNotNull(command.getResultLocation());
+        Map<String, Object[]> inputTestData = generateTestDataMap(DATA_ID_CASEINSENSITIVE_MATCH, 0);
+        int caidIdx = ArrayUtils.indexOf(FIELDS, InterfaceName.CustomerAccountId.name());
+        int sfdcidIdx = ArrayUtils.indexOf(FIELDS, SFDC_ID);
+
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration,
+                command.getResultLocation() + "/*.avro");
+        // entityId => testCaseId
+        Map<String, List<String>> testCaseIdMap = new HashMap<>();
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+
+            // all IDs should exist
+            String testId = record.get(TEST_ID).toString();
+            String customerAccountId = record.get(InterfaceName.CustomerAccountId.name()).toString();
+            String sfdcId = record.get(SFDC_ID).toString();
+            String entityId = record.get(ENTITY_ID_FIELD).toString();
+
+            testCaseIdMap.putIfAbsent(entityId, new ArrayList<>());
+            testCaseIdMap.get(entityId).add(testId);
+            Assert.assertTrue(inputTestData.containsKey(testId),
+                    String.format("Test ID [%s] should be in the input data", testId));
+
+            // system IDs in match output should be exactly the same as in input
+            Object[] row = inputTestData.get(testId);
+            Assert.assertEquals(customerAccountId, (String) row[caidIdx],
+                    String.format("CustomerAccountId in output should be the same as in input. TestId=%s", testId));
+            Assert.assertEquals(sfdcId, (String) row[sfdcidIdx],
+                    String.format("SFDC ID in output should be the same as in input. TestId=%s", testId));
+        }
+
+        Assert.assertEquals(testCaseIdMap.size(), 1,
+                String.format("All records should match to the same account. TestCaseIdMap=%s", testCaseIdMap));
+    }
+
+    // helper to generate map of (testcase => one row of test data)
+    private Map<String, Object[]> generateTestDataMap(Object[][] data, int testIdIdx) {
+        return Arrays.stream(data).collect(Collectors.toMap(row -> (String) row[0], row -> row));
     }
 
     private String extractCaseGroup(String caseId) {

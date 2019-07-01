@@ -732,6 +732,46 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         }
     }
 
+    /**
+     * System ID matching should be case in-sensitive
+     */
+    @Test(groups = "functional", dataProvider = "caseInsensitiveSystemIdMatch", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testCaseInsensitiveSystemIdMatch(String customerAccountId) {
+        Tenant tenant = newTestTenant();
+
+        // populate original account ID
+        String expectedEntityId = matchCustomerAccountId(customerAccountId, tenant);
+        Assert.assertNotNull(expectedEntityId);
+
+        // match again with the same ID
+        String entityId = matchCustomerAccountId(customerAccountId, tenant);
+        Assert.assertEquals(entityId, expectedEntityId, String
+                .format("Match again with CustomerAccountId=%s should match to the same account", customerAccountId));
+
+        // match with lower case ID
+        String lowerCaseEntityId = matchCustomerAccountId(customerAccountId.toLowerCase(), tenant);
+        Assert.assertEquals(lowerCaseEntityId, expectedEntityId, String.format(
+                "Matching with lower case ID should match to the same account as original one. CustomerAccountId=%s",
+                customerAccountId));
+
+        // match with upper case ID
+        String upperCaseEntityId = matchCustomerAccountId(customerAccountId.toUpperCase(), tenant);
+        Assert.assertEquals(upperCaseEntityId, expectedEntityId, String.format(
+                "Matching with upper case ID should match to the same account as original one. CustomerAccountId=%s",
+                customerAccountId));
+    }
+
+    private String matchCustomerAccountId(@NotNull String customerAccountId, @NotNull Tenant tenant) {
+        List<Object> data = Arrays.asList(customerAccountId, null, null, null, null, null, null, null);
+        Pair<MatchInput, MatchOutput> result = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS);
+        String entityId = verifyAndGetEntityId(result.getRight());
+        // after verifyAndGetEntityId, all intermediate object should be non-null
+        String outputCustomerAccountId = (String) result.getRight().getResult().get(0).getInput().get(0);
+        Assert.assertEquals(outputCustomerAccountId, customerAccountId,
+                "CustomerAccountId in output record's input should be the same as the original one");
+        return entityId;
+    }
+
     private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
             List<Object> data2, boolean isMatched) {
         Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data1, true, tenant,
@@ -1181,6 +1221,17 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                                         "060902413" }) //
                 }, //
         };
+    }
+
+    @DataProvider(name = "caseInsensitiveSystemIdMatch", parallel = true)
+    private Object[][] caseInsensitiveSystemIdMatchTestData() {
+        return new Object[][] { //
+                { " abCD12345FdsdkljHFFdjfkFd   " }, // alphabetic
+                { "abcdefg" }, // all lower case
+                { " 12345 " }, // all number
+                { "ZZZZZ" }, // all upper case
+                { "aaBbABC__12345xyZ" }, // alphanumeric
+        }; //
     }
 
     private static String concatIdxes(Integer idx1, Integer idx2) {
