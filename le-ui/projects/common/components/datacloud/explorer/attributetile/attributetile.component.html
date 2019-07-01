@@ -155,7 +155,8 @@
                 </label>
                 <label>
                     <span ng-if="vm.section == 're.model_iteration'">Lift &nbsp; &nbsp; &nbsp;</span>
-                    Records
+                    <span ng-if="vm.section == 're.model_iteration'">% ACCTS</span>
+                    <span ng-if="vm.section != 're.model_iteration'">Records</span>
                 </label>
             </h5>
 
@@ -171,7 +172,11 @@
                                 'non-interactive': vm.section == 're.model_iteration'
                               }"
                     ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))"
-                    ng-init="highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List); highestLift = vm.getHighestLift(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List)">
+                    ng-init="
+                        highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List);
+                        highestLift = vm.getHighestLift(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List);
+                        totalBucketsCounts = vm.getTotalBucketCounts(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5)"
+                    >
                     <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && statcount == 0">
                         <div class="cover">
                             <h3>Select Attribute</h3>
@@ -207,11 +212,13 @@
                                 <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                             </div>
                         </li>
-                        <li class="lift">
-                            <span ng-if="vm.section == 're.model_iteration'">{{stat.Lift|number:1}}x</span>
+                        <li class="lift" ng-if="vm.section == 're.model_iteration'">
+                            <span>{{stat.Lift|number:1}}x</span>
                         </li>
                         <li class="count">
-                            <span>{{stat.Cnt|number}}</span>
+                            <span ng-if="vm.section == 're.model_iteration'">
+                            {{vm.percentage(stat.Cnt, totalBucketsCounts, '%', 0)}}</span>
+                            <span ng-if="vm.section != 're.model_iteration'">{{stat.Cnt|number}}</span>
                         </li>
                     </ul>
                 </li>
