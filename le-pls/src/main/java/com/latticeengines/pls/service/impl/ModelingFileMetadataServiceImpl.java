@@ -285,6 +285,23 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> standardAttrNames =
                 standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
 
+        Set<String> mappedStandardFields = new HashSet<>();
+        // check if there's multiple mapping to standard field
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getMappedField() != null) {
+                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                    if (mappedStandardFields.contains(fieldMapping.getMappedField())) {
+                        String message =
+                                "Multiple user fields are mapped to standard field " + fieldMapping.getMappedField();
+                        validations.add(createValidation(fieldMapping.getUserField(), fieldMapping.getMappedField(),
+                                ValidationStatus.ERROR, message));
+                    } else {
+                        mappedStandardFields.add(fieldMapping.getMappedField());
+                    }
+                }
+            }
+        }
+
         // compare field mapping document after being modified with field mapping best effort
         for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
@@ -432,10 +449,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (dataFeedTask == null) {
             table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
         } else {
             table = dataFeedTask.getImportTemplate();
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
