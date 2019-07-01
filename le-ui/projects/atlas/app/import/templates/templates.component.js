@@ -180,7 +180,8 @@ export default class TemplatesComponent extends Component {
         if (value && value != "") {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
-            copy[cell.props.colName] = value;
+
+            copy['TemplateName'] = value;
             httpService.put(
                 "/pls/cdl/s3/template/displayname",
                 copy,
@@ -189,9 +190,7 @@ export default class TemplatesComponent extends Component {
                         cell.toogleEdit();
                         if (response.getStatus() === SUCCESS) {
                             let newState = [...this.state.data];
-                            newState[cell.props.rowIndex][
-                                cell.props.colName
-                            ] = value;
+                            newState[cell.props.rowIndex]['TemplateName'] = value;
                             this.setState({ data: newState });
                         }
                     },
