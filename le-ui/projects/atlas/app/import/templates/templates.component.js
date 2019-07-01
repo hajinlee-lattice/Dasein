@@ -470,12 +470,11 @@ export default class TemplatesComponent extends Component {
                 <ReactMainContainer className="templates">
                     <LeToolBar justifycontent="space-between">
                         <div>
-                            S3 Root Folder: {rootFolder}
-                            <ul className="unstyled">
+                            <ul>
                                 <CopyComponent
                                     title="Copy Link"
                                     data={
-                                        rootFolder
+                                        `${'S3 Root Folder: '}${rootFolder}`
                                     }
                                     callback={() => {
                                         messageService.sendMessage(
@@ -497,17 +496,6 @@ export default class TemplatesComponent extends Component {
                                 config={this.emailCredentialConfig}
                                 callback={() => {
                                     this.TemplatesStore.newToken();
-                                    // httpService.get(
-                                    //     "/pls/dropbox",
-                                    //     new Observer(response => {
-                                    //         // console.log("BACK HERE ", response);
-                                    //     }),
-                                    //     {
-                                    //         ErrorDisplayMethod: "Banner",
-                                    //         ErrorDisplayOptions: '{"title": "Warning"}',
-                                    //         ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                                    //     }
-                                    // );
                                 }}
                             />
                         </div>
