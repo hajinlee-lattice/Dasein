@@ -1358,6 +1358,13 @@ export default function (
         }
     }
 
+    vm.getTotalBucketCounts = function (stats) {
+        var bucketsTotal = stats.reduce(function(prev, cur) {
+          return prev + cur.Cnt;
+        }, 0);
+        return bucketsTotal;
+    }
+
     vm.getHighestStat = function (stats) {
         var highest = 0;
         stats.forEach(function (stat) {
