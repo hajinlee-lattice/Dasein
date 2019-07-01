@@ -72,7 +72,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
         prepareData();
         TransformationProgress progress = createNewProgress();
@@ -82,7 +82,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         cleanupProgressTables();
     }
 
-    @AfterClass
+    @AfterClass(groups = "pipeline1")
     private void destroy() {
         cleanupS3();
     }
