@@ -102,8 +102,7 @@ public class PlayServiceImpl implements PlayService {
         log.info(String.format("%s play %sfor tenant %s", //
                 play.getName() == null ? "Creating" : "Updating", //
                 play.getName() == null //
-                        ? ""
-                        : String.format("with name: %s, ", play.getName()),
+                        ? "" : String.format("with name: %s, ", play.getName()),
                 tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
@@ -172,9 +171,10 @@ public class PlayServiceImpl implements PlayService {
 
                 Map<String, Long> counts = play.getRatingEngine().getCountsAsMap();
                 if (counts != null) {
-                    play.getRatingEngine().setBucketMetadata(counts.keySet().stream() //
-                            .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
-                            .collect(Collectors.toList()));
+                    play.getRatingEngine()
+                            .setBucketMetadata(counts.keySet().stream() //
+                                    .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                                    .collect(Collectors.toList()));
                 }
             } else {
                 String reId = play.getRatingEngine().getId();
@@ -236,14 +236,15 @@ public class PlayServiceImpl implements PlayService {
                                 String reId = pair.getLeft();
                                 List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
                                 ratingEngines.forEach(r -> {
-                                            Map<String, Long> counts = r.getCountsAsMap();
-                                            if (counts != null) {
-                                                r.setBucketMetadata(counts.keySet().stream() //
+                                    Map<String, Long> counts = r.getCountsAsMap();
+                                    if (counts != null) {
+                                        r.setBucketMetadata(
+                                                counts.keySet().stream() //
                                                         .map(c -> new BucketMetadata(BucketName.fromValue(c),
                                                                 counts.get(c).intValue()))
                                                         .collect(Collectors.toList()));
-                                            }
-                                        });
+                                    }
+                                });
                             });
                 }
                 if (CollectionUtils.isNotEmpty(aiTypeRatingEngineIds)) {
@@ -258,10 +259,10 @@ public class PlayServiceImpl implements PlayService {
                                         String reId = pair.getLeft();
                                         List<RatingEngine> ratingEngines = ratingEnginesMap.get(reId);
                                         try {
-                                            ratingEngines.forEach(r -> r.setBucketMetadata(bucketedScoreProxy
-                                                            .getPublishedBucketMetadataByModelGuid(tenant.getId(),
-                                                                    ((AIModel) r.getPublishedIteration())
-                                                                            .getModelSummaryId())));
+                                            ratingEngines.forEach(r -> r.setBucketMetadata(
+                                                    bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(
+                                                            tenant.getId(), ((AIModel) r.getPublishedIteration())
+                                                                    .getModelSummaryId())));
                                         } catch (Exception ex) {
                                             log.info("Ignoring exception while loading latest ABCD"
                                                     + " bucket of rating engine " + reId

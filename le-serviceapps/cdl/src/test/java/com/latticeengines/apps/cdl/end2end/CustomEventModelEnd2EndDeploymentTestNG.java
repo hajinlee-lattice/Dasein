@@ -121,6 +121,8 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             System.out.println("S3 Path=" + s3DataDir);
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/Account*",
                     s3DataDir, "");
+            HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration, hdfsDataDir + "/BucketedAccount*",
+                    s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,
                     hdfsDataDir + "/AnalyticPurchaseState*", s3DataDir, "");
             HdfsUtils.copyGlobToDirWithScheme(distCpConfiguration,

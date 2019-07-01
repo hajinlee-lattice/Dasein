@@ -124,11 +124,6 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState launchState) {
-        return playLaunchEntityMgr.updatePlayLaunchState(playLaunch, appId, launchState);
-    }
-
-    @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType, boolean skipLoadingAllLookupIdMapping) {

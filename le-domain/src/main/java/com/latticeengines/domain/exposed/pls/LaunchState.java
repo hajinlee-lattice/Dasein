@@ -28,10 +28,12 @@ public enum LaunchState {
         Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
         statesAfterUnLaunched.add(Launching);
         statesAfterUnLaunched.add(Queued);
+        statesAfterUnLaunched.add(Canceled);
         transitionMap.put(UnLaunched, statesAfterUnLaunched);
 
         Set<LaunchState> statesAfterQueued = new HashSet<>();
         statesAfterUnLaunched.add(Launching);
+        statesAfterUnLaunched.add(Canceled);
         transitionMap.put(Queued, statesAfterQueued);
 
         Set<LaunchState> statesAfterLaunching = new HashSet<>();
@@ -64,19 +66,26 @@ public enum LaunchState {
 
     public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
         switch (jobStatus) {
-            case FAILED:
-                return Failed;
-            case READY:
-            case PENDING:
-            case RUNNING:
-                return Launching;
-            case SKIPPED:
-            case CANCELLED:
-                return Canceled;
-            case COMPLETED:
-                return Launched;
-            default:
-                return UnLaunched;
+        case FAILED:
+            return Failed;
+        case READY:
+        case PENDING:
+        case RUNNING:
+            return Launching;
+        case SKIPPED:
+        case CANCELLED:
+            return Canceled;
+        case COMPLETED:
+            return Launched;
+        default:
+            return UnLaunched;
         }
+    }
+
+    public Boolean isTerminal() {
+        if (this == Queued || this == UnLaunched || this == Launching) {
+            return false;
+        }
+        return true;
     }
 }

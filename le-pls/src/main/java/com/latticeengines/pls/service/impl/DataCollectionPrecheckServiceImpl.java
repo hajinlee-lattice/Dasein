@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.DataCollectionPrechecks;
 import com.latticeengines.pls.service.DataCollectionPrecheckService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component("dataCollectionPrecheckService")
@@ -27,12 +28,14 @@ public class DataCollectionPrecheckServiceImpl implements DataCollectionPrecheck
 
     private final ServingStoreProxy servingStoreProxy;
     private final DataCollectionProxy dataCollectionProxy;
+    private final DataFeedProxy dataFeedProxy;
 
     @Inject
     public DataCollectionPrecheckServiceImpl(ServingStoreProxy servingStoreProxy,
-                                             DataCollectionProxy dataCollectionProxy) {
+                                             DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy) {
         this.servingStoreProxy = servingStoreProxy;
         this.dataCollectionProxy = dataCollectionProxy;
+        this.dataFeedProxy = dataFeedProxy;
     }
 
     @Override
@@ -59,6 +62,8 @@ public class DataCollectionPrecheckServiceImpl implements DataCollectionPrecheck
                 customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction, version);
         Table apsTable = dataCollectionProxy.getTable(
                 customerSpace, TableRoleInCollection.AnalyticPurchaseState, version);
+        List<Table> transactionTemplateTables = dataFeedProxy.getTemplateTables(customerSpace,
+                BusinessEntity.Transaction.name());
 
         boolean metadataReady = false;
         boolean tablesReady = false;
@@ -85,10 +90,12 @@ public class DataCollectionPrecheckServiceImpl implements DataCollectionPrecheck
             return prechecks;
         }
 
-        for (ColumnMetadata metadata : trxCMList) {
-            if (metadata.getAttrName().equalsIgnoreCase(InterfaceName.TotalCost.name())) {
-                prechecks.setDisableMargin(false);
-                break;
+        for (Table clpTable : transactionTemplateTables) {
+            for (String attribute : clpTable.getAttributeNames()) {
+                if (attribute.equalsIgnoreCase(InterfaceName.Cost.name())) {
+                    prechecks.setDisableMargin(false);
+                    break;
+                }
             }
         }
 

@@ -4,14 +4,13 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,8 +19,6 @@ import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -62,6 +59,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     protected abstract List<RatingEngineType> getTargetEngineTypes();
     protected abstract HdfsDataUnit extractTargets(RatingModelContainer container);
     protected abstract boolean isRuleBased();
+    protected abstract GenericRecord getDummyRecord();
 
     void setupExtractStep() {
         customerSpace = parseCustomerSpace(configuration);
@@ -194,27 +192,15 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         long count = result.getCount();
         if (count == 0) {
             String engineId = container.getEngineSummary().getId();
-            log.info("Engine " + engineId + " has empty scoring target, writing a dummy record to " + result.getPath());
-            String avroGlob = PathUtils.toAvroGlob(result.getPath());
-            Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             try {
                 return retry.execute(ctx -> {
-                    if (ctx.getRetryCount() > 0) {
-                        log.info("(Attemp=" + ctx.getRetryCount() + ") write dummy record for " + engineId);
-                    }
-                    String avroPath = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob).get(0);
-                    if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
-                        HdfsUtils.rmdir(yarnConfiguration, avroPath);
-                    }
-                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                    String accountId = "__Dummy__Account__";
-                    builder.set(InterfaceName.AccountId.name(), accountId);
-                    if (!isRuleBased()) {
-                        builder.set(InterfaceName.PeriodId.name(), 0L);
-                    }
-                    GenericRecord record = builder.build();
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, avroPath, Collections.singletonList(record), true);
+                    String avroPath = result.getPath() + "/part-" + UUID.randomUUID().toString() + ".avro";
+                    log.info("(Attempt=" + ctx.getRetryCount() + ") write dummy record for " + engineId //
+                            + " at " + avroPath);
+                    GenericRecord record = getDummyRecord();
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, record.getSchema(), avroPath, //
+                            Collections.singletonList(record), true);
                     return true;
                 });
             } catch (Exception e) {

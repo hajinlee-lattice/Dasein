@@ -39,6 +39,8 @@ angular.module('lp.import.wizard.contactids', [])
         injectAsyncReducer(store, 'multitemplates.contactids', reducer);
         this.unsubscribe = store.subscribe(() => {
             const data = store.getState()['multitemplates.contactids'];
+            // console.log("DATA ", data.systems);
+            vm.systems = data.systems;
             // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
         });
        //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
@@ -104,7 +106,7 @@ angular.module('lp.import.wizard.contactids', [])
     }
 
     vm.getMapped = (mapping) => {
-        console.log('MMM ==> ',mapping);
+        // console.log('MMM ==> ',mapping);
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
@@ -138,7 +140,7 @@ angular.module('lp.import.wizard.contactids', [])
         if(vm.isMultipleTemplates()){
             vm.changeMatchIds(mapped);
         }
-        console.log('Saving', mapped);
+        // console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };
@@ -220,7 +222,7 @@ angular.module('lp.import.wizard.contactids', [])
 
     vm.updateSystem = (index) => {
         let item = vm.matchIdItems[index];
-        console.log('ITEM ', item);
+        // console.log('ITEM ', item);
         let ufName = item.userField.replace('^/', '');
         let sysName = item.system.name;
         if(ufName != '' && sysName != ''){
@@ -233,7 +235,7 @@ angular.module('lp.import.wizard.contactids', [])
         let item = vm.matchIdItems[index];
         let ufName = item.userField.replace('^/', '');
         if(ufName != ''){
-            console.log(vm.form);
+            // console.log(vm.form);
             vm.changeLatticeField(vm.fieldMapping, vm.form);
         }
     }

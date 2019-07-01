@@ -17,11 +17,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 
 public class PlayUtils {
 
-    public static void validatePlay(String playName, Play play) {
-        if (play == null) {
-            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
-        }
-
+    public static void validatePlay(Play play) {
         if (play.getRatingEngine() != null && play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }

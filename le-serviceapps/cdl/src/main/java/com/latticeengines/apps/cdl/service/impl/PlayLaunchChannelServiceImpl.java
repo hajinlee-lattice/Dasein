@@ -1,11 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,8 +18,11 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.RatingCoverageService;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -26,9 +32,15 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("playLaunchChannelService")
@@ -47,6 +59,12 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
+
+    @Inject
+    private RatingEngineService ratingEngineService;
+
+    @Inject
+    private RatingCoverageService ratingCoverageService;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -129,6 +147,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
+        runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
+
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
@@ -170,6 +190,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         return playLaunch;
     }
 
+    private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {
+        PlayUtils.validatePlay(play);
+        validatePlayAndChannelBeforeLaunch(customerSpace, play, playLaunchChannel);
+    }
+
     private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
         List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         if (CollectionUtils.isNotEmpty(allConnections)) {
@@ -209,6 +234,54 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         generatedRecommendationTable = metadataProxy.getTable(customerSpace.toString(), tableName);
 
         return generatedRecommendationTable.getName();
+    }
+
+    private void validatePlayAndChannelBeforeLaunch(String tenantId, Play play, PlayLaunchChannel channel) {
+        RatingEngine ratingEngine = play.getRatingEngine();
+        ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
+        play.setRatingEngine(ratingEngine);
+
+        if (channel.getLookupIdMap() == null || channel.getLookupIdMap().getExternalSystemType() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No destination system selected for the channel for play: " + play.getName() });
+        }
+
+        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM
+                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId()
+                && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
+        }
+
+        RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
+        coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
+        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
+            coverageRequest.setRestrictNullLookupId(
+                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId());
+        coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
+        RatingEnginesCoverageResponse coverageResponse = ratingCoverageService.getRatingCoveragesForSegment(
+                CustomerSpace.parse(tenantId).toString(), play.getTargetSegment().getName(), coverageRequest);
+
+        if (coverageResponse == null || MapUtils.isNotEmpty(coverageResponse.getErrorMap())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Unable to validate validity of launch targets due to internal Error, please retry later" });
+        }
+
+        Long accountsToLaunch = coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                .getBucketCoverageCounts().stream()
+                .filter(ratingBucket -> channel.getBucketsToLaunch()
+                        .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
+                .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
+
+        accountsToLaunch = accountsToLaunch
+                + (channel.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
+
+        if (accountsToLaunch <= 0L) {
+            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
+        }
     }
 
 }

@@ -1,15 +1,22 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -62,6 +69,19 @@ public class ExtractRuleBasedRatings extends BaseExtractRatingsStep<GenerateRati
         } else {
             return null;
         }
+    }
+
+    @Override
+    protected GenericRecord getDummyRecord() {
+        Schema schema = AvroUtils.constructSchema("dummyRating", Arrays.asList(
+                Pair.of(InterfaceName.AccountId.name(), String.class),
+                Pair.of(InterfaceName.Rating.name(), String.class)
+        ));
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        String accountId = "__Dummy__Account__";
+        builder.set(InterfaceName.AccountId.name(), accountId);
+        builder.set(InterfaceName.Rating.name(), null);
+        return builder.build();
     }
 
     private FrontEndQuery ruleBasedQuery(MetadataSegment segment, RatingModel ratingModel) {

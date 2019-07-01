@@ -27,14 +27,13 @@
             </div>
             <div class="system-options-item">
                 <div ng-if="vm.isMultipleTemplates()">
-                    <label for="dedupeField">System Name</label>
-                    <select class="form-control"> 
-                        <option value="">-- Select System --</option>
+                    <label>System Name</label>
+                    <select class="form-control" ng-model="vm.systemName" ng-change="vm.updateSystem($index)"> 
+                        <!-- <option value="">-- Select System --</option> -->
                         <option
-                            ng-repat="system in vm.systems"
-                            value="system.name"
-                            ng-required="true"
-                        >{{system.display_name}}</option>
+                        ng-repeat="s in vm.systems"
+                        value="{{s.name}}"
+                        >{{s.displayName}}</option>
                     </select>
                 </div>
             </div>

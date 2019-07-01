@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -75,6 +77,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     @Override
     protected void verifyOutput(String output) {
         log.info("Contact count is " + output);
+        Assert.assertEquals(output, "100");
     }
 
     @Override
@@ -83,16 +86,16 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     private Boolean verifyOutput(HdfsDataUnit target) {
-        // AtomicInteger count = new AtomicInteger();
-        // verifyAndReadTarget(target).forEachRemaining(record -> {
-        // count.incrementAndGet();
-        // String accountId =
-        // record.get(InterfaceName.AccountId.name()).toString();
-        // String contacts = (String) record.get("CONTACTS");
-        // log.info(String.format("For account %s, contacts are: %s", accountId,
-        // contacts));
-        // });
-        // Assert.assertEquals(count.get(), 10);
+        AtomicInteger count = new AtomicInteger();
+        verifyAndReadTarget(target).forEachRemaining(record -> {
+            count.incrementAndGet();
+            String accountId = record.get("ACCOUNT_ID").toString();
+            String contacts = record.get("CONTACTS").toString();
+            if (count.get() == 1) {
+                log.info(String.format("For account %s, contacts are: %s", accountId, contacts));
+            }
+        });
+        Assert.assertEquals(count.get(), 10);
         return true;
     }
 

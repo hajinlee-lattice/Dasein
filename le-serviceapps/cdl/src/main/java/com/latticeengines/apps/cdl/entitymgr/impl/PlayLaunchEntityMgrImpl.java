@@ -93,15 +93,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
         List<PlayLaunch> launches = playLaunchDao.getByStateAcrossTenants(state, max);
 
-        launches.forEach(launch -> {
-            Hibernate.initialize(launch.getPlay());
-        });
+        launches.forEach(launch -> Hibernate.initialize(launch.getPlay()));
         return launches;
-    }
-
-    @Override
-    public PlayLaunch updatePlayLaunchState(PlayLaunch playLaunch, String appId, LaunchState launchState) {
-        return playLaunchDao.updatePlayLaunchState(playLaunch, appId, launchState);
     }
 
     @Override
@@ -113,6 +106,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             if (hardDelete) {
                 playLaunchDao.delete(playLaunch);
             } else {
+                playLaunch.setLaunchState(
+                        playLaunch.getLaunchState().isTerminal() ? playLaunch.getLaunchState() : LaunchState.Canceled);
                 playLaunch.setDeleted(true);
                 playLaunchDao.update(playLaunch);
             }
