@@ -26,6 +26,7 @@ export default class OverviewSummaryContainer extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            saving: false,
             loading: false,
             play: null,
             types: null,
@@ -39,6 +40,7 @@ export default class OverviewSummaryContainer extends Component {
     componentDidMount() {
         let playstore = store.getState()['playbook'];
         this.state.play = playstore.play;
+        this.state.loading = playstore.loading;
 
         if(!playstore.types) {
             let vm = this;
@@ -71,6 +73,9 @@ export default class OverviewSummaryContainer extends Component {
     }
 
     savePlay(play, opts, cb) {
+        this.state.saving = true;
+        this.setState(this.state);
+
         for(var i in opts) {
             if(opts[i] === play[i]) {
                 delete opts[i];
@@ -89,6 +94,7 @@ export default class OverviewSummaryContainer extends Component {
         actions.savePlay(savePlay, function(data) {
             let playstore = store.getState()['playbook'];
             vm.state.play = playstore.play;
+            vm.state.saving = false;
             vm.setState(vm.state);
             if(cb && typeof cb === 'function') {
                 cb(data);
@@ -143,12 +149,13 @@ export default class OverviewSummaryContainer extends Component {
 
     constrainText(event, limit, debug) {
         var allowedKeys = [
-            8, //backspace
-            46, //delete
-            37, // left
-            39, //right
-        ],
-        debug = debug || false;
+                8, //backspace
+                46, //delete
+                37, // left
+                39, //right
+            ],
+            debug = debug || false;
+
         if(event.target.innerText && limit) {
             let disallow = (event.target.innerText.length >= limit && allowedKeys.indexOf(event.which) === -1); // too long && key is not one in the allowed lists
             if(debug) {
@@ -168,7 +175,8 @@ export default class OverviewSummaryContainer extends Component {
     render() {
         if(this.state.play && this.state.types) {
             let play = this.state.play,
-                types = this.state.types;
+                types = this.state.types,
+                defaultDescriptionText = (!this.state.saving && !play.description ? 'Add a description' : '');
             return (
                 <Aux>
                     <div className={'overview-summary'}>
@@ -202,9 +210,15 @@ export default class OverviewSummaryContainer extends Component {
                                         </div>
                                     </LeVPanel>
                                 </p>
-                                <p className="description">
-                                    <span contenteditable="true" data-default="Add a description" 
-                                        onBlur={ (e) => { this.savePlay(play, {description: e.target.innerText}) } } 
+                                <p className={`description ${!play.description ? 'is-empty' : ''}`}>
+                                    <span contenteditable="true" data-default={defaultDescriptionText} 
+                                        onClick={(e) => {
+                                            e.target.setAttribute('data-default', '');
+                                        }}
+                                        onBlur={ (e) => {
+                                            e.target.setAttribute('data-default', defaultDescriptionText);
+                                            this.savePlay(play, {description: e.target.innerText});
+                                        }} 
                                         onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
                                         {play.description}
                                     </span>
