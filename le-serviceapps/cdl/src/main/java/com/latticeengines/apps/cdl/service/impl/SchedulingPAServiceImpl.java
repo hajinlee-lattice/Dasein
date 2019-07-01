@@ -144,7 +144,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             // configure the context
             Tenant tenant = simpleDataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
-            String tenantId = MultiTenantContext.getShortTenantId();
+            String tenantId = tenant.getId();
 
             // retrieve data collection status
             DataCollectionStatus dcStatus = null;
