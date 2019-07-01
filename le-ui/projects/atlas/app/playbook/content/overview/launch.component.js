@@ -158,29 +158,41 @@ class LaunchComponent extends Component {
         let playstore = store.getState()['playbook'],
             vm = this;
 
-        playstore.playbookWizardStore.launchAccountsCoverage(play.name, {
-            sendEngineId: opts.sendEngineId,
-            getExcludeItems: opts.getExcludeItems,
-            getDestinationAccountId: opts.getDestinationAccountId
-        }).then(function(response) {
-            var coverage = vm.getCoverage(response).coverage,
-                hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
+        // creates this.state.launchAccountsCoverage, needed to load launch
+        if(playstore.play.ratingEngine) {
+            playstore.playbookWizardStore.launchAccountsCoverage(play.name, { 
+                sendEngineId: opts.sendEngineId,
+                getExcludeItems: opts.getExcludeItems,
+                getDestinationAccountId: opts.getDestinationAccountId
+            }).then(function(response) {
+                var coverage = vm.getCoverage(response).coverage,
+                    hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
 
-            vm.state.unscored = !hasBuckets;
-            vm.state.launchAccountsCoverage = response;
+                vm.state.unscored = !hasBuckets;
+                vm.state.launchAccountsCoverage = response;
+                console.log(response);
 
-            var coverageObj = vm.getCoverage(response),
-                coverage = coverageObj.coverage,
-                coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
+                var coverageObj = vm.getCoverage(response),
+                    coverage = coverageObj.coverage,
+                    coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
 
-            if(coverageBuckets) { // this pre-selects all the buckets
-                coverageBuckets.forEach(function(bucket) {
-                    vm.state.selectedBuckets.push(bucket.bucket);
-                });
-            }
+                if(coverageBuckets) { // this pre-selects all the buckets
+                    coverageBuckets.forEach(function(bucket) {
+                        vm.state.selectedBuckets.push(bucket.bucket);
+                    });
+                }
 
-            vm.setState(vm.state);
-        });
+                vm.setState(vm.state);
+            });
+        } else {
+            actions.fetchAccountsCount({ 'preexisting_segment_name': playstore.play.targetSegment.name }, function(data) {
+                console.log('fetchAccountsCount', data);
+                vm.state.launchAccountsCoverage = {
+                    accountsCount: data
+                };
+                vm.setState(vm.state);
+            });
+        }
     }
 
     makeRecommendationCounts(coverage, play) {
@@ -199,7 +211,7 @@ class LaunchComponent extends Component {
             this.state.recommendationCounts = null;
             return sections;
         }
-        sections.total = play.targetSegment.accounts;
+        sections.total = play.targetSegment.accounts || coverage.unscoredAccountCount;
 
         var _contacts = 0;
         for(var i in vm.state.selectedBuckets) {
@@ -538,18 +550,38 @@ class LaunchComponent extends Component {
         this.setState(this.state);
     }
 
+    getCoverageType(accountsCoverage) {
+        if(accountsCoverage.ratingModelsCoverageMap) {
+            return 'ratingModelsCoverageMap';
+        }
+        if(accountsCoverage.ratingEngineIdCoverageMap) {
+            return 'ratingEngineIdCoverageMap';
+        }
+        if(accountsCoverage.accountsCount) {
+            return 'accountsCount';
+        }
+        
+    }
+
     getCoverage(accountsCoverage) {
-        var coverageType = (accountsCoverage.ratingModelsCoverageMap ? 'ratingModelsCoverageMap' : 'ratingEngineIdCoverageMap'),
+        var coverageType = this.getCoverageType(accountsCoverage),
             engineId,
             coverage;
 
         if(coverageType === 'ratingModelsCoverageMap') {
             engineId = (accountsCoverage && accountsCoverage.engineId ? accountsCoverage.engineId : '');
             coverage = (engineId && accountsCoverage[coverageType] ? accountsCoverage[coverageType] : {});
-        } else {
+        } else if(coverageType === 'ratingEngineIdCoverageMap') {
             engineId = (accountsCoverage && accountsCoverage[coverageType] && accountsCoverage[coverageType][Object.keys(accountsCoverage[coverageType])[0]] ? Object.keys(accountsCoverage[coverageType])[0] : '');
             coverage = (engineId && accountsCoverage[coverageType][engineId] ? accountsCoverage[coverageType][engineId] : {});
+        } else if(coverageType === 'accountsCount') {
+            engineId: null;
+            coverage = { 
+                unscoredAccountCount: accountsCoverage.accountsCount,
+                bucketCoverageCounts: []
+            };
         }
+
         return {
             engineId: engineId,
             coverage: coverage
@@ -579,7 +611,6 @@ class LaunchComponent extends Component {
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
                 canLaunch = recommendationCounts.launched;
-
 
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
