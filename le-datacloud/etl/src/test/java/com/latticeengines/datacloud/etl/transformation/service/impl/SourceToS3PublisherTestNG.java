@@ -118,9 +118,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private TransformationStepConfig createStep(Source baseSourceAccMaster) {
+    private TransformationStepConfig createStep(Source baseSource) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setBaseSources(Collections.singletonList(baseSourceAccMaster.getSourceName()));
+        step.setBaseSources(Collections.singletonList(baseSource.getSourceName()));
         step.setTransformer(SourceToS3Publisher.TRANSFORMER_NAME);
         step.setTargetSource(source.getSourceName());
         return step;
