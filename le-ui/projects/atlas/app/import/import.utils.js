@@ -195,7 +195,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
                 if(savedObj.IdType || savedObj.SystemName){
-                    fieldsMapped[mapped].IdType = savedObj.IdType;
+                    fieldsMapped[mapped].idType = savedObj.IdType;
                     fieldsMapped[mapped].SystemName = savedObj.SystemName;
                 }
                 updateFieldDate(fieldsMapped[mapped], savedObj, entity);
@@ -215,7 +215,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                             if(field.mappedField == uniqueId){
                                 field.mappedToLatticeField = false;
                                 field.mapToLatticeId = false;
-                                field.IdType = null;
+                                field.idType = null;
                                 delete field.mappedField;
                             }
                             break;
@@ -224,7 +224,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                                 field.mappedToLatticeField = true;
                                 field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
                                 field.mappedField = uniqueId;
-                                field.IdType = IdType;
+                                field.idType = IdType;
                             }
                             break;
                     }
