@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
@@ -190,5 +192,20 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     @Override
     public void resetImport(String customerSpaceStr, DataFeedTask datafeedTask) {
         dataFeedTaskEntityMgr.clearTableQueuePerTask(datafeedTask);
+    }
+
+    @Override
+    public List<Table> getTemplateTables(String customerSpace, String entity) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        List<DataFeedTask> datafeedTasks = dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed);
+        List<Table> tables = new LinkedList<>();
+        if (!CollectionUtils.isEmpty(datafeedTasks)) {
+            for (DataFeedTask dataFeedTask : datafeedTasks) {
+                Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace),
+                        dataFeedTask.getImportTemplate().getName(), true);
+                tables.add(metaData);
+            }
+        }
+        return tables;
     }
 }
