@@ -563,8 +563,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
                                         cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                                         fieldMapping.setMappedToLatticeField(false);
+                                        fieldMapping.setMappedField(accountSystemId);
+                                    } else {
+                                        fieldMapping.setMappedToLatticeField(accountSystemId.equals(fieldMapping.getMappedField()));
+                                        fieldMapping.setMappedField(accountSystemId);
                                     }
-                                    fieldMapping.setMappedField(accountSystemId);
                                     if (importSystem.isMapToLatticeAccount()) {
                                         FieldMapping customerLatticeId = new FieldMapping();
                                         customerLatticeId.setUserField(fieldMapping.getUserField());
@@ -585,8 +588,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         importSystem.setContactSystemId(contactSystemId);
                                         importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
                                         cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        fieldMapping.setMappedField(contactSystemId);
                                     }
-                                    fieldMapping.setMappedField(contactSystemId);
+                                    else {
+                                        fieldMapping.setMappedToLatticeField(contactSystemId.equals(fieldMapping.getMappedField()));
+                                        fieldMapping.setMappedField(contactSystemId);
+                                    }
                                     if (importSystem.isMapToLatticeContact()) {
                                         FieldMapping customerLatticeId = new FieldMapping();
                                         customerLatticeId.setUserField(fieldMapping.getUserField());
