@@ -85,7 +85,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         create(playLaunchChannel);
         if (launchNow) {
-            createPlayLaunchFromChannel(playLaunchChannel, play);
+            playLaunchChannel.setLastLaunch(createPlayLaunchFromChannel(playLaunchChannel, play));
         }
         return playLaunchChannel;
     }
@@ -100,7 +100,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannel.setPlay(play);
         playLaunchChannel = update(playLaunchChannel);
         if (launchNow) {
-            createPlayLaunchFromChannel(playLaunchChannel, play);
+            playLaunchChannel.setLastLaunch(createPlayLaunchFromChannel(playLaunchChannel, play));
         }
         return playLaunchChannel;
     }
