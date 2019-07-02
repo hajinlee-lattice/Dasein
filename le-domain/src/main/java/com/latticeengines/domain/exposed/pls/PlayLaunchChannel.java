@@ -24,6 +24,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.CronExpression;
@@ -139,6 +140,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @JoinColumn(name = "FK_LOOKUP_ID_MAP_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private LookupIdMap lookupIdMap;
+
+    @JsonProperty("lastLaunch")
+    @Transient
+    private PlayLaunch lastLaunch;
 
     @JsonProperty("isAlwaysOn")
     @Column(name = "ALWAYS_ON")
@@ -308,6 +313,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setNextScheduledLaunch(Date nextScheduledLaunch) {
         this.nextScheduledLaunch = nextScheduledLaunch;
+    }
+
+    public PlayLaunch getLastLaunch() {
+        return lastLaunch;
+    }
+
+    public void setLastLaunch(PlayLaunch lastLaunch) {
+        this.lastLaunch = lastLaunch;
     }
 
     public ChannelConfig getChannelConfig() {
