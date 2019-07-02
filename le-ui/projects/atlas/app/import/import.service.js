@@ -97,19 +97,18 @@ angular.module('lp.import')
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
                 nextLabel: 'Next, Validate Template', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-                    ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
-                        $state.go(nextState);
-                    }, true);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 }
             },{ 
                 label: 'Validation', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields.validation', 
                 nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.setValidation('jobstatus', true);
-                    $state.go(nextState);
+                    ImportWizardStore.nextSaveMapping();
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
+                        ImportWizardStore.setValidation('jobstatus', true);
+                    }, true);
                 }
             },{ 
                 label: 'Save Template', 
@@ -167,20 +166,18 @@ angular.module('lp.import')
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
                 nextLabel: 'Next, Validate Template', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-
-                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
-                        $state.go(nextState);
-                    }, true);
+                    ImportWizardStore.nextSaveMapping(nextState);
                 }
             },{ 
                 label: 'Validation', 
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', 
                 nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
-                    ImportWizardStore.setValidation('jobstatus', true);  
-                    $state.go(nextState);
+                    ImportWizardStore.nextSaveMapping();
+                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);
+                    }, true);
                 }
             },{ 
                 label: 'Save Template', 

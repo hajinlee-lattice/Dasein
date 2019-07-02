@@ -245,6 +245,10 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private void validatePlayAndChannelBeforeLaunch(String tenantId, Play play, PlayLaunchChannel channel) {
+        if (play.getRatingEngine() == null) {
+            return;
+        }
+
         RatingEngine ratingEngine = play.getRatingEngine();
         ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
         play.setRatingEngine(ratingEngine);
@@ -281,8 +285,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (channel.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
