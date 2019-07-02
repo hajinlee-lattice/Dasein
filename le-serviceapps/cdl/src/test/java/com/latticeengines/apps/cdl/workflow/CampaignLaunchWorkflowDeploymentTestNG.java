@@ -22,7 +22,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
+import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -42,7 +43,7 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
-public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase {
+public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowDeploymentTestNG.class);
 
@@ -79,7 +80,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         return testPlayCreationHelper.getTenant();
     }
 
-    @BeforeClass(groups = "deployment-app")
+    @BeforeClass(groups = "deployment-app", enabled = false)
     public void setup() throws Exception {
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
@@ -105,9 +106,13 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         testPlayCreationHelper.setupTenantAndCreatePlay(marketoPlayLaunchConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
         setMainTestTenant(super.testBed.getMainTestTenant());
+        checkpointService.setMainTestTenant(super.testBed.getMainTestTenant());
+        checkpointService.resumeCheckpoint( //
+                "update3", //
+                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
+
         FeatureFlagValueMap ffVMap = super.testBed.getFeatureFlags();
         log.info("Feature Flags for Tenant: " + ffVMap);
-
         Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         dropboxSummary = dropBoxProxy.getDropBox(currentTestTenant().getId());
@@ -118,7 +123,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         defaultPlay = testPlayCreationHelper.getPlay();
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", enabled = false)
     public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoPlayLaunchConfig, true);
@@ -130,7 +135,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoPlayLaunchWorkflow")
+    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoPlayLaunchWorkflow", enabled = false)
     public void testVerifyAndCleanupMarketoUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -177,7 +182,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         }
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File")
+    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File", enabled = false)
     public void testS3LaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         testPlayCreationHelper.createPlayLaunch(s3PlayLaunchConfig);
@@ -190,7 +195,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testS3LaunchWorkflow")
+    @Test(groups = "deployment-app", dependsOnMethods = "testS3LaunchWorkflow", enabled = false)
     public void testVerifyAndCleanupS3UploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -233,5 +238,17 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGB
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
+    }
+
+    @Override
+    public void testWorkflow() throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    protected void verifyTest() {
+        // TODO Auto-generated method stub
+
     }
 }
