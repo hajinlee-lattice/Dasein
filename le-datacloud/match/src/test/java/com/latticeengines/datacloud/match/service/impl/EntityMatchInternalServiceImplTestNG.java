@@ -16,6 +16,7 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.NC_NETFLIX_2;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDomainCountry;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDuns;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromExternalSystem;
@@ -27,8 +28,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -590,6 +594,56 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         });
         matchedSeeds = entityRawSeedService.get(EntityMatchEnvironment.SERVING, tenant2, TEST_ENTITY, seedIds);
         Assert.assertFalse(matchedSeeds.contains(null));
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 12)
+    private void testGetOrCreateAnonymousSeed() throws Exception {
+        entityMatchConfigurationService.setIsAllocateMode(true);
+
+        Tenant t1 = newTestTenant();
+
+        int numCalls = 100;
+        CountDownLatch latch = new CountDownLatch(numCalls);
+        ExecutorService service = Executors.newFixedThreadPool(20);
+
+        // get or create anonymous accounts
+        Queue<EntityRawSeed> seeds = new ConcurrentLinkedQueue<>();
+        for (int i = 0; i < numCalls; i++) {
+            service.submit(() -> {
+                seeds.add(entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Account.name()));
+                latch.countDown();
+            });
+        }
+
+        // wait for all calls to finish
+        latch.await();
+
+        List<Integer> newlyAllocatedIdx = new ArrayList<>();
+        Assert.assertEquals(seeds.size(), numCalls, "Number of stored anonymous seed should match the number of calls");
+        for (int i = 0; !seeds.isEmpty(); i++) {
+            EntityRawSeed seed = seeds.poll();
+            Assert.assertNotNull(seed, String.format("Anonymous seed is null at idx %d", i));
+            Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID,
+                    String.format("Anonymous seed at idx %d has the wrong ID", i));
+            if (seed.isNewlyAllocated()) {
+                newlyAllocatedIdx.add(i);
+            }
+        }
+        Assert.assertEquals(newlyAllocatedIdx.size(), 1, String
+                .format("Should only have one new anonymous seed. New anonymous seed indexes = %s", newlyAllocatedIdx));
+
+        // should create anonmymous contact for the same tenant
+        EntityRawSeed seed = entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Contact.name());
+        Assert.assertNotNull(seed);
+        Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID);
+        Assert.assertTrue(seed.isNewlyAllocated(), "Anonymous contact should be newly allocated");
+
+        // create anonymous account for another tenant
+        Tenant t2 = newTestTenant();
+        seed = entityMatchInternalService.getOrCreateAnonymousSeed(t2, BusinessEntity.Account.name());
+        Assert.assertNotNull(seed);
+        Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID);
+        Assert.assertTrue(seed.isNewlyAllocated(), "Anonymous account for another tenant should be newly allocated");
     }
 
     // [ nAllocations, nThreads ]

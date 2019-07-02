@@ -40,7 +40,7 @@ public class FirehoseServiceImplTestNG extends AbstractTestNGSpringContextTests 
         try (PerformanceTimer timer = new PerformanceTimer("Perform-Single")) {
             for (int i = 0; i < BATCH_SIZE; i++) {
                 String data = String.format(format, i);
-                firehoseService.send("latticeengines-etl-score-history-dev", null, data);
+                firehoseService.send("latticeengines-etl-score-history-dev", data);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -55,7 +55,7 @@ public class FirehoseServiceImplTestNG extends AbstractTestNGSpringContextTests 
                 String data = String.format(format, "-batch-" + i);
                 streams.add(data);
             }
-            firehoseService.sendBatch("latticeengines-etl-score-history-dev", null, streams);
+            firehoseService.sendBatch("latticeengines-etl-score-history-dev", streams);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -43,7 +43,7 @@ export default class OverviewComponent extends Component {
     }
 
     componentWillUnmount() {
-        actions.clearInitialState();
+        actions.reset();
         this.unsubscribe();
     }
 

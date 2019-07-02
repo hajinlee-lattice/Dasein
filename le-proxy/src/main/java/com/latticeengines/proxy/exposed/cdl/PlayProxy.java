@@ -209,11 +209,17 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("update play launch", url, pLayLaunch, PlayLaunch.class);
     }
 
-    public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/launch?dry-run={isDryRunMode}",
-                shortenCustomerSpace(customerSpace), playName, launchId, isDryRunMode);
+    public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode,
+            boolean useSpark) {
+        String url = constructUrl(
+                URL_PREFIX + "/{playName}/launches/{launchId}/launch?dry-run={isDryRunMode}&use-spark={useSpark}",
+                shortenCustomerSpace(customerSpace), playName, launchId, isDryRunMode, useSpark);
         log.info("url is " + url);
         return post("Launchplay", url, null, PlayLaunch.class);
+    }
+
+    public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode) {
+        return launchPlay(customerSpace, playName, launchId, isDryRunMode, false);
     }
 
     @SuppressWarnings("rawtypes")

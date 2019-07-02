@@ -29,7 +29,6 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -43,7 +42,6 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -153,11 +151,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchHistories.add(matchHistory);
         }
 
-        String s3ObjectPrefix = getS3ObjectPrefix(matchContext);
-        publishMatchHistory(s3ObjectPrefix, matchHistories);
+        publishMatchHistory(matchHistories);
     }
 
-    private void publishMatchHistory(String s3ObjectPrefix, List<MatchHistory> matchHistories) {
+    private void publishMatchHistory(List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
             log.info("MatchHistory not enabled, returning.");
             return;
@@ -174,9 +171,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory using S3 Prefix: " +
-                s3ObjectPrefix);
-        firehoseService.sendBatch(deliveryStreamName, s3ObjectPrefix, histories);
+        log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
+        firehoseService.sendBatch(deliveryStreamName, histories);
     }
 
     @VisibleForTesting
@@ -404,23 +400,5 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return record.getEntityIds().get(entity);
-    }
-
-    private String getS3ObjectPrefix(MatchContext matchContext) {
-        if (matchContext.getInput().getTenant() != null &&
-                StringUtils.isNotBlank(matchContext.getInput().getTenant().getId())) {
-            Tenant tenant = matchContext.getInput().getTenant();
-            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-            String tenantName = customerSpace.getTenantId();
-            if (matchContext.getInput().isPerTenantMatchReportEnabled()) {
-                log.debug("S3ObjectPrefix is " + tenantName + "/");
-                return tenantName + "/";
-            } else {
-                log.debug("Not using S3ObjectPrefix for " + tenantName);
-            }
-        } else {
-            log.warn("Could not find Tenant or Tenant ID from MatchContext");
-        }
-        return null;
     }
 }

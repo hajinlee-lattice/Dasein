@@ -286,7 +286,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             livyHost = "http://localhost:8998";
         }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> livySessionService.startSession(livyHost, jobName, //
+        return retry.execute(context -> livySessionService.startSession(jobName, //
                 getLivyConf(sparkProps), getSparkConf(sparkProps)));
     }
 

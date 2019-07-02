@@ -1,5 +1,6 @@
 name: leds
 channels:
+  - anaconda
   - conda-forge
 dependencies:
   - python=3.7

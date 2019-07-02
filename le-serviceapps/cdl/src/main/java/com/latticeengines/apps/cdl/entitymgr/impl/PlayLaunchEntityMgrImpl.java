@@ -84,6 +84,12 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch findLatestByChannel(Long playLaunchChannelId) {
+        return playLaunchDao.findLatestByChannel(playLaunchChannelId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchDao.findByState(state);
     }

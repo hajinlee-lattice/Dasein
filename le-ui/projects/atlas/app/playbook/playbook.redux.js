@@ -3,25 +3,30 @@ import Observer from "common/app/http/observer";
 import { store } from 'store';
 
 var CONST = {
+    RESET: 'RESET',
+    LOADING: 'LOADING',
     FETCHING: 'FETCHING',
     FETCH_PLAY: 'FETCH_PLAY',
     FETCH_PLAYS: 'FETCH_PLAYS',
     FETCH_CONNECTIONS: 'FETCH_CONNECTIONS',
     FETCH_RATINGS: 'FETCH_RATINGS',
+    FETCH_TYPES: 'FETCH_TYPES',
+    FETCH_LOOKUP_ID_MAPPING: 'FETCH_LOOKUP_ID_MAPPING',
+    FETCH_USER_DOCUMENT: 'FETCH_USER_DOCUMENT',
+    FETCH_PROGRAMS: 'FETCH_PROGRAMS',
+    FETCH_STATIC_LISTS: 'FETCH_STATIC_LISTS',
+    FETCH_ACCOUNTS_DATA: 'FETCH_ACCOUNTS_DATA',
+    FETCH_ACCOUNTS_COUNT: 'FETCH_ACCOUNTS_COUNT',
     SAVE_LAUNCH: 'SAVE_LAUNCH',
     SAVE_PLAY: 'SAVE_PLAY',
     ACCOUNTS_COVERAGE: 'ACCOUNTS_COVERAGE',
     EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID: 'EXCLUDE_ITEMS_WITHOUT_SALESFORCE_ID',
     DESTINATION_ACCOUNT_ID: 'DESTINATION_ACCOUNT_ID',
-    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE',
-    FETCH_TYPES: 'FETCH_TYPES',
-    FETCH_LOOKUP_ID_MAPPING: 'FETCH_LOOKUP_ID_MAPPING',
-    FETCH_USER_DOCUMENT: 'FETCH_USER_DOCUMENT',
-    FETCH_PROGRAMS: 'FETCH_PROGRAMS',
-    FETCH_STATIC_LISTS: 'FETCH_STATIC_LISTS'
+    ADD_PLAYBOOKWIZARDSTORE: 'ADD_PLAYBOOKWIZARDSTORE'
 }
 
 const initialState = {
+    loading: false,
     play: null,
     plays: null,
     connections: null,
@@ -35,37 +40,22 @@ const initialState = {
     lookupIdMapping: null,
     userDocument: null,
     programs: null,
-    staticLists: null
+    staticLists: null,
+    accountsCount: null,
+    accountsData: null
 };
 
 export const actions = {
-    /**
-     * [clears your initialState]
-     * @param  {[array]} constnames [what you want to clear, if empty it clears everything]
-     * @param  {[type]} donotclear [what you don't want to clear]
-     */
-    clearInitialState: (constnames, donotclear) => {
-        var donotclear = donotclear || [];
-        if(constnames) {
-            if(typeof constnames === 'object') {
-                constnames.forEach(function(constname) {
-                    store.dispatch({
-                        type: CONST[constname],
-                        payload: null
-                    });
-                });
-            }
-        } else {
-            for(var i in CONST) {
-                var constname = CONST[i];
-                if(donotclear.indexOf(constname) === -1) {
-                    store.dispatch({
-                        type: CONST[constname],
-                        payload: null
-                    });
-                }
-            }
-        }
+    reset: () => {
+        store.dispatch({
+            type: CONST.RESET
+        });
+    },
+    setLoading: (state) => {
+        store.dispatch({
+            type: CONST.LOADING,
+            payload: state
+        });
     },
     addPlaybookWizardStore: (playbookWizardStore) => {
         store.dispatch({
@@ -143,6 +133,41 @@ export const actions = {
             ratingEngineIds: ratingEngineIds,
             restrictNotNullSalesforceId: restrictNotNullSalesforceId
         }, observer, {});
+    },
+    getAccountsData: (query) => {
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_ACCOUNTS_COUNT,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb(response.data);
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        httpService.post(`/pls/accounts/data`, query, observer, {});
+    },
+    fetchAccountsCount: (query, cb, deferred) => {
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_ACCOUNTS_COUNT,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb(response.data);
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        // var query = { 'preexisting_segment_name': data.targetSegment.name };
+        httpService.post(`/pls/accounts/count`, query, observer, {});
     },
     fetchTypes: (cb, deferred) => {
         deferred = deferred || { resolve: (data) => data }
@@ -262,11 +287,13 @@ export const actions = {
         }
     },
     savePlay: (opts, cb) => {
+        actions.setLoading(true);
         http.post('/pls/play/', opts).then((response) => {
             store.dispatch({
                 type: CONST.SAVE_PLAY,
                 payload: response.data
             });
+            actions.setLoading(false);
             if(cb && typeof cb === 'function') {
                 cb(response.data);
             }
@@ -417,6 +444,13 @@ export const actions = {
 
 export const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case CONST.RESET:
+            return initialState;
+        case CONST.LOADING:
+            return {
+                ...state,
+                loading: action.payload
+            }
         case CONST.ADD_PLAYBOOKWIZARDSTORE:
             return {
                 ...state,
@@ -441,6 +475,16 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 ratings: action.payload
+            }
+        case CONST.FETCH_ACCOUNTS_DATA:
+            return {
+                ...state,
+                accountsData: action.payload
+            }
+        case CONST.FETCH_ACCOUNTS_COUNT:
+            return {
+                ...state,
+                accountsCount: action.payload
             }
         case CONST.FETCH_TYPES:
             return {

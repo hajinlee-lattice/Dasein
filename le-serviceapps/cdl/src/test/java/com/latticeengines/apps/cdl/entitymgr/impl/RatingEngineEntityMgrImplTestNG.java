@@ -288,8 +288,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(createdRatingEngine.getLatestIteration());
         AIModel latestIteration = (AIModel) createdRatingEngine.getLatestIteration();
         Assert.assertNotNull(latestIteration);
-        CustomEventModelingConfig config = (CustomEventModelingConfig) latestIteration
-                .getAdvancedModelingConfig();
+        CustomEventModelingConfig config = (CustomEventModelingConfig) latestIteration.getAdvancedModelingConfig();
         Assert.assertEquals(config.getCustomEventModelingType(), CustomEventModelingType.LPI);
 
         // Ai Ratings set scoring Iteration first, then mark them as active
@@ -514,6 +513,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private Play generateDefaultPlay(RatingEngine ratingEngine) {
         List<PlayType> types = playTypeService.getAllPlayTypes(mainTestTenant.getId());
         Play play = new Play();
+        play.setDisplayName(PLAY_NAME);
         play.setDescription(PLAY_NAME);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);

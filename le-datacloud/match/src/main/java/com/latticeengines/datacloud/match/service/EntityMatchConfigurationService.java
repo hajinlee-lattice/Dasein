@@ -74,6 +74,21 @@ public interface EntityMatchConfigurationService {
     long getMaxSeedCacheMemoryInMB();
 
     /**
+     * Return the duration that an anonymous seed cache entry is allowed to stay in
+     * cache without being accessed
+     *
+     * @return non-null duration object
+     */
+    Duration getMaxAnonymousSeedCacheIdleDuration();
+
+    /**
+     * Return the maximum memory allowed to use for anonymous seed's in memory cache
+     *
+     * @return non-negative number (in megabytes)
+     */
+    long getMaxAnonymousSeedCacheInMB();
+
+    /**
      * Return retry template that is configured for the given environment. Same environment will always get the same
      * instance of retry template.
      *

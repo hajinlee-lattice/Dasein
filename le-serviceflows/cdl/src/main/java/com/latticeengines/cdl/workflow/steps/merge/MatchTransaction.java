@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -80,11 +79,8 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
     }
 
     private String getMatchConfig() {
-        MatchInput matchInput = getBaseMatchInput();
-        matchInput.setPerTenantMatchReportEnabled(configuration.isPerTenantMatchReportEnabled());
-        log.info("MatchTransaction: PerTenantMatchReportEnabled=" + configuration.isPerTenantMatchReportEnabled());
         Set<String> columnNames = getInputTableColumnNames(0);
-        return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
+        return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
                 Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
     }
 }

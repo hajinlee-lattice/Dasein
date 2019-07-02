@@ -62,11 +62,11 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
                     + scoreHistory.getRecordId() + " latticeId " + scoreHistory.getLatticeId());
             histories.add(JsonUtils.serialize(scoreHistory));
         }
-        firehoseService.sendBatch(deliveryStreamName, null, histories);
+        firehoseService.sendBatch(deliveryStreamName, histories);
     }
 
     private void publishScoreHistory(ScoreRecordHistory scoreHistory) {
-        firehoseService.send(deliveryStreamName, null, JsonUtils.serialize(scoreHistory));
+        firehoseService.send(deliveryStreamName, JsonUtils.serialize(scoreHistory));
     }
 
     @Override

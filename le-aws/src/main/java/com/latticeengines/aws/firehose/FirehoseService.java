@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface FirehoseService {
 
-    void send(String deliveryStreamName, String s3ObjectPrefix, String stream);
+    void send(String deliveryStreamName, String stream);
 
-    void sendBatch(String deliveryStreamName, String s3ObjectPrefix, List<String> streams);
+    void sendBatch(String deliveryStreamName, List<String> streams);
 
 }

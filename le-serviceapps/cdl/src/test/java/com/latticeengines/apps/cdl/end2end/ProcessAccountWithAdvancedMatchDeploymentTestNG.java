@@ -46,6 +46,9 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     static final String CHECK_POINT = "entitymatch_process1";
 
+    // FIXME remove after regenerate checkpoints for all following tests
+    private static final long ACCOUNT_PA_EM_ANONYMOUS = ACCOUNT_PA_EM + 1;
+
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -58,7 +61,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
-        //featureFlagMap.put(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         log.info("Setup Complete!");
     }
@@ -195,7 +197,8 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 8L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_PA_EM);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL,
+                ACCOUNT_PA_EM_ANONYMOUS);
 
         Map<String, Object> contactReport = new HashMap<>();
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_PA_EM);
@@ -213,7 +216,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_PA_EM, //
+                BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS, //
                 BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
@@ -221,7 +224,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS);
         map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         return map;
     }
@@ -229,15 +232,15 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA_EM //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM_ANONYMOUS, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA_EM_ANONYMOUS //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ACCOUNT_PA_EM, //
+                BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS, //
                 BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
