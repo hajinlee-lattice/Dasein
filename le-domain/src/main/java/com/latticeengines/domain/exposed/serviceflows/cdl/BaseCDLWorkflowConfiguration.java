@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = GenerateRatingWorkflowConfiguration.class, name = "GenerateRatingWorkflowConfiguration"),
         @Type(value = GenerateAIRatingWorkflowConfiguration.class, name = "GenerateAIRatingWorkflowConfiguration"),
         @Type(value = PlayLaunchWorkflowConfiguration.class, name = "PlayLaunchWorkflowConfiguration"),
+        @Type(value = CampaignLaunchWorkflowConfiguration.class, name = "CampaignLaunchWorkflowConfiguration"),
         @Type(value = ProcessAnalyzeWorkflowConfiguration.class, name = "ProcessAnalyzeWorkflowConfiguration"),
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
         @Type(value = UpdateAccountWorkflowConfiguration.class, name = "UpdateAccountWorkflowConfiguration"),

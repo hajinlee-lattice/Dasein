@@ -358,15 +358,19 @@ public class TestPlayCreationHelper {
         return lookupIdMappingProxy.registerExternalSystem(tenant.getId(), lookupIdMap);
     }
 
-    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
+    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig, boolean useSpark) {
         playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(),
-                playLaunchConfig.isPlayLaunchDryRun());
+                playLaunchConfig.isPlayLaunchDryRun(), useSpark);
         if (playLaunchConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
             Assert.assertNotNull(playLaunch.getApplicationId());
         }
         return playLaunch;
+    }
+
+    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
+        return launchPlayWorkflow(playLaunchConfig, false);
     }
 
     private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
@@ -404,7 +408,8 @@ public class TestPlayCreationHelper {
     private void assertBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         Assert.assertNotNull(playLaunch.getBucketsToLaunch());
         Set<RatingBucketName> defaultBucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
-        // Assert.assertEquals(bucketsToLaunch.size(), defaultBucketsToLaunch.size());
+        // Assert.assertEquals(bucketsToLaunch.size(),
+        // defaultBucketsToLaunch.size());
         for (RatingBucketName bucket : bucketsToLaunch) {
             Assert.assertTrue(defaultBucketsToLaunch.contains(bucket));
         }
@@ -474,21 +479,21 @@ public class TestPlayCreationHelper {
     private void createChannel(PlayLaunchConfig config, Play play, PlayLaunchChannel channel) {
         channel.setBucketsToLaunch(config.getBucketsToLaunch());
         switch (channel.getLookupIdMap().getExternalSystemName()) {
-            case Salesforce:
-                channel.setChannelConfig(new SalesforceChannelConfig());
-                break;
-            case Marketo:
-                channel.setChannelConfig(new MarketoChannelConfig());
-                break;
-            case AWS_S3:
-                channel.setChannelConfig(new S3ChannelConfig());
-                break;
-            case Eloqua:
-                channel.setChannelConfig(new EloquaChannelConfig());
-                break;
-            default:
-                channel.setChannelConfig(new SalesforceChannelConfig());
-                break;
+        case Salesforce:
+            channel.setChannelConfig(new SalesforceChannelConfig());
+            break;
+        case Marketo:
+            channel.setChannelConfig(new MarketoChannelConfig());
+            break;
+        case AWS_S3:
+            channel.setChannelConfig(new S3ChannelConfig());
+            break;
+        case Eloqua:
+            channel.setChannelConfig(new EloquaChannelConfig());
+            break;
+        default:
+            channel.setChannelConfig(new SalesforceChannelConfig());
+            break;
         }
         channel.setTenant(tenant);
         channel.setTenantId(tenant.getPid());
