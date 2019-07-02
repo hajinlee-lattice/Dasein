@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -281,44 +280,62 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<FieldValidation> validations = new ArrayList<>();
 
         FieldMappingDocument documentBestEffort = getFieldMappingDocumentBestEffort(sourceFileName, entity, source, feedType);
-        // filter off field mapping with cdl external system, or will cause multiple lattice field mapped to the same user field
-        Map<String, FieldMapping> userFieldMap = fieldMappings.stream()
-                .filter(mapping -> mapping.getCdlExternalSystemType() == null && StringUtils
-                        .isNotBlank(mapping.getUserField()))
-                .collect(Collectors.toMap(FieldMapping::getUserField, Function.identity()));
+        // multiple lattice field mapped to the same user field, the value of map should be a list
+        Map<String, List<FieldMapping>> userFieldMap = fieldMappings.stream()
+                .filter(mapping -> StringUtils.isNotBlank(mapping.getUserField()))
+                .collect(Collectors.groupingBy(FieldMapping::getUserField));
         Set<String> standardAttrNames =
                 standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+
+        Set<String> mappedStandardFields = new HashSet<>();
+        // check if there's multiple mapping to standard field
+        for (FieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getMappedField() != null) {
+                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                    if (mappedStandardFields.contains(fieldMapping.getMappedField())) {
+                        String message =
+                                "Multiple user fields are mapped to standard field " + fieldMapping.getMappedField();
+                        validations.add(createValidation(fieldMapping.getUserField(), fieldMapping.getMappedField(),
+                                ValidationStatus.ERROR, message));
+                    } else {
+                        mappedStandardFields.add(fieldMapping.getMappedField());
+                    }
+                }
+            }
+        }
 
         // compare field mapping document after being modified with field mapping best effort
         for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
             // skip user field mapped to standard attribute or user ignored fields
             if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
-                FieldMapping fieldMapping = userFieldMap.get(userField);
-                if (fieldMapping == null) {
+                List<FieldMapping> fieldMappingGroup = userFieldMap.get(userField);
+                if (CollectionUtils.isEmpty(fieldMappingGroup)) {
                     continue;
                 }
-                if (!standardAttrNames.contains(fieldMapping.getMappedField()) && bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
-                    String message = String
-                            .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
-                                    bestEffortMapping.getFieldType());
-                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                            message));
-                } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
-                    String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
-                            fieldMapping.getDateFormatString() :
-                            fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
-                                    + fieldMapping.getTimeFormatString();
-                    String correctFormat = StringUtils
-                            .isBlank(bestEffortMapping.getTimeFormatString()) ?
-                            bestEffortMapping.getDateFormatString() :
-                            bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
-                                    + bestEffortMapping.getTimeFormatString();
-                    String message = String
-                            .format("%s is set as %s but appears to be %s in your file.", userField,
-                                    userFormat, correctFormat);
-                    validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                            message));
+                for (FieldMapping fieldMapping : fieldMappingGroup) {
+                    if (!standardAttrNames.contains(fieldMapping.getMappedField()) && bestEffortMapping.getFieldType() != fieldMapping.getFieldType()) {
+                        String message = String
+                                .format("%s is set as %s but appears to only have %s values.", userField, fieldMapping.getFieldType(),
+                                        bestEffortMapping.getFieldType());
+                        validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                message));
+                    } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
+                        String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
+                                fieldMapping.getDateFormatString() :
+                                fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
+                                        + fieldMapping.getTimeFormatString();
+                        String correctFormat = StringUtils
+                                .isBlank(bestEffortMapping.getTimeFormatString()) ?
+                                bestEffortMapping.getDateFormatString() :
+                                bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
+                                        + bestEffortMapping.getTimeFormatString();
+                        String message = String
+                                .format("%s is set as %s but appears to be %s in your file.", userField,
+                                        userFormat, correctFormat);
+                        validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                message));
+                    }
                 }
             }
         }
@@ -437,12 +454,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (dataFeedTask == null) {
             table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
         } else {
             table = dataFeedTask.getImportTemplate();
-            regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        // this is to avoid the exception in following steps, e.g. resolve metadata
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
