@@ -116,13 +116,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected void setupLivyEnvironment() {
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
-        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), //
+        session = sessionService.startSession(this.getClass().getSimpleName(), //
                 Collections.emptyMap(), Collections.emptyMap());
     }
 

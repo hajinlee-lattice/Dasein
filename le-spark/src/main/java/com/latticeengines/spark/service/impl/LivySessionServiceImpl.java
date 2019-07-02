@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -27,10 +29,17 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Service("livySessionService")
 public class LivySessionServiceImpl implements LivySessionService {
+
+    @Inject
+    private EMRCacheService emrCacheService;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
@@ -41,7 +50,7 @@ public class LivySessionServiceImpl implements LivySessionService {
     private ObjectMapper om = new ObjectMapper();
 
     @Override
-    public LivySession startSession(@NotNull String host, @NotNull String name, //
+    public LivySession startSession(@NotNull String name, //
             Map<String, Object> livyConf, Map<String, String> sparkConf) {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
@@ -64,6 +73,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             payLoad.putAll(livyConf);
             log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
+        String host = getLivyHost();
         String url = host + URI_SESSIONS;
         String resp;
         try {
@@ -94,6 +104,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             restTemplate.delete(url);
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
+    }
+
+    public String getLivyHost() {
+        return Boolean.TRUE.equals(useEmr) ? emrCacheService.getLivyUrl() : "http://localhost:8998";
     }
 
     private String getSessionInfo(LivySession session) {

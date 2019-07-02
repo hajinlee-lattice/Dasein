@@ -96,17 +96,11 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         } else {
             jobName = String.format("%s~SparkSQL", tenantId);
         }
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
             LivySession session = null;
             try {
-                session = livySessionService.startSession(livyHost, jobName, //
+                session = livySessionService.startSession(jobName, //
                         getLivyConf(scalingFactor), getSparkConf(scalingFactor));
                 bootstrapAttrRepo(session, hdfsPathMap, storageLevel);
             } catch (Exception e) {
