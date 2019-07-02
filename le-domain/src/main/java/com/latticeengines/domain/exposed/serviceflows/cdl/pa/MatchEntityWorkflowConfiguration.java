@@ -49,13 +49,6 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
             return this;
         }
 
-        public Builder perTenantMatchReportEnabled(boolean perTenantMatchReportEnabled) {
-            processAccountStepConfiguration.setPerTenantMatchReportEnabled(perTenantMatchReportEnabled);
-            processContactStepConfiguration.setPerTenantMatchReportEnabled(perTenantMatchReportEnabled);
-            processTxnStepConfiguration.setPerTenantMatchReportEnabled(perTenantMatchReportEnabled);
-            return this;
-        }
-
         public MatchEntityWorkflowConfiguration build() {
             configuration.setContainerConfiguration("matchEntityWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

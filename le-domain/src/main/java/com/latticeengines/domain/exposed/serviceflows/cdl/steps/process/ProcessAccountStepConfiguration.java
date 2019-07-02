@@ -9,8 +9,6 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
     private String dataCloudVersion;
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
-    @JsonProperty("per_tenant_match_report_enabled")
-    private boolean perTenantMatchReportEnabled = false;
 
     @Override
     public BusinessEntity getMainEntity() {
@@ -31,13 +29,5 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
-    }
-
-    public boolean isPerTenantMatchReportEnabled() {
-        return perTenantMatchReportEnabled;
-    }
-
-    public void setPerTenantMatchReportEnabled(boolean perTenantMatchReportEnabled) {
-        this.perTenantMatchReportEnabled = perTenantMatchReportEnabled;
     }
 }
