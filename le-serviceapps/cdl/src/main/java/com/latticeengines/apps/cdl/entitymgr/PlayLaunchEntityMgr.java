@@ -29,6 +29,8 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
     PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);
 
+    PlayLaunch findLatestByChannel(Long playLaunchChannelId);
+
     List<PlayLaunch> findByState(LaunchState state);
 
     List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);

@@ -112,6 +112,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -308,6 +309,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setPlay(Play play) {
         this.play = play;
+    }
+
+    public PlayLaunchChannel getPlayLaunchChannel() {
+        return playLaunchChannel;
+    }
+
+    public void setPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
+        this.playLaunchChannel = playLaunchChannel;
     }
 
     public String getApplicationId() {
@@ -546,6 +555,5 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public void setExportFile(String exportFile) {
         this.exportFile = exportFile;
     }
-
 
 }

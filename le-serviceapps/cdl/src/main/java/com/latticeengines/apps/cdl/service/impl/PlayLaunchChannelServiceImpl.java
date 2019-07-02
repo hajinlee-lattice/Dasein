@@ -17,6 +17,7 @@ import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
@@ -50,6 +51,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private PlayService playService;
+
+    @Inject
+    private PlayLaunchService playLaunchService;
 
     @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
@@ -139,6 +143,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     @Override
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findByPlayName(playName);
+        for (PlayLaunchChannel playLaunchChannel : channels) {
+            playLaunchChannel.setLastLaunch(playLaunchService.findLatestByChannel(playLaunchChannel.getPid()));
+        }
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
         }
@@ -155,6 +162,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(play);
+        playLaunch.setPlayLaunchChannel(playLaunchChannel);
         playLaunch.setLaunchState(LaunchState.Queued);
         playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
@@ -273,11 +281,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (channel.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
