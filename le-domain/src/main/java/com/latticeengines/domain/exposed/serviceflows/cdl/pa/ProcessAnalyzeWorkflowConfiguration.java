@@ -232,11 +232,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder perTenantMatchReportEnabled(boolean perTenantMatchReportEnabled) {
-            matchEntityWorkflowBuilder.perTenantMatchReportEnabled(perTenantMatchReportEnabled);
-            return this;
-        }
-
         public Builder skipEntities(Set<BusinessEntity> entities) {
             processStepConfiguration.setSkipEntities(entities);
             if (CollectionUtils.containsAny(entities, BusinessEntity.AnalyticPurchaseState)) {
