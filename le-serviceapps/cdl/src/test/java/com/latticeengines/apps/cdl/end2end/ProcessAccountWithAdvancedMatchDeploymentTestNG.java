@@ -61,7 +61,6 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
-        //featureFlagMap.put(LatticeFeatureFlag.ENABLE_PER_TENANT_MATCH_REPORT.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         log.info("Setup Complete!");
     }

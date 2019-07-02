@@ -83,8 +83,6 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private String getMatchConfig() {
         MatchInput matchInput = getBaseMatchInput();
-        matchInput.setPerTenantMatchReportEnabled(configuration.isPerTenantMatchReportEnabled());
-        log.info("MatchAccount: PerTenantMatchReportEnabled=" + configuration.isPerTenantMatchReportEnabled());
         Set<String> columnNames = getInputTableColumnNames(0);
         if (configuration.isEntityMatchEnabled()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
