@@ -60,7 +60,10 @@
       display: none;
     }
   }
-
+  .le-table-row{
+    min-height: 55px;
+    align-items: center;
+  }
   .le-table-row:hover {
     & > .le-table-cell > * {
       color: $pearl-white;
