@@ -105,7 +105,7 @@ public class CampaignLaunchProcessor {
 
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
         // prepare basic account and contact front end queries
-        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
+        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
         applyEmailFilterToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
     }

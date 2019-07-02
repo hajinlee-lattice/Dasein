@@ -56,8 +56,9 @@
         text-align: center;
       }
     }
-    .initially-hidden {
+    .le-copy-controlls {
       display: none;
+      width: 0px;
     }
   }
   .le-table-row{
@@ -88,9 +89,13 @@
       }
     }
     & > .le-table-cell > .le-cell-template {
-      .initially-hidden {
-        display: initial;
+      & > div{
+        display: flex;
+      }
+      & .le-copy-controlls {
+        display: inline-flex;
         color: $pearl-white;
+        width: 100%;
       }
     }
   }

@@ -170,7 +170,8 @@ export default class MultipleTemplatesList extends Component {
                     onlyTemplate: true,
                     template: cell => {
                         if (!cell.state.saving && !cell.state.editing) {
-                            return (<span>{cell.props.rowData.ImportSystem.display_name}</span>);
+                            let displayName = cell.props.rowData.ImportSystem ? cell.props.rowData.ImportSystem.display_name : '';
+                            return (<span>{displayName}</span>);
                         }
                         if (cell.state.editing && !cell.state.saving) {
                             if (cell.props.rowData.Exist) {
