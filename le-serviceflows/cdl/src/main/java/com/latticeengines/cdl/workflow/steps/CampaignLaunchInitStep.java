@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -89,6 +90,12 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+
+            long totalAccountsAvailableForLaunch = playLaunchContext.getPlayLaunch().getAccountsSelected();
+            long totalContactsAvailableForLaunch = playLaunchContext.getPlayLaunch().getContactsSelected();
+            log.info(String.format("Total available accounts available for Launch: %d, contacts: %d",
+                    totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
+
             campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
             SparkJobResult createRecJobResult = retry.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
@@ -112,37 +119,41 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 }
             });
 
-            /*
-             * 4. export to mysql database using sqoop
-             */
-            log.info(createRecJobResult.getOutput());
             long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
-            log.info("Account#: " + launchedAccountNum);
+            log.info("Total Account launched: " + launchedAccountNum);
+            long launchedContactNum = 0L;
+            if (createRecJobResult.getOutput() != null) {
+                launchedContactNum = Long.parseLong(createRecJobResult.getOutput());
+                log.info("Total Contact launched: " + launchedContactNum);
+            } else {
+                log.warn("Contact is null");
+            }
+            log.info(createRecJobResult.getOutput());
             String targetPath = createRecJobResult.getTargets().get(0).getPath();
             log.info("Target HDFS path: " + targetPath);
             putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH, targetPath);
-            campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext, System.currentTimeMillis(),
-                    targetPath);
 
-            // TODO update the suppressed number
-            // PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-            // long suppressedAccounts = (totalAccountsAvailableForLaunch -
-            // playLaunch.getAccountsLaunched()
-            // - playLaunch.getAccountsErrored());
-            // playLaunch.setAccountsSuppressed(suppressedAccounts);
-            // long suppressedContacts = (totalContactsAvailableForLaunch -
-            // playLaunch.getContactsLaunched()
-            // - playLaunch.getContactsErrored());
-            // playLaunch.setContactsSuppressed(suppressedContacts);
-            // campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
-            // log.info(String.format("Total launched accounts count: %d",
-            // playLaunch.getAccountsLaunched()));
-            // log.info(String.format("Total errored accounts count: %d",
-            // playLaunch.getAccountsErrored()));
-            // log.info(String.format("Total suppressed account count for
-            // launch: %d", suppressedAccounts));
+            /*
+             * 4. export to mysql database using sqoop
+             */
+            // as per PM requirement, we need to fail play launch if 0
+            // recommendations were created.
+            if (launchedAccountNum <= 0L) {
+                throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
+            } else {
+                PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+                campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext,
+                        System.currentTimeMillis(), targetPath);
+                long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
+                playLaunch.setAccountsSuppressed(suppressedAccounts);
+                long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
+                playLaunch.setContactsSuppressed(suppressedContacts);
+                campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+                log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+                log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
 
-            successUpdates(customerSpace, playName, playLaunchId);
+                successUpdates(customerSpace, playName, playLaunchId);
+            }
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);
             throw new LedpException(LedpCode.LEDP_18157, ex);

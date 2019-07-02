@@ -30,7 +30,7 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private PlayLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new PlayLaunchExportPublishToSNSConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("playLaunchWorkflow", customerSpace,
+            configuration.setContainerConfiguration("campaignLaunchWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             importS3.setCustomerSpace(customerSpace);
             initStepConf.setCustomerSpace(customerSpace);
