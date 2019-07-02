@@ -1,5 +1,6 @@
 name: p2
 channels:
+  - anaconda
   - conda-forge
 dependencies:
   - python=2.7
