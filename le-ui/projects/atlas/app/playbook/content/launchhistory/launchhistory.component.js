@@ -243,7 +243,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     vm.getSourceFilePath = function(launchSummary) {
         var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
-        var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
+        var filePath = integrationStatusMonitor && integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
         if (filePath) {
             return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
         } else {
