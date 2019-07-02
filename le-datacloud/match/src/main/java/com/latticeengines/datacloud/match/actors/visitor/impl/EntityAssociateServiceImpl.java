@@ -262,7 +262,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         String entity = request.getEntity();
         if (CollectionUtils.isEmpty(request.getLookupResults())) {
             // no lookup entry in the request, associate to anonymous entity
-            return new EntityRawSeed(ANONYMOUS_ENTITY_ID, entity, Collections.emptyList(), null);
+            return entityMatchInternalService.getOrCreateAnonymousSeed(tenant, entity);
         } else {
             // allocate new seed
             String seedId = entityMatchInternalService.allocateId(tenant, entity);

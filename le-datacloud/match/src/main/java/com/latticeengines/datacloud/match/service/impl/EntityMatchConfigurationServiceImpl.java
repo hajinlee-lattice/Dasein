@@ -41,6 +41,8 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private static final long LOOKUP_CACHE_MAX_MEMORY_MB = 1024; // 1G
     private static final long SEED_CACHE_MAX_IDLE_SECONDS = 3600; // 1 hr
     private static final long SEED_CACHE_MAX_MEMORY_MB = 2048; // 2G
+    private static final long ANONYMOUS_SEED_CACHE_MAX_IDLE_SECONDS = 24 * 3600; // 1 day
+    private static final long ANONYMOUS_SEED_CACHE_MAX_MEMORY_MB = 256; // 256M
 
     private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
 
@@ -130,6 +132,16 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @Override
     public long getMaxSeedCacheMemoryInMB() {
         return SEED_CACHE_MAX_MEMORY_MB;
+    }
+
+    @Override
+    public Duration getMaxAnonymousSeedCacheIdleDuration() {
+        return Duration.ofSeconds(ANONYMOUS_SEED_CACHE_MAX_IDLE_SECONDS);
+    }
+
+    @Override
+    public long getMaxAnonymousSeedCacheInMB() {
+        return ANONYMOUS_SEED_CACHE_MAX_MEMORY_MB;
     }
 
     @Override
