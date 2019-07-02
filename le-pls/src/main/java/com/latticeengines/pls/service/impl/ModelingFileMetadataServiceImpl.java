@@ -453,6 +453,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             table = dataFeedTask.getImportTemplate();
         }
         schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        // this is to avoid the exception in following steps, e.g. resolve metadata
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, true, schemaTable);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
