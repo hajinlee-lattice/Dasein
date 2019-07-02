@@ -29,12 +29,11 @@ class CopyComponent extends Component {
   render() {
     return (
       <li
-        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-        title="Copy Link"
+        className="le-copy-controlls"
         onClick={this.clickHandler}
-      > 
+      >
         {this.getData()}
-        <i className="fa fa-files-o le-copy-control" />
+        <i className="fa fa-files-o le-copy-control" title="Copy Link"/>
       </li>
     );
   }

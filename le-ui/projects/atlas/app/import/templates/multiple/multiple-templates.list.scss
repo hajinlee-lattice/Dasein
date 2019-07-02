@@ -63,8 +63,9 @@
         text-align: center;
       }
     }
-    .initially-hidden {
+    .le-copy-controlls {
       display: none;
+      width: 0px;
     }
   }
 
@@ -91,10 +92,12 @@
         }
       }
     }
+   
     & > .le-table-cell > .le-cell-template {
-      .initially-hidden {
-        display: initial;
+      & > .le-copy-controlls {
+        display: inline-flex;
         color: $pearl-white;
+        width: 100%;
       }
     }
   }

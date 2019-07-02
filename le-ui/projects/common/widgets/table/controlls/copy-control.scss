@@ -1,9 +1,24 @@
-@import '../../colors.scss';
-
-.le-copy-control{
-    margin-left: 0.5em;
-    padding: 0.3em;
-    &:hover{
+@import "../../colors.scss";
+.le-copy-controlls {
+    width: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    & > span {
+        width: inherit;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+    }
+    .le-copy-control {
+      min-width: 26px;
+      margin-left: 0.5em;
+      padding: 0.3em;
+      &:hover {
         cursor: pointer;
+
+      }
     }
 }
