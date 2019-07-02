@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -107,9 +109,15 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     // 1. form FrontEndQuery for Account and Contact
                     // 2. get DataFrame for Account and Contact
                     HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
-                    HdfsDataUnit contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("accountDataUnit: " + accountDataUnit.toString());
-                    log.info("contactDataUnit: " + contactDataUnit.toString());
+                    HdfsDataUnit contactDataUnit = null;
+                    String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                    if (StringUtils.isBlank(contactTableName)) {
+                        log.info("No contact table available in Redshift.");
+                    } else {
+                        contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
+                        log.info("contactDataUnit: " + contactDataUnit.toString());
+                    }
                     // 3. generate avro out of DataFrame with predefined format
                     // for Recommendations
                     return executeSparkJob(CreateRecommendationsJob.class,
@@ -164,7 +172,11 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             HdfsDataUnit contactDataUnit, PlayLaunchContext playLaunchContext) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         createRecConfig.setWorkspace(getRandomWorkspace());
-        createRecConfig.setInput(Arrays.asList(accountDataUnit, contactDataUnit));
+        if (contactDataUnit != null) {
+            createRecConfig.setInput(Arrays.asList(accountDataUnit, contactDataUnit));
+        } else {
+            createRecConfig.setInput(Collections.singletonList(accountDataUnit));
+        }
         createRecConfig.setPlayLaunchSparkContext(playLaunchContext.toPlayLaunchSparkContext());
         return createRecConfig;
     }

@@ -174,10 +174,13 @@ public class FrontEndQueryCreator {
             accountFrontEndQuery.setContactRestriction(contactRestriction);
 
             Restriction extractedContactRestriction = contactRestriction.getRestriction() == null
-                    ? LogicalRestriction.builder().or(new ArrayList<>()).build() : contactRestriction.getRestriction();
+                    ? LogicalRestriction.builder().or(new ArrayList<>()).build()
+                    : contactRestriction.getRestriction();
             if (!separateActWithCnt) {
                 contactFrontEndQuery.setContactRestriction(prepareContactRestriction(extractedContactRestriction,
                         modifiableAccountIdCollectionForContacts));
+            } else {
+                contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(extractedContactRestriction));
             }
         }
 
@@ -239,25 +242,23 @@ public class FrontEndQueryCreator {
     @VisibleForTesting
     void initLookupFieldsConfiguration() {
         accountLookupFields = new HashMap<>();
-        accountLookupFields.put(BusinessEntity.Account,
-                Arrays.asList(InterfaceName.AccountId.name(), //
-                        InterfaceName.CompanyName.name(), //
-                        InterfaceName.LDC_Name.name()));
+        accountLookupFields.put(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name(), //
+                InterfaceName.CompanyName.name(), //
+                InterfaceName.LDC_Name.name()));
 
         contactLookupFields = new HashMap<>();
-        contactLookupFields.put(BusinessEntity.Contact,
-                Arrays.asList(InterfaceName.AccountId.name(), //
-                        InterfaceName.ContactId.name(), //
-                        InterfaceName.CompanyName.name(), //
-                        InterfaceName.Email.name(), //
-                        InterfaceName.ContactName.name(), //
-                        InterfaceName.City.name(), //
-                        InterfaceName.State.name(), //
-                        InterfaceName.Country.name(), //
-                        InterfaceName.PostalCode.name(), //
-                        InterfaceName.PhoneNumber.name(), //
-                        InterfaceName.Title.name(), //
-                        InterfaceName.Address_Street_1.name()));
+        contactLookupFields.put(BusinessEntity.Contact, Arrays.asList(InterfaceName.AccountId.name(), //
+                InterfaceName.ContactId.name(), //
+                InterfaceName.CompanyName.name(), //
+                InterfaceName.Email.name(), //
+                InterfaceName.ContactName.name(), //
+                InterfaceName.City.name(), //
+                InterfaceName.State.name(), //
+                InterfaceName.Country.name(), //
+                InterfaceName.PostalCode.name(), //
+                InterfaceName.PhoneNumber.name(), //
+                InterfaceName.Title.name(), //
+                InterfaceName.Address_Street_1.name()));
     }
 
 }
