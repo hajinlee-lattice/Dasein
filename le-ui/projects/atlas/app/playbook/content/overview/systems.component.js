@@ -120,7 +120,7 @@ class SystemsComponent extends Component {
 
                 let connections = playstore.connections,
                     launchingConnection = connections.find(function(connection) {
-                        return (connection  && connection.playLaunch && connection.playLaunch.launchState === 'Launching');
+                        return (connection  && connection.lastLaunch && connection.lastLaunch.launchState === 'Launching');
                     });
 
                 if(!launchingConnection) {
@@ -133,7 +133,7 @@ class SystemsComponent extends Component {
     }
 
     getLaunchStateText(connection, play) {
-        var launch = connection.playLaunch,
+        var launch = connection.lastLaunch,
             launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
             launching = (launchState === 'Launching' ? true : false),
@@ -178,7 +178,7 @@ class SystemsComponent extends Component {
 
     getLaunchButton(connection, play) {
         var button = [],
-            launch = connection.playLaunch,
+            launch = connection.lastLaunch,
             launchState = (launch ? launch.launchState : 'Unlaunched'),
             launched = (launchState === 'Launched' ? true : false),
             launching =  (launchState === 'Launching' ? true : false),
@@ -246,7 +246,7 @@ class SystemsComponent extends Component {
     connectionTemplate(connection, play) {
         var connectionsTemplate = [];
         if(connection) {
-            var launchState = (connection.playLaunch ? connection.playLaunch.launchState : 'Unlaunched'),
+            var launchState = (connection.lastLaunch ? connection.lastLaunch.launchState : 'Unlaunched'),
                 launched = (launchState === 'Launching' ? true : false);
 
             var configObj = this._connectors[connection.lookupIdMap.externalSystemName],

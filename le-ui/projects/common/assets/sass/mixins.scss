@@ -58,3 +58,8 @@
     -ms-user-select: $args;
     user-select: $args;
 }
+
+@mixin box-shadow($fmt) {
+    -webkit-box-shadow: $fmt;
+    box-shadow: $fmt;
+}

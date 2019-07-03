@@ -1,3 +1,7 @@
+@mixin box-shadow($fmt) {
+    -webkit-box-shadow: $fmt;
+    box-shadow: $fmt;
+}
 /**
  * simple tooltip, placeholder data-attr name until we clean up qtip plugin code (remove it)
  * current default is to the right, use classnames to make left, top, bottom versions, color variations, etc.
