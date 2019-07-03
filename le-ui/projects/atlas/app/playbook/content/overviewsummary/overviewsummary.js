@@ -32,7 +32,8 @@ export default class OverviewSummaryContainer extends Component {
             loading: false,
             play: null,
             types: null,
-            showType: false
+            showType: false,
+            editing: {}
         };
     }
 
@@ -178,7 +179,17 @@ export default class OverviewSummaryContainer extends Component {
         if(this.state.play && this.state.types) {
             let play = this.state.play,
                 types = this.state.types,
-                defaultDescriptionText = (!this.state.saving && !play.description ? 'Add a description' : '');
+                defaultDescriptionText = (!this.state.editing.description && !play.description ? 'Add a description' : '');
+
+                if(this.state.saving) {
+                    defaultDescriptionText = '';
+                }
+                console.log({
+                    defaultDescriptionText: defaultDescriptionText,
+                    'this.state.saving': this.state.saving,
+                    'this.state.editing.description': this.state.editing.description,
+                    'play.description': play.description
+                });
             return (
                 <Aux>
                     <div className={'overview-summary'}>
@@ -228,10 +239,14 @@ export default class OverviewSummaryContainer extends Component {
                                     <span contenteditable="true" data-default={defaultDescriptionText} 
                                         onClick={(e) => {
                                             e.target.setAttribute('data-default', '');
+                                            this.state.editing.description = true;
+                                            this.setState(this.state);
                                         }}
                                         onBlur={ (e) => {
                                             e.target.setAttribute('data-default', defaultDescriptionText);
                                             this.savePlay(play, {description: e.target.innerText});
+                                            this.state.editing.description = false;
+                                            this.setState(this.state);
                                         }} 
                                         onKeyDown={(event) => { this.constrainText(event, 255)} } tabIndex={1}>
                                         {play.description}
