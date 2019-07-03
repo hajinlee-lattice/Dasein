@@ -84,27 +84,22 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String sourceName = step.getBaseSources()[counter].getSourceName();
                 Source source = step.getBaseSources()[counter];
 
-                String hdfsSchemaDir;
-                String hdfsSnapshotDir;
-                String hdfsVersionFilePath;
-                String IngestionVerDir;
+                String hdfsSchemaDir = null;
+                String hdfsSnapshotDir = null;
+                String hdfsVersionFilePath = null;
+                String IngestionVerDir = null;
                 if (sourceName.contains("Ingestion")) {
-                    sourceName = sourceName.substring(sourceName.lastIndexOf("_") + 1);
-                    Path ingestionDir = hdfsPathBuilder.constructIngestionDir(sourceName);
-
-                    hdfsSchemaDir = null;
-                    hdfsSnapshotDir = null;
+                    Path ingestionDir = hdfsPathBuilder
+                            .constructIngestionDir(sourceName.substring(sourceName.lastIndexOf("_") + 1));
 
                     hdfsVersionFilePath = ingestionDir.append(HdfsPathBuilder.VERSION_FILE).toString();
                     IngestionVerDir = ingestionDir.append(step.getBaseVersions().get(counter)).toString();
                 } else {
-                    IngestionVerDir = null;
-
                     hdfsSnapshotDir = getSourceHdfsDir(step, counter);
                     try {
                         hdfsSchemaDir = getBaseSourceSchemaDir(step, counter);
                     } catch (Exception e) {
-                        hdfsSchemaDir = null;
+
                     }
                     hdfsVersionFilePath = getBaseSourceVersionFilePath(step, counter);
                 }
@@ -119,8 +114,8 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                     copyAndValidate(sourceName, IngestionVerDir, true);
                 }
 
-                if (!s3Service.objectExist(s3Bucket, hdfsVersionFilePath)
-                        || isNewerVerFileHdfs(source, hdfsVersionFilePath)) {
+                if (hdfsVersionFilePath != null && (!s3Service.objectExist(s3Bucket, hdfsVersionFilePath)
+                        || isNewerVerFileHdfs(source, hdfsVersionFilePath))) {
                     copyAndValidate(sourceName, hdfsVersionFilePath, true);
                 }
                 counter++;

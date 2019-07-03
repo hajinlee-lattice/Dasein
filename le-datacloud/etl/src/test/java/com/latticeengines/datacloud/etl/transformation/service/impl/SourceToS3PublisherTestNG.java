@@ -111,9 +111,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             configuration.setName("HdfsToS3Publish");
             configuration.setVersion(targetVersion);
 
-            List<String> baseSources = new ArrayList<>();
-            baseSources.add(baseSrc5.getSourceName());
-            baseSources.add(baseSrc6.getSourceName());
+            List<String> baseSources = Arrays.asList(baseSrc5.getSourceName(), baseSrc6.getSourceName());
 
             List<TransformationStepConfig> steps = new ArrayList<>();
 
@@ -156,7 +154,6 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void prepareData() throws IOException {
         initExpectedSnapshotFiles();
 
-
         s3FilePrepare();
 
         uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
@@ -185,31 +182,33 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     }
 
     private void s3FilePrepare() throws IOException {
-        currentVerionPrepare(baseSrc1, earlySourceVersion);
-        currentVerionPrepare(baseSrc2, basedSourceVersion);
-        currentVerionPrepare(baseSrc5, laterSourceVersion);
 
-        String resource = "sources/" + "AccountTable1.avro";
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-        String s3Key = hdfsPathBuilder.constructSnapshotDir(baseSrc2.getSourceName(), basedSourceVersion) + "/"
-                + "AccountTable1.avro";
-        s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
+        uploadToS3(baseSrc1, earlySourceVersion, false);
+        uploadToS3(baseSrc2, basedSourceVersion, false);
+        uploadToS3(baseSrc5, laterSourceVersion, false);
 
-        System.out.println("s3FilePrepare finished!!");
+        uploadToS3(baseSrc2, basedSourceVersion, true);
     }
 
-    private void currentVerionPrepare(Source baseSource, String sourceVerion) throws IOException {
-        InputStream inputStream = IOUtils.toInputStream(sourceVerion, "UTF-8");
-        String path = hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion) + "/";
+    private void uploadToS3(Source baseSource, String sourceVerion, boolean isFile) throws IOException {
         String s3Key;
-        if (baseSource instanceof IngestionSource) {
-            s3Key = path.substring(0, path.lastIndexOf(((IngestionSource) baseSource).getIngestionName()) + 12)
-                    + hdfsPathBuilder.VERSION_FILE;
+        InputStream inputStream;
+        String path = hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion) + "/";
+
+        if (isFile) {
+            inputStream = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("sources/" + "AccountTable1.avro");
+            s3Key = path + "AccountTable1.avro";
         } else {
-            s3Key = path.substring(0, path.lastIndexOf(baseSource.getSourceName()) + 12)
-                    + hdfsPathBuilder.VERSION_FILE;
+            inputStream = IOUtils.toInputStream(sourceVerion, "UTF-8");
+            if (baseSource instanceof IngestionSource) {
+                s3Key = path.substring(0, path.lastIndexOf(((IngestionSource) baseSource).getIngestionName()) + 12)
+                        + hdfsPathBuilder.VERSION_FILE;
+            } else {
+                s3Key = path.substring(0, path.lastIndexOf(baseSource.getSourceName()) + 12)
+                        + hdfsPathBuilder.VERSION_FILE;
+            }
         }
-        // System.out.println("s3Key: " + s3Key);
         s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
     }
 
@@ -244,37 +243,41 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
             String versionFilePath;
 
-            if (!baseSource.getSourceName().contains("Ingestion")) {
+            if (baseSource instanceof IngestionSource) {
 
-                // Verify snapshot files
+                Path ingestionVerDir = hdfsPathBuilder
+                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
+                        .append(basedSourceVersion);
+
+                List<String> IngestionVerFiles = Arrays.asList(
+                        ingestionVerDir.append("AccountMaster206.avro").toString(),
+                        ingestionVerDir.append(HdfsPathBuilder.SUCCESS_FILE).toString());
+
+                // Verify Ingestion baseVersion files
+                validateCopySuccess(IngestionVerFiles);
+
+                versionFilePath = hdfsPathBuilder
+                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
+                        .append(HdfsPathBuilder.VERSION_FILE).toString();
+                
+            } else {
+             // Verify snapshot files
                 List<String> snapshotFiles = getExpectedSnapshotFiles(baseSource);
-                validateCopySucseess(snapshotFiles);
+                validateCopySuccess(snapshotFiles);
 
                 versionFilePath = hdfsPathBuilder.constructVersionFile(sourceName).toString();
-            } else {
-                String ingestionName = baseSource.getSourceName()
-                        .substring(baseSource.getSourceName().lastIndexOf("_") + 1);
-                Path ingestionPath = hdfsPathBuilder.constructIngestionDir(ingestionName);
-                List<String> IngestionVerFiles = new ArrayList<>();
-                IngestionVerFiles
-                        .add(ingestionPath.append(basedSourceVersion).append("AccountMaster206.avro").toString());
-                IngestionVerFiles
-                        .add(ingestionPath.append(basedSourceVersion).append(HdfsPathBuilder.SUCCESS_FILE).toString());
-                validateCopySucseess(IngestionVerFiles);
 
-                versionFilePath = ingestionPath.append(HdfsPathBuilder.VERSION_FILE).toString();
             }
-
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
                         .append(sourceName + ".avsc").toString();
-                validateCopySucseess(Arrays.asList(schemaFile));
+                validateCopySuccess(Arrays.asList(schemaFile));
+
             }
-
             // Verify current version file
-
-            validateCopySucseess(Arrays.asList(versionFilePath));
+            validateCopySuccess(Arrays.asList(versionFilePath));
+            
         } catch (Exception e) {
             log.error("Fail to validate publising source {} at version {}", sourceName, version);
             throw new RuntimeException(e);
@@ -292,7 +295,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySucseess(List<String> files) throws IOException {
+    private void validateCopySuccess(List<String> files) throws IOException {
         files.forEach(file -> {
             Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
         });
