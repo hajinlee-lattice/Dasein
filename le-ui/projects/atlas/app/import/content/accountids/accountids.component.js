@@ -1,3 +1,6 @@
+import {actions, reducer} from '../../templates/multiple/multipletemplates.redux';
+import { store, injectAsyncReducer } from 'store';
+
 angular.module('lp.import.wizard.accountids', [])
 .controller('ImportWizardAccountIDs', function(
     $state, $stateParams, $scope, $timeout, 
@@ -29,12 +32,21 @@ angular.module('lp.import.wizard.accountids', [])
         initialMapping: {},
         keyMap: {},
         saveMap: {},
-        matchIdItems: [],
+        matchIdItems: ImportWizardStore.getMatchIdsItems(FieldDocument.fieldMappings),
+        systems: [],
         match: false
     });
 
     vm.init = function() {
-        var flags = FeatureFlagService.Flags();
+        injectAsyncReducer(store, 'multitemplates.accountids', reducer);
+        this.unsubscribe = store.subscribe(() => {
+            const data = store.getState()['multitemplates.accountids'];
+            // console.log("DATA ", data.systems);
+            vm.systems = data.systems;
+            // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
+        });
+       //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
+        actions.fetchSystems({});
 
         let validationStatus = ImportWizardStore.getValidationStatus();
         let banners = Banner.get();
@@ -101,32 +113,23 @@ angular.module('lp.import.wizard.accountids', [])
         }
     }
 
-    vm.changeLatticeField = function(mapping, form) {
+    vm.getMapped = (mapping) => {
+        // console.log('MMM ==> ',mapping);
         var mapped = [];
         vm.unavailableFields = [];
         for(var i in mapping) {
-            if(mapping[i] || mapping[i] === "") { // yes yes, don't worry about it
+            if(mapping[i] || mapping[i] === "") {
                 var key = i,
                     userField = mapping[key],
                     map = {
-                        userField: userField, //(userField === 'unmapToNull' ? null : userField), 
+                        userField: userField, 
                         mappedField: vm.mappedFieldMap[key],
                         // removing the following 3 lines makes it update instead of append
                         originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
                         originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
                         append: false
                     };
-                // leaving this here because maybe a hack for PLS-13927, I never tested this though
-                // if you see this after july 2019, please remove
-                // console.log(map);
-                // if(vm.entityMatchEnabled) {
-                //     map = Object.assign({
-                //         idType: 'Account',
-                //         systemName: 'DefaultSystem',
-                //         mapToLatticeId: true 
-                //     }, map);
-                // }
-                // console.log(map);
+                // console.log(' <===> ',map, vm.fieldMapping.contact);
                 if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
                     map.mapToLatticeId = vm.match;
                     map.IdType = map.mapToLatticeId == true ?'Account' : null;
@@ -137,9 +140,75 @@ angular.module('lp.import.wizard.accountids', [])
                 }
             }
         }
+        return mapped;
+    }
+
+    // vm.changeLatticeField = function(mapping, form) {
+    //     var mapped = [];
+    //     vm.unavailableFields = [];
+    //     for(var i in mapping) {
+    //         if(mapping[i] || mapping[i] === "") { // yes yes, don't worry about it
+    //             var key = i,
+    //                 userField = mapping[key],
+    //                 map = {
+    //                     userField: userField, //(userField === 'unmapToNull' ? null : userField), 
+    //                     mappedField: vm.mappedFieldMap[key],
+    //                     // removing the following 3 lines makes it update instead of append
+    //                     originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
+    //                     originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
+    //                     append: false
+    //                 };
+    //             // leaving this here because maybe a hack for PLS-13927, I never tested this though
+    //             // if you see this after july 2019, please remove
+    //             // console.log(map);
+    //             // if(vm.entityMatchEnabled) {
+    //             //     map = Object.assign({
+    //             //         idType: 'Account',
+    //             //         systemName: 'DefaultSystem',
+    //             //         mapToLatticeId: true 
+    //             //     }, map);
+    //             // }
+    //             // console.log(map);
+    //             if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
+    //                 map.mapToLatticeId = vm.match;
+    //                 map.IdType = map.mapToLatticeId == true ?'Account' : null;
+    //             }
+    //             mapped.push(map);
+    //             if(userField) {
+    //                 vm.unavailableFields.push(userField);
+    //             }
+    //         }
+    //     }
+    //     ImportWizardStore.setSaveObjects(mapped, $state.current.name);
+    //     vm.checkValid(form);
+    // };
+
+    vm.changeLatticeField = function(mapping, form) {
+        let mapped = vm.getMapped(mapping);
+        if(vm.isMultipleTemplates()){
+            vm.changeMatchIds(mapped);
+        }
+        // console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        vm.checkValid(form);
+        vm.checkValid(form); 
     };
+    vm.changeMatchIds = (mapped) => {
+        vm.matchIdItems.forEach(item => {
+            let name = item.userField;
+            if(name!= ''){
+                name = name.replace('^/','');
+            }
+            let sysName = item.system;
+            if(name != '' && sysName != ''){
+                mapped.push({
+                    userField: name,
+                    IdType: 'Account',
+                    SystemName: sysName
+                })
+            }
+
+        });
+    }
 
     vm.checkFieldsDelay = function(form) {
         var mapped = [];
@@ -159,12 +228,12 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.checkValidDelay = function(form) {
         $timeout(function() {
-            vm.checkValid(form);
+            vm.checkValid(vm.form);
         }, 1);
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('ids', form.$valid);
+        ImportWizardStore.setValidation('ids', vm.form.$valid);
     }
     vm.isMultipleTemplates = () => {
         var flags = FeatureFlagService.Flags();
@@ -174,12 +243,45 @@ angular.module('lp.import.wizard.accountids', [])
 
     vm.addMatchId = () => {
         vm.matchIdItems.push({
-            userField: '-- Select Field --',
-            system: '-- Select System --'
+            userField: '',
+            system: { displayName: '', name: ''}
         });
     }
+
     vm.removeMatchId = (index) => {
+        let ufName = vm.matchIdItems[index].userField.replace('^/', '');
+        let sName = vm.matchIdItems[index].syatem;
+        let mapped = vm.getMapped(vm.fieldMapping);
         vm.matchIdItems.splice(index, 1);
+        for(var i = 0; i< mapped.length - 1; i++){
+            if(mapped[i].userField == ufName && mapped[i].SystemName == sName){
+                mapped.splice(i, 1);
+                return;
+            }
+        }
+        // console.log('Saving R ', mapped);
+        ImportWizardStore.setSaveObjects(mapped, $state.current.name);
+        
+    }
+
+    vm.updateSystem = (index) => {
+        let item = vm.matchIdItems[index];
+        // console.log('ITEM ', item);
+        let ufName = item.userField.replace('^/', '');
+        let sysName = item.system.name;
+        if(ufName != '' && sysName != ''){
+            vm.changeLatticeField(vm.fieldMapping, vm.form);
+        }
+    }
+
+    
+    vm.changeMatchingFields = (index, newVal, oldVal) => {
+        let item = vm.matchIdItems[index];
+        let ufName = item.userField.replace('^/', '');
+        if(ufName != ''){
+            // console.log(vm.form);
+            vm.changeLatticeField(vm.fieldMapping, vm.form);
+        }
     }
 
     vm.init();

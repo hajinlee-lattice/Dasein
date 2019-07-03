@@ -56,7 +56,7 @@
       Select your unique IDs to de-duplicate your account records.
     </p>
   </div>
-  <form name="form">
+  <ng-form name="vm.form">
     <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
       <div class="id-options-item">
         <select
@@ -95,7 +95,6 @@
         >
       </p>
     </div>
-  </form>
   <!--  -->
   <!-- MATCH IDs -->
   <div class="match-ids-multi-templates">
@@ -109,7 +108,6 @@
       <br />
     </div>
 
-    <form name="form">
       <ul class="field-mapping multi-templates">
         <li class="header">
           <ul class="match-id-header">
@@ -122,8 +120,9 @@
             <li class="system-name">
               <select
                 class="form-control"
-                ng-model="vm.fieldMapping[field.name].userField"
-                ng-change="vm.changeMatchingFields(vm.fieldMapping, form)"
+                ng-model="vm.matchIdItems[$index].userField"
+                ng-change="vm.changeMatchingFields($index, (vm.matchIdItems[$index]), {{vm.matchIdItems[$index]}})"
+              
               >
                 <option value="">{{ vm.ignoredFieldLabel }}</option>
                 <option
@@ -137,8 +136,15 @@
               </select>
             </li>
             <li class="system-type">
-              <select class="form-control"> </select>
-            </li>
+                <select class="form-control" ng-model="vm.matchIdItems[$index].system" ng-change="vm.updateSystem($index)"> 
+                  <!-- <option value="">-- Select System --</option> -->
+                  <option
+                    ng-repeat="s in vm.systems"
+                    value="{{s.name}}"
+                    ng-required="true"
+                  >{{s.display_name}}</option>
+                </select>
+              </li>
             <li class="remove-button" ng-click="vm.removeMatchId($index)">
               <span title="remove mapping"><i class="fa fa-times"></i></span>
             </li>
