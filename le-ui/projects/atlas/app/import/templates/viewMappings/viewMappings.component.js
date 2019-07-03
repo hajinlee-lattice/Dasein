@@ -252,7 +252,7 @@ export default class ViewMappings extends Component {
                                     <LeLink
                                       config={{
                                         label: "< Back",
-                                        classes: "",
+                                        classes: "back-button",
                                         name: ""
                                       }}
                                       callback={() => {
