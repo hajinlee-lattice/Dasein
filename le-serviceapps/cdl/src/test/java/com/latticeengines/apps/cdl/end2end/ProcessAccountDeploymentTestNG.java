@@ -183,7 +183,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         Assert.assertNotNull(attr1);
         Assert.assertTrue(StringUtils.isNotBlank(attr1.getLastDataRefresh()), JsonUtils.serialize(attr1));
 
-        Table contactTable = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Contact.getBatchStore());
+        Table contactTable = dataCollectionProxy.getTable(mainCustomerSpace, BusinessEntity.Contact.getServingStore());
         Assert.assertNotNull(contactTable);
         Attribute attr2 = contactTable.getAttribute("user_Last_Communication_Date");
         Assert.assertNotNull(attr2);
