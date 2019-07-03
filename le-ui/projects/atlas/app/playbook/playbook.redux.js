@@ -404,7 +404,7 @@ export const actions = {
                             return connection.id === channelId;
                         });
 
-                    connections[connectionIndex].playLaunch = response.data;
+                    connections[connectionIndex].lastLaunch = response.data;
 
                     store.dispatch({
                         type: CONST.FETCH_CONNECTIONS,

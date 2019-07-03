@@ -4,6 +4,8 @@ import React, {
 } from "../../../../../common/react-vendor";
 import { moment } from "common/vendor.index"
 import "./overviewsummary.scss";
+import "../../../../../common/assets/sass/mixins.scss";
+import "../../../../../common/assets/sass/_tooltips.scss";
 import Aux from "../../../../../common/widgets/hoc/_Aux";
 import SummaryBox from "./overviewsummary-box";
 import LeVPanel from "common/widgets/container/le-v-panel";
@@ -199,11 +201,23 @@ export default class OverviewSummaryContainer extends Component {
                                                 <LeHPanel hstretch={"true"} valignment={CENTER} className={'le-summary-times'}>
                                                     <span className={'right-border'}>
                                                         Created: {moment(play.created).format('MMM D, YYYY')} 
-                                                        <i title={play.createdBy} class="user-ico"></i>
+                                                        <i className={'user-ico show-tooltip top'}>
+                                                            <div className={'tooltip_'}>
+                                                                <div className={'cover'}>
+                                                                    by {play.createdBy}
+                                                                </div>
+                                                            </div>
+                                                        </i>
                                                     </span>
                                                     <span>
                                                         Edited: {moment(play.updated).format('MMM D, YYYY')}
-                                                        <i title={play.updatedBy} class="user-ico"></i>
+                                                        <i className={'user-ico show-tooltip top'}>
+                                                            <div className={'tooltip_'}>
+                                                                <div className={'cover'}>
+                                                                    by {play.updatedBy}
+                                                                </div>
+                                                            </div>
+                                                        </i>
                                                     </span>
                                                 </LeHPanel>
                                             </div>

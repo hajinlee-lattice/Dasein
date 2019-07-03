@@ -82,13 +82,13 @@ export default class OverviewComponent extends Component {
     }
 
     launchHistoryLink(play) {
-        if(play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || (play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState)) {
+        //if(play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || (play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState)) {
             return(
                 <a href="javascript:void(0);" onClick={() => {
                     NgState.getAngularState().go('home.playbook.dashboard.launchhistory', {play_name: play.name}); 
                 }}>Launch History</a>
             );
-        }
+        //}
     }
     render() {
         if (this.state.play) {

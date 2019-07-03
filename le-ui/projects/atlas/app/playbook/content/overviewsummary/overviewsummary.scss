@@ -151,6 +151,9 @@
                                 background-size: contain;
                             }
                         }
+                        &.le-nowrap {
+                            overflow: initial!important;
+                        }
                     }
                 }
             }

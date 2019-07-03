@@ -282,11 +282,37 @@ class LaunchComponent extends Component {
         return _buckets;
     }
 
+    makeBucketsContainer(coverage, play, noBuckets, opts) {
+        var _buckets = [],
+            total = 0,
+            vm = this,
+            coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []),
+            buckets = buckets || coverageBuckets,
+            littleBuckets = true;
+
+        if(buckets && buckets.length) {
+            return(
+                <Aux>
+                    <h2>Ratings</h2>
+                    <LeHPanel 
+                        hstretch={!littleBuckets} 
+                        halignment={LEFT} 
+                        valignment={CENTER} 
+                        className={`rating-buckets ${littleBuckets ? 'little-buckets' : ''}`}
+                    >
+                        {this.makeBuckets(coverage, play, noBuckets, opts)}
+                    </LeHPanel>
+                </Aux>
+            );
+        }
+    }
+
     makeBucketList = (play, coverage, opts) => {
+        let unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0;
         /**
          * If no buckets this should produce 5 default buckets
          */
-        let vm = this,
+        var vm = this,
             _noBuckets = [{
                 bucket: 'A',
                 count: 0,
@@ -306,23 +332,13 @@ class LaunchComponent extends Component {
                 bucket: 'F',
                 count: 0,
             }],
-            unscoredAccountCountPercent = opts.unscoredAccountCountPercent || 0,
             hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length),
-            noBuckets = (hasBuckets ? null : _noBuckets),
-            littleBuckets = true;
+            noBuckets = (hasBuckets ? null : null); //_noBuckets);
 
         if(coverage) {
             return (
                 <Aux>
-                    <h2>Ratings</h2>
-                    <LeHPanel 
-                        hstretch={!littleBuckets} 
-                        halignment={LEFT} 
-                        valignment={CENTER} 
-                        className={`rating-buckets ${littleBuckets ? 'little-buckets' : ''}`}
-                    >
-                        {this.makeBuckets(coverage, play, noBuckets, opts)}
-                    </LeHPanel>
+                    {this.makeBucketsContainer(coverage, play, noBuckets, opts)}
                     <div className={'unscored-accounts-container'}>
                         <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
                         <label for="unscored">
@@ -333,6 +349,19 @@ class LaunchComponent extends Component {
             );
         }
     }
+
+    makeRequireAccountId() {
+        console.log(this.state.externalSystemName);
+        if(this.state.externalSystemName === 'Salesforce') {
+            return (
+                <li>
+                    <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
+                    <label for="requireAccountId">Must have account ID</label>
+                </li>
+            );
+        }
+    }
+
 
     makeProgramsList(programs) {
         var vm = this,
@@ -652,10 +681,7 @@ class LaunchComponent extends Component {
                                     <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
                                     <label for="requireAccountId">Must have email</label>
                                 </li>
-                                <li>
-                                    <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
-                                    <label for="requireAccountId">Must have account ID</label>
-                                </li>
+                                {this.makeRequireAccountId()}
                             </ul>
                         </div>
                         {this.makeProgramsList(this.state.programs)}
