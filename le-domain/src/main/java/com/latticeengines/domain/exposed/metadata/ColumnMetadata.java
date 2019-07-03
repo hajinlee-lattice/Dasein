@@ -114,6 +114,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("LastDataRefresh")
     private String lastDataRefresh;
 
+    @JsonProperty("IsCampaignDerivedField")
+    private Boolean isCampaignDerivedField = false;
+
     // TODO: Attribute Customization should be migrated to new metadata
     // framework
     @Deprecated
@@ -666,6 +669,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setLastDataRefresh(String lastDataRefresh) {
         this.lastDataRefresh = lastDataRefresh;
+    }
+
+    public Boolean isCampaignDerivedField() {
+        return isCampaignDerivedField;
+    }
+
+    public void setIsCampaignDerivedField(Boolean isCampaignDerivedField) {
+        this.isCampaignDerivedField = isCampaignDerivedField;
     }
 
     public boolean isDateAttribute() {
