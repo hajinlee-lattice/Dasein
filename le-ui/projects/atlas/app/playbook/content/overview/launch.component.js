@@ -350,14 +350,30 @@ class LaunchComponent extends Component {
         }
     }
 
-    makeRequireAccountId() {
-        console.log(this.state.externalSystemName);
-        if(this.state.externalSystemName === 'Salesforce') {
+    makeAccountOptions() {
+        let externalSystemName = this.state.externalSystemName;
+
+        if(externalSystemName === 'Salesforce') {
             return (
-                <li>
-                    <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
-                    <label for="requireAccountId">Must have account ID</label>
-                </li>
+                <Aux>
+                    <li>
+                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
+                        <label for="requireEmail">Must have email</label>
+                    </li>
+                    <li>
+                        <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
+                        <label for="requireAccountId">Must have account ID</label>
+                    </li>
+                </Aux>
+            );
+        } else if(externalSystemName === 'Marketo') {
+            return (
+                <Aux>
+                    <li>
+                        <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
+                        <label for="requireContactIfo">Must have contact info</label>
+                    </li>
+                </Aux>
             );
         }
     }
@@ -658,7 +674,7 @@ class LaunchComponent extends Component {
                 <LeVPanel className={`campaign-launch ${this.state.launchingState}`} hstretch={true}>
                     <div className="campaign-launch-container">
                         <div className={'launch-section recommendations'}>
-                            <h2>{type === 'salesforce' ? 'Recommendations' : 'Contacts'} to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
+                            <h2>Accounts to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
                             <ul>
                                 <li>
                                     <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
@@ -677,11 +693,7 @@ class LaunchComponent extends Component {
                         </div>
                         <div className={'launch-section account-options'}>
                             <ul>
-                                <li>
-                                    <input id="requireAccountId" checked={true} type="checkbox" disabled={true} /> 
-                                    <label for="requireAccountId">Must have email</label>
-                                </li>
-                                {this.makeRequireAccountId()}
+                                {this.makeAccountOptions()}
                             </ul>
                         </div>
                         {this.makeProgramsList(this.state.programs)}
