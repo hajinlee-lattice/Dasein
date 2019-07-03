@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private static final String ratingId = RatingEngine.generateIdStr();
     private static final String destinationAccountId = "D41000001Q3z4EAC";
     private static final int contactPerAccount = 10;
+    private String accountData;
+    private String contactData;
 
     @Test(groups = "functional")
     public void runTest() {
@@ -43,6 +46,11 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         PlayLaunchSparkContext playLaunchContext = generatePlayLaunchSparkContext();
         createRecConfig.setPlayLaunchSparkContext(playLaunchContext);
         SparkJobResult result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
+        verifyResult(result);
+
+        // mimic the case where there is no contact data
+        inputs = Collections.singletonList(accountData);
+        result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
         verifyResult(result);
     }
 
@@ -77,7 +85,11 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     @Override
     protected void verifyOutput(String output) {
         log.info("Contact count is " + output);
-        Assert.assertEquals(output, "100");
+        if (inputs.size() == 2) {
+            Assert.assertEquals(output, "100");
+        } else {
+            Assert.assertEquals(output, "0");
+        }
     }
 
     @Override
@@ -90,9 +102,11 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();
             String accountId = record.get("ACCOUNT_ID").toString();
-            String contacts = record.get("CONTACTS").toString();
-            if (count.get() == 1) {
-                log.info(String.format("For account %s, contacts are: %s", accountId, contacts));
+            if (inputs.size() == 2) {
+                String contacts = record.get("CONTACTS").toString();
+                if (count.get() == 1) {
+                    log.info(String.format("For account %s, contacts are: %s", accountId, contacts));
+                }
             }
         });
         Assert.assertEquals(count.get(), 10);
@@ -122,8 +136,10 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 { "8L", "destinationAccountId", "Dell", "Dell", "8", "F", "10" }, //
                 { "9L", "destinationAccountId", "HP", "HP", "38", "E", "500" }, //
         };
-        String accountData = uploadHdfsDataUnit(accounts, accountFields);
+        accountData = uploadHdfsDataUnit(accounts, accountFields);
 
+        // the contact schema does not have the Address_Street_1.name for
+        // testing the the case where contact schema is not complete
         List<Pair<String, Class<?>>> contactfields = Arrays.asList( //
                 Pair.of(InterfaceName.AccountId.name(), String.class), //
                 Pair.of(InterfaceName.ContactId.name(), String.class), //
@@ -135,8 +151,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Country.name(), String.class), //
                 Pair.of(InterfaceName.PostalCode.name(), String.class), //
                 Pair.of(InterfaceName.PhoneNumber.name(), String.class), //
-                Pair.of(InterfaceName.Title.name(), String.class), //
-                Pair.of(InterfaceName.Address_Street_1.name(), String.class) //
+                Pair.of(InterfaceName.Title.name(), String.class) //
         );
 
         Object[][] contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
@@ -153,10 +168,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 contacts[accounts.length * i + j][8] = "94404";
                 contacts[accounts.length * i + j][9] = "650-898-3928";
                 contacts[accounts.length * i + j][10] = "CEO";
-                contacts[accounts.length * i + j][11] = "100 San Mateo Dr";
             }
         }
-        String contactData = uploadHdfsDataUnit(contacts, contactfields);
+        contactData = uploadHdfsDataUnit(contacts, contactfields);
         inputs = Arrays.asList(accountData, contactData);
     }
 
