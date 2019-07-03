@@ -29,16 +29,13 @@ class DBStorage:
     __engine = None
     __session = None
 
-    def __init__(self):
-        MYSQL_USER = getenv('MYSQL_USER')
-        MYSQL_PWD = getenv('MYSQL_PWD')
-        MYSQL_HOST = getenv('MYSQL_HOST')
-        MYSQL_DB = getenv('MYSQL_DB')
+    def __init__(self, MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB):
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
                                       format(MYSQL_USER,
                                              MYSQL_PWD,
                                              MYSQL_HOST,
                                              MYSQL_DB))
+        self.reload()
 
     def all(self, cls=None):
         if cls is not None and isinstance(cls, str):
@@ -68,5 +65,5 @@ class DBStorage:
 
     def close(self):
         """call remove() method on the private session attribute"""
-        self.__session.remove()
+        self.__session.close()
 
