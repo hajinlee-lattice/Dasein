@@ -44,7 +44,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ExportFieldMetadataServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ExportFieldMetadataServiceDeploymentTestNG.class);
 
     private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
