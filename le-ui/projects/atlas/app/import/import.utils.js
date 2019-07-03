@@ -121,13 +121,21 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     };
 
     function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj, entity){
-        fieldsMapped.forEach(function(fieldMapped){
+        for(var i=0; i<fieldsMapped.length ; i++){
+            let fieldMapped = fieldsMapped[i];
             if(fieldMapped.userField == userFieldName){
                 fieldMapped.fieldType = newTypeObj.type;
                 updateFieldDate(fieldMapped, newTypeObj, entity);
                 return;
             }
-        });
+        }
+        // fieldsMapped.forEach(function(fieldMapped){
+        //     if(fieldMapped.userField == userFieldName){
+        //         fieldMapped.fieldType = newTypeObj.type;
+        //         updateFieldDate(fieldMapped, newTypeObj, entity);
+        //         return;
+        //     }
+        // });
     }
 
     function updateFieldDate(fieldMapped, newTypeObj, entity) {
