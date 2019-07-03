@@ -34,7 +34,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             }
         },
         systemMap: {},
-        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION)
+        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION),
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.init = function() {
