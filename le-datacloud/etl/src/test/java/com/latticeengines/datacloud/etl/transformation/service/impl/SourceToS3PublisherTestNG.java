@@ -55,8 +55,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private GeneralSource baseSrc4 = new GeneralSource("TestSource4");
 
     // Sources for multi-source step
-    private IngestionSource baseSrc5 = new IngestionSource("TestSource5");///
-    private GeneralSource baseSrc6 = new GeneralSource("TestSource6");///
+    private IngestionSource baseSrc5 = new IngestionSource("TestSource5");
+    private GeneralSource baseSrc6 = new GeneralSource("TestSource6");
 
     // Place holder of target source whose name is used as pod
     private GeneralSource source = new GeneralSource(
@@ -95,7 +95,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         cleanupProgressTables();
     }
 
-    @AfterClass(groups = "pipeline1", enabled = false)
+    @AfterClass(groups = "pipeline1", enabled = true)
     private void destroy() {
         cleanup();
     }
@@ -166,7 +166,6 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
                 basedSourceVersion);
         uploadBaseSourceFile(baseSrc5, "AccountMaster206.avro", basedSourceVersion);
         uploadBaseSourceFile(baseSrc6, "AccountTable1", basedSourceVersion);
-        System.out.println("BaseSrc5 getName: " + baseSrc5.getSourceName());
 
         createSchema(baseSrc1, basedSourceVersion);
         createSchema(baseSrc2, basedSourceVersion);
@@ -234,8 +233,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         stepSuccessValidate(baseSrc2, basedSourceVersion);
         stepSuccessValidate(baseSrc3, basedSourceVersion);
         stepSuccessValidate(baseSrc4, basedSourceVersion);
-        stepSuccessValidate(baseSrc5, basedSourceVersion);///
-        stepSuccessValidate(baseSrc6, basedSourceVersion);///
+        stepSuccessValidate(baseSrc5, basedSourceVersion);
+        stepSuccessValidate(baseSrc6, basedSourceVersion);
     }
 
     private void stepSuccessValidate(Source baseSource, String version) {
