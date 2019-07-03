@@ -37,6 +37,32 @@ CREATE PROCEDURE `UpdatePLSTables`()
    	  FOREIGN KEY (`FK_PLAY_LAUNCH_CHANNEL_ID`) REFERENCES `PLAY_LAUNCH_CHANNEL` (`PID`) ON DELETE CASCADE;
 
     ALTER TABLE `PLAY_LAUNCH_CHANNEL` DROP FOREIGN KEY `FK_PLAYLAUNCHCHANNEL_FKPLAYLAUNCHID_PLAYLAUNCH`;
+    
+    create table `EXPORT_FIELD_METADATA_DEFAULTS` 
+    	(`PID` bigint not null auto_increment, 
+    	`ATTR_NAME` varchar(255) not null, 
+    	`DISPLAY_NAME` varchar(255) not null, 
+    	`ENTITY` varchar(255) not null, 
+    	`EXPORT_ENABLED` bit not null, 
+    	`EXT_SYS_NAME` varchar(255) not null, 
+    	`HISTORY_ENABLED` bit not null, 
+    	`JAVA_CLASS` varchar(255) not null, 
+    	`STANDARD_FIELD` bit not null, 
+    	primary key (`PID`)) engine=InnoDB;
+
+	create table `EXPORT_FIELD_METADATA_MAPPING` 
+		(`PID` bigint not null auto_increment, 
+		`CREATED` datetime not null, 
+		`DESTINATION_FIELD` varchar(255) not null, 
+		`OVERWRITE_VALUE` bit not null, 
+		`SOURCE_FIELD` varchar(255) not null, 
+		`UPDATED` datetime not null, 
+		`FK_LOOKUP_ID_MAP` bigint not null, 
+		`FK_TENANT_ID` bigint not null, 
+		primary key (`PID`)) engine=InnoDB;
+
+	alter table `EXPORT_FIELD_METADATA_MAPPING` add constraint `FK_EXPORTFIELDMETADATAMAPPING_FKLOOKUPIDMAP_LOOKUPIDMAP` foreign key (`FK_LOOKUP_ID_MAP`) references `LOOKUP_ID_MAP` (`PID`) on delete cascade;
+	alter table `EXPORT_FIELD_METADATA_MAPPING` add constraint `FK_EXPORTFIELDMETADATAMAPPING_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`);
 
   END;
 //
