@@ -82,7 +82,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
             for (String subCategory : value.getSubcategories().keySet()) {
                 List<TopAttribute> attrs = value.getSubcategories().get(subCategory);
                 assertNotNull(attrs);
-                assertTrue(attrs.size() > 0);
+                assertTrue(attrs.size() >= 0);
 
                 for (TopAttribute attr : attrs) {
                     assertNotNull(attr);
