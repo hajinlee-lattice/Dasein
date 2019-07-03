@@ -50,7 +50,11 @@ class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
   }
   
   private def getInputValue(input: Row, key: String): String = {
+    try {
       return Option(input.getAs[Any](inputSchema.fieldIndex(key))).map(_.toString).getOrElse(null)
+    } catch {
+      case e: IllegalArgumentException => return null
+    }
   }
 
   // This is how to merge two objects with the bufferSchema type.
