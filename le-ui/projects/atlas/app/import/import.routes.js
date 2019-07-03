@@ -381,8 +381,13 @@ angular
                 FileName: function (ImportWizardStore) {
                     return ImportWizardStore.getCsvFileName();
                 },
-                FieldDocument: function(ImportWizardStore) {
-                    return ImportWizardStore.getFieldDocument();
+                FieldDocument: function(ImportWizardStore, $transition$) {
+                    var from = $transition$._targetState._definition.parent.name;
+                    let mapping = ImportWizardStore.getSavedDocumentCopy(from);
+                    
+                    let ret = ImportWizardStore.getFieldDocument();
+                    ret.fieldMappings = mapping;
+                    return ret;
                 },
                 TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
@@ -664,8 +669,13 @@ angular
                 FileName: function (ImportWizardStore) {
                     return ImportWizardStore.getCsvFileName();
                 },
-                FieldDocument: function(ImportWizardStore) {
-                    return ImportWizardStore.getFieldDocument();
+                FieldDocument: function(ImportWizardStore, $transition$) {
+                    var from = $transition$._targetState._definition.parent.name;
+                    let mapping = ImportWizardStore.getSavedDocumentCopy(from);
+                    
+                    let ret = ImportWizardStore.getFieldDocument();
+                    ret.fieldMappings = mapping;
+                    return ret;
                 },
                 TemplateData: function(ImportWizardStore) {
                     return ImportWizardStore.getTemplateData();
