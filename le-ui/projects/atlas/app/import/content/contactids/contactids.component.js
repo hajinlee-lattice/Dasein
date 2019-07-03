@@ -44,8 +44,7 @@ angular.module('lp.import.wizard.contactids', [])
             // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
         });
        //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
-        actions.fetchSystems({Contact: true});
-        
+        actions.fetchSystems({});
         let validationStatus = ImportWizardStore.getValidationStatus();
         let banners = Banner.get();
         if (validationStatus && banners.length == 0) {
