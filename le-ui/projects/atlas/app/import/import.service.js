@@ -848,7 +848,7 @@ angular.module('lp.import')
         let items = [];
         fieldsMappings.forEach( field => {
             if(field.SystemName && field.IdType && !field.mappedField){
-                items.push({userField: field.userField, system: field.SystemName});
+                items.push({userField: field.userField, system: field.systemName});
             }
         });
         return items;

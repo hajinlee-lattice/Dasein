@@ -196,7 +196,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 }
                 if(savedObj.IdType || savedObj.SystemName){
                     fieldsMapped[mapped].idType = savedObj.IdType;
-                    fieldsMapped[mapped].SystemName = savedObj.SystemName;
+                    fieldsMapped[mapped].systemName = savedObj.SystemName;
                 }
                 updateFieldDate(fieldsMapped[mapped], savedObj, entity);
             }
