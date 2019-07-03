@@ -3,6 +3,9 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl.publish
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.SERVICE_TENANT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOURCE_TO_S3_PUBLISHER;
 
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,12 +21,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.hadoop.configuration.ConfigurationUtils;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.util.IOUtils;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractTransformer;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -37,6 +45,9 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
 
     @Resource(name = "distCpConfiguration")
     private Configuration distCpConfiguration;
+
+    @Inject
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -66,31 +77,54 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
-            String sourceName = step.getBaseSources()[0].getSourceName();
 
-            String hdfsSnapshotDir = getSourceHdfsDir(step, 0);
-            String hdfsSchemaDir;
-            try {
-                hdfsSchemaDir = getBaseSourceSchemaDir(step, 0);
-            } catch (Exception e) {
-                hdfsSchemaDir = null;
-            }
-            String hdfsVersionFilePath = getBaseSourceVersionFilePath(step, 0);
-            String s3SnapshotPrefix = gets3nPath(s3Bucket, hdfsSnapshotDir);
-            String s3SchemaPrefix = gets3nPath(s3Bucket, hdfsSchemaDir);
-            String s3VersionFilePrefix = gets3nPath(s3Bucket, hdfsVersionFilePath);
+            int counter = 0;
 
-            copyToS3(sourceName, hdfsSnapshotDir, s3SnapshotPrefix, true);
-            validateCopySuccess(hdfsSnapshotDir);
+            do {
+                String sourceName = step.getBaseSources()[counter].getSourceName();
+                Source source = step.getBaseSources()[counter];
 
-            if (hdfsSchemaDir != null && HdfsUtils.fileExists(distCpConfiguration, hdfsSchemaDir)) {
-                copyToS3(sourceName, hdfsSchemaDir, s3SchemaPrefix, true);
-                validateCopySuccess(hdfsSchemaDir);
-            }
+                String hdfsSchemaDir;
+                String hdfsSnapshotDir;
+                String hdfsVersionFilePath;
+                String IngestionVerDir;
+                if (sourceName.contains("Ingestion")) {
+                    sourceName = sourceName.substring(sourceName.lastIndexOf("_") + 1);
+                    Path ingestionDir = hdfsPathBuilder.constructIngestionDir(sourceName);
 
-            copyToS3(sourceName, hdfsVersionFilePath, s3VersionFilePrefix, false);
-            validateCopySuccess(hdfsVersionFilePath);
+                    hdfsSchemaDir = null;
+                    hdfsSnapshotDir = null;
 
+                    hdfsVersionFilePath = ingestionDir.append(HdfsPathBuilder.VERSION_FILE).toString();
+                    IngestionVerDir = ingestionDir.append(step.getBaseVersions().get(counter)).toString();
+                } else {
+                    IngestionVerDir = null;
+
+                    hdfsSnapshotDir = getSourceHdfsDir(step, counter);
+                    try {
+                        hdfsSchemaDir = getBaseSourceSchemaDir(step, counter);
+                    } catch (Exception e) {
+                        hdfsSchemaDir = null;
+                    }
+                    hdfsVersionFilePath = getBaseSourceVersionFilePath(step, counter);
+                }
+
+                if (hdfsSnapshotDir != null) {
+                    copyAndValidate(sourceName, hdfsSnapshotDir, true);
+                }
+                if (hdfsSchemaDir != null && HdfsUtils.fileExists(distCpConfiguration, hdfsSchemaDir)) {
+                    copyAndValidate(sourceName, hdfsSchemaDir, true);
+                }
+                if (IngestionVerDir != null && HdfsUtils.fileExists(distCpConfiguration, IngestionVerDir)) {
+                    copyAndValidate(sourceName, IngestionVerDir, true);
+                }
+
+                if (!s3Service.objectExist(s3Bucket, hdfsVersionFilePath)
+                        || isNewerVerFileHdfs(source, hdfsVersionFilePath)) {
+                    copyAndValidate(sourceName, hdfsVersionFilePath, true);
+                }
+                counter++;
+            } while (counter < step.getBaseSources().length);
             step.setTarget(null);
             step.setCount(0L);
             return true;
@@ -101,6 +135,11 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
+    private void copyAndValidate(String sourceName, String hdfsDir, boolean isDir) {
+        String s3Prefix = gets3nPath(hdfsDir);
+        copyToS3(sourceName, hdfsDir, s3Prefix, isDir);
+        validateCopySuccess(hdfsDir);
+    }
 
     private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir) {
         try {
@@ -169,9 +208,19 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
+    private boolean isNewerVerFileHdfs(Source source, String hdfsDir) throws IOException, ParseException {
+        if (s3Service.objectExist(s3Bucket, hdfsDir)) {
+            Date hdfsDate = hdfsPathBuilder.dateFormat.parse(hdfsSourceEntityMgr.getCurrentVersion(source));
+            Date s3Date = hdfsPathBuilder.dateFormat.parse(IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, hdfsDir)));
+            if (hdfsDate.after(s3Date)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private String gets3nPath(String bucket, String hdfsPath) {
-        return "s3n://" + bucket + getValidPath(hdfsPath);
+    private String gets3nPath(String hdfsPath) {
+        return "s3n://" + s3Bucket + getValidPath(hdfsPath);
     }
 
     private String getValidPath(String path) {
