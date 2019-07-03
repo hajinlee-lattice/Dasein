@@ -79,7 +79,8 @@ public class StringStandardizationUtils {
             return null;
         }
 
-        return systemId.trim();
+        // system ID matching are case in-sensitive
+        return systemId.trim().toLowerCase();
     }
 
     public static String getStandardizedOutputLatticeID(String latticeId) {

@@ -401,7 +401,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
-        log.info("Generating EntityMatchHistory for Match Report.");
+        log.debug("Generating EntityMatchHistory for Match Report.");
 
         log.debug("------------------------ Entity Match History Debug Logs ------------------------");
 

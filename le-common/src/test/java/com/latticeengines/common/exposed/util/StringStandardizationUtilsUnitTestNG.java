@@ -105,7 +105,8 @@ public class StringStandardizationUtilsUnitTestNG {
                 { null, null }, //
                 { "", null }, //
                 { "123456789", "123456789" }, //
-                { "1a2b3c4d5e", "1a2b3c4d5e" }
+                { "1a2b3c4d5e", "1a2b3c4d5e" }, //
+                { "   AbCDEfghiJkLmnOPQRSTuvwxyz   ", "abcdefghijklmnopqrstuvwxyz" }, //
         };
     }
 
