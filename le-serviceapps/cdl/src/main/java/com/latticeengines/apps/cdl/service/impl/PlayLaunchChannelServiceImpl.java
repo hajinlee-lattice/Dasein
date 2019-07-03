@@ -21,8 +21,11 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -69,6 +72,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private RatingCoverageService ratingCoverageService;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -204,14 +210,19 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
+        boolean enableS3 = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ALPHA_FEATURE);
         List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         if (CollectionUtils.isNotEmpty(allConnections)) {
-            allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels));
+            allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels, enableS3));
         }
         return channels;
     }
 
-    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels) {
+    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels, boolean enableS3) {
+        if (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3) {
+            return;
+        }
         String configId = mapping.getId();
         for (PlayLaunchChannel channel : channels) {
             if (channel.getLookupIdMap().getId().equals(configId)) {

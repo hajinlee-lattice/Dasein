@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -15,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -107,6 +109,11 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @JsonProperty("externalAuthentication")
     @OneToOne(mappedBy = "lookupIdMap", fetch = FetchType.EAGER)
     private ExternalSystemAuthentication externalAuthentication;
+
+    @JsonProperty("exportFieldMappings")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "lookupIdMap")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<ExportFieldMetadataMapping> exportFieldMetadataMappings;
 
     @JsonProperty("exportFolder")
     @Transient
@@ -224,6 +231,14 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setExternalAuthentication(ExternalSystemAuthentication externalAuthentication) {
         this.externalAuthentication = externalAuthentication;
+    }
+
+    public List<ExportFieldMetadataMapping> getExportFieldMetadataMappings() {
+        return exportFieldMetadataMappings;
+    }
+
+    public void setExportFieldMappings(List<ExportFieldMetadataMapping> exportFieldMetadataMappings) {
+        this.exportFieldMetadataMappings = exportFieldMetadataMappings;
     }
 
     public String getExportFolder() {
