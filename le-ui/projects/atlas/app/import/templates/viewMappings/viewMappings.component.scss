@@ -1,4 +1,10 @@
 .view-mappings {
+	.back-button .le-link {
+		color: #222;
+		&:hover {
+			color: #26639b
+		}
+	}
 	.le-flex-h-panel.center-v.le-link-container {
 		width: auto;
 		display: inline;
