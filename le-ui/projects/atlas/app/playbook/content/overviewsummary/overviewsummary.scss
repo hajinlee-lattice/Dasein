@@ -104,13 +104,21 @@
                     }
                 }
                 .play-name {
+                    width: 100%;
                     h1 {
                         font-size: 24px;
                         white-space: nowrap;
                         text-overflow: ellipsis;
                         margin-bottom: 2px;
+                        &:active {
+                            //background: rgba(255,255,255,0.55);
+                            background: pink;
+                        }
                         span {
                             padding: 0;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            width: 100%;
                         }
                     }
                 }
@@ -195,6 +203,13 @@
             &:after {
                 opacity: 1;
             }
+        }
+        &:focus {
+            overflow: visible!important;
+            background: rgba(0,0,0,0.55)!important;
+            width: auto!important;
+            position: relative;
+            z-index: 100000;
         }
     }
 }
