@@ -152,8 +152,8 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             vm.changeSystem(mapped);
         }
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        console.log(mapped);
-        // vm.checkValid(form);
+        // console.log(mapped);
+        vm.checkValid(form);
     };
 
     vm.changeSystem = (mapped) => {
