@@ -61,8 +61,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             //vm.systems = [{ displayName: '-- Select System --', name: 'select'},{name: 't4', displayName: 'Test 4'}, {name: 't5', displayName: 'Test 5'}];
         });
        
-        actions.fetchSystems({Account: true});
-        
+        actions.fetchSystems({});
         let validationStatus = ImportWizardStore.getValidationStatus();
         let banners = Banner.get();
         if (validationStatus && banners.length == 0) {
