@@ -16,7 +16,6 @@ class RatingsComponent extends Component {
             var lifts = play.ratingEngine.bucketMetadata;
             
             lifts.forEach(function(lift) {
-                console.log(lift);
                 lift.lift = Math.round(lift.lift); // PLS-14032
                 data[lift.bucket_name] = {
                     label: lift.bucket_name,

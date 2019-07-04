@@ -299,7 +299,7 @@ class SystemsComponent extends Component {
             },
             title: () => {
                 return (
-                    <p>Launch to {connection.lookupIdMap.orgName}</p>
+                    <Aux>Launch to {connection.lookupIdMap.orgName}</Aux>
                 );
             },
             titleIcon: () => {
