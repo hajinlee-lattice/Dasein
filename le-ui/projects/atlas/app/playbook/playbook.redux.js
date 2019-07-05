@@ -297,6 +297,8 @@ export const actions = {
             if(cb && typeof cb === 'function') {
                 cb(response.data);
             }
+        }, (error) => {
+            console.error(error);
         });
     },
     savePlayLaunch: (play_name, opts) => {
@@ -376,6 +378,8 @@ export const actions = {
             } else { // since no id we can't replace just the one channel, so get the whole list again
                 actions.fetchConnections(play_name, true, cb);
             }
+        }, (error) => {
+            console.error(error);
         });
     },
     saveLaunch: (play_name, opts, cb) => {

@@ -120,18 +120,23 @@ class LaunchComponent extends Component {
                 actions.fetchPrograms({ // get the programs list
                     externalSystemName: vm.state.externalSystemName
                 }, function(data) {
-                    let programs = (data && data.result ? data.result : []);
-                    vm.state.programs = programs;
-                    vm.state.audienceParams.audienceName = programs[0].name;
-                    vm.setState(vm.state);
+                    if(data.success) {
+                        let programs = (data && data.result ? data.result : []);
+                        vm.state.programs = programs;
+                        vm.state.audienceParams.audienceName = programs[0].name;
+                        vm.setState(vm.state);
 
-                    actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
-                        if(data && data.result) {
-                            let staticList = (data && data.result ? data.result : []);
-                            vm.state.staticList = staticList;
-                            vm.setState(vm.state);
-                        }
-                    });
+                        actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
+                            if(data && data.result) {
+                                let staticList = (data && data.result ? data.result : []);
+                                vm.state.staticList = staticList;
+                                vm.setState(vm.state);
+                            }
+                        });
+                    } else if(data.message) {
+                        vm.state.error = 'Error retrieving Marketo programs. Please retry later.'; //data.message;
+                        vm.setState(vm.state)
+                    }
                 });
             });
         }
@@ -735,6 +740,12 @@ class LaunchComponent extends Component {
                         </div>
                     </div>
                 </LeVPanel>
+            );
+        } else if(this.state.error) {
+            return(
+                <Aux>
+                    {this.state.error}
+                </Aux>
             );
         } else {
             return (
