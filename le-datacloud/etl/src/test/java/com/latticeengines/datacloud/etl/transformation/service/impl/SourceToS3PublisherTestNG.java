@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -69,9 +69,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             baseSrc4.getSourceName(), //
             baseSrc6.getSourceName());
 
-    // Base source name -> expected snapshot file names -- initialized in
-    // initExpectedSnapshotFiles()
-    private Map<String, List<String>> expectedSnapshotFiles;
+    private Map<String, List<String>> expectedDataFiles = ExpectedDataFiles();
 
     @Inject
     private S3Service s3Service;
@@ -81,6 +79,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
 
+    //
     private String laterSourceVersion = "2019-06-29_21-05-11_UTC";
 
     private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
@@ -152,8 +151,6 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
      *******************/
 
     private void prepareData() throws IOException {
-        initExpectedSnapshotFiles();
-
         s3FilePrepare();
 
         uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
@@ -182,45 +179,42 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     }
 
     private void s3FilePrepare() throws IOException {
-
+        //
         uploadToS3(baseSrc1, earlySourceVersion, false);
         uploadToS3(baseSrc2, basedSourceVersion, false);
         uploadToS3(baseSrc5, laterSourceVersion, false);
-
+        //
         uploadToS3(baseSrc2, basedSourceVersion, true);
     }
 
-    private void uploadToS3(Source baseSource, String sourceVerion, boolean isFile) throws IOException {
-        String s3Key;
-        InputStream inputStream;
-        String path = hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion) + "/";
+    private void uploadToS3(Source baseSource, String sourceVerion, boolean isDataDir) throws IOException {
 
-        if (isFile) {
-            inputStream = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("sources/" + "AccountTable1.avro");
-            s3Key = path + "AccountTable1.avro";
-        } else {
-            inputStream = IOUtils.toInputStream(sourceVerion, "UTF-8");
-            if (baseSource instanceof IngestionSource) {
-                s3Key = path.substring(0, path.lastIndexOf(((IngestionSource) baseSource).getIngestionName()) + 12)
-                        + hdfsPathBuilder.VERSION_FILE;
-            } else {
-                s3Key = path.substring(0, path.lastIndexOf(baseSource.getSourceName()) + 12)
-                        + hdfsPathBuilder.VERSION_FILE;
-            }
-        }
+        InputStream inputStream = isDataDir
+                ? Thread.currentThread().getContextClassLoader().getResourceAsStream("sources/" + "AccountTable1.avro")
+                : IOUtils.toInputStream(sourceVerion, "UTF-8");
+
+        String s3Key = isDataDir
+                ? hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion)//
+                        + "/" + "AccountTable1.avro"
+                : hdfsPathBuilder.constructVersionFile(baseSource).toString();
+
         s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
     }
 
-
-    private void initExpectedSnapshotFiles() {
-        expectedSnapshotFiles = ImmutableMap.of(//
-                baseSrc1.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc2.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc3.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc4.getSourceName(), Arrays.asList("part-0000.avro", "part-0001.avro"), //
-                baseSrc6.getSourceName(), Arrays.asList("AccountTable1.avro") //
-        );
+    // Base source name -> expected snapshot file names
+    private Map<String, List<String>> ExpectedDataFiles() {
+        @SuppressWarnings("serial")
+        Map<String, List<String>> expectedDataFiles = new HashMap<String, List<String>>() {
+            {
+                put(baseSrc1.getSourceName(), Arrays.asList("AccountMaster206.avro"));
+                put(baseSrc2.getSourceName(), Arrays.asList("AccountMaster206.avro"));
+                put(baseSrc3.getSourceName(), Arrays.asList("AccountMaster206.avro"));
+                put(baseSrc4.getSourceName(), Arrays.asList("part-0000.avro", "part-0001.avro"));
+                put(baseSrc5.getSourceName(), Arrays.asList("AccountMaster206.avro"));
+                put(baseSrc6.getSourceName(), Arrays.asList("AccountTable1.avro"));
+            }
+        };
+        return expectedDataFiles;
     }
 
     /*****************
@@ -236,38 +230,17 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         stepSuccessValidate(baseSrc6, basedSourceVersion);
     }
 
+
+
     private void stepSuccessValidate(Source baseSource, String version) {
         String sourceName = baseSource.getSourceName();
         try {
             log.info("Checking the objects of Source: {}", sourceName);
 
-            String versionFilePath;
+            // Verify data files
+            List<String> dataFiles = getExpectedDataFiles(baseSource);
+            validateCopySuccess(dataFiles);
 
-            if (baseSource instanceof IngestionSource) {
-
-                Path ingestionVerDir = hdfsPathBuilder
-                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
-                        .append(basedSourceVersion);
-
-                List<String> IngestionVerFiles = Arrays.asList(
-                        ingestionVerDir.append("AccountMaster206.avro").toString(),
-                        ingestionVerDir.append(HdfsPathBuilder.SUCCESS_FILE).toString());
-
-                // Verify Ingestion baseVersion files
-                validateCopySuccess(IngestionVerFiles);
-
-                versionFilePath = hdfsPathBuilder
-                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
-                        .append(HdfsPathBuilder.VERSION_FILE).toString();
-                
-            } else {
-             // Verify snapshot files
-                List<String> snapshotFiles = getExpectedSnapshotFiles(baseSource);
-                validateCopySuccess(snapshotFiles);
-
-                versionFilePath = hdfsPathBuilder.constructVersionFile(sourceName).toString();
-
-            }
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
@@ -275,7 +248,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
                 validateCopySuccess(Arrays.asList(schemaFile));
 
             }
+
             // Verify current version file
+            String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
             validateCopySuccess(Arrays.asList(versionFilePath));
             
         } catch (Exception e) {
@@ -284,14 +259,14 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private List<String> getExpectedSnapshotFiles(Source baseSource) {
-        Path snapshotPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, basedSourceVersion);
-        List<String> expectedFiles = expectedSnapshotFiles.get(baseSource.getSourceName());
+    private List<String> getExpectedDataFiles(Source baseSource) {
+        Path DataPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, basedSourceVersion);
+        List<String> expectedFiles = expectedDataFiles.get(baseSource.getSourceName());
         Assert.assertTrue(CollectionUtils.isNotEmpty(expectedFiles));
 
         List<String> lists = expectedFiles.stream() //
-                .map(file -> snapshotPath.append(file).toString()).collect(Collectors.toList());
-        lists.add(snapshotPath.append(HdfsPathBuilder.SUCCESS_FILE).toString());
+                .map(file -> DataPath.append(file).toString()).collect(Collectors.toList());
+        lists.add(DataPath.append(HdfsPathBuilder.SUCCESS_FILE).toString());
         return lists;
     }
 
