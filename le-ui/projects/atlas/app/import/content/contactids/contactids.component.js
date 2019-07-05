@@ -44,7 +44,9 @@ angular.module('lp.import.wizard.contactids', [])
             // vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
         });
        //[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
+
         actions.fetchSystems({});
+
         let validationStatus = ImportWizardStore.getValidationStatus();
         let banners = Banner.get();
         if (validationStatus && banners.length == 0) {
@@ -138,12 +140,24 @@ angular.module('lp.import.wizard.contactids', [])
         let mapped = vm.getMapped(mapping);
         if(vm.isMultipleTemplates()){
             vm.changeMatchIds(mapped);
+            vm.updateMatch(mapped);
         }
         // console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };
     
+    vm.updateMatch = (mapped) => {
+        for(var i=0; i<mapped.length; i++){
+            if(mapped[i].mappedField == 'CustomerContactId'){
+                mapped[i].mapToLatticeId = vm.match;
+                return;
+            }else{
+                delete mapped[i].mapToLatticeId;
+            }
+        }
+        // changeLatticeField
+    }
     vm.changeMatchIds = (mapped) => {
         vm.matchIdItems.forEach(item => {
             let name = item.userField;

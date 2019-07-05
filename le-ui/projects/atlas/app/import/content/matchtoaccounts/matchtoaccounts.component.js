@@ -152,8 +152,8 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             vm.changeSystem(mapped);
         }
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        console.log(mapped);
-        // vm.checkValid(form);
+        // console.log(mapped);
+        vm.checkValid(form);
     };
 
     vm.changeSystem = (mapped) => {
@@ -171,42 +171,6 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
 
     vm.changeMatchingFields = function(mapping, form) {
         vm.changeLatticeField(mapping, form);
-        // var _mapping = [];
-        // vm.unavailableFields = [];
-        // vm.ignoredFieldLabel = ignoredFieldLabel;
-
-        // for(var i in mapping) {
-        //     var item = mapping[i],
-        //         map = makeObject(item.userField);
-
-        //     if(!map.userField) {
-        //         /**
-        //          * to unmap find the userField using the original fieldMappings object
-        //          */
-        //         var fieldItem = vm.fieldMappings.find(function(item) {
-        //             return item.mappedField === i;
-        //         });
-        //         if(fieldItem && fieldItem.userField) {
-        //             map.userField = fieldItem.userField;
-        //             map.mappedField = null;
-        //             map.unmap = true;
-        //         }
-        //     }
-
-        //     if(item.userField) {
-        //         vm.unavailableFields.push(map.userField);
-        //     }
-
-        //     if(map.userField) {
-        //         _mapping.push(map);
-        //     }
-        // }
-
-        // if(vm.unavailableFields.length >= vm.AvailableFields.length) {
-        //     vm.ignoredFieldLabel = noFieldLabel;
-        // }
-        // ImportWizardStore.setSaveObjects(_mapping);
-        // vm.checkValid(form);
     };
 
     vm.checkFieldsDelay = function(form) {
@@ -249,7 +213,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('matchtoaccounts', form.$valid);
+        ImportWizardStore.setValidation('matchtoaccounts', vm.form.$valid);
     }
 
     vm.isMultipleTemplates = () => {

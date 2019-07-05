@@ -775,7 +775,17 @@ angular.module('lp.import')
         var userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
 
         userIndexes.forEach(function(index) {
-            ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type;
+            if(typeof type == 'object' && type.type == 'DATE'){
+                ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
+                ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString = type.dateFormatString;
+                ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString = type.timeFormatString;
+                ImportWizardStore.fieldDocument.fieldMappings[index].timezone = type.timezone;
+            }else{
+                ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].timezone;
+            }
         });
     }
 
@@ -848,7 +858,7 @@ angular.module('lp.import')
         let items = [];
         fieldsMappings.forEach( field => {
             if(field.SystemName && field.IdType && !field.mappedField){
-                items.push({userField: field.userField, system: field.SystemName});
+                items.push({userField: field.userField, system: field.systemName});
             }
         });
         return items;

@@ -133,6 +133,7 @@ angular.module('lp.import.wizard.customfields', [])
     vm.updateFormats = (formats) => {
         let field = formats.field;
         ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
+        ImportWizardStore.remapType(field.userField, {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone}, ImportWizardStore.getEntityType());
         vm.validate();
     }
 

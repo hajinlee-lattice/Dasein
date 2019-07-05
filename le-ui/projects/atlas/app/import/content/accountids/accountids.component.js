@@ -187,11 +187,24 @@ angular.module('lp.import.wizard.accountids', [])
         let mapped = vm.getMapped(mapping);
         if(vm.isMultipleTemplates()){
             vm.changeMatchIds(mapped);
+            vm.updateMatch(mapped);
         }
         // console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };
+
+    vm.updateMatch = (mapped) => {
+        for(var i=0; i<mapped.length; i++){
+            if(mapped[i].mappedField == 'CustomerAccountId'){
+                mapped[i].mapToLatticeId = vm.match;
+                return;
+            }else{
+                delete mapped[i].mapToLatticeId;
+            }
+        }
+        // changeLatticeField
+    }
     vm.changeMatchIds = (mapped) => {
         vm.matchIdItems.forEach(item => {
             let name = item.userField;
