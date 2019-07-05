@@ -79,7 +79,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
 
-    //
+    // Test for _CURRENT_VERSION file update
     private String laterSourceVersion = "2019-06-29_21-05-11_UTC";
 
     private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
@@ -179,11 +179,12 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     }
 
     private void s3FilePrepare() throws IOException {
-        //
+        // Prepare _CURRENT_VERION file
         uploadToS3(baseSrc1, earlySourceVersion, false);
         uploadToS3(baseSrc2, basedSourceVersion, false);
         uploadToS3(baseSrc5, laterSourceVersion, false);
-        //
+
+        // Prepare data file
         uploadToS3(baseSrc2, basedSourceVersion, true);
     }
 
