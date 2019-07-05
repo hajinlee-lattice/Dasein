@@ -123,7 +123,6 @@ angular
             let attrs = [];
             let enrichments = [];
             let enrichmentsMap = DataCloudStore.getEnrichmentsMap();
-
             restrictions.forEach(function (restriction) {
                 var bucketEntity = restriction.bucketRestriction.attr.split('.')[0],
                     bucketColumnId = restriction.bucketRestriction.attr.split('.')[1],
@@ -169,7 +168,17 @@ angular
                                 break;
 
                             case 'Boolean':
-                                attrs.push({ label: enrichment.DisplayName + ': ', value: QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType) });
+                                let cmp = restriction.bucketRestriction.bkt.Cmp;
+                                let val = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
+
+                                if (!val) {
+                                    switch (cmp) {
+                                        case "IS_NULL": val = 'Is Empty'; break;
+                                        case "IS_NOT_NULL": val = 'Is Present'; break;
+                                    }
+                                }
+
+                                attrs.push({ label: enrichment.DisplayName + ': ', value: val });
 
                                 break;
 

@@ -23,7 +23,6 @@ angular
 
                 vm.isNumericalChips = function () {
                     let ret = vm.chipsOperations.indexOf(vm.tree.bucketRestriction.bkt.Cmp) > -1;
-                    //console.log('[tree-item] isNumericalChips()', ret);
                     return ret;
                 }
 

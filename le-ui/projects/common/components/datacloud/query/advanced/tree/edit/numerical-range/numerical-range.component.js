@@ -16,8 +16,8 @@ angular
                 form: '=',
                 type: '@',
                 bucketrestriction: '=',
-                config: '@',
-                mainconfig: '@?',
+                config: '=',
+                mainconfig: '=',
                 showmessage: '=',
                 showfrom: '=',
                 showto: '=',
@@ -35,7 +35,7 @@ angular
             controller: function ($scope, $element) {
 
                 function getConfigField(position) {
-                    var values = JSON.parse($scope.config);
+                    var values = $scope.config;
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
@@ -43,7 +43,7 @@ angular
                 function validateMainConfig() {
                     $scope.conf = {};
                     if ($scope.mainconfig) {
-                        var tmp = JSON.parse($scope.mainconfig);
+                        var tmp = $scope.mainconfig;
                         $scope.conf.debounce = (tmp.debounce ? tmp.debounce : 500);
                     } else {
                         $scope.conf.debounce = 500;
@@ -51,6 +51,7 @@ angular
                 }
 
                 $scope.init = function () {
+                    console.log('numeric init', $scope.config, $scope.values);
                     validateMainConfig();
                     var conf = $scope.config;
                     if ($scope.initialvalidation === undefined) {
@@ -69,7 +70,8 @@ angular
                         $scope.todisabled = !!$scope.todisabled;
                     }
 
-                    $scope.values = JSON.parse($scope.config);
+                    $scope.values = $scope.config;
+                    console.log('numeric init', $scope.config, $scope.values, $scope);
                 }
 
                 $scope.getSteps = function (position) {
