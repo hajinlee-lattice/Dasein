@@ -184,12 +184,6 @@ export default class OverviewSummaryContainer extends Component {
                 if(this.state.saving) {
                     defaultDescriptionText = '';
                 }
-                console.log({
-                    defaultDescriptionText: defaultDescriptionText,
-                    'this.state.saving': this.state.saving,
-                    'this.state.editing.description': this.state.editing.description,
-                    'play.description': play.description
-                });
             return (
                 <Aux>
                     <div className={'overview-summary'}>
