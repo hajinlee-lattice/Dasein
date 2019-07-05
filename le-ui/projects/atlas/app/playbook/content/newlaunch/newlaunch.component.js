@@ -8,7 +8,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
     },
     controller: function(
         $scope, $state, $stateParams, FeatureFlagService,
-        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService
+        ResourceUtility, BrowserStorageUtility, PlaybookWizardStore, PlaybookWizardService, Banner
     ) {
         var vm = this;
 
@@ -39,12 +39,16 @@ angular.module('lp.playbook.wizard.newlaunch', [])
                     PlaybookWizardService.getMarketoPrograms(vm.externalAuthenticationId, vm.userAccessToken).then(function(programResults) {
                         vm.programs = programResults.result;
                         vm.loadingFolders = false;
-                        var mostRecentProgram = vm.programs.filter((program) => {
-                            return program.name == mostRecentProgramName;
-                        });
-                        if (mostRecentProgram.length == 1 && mostRecentProgram[0].name) {
-                            vm.programName = mostRecentProgram[0].name;
-                            vm.updateProgramName(true);
+                        if (vm.programs != undefined) {
+                            var mostRecentProgram = vm.programs.filter((program) => {
+                                return program.name == mostRecentProgramName;
+                            });
+                            if (mostRecentProgram.length == 1 && mostRecentProgram[0].name) {
+                                vm.programName = mostRecentProgram[0].name;
+                                vm.updateProgramName(true);
+                            }
+                        } else {
+                            Banner.error({message: "Error retrieving Marketo programs. Please retry later."});
                         }
                     });
                 })
