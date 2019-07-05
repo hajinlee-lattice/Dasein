@@ -189,8 +189,10 @@ angular.module('common.datacloud.query.results', [
                 },
                 "sort": {
                     "attributes": [{
-                        "attribute": vm.sortType,
-                        "entity": "Account"
+                        "attribute":{
+                            "attribute": vm.sortType,
+                            "entity": "Account"
+                        }
                     }]
                 }
             };
@@ -207,6 +209,10 @@ angular.module('common.datacloud.query.results', [
                 });
             }
 
+            // "property": 'attribute',
+            // "attribute": vm.sortType,
+            // "entity": vm.page
+
             var query = {
                "free_form_text_search": vm.search,
                "account_restriction": vm.accountRestriction,
@@ -215,7 +221,18 @@ angular.module('common.datacloud.query.results', [
                "page_filter":{  
                     "num_rows": vm.pagesize,
                     "row_offset": offset
-               }
+               },
+               "sort": {
+                    "attributes": [
+                        {
+                           "attribute" : {
+                                "entity": vm.page,
+                                "attribute":vm.sortType   
+                           }
+                        }
+                    ],
+                    "descending": false
+                }
             };
 
             QueryStore.getEntitiesCounts(query).then(function(data){ 
@@ -291,6 +308,17 @@ angular.module('common.datacloud.query.results', [
                             "page_filter": {
                                 "num_rows": vm.pagesize,
                                 "row_offset": offset
+                            },
+                            "sort": {
+                                "attributes": [
+                                    {
+                                       "attribute" : {
+                                            "entity": vm.page,
+                                            "attribute":vm.sortType   
+                                       }
+                                    }
+                                ],
+                                "descending": false
                             }
                             // for PLS-13560
                             // "sort": {

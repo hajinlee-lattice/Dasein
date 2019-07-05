@@ -54,15 +54,47 @@ angular.module('common.datacloud.query')
                             page_filter: {
                                 num_rows: 10,
                                 row_offset: 0
-                            }
+                            },
                         };
                     };
 
                 if (name === "Create") {
                     var account_restriction = QueryStore.getAccountRestriction(),
                         contact_restriction = QueryStore.getContactRestriction(),
-                        query = getQuery(name, account_restriction, contact_restriction),
-                        result = QueryStore.GetDataByQuery(type, query).then(function(data) { 
+                        query = getQuery(name, account_restriction, contact_restriction);
+                        switch (type) {
+                            case 'accounts':
+                                query.sort = {
+                                    "attributes": [
+                                        {
+                                            "attribute": {
+                                                "entity": "Account",
+                                                "attribute": "AccountId"
+                                            }   
+                                        }
+                                    ],
+                                    "descending": false
+                                }
+                                break;
+
+                            case 'contacts':
+                                query.sort = {
+                                    "attributes": [
+                                        {
+                                            "attribute": {
+                                                "entity": "Contact",
+                                                "attribute": "ContactId"
+                                            }   
+                                        }
+                                    ],
+                                    "descending": false
+                                }
+                                break;
+                        
+                            default:
+                                break;
+                        }
+                        let result = QueryStore.GetDataByQuery(type, query).then(function(data) { 
                             return data; 
                         });
 
