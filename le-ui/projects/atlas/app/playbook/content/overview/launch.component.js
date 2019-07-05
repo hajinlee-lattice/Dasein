@@ -170,7 +170,6 @@ class LaunchComponent extends Component {
 
                 vm.state.unscored = !hasBuckets;
                 vm.state.launchAccountsCoverage = response;
-                console.log(response);
 
                 var coverageObj = vm.getCoverage(response),
                     coverage = coverageObj.coverage,
@@ -357,10 +356,6 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <li>
-                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
-                        <label for="requireEmail">Must have email</label>
-                    </li>
-                    <li>
                         <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
                         <label for="requireAccountId">Must have account ID</label>
                     </li>
@@ -369,6 +364,10 @@ class LaunchComponent extends Component {
         } else if(externalSystemName === 'Marketo') {
             return (
                 <Aux>
+                    <li>
+                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
+                        <label for="requireEmail">Must have email</label>
+                    </li>
                     <li>
                         <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
                         <label for="requireContactIfo">Must have contact info</label>
