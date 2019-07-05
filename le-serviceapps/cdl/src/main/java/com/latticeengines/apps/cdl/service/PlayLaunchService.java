@@ -23,7 +23,11 @@ public interface PlayLaunchService {
 
     PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);
 
+    PlayLaunch findLatestByChannel(Long playLaunchChannelId);
+
     List<PlayLaunch> findByState(LaunchState state);
+
+    List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max);
 
     PlayLaunch update(PlayLaunch existingPlayLaunch);
 

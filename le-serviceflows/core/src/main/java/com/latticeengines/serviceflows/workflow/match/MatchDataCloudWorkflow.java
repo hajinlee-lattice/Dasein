@@ -2,7 +2,6 @@ package com.latticeengines.serviceflows.workflow.match;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -27,9 +26,6 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<MatchDataCloudWorkf
 
     @Inject
     private ProcessMatchResult processMatchResult;
-
-    @Value("${workflowapi.use.spark}")
-    private boolean useSpark;
 
     @Override
     public Workflow defineWorkflow(MatchDataCloudWorkflowConfiguration config) {

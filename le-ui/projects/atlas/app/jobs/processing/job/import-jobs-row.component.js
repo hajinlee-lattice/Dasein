@@ -348,6 +348,52 @@ angular.module('lp.jobs.import.row', [
             }
         }
 
+        $scope.getJobMessage = (job) => {
+            let errorMsg = $scope.getJobErrorMsg(job);
+            if(errorMsg != ''){
+                return errorMsg;
+            }
+            return $scope.getJobWarningMsg(job);
+        }
+        $scope.getJobMsgType = (job) => {
+            let errorMsg = $scope.getJobErrorMsg(job);
+            if(errorMsg != ''){
+                return 'failed';
+            }
+            let warningMsg = $scope.getJobWarningMsg(job);
+            if(warningMsg != ''){
+                return 'warning';
+            }
+            return 'unknown';
+        }
+
+        $scope.getJobWarningMsg = (job) => {
+            //  console.log('MSG =>',$scope.thejob.id);
+            // return 'TEST 1234';
+            // console.log('MSG =>',job.id, $scope.thejob.id, job.jobStatus);
+            let msg = '';
+            if(job.reports && job.reports.length > 0) {
+                var json = job.reports[0].json.Payload;
+                var obj = JSON.parse(json);
+                // console.log(obj.ProcessAnalyzeWarningSummary.join());
+                msg = obj.ProcessAnalyzeWarningSummary ? obj.ProcessAnalyzeWarningSummary.join() : '';
+            }
+            return msg;
+        }
+        $scope.getJobErrorMsg = (job) => {
+            //  console.log('MSG =>',$scope.thejob.id);
+            // return 'TEST 1234';
+            // console.log('MSG =>',job.id, $scope.thejob.id, job.jobStatus);
+            let msg = '';
+            if(job.reports && job.reports.length > 0) {
+                var json = job.reports[0].json.Payload;
+                var obj = JSON.parse(json);
+                // console.log(obj.ProcessAnalyzeWarningSummary.join());
+                msg = obj.ProcessAnalyzeErrorSummary ? obj.ProcessAnalyzeErrorSummary.join() : '';
+            }
+            return msg;
+        }
+
         init();
 
     }];

@@ -11,3 +11,4 @@ import './producthierarchyids/producthierarchyids.component';
 import './productids/productids.component';
 import './thirdpartyids/thirdpartyids.component';
 import './transactionids/transactionids.component';
+import './validatetemplate/validatetemplate.component';

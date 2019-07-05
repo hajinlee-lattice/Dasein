@@ -1,7 +1,10 @@
+import {actions, reducer} from '../../templates/multiple/multipletemplates.redux';
+import { store, injectAsyncReducer } from 'store';
+
 angular.module('lp.import.wizard.matchtoaccounts', [])
 .controller('ImportWizardMatchToAccounts', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields
+    ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, MatchingFields, Banner, FeatureFlagService
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
@@ -45,10 +48,27 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         ignoredFieldLabel: ignoredFieldLabel,
         matchingFieldsList: angular.copy(matchingFieldsList),
         matchingFields: MatchingFields,
+        systemName: '',
+        systems: []
     });
 
     vm.init = function() {
-        console.log('AvailableFields 1', angular.copy(vm.AvailableFields));
+        injectAsyncReducer(store, 'multitemplates.matchaccount', reducer);
+        this.unsubscribe = store.subscribe(() => {
+            const data = store.getState()['multitemplates.matchaccount'];
+            // console.log("DATA ", data.systems);
+            vm.systems = data.systems;
+            //vm.systems = [{ displayName: '-- Select System --', name: 'select'},{name: 't4', displayName: 'Test 4'}, {name: 't5', displayName: 'Test 5'}];
+        });
+       
+        actions.fetchSystems({});
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);
@@ -86,32 +106,7 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         vm.AvailableFields = vm.AvailableFields.filter(function(item) {
             return (item.userField && typeof item.userField !== 'object');
         });
-        console.log('AvailableFields 2', angular.copy(vm.AvailableFields));
     };
-
-    vm.changeLatticeField = function(mapping, form) {
-        var mapped = [];
-        vm.unavailableFields = [];
-        for(var i in mapping) {
-            var key = i,
-                userField = mapping[key],
-                map = {
-                    userField: userField, 
-                    mappedField: vm.mappedFieldMap[key],
-                    // removing the following 3 lines makes it update instead of append
-                    originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
-                    originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
-                    append: false
-                };
-            mapped.push(map);
-            if(userField) {
-                vm.unavailableFields.push(userField);
-            }
-        }
-        ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-        vm.checkValid(form);
-    };
-
 
     /**
      * NOTE: The delimiter could cause a problem if the column name has : as separator 
@@ -129,43 +124,53 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         }
     }
 
-    vm.changeMatchingFields = function(mapping, form) {
-        var _mapping = [];
+    vm.getMapped = (mapping) => {
+        var mapped = [];
         vm.unavailableFields = [];
-        vm.ignoredFieldLabel = ignoredFieldLabel;
-
         for(var i in mapping) {
-            var item = mapping[i],
-                map = makeObject(item.userField);
-
-            if(!map.userField) {
-                /**
-                 * to unmap find the userField using the original fieldMappings object
-                 */
-                var fieldItem = vm.fieldMappings.find(function(item) {
-                    return item.mappedField === i;
-                });
-                if(fieldItem && fieldItem.userField) {
-                    map.userField = fieldItem.userField;
-                    map.mappedField = null;
-                    map.unmap = true;
-                }
-            }
-
-            if(item.userField) {
-                vm.unavailableFields.push(map.userField);
-            }
-
-            if(map.userField) {
-                _mapping.push(map);
+            var key = i,
+                userFieldObject = (typeof mapping[key] === 'object' ? makeObject(mapping[key].userField) : {userField: mapping[key], mappedField: vm.mappedFieldMap[key]}),
+                map = {
+                    userField: userFieldObject.userField, 
+                    mappedField: userFieldObject.mappedField,
+                    // removing the following 3 lines makes it update instead of append
+                    originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
+                    originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
+                    append: false
+                };
+            mapped.push(map);
+            if(userFieldObject && userFieldObject.userField) {
+                vm.unavailableFields.push(userFieldObject.userField);
             }
         }
+        return mapped;
+    }
 
-        if(vm.unavailableFields.length >= vm.AvailableFields.length) {
-            vm.ignoredFieldLabel = noFieldLabel;
+    vm.changeLatticeField = function(mapping, form) {
+        let mapped = vm.getMapped(mapping);
+        if(vm.isMultipleTemplates()){
+            vm.changeSystem(mapped);
         }
-        ImportWizardStore.setSaveObjects(_mapping);
+        ImportWizardStore.setSaveObjects(mapped, $state.current.name);
+        // console.log(mapped);
         vm.checkValid(form);
+    };
+
+    vm.changeSystem = (mapped) => {
+        mapped.forEach(item => {
+            
+            if(item.mappedField == "CustomerAccountId"){
+                item.SystemName = vm.systemName;
+                item.IdType = 'Contact'
+            }else{
+                item.SystemName = null;
+                item.IdType = null;
+            }
+        });
+    }
+
+    vm.changeMatchingFields = function(mapping, form) {
+        vm.changeLatticeField(mapping, form);
     };
 
     vm.checkFieldsDelay = function(form) {
@@ -208,9 +213,18 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
     };
 
     vm.checkValid = function(form) {
-        ImportWizardStore.setValidation('matchtoaccounts', form.$valid);
+        ImportWizardStore.setValidation('matchtoaccounts', vm.form.$valid);
     }
 
+    vm.isMultipleTemplates = () => {
+        var flags = FeatureFlagService.Flags();
+        var multipleTemplates = FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT);
+        return multipleTemplates;
+    }
+
+    vm.updateSystem = () => {
+        vm.changeLatticeField(vm.fieldMapping, vm.form)
+    }
 
     vm.init();
 });

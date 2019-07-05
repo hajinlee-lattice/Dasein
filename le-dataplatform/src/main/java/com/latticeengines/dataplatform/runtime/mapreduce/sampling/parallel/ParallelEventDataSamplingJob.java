@@ -75,7 +75,8 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
         MRJobUtil.setLocalizedResources(mrJob, properties);
 
         String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
-        config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml");
+        config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
+                + " -DLOG4J_LE_LEVEL=INFO");
 
         setInputFormat(mrJob, config, properties);
         setOutputFormat(mrJob, properties);

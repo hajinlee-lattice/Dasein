@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.etl.orchestration.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,17 +14,27 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressDao;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 
 @Component("orchestrationProgressEntityMgr")
-public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgressEntityMgr {
-    @Autowired
+public class OrchestrationProgressEntityMgrImpl extends BaseEntityMgrImpl<OrchestrationProgress>
+        implements OrchestrationProgressEntityMgr {
+
+    @Inject
     private OrchestrationProgressDao orchestrationProgressDao;
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         return orchestrationProgressDao.findProgressesByField(fields, orderFields);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasJobInProgress(String orchName) {
+        return orchestrationProgressDao.hasJobInProgress(orchName);
     }
 
     @Override
@@ -73,4 +85,14 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
         return orchestrationProgressDao.isDuplicateVersion(orchName, version);
     }
 
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasTriggeredSince(String orchName, Date since) {
+        return orchestrationProgressDao.hasTriggeredSince(orchName, since);
+    }
+
+    @Override
+    public BaseDao<OrchestrationProgress> getDao() {
+        return orchestrationProgressDao;
+    }
 }

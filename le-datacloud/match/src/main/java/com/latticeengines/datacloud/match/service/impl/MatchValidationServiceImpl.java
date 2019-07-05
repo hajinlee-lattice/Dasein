@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
@@ -16,6 +17,7 @@ import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("matchValidationService")
 public class MatchValidationServiceImpl implements MatchValidationService {
@@ -52,7 +54,14 @@ public class MatchValidationServiceImpl implements MatchValidationService {
     }
 
     @Override
-    public void validateDataCloudVersion(@NotNull String dataCloudVersion) {
+    public void validateDataCloudVersion(@NotNull String dataCloudVersion, @NotNull Tenant tenant) {
+        // 1.0 SQL table based matcher is no longer supported as SQL Server in
+        // BODC is shutdown. Fail 1.0 match request.
+        if (MatchUtils.isValidForRTSBasedMatch(dataCloudVersion)) {
+            String errorMsg = "Found a match request against RTS source which is unsupported any more. Tenant="
+                    + JsonUtils.serialize(tenant);
+            throw new IllegalArgumentException(errorMsg);
+        }
         checkDataFabricEntityMgrs(dataCloudVersion);
     }
 

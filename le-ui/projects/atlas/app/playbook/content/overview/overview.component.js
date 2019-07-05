@@ -28,7 +28,8 @@ export default class OverviewComponent extends Component {
         super(props);
         this.state = {
             play: props.play,
-            connections: null
+            connections: null,
+            talkingPointsText: ''
         };
     }
 
@@ -42,7 +43,8 @@ export default class OverviewComponent extends Component {
     }
 
     componentWillUnmount() {
-      this.unsubscribe();
+        actions.reset();
+        this.unsubscribe();
     }
 
     handleChange = () => {
@@ -54,22 +56,25 @@ export default class OverviewComponent extends Component {
     goto = (route, params) => {
         //ngState.getAngularState().go(route, params)
     }
+
+    makeTalkingpointsText(play) {
+        if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
+            return 'Create Talking Points';
+        } else {
+            return 'Edit Talking Points';
+        }
+    }
+
     makeTalkingpoints(play) {
         if(!play.talkingPoints || (play.talkingPoints && !play.talkingPoints.length)) {
             return (
-                <div className="talking-points">
-                    <a href="javascript:void(0);" onClick={() => {
-                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
-                    }}>Create Talking Points</a>
+                <div className="talking-points-count">
                     No talking points
                 </div>
             );
         } else {
             return (
-                <div className="talking-points">
-                    <a href="javascript:void(0);" onClick={() => {
-                        NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: play.name}); 
-                    }}>Edit Talking points</a>
+                <div className="talking-points-count">
                     {play.talkingPoints.length} talking points have been created
                 </div>
             );
@@ -77,20 +82,27 @@ export default class OverviewComponent extends Component {
     }
 
     launchHistoryLink(play) {
-        if(play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || (play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState)) {
+        //if(play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState && ['Launching','Launched','Failed'].indexOf(play.launchHistory.mostRecentLaunch.launchState) !== -1 || (play.launchHistory.lastCompletedLaunch && play.launchHistory.lastCompletedLaunch.launchState)) {
             return(
                 <a href="javascript:void(0);" onClick={() => {
                     NgState.getAngularState().go('home.playbook.dashboard.launchhistory', {play_name: play.name}); 
-                }}><span class="ico ico-cog ico-black"></span> Launch History</a>
+                }}>Launch History</a>
             );
-        }
+        //}
     }
     render() {
         if (this.state.play) {
             return (
                 <ReactMainContainer className={'container playbook-overview show-spinner'}>
-                    <div className="launch-history">{this.launchHistoryLink(this.state.play)}</div>
-                    <LeHPanel hstretch={"true"} vstretch={"true"}>
+                    <div className="overview-header">
+                        <h1>
+                            Campaign Dashboard
+                        </h1>
+                        <div className="launch-history">
+                            {this.launchHistoryLink(this.state.play)}
+                        </div>
+                    </div>
+                    <LeHPanel hstretch={"true"} vstretch={"true"} className="components">
                         <div class="systems-component">
                             <SystemsComponent play={this.state.play} connections={this.state.connections} />
                         </div>
@@ -100,7 +112,12 @@ export default class OverviewComponent extends Component {
                                     <RatingsComponent play={this.state.play} />
                                 </span>
                                 <span>
-                                    <h2>SFDC Talking Points</h2>
+                                    <h2 className="panel-label talking-points-label">
+                                        <strong>SFDC Talking Points</strong>
+                                        <a href="javascript:void(0);" onClick={() => {
+                                            NgState.getAngularState().go('home.playbook.dashboard.insights', {play_name: this.state.play.name}); 
+                                        }}>{this.makeTalkingpointsText(this.state.play)}</a>
+                                    </h2>
                                     {this.makeTalkingpoints(this.state.play)}
                                 </span>
                             </GridLayout>
@@ -111,7 +128,7 @@ export default class OverviewComponent extends Component {
         } else {
             return (
                 <ReactMainContainer className={'container playbook-overview'}>
-                    <p>Loading...</p>
+                    <div className="loader"></div>
                 </ReactMainContainer>
             );
         }

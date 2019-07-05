@@ -30,6 +30,9 @@ public class TemplateFieldPreview {
     @JsonProperty("field_category")
     private FieldCategory fieldCategory;
 
+    @JsonProperty("unmapped")
+    private boolean unmapped = false;
+
     public String getNameFromFile() {
         return nameFromFile;
     }
@@ -84,5 +87,13 @@ public class TemplateFieldPreview {
 
     public void setFieldCategory(FieldCategory fieldCategory) {
         this.fieldCategory = fieldCategory;
+    }
+
+    public boolean isUnmapped() {
+        return unmapped;
+    }
+
+    public void setUnmapped(boolean unmapped) {
+        this.unmapped = unmapped;
     }
 }

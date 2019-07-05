@@ -1,5 +1,47 @@
 @import "atlas/react/react-main.component.scss";
+@import '../../../../../common/widgets/colors.scss';
+
+.main-content.system-creation{
+  max-width: 900px;
+  margin-bottom: 100px;
+}
+
 .system-creation {
+  min-height: 100px;
+  // border: 1px solid red;
+  // max-width: 900px;
+  padding: 10px 16px;
+  .wizard-container{
+      border: 1px solid rgb(201, 201, 201);
+      margin-top: 20px 25px;
+      
+
+      .sub-header{
+          width: 100%;
+          font-size: 18px;
+          border-bottom: 1px solid rgb(201, 201, 201);
+          padding: 1rem;
+      }
+      .left{
+          display: flex;
+          flex: 0.5;
+          max-width: 350px;
+          padding: 1rem;
+          justify-content: center;
+      }
+
+      .info{
+          display: flex;
+          max-width: 350px;
+          padding: 0.5rem;
+          justify-content: center;
+      }
+      .wizard-controlls{
+          padding: 0.5rem;
+          border-top: 1px solid rgb(201, 201, 201);
+          justify-content: space-between;
+      }
+  }
   .le-header {
     font-size: 18px;
     margin: 0 0 1em 0;
@@ -16,15 +58,46 @@
     margin: 2em 0;
   }
   .system-info {
-    margin-top: 2em;
+    margin-top: 0em;
+    margin-bottom: 4em;
   }
   .le-card.system-creation {
     max-width: none;
     &:hover {
       cursor: pointer;
     }
-    .system-image {
-      height: 50px;
+    .le-card-image-container{
+      height: 100%;
+      .system-image {
+        max-height: 30px;
+        // border: 1px solid red;
+      }
     }
+    
+  }
+
+  .systems-grid{
+    .system-card-fix{
+      min-width: 150px;
+      min-height: 120px;
+      max-width: 150px;
+      max-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid $silver;
+      .system-card{
+        // max-width: 150px;
+        // min-width: 150px;
+        // min-height: 150px;
+        flex-direction: row;
+        border: none;
+      }
+      &.selected{
+        background-color: $blue-text;
+      }
+    }
+
+    
   }
 }

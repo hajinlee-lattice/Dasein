@@ -50,14 +50,22 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
+/**
+ * 1.0 RTS SQL table based matcher has been retired. But don't remove legacy
+ * code for now. SQL Server will be shutdown, data source connection (db
+ * connection) configuration is cleaned. Since connection initialization in
+ * SqlServerHelper is lazy loading, as long as no 1.0 match request is received
+ * (fail fast in MatchResource), it will not try to make connection
+ */
 @Component("sqlServerHelper")
 public class SqlServerHelper implements DbHelper {
 
     private static final Logger log = LoggerFactory.getLogger(SqlServerHelper.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
     private static final Integer MAX_RETRIES = 2;
-
     private static final Integer QUEUE_SIZE = 20000;
+    public static final String DEFAULT_DATACLOUD_VERSION = "1.0.0";
+
     @Value("${datacloud.match.sqlfetch.realtime.timeout:1}")
     private Integer realtimeTimeoutMins;
     @Value("${datacloud.match.sqlfetch.bulk.timeout:8}")
@@ -684,7 +692,7 @@ public class SqlServerHelper implements DbHelper {
                                     }
                                     String version = matchContext.getInput().getDataCloudVersion();
                                     if (StringUtils.isEmpty(version)) {
-                                        version = MatchInput.DEFAULT_DATACLOUD_VERSION;
+                                        version = DEFAULT_DATACLOUD_VERSION;
                                     }
                                     if (StringUtils.isEmpty(groupDataCloudVersion)) {
                                         groupDataCloudVersion = version;

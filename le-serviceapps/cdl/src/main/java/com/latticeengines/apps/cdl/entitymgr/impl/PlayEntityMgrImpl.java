@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -128,10 +127,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             MetadataSegment selSegment = segmentEntityMgr.findByName(segmentName.trim());
             play.setTargetSegment(selSegment);
         }
-        // TODO: Remove in M24
-        if (play.getDisplayName() == null) {
-            play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
-        }
+
         if (play.getName() == null) {
             play.setName(play.generateNameStr());
         }
@@ -160,7 +156,7 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
         if (plays.getPlayGroups() == null) {
             throw new NullPointerException("No Play Group in Play");
         }
-        Set<PlayGroup> playGroups = new HashSet<PlayGroup>();
+        Set<PlayGroup> playGroups = new HashSet<>();
         for (PlayGroup playGroup : plays.getPlayGroups()) {
             String playGroupId = playGroup.getId();
             if (playGroupId == null) {

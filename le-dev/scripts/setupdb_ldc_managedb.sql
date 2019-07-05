@@ -54,6 +54,15 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2019.csv' INTO TABLE `AccountMasterColumn`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY '\t'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
@@ -190,7 +199,8 @@ VALUES
   ('2.0.14', '2018-09-17', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.16', '2018-12-10', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.17', '2019-02-25', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.18', '2019-05-03', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.18', '2019-05-03', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.19', '2019-06-26', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -230,5 +240,12 @@ SET
   `AccountLookupHdfsVersion` = '2019-04-04_00-00-00_UTC',
   `EnrichmentStatsVersion`   = '2019-04-05_00-00-00_UTC'
 WHERE `Version` = '2.0.18';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2019-06-23_00-00-00_UTC',
+  `AccountLookupHdfsVersion` = '2019-06-23_00-00-00_UTC',
+  `EnrichmentStatsVersion`   = '2019-06-23_00-00-00_UTC'
+WHERE `Version` = '2.0.19';
 
 SET SQL_SAFE_UPDATES = 1;

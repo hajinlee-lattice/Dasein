@@ -24,24 +24,30 @@
                         <div class="col-sm-12 text-center">
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_FIRST_NAME_LABEL')}}</label>
-                                <input type="text" class="form-control" name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_FIRST_NAME_LABEL')}}" data-ng-model="user.FirstName" required>
+                                <input type="text" class="form-control"
+                                       name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_FIRST_NAME_LABEL')}}" data-ng-model="user.FirstName" ng-disabled="showAddUserSuccess" required>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_LAST_NAME_LABEL')}}</label>
-                                <input type="text" class="form-control" name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_LAST_NAME_LABEL')}}" data-ng-model="user.LastName" required>
+                                <input type="text" class="form-control"
+                                       name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_LAST_NAME_LABEL')}}" data-ng-model="user.LastName" ng-disabled="showAddUserSuccess" required>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EMAIL_LABEL')}}</label>
-                                <input type="email" class="form-control" name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_EMAIL_LABEL')}}" data-ng-model="user.Email" ng-change="emailChange()" required>
+                                <input type="email" class="form-control"
+                                       name="{{ResourceUtility.getString('ADD_USER_TITLE')}}: {{ResourceUtility.getString('ADD_USER_EMAIL_LABEL')}}" data-ng-model="user.Email" ng-change="emailChange()" ng-disabled="showAddUserSuccess" required>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_ACCESS_LEVEL_LABEL')}}</label>
                                 <select data-ng-options="ResourceUtility.getString('ACCESS_LEVEL_' + level) for level in levelsToSelect"
-                                        class="form-control" data-ng-model="user.AccessLevel" name="{{ResourceUtility.getString('ADD_USER_ACCESS_LEVEL_LABEL')}}" ng-disabled="!allowAccessSelect()"></select>
+                                        class="form-control" data-ng-model="user.AccessLevel"
+                                        name="{{ResourceUtility.getString('ADD_USER_ACCESS_LEVEL_LABEL')}}"
+                                        ng-disabled="showAddUserSuccess || !allowAccessSelect()"></select>
                             </div>
                             <div class="form-group" ng-if="allowExpireSelect()">
                                 <label class="control-label">{{ResourceUtility.getString('ADD_USER_EXPIRE_PERIOD_LABEL')}}</label>
-                                <input type="date" class="form-control" data-ng-model="user.ExpirationDate" ng-disabled="showAddUserSuccess" />
+                                <input type="date" class="form-control" data-ng-model="user.ExpirationDate"
+                                       ng-disabled="showAddUserSuccess || disableExpire()" />
                             </div>
                         </div>
                     </div>

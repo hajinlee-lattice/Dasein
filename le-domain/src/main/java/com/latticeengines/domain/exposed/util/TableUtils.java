@@ -116,7 +116,7 @@ public class TableUtils {
         return fieldAssembler.endRecord();
     }
 
-    private static Type getTypeFromPhysicalDataType(String dataType) {
+    public static Type getTypeFromPhysicalDataType(String dataType) {
         if (StringUtils.isEmpty(dataType)) {
             throw new IllegalArgumentException("Physical data type cannot be null!");
         }

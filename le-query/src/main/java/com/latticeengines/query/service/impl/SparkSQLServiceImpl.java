@@ -45,6 +45,8 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     private static final Logger log = LoggerFactory.getLogger(SparkSQLServiceImpl.class);
 
+    private static final long GB = 1024 * 1024 * 1024;
+
     @Inject
     private Configuration yarnConfiguration;
 
@@ -81,29 +83,26 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
 
+    @Value("${dataflowapi.spark.sql.broadcast.join.threashold.gb}")
+    private long bhjThresholdGb;
+
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
-                                             int scalingFactor, boolean persist, String secondaryJobName) {
+                                             int scalingFactor, String storageLevel, String secondaryJobName) {
         String tenantId = attrRepo.getCustomerSpace().getTenantId();
         String jobName;
         if (StringUtils.isNotBlank(secondaryJobName)) {
-            jobName = tenantId + "~SparkSQL~" + secondaryJobName;
+            jobName = String.format("%s~SparkSQL~%s", tenantId, secondaryJobName);
         } else {
-            jobName = tenantId + "~SparkSQL";
-        }
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
+            jobName = String.format("%s~SparkSQL", tenantId);
         }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(context -> {
             LivySession session = null;
             try {
-                session = livySessionService.startSession(livyHost, jobName, //
-                        getLivyConf(), getSparkConf(scalingFactor));
-                bootstrapAttrRepo(session, hdfsPathMap, persist);
+                session = livySessionService.startSession(jobName, //
+                        getLivyConf(scalingFactor), getSparkConf(scalingFactor));
+                bootstrapAttrRepo(session, hdfsPathMap, storageLevel);
             } catch (Exception e) {
                 log.warn("Failed to launch a new livy session.", e);
                 if (session != null) {
@@ -145,14 +144,16 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return result.getTargets().get(0);
     }
 
-    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, boolean persist) {
+    private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, String storageLevel) {
         InputStreamSparkScript sparkScript = getAttrRepoScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         params.put("TABLE_MAP", hdfsPathMap);
         params.put("TABLE_FORMAT", getTableFormat(hdfsPathMap));
-        params.put("PERSIST_RAW_TABLES", persist);
+        if (StringUtils.isNotBlank(storageLevel)) {
+            params.put("STORAGE_LEVEL", storageLevel);
+        }
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         log.info("Output: " + result.getOutput());
@@ -203,31 +204,46 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return sparkScript;
     }
 
-    private Map<String, Object> getLivyConf() {
+    private Map<String, Object> getLivyConf(int scalingFactor) {
         Map<String, Object> conf = new HashMap<>();
         conf.put("driverCores", driverCores);
         conf.put("driverMemory", driverMem);
         conf.put("executorCores", executorCores);
         conf.put("executorMemory", executorMem);
+        if (scalingFactor > 1) {
+            // scale up first
+            String unit = executorMem.substring(executorMem.length()-1);
+            int val = Integer.parseInt(executorMem.replace(unit, ""));
+            String newMem = String.format("%d%s", 2 * val, unit);
+            log.info("Double executor memory to " + newMem + " based on scalingFactor=" + scalingFactor);
+            conf.put("executorMemory", newMem);
+        }
+
         return conf;
     }
 
     private Map<String, String> getSparkConf(int scalingFactor) {
         scalingFactor = Math.max(scalingFactor, 1);
         Map<String, String> conf = new HashMap<>();
+
+        // instances
         int minExe = minExecutors * scalingFactor;
-        if (scalingFactor > 1) {
-            // when scaling factor > 1, we eagerly want more executors
-            minExe *= 2;
-        }
-        int maxExe = maxExecutors * scalingFactor;
+        int maxExe = Math.max((int) (maxExecutors * scalingFactor * 0.5), minExe);
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
+
+        // partitions
         int partitions = Math.max(maxExe * executorCores * 2, 200);
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
+
+        // broadcast join
+        conf.put("spark.sql.autoBroadcastJoinThreshold", String.valueOf(bhjThresholdGb * GB));
+        conf.put("spark.sql.broadcastTimeout", "600");
+
+        // others
         conf.put("spark.driver.maxResultSize", "4g");
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;

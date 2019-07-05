@@ -37,7 +37,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        templates = cdlService.getS3ImportTemplate(customerSpace);
+        templates = cdlService.getS3ImportTemplate(customerSpace, "");
     }
 
     @Test(groups = "deployment")

@@ -118,12 +118,16 @@ export const openConfigWindow = () => {
         let observer = new Observer(
             response => {
                 if (response.data) {
-                    var authValues = response.data.authValues;
+                    var authValues = response.data.solutionInstance.authValues;
                     var externalMarketoAuthentication = authValues.filter(function(authValue) {
                         return authValue.externalId == "external_marketo_authentication";
                     })
-                    registerLookupIdMap(externalMarketoAuthentication[0].authId);
-                    updateSolutionInstance(response.data.id, response.data.name);
+                    var trayAuthenticationId = externalMarketoAuthentication[0].authId;
+                    var authenticationName = response.data.authentications.filter(function(auth) {
+                        return auth.node.id == trayAuthenticationId;
+                    })
+                    registerLookupIdMap(trayAuthenticationId, authenticationName[0].node.name);
+                    updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name);
                     httpService.unsubscribeObservable(observer);
                 }
             },
@@ -134,7 +138,7 @@ export const openConfigWindow = () => {
         httpService.get('/tray/solutionInstances/' + solutionInstanceId, observer, {useraccesstoken: solutionInstanceConfig.accessToken});
     }
 
-    function registerLookupIdMap(trayAuthenticationId) {
+    function registerLookupIdMap(trayAuthenticationId, trayAuthenticationName) {
         let observer = new Observer(
             response => {
                 if (response.data && response.data.name) {
@@ -150,7 +154,7 @@ export const openConfigWindow = () => {
 
         var lookupIdMap = {
             orgId: guidGenerator(),
-            orgName: "Marketo_" +  (new Date()).getTime(),
+            orgName: trayAuthenticationName ? trayAuthenticationName : "Marketo_" +  (new Date()).getTime(),
             externalSystemType: "MAP",
             externalSystemName: "Marketo",
             externalAuthentication: {

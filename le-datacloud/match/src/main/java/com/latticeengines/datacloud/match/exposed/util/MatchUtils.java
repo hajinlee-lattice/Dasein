@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 
 public class MatchUtils {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchUtils.class);
     private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 
@@ -64,11 +63,26 @@ public class MatchUtils {
         return avroGlobs;
     }
 
+    /**
+     * V1.0 SQL table based matcher -- No longer supported
+     *
+     * @param version
+     * @return
+     */
     public static boolean isValidForRTSBasedMatch(String version) {
-        return StringUtils.isEmpty(version)
-                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING);
+        return StringUtils.isNotEmpty(version)
+                && version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING);
     }
 
+    /**
+     * V2.0 AccountMaster + DnB fuzzy match based matcher
+     *
+     * If coming match request doesn't have DataCloud version provided, populate
+     * default version in MatchPlannerBase.setDataCloudVersion
+     *
+     * @param version
+     * @return
+     */
     public static boolean isValidForAccountMasterBasedMatch(String version) {
         return StringUtils.isNotEmpty(version)
                 && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING);

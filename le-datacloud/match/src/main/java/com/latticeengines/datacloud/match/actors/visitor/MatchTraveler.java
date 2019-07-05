@@ -3,8 +3,10 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,8 @@ import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
@@ -78,8 +82,10 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // the Lattice Data Cloud decision graph.
     private List<Pair<EntityMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
 
-    // Entity match errors
-    private List<String> entityMatchErrors;
+    // Entity -> (Lookup Type -> List of MatchKeyTuples)
+    private Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityExistingLookupEntryMap = new HashMap<>();
+
+    private Set<String> fieldsToClear = new HashSet<>();
 
     /***************************************************************************
      * Bound to current decision graph or request to external assistant actors
@@ -126,7 +132,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @Override
     public void prepareForRetravel() {
         super.prepareForRetravel();
-        entityMatchErrors = null;
+        fieldsToClear.clear();
     }
 
     @Override
@@ -381,12 +387,51 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         entityLdcMatchTypeToTupleList.add(pair);
     }
 
+    public void addEntityExistingLookupEntryMap(String entity, EntityLookupEntry.Type lookupType, MatchKeyTuple tuple) {
+        EntityMatchType matchType = MatchKeyUtils.getEntityMatchType(lookupType, tuple);
+        if (matchType == null) {
+            log.error("Could not add Existing Lookup Entry, EntityLookupEntry.Type is invalid");
+            return;
+        }
+
+        Map<EntityMatchType, List<MatchKeyTuple>> existingLookupEntryMap;
+        if (entityExistingLookupEntryMap.containsKey(entity)) {
+            existingLookupEntryMap = entityExistingLookupEntryMap.get(entity);
+        } else {
+            existingLookupEntryMap = new HashMap<>();
+            entityExistingLookupEntryMap.put(entity, existingLookupEntryMap);
+        }
+
+        List<MatchKeyTuple> matchKeyTupleList;
+        if (existingLookupEntryMap.containsKey(matchType)) {
+            matchKeyTupleList = existingLookupEntryMap.get(matchType);
+        } else {
+            matchKeyTupleList = new ArrayList<>();
+            existingLookupEntryMap.put(matchType, matchKeyTupleList);
+        }
+        matchKeyTupleList.add(tuple);
+    }
+
+    public Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> getEntityExistingLookupEntryMap() {
+        return entityExistingLookupEntryMap;
+    }
+
+    public Set<String> getFieldsToClear() {
+        return fieldsToClear;
+    }
+
+    public void addFieldToClear(String field) {
+        if (StringUtils.isNotBlank(field)) {
+            fieldsToClear.add(field);
+        }
+    }
+
     public List<String> getEntityMatchErrors() {
-        return entityMatchErrors;
+        return getTravelErrors();
     }
 
     public void setEntityMatchErrors(List<String> entityMatchErrors) {
-        this.entityMatchErrors = entityMatchErrors;
+        logTravelErrors(entityMatchErrors);
     }
 
 }

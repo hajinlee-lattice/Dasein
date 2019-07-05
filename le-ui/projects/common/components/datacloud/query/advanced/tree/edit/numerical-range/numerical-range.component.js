@@ -98,7 +98,7 @@ angular
                         case 1: {
                             var fromVal = $scope.values.from.value;
                             if (fromVal) {
-                                return fromVal + (conf.step ? conf.step : 0.1);
+                                return fromVal;// + (conf.step ? conf.step : 0.1);
                             } else {
                                 return conf.min != undefined ? conf.min : '';
                             }
@@ -127,8 +127,9 @@ angular
                     switch (conf.position) {
                         case 0: {
                             var toVal = $scope.values.to.value;
+                            // console.log('toVal ')
                             if (toVal) {
-                                return toVal - (conf.step ? conf.step : 0.1);
+                                return toVal;//toVal - (conf.step ? conf.step : 0.1);
                             } else {
                                 return conf.max != undefined ? conf.max : '';
                             }
@@ -195,9 +196,11 @@ angular
                 $scope.changeValue = function (position) {
                     var conf = getConfigField(position);
                     if ($scope.isValValid(position) || ($scope.invalidcallback && !!$scope.invalidcallback == true)) {
+                        // console.log('Change value');
                         switch (position) {
                             case 0: {
                                 var value = $scope.values.from.value;
+                                // console.log('From ', value);
                                 $scope.changed({ type: conf.type, position: position, value: value });
                                 var toInput = $element[0].querySelector('input[name="' + getConfigField(1).name + '"]');
                                 if (toInput) {
@@ -207,6 +210,7 @@ angular
                             }
                             case 1: {
                                 var value = $scope.values.to.value;
+                                // console.log('To ', value);
                                 $scope.changed({ type: conf.type, position: position, value: value });
                                 var fromInput = $element[0].querySelector('input[name="' + getConfigField(0).name + '"]');
                                 if (fromInput) {
@@ -228,7 +232,7 @@ angular
                     var valid = true;
                     if ($scope.form[conf.name]) {
                         if ($scope.form[conf.name].$dirty === true ||
-                            ($scope.form[conf.name].$dirty === false) && $scope.initialvalidation === true) {
+                            ($scope.form[conf.name].$dirty === false && $scope.initialvalidation === true)) {
                             valid = $scope.form[conf.name].$valid;
                         }
                     }

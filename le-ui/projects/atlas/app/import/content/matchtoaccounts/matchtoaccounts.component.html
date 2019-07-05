@@ -5,7 +5,7 @@
             <strong>Select your Account ID to match your contact records to exsiting accounts.</strong>
         </p>
     </div>
-    <form name="form">
+    <ng-form name="vm.form">
         <div class="id-option" ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
@@ -23,6 +23,18 @@
                             {{AvailableField.userField}}
                         </option>
                    </select>
+                </div>
+            </div>
+            <div class="system-options-item">
+                <div ng-if="vm.isMultipleTemplates()">
+                    <label>System Name</label>
+                    <select class="form-control" ng-model="vm.systemName" ng-change="vm.updateSystem($index)"> 
+                        <!-- <option value="">-- Select System --</option> -->
+                        <option
+                        ng-repeat="s in vm.systems"
+                        value="{{s.name}}"
+                        >{{s.display_name}}</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -51,5 +63,5 @@
             </ul>
         </div>
 
-    </form>
+    </ng-form>
 </div>

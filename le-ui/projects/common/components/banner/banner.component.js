@@ -43,7 +43,12 @@ angular.module('common.banner', [])
             banner.timestamp = [ new Date().getTime() ];
             this.banners.push(banner);
         }
-        banner.message = wrapMessage(banner.message);
+
+        if (Array.isArray(banner.message)) {
+            banner.message = handleArrayOfMessages(banner.message);
+        } else {
+            banner.message = wrapMessage(banner.message);
+        }
     };
 
     function wrapMessage(message) {
@@ -58,6 +63,17 @@ angular.module('common.banner', [])
         });
 
         return messageAr.join(' ');
+    }
+
+    function handleArrayOfMessages (messages) {
+        let messageArr = [];
+        messages.forEach(function(message) {
+            message = '<li>' + message + '</li>';
+
+            messageArr.push(message);
+        });
+
+        return messageArr;
     }
 
     this.reset = function(lifetime) {

@@ -8,7 +8,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
 .service('ImportUtils', function($state){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
-    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId'}};
+    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId', CustomerAccountId:'CustomerAccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId', CustomerContactId: 'CustomerContactId'}};
     var latticeSchema = {};
 
     function setFields(fieldObj, field){
@@ -121,13 +121,21 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     };
 
     function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj, entity){
-        fieldsMapped.forEach(function(fieldMapped){
+        for(var i=0; i<fieldsMapped.length ; i++){
+            let fieldMapped = fieldsMapped[i];
             if(fieldMapped.userField == userFieldName){
                 fieldMapped.fieldType = newTypeObj.type;
                 updateFieldDate(fieldMapped, newTypeObj, entity);
                 return;
             }
-        });
+        }
+        // fieldsMapped.forEach(function(fieldMapped){
+        //     if(fieldMapped.userField == userFieldName){
+        //         fieldMapped.fieldType = newTypeObj.type;
+        //         updateFieldDate(fieldMapped, newTypeObj, entity);
+        //         return;
+        //     }
+        // });
     }
 
     function updateFieldDate(fieldMapped, newTypeObj, entity) {
@@ -194,41 +202,51 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 if(savedObj.cdlExternalSystemType){
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
+                if(savedObj.IdType || savedObj.SystemName){
+                    fieldsMapped[mapped].idType = savedObj.IdType;
+                    fieldsMapped[mapped].systemName = savedObj.SystemName;
+                }
                 updateFieldDate(fieldsMapped[mapped], savedObj, entity);
             }
             
         });
     }
     
-    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap){
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId, IdType){
         if(uniqueId && fieldName){
-            Object.keys(fieldsMapping).forEach(index => {
-                let field = fieldsMapping[index];
+            let keys = Object.keys(fieldsMapping);
+            for(var i = 0; i < keys.length; i++){
+                let field = fieldsMapping[keys[i]];
                 if(field.userField == fieldName){
                     switch(unmap){
                         case true:
                             if(field.mappedField == uniqueId){
                                 field.mappedToLatticeField = false;
+                                field.mapToLatticeId = false;
+                                field.idType = null;
                                 delete field.mappedField;
                             }
                             break;
                         case false:
                             if(!field.fieldMapped){
                                 field.mappedToLatticeField = true;
+                                field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
                                 field.mappedField = uniqueId;
+                                field.idType = IdType;
                             }
                             break;
                     }
+                    return;
                 }
-            });
+            }
         }
     }
     function updateUniqueIdsMapping(entity, fieldsMapping, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
             let saved = savedObj[index];
             if(saved.originalUserField && saved.append != true){
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true);
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
             }
         });
     }

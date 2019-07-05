@@ -123,9 +123,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 TableRoleInCollection.ConsolidatedRawTransaction, active);
         hasRawStore = StringUtils.isNotBlank(rawTableName);
         if (hasRawStore) {
-            log.info("Found raw period store.");
+            log.info("Found raw transaction store.");
         } else {
-            log.info("No raw period store");
+            log.info("No raw transaction store");
         }
     }
 
@@ -235,8 +235,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected boolean shouldUpdate() {
-        boolean should = super.shouldUpdate();
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean should = super.shouldUpdate(step);
 
         log.info(String.format("Important flag to decide transaction update: hasProducts=%b", hasProducts));
 

@@ -46,6 +46,9 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
 
     static final String CHECK_POINT = "entitymatch_process1";
 
+    // FIXME remove after regenerate checkpoints for all following tests
+    private static final long ACCOUNT_PA_EM_ANONYMOUS = ACCOUNT_PA_EM + 1;
+
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -190,17 +193,18 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
-                ACCOUNT_1);
+                ACCOUNT_PA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 8L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
-        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ENTITY_MATCH_ACCOUNT_1);
+        accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL,
+                ACCOUNT_PA_EM_ANONYMOUS);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, ENTITY_MATCH_CONTACT_1);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, CONTACT_PA_EM);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
-        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ENTITY_MATCH_CONTACT_1);
+        contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_PA_EM);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, accountReport);
@@ -212,32 +216,32 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1, //
-                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1 //
+                BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS, //
+                BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1);
-        map.put(BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         return map;
     }
 
     @Override
     protected Map<TableRoleInCollection, Long> getExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ENTITY_MATCH_ACCOUNT_1, //
-                TableRoleInCollection.AccountExport, ENTITY_MATCH_ACCOUNT_1 //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA_EM_ANONYMOUS, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA_EM_ANONYMOUS //
         );
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of( //
-                BusinessEntity.Account, ENTITY_MATCH_ACCOUNT_1, //
-                BusinessEntity.Contact, ENTITY_MATCH_CONTACT_1 //
+                BusinessEntity.Account, ACCOUNT_PA_EM_ANONYMOUS, //
+                BusinessEntity.Contact, CONTACT_PA_EM //
         );
     }
 

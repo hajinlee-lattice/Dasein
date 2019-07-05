@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.service.impl.IngestedFileToSourceDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
@@ -41,12 +42,6 @@ public class IngestedFileToSourceTransformer
     @Override
     protected boolean validateConfig(IngestedFileToSourceTransformerConfig config, List<String> baseSources) {
         String error = null;
-        if (config.getIngestionName() == null) {
-            error = "Please provide ingestion name";
-            log.error(error);
-            RequestContext.logError(error);
-            return false;
-        }
         if (baseSources.size() != 1) {
             error = "Process one ingestion at a time";
             log.error(error);
@@ -75,7 +70,7 @@ public class IngestedFileToSourceTransformer
     @Override
     protected void updateParameters(IngestedFileToSourceParameters parameters, Source[] baseTemplates,
             Source targetTemplate, IngestedFileToSourceTransformerConfig config, List<String> baseVersions) {
-        parameters.setIngestionName(config.getIngestionName());
+        parameters.setIngestionName(((IngestionSource) baseTemplates[0]).getIngestionName());
         parameters.setQualifier(config.getQualifier());
         parameters.setDelimiter(config.getDelimiter());
         parameters.setCharset(config.getCharset());

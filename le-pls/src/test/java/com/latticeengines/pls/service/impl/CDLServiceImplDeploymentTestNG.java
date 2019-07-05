@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,7 +99,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 new FileInputStream(dataFile));
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false,
+                .getFieldMappingDocumentBestEffort(template.getName(), SchemaInterpretation.Account, null, false, false,
                         false);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -106,19 +107,39 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 fieldMapping.setMappedToLatticeField(true);
             }
         }
-        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument);
+        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument, false, false);
     }
 
     @Test(groups = "deployment")
     public void testS3ImportSystem() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce);
-        cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other);
-        S3ImportSystem system = cdlService.getS3ImportSystem(customerSpace, "SYSTEM1");
-        Assert.assertNotNull(system);
-        Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Salesforce, false);
+        cdlService.createS3ImportSystem(customerSpace, "SYSTEM2", S3ImportSystem.SystemType.Other, false);
+
+        List<S3ImportSystem> allSystem = cdlService.getAllS3ImportSystem(customerSpace);
+        for (S3ImportSystem system : allSystem) {
+            if (system.getName().equals("SYSTEM1")) {
+                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
+                Assert.assertTrue(system.isPrimarySystem());
+            } else {
+                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Other);
+                Assert.assertEquals(system.getPriority(), 2);
+            }
+        }
+        cdlService.createS3ImportSystem(customerSpace, "PRIMARY SYSTEM", S3ImportSystem.SystemType.Other, true);
+        allSystem = cdlService.getAllS3ImportSystem(customerSpace);
+        Assert.assertEquals(allSystem.size(), 3);
+        boolean hasPrimary = false;
+        for (S3ImportSystem system : allSystem) {
+            if (system.getDisplayName().equals("PRIMARY SYSTEM")) {
+                hasPrimary = true;
+                Assert.assertTrue(system.isPrimarySystem());
+            }
+        }
+        Assert.assertTrue(hasPrimary);
         Assert.assertThrows(RuntimeException.class,
-                () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other));
+                () -> cdlService.createS3ImportSystem(customerSpace, "SYSTEM1", S3ImportSystem.SystemType.Other,
+                        false));
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -154,6 +175,6 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 return;
             }
         }
-        assertTrue(false, "No data collection folder was created!");
+        fail("No data collection folder was created!");
     }
 }

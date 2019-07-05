@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EntityMatchHistory {
@@ -24,6 +28,9 @@ public class EntityMatchHistory {
     @JsonProperty("MatchType")
     private String matchType;
 
+    @JsonProperty("ExistingLookupKeyList")
+    private List<Pair<String, MatchKeyTuple>> existingLookupKeyList;
+
     //
     // Lead to Account (l2a) Results when main entity is Contact.
     //
@@ -44,6 +51,9 @@ public class EntityMatchHistory {
 
     @JsonProperty("L2AMatchType")
     private String l2aMatchType;
+
+    @JsonProperty("L2AExistingLookupKeyList")
+    private List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList;
 
     public void setBusinessEntity(String businessEntity) {
         this.businessEntity = businessEntity;
@@ -101,6 +111,14 @@ public class EntityMatchHistory {
         return matchType;
     }
 
+    public void setExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> existingLookupKeyList) {
+        this.existingLookupKeyList = existingLookupKeyList;
+    }
+
+    public List<Pair<String, MatchKeyTuple>> getExistingLookupKeyList() {
+        return existingLookupKeyList;
+    }
+
     public void setL2aEntityMatched(String l2aEntityMatched) {
         this.l2aEntityMatched = l2aEntityMatched;
     }
@@ -147,6 +165,14 @@ public class EntityMatchHistory {
 
     public String getL2aMatchType() {
         return l2aMatchType;
+    }
+
+    public void setL2aExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList) {
+        this.l2aExistingLookupKeyList = l2aExistingLookupKeyList;
+    }
+
+    public List<Pair<String, MatchKeyTuple>> getL2aExistingLookupKeyList() {
+        return l2aExistingLookupKeyList;
     }
 }
 

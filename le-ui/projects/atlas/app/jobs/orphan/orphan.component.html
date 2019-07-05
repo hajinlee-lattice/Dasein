@@ -52,7 +52,7 @@
                                             startFrom: ($ctrl.currentPage - 1) * $ctrl.pagesize |
                                             limitTo: $ctrl.pagesize"
                 index="$index"
-                ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}"
+                ng-class="{'dark-row' : $index % 2 != 0, 'white-row' : $index % 2 == 0}"
             >
                 <div class="le-cell le-col-start-1 le-col-span-3">
                     {{ orphan.startTimestamp | date: 'MM/dd/yyyy h:mma' }}

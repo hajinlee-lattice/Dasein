@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -103,6 +104,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
         if (table != null && CollectionUtils.isNotEmpty(table.getAttributes(LogicalDataType.Event))) {
             eventColumnName = table.getAttributes(LogicalDataType.Event).get(0).getName();
         }
+        boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
 
         String targetTableName = tableName + "_TargetTable";
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
@@ -163,7 +165,8 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .modelIteration(parameters.getModelIteration()) //
                 .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent()) //
-                .ratingEngineType(ratingEngineType);
+                .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
+                .ratingEngineType(ratingEngineType); 
         return builder.build();
     }
 

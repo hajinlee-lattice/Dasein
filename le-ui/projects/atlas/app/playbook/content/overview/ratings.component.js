@@ -14,8 +14,8 @@ class RatingsComponent extends Component {
         var data = {};
         if(play && play.ratingEngine && play.ratingEngine.bucketMetadata) {
             var lifts = play.ratingEngine.bucketMetadata;
-            
             lifts.forEach(function(lift) {
+                lift.lift = (Math.round( lift.lift * 10) / 10).toString(); // PLS-14032 // playlist.component.js:270
                 data[lift.bucket_name] = {
                     label: lift.bucket_name,
                     value: lift.lift,
@@ -38,7 +38,7 @@ class RatingsComponent extends Component {
     render() {
         return (
             <LeVPanel className="main-panel panel ratings-chart">
-                <h2> Ratings</h2>
+                <h2 className="panel-label"> Ratings</h2>
                 <div class="lift-chart">
                     {this.barChart(this.props.play)}
                 </div>

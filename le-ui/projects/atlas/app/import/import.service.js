@@ -52,6 +52,7 @@ angular.module('lp.import')
         this.postBody = null;
         this.autoImport = true;
         this.importOnly = false;
+        this.validationStatus = null;
     }
 
     this.init();
@@ -94,20 +95,24 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Validate Template', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                }
+            },{ 
+                label: 'Validation', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields.validation', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-                    // ImportWizardStore.saveDocument(nextState, function(){
-                    //     ImportWizardStore.setValidation('jobstatus', true); 
-                    // });
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                        ImportWizardStore.setValidation('jobstatus', true);
                     }, true);
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
+                state: 'accounts.ids.thirdpartyids.latticefields.customfields.validation.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -159,20 +164,24 @@ angular.module('lp.import')
             },{ 
                 label: 'Custom Fields', 
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Validate Template', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                }
+            },{ 
+                label: 'Validation', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
-                    // ImportWizardStore.saveDocument(nextState, function(){
-                    //     ImportWizardStore.setValidation('jobstatus', true); 
-                    // });
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
-                        ImportWizardStore.setValidation('jobstatus', true);                
+                        ImportWizardStore.setValidation('jobstatus', true);
                     }, true);
                 }
             },{ 
                 label: 'Save Template', 
-                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', 
+                state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -199,7 +208,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'productpurchases.ids.latticefields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -235,7 +244,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'productbundles.ids.latticefields', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -270,7 +279,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Product Hierarchy', 
                 state: 'producthierarchy.ids.producthierarchy', 
-                nextLabel: 'Next, Import File', 
+                nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -306,6 +315,14 @@ angular.module('lp.import')
 
     this.setValidation = function(type, value) {
         this.validation[type] = value;
+    }
+
+    this.getValidationStatus = function() {
+        return this.validationStatus;
+    }
+
+    this.setValidationStatus = function(validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     this.nextSaveGeneric = function(nextState) {
@@ -558,6 +575,13 @@ angular.module('lp.import')
         this.feedType = type;
     };
 
+    this.setObject = function(obj) {
+        this.Object = obj;
+    };
+    this.getObject = function() {
+        return this.Object;
+    };
+
     this.getAutoImport = function(){
         return this.autoImport;
     }
@@ -584,30 +608,41 @@ angular.module('lp.import')
     this.updateSavedObjects = (object) => {
         let name = $state.current.name;
         let saved = this.saveObjects[name];
+        let newObject = [];
         if(saved){
             Object.keys(object).forEach(index => {
                 let element = object[index];
-                let alreadyAdded = ImportWizardStore.isAlreadySave(saved, element.userField);//underscore.findWhere(saved, {userField: element.userField});
-                if(alreadyAdded != undefined && alreadyAdded.mappedField != element.mappedField){
+                let alreadyAdded = ImportWizardStore.isAlreadySave(saved, 'userField', element.userField);//underscore.findWhere(saved, {userField: element.userField});
+                if(alreadyAdded == undefined){
+                    newObject.push(element);
+                }else if(alreadyAdded != undefined && alreadyAdded.mappedField != element.mappedField){
                     alreadyAdded.mappedField = element.mappedField;
                     alreadyAdded.dateFormatString = element.dateFormatString ? element.dateFormatString : null;
                     alreadyAdded.timeFormatString = element.timeFormatString ? element.timeFormatString : null;
                     alreadyAdded.timezone = element.timezone ? element.timezone : null;
-                }else if(alreadyAdded == undefined){
-                    saved.push(element);
+                    newObject.push(alreadyAdded);
+                }else if(alreadyAdded != undefined && alreadyAdded.mappedField == element.mappedField){
+                    alreadyAdded.dateFormatString = alreadyAdded.dateFormatString == undefined ? (element.dateFormatString ? element.dateFormatString : null) : alreadyAdded.dateFormatString ;
+                    alreadyAdded.timeFormatString = alreadyAdded.timeFormatString == undefined ? (element.timeFormatString ? element.timeFormatString : null) : alreadyAdded.timeFormatString ;
+                    // element.timeFormatString ? element.timeFormatString : null;
+                    alreadyAdded.timezone = alreadyAdded.timezone == undefined ? (element.timezone ? element.timezone : null) : alreadyAdded.timezone ;
+                    //element.timezone ? element.timezone : null;
+                    newObject.push(alreadyAdded);
                 }
             });
+            this.setSaveObjects(newObject, name);
+            return;
         }else{
             this.setSaveObjects(object, name);
         }
          
     }
     
-    this.isAlreadySave = (savedObj, userFieldName) => {
+    this.isAlreadySave = (savedObj, key, userFieldName) => {
         let found;
         Object.keys(savedObj).forEach(index => {
             // let alreadyAdded = underscore.findWhere(savedObj[index], {userField: userFieldName});
-            if(savedObj[index].userField == userFieldName){
+            if(savedObj[index][key] == userFieldName){
                 found = savedObj[index];
                 return;
             }
@@ -740,7 +775,17 @@ angular.module('lp.import')
         var userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
 
         userIndexes.forEach(function(index) {
-            ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type;
+            if(typeof type == 'object' && type.type == 'DATE'){
+                ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
+                ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString = type.dateFormatString;
+                ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString = type.timeFormatString;
+                ImportWizardStore.fieldDocument.fieldMappings[index].timezone = type.timezone;
+            }else{
+                ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString;
+                delete ImportWizardStore.fieldDocument.fieldMappings[index].timezone;
+            }
         });
     }
 
@@ -808,6 +853,16 @@ angular.module('lp.import')
         info.modeDisplayName = StringUtility.TitleCase(info.mode);
         return info;
     }
+
+    this.getMatchIdsItems = (fieldsMappings) => {
+        let items = [];
+        fieldsMappings.forEach( field => {
+            if(field.SystemName && field.IdType && !field.mappedField){
+                items.push({userField: field.userField, system: field.systemName});
+            }
+        });
+        return items;
+    }   
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility, ImportUtils, ReduxService) {
 
@@ -984,6 +1039,45 @@ angular.module('lp.import')
 
 	        return deferred.promise;
 	    };
+
+        this.validateTemplate = function(fileName, templateData, fieldDocument) {
+
+            var deferred = $q.defer(),
+                entity = templateData.Entity,
+                displayName = fileName,
+                feedType = templateData.FeedType,
+                source = 'File',
+                params = { 
+                    'entity':  entity,
+                    'source': source,
+                    'displayName': displayName,
+                    'feedType': feedType
+                };
+
+            $http({
+                method: 'POST',
+                url: '/pls/models/uploadfile/validate',
+                params: params,
+                headers: { 'Content-Type': 'application/json' },
+                data: fieldDocument
+            }).then(
+                function onSuccess(response) {
+
+                    var result = response.data;
+                    deferred.resolve(result);
+
+                }, function onError(response) {
+                    if (!response.data) {
+                        response.data = {};
+                    }
+
+                    var errorMsg = response.data.errorMsg || 'unspecified error';
+                    deferred.resolve(errorMsg);
+                }
+            );
+
+            return deferred.promise;
+        };
 
 	    this.templateDataIngestion = function(fileName, importOnly, autoImportData, postBody) {
 

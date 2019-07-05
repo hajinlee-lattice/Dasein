@@ -71,7 +71,8 @@ public class WorkflowResource {
     @PostMapping(value = "/job/{workflowId}/restart", headers = "Accept=application/json")
     @ApiOperation(value = "Restart a previous workflow execution")
     public AppSubmission restartWorkflowExecution(@PathVariable String workflowId, @RequestParam String customerSpace,
-            @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) Integer memory,
+            @ApiParam(value = "Memory in MB", required = false)
+            @RequestParam(value = "memory", required = false) String memoryStr,
             @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry) {
         long wfId = Long.valueOf(workflowId);
 
@@ -93,6 +94,7 @@ public class WorkflowResource {
         } else {
             workflowConfig.setUserId(job.getUser());
         }
+        int memory = StringUtils.isNotBlank(memoryStr) ? Integer.parseInt(memoryStr) : 0;
         setupMemory(memory, job, workflowConfig);
 
         return new AppSubmission(workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));

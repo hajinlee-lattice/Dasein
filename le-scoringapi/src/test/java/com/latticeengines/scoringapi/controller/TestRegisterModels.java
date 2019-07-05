@@ -72,14 +72,14 @@ public class TestRegisterModels {
                 modelConfiguration.getModelVersion()));
         modelSummary.setSourceSchemaInterpretation(modelConfiguration.getSourceInterpretation());
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
-// called for getting latest data cloud version
+        // called for getting latest data cloud version
         String dataCloudVersion = columnMetadataProxy
                 .latestVersion(//
                         null)//
                 .getVersion();
         modelSummary.setDataCloudVersion(dataCloudVersion);
 
-        testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelSummaryJsonLocalpath());
+        testModelSummaryParser.setPredictors(modelSummary, modelConfiguration.getModelJsonLocalpath());
 
         ModelSummary retrievedSummary = modelSummaryProxy.getModelSummaryFromModelId(tenant.getId(),
                 modelConfiguration.getModelId());
@@ -107,7 +107,7 @@ public class TestRegisterModels {
                 .getResourceAsStream(modelConfiguration.getLocalModelPath() + "eventtable-"
                         + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         InputStream modelJsonUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(modelConfiguration.getModelSummaryJsonLocalpath());
+                .getResourceAsStream(modelConfiguration.getModelJsonLocalpath());
         InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(modelConfiguration.getLocalModelPath() + ModelJsonTypeHandler.PMML_FILENAME);
         InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //

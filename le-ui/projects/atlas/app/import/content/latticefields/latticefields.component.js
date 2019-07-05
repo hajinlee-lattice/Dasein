@@ -4,7 +4,7 @@ angular.module('lp.import.wizard.latticefields', [])
     ResourceUtility, ImportWizardService, 
     ImportWizardStore, FieldDocument, 
     UnmappedFields, Type, MatchingFields, ImportUtils,
-    AnalysisFields
+    AnalysisFields, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
@@ -64,6 +64,13 @@ angular.module('lp.import.wizard.latticefields', [])
     vm.init = function() {
         // vm.updateAnalysisFields();
         ImportWizardStore.setValidation('latticefields', false);
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
 
         vm.matchingFieldsArr = [];
         vm.matchingFields.forEach(function(matchingField) {

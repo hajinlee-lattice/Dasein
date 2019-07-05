@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
 import io.swagger.annotations.Api;
@@ -141,6 +142,15 @@ public class DataFeedTaskResource {
             @PathVariable String dataFeedType, @PathVariable String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getExtractsPendingInQueue(customerSpace, source, dataFeedType, entity);
+    }
+
+    @RequestMapping(value = "/{entity}/getTables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task template tables")
+    public List<Table> getTemplateTables(@PathVariable String customerSpace,
+                                         @PathVariable String entity) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateTables(customerSpace, entity);
     }
 
 }

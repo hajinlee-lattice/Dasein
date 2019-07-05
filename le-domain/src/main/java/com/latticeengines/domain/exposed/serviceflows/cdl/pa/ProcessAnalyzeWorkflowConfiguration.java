@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -216,12 +217,17 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            processRatingWorkflowBuilder.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }

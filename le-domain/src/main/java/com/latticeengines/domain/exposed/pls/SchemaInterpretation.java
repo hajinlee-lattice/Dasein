@@ -7,6 +7,7 @@ public enum SchemaInterpretation {
     SalesforceLead, //
     TestingData, //
     Account, //
+    ModelAccount, //
     Contact, //
     Product, //
     Transaction, //

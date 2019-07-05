@@ -1,0 +1,41 @@
+
+.match-priority{
+    
+    .wizard-container{
+        border: 1px solid rgb(201, 201, 201);
+        margin-top: 20px;
+
+        .wizard-body{
+            padding: 10px 16px;
+            margin-bottom: 4em;
+        }
+
+        .sub-header{
+            width: 100%;
+            border-bottom: 1px solid rgb(201, 201, 201);
+            padding: 1rem;
+        }
+        .left{
+            display: flex;
+            flex: 0.5;
+            max-width: 350px;
+            padding: 1rem;
+            justify-content: center;
+        }
+
+        .info{
+            display: flex;
+            max-width: 350px;
+            padding: 0.5rem;
+            margin-top: 10px;
+            justify-content: center;
+            & > p {
+                font-weight: bold;
+            }
+        }
+        .priorities-controlls{
+            padding: 0.5rem;
+            border-top: 1px solid rgb(201, 201, 201);
+        }
+    }
+}

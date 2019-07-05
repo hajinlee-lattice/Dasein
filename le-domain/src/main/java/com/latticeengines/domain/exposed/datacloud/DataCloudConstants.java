@@ -135,7 +135,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
     public static final String TRANSFORMER_TRANSACTION_AGGREGATOR = "transactionAggregator";
     public static final String TRANSFORMER_CONTACT_NAME_CONCATENATER = "contactNameConcatenater";
-    public static final String TRANSFORMER_PIVOT_RATINGS = "pivotRatingTransformer";
     public static final String TRANSFORMER_MERGE = "MergeTransformer";
     public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 
@@ -175,6 +174,8 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_CLEANER = "AMCleaner";
     public static final String TRANSFORMER_AM_DECODER = "AMDecoder";
     public static final String TRANSFORMER_AM_REFRESH_VER_UPDATER = "amRefreshVersionUpdater";
+
+    public static final String TRANSFORMER_SOURCE_TO_S3_PUBLISHER = "sourceToS3Publisher";
 
     public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 

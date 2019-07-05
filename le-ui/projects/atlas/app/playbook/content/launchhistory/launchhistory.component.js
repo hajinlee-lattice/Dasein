@@ -34,7 +34,8 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             }
         },
         systemMap: {},
-        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION)
+        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION),
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.init = function() {
@@ -103,12 +104,12 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 offset: vm.offset,
                 max: 10,
                 orgId: vm.orgId,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 externalSysType: vm.externalSystemType
             },
             countParams = {
                 playName: vm.playName || $stateParams.play_name,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 offset: 0,
                 startTimestamp: 0,
                 orgId: vm.orgId,
@@ -146,12 +147,15 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var stats = vm.launches.cumulativeStats;
         vm.summaryData = {
             selectedTargets: stats.selectedTargets,
-            suppressed: stats.suppressed,
+            selectedContacts: stats.selectedContacts,
+            accountsSuppressed: stats.accountsSuppressed,
+            contactsSuppressed: stats.contactsSuppressed,
             accountErrors: stats.accountErrors,
             contactErrors: stats.contactErrors,
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
+        console.log(vm.summaryData);
 
     }
 
@@ -240,7 +244,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     vm.getSourceFilePath = function(launchSummary) {
         var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
-        var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
+        var filePath = integrationStatusMonitor && integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
         if (filePath) {
             return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
         } else {

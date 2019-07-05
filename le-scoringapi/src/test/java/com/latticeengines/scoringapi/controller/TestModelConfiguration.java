@@ -12,6 +12,7 @@ public class TestModelConfiguration {
     private String modelVersion;
     private String eventTable;
     private String sourceInterpretation;
+    private String modelJsonLocalpath;
     private String modelSummaryJsonLocalpath;
 
     public TestModelConfiguration(String testModelFolderName, String modelId, String applicationId,
@@ -24,7 +25,8 @@ public class TestModelConfiguration {
         this.modelVersion = modelVersion;
         this.eventTable = testModelFolderName;
         this.sourceInterpretation = "SalesforceLead";
-        this.modelSummaryJsonLocalpath = localModelPath + ModelRetrieverImpl.MODEL_JSON;
+        this.modelJsonLocalpath = localModelPath + ModelRetrieverImpl.MODEL_JSON;
+        this.modelSummaryJsonLocalpath = localModelPath + ModelRetrieverImpl.MODEL_SUMMARY_JSON;
     }
 
     public TestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion) {
@@ -67,7 +69,12 @@ public class TestModelConfiguration {
         return sourceInterpretation;
     }
 
+    public String getModelJsonLocalpath() {
+        return modelJsonLocalpath;
+    }
+
     public String getModelSummaryJsonLocalpath() {
         return modelSummaryJsonLocalpath;
     }
+    
 }

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl.filetosrc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,7 +12,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
@@ -32,12 +33,10 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private GeneralSource source = new GeneralSource("DnBCacheSeedRaw");
 
-    @Autowired
-    private IngestionSource baseSource;
+    private IngestionSource baseSource = new IngestionSource(IngestionNames.DNB_CASHESEED);
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
-        baseSource.setIngestionName(IngestionNames.DNB_CASHESEED);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_052.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_053.OUT.gz", baseSourceVersion);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_054.OUT.gz", baseSourceVersion);
@@ -64,9 +63,9 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
         // -----------
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = new ArrayList<String>();
-        baseSources.add(baseSource.getSourceName());
-        step1.setBaseSources(baseSources);
+        step1.setBaseSources(Arrays.asList(baseSource.getSourceName()));
+        step1.setBaseIngestions(Collections.singletonMap(baseSource.getSourceName(),
+                new SourceIngestion(baseSource.getIngestionName())));
         step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
         step1.setTargetSource(source.getSourceName());
         String confParamStr1 = getIngestedFileToSourceTransformerConfig();
@@ -83,7 +82,6 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private String getIngestedFileToSourceTransformerConfig() {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngestionName(IngestionNames.DNB_CASHESEED);
         conf.setFileNameOrExtension(".OUT");
         conf.setCompressedFileNameOrExtension(".OUT.gz");
         conf.setCompressType(CompressType.GZ);

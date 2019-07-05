@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -52,6 +51,9 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("generateProcessingReport")
@@ -74,6 +76,12 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    private LivySessionService sessionService;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -116,16 +124,16 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
-            case Profile:
-                return BusinessEntity.Account;
-            case ContactProfile:
-                return BusinessEntity.Contact;
-            case PurchaseHistoryProfile:
-                return BusinessEntity.PurchaseHistory;
-            case ConsolidatedRawTransaction:
-                return BusinessEntity.Transaction;
-            default:
-                return null;
+                case Profile:
+                    return BusinessEntity.Account;
+                case ContactProfile:
+                    return BusinessEntity.Contact;
+                case PurchaseHistoryProfile:
+                    return BusinessEntity.PurchaseHistory;
+                case ConsolidatedRawTransaction:
+                    return BusinessEntity.Transaction;
+                default:
+                    return null;
             }
         }
         return owner;
@@ -147,8 +155,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private void updateWarningReport(ObjectNode report) {
         List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
         if (CollectionUtils.isNotEmpty(warningMessages)) {
-            ArrayNode warningMessageNode =
-                    (ArrayNode) report.get(ReportPurpose.PROCESS_ANALYZE_WARNING_SUMMARY.getKey());
+            ArrayNode warningMessageNode = (ArrayNode) report
+                    .get(ReportPurpose.PROCESS_ANALYZE_WARNING_SUMMARY.getKey());
             if (warningMessageNode == null) {
                 log.info("No warningMessage summary reports found. Create it.");
                 warningMessageNode = report.putArray(ReportPurpose.PROCESS_ANALYZE_WARNING_SUMMARY.getKey());
@@ -205,7 +213,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 BusinessEntity.Transaction, BusinessEntity.PurchaseHistory };
         for (BusinessEntity entity : entities) {
             ObjectNode entityNode = entitiesSummaryNode.get(entity.name()) != null
-                    ? (ObjectNode) entitiesSummaryNode.get(entity.name()) : PAReportUtils.initEntityReport(entity);
+                    ? (ObjectNode) entitiesSummaryNode.get(entity.name())
+                    : PAReportUtils.initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             // Product report is generated in MergeProduct step
@@ -320,7 +329,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     }
                 }
                 log.info("Count records in HDFS " + hdfsPath);
-                result = AvroUtils.count(yarnConfiguration, hdfsPath);
+                result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
             }
             log.info(String.format("Table role %s has %d entities.", tableRole.name(), result));
             return result;
@@ -333,50 +342,50 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private long countOrphansInRedshift(OrphanRecordsType orphanRecordsType) {
         FrontEndQuery frontEndQuery;
         switch (orphanRecordsType) {
-        case UNMATCHED_ACCOUNT:
-            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                    BusinessEntity.Account.getServingStore(), inactive);
-            if (StringUtils.isNotBlank(tableName)) {
-                Restriction nullLatticeAccountId = Restriction.builder()
-                        .let(BusinessEntity.Account, InterfaceName.LatticeAccountId.name()).isNull().build();
-                FrontEndRestriction accountRestriction = new FrontEndRestriction();
-                accountRestriction.setRestriction(nullLatticeAccountId);
-                frontEndQuery = new FrontEndQuery();
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
-                frontEndQuery.setAccountRestriction(accountRestriction);
-                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
-            } else {
-                log.info("There is no account serving store, return 0 as the number of unmatched accounts.");
-                return 0L;
-            }
-        case CONTACT:
-            Table batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                    BusinessEntity.Contact.getBatchStore(), inactive);
-            if (batchStoreTable != null) {
-                long allContacts = batchStoreTable.getExtracts().get(0).getProcessedRecords();
-                log.debug("There are " + allContacts + " contacts in total.");
-                String servingStoreTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                        BusinessEntity.Contact.getServingStore(), inactive);
-                if (StringUtils.isNotBlank(servingStoreTable)) {
+            case UNMATCHED_ACCOUNT:
+                String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                        BusinessEntity.Account.getServingStore(), inactive);
+                if (StringUtils.isNotBlank(tableName)) {
+                    Restriction nullLatticeAccountId = Restriction.builder()
+                            .let(BusinessEntity.Account, InterfaceName.LatticeAccountId.name()).isNull().build();
+                    FrontEndRestriction accountRestriction = new FrontEndRestriction();
+                    accountRestriction.setRestriction(nullLatticeAccountId);
                     frontEndQuery = new FrontEndQuery();
-                    frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                    long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), //
-                            frontEndQuery, inactive);
-                    log.debug("There are " + nonOrphanContacts + " non-orphan contacts in redshift.");
-                    long orphanContacts = allContacts - nonOrphanContacts;
-                    log.debug("There are " + orphanContacts + " orphan contacts.");
-                    return orphanContacts;
+                    frontEndQuery.setMainEntity(BusinessEntity.Account);
+                    frontEndQuery.setAccountRestriction(accountRestriction);
+                    return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
                 } else {
-                    log.info("There is no contact serving store, all contacts are orphan.");
-                    return allContacts;
+                    log.info("There is no account serving store, return 0 as the number of unmatched accounts.");
+                    return 0L;
                 }
-            } else {
-                log.info("There is no contact batch store, return 0 as the number of orphan contacts.");
-                return 0L;
-            }
-        case TRANSACTION:
-        default:
-            return 0;
+            case CONTACT:
+                Table batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
+                        BusinessEntity.Contact.getBatchStore(), inactive);
+                if (batchStoreTable != null) {
+                    long allContacts = batchStoreTable.getExtracts().get(0).getProcessedRecords();
+                    log.debug("There are " + allContacts + " contacts in total.");
+                    String servingStoreTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                            BusinessEntity.Contact.getServingStore(), inactive);
+                    if (StringUtils.isNotBlank(servingStoreTable)) {
+                        frontEndQuery = new FrontEndQuery();
+                        frontEndQuery.setMainEntity(BusinessEntity.Contact);
+                        long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), //
+                                frontEndQuery, inactive);
+                        log.debug("There are " + nonOrphanContacts + " non-orphan contacts in redshift.");
+                        long orphanContacts = allContacts - nonOrphanContacts;
+                        log.debug("There are " + orphanContacts + " orphan contacts.");
+                        return orphanContacts;
+                    } else {
+                        log.info("There is no contact serving store, all contacts are orphan.");
+                        return allContacts;
+                    }
+                } else {
+                    log.info("There is no contact batch store, return 0 as the number of orphan contacts.");
+                    return 0L;
+                }
+            case TRANSACTION:
+            default:
+                return 0;
         }
     }
 
@@ -400,10 +409,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(NUM_RETRIES, 5000L, 2.0, null);
         return template.execute(context -> {
             if (context.getRetryCount() > 1) {
-                log.warn(
-                        String.format(
-                                "Retries=%d of %d. Exception in getting count from serving store for entity %s with version %s",
-                                context.getRetryCount(), NUM_RETRIES, entity.name(), inactive.name()),
+                log.warn(String.format(
+                        "Retries=%d of %d. Exception in getting count from serving store for entity %s with version %s",
+                        context.getRetryCount(), NUM_RETRIES, entity.name(), inactive.name()),
                         context.getLastThrowable());
             }
             try {

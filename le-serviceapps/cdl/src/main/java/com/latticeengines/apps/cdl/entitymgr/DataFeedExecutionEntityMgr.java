@@ -25,4 +25,6 @@ public interface DataFeedExecutionEntityMgr extends BaseEntityMgrRepository<Data
     DataFeedExecution findByStatusAndWorkflowId(DataFeedExecution.Status status, Long workflowId);
 
     DataFeedExecution updateStatus(DataFeedExecution execution);
+
+    DataFeedExecution updateRetryCount(DataFeedExecution execution);
 }

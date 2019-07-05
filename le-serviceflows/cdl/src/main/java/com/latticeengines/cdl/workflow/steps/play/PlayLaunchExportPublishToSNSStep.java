@@ -25,8 +25,8 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ExportFileConfig;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportPublishToSNSConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -69,7 +69,7 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
         s3ExportFilePaths = getListObjectFromContext(
                 PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, String.class);
 
-        s3ExportFilePaths.stream().forEach(exportPath -> {
+        s3ExportFilePaths.forEach(exportPath -> {
             List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
                     new ArrayList<>());
             fileConfigs

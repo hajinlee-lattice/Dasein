@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         return playLaunchDao.findByPlayId(playId, states);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
@@ -81,11 +82,25 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         return playLaunchDao.findLatestByPlayAndSysOrg(playId, orgId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch findLatestByChannel(Long playLaunchChannelId) {
+        return playLaunchDao.findLatestByChannel(playLaunchChannelId);
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchDao.findByState(state);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
+        List<PlayLaunch> launches = playLaunchDao.getByStateAcrossTenants(state, max);
+
+        launches.forEach(launch -> Hibernate.initialize(launch.getPlay()));
+        return launches;
     }
 
     @Override
@@ -97,6 +112,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             if (hardDelete) {
                 playLaunchDao.delete(playLaunch);
             } else {
+                playLaunch.setLaunchState(
+                        playLaunch.getLaunchState().isTerminal() ? playLaunch.getLaunchState() : LaunchState.Canceled);
                 playLaunch.setDeleted(true);
                 playLaunchDao.update(playLaunch);
             }
@@ -108,8 +125,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
-        return playLaunchDao.findByPlayStatesAndPagination(playId, states,
-                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
+        return playLaunchDao.findByPlayStatesAndPagination(playId, states, startTimestamp, offset, max, sortby,
+                descending, endTimestamp, orgId, externalSysType);
     }
 
     @Override

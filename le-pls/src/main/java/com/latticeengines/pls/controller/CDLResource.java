@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +74,7 @@ public class CDLResource {
     private static final String editS3TemplateAndImportMsg = "<p>%s template has been edited.  Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String importUsingTemplateMsg = "<p>Your data import is being validated and queued. Visit <a ui-sref='home.jobs.data'>Data P&A</a> to track the process.</p>";
     private static final String createS3ImportSystemMsg = "<p>%s system has been created.</p>";
+    private static final String updateS3ImportSystemPriorityMsg = "System priority has been updated.</p>";
 
     @Inject
     private CDLJobProxy cdlJobProxy;
@@ -302,9 +304,10 @@ public class CDLResource {
     @GetMapping(value = "/s3import/template")
     @ResponseBody
     @ApiOperation("get template table fields")
-    public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries() {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplateEntries(
+            @RequestParam(required = false, defaultValue = "SystemDisplay") String sortBy) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        return cdlService.getS3ImportTemplate(customerSpace.toString());
+        return cdlService.getS3ImportTemplate(customerSpace.toString(), sortBy);
     }
 
     @GetMapping(value = "/s3import/fileList")
@@ -318,20 +321,61 @@ public class CDLResource {
     @PostMapping(value = "/s3import/system")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
-    public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemName,
-                                                      @RequestParam S3ImportSystem.SystemType systemType) {
+    public Map<String, UIAction> createS3ImportSystem(@RequestParam String systemDisplayName,
+                                                      @RequestParam S3ImportSystem.SystemType systemType,
+                                                      @RequestParam(value = "primary", required = false,
+                                                              defaultValue = "false") Boolean primary) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            cdlService.createS3ImportSystem(customerSpace.toString(), systemName, systemType);
+            cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
             UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
-                    String.format(createS3ImportSystemMsg, systemName));
+                    String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (RuntimeException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_18216, new String[]{systemName});
+            throw new LedpException(LedpCode.LEDP_18216, new String[]{systemDisplayName});
+        }
+    }
+
+    @GetMapping(value = "/s3import/system/list")
+    @ResponseBody
+    @ApiOperation("create new S3 Import system")
+    public List<S3ImportSystem> getS3ImportSystemList(
+            @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
+            @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace.toString());
+        if (Boolean.TRUE.equals(filterByAccountSystemId)) {
+            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
+        }
+        if (Boolean.TRUE.equals(filterByContactSystemId)) {
+            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
+        }
+        return allSystems;
+    }
+
+    @PostMapping(value = "/s3import/system/list")
+    @ResponseBody
+    @ApiOperation("update import system priority based on sequence")
+    public Map<String, UIAction> updateSystemPriorityBasedOnSequence(@RequestBody List<S3ImportSystem> systemList) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            cdlService.updateS3ImportSystemPriorityBasedOnSequence(customerSpace.toString(), systemList);
+            UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success,
+                    updateS3ImportSystemPriorityMsg);
+            return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        } catch (RuntimeException e) {
+            log.error("Failed to Update system priority: " + e.getMessage());
+            throw new LedpException(LedpCode.LEDP_18223, new String[] {e.getMessage()});
         }
     }
 

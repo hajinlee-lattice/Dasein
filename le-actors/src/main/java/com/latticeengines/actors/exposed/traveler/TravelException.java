@@ -11,8 +11,8 @@ public class TravelException extends RuntimeException {
         super(msg);
     }
 
-    public TravelException(String msg, Exception ex) {
-        super(msg, ex);
+    public TravelException(String msg, Throwable throwable) {
+        super(msg, throwable);
     }
 
 }

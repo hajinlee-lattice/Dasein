@@ -61,7 +61,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     private EMRCacheService emrCacheService;
 
     @Inject
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Inject
     private SparkJobService sparkJobService;
@@ -100,12 +100,14 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     // override this to enforce ordering between inputs
-    protected List<String> getInputOrder() { return null; }
+    protected List<String> getInputOrder() {
+        return null;
+    }
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupLivyEnvironment();
-//        reuseLivyEnvironment(7);
+        // reuseLivyEnvironment(7);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
@@ -114,13 +116,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected void setupLivyEnvironment() {
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
-        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), //
+        session = sessionService.startSession(this.getClass().getSimpleName(), //
                 Collections.emptyMap(), Collections.emptyMap());
     }
 
@@ -158,7 +154,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
                 resources = resolver.getResources(dataRoot + "/*/*.avro");
                 log.info("Resolved resources for " + dataRoot);
             } catch (Exception e) {
-                log.warn("Cannot resolve resource for " + dataRoot);
+                log.error("Cannot resolve resource for " + dataRoot, e);
             }
 
             Map<String, String> dataSetPaths = new HashMap<>();
@@ -200,7 +196,6 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
             });
         }
     }
-
 
     protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {

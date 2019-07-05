@@ -10,23 +10,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.minlog.Log;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
@@ -35,15 +42,20 @@ import com.latticeengines.datacloud.match.exposed.service.PatchBookValidator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchBookValidationError;
 
-import reactor.core.publisher.ParallelFlux;
-
 @Component("patchBookValidator")
 public class PatchBookValidatorImpl implements PatchBookValidator {
+
+    private static final Logger log = LoggerFactory.getLogger(PatchBookValidatorImpl.class);
+
+    private static final long AM_COL_CACHE_TTL_IN_HRS = 1L; // 1 hr ttl, add to property file later if needed
+    // TODO remove dummy version after source attr table has versioning
+    private static final String DUMMY_SRC_ATTR_DC_VERSION = "2.0.999"; // dummy version for src attr cache
 
     @Autowired
     @Qualifier("accountMasterColumnEntityMgr")
@@ -55,6 +67,12 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     @Autowired
     @Qualifier("sourceAttributeEntityMgr")
     private SourceAttributeEntityMgr sourceAttributeEntityMgr;
+
+    @Inject
+    private DataCloudVersionEntityMgr datacloudVersionEntityMgr;
+
+    private volatile LoadingCache<String, List<AccountMasterColumn>> amColumnCache;
+    private volatile LoadingCache<String, List<SourceAttribute>> srcAttrCache;
 
     @Override
     public Pair<Integer, List<PatchBookValidationError>> validate(
@@ -112,17 +130,14 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                 DataCloudConstants.ATTR_IS_CTRY_PRIMARY_LOCATION, DataCloudConstants.ATTR_IS_ST_PRIMARY_LOCATION,
                 DataCloudConstants.ATTR_IS_ZIP_PRIMARY_LOCATION));
         List<PatchBookValidationError> patchBookValidErrorList = new ArrayList<>();
-        ParallelFlux<AccountMasterColumn> amCols = columnEntityMgr
-                .findAll(dataCloudVersion);
-        // Getting List from ParallelFlux
-        List<AccountMasterColumn> amColsList = amCols.sequential().collectList().block();
+        List<AccountMasterColumn> amColsList = getAMColumns(dataCloudVersion);
         // Collected AMColumnIds that we need to compare into a set
         Map<String, AccountMasterColumn> amColsMap = new HashMap<>();
-        for (AccountMasterColumn a : amColsList) { // mapping columnId to
-                                                   // accMasterColumn
+        for (AccountMasterColumn a : amColsList) { // mapping columnId to accMasterColumn
             amColsMap.put(a.getAmColumnId(), a);
         }
         Map<String, List<Long>> errNotInAmAndExcluded = new HashMap<>();
+        List<Long> attrCleanupKeys = new ArrayList<>();
         // Iterate through input patch Books
         for (PatchBook book : books) {
             List<String> encodedAttrs = new ArrayList<>();
@@ -144,6 +159,9 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
                     keysExcluded.add(patchAttr);
                 }
             }
+            if (book.getType().equals(Type.Attribute) && book.isCleanup()) {
+                attrCleanupKeys.add(book.getPid());
+            }
             if (encodedAttrs.size() > 0) {
                 PatchBookValidationError error = new PatchBookValidationError();
                 error.setMessage(ENCODED_ATTRS_NOT_SUPPORTED + encodedAttrs.toString());
@@ -164,6 +182,12 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             PatchBookValidationError error = new PatchBookValidationError();
             error.setMessage(itemNotInAmOrExcluded.getKey());
             error.setPatchBookIds(itemNotInAmOrExcluded.getValue());
+            patchBookValidErrorList.add(error);
+        }
+        if (attrCleanupKeys.size() > 0) {
+            PatchBookValidationError error = new PatchBookValidationError();
+            error.setMessage(ERR_ATTRI_CLEANUP);
+            error.setPatchBookIds(attrCleanupKeys);
             patchBookValidErrorList.add(error);
         }
         return patchBookValidErrorList;
@@ -307,8 +331,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     List<PatchBookValidationError> validateSourceAttribute(@NotNull List<PatchBook> books,
             @NotNull String dataCloudVersion) {
         /* extract attributes based on domain and duns based source */
-        List<SourceAttribute> sourceAttributes = sourceAttributeEntityMgr
-                .getAttributes("AccountMaster", "MapStage", "mapAttribute", null, false);
+        List<SourceAttribute> sourceAttributes = getSourceAttributes(dataCloudVersion);
         Set<String> attrNamesForDomBasedSources = new HashSet<>();
         Set<String> attrNamesForDunsBasedSources = new HashSet<>();
         for (SourceAttribute srcAttr : sourceAttributes) {
@@ -433,6 +456,79 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
         List<PatchBookValidationError> errors = new ArrayList<>();
         errors.addAll(domainPatchValidate(books));
         return errors;
+    }
+
+    /*
+     * wrappers around in-memory cache
+     */
+    private List<AccountMasterColumn> getAMColumns(@NotNull String dataCloudVersion) {
+        initAmColumnCache();
+        return amColumnCache.get(dataCloudVersion);
+    }
+
+    private List<SourceAttribute> getSourceAttributes(@NotNull String dataCloudVersion) {
+        initSourceAttrCache();
+        return srcAttrCache.get(DUMMY_SRC_ATTR_DC_VERSION);
+    }
+
+    private void initAmColumnCache() {
+        if (amColumnCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (amColumnCache == null) {
+                log.info("Instantiating AM column cache");
+                amColumnCache = Caffeine.newBuilder() //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .build((dataCloudVersion) -> {
+                            log.info("Loading AM columns for datacloud version {}", dataCloudVersion);
+                            List<AccountMasterColumn> amCols = columnEntityMgr.findAll(dataCloudVersion) //
+                                    .sequential().collectList().block();
+                            // Temporary solution to solve issue:
+                            // When we build new AccountMaster with PatchBook,
+                            // AccountMasterColumn table in production doesn't
+                            // have new DataCloud version yet, so fall back to
+                            // use current approved version -- For now, PM is
+                            // not likely to patch an attribute which is not
+                            // approved in current AccountMaster in production
+                            // TODO: Final solution could be create a new
+                            // AccountMasterColumn staging table which could be
+                            // added with new DataCloud version during AM
+                            // rebuild process without impacting application in
+                            // production
+                            if (CollectionUtils.isEmpty(amCols)) {
+                                String currentVersion = datacloudVersionEntityMgr.currentApprovedVersionAsString();
+                                log.info(
+                                        "DataCloud version {} doesn't exist in AccountMasterColumn table in production, fall back to load AM columns for version {}",
+                                        dataCloudVersion, currentVersion);
+                                amCols = columnEntityMgr.findAll(currentVersion) //
+                                        .sequential().collectList().block();
+                            }
+                            return amCols;
+                        });
+            }
+        }
+    }
+
+    private void initSourceAttrCache() {
+        if (srcAttrCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (srcAttrCache == null) {
+                log.info("Instantiating source attribute cache");
+                srcAttrCache = Caffeine.newBuilder() //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .build((dataCloudVersion) -> {
+                            log.info("Loading source attributes for datacloud version {}", dataCloudVersion);
+                            // TODO use datacloud version after the table supports it
+                            return sourceAttributeEntityMgr.getAttributes("AccountMaster", "MapStage", "mapAttribute",
+                                    null, false);
+                        });
+            }
+        }
     }
 
     /*

@@ -27,14 +27,22 @@ public class TimeStampConvertUtilsUnitTestNG {
         // Test that all the supported Java time zones are valid Java time zones.
         Set<String> timeZoneIds = new LinkedHashSet<>(Arrays.asList(getAvailableTimeZoneIDs()));
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertFalse(timeZoneIds.contains(javaTimeZones));
+            } else {
+                Assert.assertTrue(timeZoneIds.contains(javaTimeZones));
+            }
         }
 
         // Test that when processed, the Java time zones return the correct string.  This test is needed because
         // if Java fails to convert a TimeZone to a ZoneId, it silently fails and returns "GMT" as the ZoneId.
         for (String javaTimeZones : TimeStampConvertUtils.getSupportedJavaTimeZones()) {
-            Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
-            log.info("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
+            if (TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(javaTimeZones)) {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), "GMT");
+            } else {
+                Assert.assertEquals(TimeZone.getTimeZone(javaTimeZones).toZoneId().getId(), javaTimeZones);
+            }
+            log.debug("Support Java Time Zone: " + javaTimeZones + "  Zone Id: "
                     + TimeZone.getTimeZone(javaTimeZones).toZoneId());
         }
     }
@@ -258,6 +266,62 @@ public class TimeStampConvertUtilsUnitTestNG {
         // From https://solutions.lattice-engines.com/browse/DP-10017
         actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04Z", "", "", "");
         Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 23: Test case where time is in ISO 8601 with time, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 24: Test case where time is in ISO 8601 with time, milliseconds, date
+        actualTime = TimeStampConvertUtils.convertToLong("2019-04-07T23:31:04.123Z", "YYYY-MM-DD", "00:00:00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 25: Test case where time is not in ISO 8601 with time, ms, date, timezone
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31:04.123", "YYYY/MM/DD", "00:00:00.000 24H",
+                TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 26: Test case where time is not in ISO 8601 with time, ms, date,
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23-31-04.123", "YYYY/MM/DD", "00-00-00.000 24H",
+                "");
+        Assert.assertEquals(actualTime, 1554679864123L);
+
+        // Test Case 27: ISO 8601 date format but user only provided date format and not time format.
+        // ISO 8601 date/time with date-only format YYYY-MM-DD format provided, America/Los_Angeles timezone.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2017-03-04T12:34:56Z",
+                "YYYY-MM-DD", "", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1488614400000L);
+
+        // Test Case 28: ISO 8601 date format but user only provided date format and not time format.
+        // ISO 8601 date/time with milliseconds with date-only format YYYY-MM-DD format provided, America/Los_Angeles
+        // timezone.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2017-03-04T12:34:56.789Z",
+                "YYYY-MM-DD", "", "America/Los_Angeles");
+        Assert.assertEquals(actualTime, 1488614400000L);
+
+        // Test Case 29: Test case where provided time format has milliseconds but actual value does not.
+        // Regular date type with date format YYYY/MM/DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31:04", "YYYY/MM/DD",
+                "00:00:00.000 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679864000L);
+
+        // Test Case 30: Test case where provided time format has milliseconds but actual value does not even have
+        // seconds.  Regular date type with date format YYYY/MM/DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("2019/04/07 23:31", "YYYY/MM/DD",
+                "00:00:00.000 24H", "UTC");
+        Assert.assertEquals(actualTime, 1554679860000L);
+
+        // Test Case 30: Test case where provided time format has seconds but actual value does not have seconds.
+        // Regular date type with date format YYYY.MM.DD and time format 00:00:00.000 24H.
+        // From https://solutions.lattice-engines.com/browse/DP-9820  (testing graceful handling of format mismatch).
+        actualTime = TimeStampConvertUtils.convertToLong("07.04.19 11-31 PM", "DD.MM.YY",
+                "00-00-00 12H", "UTC");
+        Assert.assertEquals(actualTime, 1554679860000L);
     }
 
     // Test stripping out T and Z from dates in ISO 8601 format.
@@ -418,7 +482,7 @@ public class TimeStampConvertUtilsUnitTestNG {
             Assert.assertTrue(e instanceof IllegalArgumentException);
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Date value (11/11/11) could not be parsed by format string: YYYY-MM-DD"),
+                            "Date-only value (11/11/11) could not be parsed by format string: YYYY-MM-DD"),
                     "Wrong error message: " + e.getMessage());
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of date only not matching date format.");
@@ -569,7 +633,7 @@ public class TimeStampConvertUtilsUnitTestNG {
             Assert.assertTrue(e instanceof IllegalArgumentException);
             Assert.assertTrue(
                     e.getMessage().contains(
-                            "Date value (2018/Sept/01) could not be parsed by format string: YYYY/MMM/DD"),
+                            "Date-only value (2018/Sept/01) could not be parsed by format string: YYYY/MMM/DD"),
                     "Wrong error message: " + e.getMessage());
         }
         Assert.assertTrue(exceptionFound, "Did not fail on case of four character month.");

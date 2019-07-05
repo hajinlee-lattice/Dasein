@@ -71,10 +71,11 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:",  ctx.getLastThrowable());
             }
             Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
             try {
-                startLivySession(getHdfsPaths(attrRepo));
+                startSparkSQLSession(getHdfsPaths(attrRepo), false);
                 configuration.getExportEntities().forEach(exportEntity -> {
                     BusinessEntity mainEntity = null;
                     if (ExportEntity.Account.equals(exportEntity)) {
@@ -89,7 +90,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     }
                 });
             } finally {
-                stopLivySession();
+                stopSparkSQLSession();
             }
             return resultForCurrentAttempt;
         });
@@ -194,9 +195,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 schemaMap.put(entity, cms);
             }
             log.info("Found " + CollectionUtils.size(cms) + " attrs to export for " + entity);
-            cms.forEach(cm -> {
-                log.info("Attribute Name: " + cm.getAttrName());
-            });
         }
         return schemaMap;
     }

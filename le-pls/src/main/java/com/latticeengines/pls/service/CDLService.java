@@ -38,17 +38,26 @@ public interface CDLService {
 
     ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation);
 
-    List<S3ImportTemplateDisplay> getS3ImportTemplate(String string);
+    List<S3ImportTemplateDisplay> getS3ImportTemplate(String string, String sortBy);
 
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 
-    void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType);
+    void createS3ImportSystem(String customerSpace, String systemDisplayName, S3ImportSystem.SystemType systemType,
+                              Boolean primary);
 
     S3ImportSystem getS3ImportSystem(String customerSpace, String systemName);
+
+    List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
     List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable);
 
     boolean autoImport(String templateFileName);
 
     String getTemplateMappingContent(Table templateTable, Table standardTable);
+
+    String getSystemNameFromFeedType(String feedType);
+
+    void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
+
+    void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList);
 }

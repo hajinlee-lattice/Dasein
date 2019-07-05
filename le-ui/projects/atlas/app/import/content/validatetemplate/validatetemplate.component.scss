@@ -1,0 +1,25 @@
+.import-validatetemplate {
+    .fa-check {
+        color: green;
+    }
+    .fa-exclamation-triangle {
+        color: red;
+        &.warning {
+            color: orange;
+        }
+    }
+    strong {
+        font-weight: bold;
+    }
+    ul {
+        margin-top: 8px;
+    }
+    h2 {
+        margin-bottom: 0;
+    }
+    h4 {
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+}

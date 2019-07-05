@@ -32,12 +32,9 @@ public class PurgeServiceImpl implements PurgeService {
         {
             add("AMRefreshVersionUpdater");
             add("Alexa");
-            add("AlexaMostRecent");
             add("Bombora30DayAgg");
             add("BuiltWith");
             add("BuiltWithBak");
-            add("BuiltWithMostRecent");
-            add("BuiltWithPivoted");
             add("BuiltWith_20160802");
             add("CompeteMostRecent");
             add("DomainValidation");
@@ -50,13 +47,13 @@ public class PurgeServiceImpl implements PurgeService {
             add("G2000DomainOnly");
             add("G2000Standard");
             add("HGDataPivoted");
+            add("HGData");
             add("LargeBusinesses");
             add("LargeBusinessesFullLocation");
             add("LargeBusinessesNameAndStateAndCountry");
             add("MediumBusinesses");
             add("MostRecent_Legacy");
             add("OrbGolden");
-            add("OrbIntelligenceMostRecent");
             add("OrbIntelligenceV1");
             add("PublicDomain");
             add("QADnBMonitor");

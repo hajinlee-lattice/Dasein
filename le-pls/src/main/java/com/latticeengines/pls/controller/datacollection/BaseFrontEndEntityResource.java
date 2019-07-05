@@ -231,15 +231,13 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    void mergeCompanyName(Map<String, Object> result) {
+    private void mergeCompanyName(Map<String, Object> result) {
         if (result.containsKey(InterfaceName.CompanyName.toString())
                 && result.containsKey(InterfaceName.LDC_Name.toString())) {
             String companyName = (String) result.get(InterfaceName.CompanyName.toString());
             String ldcName = (String) result.get(InterfaceName.LDC_Name.toString());
-            String consolidatedName = (ldcName != null) ? ldcName : companyName;
-            if (consolidatedName != null && !consolidatedName.equals(companyName)) {
-                result.put(InterfaceName.CompanyName.toString(), consolidatedName);
-            }
+            String consolidatedName = (companyName != null) ? companyName : ldcName;
+            result.put(InterfaceName.CompanyName.toString(), consolidatedName);
             result.remove(InterfaceName.LDC_Name.name());
         }
     }

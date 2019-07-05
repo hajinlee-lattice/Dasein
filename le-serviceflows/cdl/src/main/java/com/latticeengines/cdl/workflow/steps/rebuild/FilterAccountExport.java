@@ -37,7 +37,7 @@ import com.latticeengines.spark.exposed.job.common.CopyJob;
 @Component(FilterAccountExport.BEAN_NAME)
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FilterAccountExport extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
+public class FilterAccountExport extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(FilterAccountExport.class);
 

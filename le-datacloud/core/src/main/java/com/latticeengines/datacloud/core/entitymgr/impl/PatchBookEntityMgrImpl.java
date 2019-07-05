@@ -33,11 +33,43 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
         return getDao().findAllByField(PatchBook.COLUMN_TYPE, type.name());
     }
 
+
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
     public List<PatchBook> findByTypeAndHotFix(@NotNull PatchBook.Type type, boolean hotFix) {
         Preconditions.checkNotNull(type);
-        return getDao().findAllByFields(PatchBook.COLUMN_TYPE, type.name(), PatchBook.COLUMN_HOTFIX, hotFix);
+        return getDao().findAllByFields(PatchBook.COLUMN_TYPE, type.name(), PatchBook.COLUMN_HOTFIX,
+                hotFix);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByTypeWithPagination(@NotNull int offset, @NotNull int limit,
+            @NotNull String sortByField, PatchBook.Type type) {
+        return getDao().findAllSortedByFieldWithPagination(offset, limit, sortByField,
+                PatchBook.COLUMN_TYPE, type.name());
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByTypeAndHotFixWithPagination(@NotNull int offset, @NotNull int limit,
+            @NotNull String sortByField, PatchBook.Type type, boolean hotfix) {
+        return getDao().findAllSortedByFieldWithPagination(offset, limit, sortByField, PatchBook.COLUMN_TYPE,
+                type.name(), PatchBook.COLUMN_HOTFIX, hotfix);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public long findCountByType(@NotNull PatchBook.Type type) {
+        Preconditions.checkNotNull(type);
+        return getDao().findCountByFields(PatchBook.COLUMN_TYPE, type.name());
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public long findCountByTypeAndHotFix(PatchBook.Type type, boolean hotFix) {
+        Preconditions.checkNotNull(type);
+        return getDao().findCountByFields(PatchBook.COLUMN_TYPE, type.name(), PatchBook.COLUMN_HOTFIX, hotFix);
     }
 
     /* override methods that require write access to use the correct manager (write connection) */
@@ -64,6 +96,12 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public void delete(PatchBook entity) {
         super.delete(entity);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    public void deleteAll() {
+        super.deleteAll();
     }
 
     /* methods to set a value to a field for all PatchBooks in the given list */

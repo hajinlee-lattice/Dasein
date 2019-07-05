@@ -132,8 +132,8 @@ public class TestDunsGuideBookUtils {
 
                 /* ManualMatch redirect book */
                 { //
-                        newTuple("The Daisy Group LLC", null, null, null), //
-                        "038169883", "220348575", //
+                        newTuple("Lane Gin", null, null, null), //
+                        "602759081", "859029956", //
                         "ManualMatch" //
                 }, //
                 { //

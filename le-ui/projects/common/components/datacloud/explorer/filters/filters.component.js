@@ -30,7 +30,7 @@ export default function () {
                 },
                 header: {
                     sort_modeliteration: {
-                        label: 'Sort By',
+                        label: 'Display Name',
                         icon: 'numeric',
                         property: 'DisplayName',
                         order: '',

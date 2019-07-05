@@ -243,7 +243,6 @@ public class UserServiceImpl implements UserService {
                 expirationDate = null;
             } else {
                 if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(), expirationDate)) {
-
                     throw new AccessDeniedException("Access denied.");
                 }
             }
@@ -477,6 +476,11 @@ public class UserServiceImpl implements UserService {
     private RegistrationResult validateNewUser(User newUser, String tenantId) {
         String email = newUser.getEmail();
         User oldUser = findByEmail(email);
+        if (oldUser != null) {
+            if (globalUserManagementService.userExpireIntenant(oldUser.getEmail(), tenantId)) {
+                deleteUser(tenantId, oldUser.getUsername());
+            }
+        }
         RegistrationResult result = new RegistrationResult();
         result.setValid(true);
         result.setValidEmail(true);
@@ -494,9 +498,6 @@ public class UserServiceImpl implements UserService {
         }
 
         if (oldUser != null) {
-            if (globalUserManagementService.userExpireIntenant(oldUser.getEmail(), tenantId)) {
-                deleteUser(tenantId, oldUser.getUsername());
-            }
             result.setValid(false);
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);

@@ -42,8 +42,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.camille.exposed.Camille;
@@ -54,10 +57,12 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -66,6 +71,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -155,45 +161,152 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String S3_AVRO_VERSION = "6";
     static final String S3_AVRO_VERSION_ADVANCED_MATCH = "6";
     static final String ADVANCED_MATCH_SUFFIX = "EntityMatch";
+    private static final String MAP_ID_PREFIX = "LETest_MapTo_";
 
     private static final String LARGE_CSV_DIR = "le-serviceapps/cdl/end2end/large_csv";
     private static final String LARGE_CSV_VERSION = "1";
 
-    static final Long ACCOUNT_1 = 900L;
-    static final Long ENTITY_MATCH_ACCOUNT_1 = 903L;
-    static final Long CONTACT_1 = 900L;
-    static final Long ENTITY_MATCH_CONTACT_1 = 900L;
-    static final Long TRANSACTION_1 = 41156L;
-    static final Long TRANSACTION_IN_REPORT_1 = 48760L;
-    static final Long PERIOD_TRANSACTION_1 = 62550L;
-    static final Long PURCHASE_HISTORY_1 = 5L;
+    /* Expected account result */
 
-    static final Long ACCOUNT_2 = 100L;
-    static final Long ACCOUNT_3 = 1000L;
-    static final Long UPDATED_ACCOUNT = 100L;
-    static final Long ENTITY_MATCH_ACCOUNT_2 = 103L;
-    static final Long ENTITY_MATCH_ACCOUNT_3 = 1006L;
-    static final Long ENTITY_MATCH_UPDATED_ACCOUNT = 100L;
-    static final Long CONTACT_2 = 100L;
-    static final Long CONTACT_3 = 1000L;
-    static final Long UPDATED_CONTACT = 100L;
-    static final Long ENTITY_MATCH_CONTACT_2 = 100L;
-    static final Long ENTITY_MATCH_CONTACT_3 = 1000L;
-    static final Long ENTITY_MATCH_UPDATED_CONTACT = 100L;
-    static final Long TRANSACTION_2 = 39004L;
-    static final Long TRANSACTION_3 = 50238L;
-    static final Long TRANSACTION_IN_REPORT_2 = 13633L;
-    static final Long TRANSACTION_IN_REPORT_3 = 62393L;
-    static final Long PERIOD_TRANSACTION_3 = 73892L;
+    // Number of total account after ProcessAccount test
+    static final Long ACCOUNT_PA = 900L;
+    // Number of total account after ProcessAccount entity match test
+    static final Long ACCOUNT_PA_EM = 903L;
+    // Number of total account after UpdateAccount test
+    static final Long ACCOUNT_UA = 1000L;
+    // Number of new account after UpdateAccount test
+    static final Long NEW_ACCOUNT_UA = 100L;
+    // Number of new account after ProcessTransaction entity match test (There
+    // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
+    static final Long NEW_ACCOUNT_PT_EM = 91L;
+    // Number of new account after UpdateTransaction entity match test (There
+    // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
+    static final Long NEW_ACCOUNT_UT_EM = 190L;
+    // Number of new account after UpdateAccount entity match test
+    // FIXME change back to 111 after using new ProcessAccount checkpoint. currently
+    // it is 112 cuz one anonymous account created. It will be created by
+    // ProcessAccount by one of its contact after updating checkpoint.
+    static final Long NEW_ACCOUNT_UA_EM = 112L;
+    // Number of updated account after UpdateAccount test
+    static final Long UPDATED_ACCOUNT_UA = 100L;
+    // Number of updated account after UpdateAccount entity match test
+    static final Long UPDATED_ACCOUNT_UA_EM = 100L;
 
-    static final Long PRODUCT_ID = 40L;
-    static final Long PRODUCT_HIERARCHY = 5L;
-    static final Long PRODUCT_BUNDLE = 14L;
+    // Number of total account after ProcessTransaction entity match test (There
+    // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
+    // -- 994
+    static final Long ACCOUNT_PT_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EM;
+    // Number of total account after UpdateTransaction entity match test (There
+    // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
+    // -- 1184
+    static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
+    // Number of total account after UpdateAccount entity match test -- 1015
+    static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
+
+    /* Expected contact result */
+
+    // Number of total contact after ProcessAccount test
+    static final Long CONTACT_PA = 900L;
+    // Number of total contact after ProcessAccount entity match test
+    static final Long CONTACT_PA_EM = 900L;
+    // Number of total contact after UpdateContact test
+    static final Long CONTACT_UC = 1000L;
+    // Number of total contact after ProcessAccount entity match test
+    static final Long CONTACT_UA_EM = 1005L;
+    // Number of new contact after UpdateContact test
+    static final Long NEW_CONTACT_UC = 100L;
+    // Number of new contact after UpdateAccount entity match test
+    static final Long NEW_CONTACT_UA_EM = 105L;
+    // Number of updated contact after UpdateContact test
+    static final Long UPDATED_CONTACT_UC = 100L;
+    // Number of updated contact after ProcessAccount entity match test
+    static final Long UPDATED_CONTACT_UA_EM = 100L;
+
+
+    /* Expected transaction result */
+
+    // Number of new raw txn after ProcessTransaction test
+    static final Long NEW_TRANSACTION_PT = 48760L;
+    // Number of new raw txn after UpdateTransaction test
+    static final Long NEW_TRANSACTION_UT = 13633L;
+    // Number of total raw txn after UpdateTransaction test -- 62393
+    static final Long TOTAL_TRANSACTION_UT = NEW_TRANSACTION_PT + NEW_TRANSACTION_UT;
+    // Number of aggregated daily transaction after ProcessTransaction test
+    static final Long DAILY_TXN_PT = 41156L;
+    // Number of aggregated daily transaction after ProcessTransaction entity
+    // match test
+    static final Long DAILY_TXN_PT_EM = 41064L;
+    // Number of aggregated daily transaction after UpdateTransaction test
+    static final Long DAILY_TXN_UT = 50238L;
+    // Number of aggregated daily transaction after UpdateTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long DAILY_TXN_UT_EM = 50863L;
+    // Number of aggregated period transaction after ProcessTransaction test
+    static final Long PERIOD_TRANSACTION_PT = 62550L;
+    // Number of aggregated period transaction after ProcessTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long PERIOD_TXN_PT_EM = 62037L;
+    // Number of aggregated period transaction after UpdateTransaction test
+    static final Long PERIOD_TRANSACTION_UT = 73892L;
+    // Number of aggregated period transaction after UpdateTransaction entity
+    // match test (txn data distribution is different for txn test with and
+    // without entity match)
+    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    // Number of total purchase history attributes after ProcessTransaction test
+    static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
+    // Number of total purchase history attributes after UpdateTransaction test
+    static final Long TOTAL_PURCHASE_HISTORY_UT = 6L;
+
+    // Number of distinct days in daily txn store after ProcessTransaction test
+    static final int DAILY_TXN_DAYS_PT = 214;
+    // Number of distinct days in daily txn store after UpdateTransaction test
+    static final int DAILY_TXN_DAYS_UT = 260;
+    // Min date in daily txn store after ProcessTransaction test
+    static final String MIN_TXN_DATE_PT = "2016-03-15";
+    // Max date in daily txn store after ProcessTransaction test
+    static final String MAX_TXN_DATE_PT = "2017-10-20";
+    // Min date in daily txn store after UpdateTransaction test
+    static final String MIN_TXN_DATE_UT = "2016-03-15";
+    // Max date in daily txn store after UpdateTransaction test
+    static final String MAX_TXN_DATE_UT = "2017-12-31";
+
+    // To verify txn daily store, pick certain aid, pid and txn date
+    private static final String VERIFY_DAILYTXN_TXNDATE = "2017-09-28";
+    private static final String VERIFY_DAILYTXN_ACCOUNTID = "109";
+    private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
+    // For verified aid, pid and txn date, daily txn amount after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860;
+    // For verified aid, pid and txn date, daily txn quantity after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_QUANTITY_PT = 10;
+    // For verified aid, pid and txn date, daily txn cost after
+    // ProcessTransaction test
+    static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
+
+    /* Expected product result */
+
+    // Number of product id after ProcessAccount test
+    static final Long PRODUCT_ID_PA = 40L;
+    // Number of product hierarchy after ProcessAccount test
+    static final Long PRODUCT_HIERARCHY_PA = 5L;
+    // Number of product bundle after ProcessAccount test
+    static final Long PRODUCT_BUNDLE_PA = 14L;
+    // Error message after merging product
     static final String PRODUCT_ERROR_MESSAGE = null;
+    // Warn message after merging product
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
-    static final Long BATCH_STORE_PRODUCTS = 103L;
-    static final Long SERVING_STORE_PRODUCTS = 34L;
-    static final Long SERVING_STORE_PRODUCT_HIERARCHIES = 20L;
+    // Number of products in batch store after ProcessTransaction test
+    static final Long BATCH_STORE_PRODUCT_PT = 103L;
+    // Number of products in serving store after ProcessTransaction test
+    static final Long SERVING_STORE_PRODUCTS_PT = 34L;
+    // Number of product hierarchy in serving store after ProcessTransaction
+    // test
+    static final Long SERVING_STORE_PRODUCT_HIERARCHIES_PT = 20L;
+
+    /* Expected segment result */
 
     static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
@@ -223,34 +336,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
+    /* Expected rating result */
+
     static final long RATING_A_COUNT_1 = 6;
     static final long RATING_D_COUNT_1 = 5;
     static final long RATING_F_COUNT_1 = 2;
 
     static final String TARGET_PRODUCT = "A48F113437D354134E584D8886116989";
     static final String TRAINING_PRODUCT = "9IfG2T5joqw0CIJva0izeZXSCwON1S";
-
-    static final int EARLIEST_TRANSACTION = 48033;
-    static final int LATEST_TRANSACTION = 48929;
-
-    // 1: after 1st import (rebuild); 2: after 2nd import (update)
-    static final int DAILY_TRANSACTION_DAYS_1 = 214;
-    static final int DAILY_TRANSACTION_DAYS_2 = 260;
-    static final String MIN_TRANSACTION_DATE_1 = "2016-03-15";
-    static final String MAX_TRANSACTION_DATE_1 = "2017-10-20";
-    static final String MIN_TRANSACTION_DATE_2 = "2016-03-15";
-    static final String MAX_TRANSACTION_DATE_2 = "2017-12-31";
-
-    private static final String VERIFICATION_TRANSACTION_DATE = "2017-09-28";
-    private static final String VERIFY_DAILYTXN_ACCOUNTID = "109";
-    private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
-    // After 1st import (rebuild), verify date = 2017-09-28
-    // After 2nd import (update), 3 values will be doubled because 2nd import
-    // has same transactions as 1st import for VERIFY_ACCOUNTID &
-    // VERIFY_PRODUCTID
-    static final double VERIFY_DAILYTXN_AMOUNT_1 = 1860;
-    static final double VERIFY_DAILYTXN_QUANTITY_1 = 10;
-    static final double VERIFY_DAILYTXN_COST = 1054.588389;
 
     int actionsNumber;
 
@@ -273,7 +366,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected Configuration yarnConfiguration;
 
     @Inject
-    private CheckpointService checkpointService;
+    protected CheckpointService checkpointService;
 
     @Inject
     private TestArtifactService testArtifactService;
@@ -285,7 +378,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
+    protected ServingStoreProxy servingStoreProxy;
 
     @Inject
     protected PeriodProxy periodProxy;
@@ -295,6 +388,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -342,8 +438,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         setupPurchaseHistoryMetrics();
         setDefaultAPSRollupPeriod();
 
-        attachProtectedProxy(fileUploadProxy);
-        attachProtectedProxy(testMetadataSegmentProxy);
+        attachPlsProxies();
 
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
@@ -362,6 +457,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         setupPurchaseHistoryMetrics();
         setDefaultAPSRollupPeriod();
 
+        attachPlsProxies();
+    }
+
+    protected void attachPlsProxies() {
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
     }
@@ -486,6 +585,42 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
+    /**
+     * Load {@link S3ImportSystem} from test artifact repo and upsert it
+     *
+     * @param systemName
+     *            target system name
+     */
+    protected void mockImportSystem(@NotNull String systemName) {
+        Preconditions.checkNotNull(systemName, "Cannot mock S3ImportSystem with null name");
+        S3ImportSystem system = getMockSystem(systemName);
+        // update tenant to test tenant
+        system.setTenant(mainTestTenant);
+        S3ImportSystem currSystem = cdlProxy.getS3ImportSystem(mainCustomerSpace, systemName);
+        if (currSystem != null) {
+            cdlProxy.updateS3ImportSystem(mainCustomerSpace, system);
+        } else {
+            cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        }
+    }
+
+    /*
+     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3 bucket.
+     * Filename format: "System_<SYSTEM_NAME>.json"
+     */
+    private S3ImportSystem getMockSystem(@NotNull String systemName) {
+        String filename = String.format("System_%s.json", systemName);
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(), filename);
+        ObjectMapper om = new ObjectMapper();
+        try {
+            return om.readValue(is, S3ImportSystem.class);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Failed to read S3ImportSystem(name=%s) from s3. bucket=%s, version=%s", filename,
+                            S3_AVRO_DIR, getAvroFileVersion()));
+        }
+    }
+
     private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String feedTaskId;
@@ -534,8 +669,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         actionProxy.createAction(mainCustomerSpace, action);
     }
 
-    void importData(BusinessEntity entity, String s3FileName, String feedType) {
-        importData(entity, s3FileName, feedType, false, false);
+    void importData(BusinessEntity entity, String s3FileName) {
+        importData(entity, s3FileName, null, false, false);
+    }
+
+    void importData(BusinessEntity entity, String s3FileName, String systemName) {
+        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
@@ -543,7 +682,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
-        feedType = getFeedTypeByEntity(entity.name());
+        if (feedType == null) {
+            feedType = getFeedTypeByEntity(entity.name());
+        }
         if (s3FileName.endsWith(".gz"))
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
@@ -613,6 +754,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private void modifyFieldMappings(BusinessEntity entity, FieldMappingDocument fieldMappingDocument) {
+        modifyMatchIdMappings(fieldMappingDocument.getFieldMappings());
         switch (entity) {
         case Account:
             modifyFieldMappingsForAccount(fieldMappingDocument);
@@ -620,6 +762,38 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         case Contact:
             modifyFieldMappingsForContact(fieldMappingDocument);
         default:
+        }
+    }
+
+    /*
+     * Modify field mapping for match IDs. Fields need to have the following format
+     * to be mapped to other system (for unique ID, need to specify its own system
+     * name)
+     *
+     * Format: <PREFIX>_<SystemName>_<Entity>_<map_to_lattice_id> E.g.,
+     * LETest_MapTo_DefaultSystem_Account_True will map this column to default
+     * system's account ID and also map to global customer account ID
+     */
+    private void modifyMatchIdMappings(List<FieldMapping> fieldMappings) {
+        for (FieldMapping mapping : fieldMappings) {
+            // map ID to other system
+            if (mapping.getUserField().startsWith(MAP_ID_PREFIX)) {
+                String system = mapping.getUserField().substring(MAP_ID_PREFIX.length());
+                // parse system name & entity. Format =
+                // <SystemName>_<Entity>_<map_to_lattice_id>
+                String[] tokens = system.split("_");
+                mapping.setSystemName(tokens[0]);
+                mapping.setIdType(BusinessEntity.Account.name().equals(tokens[1]) ? FieldMapping.IdType.Account
+                        : FieldMapping.IdType.Contact);
+                boolean mapToLatticeId = false;
+                if (tokens.length == 3 && tokens[2].equalsIgnoreCase(Boolean.TRUE.toString())) {
+                    // map to lattice account ID
+                    mapToLatticeId = true;
+                }
+                mapping.setMapToLatticeId(mapToLatticeId);
+                log.info("Map user field [{}] to system [{}] for entity [{}]. MapToLatticeId={}",
+                        mapping.getUserField(), mapping.getSystemName(), tokens[1], mapToLatticeId);
+            }
         }
     }
 
@@ -887,57 +1061,54 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void verifyProcessAnalyzeReport(String appId, Map<BusinessEntity, Map<String, Object>> expectedReport) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 1);
-        Report summaryReport = reports.get(0);
-        verifySystemActionReport(summaryReport);
-        verifyDecisionReport(summaryReport);
-        verifyConsolidateSummaryReport(summaryReport, expectedReport);
+        Report report = reports.get(0);
+        log.info("PAReport: {}", report.getJson().getPayload());
+        verifySystemActionReport(report);
+        verifyDecisionReport(report);
+        verifyConsolidateSummaryReport(report, expectedReport);
     }
 
-    private void verifyDecisionReport(Report summaryReport) {
-        log.info("DecisionReport: " + summaryReport.getJson().getPayload());
+    private void verifyDecisionReport(Report paReport) {
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ObjectNode decisionNode = (ObjectNode) report.get(ReportPurpose.PROCESS_ANALYZE_DECISIONS_SUMMARY.getKey());
             Assert.assertNotNull(decisionNode);
             for (JsonNode n : decisionNode) {
                 Assert.assertNotNull(n);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
 
     }
 
-    private void verifySystemActionReport(Report summaryReport) {
-        Assert.assertNotNull(summaryReport);
-        Assert.assertNotNull(summaryReport.getJson());
-        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
-        log.info("SystemActionReport: " + summaryReport.getJson().getPayload());
-
+    private void verifySystemActionReport(Report paReport) {
+        Assert.assertNotNull(paReport);
+        Assert.assertNotNull(paReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(paReport.getJson().getPayload()));
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ArrayNode systemActionNode = (ArrayNode) report.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
             Assert.assertNotNull(systemActionNode);
             for (JsonNode n : systemActionNode) {
                 Assert.assertNotNull(n);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
     }
 
-    private void verifyConsolidateSummaryReport(Report summaryReport,
+    private void verifyConsolidateSummaryReport(Report paReport,
             Map<BusinessEntity, Map<String, Object>> expectedReport) {
-        Assert.assertNotNull(summaryReport);
-        Assert.assertNotNull(summaryReport.getJson());
-        Assert.assertTrue(StringUtils.isNotBlank(summaryReport.getJson().getPayload()));
-        log.info("ConsolidateSummaryReport: " + summaryReport.getJson().getPayload());
+        Assert.assertNotNull(paReport);
+        Assert.assertNotNull(paReport.getJson());
+        Assert.assertTrue(StringUtils.isNotBlank(paReport.getJson().getPayload()));
 
         try {
             ObjectMapper om = JsonUtils.getObjectMapper();
-            ObjectNode report = (ObjectNode) om.readTree(summaryReport.getJson().getPayload());
+            ObjectNode report = (ObjectNode) om.readTree(paReport.getJson().getPayload());
             ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
 
             expectedReport.forEach((entity, entityReport) -> {
@@ -974,7 +1145,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 });
             });
         } catch (IOException e) {
-            throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
+            throw new RuntimeException("Fail to parse report payload: " + paReport.getJson().getPayload(), e);
         }
     }
 
@@ -1346,14 +1517,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount
+                .forEach((key, value) -> log.info("Row count for batch store of {}: {}", key.getBatchStore().name(),
+                countTableRole(key.getBatchStore())));
         expectedEntityCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
+        Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {}",
+                key.getServingStore().name(), countTableRole(key.getServingStore())));
         expectedEntityCount.forEach((key, value) -> {
             Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value, key.getServingStore().name());
 //            if (key != BusinessEntity.ProductHierarchy) {
@@ -1377,8 +1553,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
+        expectedEntityCount
+                .forEach((key, value) -> log.info("Row count for redshift table of {}: {}", key, countInRedshift(key)));
         expectedEntityCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
+        Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
     void runCommonPAVerifications() {
@@ -1448,15 +1626,16 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals((int) minMaxPeriods.getLeft(), minDay);
         Assert.assertEquals((int) minMaxPeriods.getRight(), maxDay);
         // Verify daily aggregated result
-        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFICATION_TRANSACTION_DATE);
+        int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFY_DAILYTXN_TXNDATE);
         String dailyFileContainingTargetDay = dailyFiles.stream()
                 .filter(f -> f.contains(String.valueOf(dayPeriod))).findFirst().orElse(null);
         Assert.assertNotNull(dailyFileContainingTargetDay);
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
+        String aidFld = isEntityMatchEnabled() ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
-            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(InterfaceName.AccountId.name()).toString())
+            if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
                     && VERIFY_DAILYTXN_PRODUCTID.equals(record.get(InterfaceName.ProductId.name()).toString())) {
                 verifyRecord = record;
                 break;
@@ -1469,22 +1648,35 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals(verifyRecord.get(InterfaceName.TotalCost.name()), cost);
     }
 
-    private String getFeedTypeByEntity(String entity) {
+    protected String getFeedTypeByEntity(String entity) {
+        return getFeedType(entity, "DefaultSystem");
+    }
+
+    protected String getFeedType(String entity, String systemName) {
         String feedType = entity + "Schema";
-        String systemName = "DefaultSystem";
         String splitChart = "_";
         switch (entity) {
-            case "Account": feedType =
-                    systemName + splitChart + EntityType.Accounts.getDefaultFeedTypeName();break;
-            case "Contact": feedType =
-                    systemName + splitChart + EntityType.Contacts.getDefaultFeedTypeName();break;
-            case "Transaction": feedType =
-                    systemName + splitChart + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
-            case "Product": feedType =
-                    systemName + splitChart + EntityType.ProductBundles.getDefaultFeedTypeName();break;
-            default:break;
+        case "Account":
+            feedType = systemName + splitChart + EntityType.Accounts.getDefaultFeedTypeName();
+            break;
+        case "Contact":
+            feedType = systemName + splitChart + EntityType.Contacts.getDefaultFeedTypeName();
+            break;
+        case "Transaction":
+            feedType = systemName + splitChart + EntityType.ProductPurchases.getDefaultFeedTypeName();
+            break;
+        case "Product":
+            feedType = systemName + splitChart + EntityType.ProductBundles.getDefaultFeedTypeName();
+            break;
+        default:
+            break;
         }
         return feedType;
+    }
+
+    private boolean isEntityMatchEnabled() {
+        FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
+        return FeatureFlagUtils.isEntityMatchEnabled(flags);
     }
 
 }

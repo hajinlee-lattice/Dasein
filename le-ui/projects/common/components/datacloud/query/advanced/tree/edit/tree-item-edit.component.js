@@ -22,7 +22,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
-                    console.log('[tree-edit] init start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
+                    console.log('[tree-edit] initz start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                     vm.initVariables();
                     vm.resetCmp();
                     console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);

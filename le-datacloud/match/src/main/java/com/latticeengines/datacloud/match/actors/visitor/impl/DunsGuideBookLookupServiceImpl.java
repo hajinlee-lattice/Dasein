@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,8 +10,11 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -53,6 +58,9 @@ public class DunsGuideBookLookupServiceImpl extends DataSourceLookupServiceBase 
     private final Queue<String> pendingRequestIds = new ConcurrentLinkedQueue<>();
 
     private ExecutorService executorService;
+
+    // flag to indicate whether background fetcher should keep running
+    private volatile boolean shouldTerminate = false;
 
     @Override
     protected DunsGuideBook lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
@@ -109,21 +117,41 @@ public class DunsGuideBookLookupServiceImpl extends DataSourceLookupServiceBase 
         }
     }
 
+    @PreDestroy
+    private void preDestroy() {
+        try {
+            if (shouldTerminate) {
+                return;
+            }
+            log.info("Shutting down DunsGuideBook fetchers");
+            shouldTerminate = true;
+            if (executorService != null) {
+                executorService.shutdownNow();
+                executorService.awaitTermination(TERMINATE_EXECUTOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            }
+            log.info("Completed shutting down of DunsGuideBook fetchers");
+        } catch (Exception e) {
+            log.error("Fail to finish all pre-destroy actions", e);
+        }
+    }
+
     /*
      * background worker to fetch DunsGuideBook
      */
     private class Fetcher implements Runnable {
         @Override
         public void run() {
-            // TODO add a way to terminate gracefully
-            while (true) {
+            while (!shouldTerminate) {
                 List<String> requestIds = new ArrayList<>();
                 synchronized (pendingRequestIds) {
-                    while (pendingRequestIds.isEmpty()) {
+                    while (!shouldTerminate && pendingRequestIds.isEmpty()) {
                         try {
                             pendingRequestIds.wait();
                         } catch (InterruptedException e) {
-                            log.error("Encounter InterruptedException in DunsGuideBook fetcher, err={}", e.getMessage());
+                            if (!shouldTerminate) {
+                                log.warn("Encounter InterruptedException in DunsGuideBook fetcher, err={}",
+                                        e.getMessage());
+                            }
                         }
                     }
 
@@ -171,6 +199,8 @@ public class DunsGuideBookLookupServiceImpl extends DataSourceLookupServiceBase 
                 for (int i = 0; i < params.size(); i++) {
                     String requestId = params.get(i).getKey();
                     String returnAddr = getReqReturnAddr(requestId);
+                    // Inject failure only for testing purpose
+                    injectFailure(getReq(requestId));
                     removeReq(requestId);
                     sendResponse(requestId, books.get(i), returnAddr);
                 }

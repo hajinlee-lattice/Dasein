@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -13,6 +14,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -20,6 +23,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -37,7 +41,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(resumeFromCheckPoint());
         verifyNumAttrsInAccount();
         verifyDateTypeAttrs();
         new Thread(() -> {
@@ -55,21 +59,30 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
             verifyProcess();
         } finally {
             if (isLocalEnvironment()) {
-                saveCheckpoint(CHECK_POINT);
+                saveCheckpoint(saveToCheckPoint());
             }
         }
     }
 
-    private void importData() throws Exception {
+    protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Transaction, 1, "DefaultSystem_TransactionData");
         Thread.sleep(1100);
         mockCSVImport(BusinessEntity.Transaction, 2, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
     }
 
-    private void verifyProcess() {
+    protected String resumeFromCheckPoint() {
+        return ProcessAccountDeploymentTestNG.CHECK_POINT;
+    }
+
+    protected String saveToCheckPoint() {
+        return CHECK_POINT;
+    }
+
+    protected void verifyProcess() {
         clearCache();
         runCommonPAVerifications();
+
         verifyNumAttrsInAccount();
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory, //
@@ -77,11 +90,8 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         verifyBatchStore(getExpectedBatchStoreCounts());
         verifyServingStore(getExpectedServingStoreCounts());
         verifyRedshift(getExpectedRedshiftCounts());
-
-        verifyTxnDailyStore(DAILY_TRANSACTION_DAYS_1, MIN_TRANSACTION_DATE_1, MAX_TRANSACTION_DATE_1, //
-                VERIFY_DAILYTXN_AMOUNT_1, //
-                VERIFY_DAILYTXN_QUANTITY_1, //
-                VERIFY_DAILYTXN_COST);
+        verifyTxnDailyStore();
+        verifyPurchaseHistoryAttrs();
     }
 
     private void verifyNumAttrsInAccount() {
@@ -91,20 +101,20 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Assert.assertTrue(cms.size() < 20000, "Should not have more than 20000 account attributes");
     }
 
-    private void verifyDateTypeAttrs() {
+    protected void verifyDateTypeAttrs() {
         FrontEndQuery query = new FrontEndQuery();
         query.setMainEntity(BusinessEntity.Account);
         Bucket bkt = Bucket.dateBkt(TimeFilter.ever());
         Restriction restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         Long count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count, ACCOUNT_1);
+        Assert.assertEquals(count, ACCOUNT_PA);
 
         bkt = Bucket.dateBkt(TimeFilter.isEmpty());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count.longValue(), 0);
+        Assert.assertEquals(count.longValue(), expectedUserTestDateCntsBeforePA());
 
         bkt = Bucket.dateBkt(TimeFilter.latestDay());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
@@ -112,21 +122,25 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         count = entityProxy.getCount(mainCustomerSpace, query);
         log.info("count " + count);
         Assert.assertTrue(count > 0);
-        Assert.assertTrue(count < ACCOUNT_1);
+        Assert.assertTrue(count < ACCOUNT_PA);
         log.info("verify date done");
+    }
+
+    protected int expectedUserTestDateCntsBeforePA() {
+        return 0;
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_PT);
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                TRANSACTION_IN_REPORT_1);
+                NEW_TRANSACTION_PT);
 
         Map<String, Object> purchaseHistoryReport = new HashMap<>();
         purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                PURCHASE_HISTORY_1);
+                TOTAL_PURCHASE_HISTORY_PT);
 
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Transaction, transactionReport);
@@ -134,32 +148,58 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         return expectedReport;
     }
 
-    private Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCTS);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
+    protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES);
-        map.put(BusinessEntity.Transaction, TRANSACTION_1);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_PT);
         return map;
     }
 
-    private Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
+    protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_1);
-        map.put(BusinessEntity.Contact, CONTACT_1);
+        map.put(BusinessEntity.Account, ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA);
         return map;
+    }
+
+    protected void verifyPurchaseHistoryAttrs() {
+        List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(mainCustomerSpace,
+                BusinessEntity.PurchaseHistory);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
+        cms.forEach(cm -> {
+            if (InterfaceName.AccountId.name().equals(cm.getAttrName())) {
+                return;
+            }
+            if (ActivityMetricsUtils.isHasPurchasedAttr(cm.getAttrName())) {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.BOOLEAN);
+            } else if (ActivityMetricsUtils.isTotalSpendAttr(cm.getAttrName())
+                    || ActivityMetricsUtils.isAvgSpendAttr(cm.getAttrName())) {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.CURRENCY);
+            } else {
+                Assert.assertEquals(cm.getFundamentalType(), FundamentalType.NUMERIC);
+            }
+        });
+    }
+
+    protected void verifyTxnDailyStore() {
+        verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
+                VERIFY_DAILYTXN_AMOUNT_PT, //
+                VERIFY_DAILYTXN_QUANTITY_PT, //
+                VERIFY_DAILYTXN_COST_PT);
     }
 
 }

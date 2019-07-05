@@ -56,11 +56,15 @@
         text-align: center;
       }
     }
-    .initially-hidden {
+    .le-copy-controlls {
       display: none;
+      width: 0px;
     }
   }
-
+  .le-table-row{
+    min-height: 55px;
+    align-items: center;
+  }
   .le-table-row:hover {
     & > .le-table-cell > * {
       color: $pearl-white;
@@ -85,9 +89,13 @@
       }
     }
     & > .le-table-cell > .le-cell-template {
-      .initially-hidden {
-        display: initial;
+      & > div{
+        display: flex;
+      }
+      & .le-copy-controlls {
+        display: inline-flex;
         color: $pearl-white;
+        width: 100%;
       }
     }
   }

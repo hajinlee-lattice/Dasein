@@ -10,8 +10,11 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface PlayLaunchChannelRepository extends BaseJpaRepository<PlayLaunchChannel, Long> {
 
+    List<PlayLaunchChannel> findByPlayName(String playName);
+
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playId, String lookupId);
 
+    @EntityGraph(value = "PlayLaunchChannel.play", type = EntityGraphType.LOAD)
     PlayLaunchChannel findById(String channelId);
 
     @EntityGraph(value = "PlayLaunchChannel.play", type = EntityGraphType.LOAD)

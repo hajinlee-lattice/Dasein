@@ -192,12 +192,73 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     @SuppressWarnings("unchecked")
+    public final List<T> findAllSortedByFieldWithPagination(int offset, int limit,
+            String sortByField, Object... fieldsAndValues) {
+        // verify offset and limit
+        if (offset < 0 || limit < 0) {
+            throw new IllegalArgumentException("Value of Offset and limit should be >= 0");
+        }
+        Session session = getCurrentSession();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            if (i > 0) {
+                sb.append(" and ");
+            }
+            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
+        }
+        String queryStr = String.format("from %s where %s order by %s",
+                getEntityClass().getSimpleName(), sb.toString(), sortByField);
+        Query<T> query = session.createQuery(queryStr);
+        query.setMaxResults(limit);
+        query.setFirstResult(offset);
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
+        }
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll() {
         Session session = getCurrentSession();
         Class<T> entityClz = getEntityClass();
         Query<T> query = session.createQuery("from " + entityClz.getSimpleName());
         return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public long findAllCount() {
+        Session session = getCurrentSession();
+        Class<T> entityClz = getEntityClass();
+        Query<Long> query = session.createQuery("select count(1) from " + entityClz.getSimpleName());
+        Long count = query.uniqueResult();
+        return count == null ? 0L : count.longValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public long findCountByFields(Object... fieldsAndValues) {
+        if (fieldsAndValues.length % 2 != 0) {
+            throw new RuntimeException("Must specify a value for each field name");
+        }
+
+        Session session = getCurrentSession();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            if (i > 0) {
+                sb.append(" and ");
+            }
+            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
+        }
+        String queryStr = String.format("select count(1) from %s where %s", getEntityClass().getSimpleName(),
+                sb.toString());
+        Query<Long> query = session.createQuery(queryStr);
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
+        }
+        Long count = query.uniqueResult();
+        return count == null ? 0L : count.longValue();
     }
 
     @Override

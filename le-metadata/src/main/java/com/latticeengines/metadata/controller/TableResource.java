@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.common.exposed.rest.controller.BaseRestResource;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -93,6 +94,14 @@ public class TableResource extends BaseRestResource {
             @PathVariable String tableName, //
             @RequestBody List<Attribute> attributes) {
         return tableResourceHelper.createTableAttributes(customerSpace, tableName, attributes);
+    }
+
+    @PostMapping(value = "/tables/{tableName}/fixattributes")
+    @ResponseBody
+    @ApiOperation(value = "Fix table attributes")
+    public Boolean fixTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
+                                      @RequestBody List<AttributeFixer> attributeFixerList) {
+        return tableResourceHelper.fixTableAttributes(customerSpace, tableName, attributeFixerList);
     }
 
     @PutMapping(value = "/tables/{tableName}")

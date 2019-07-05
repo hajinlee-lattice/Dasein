@@ -6,8 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+
 public enum LaunchState {
     UnLaunched, //
+    Queued, //
     Launching, //
     Launched, //
     Failed, //
@@ -24,7 +27,14 @@ public enum LaunchState {
     static {
         Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
         statesAfterUnLaunched.add(Launching);
+        statesAfterUnLaunched.add(Queued);
+        statesAfterUnLaunched.add(Canceled);
         transitionMap.put(UnLaunched, statesAfterUnLaunched);
+
+        Set<LaunchState> statesAfterQueued = new HashSet<>();
+        statesAfterUnLaunched.add(Launching);
+        statesAfterUnLaunched.add(Canceled);
+        transitionMap.put(Queued, statesAfterQueued);
 
         Set<LaunchState> statesAfterLaunching = new HashSet<>();
         statesAfterLaunching.add(Launched);
@@ -52,5 +62,30 @@ public enum LaunchState {
             return true;
         }
         return false;
+    }
+
+    public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
+        switch (jobStatus) {
+        case FAILED:
+            return Failed;
+        case READY:
+        case PENDING:
+        case RUNNING:
+            return Launching;
+        case SKIPPED:
+        case CANCELLED:
+            return Canceled;
+        case COMPLETED:
+            return Launched;
+        default:
+            return UnLaunched;
+        }
+    }
+
+    public Boolean isTerminal() {
+        if (this == Queued || this == UnLaunched || this == Launching) {
+            return false;
+        }
+        return true;
     }
 }

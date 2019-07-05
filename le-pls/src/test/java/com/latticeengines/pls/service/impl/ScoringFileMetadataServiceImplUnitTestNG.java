@@ -118,7 +118,7 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
 
         ScoringFileMetadataServiceImpl scoringFileMetadataService = new ScoringFileMetadataServiceImpl();
         FieldMappingDocument fieldMappingDocument = scoringFileMetadataService.getFieldMapping(
-                Sets.newHashSet("Company", "Country", "Id", "Email", "City", "State"), attrs,
+                Sets.newHashSet("Company1", "Country", "Id", "Email", "City", "State"), attrs,
                 SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceLead));
 
         String expected = FileUtils.getContentsAsString(new File(ClassLoader

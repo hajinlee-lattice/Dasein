@@ -87,7 +87,7 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[play.name].editPlay">
 
                         <!-- Created Play with no previous launch history -->
-                        <div ng-if="play.launchHistory.lastCompletedLaunch === null || ['UnLaunched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) >= 0">This campaign was started but not launched.</div>
+                        <div ng-if="(play.launchHistory.lastCompletedLaunch === null || ['UnLaunched'].indexOf(play.launchHistory.lastCompletedLaunch.launchState) >= 0) && vm.current.tileStates[play.name].launching != true">This campaign was started but not launched.</div>
 
                         <!-- Created Play with no previous launch history -->
                         <!-- <div ng-if="
@@ -116,17 +116,34 @@
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="(vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
+                            ng-if="!vm.alwaysOnCampaigns && (vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             Launch
                         </button>
                          <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="(vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
+                            ng-if="!vm.alwaysOnCampaigns && (vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
                             ng-disabled="vm.current.tileStates[play.name].launching == true"
                             ui-sref="home.playbook.launch({play_name:play.name, status: 'Launch'})">    
                             {{vm.launchButtonLabel(play)}}
+                        </button>
+                        <!-- to handle always on cases --> 
+                         <button 
+                            type="button"
+                            class="button blue-button pull-right"
+                            ng-if="vm.alwaysOnCampaigns && (vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && !play.talkingPoints.length) && vm.current.tileStates[play.name].launching !== true"
+                            ng-disabled="vm.current.tileStates[play.name].launching == true"
+                            ui-sref="home.playbook.overview({play_name:play.name})">    
+                            Overview
+                        </button>
+                         <button 
+                            type="button"
+                            class="button blue-button pull-right"
+                            ng-if="vm.alwaysOnCampaigns && (vm.completedStates.indexOf(play.launchHistory.lastCompletedLaunch.launchState) < 0 && play.talkingPoints.length) || vm.current.tileStates[play.name].launching == true"
+                            ng-disabled="vm.current.tileStates[play.name].launching == true"
+                            ui-sref="home.playbook.overview({play_name:play.name})">    
+                            Overview
                         </button>
                          <span ng-if="!vm.current.tileStates[play.name].launching">
                                 <span 

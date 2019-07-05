@@ -28,6 +28,7 @@ import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -44,12 +45,14 @@ import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -66,6 +69,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -107,6 +111,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     @Inject
     private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private BatonService batonService;
@@ -542,6 +549,18 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 if (attr.getSourceAttrName() != null) {
                     templateAttrs.get(attr.getName()).setSourceAttrName(attr.getSourceAttrName());
                 }
+                if (!StringUtils.equals(attr.getDateFormatString(),
+                        templateAttrs.get(attr.getName()).getDateFormatString())) {
+                    templateAttrs.get(attr.getName()).setDateFormatString(attr.getDateFormatString());
+                }
+                if (!StringUtils.equals(attr.getTimeFormatString(),
+                        templateAttrs.get(attr.getName()).getTimeFormatString())) {
+                    templateAttrs.get(attr.getName()).setTimeFormatString(attr.getTimeFormatString());
+                }
+                if (!StringUtils.equals(attr.getDateFormatString(),
+                        templateAttrs.get(attr.getName()).getTimezone())) {
+                    templateAttrs.get(attr.getName()).setTimezone(attr.getTimezone());
+                }
             }
         }
         return templateTable;
@@ -670,6 +689,96 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         return true;
+    }
+
+    @Override
+    public ImportTemplateDiagnostic diagnostic(String customerSpaceStr, String taskIdentifier) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpaceStr, taskIdentifier);
+        if (dataFeedTask == null) {
+            throw new RuntimeException("Cannot find datafeed task for id: " + taskIdentifier);
+        }
+        Table templateTable = dataFeedTask.getImportTemplate();
+        if (templateTable == null) {
+            throw new RuntimeException(String.format("The template for datafeed task %s is empty!", taskIdentifier));
+        }
+        BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
+        ImportTemplateDiagnostic diagnostic = new ImportTemplateDiagnostic();
+        // 1. check physical data type & fundamental type
+        for (Attribute attr : templateTable.getAttributes()) {
+            try {
+                Schema.Type avroType = TableUtils.getTypeFromPhysicalDataType(attr.getPhysicalDataType());
+                if (StringUtils.isEmpty(attr.getFundamentalType())) {
+                    diagnostic.addWarnings(String.format("Attribute %s has empty fundamental type.", attr.getName()));
+                }
+                FundamentalType fdType = FundamentalType.fromName(attr.getFundamentalType());
+                switch (avroType) {
+                    case ENUM:
+                        if (!FundamentalType.ENUM.equals(fdType)) {
+                            diagnostic.addWarnings(String.format("Attribute %s has data type %s but fundamental " +
+                                    "type is %s", attr.getName(), attr.getPhysicalDataType(), attr.getFundamentalType()));
+                        }
+                        break;
+                    case STRING:
+                        if (!FundamentalType.ALPHA.equals(fdType) && !FundamentalType.DATE.equals(fdType)) {
+                            diagnostic.addWarnings(String.format("Attribute %s has data type %s but fundamental " +
+                                    "type is %s", attr.getName(), attr.getPhysicalDataType(), attr.getFundamentalType()));
+                        }
+                        break;
+                    case INT:
+                    case FLOAT:
+                        if (!FundamentalType.NUMERIC.equals(fdType)) {
+                            diagnostic.addWarnings(String.format("Attribute %s has data type %s but fundamental " +
+                                    "type is %s", attr.getName(), attr.getPhysicalDataType(), attr.getFundamentalType()));
+                        }
+                        break;
+                    case LONG:
+                    case DOUBLE:
+                        if (!FundamentalType.NUMERIC.equals(fdType)
+                                && !FundamentalType.CURRENCY.equals(fdType)
+                                && !FundamentalType.DATE.equals(fdType)) {
+                            diagnostic.addWarnings(String.format("Attribute %s has data type %s but fundamental " +
+                                    "type is %s", attr.getName(), attr.getPhysicalDataType(), attr.getFundamentalType()));
+                        }
+                        break;
+                    case BOOLEAN:
+                        if (!FundamentalType.BOOLEAN.equals(fdType)) {
+                            diagnostic.addWarnings(String.format("Attribute %s has data type %s but fundamental " +
+                                    "type is %s", attr.getName(), attr.getPhysicalDataType(), attr.getFundamentalType()));
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                diagnostic.addErrors(String.format("Attribute %s has wrong data type %s", attr.getName(),
+                        attr.getPhysicalDataType()));
+            }
+        }
+        // 2. with standard schema:
+        boolean entityMatch = batonService.isEnabled(CustomerSpace.parse(customerSpaceStr),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        Table standardTable = SchemaRepository.instance().getSchema(entity, true, false, entityMatch);
+        Map<String, Attribute> standardAttrMap =
+                standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));
+
+        for (Attribute attr : templateTable.getAttributes()) {
+            if (standardAttrMap.containsKey(attr.getName())) {
+                Attribute standardAttr = standardAttrMap.get(attr.getName());
+                if (!attr.getPhysicalDataType().equalsIgnoreCase(standardAttr.getPhysicalDataType())) {
+                    diagnostic.addErrors(String.format("Attribute %s has wrong physicalDataType %s, should be %s",
+                            attr.getName(), attr.getPhysicalDataType(), standardAttr.getPhysicalDataType()));
+                }
+                if (!attr.getRequired().equals(standardAttr.getRequired())) {
+                    diagnostic.addErrors(String.format("Attribute %s has required flag %b, is different from schema."
+                            , attr.getName(), attr.getRequired()));
+                }
+                if (!attr.isNullable().equals(standardAttr.isNullable())) {
+                    diagnostic.addErrors(String.format("Attribute %s has nullable flag %b, is different from schema."
+                            , attr.getName(), attr.isNullable()));
+                }
+            }
+        }
+        return diagnostic;
     }
 
 }

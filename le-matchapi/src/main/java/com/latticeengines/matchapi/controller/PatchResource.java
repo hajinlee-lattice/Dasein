@@ -71,23 +71,18 @@ public class PatchResource {
     }
 
     @RequestMapping(
-            value = "/validate/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+            value = "/validate/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
-    private PatchValidationResponse validatePatchBook(
-            @PathVariable String patchBookType, @RequestBody PatchRequest request) {
+    private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
 
         PatchBook.Type type = getPatchBookType(patchBookType);
-        // FIXME currently, validation for PatchBook.Type == Domain is not implemented yet, remove this when it is done
-        if (type == PatchBook.Type.Domain) {
-            throw new UnsupportedOperationException(
-                    "Validation for 'Domain' patch book entries hasn't been implemented yet");
-        }
-
-        List<PatchBook> books = load(request.getMode(), type);
-
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
+                request.getLimit(), request.getSortByField());
+        patchBookEntityMgr.findByTypeWithPagination(request.getOffset(), request.getLimit(),
+                request.getSortByField(), type);
         return validate(books, type, request);
     }
 
@@ -101,7 +96,8 @@ public class PatchResource {
         LookupPatchResponse response = prepareResponse(request);
 
         PatchBook.Type type = PatchBook.Type.Lookup;
-        List<PatchBook> books = load(request.getMode(), type);
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
+                request.getLimit(), request.getSortByField());
 
         // validate
         PatchValidationResponse validationResponse = validate(books, type, request);
@@ -210,12 +206,14 @@ public class PatchResource {
         return response;
     }
 
-    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type) {
+    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset, int limit, String sortByField) {
+        // adding pagination parameters
         if (mode == PatchMode.Normal) {
-            return patchBookEntityMgr.findByType(type);
+            return patchBookEntityMgr.findByTypeWithPagination(offset, limit, sortByField, type);
         } else {
             // hot fix mode
-            return patchBookEntityMgr.findByTypeAndHotFix(type, true);
+            return patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, limit, sortByField,
+                    type, true);
         }
     }
 
@@ -239,7 +237,6 @@ public class PatchResource {
             String versionStr = request.getDataCloudVersion();
             DataCloudVersion version = dataCloudVersionEntityMgr.findVersion(versionStr);
             if (version == null) {
-                // TODO throw different error
                 String msg = String.format("Provided DataCloudVersion (%s) does not exist", versionStr);
                 throw new IllegalArgumentException(msg);
             }

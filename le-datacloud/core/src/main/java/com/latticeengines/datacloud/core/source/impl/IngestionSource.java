@@ -1,20 +1,21 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.stereotype.Component;
-
 import com.latticeengines.datacloud.core.source.Source;
 
-// Place holder of Ingestion
-@Component("ingestionSource")
+// Ingestion is treated as a special source
 public class IngestionSource implements Source {
 
     private static final long serialVersionUID = 2237469282940403218L;
 
     private String ingestionName;
 
+    public IngestionSource(String ingestionName) {
+        this.ingestionName = ingestionName;
+    }
+
     @Override
     public String getSourceName() {
-        return "IngestionSource";
+        return "Ingestion_" + ingestionName;
     }
 
     @Override

@@ -98,7 +98,8 @@ public abstract class AvroExportJob extends MRJobCustomizationBase {
 
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
             config.set(MRJobConfig.MAP_JAVA_OPTS,
-                    opts + " -Dlog4j.configurationFile=log4j2-yarn.xml " + CipherUtils.getSecretPropertyStr());
+                    opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
+                            + " -DLOG4J_LE_LEVEL=INFO " + CipherUtils.getSecretPropertyStr());
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

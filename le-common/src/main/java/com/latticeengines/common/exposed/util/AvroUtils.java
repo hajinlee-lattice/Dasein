@@ -97,6 +97,19 @@ public class AvroUtils {
         return reader;
     }
 
+    public static FileReader<GenericRecord> getLocalFileReader(File file) {
+        FileReader<GenericRecord> reader;
+
+        try {
+            GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
+            reader = DataFileReader.openReader(file, fileReader);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Getting avro file reader from path: " + file, e);
+        }
+        return reader;
+    }
+
     public static DataFileStream<GenericRecord> getAvroFileStream(Configuration config, Path path) {
         DataFileStream<GenericRecord> streamReader;
         try {
@@ -254,17 +267,25 @@ public class AvroUtils {
         if (matches.size() == 1) {
             return countOneFile(configuration, matches.get(0));
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(4, matches.size()));
+
         List<Callable<Long>> counters = new ArrayList<>();
-        for (final String match : matches) {
+        long count = 0L;
+        for (int i = 0; i < matches.size(); i++) {
+            String match = matches.get(i);
             counters.add(() -> countOneFile(configuration, match));
+            if (counters.size() >= 256 || i == matches.size() - 1) {
+                List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
+                count += partialCounts.stream().mapToLong(c -> c).sum();
+                counters.clear();
+            }
         }
-        List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
-        Long count = partialCounts.stream().mapToLong(c -> c).sum();
+
         executorService.shutdown();
         log.info(String.format("Totally %d records in %s", count, StringUtils.join(globs, ",")));
         return count;
     }
+
 
     private static Long countOneFile(Configuration configuration, String path) {
         // log.info("Counting number of records in " + path);
@@ -791,6 +812,58 @@ public class AvroUtils {
                 }
             }
         }
+    }
+
+    public static DataFileWriter<GenericRecord> getLocalFileWriter(File avroFile,
+                                                              boolean snappy,
+                                                              boolean create,
+                                                              Schema schema) {
+        create = !avroFile.exists() || create;
+        if (!avroFile.exists() && !create){
+
+            log.error(avroFile + " does not exist and create == false");
+            throw new RuntimeException("try to write to an non-existing file without creating it");
+
+        }
+
+        if (create && schema == null) {
+
+            log.error("try to create " + avroFile + " with schema == null");
+            throw new RuntimeException("try to create an avro file without schema");
+
+        }
+
+        DataFileWriter<GenericRecord> writer = null;
+
+        try {
+            writer = new DataFileWriter<>(new GenericDatumWriter<>());
+
+            if (snappy) {
+
+                writer.setCodec(CodecFactory.snappyCodec());
+
+            }
+
+            if (create) {
+
+                FileUtils.deleteQuietly(avroFile);
+                writer.create(schema, avroFile);
+
+            } else {
+
+                writer.appendTo(avroFile);
+
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("getting avro file writer from " + avroFile, e);
+
+        }
+
+        return writer;
+
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {

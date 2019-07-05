@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl.filetosrc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
@@ -36,12 +38,10 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
     @Autowired
     private OrbCompanyRaw source;
 
-    @Autowired
-    private IngestionSource baseSource;
+    private IngestionSource baseSource = new IngestionSource(IngestionNames.ORB_INTELLIGENCE);
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
-        baseSource.setIngestionName(IngestionNames.ORB_INTELLIGENCE);
         uploadBaseSourceFile(baseSource, "orb-db2-export-sample.zip", baseSourceVersion);
         prepareUncompressDir();
         TransformationProgress progress = createNewProgress();
@@ -65,9 +65,9 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
         // -----------
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = new ArrayList<String>();
-        baseSources.add(baseSource.getSourceName());
-        step1.setBaseSources(baseSources);
+        step1.setBaseSources(Arrays.asList(baseSource.getSourceName()));
+        step1.setBaseIngestions(Collections.singletonMap(baseSource.getSourceName(),
+                new SourceIngestion(baseSource.getIngestionName())));
         step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
         step1.setTargetSource(source.getSourceName());
         String confParamStr1 = getIngestedFileToSourceTransformerConfig();
@@ -84,7 +84,6 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private String getIngestedFileToSourceTransformerConfig() {
         IngestedFileToSourceTransformerConfig conf = new IngestedFileToSourceTransformerConfig();
-        conf.setIngestionName(IngestionNames.ORB_INTELLIGENCE);
         conf.setFileNameOrExtension("orb_companies.csv");
         conf.setCompressedFileNameOrExtension("orb-db2-export-sample.zip");
         conf.setCompressType(CompressType.ZIP);
@@ -109,8 +108,8 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
         String[] expectedIds = new String[] { "12885634", "11108077", "17145445", "12221764",
                 "13262799", "11352808", "11417478", "17149076", "48010954", "50304275", "59621453",
                 "59815388", "61932862", "201146532", "12438907", "12682624", "201148328",
-                "100041221857", "100038778540", "100039685996", "100040386494", "100036947123",
-                "100042212357" };
+                "100039974710", "100041765143", "100037457877", "100042032273", "100039605366",
+                "100040987540", "100040004061" };
         Set<String> expectedIdSet = new HashSet<>(Arrays.asList(expectedIds));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -119,7 +118,7 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(expectedIdSet.contains(orbNum));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 23);
+        Assert.assertEquals(rowNum, 24);
     }
 
 }

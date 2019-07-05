@@ -332,7 +332,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         } else if (field2.equals("user_TestDate3")) {
             Assert.assertEquals(field0, CUSTOM);
             Assert.assertEquals(field1, "TestDate3");
-            Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H");
+            Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H Time Zone is Part of Value");
         } else if (field2.equals("LastModifiedDate")) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, UNMAPPED);

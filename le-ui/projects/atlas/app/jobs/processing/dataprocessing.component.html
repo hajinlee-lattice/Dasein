@@ -16,7 +16,7 @@
         </div>
 
         <div class="le-grid" on-finish-render>
-            <div class="le-header le-row">
+            <div class="le-header le-row pa-header">
                 <div class="le-cell le-col-start-1 le-col-span-2">
                     <span>Creation Timestamp</span>
                 </div>
@@ -33,7 +33,7 @@
                                         orderBy: vm.header.sort.order + vm.header.sort.property |
                                         startFrom: (vm.currentPage - 1) * vm.pagesize |
                                         limitTo: vm.pagesize" class="le-row" job="job" vm="vm" index="$index"
-                                        ng-class="{'dark-row' : $index % 2 == 0, 'white-row' : $index % 2 != 0}">
+                                        ng-class="{'dark-row' : $index % 2 != 0, 'white-row' : $index % 2 == 0}">
 
             </import-job-row>
             <div class="le-row info-row" ng-if="vm.loading">

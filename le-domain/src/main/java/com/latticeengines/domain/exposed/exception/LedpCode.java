@@ -346,6 +346,10 @@ public enum LedpCode {
     LEDP_18219("Unable to update PlayLaunchChannel due to {0}"),
     LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"),
     LEDP_18221("User not found"),
+    LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"),
+    LEDP_18223("Failed to update import system priority: {0}"),
+    LEDP_18224("AWS credentials have not been generated yet. Please ask your administrator to generate one first."),
+    LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -592,6 +596,7 @@ public enum LedpCode {
     LEDP_28028("Unsupported PMML version {0} detected. We only support {1}."), //
     LEDP_28029("Download model summary failed."), //
     LEDP_28030("Problem in event counting: {0}."), //
+    LEDP_28031("Workflow yarn step {0} has lost node error: {1}."), //
 
     // le-dellebi
     LEDP_29000(
@@ -813,13 +818,18 @@ public enum LedpCode {
     LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
     LEDP_40052("Could not find External System Authentication ID: {0}"),
     LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"),
-    LEDP_40054(
-            "We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
+    LEDP_40054("We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
     LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
     LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
     LEDP_40059("Error when validating with input file, please reference {0}."),
+    LEDP_40060("Invalid business calendar"),
+    LEDP_40061("Cannot update Import System: {0}"),
+    LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
+    LEDP_40063("Cannot update All System Priority, missing system: {0}."),
+    LEDP_40064("Cannot update All System Priority: {0}"),
+    LEDP_40065("Cannot create a new Campaign without a Display Name"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

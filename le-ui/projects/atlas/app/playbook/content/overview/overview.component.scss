@@ -1,4 +1,28 @@
 .playbook-overview {
+    h2 {
+        font-size: 1.2em;
+        font-weight: bold;
+        &.panel-label {
+            margin-bottom: 20px;
+        }
+    }
+    .overview-header {
+        margin: 10px;
+        padding: 10px;
+        margin-bottom: 40px;
+        h1 {
+            font-size: 18px;
+            float: left;
+            padding-left: 35px;
+            background: url(/assets/images/campaignoverview/dashboard-ico.png) no-repeat left center;
+            background-size: contain;
+        }
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+    }
     .panel {
         margin: 10px;
         padding: 10px;
@@ -12,7 +36,13 @@
         }
     }
     .launch-history {
-        text-align: right;
+        float: right;
+        a {
+            font-size: 12px;
+            padding-left: 25px;
+            background: url(/assets/images/campaignoverview/launch-history-ico.png) no-repeat left center;
+            background-size: contain;
+        }
     }
     .systems-component {
         flex: 1 1 auto;
@@ -20,46 +50,58 @@
     }
     .main-component {
         flex: 0 1 auto;
-        .lift-chart {
-            font-size: 10px;
-            width: 390px;
-            .bar-labels {
-                & > strong {
-                    position: relative;
-                    top: -5px;
-                    &:before {
-                        //top: -18px !important;
+        .panel {
+            &.ratings-chart {
+                margin: 0;
+                padding: 0;
+                margin-bottom: 50px;
+                .lift-chart {
+                    font-size: 12px;
+                    width: 390px;
+                    .bar-labels {
+                        & > strong {
+                            position: relative;
+                            top: -5px;
+                            &:before {
+                                //top: -18px !important;
+                            }
+                        }
                     }
-                }
-            }
-            .additional-info {
-                & > span {
-                    position: relative;
-                    top: -5px;
-                    &:before {
-                        top: -18px !important;
-                    }
-                    &.label-Accounts {
-                        min-width: 46px;
+                    .additional-info {
+                        & > span {
+                            position: relative;
+                            top: -5px;
+                            &:before {
+                                top: -18px !important;
+                            }
+                            &.label-Accounts {
+                                min-width: 46px;
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    .talking-points {
+    .talking-points-label {
+        & > strong {
+            float: left;
+        }
+        & > a {
+            font-size: 12px;
+            font-weight: normal;
+            float: right;
+            margin-right: 20px;
+        }
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+    }
+    .talking-points-count {
         & > a {
             display: block;
-        }
-    }
-}
-.rating-modal {
-    .le-title-container {
-        & > img {
-            height: 37px;
-        }
-        & > p {
-            border-left: 1px solid #aaa;
-            padding-left: 10px;
         }
     }
 }

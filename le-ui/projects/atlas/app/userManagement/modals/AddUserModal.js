@@ -89,6 +89,13 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
         }
     }
 
+    $scope.disableExpire = function(){
+        var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
+        if (currentLevel.ordinal != 4){
+            return true;
+        }
+    }
+
     $scope.saveInProgress = false;
     $scope.addUserErrorMessage = "";
     $scope.showAddUserError = false;

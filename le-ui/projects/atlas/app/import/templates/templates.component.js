@@ -55,47 +55,44 @@ export default class TemplatesComponent extends Component {
             data: [],
             entity: '',
             entityType: '',
-            feedType: ''
+            feedType: '',
+            object: ''
         };
 
     }
 
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
-
-        console.log(response.type);
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
                 state.entityType = 'Account';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Contacts": {
                 state.entity = "contacts";
                 state.entityType = 'Contact';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Purchases": {
                 state.entity = "productpurchases";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Bundles": {
                 state.entity = "productbundles";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Hierarchy": {
                 state.entity = "producthierarchy";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
         }
+
+        state.feedType = response.data.FeedType;
+        state.object = response.data.Object;
 
         this.setState(state, function () {
             
@@ -107,6 +104,7 @@ export default class TemplatesComponent extends Component {
             ImportWizardStore.setFeedType(this.state.feedType);
             ImportWizardStore.setTemplateAction(action);
             ImportWizardStore.setTemplateData(data);
+            ImportWizardStore.setObject(this.state.object);
             if (action == 'view-template') {
                 this.viewTemplate(response);
             } else {
@@ -182,7 +180,8 @@ export default class TemplatesComponent extends Component {
         if (value && value != "") {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
-            copy[cell.props.colName] = value;
+
+            copy['TemplateName'] = value;
             httpService.put(
                 "/pls/cdl/s3/template/displayname",
                 copy,
@@ -191,9 +190,7 @@ export default class TemplatesComponent extends Component {
                         cell.toogleEdit();
                         if (response.getStatus() === SUCCESS) {
                             let newState = [...this.state.data];
-                            newState[cell.props.rowIndex][
-                                cell.props.colName
-                            ] = value;
+                            newState[cell.props.rowIndex]['TemplateName'] = value;
                             this.setState({ data: newState });
                         }
                     },
@@ -473,12 +470,11 @@ export default class TemplatesComponent extends Component {
                 <ReactMainContainer className="templates">
                     <LeToolBar justifycontent="space-between">
                         <div>
-                            S3 Root Folder: {rootFolder}
-                            <ul className="unstyled">
+                            <ul>
                                 <CopyComponent
                                     title="Copy Link"
                                     data={
-                                        rootFolder
+                                        `${'S3 Root Folder: '}${rootFolder}`
                                     }
                                     callback={() => {
                                         messageService.sendMessage(
@@ -500,17 +496,6 @@ export default class TemplatesComponent extends Component {
                                 config={this.emailCredentialConfig}
                                 callback={() => {
                                     this.TemplatesStore.newToken();
-                                    // httpService.get(
-                                    //     "/pls/dropbox",
-                                    //     new Observer(response => {
-                                    //         // console.log("BACK HERE ", response);
-                                    //     }),
-                                    //     {
-                                    //         ErrorDisplayMethod: "Banner",
-                                    //         ErrorDisplayOptions: '{"title": "Warning"}',
-                                    //         ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                                    //     }
-                                    // );
                                 }}
                             />
                         </div>

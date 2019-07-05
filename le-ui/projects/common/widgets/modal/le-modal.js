@@ -38,7 +38,6 @@ export default class LeModal extends Component {
 
     componentDidMount() {
         this.modalRoot = document.getElementById('le-modal')
-        // console.log('MOUNTED ',document.getElementById('react-main-body'));
     }
 
     clickHandler(action) {
@@ -147,7 +146,7 @@ export default class LeModal extends Component {
                         }}>&times;</span>
                         <div className="le-title-container">
                             {this.getTitleIcon()}
-                            <p className="le-title" title={this.getTitle()}>
+                            <p className="le-title">
                                 {this.getTitle()}
                             </p>
                         </div>

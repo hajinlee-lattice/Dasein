@@ -24,7 +24,7 @@ class ReactRouter {
 
         // Register each state
         const states = mainStates;
-        //console.log('STATE ',states);
+        // console.log('STATE ',states);
         states.forEach(state => this.routing.router.stateRegistry.register(state));
 
         // Set initial and fallback states

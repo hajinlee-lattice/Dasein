@@ -61,7 +61,7 @@ public class ProductDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importData(BusinessEntity.Product, "Product.csv", "Product", false, false);
+        importData(BusinessEntity.Product, "Product.csv", null, false, false);
     }
 
     protected void processAnalyze() {
@@ -119,7 +119,7 @@ public class ProductDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
         Restriction restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         Long count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count, ACCOUNT_1);
+        Assert.assertEquals(count, ACCOUNT_PA);
 
         bkt = Bucket.dateBkt(TimeFilter.isEmpty());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);

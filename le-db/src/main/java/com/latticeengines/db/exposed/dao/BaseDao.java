@@ -47,8 +47,15 @@ public interface BaseDao<T> {
 
     List<T> findAllByFields(Object... fieldsAndValues);
 
+    List<T> findAllSortedByFieldWithPagination(int offset, int limit, String sortByField,
+            Object... fieldsAndValues);
+
     T merge(T entity);
     
+    long findAllCount();
+
+    long findCountByFields(Object... fieldsAndValues);
+
     void flushSession();
     
     void clearSession();

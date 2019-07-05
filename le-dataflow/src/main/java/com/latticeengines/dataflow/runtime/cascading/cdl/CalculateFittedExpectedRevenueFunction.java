@@ -102,7 +102,7 @@ public class CalculateFittedExpectedRevenueFunction extends BaseOperation implem
 
         // now overwrite adjusted predicted value into predictedRevenueFieldPos
         // (DSC-377)
-        result.set(predictedRevenueFieldPos, adjustedPredictedRevenue);
+//        result.set(predictedRevenueFieldPos, adjustedPredictedRevenue);
         result.set(probabilityFieldPos, adjustedProbability);
 
         normalizedExpectedRevenue = BigDecimal.valueOf(normalizedExpectedRevenue)

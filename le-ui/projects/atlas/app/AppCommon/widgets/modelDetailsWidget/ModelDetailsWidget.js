@@ -30,6 +30,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.created = ratingEngine.created;
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
             $scope.segmentName = ratingEngine.segment ? ratingEngine.segment.display_name : 'No segment selected';
+            $scope.scorableAccounts = undefined;
 
             if ($scope.IsRuleBased || $scope.IsCustomEvent) {
                 if ($scope.IsRuleBased) {
@@ -52,6 +53,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                     $scope.scorableAccounts = 0;
                 }
             }
+
+            console.log($scope.scorableAccounts);
 
             $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
             $scope.segmentAccountsString = "(" + $scope.segmentAccounts + " total accounts)";
@@ -181,6 +184,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                         $scope.scorableAccounts = 0;
                     }
                 }
+
+                console.log($scope.scorableAccounts);
 
                 $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
                 $scope.segmentAccountsString = "(" + $scope.segmentAccounts + " total accounts)";

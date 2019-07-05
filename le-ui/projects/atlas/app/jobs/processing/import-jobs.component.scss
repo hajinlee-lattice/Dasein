@@ -1,16 +1,27 @@
 section.import-jobs {
+    
+    .le-grid .le-header{
+        border-top: 0;
+        background: none;
+    }
     .le-grid{
         min-width: 650px; 
     }
+
     .info-row {
         border: 1px solid rgba(0, 0, 0, 0.22);
         font-size: 16px;
     }
     import-job-row {
-        border: 1px solid rgba(0, 0, 0, 0.22);
+        border-top: 1px solid rgba(0, 0, 0, 0.22);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.22);
         .icon-failed {
             padding: 10px;
             color: #F16A24;
+        }
+        .icon-warning{
+            @extend .icon-failed;
+            color: #FFBD48;
         }
         .partial {
             color: #F16A24;
@@ -145,7 +156,8 @@ section.import-jobs {
           flex: 1;
       }
       .text-icon-tooltip-container{
-        width: 50%;
+        width: 0;
+        padding-left: 8px;
         height: 100%;
         display: flex;
         justify-content: center;

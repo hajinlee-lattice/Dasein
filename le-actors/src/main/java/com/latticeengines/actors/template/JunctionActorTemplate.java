@@ -52,7 +52,7 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
                 return false;
             }
         } catch (Exception e) {
-            traveler.warn(
+            traveler.error(
                     String.format("Force to return anchor due to exception encountered at %s: %s",
                             getActorName(self()), e.getMessage()),
                     e);
@@ -64,6 +64,8 @@ public abstract class JunctionActorTemplate extends VisitorActorTemplate {
     @Override
     protected void process(Response response) {
         Traveler traveler = response.getTravelerContext();
+        // Inject failure only for testing purpose
+        injectFailure(traveler);
         recoverTraveler(traveler);
     }
 

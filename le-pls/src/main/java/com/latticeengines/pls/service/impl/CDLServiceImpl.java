@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -330,7 +332,7 @@ public class CDLServiceImpl implements CDLService {
      * template according to data feed task
      */
     @Override
-    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace) {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
         List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
         log.info("folderNames is : " + folderNames.toString());
@@ -356,7 +358,8 @@ public class CDLServiceImpl implements CDLService {
                     display.setEntity(entityType.getEntity());
                     display.setObject(entityType.getDisplayName());
                     display.setFeedType(folderName);
-                    display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
+                    display.setS3ImportSystem(getS3ImportSystem(customerSpace,
+                            S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                     templates.add(display);
                 }
@@ -373,7 +376,8 @@ public class CDLServiceImpl implements CDLService {
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setEntity(entityType.getEntity());
-                display.setSystemName(S3PathBuilder.getSystemNameFromFeedType(folderName));
+                display.setS3ImportSystem(getS3ImportSystem(customerSpace,
+                        S3PathBuilder.getSystemNameFromFeedType(folderName)));
                 display.setImportStatus(task.getS3ImportStatus() == null ?
                         DataFeedTask.S3ImportStatus.Pause : task.getS3ImportStatus());
                 templates.add(display);
@@ -381,6 +385,25 @@ public class CDLServiceImpl implements CDLService {
         }
         // ensure there exists 5 templates at least in the returned list
         populateDefaultTemplate(templates);
+
+        if (StringUtils.isNotEmpty(sortBy)) {
+            Comparator<S3ImportTemplateDisplay> compareBySystemType =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
+                            s.getS3ImportSystem().getSystemType().name());
+            Comparator<S3ImportTemplateDisplay> compareBySystemName =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
+                            s.getS3ImportSystem().getDisplayName() == null ? "" : s.getS3ImportSystem().getDisplayName());
+            Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType.thenComparing(compareBySystemName);
+
+            Comparator<S3ImportTemplateDisplay> compareBySystemPriority =
+                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1 :
+                            s.getS3ImportSystem().getPriority());
+            if (sortBy.equalsIgnoreCase("SystemDisplay")) {
+                templates.sort(compareBySystem);
+            } else if (sortBy.equalsIgnoreCase("SystemPriority")) {
+                templates.sort(compareBySystemPriority);
+            }
+        }
         return templates;
     }
 
@@ -390,11 +413,17 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public void createS3ImportSystem(String customerSpace, String systemName, S3ImportSystem.SystemType systemType) {
+    public void createS3ImportSystem(String customerSpace, String systemDisplayName,
+                                     S3ImportSystem.SystemType systemType, Boolean primary) {
         S3ImportSystem s3ImportSystem = new S3ImportSystem();
+        String systemName = AvroUtils.getAvroFriendlyString(systemDisplayName);
         s3ImportSystem.setSystemType(systemType);
         s3ImportSystem.setName(systemName);
+        s3ImportSystem.setDisplayName(systemDisplayName);
         s3ImportSystem.setTenant(MultiTenantContext.getTenant());
+        if (Boolean.TRUE.equals(primary)) {
+            s3ImportSystem.setPriority(1);
+        }
         cdlProxy.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxProxy.createTemplateFolder(customerSpace, systemName, null, null);
     }
@@ -405,17 +434,34 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
+    public List<S3ImportSystem> getAllS3ImportSystem(String customerSpace) {
+        List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(customerSpace);
+        if (CollectionUtils.isNotEmpty(allSystems)) {
+            allSystems.sort(Comparator.comparing(S3ImportSystem::getPriority));
+        }
+        return allSystems;
+    }
+
+    @Override
     public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable) {
         List<TemplateFieldPreview> templatePreview =
                 templateTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
+        List<TemplateFieldPreview> standardPreview =
+                standardTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
         Set<String> standardAttrNames = standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
         for (TemplateFieldPreview fieldPreview : templatePreview) {
             if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                standardPreview.removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
             } else {
                 fieldPreview.setFieldCategory(FieldCategory.CustomField);
             }
         }
+        standardPreview.forEach(preview -> {
+            preview.setUnmapped(true);
+            preview.setFieldCategory(FieldCategory.LatticeField);
+        });
+        templatePreview.addAll(standardPreview);
         return templatePreview;
     }
 
@@ -494,6 +540,30 @@ public class CDLServiceImpl implements CDLService {
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
         return fileContent.toString();
+    }
+
+    @Override
+    public String getSystemNameFromFeedType(String feedType) {
+        if (StringUtils.isEmpty(feedType) || !feedType.contains("_")) {
+            return null;
+        }
+        return feedType.substring(0, feedType.lastIndexOf("_"));
+    }
+
+    @Override
+    public void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
+        cdlProxy.updateS3ImportSystem(customerSpace, importSystem);
+    }
+
+    @Override
+    public void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList) {
+        if (CollectionUtils.isEmpty(systemList)) {
+            return;
+        }
+        for (int i = 0; i < systemList.size(); i++) {
+            systemList.get(i).setPriority(i + 1);
+        }
+        cdlProxy.updateAllS3ImportSystemPriority(customerSpace, systemList);
     }
 
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {

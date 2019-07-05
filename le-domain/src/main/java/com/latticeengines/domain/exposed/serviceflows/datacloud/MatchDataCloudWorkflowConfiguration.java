@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultCascadingConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -32,7 +31,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private BulkMatchWorkflowConfiguration.Builder bulkMatchWorkflowConfigurationBuilder = new BulkMatchWorkflowConfiguration.Builder();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
-        private ProcessMatchResultCascadingConfiguration matchResultCascading = new ProcessMatchResultCascadingConfiguration();
 
         public MatchDataCloudWorkflowConfiguration build() {
             configuration.setContainerConfiguration("matchDataCloudWorkflow",
@@ -40,7 +38,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             configuration.add(match);
             configuration.add(prepareMatchDataConfiguration);
             configuration.add(bulkMatchWorkflowConfigurationBuilder.build());
-            configuration.add(matchResultCascading);
             configuration.add(matchResult);
             return configuration;
         }
@@ -50,7 +47,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setCustomerSpace(customerSpace);
             prepareMatchDataConfiguration.setCustomerSpace(customerSpace);
             bulkMatchWorkflowConfigurationBuilder.customer(customerSpace);
-            matchResultCascading.setCustomerSpace(customerSpace);
             matchResult.setCustomer(customerSpace.toString());
             return this;
         }
@@ -58,8 +54,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder microServiceHostPort(String microServiceHostPort) {
             match.setMicroServiceHostPort(microServiceHostPort);
             prepareMatchDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            bulkMatchWorkflowConfigurationBuilder.microserviceHostPort(microServiceHostPort);
-            matchResultCascading.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -67,7 +61,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setInternalResourceHostPort(internalResourceHostPort);
             prepareMatchDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             matchResult.setInternalResourceHostPort(internalResourceHostPort);
-            matchResultCascading.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -97,7 +90,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
-            matchResultCascading.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
@@ -131,13 +123,11 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchResult.setExcludeDataCloudAttrs(exclude);
-            matchResultCascading.setExcludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder keepMatchLid(boolean keepLid) {
             matchResult.setKeepLid(keepLid);
-            matchResultCascading.setKeepLid(keepLid);
             return this;
         }
 
@@ -155,7 +145,6 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setSkipStep(skipMatchingStep);
             prepareMatchDataConfiguration.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
-            matchResultCascading.setSkipStep(skipMatchingStep);
             return this;
         }
 
@@ -187,13 +176,11 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder matchGroupId(String matchGroupId) {
             prepareMatchDataConfiguration.setMatchGroupId(matchGroupId);
             matchResult.setMatchGroupId(matchGroupId);
-            matchResultCascading.setMatchGroupId(matchGroupId);
             return this;
         }
 
         public Builder joinWithInternalId(boolean joinWithInternalId) {
             matchResult.setJoinInternalId(joinWithInternalId);
-            matchResultCascading.setJoinInternalId(joinWithInternalId);
             return this;
         }
 

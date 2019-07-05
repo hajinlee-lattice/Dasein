@@ -9,6 +9,7 @@ from random import randrange
 
 ACCOUNT_FILE = 'Account_All.csv'
 CONTACT_FILE = 'Contact_All.csv'
+TXN_FILE = 'Transaction_All.csv'
 ID = 'Id'
 ACCOUNT_ID = 'AccountId'
 CONTACT_ID = 'ContactId'
@@ -89,6 +90,19 @@ def read_contact_base(file):
     return contacts, schema
 
 
+def read_txn_base(file):
+    txns = []
+    schema = []
+    with open(file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        schema = reader.fieldnames
+        for row in reader:
+            standardize_txn(row)
+            txns.append(row)
+    schema = standardize_txn_schema(schema)
+    return txns, schema
+
+
 def standardize_account(account):
     if ID in account:
         account[CUSTOMER_ACCOUNT_ID] = account[ID]
@@ -124,6 +138,17 @@ def standardize_contact(contact):
 def standardize_contact_schema(schema):
     schema = [CUSTOMER_ACCOUNT_ID if s == ACCOUNT_ID else CUSTOMER_CONTACT_ID if s == CONTACT_ID else s for s in schema]
     schema += [PHONE_NUMBER, WEBSITE, COMPANY_NAME, COUNTRY, STATE, CITY, REF_CUSTOMER_CONTACT_ID, REF_CUSTOMER_ACCOUNT_ID, TEST_SCENARIO]
+    return schema
+
+
+def standardize_txn(txn):
+    if ACCOUNT_ID in txn:
+        txn[CUSTOMER_ACCOUNT_ID] = txn[ACCOUNT_ID]
+        txn.pop(ACCOUNT_ID, None)
+        
+        
+def standardize_txn_schema(schema):
+    schema = [CUSTOMER_ACCOUNT_ID if s == ACCOUNT_ID else s for s in schema]
     return schema
 
 
@@ -239,6 +264,7 @@ def update_account_in_contact(contacts, aid_to_account, update_mode):
         else:
             raise Exception('Unknown Contact to Account match scenario: %s' % ContactToAccount(i))
 
+
 def update_account_in_contact_case_email_nl(contact, account):
     contact[CUSTOMER_ACCOUNT_ID] = None
     contact[EMAIL] = '%s@%s' % (contact[EMAIL][:contact[EMAIL].index('@')], account.website[account.website.find('@')+1:])
@@ -248,6 +274,7 @@ def update_account_in_contact_case_email_nl(contact, account):
     contact[CITY] = account.city
     contact[POSTAL_CODE] = account.postal_code
     update_scenario(contact, 'Contact to Account: Email + Name + Location;')
+
 
 def update_account_in_contact_case_website_nl(contact, account):
     contact[CUSTOMER_ACCOUNT_ID] = None
@@ -260,6 +287,7 @@ def update_account_in_contact_case_website_nl(contact, account):
     contact[POSTAL_CODE] = account.postal_code
     update_scenario(contact, 'Contact to Account: Website + Name + Location;')
 
+
 def update_contact(contacts):
     for contact in contacts:
         contact[CUSTOMER_CONTACT_ID] = None
@@ -270,6 +298,30 @@ def update_contact(contacts):
             update_scenario(contact, 'Contact match: Email;')
         else:
             update_scenario(contact, 'Contact match: First Name + Last Name + Phone Number;')
+            
+
+# For ProcessTxn test:
+# 1. Update CustomerAccountId in range [901, 1000] to be [10901, 11000] by adding 10000
+#    Reason: Expect CustomerAccountId in range [10901, 11000] becomes NEW account created by ProcessTxn test
+#            Expect CustomerAccountId in range [901, 1000] becomes NEW account created by UpdateAccount test which runs after ProcessTxn
+# 2. Update CustomerAccountId in range [1001, ) to be [0, 899] by mod 900
+#    Reason: To avoid trigger profiling account in ProcessTxn test, new CustomerAccountId cannot be more than 30% of accounts created by ProcessAccount test
+def update_account_in_txn_for_process(txns):
+    for txn in txns:
+        if (int(txn[CUSTOMER_ACCOUNT_ID]) >= 901 and int(txn[CUSTOMER_ACCOUNT_ID]) <= 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) + 10000
+        elif (int(txn[CUSTOMER_ACCOUNT_ID]) > 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) % 900
+
+
+# For UpdateTxn test:
+# 1. Update CustomerAccountId in range [1001, ) to be [20000, 20899] by mod 900 and adding 20000
+#    Reason: Expect CustomerAccountId originally in range [20000, 20899] become NEW account created by UpdateTxn test
+#            Also to avoid trigger profiling account in UpdateTxn test, new CustomerAccountId cannot be more than 30% of accounts created by all the previous end2end tests
+def update_account_in_txn_for_update(txns):
+    for txn in txns:
+        if (int(txn[CUSTOMER_ACCOUNT_ID]) > 1000):
+            txn[CUSTOMER_ACCOUNT_ID] = int(txn[CUSTOMER_ACCOUNT_ID]) % 900 + 20000
 
 
 def update_scenario(contact, msg):
@@ -316,3 +368,18 @@ if __name__ == '__main__':
     output(contacts1, 'EntityMatch_Contact_1_900.csv', contact_schema)
     output(contacts2, 'EntityMatch_Contact_401_500.csv', contact_schema)
     output(contacts3, 'EntityMatch_Contact_901_1000.csv', contact_schema)
+    
+    # Transaction
+    # list: Transaction, list: Transaction field names
+    txns, txn_schema = read_txn_base(TXN_FILE)
+    # For ProcessTxn test
+    txn1 = split(txns, 0, 25000)
+    txn2 = split(txns, 25000, 50000)
+    # For UpdateTxn test
+    txn3 = split(txns, 46000, 60000)
+    update_account_in_txn_for_process(txn1)
+    update_account_in_txn_for_process(txn2)
+    update_account_in_txn_for_update(txn3)
+    output(txn1, 'EntityMatch_Transaction_1_25K.csv', txn_schema)
+    output(txn2, 'EntityMatch_Transaction_25K_50K.csv', txn_schema)
+    output(txn3, 'EntityMatch_Transaction_46K_60K.csv', txn_schema)

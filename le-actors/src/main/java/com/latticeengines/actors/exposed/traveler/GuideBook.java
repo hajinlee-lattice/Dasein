@@ -67,7 +67,7 @@ public abstract class GuideBook {
         try {
             decisionGraph = getDecisionGraphByName(traveler.getDecisionGraph());
         } catch (Exception e) {
-            traveler.warn("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
+            traveler.error("Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
             traveler.clearLocationsToVisitingQueue();
             return;
         }
@@ -102,7 +102,7 @@ public abstract class GuideBook {
             try {
                 decisionGraph = getDecisionGraphByName(traveler.getDecisionGraph());
             } catch (Exception e) {
-                traveler.warn(
+                traveler.error(
                         "Failed to retrieve decision graph " + traveler.getDecisionGraph(), e);
                 return traveler.getOriginalLocation();
             }

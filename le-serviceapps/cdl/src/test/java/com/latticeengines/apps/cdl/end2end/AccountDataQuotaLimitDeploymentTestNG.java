@@ -67,7 +67,7 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
 
         long spendTime = 0L;
         spendTime = System.currentTimeMillis();
-        importData(BusinessEntity.Account, accountCsv, "Account", false, false);
+        importData(BusinessEntity.Account, accountCsv, null, false, false);
         log.info("Import " + accountCsv + " Execution time: " + (System.currentTimeMillis() - spendTime) / 1000f
                 + " second");
     }
@@ -127,7 +127,7 @@ public class AccountDataQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploymentT
         Restriction restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);
         query.setAccountRestriction(new FrontEndRestriction(restriction));
         Long count = entityProxy.getCount(mainCustomerSpace, query);
-        Assert.assertEquals(count, ACCOUNT_1);
+        Assert.assertEquals(count, ACCOUNT_PA);
 
         bkt = Bucket.dateBkt(TimeFilter.isEmpty());
         restriction = new BucketRestriction(BusinessEntity.Account, "user_Test_Date", bkt);

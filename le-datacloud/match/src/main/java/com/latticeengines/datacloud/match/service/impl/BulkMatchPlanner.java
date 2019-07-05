@@ -30,6 +30,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
             setEntityDecisionGraph(input);
         }
+        setDataCloudVersion(input);
 
         MatchContext context = new MatchContext();
         context.setInput(input);

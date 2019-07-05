@@ -1,0 +1,36 @@
+import models
+from sqlalchemy.ext.declarative import declarative_base
+
+
+Base = declarative_base()
+
+
+class BaseModel:
+
+    def __init__(self, **kwargs):
+        if kwargs:
+            for k, v in kwargs.items():
+                self.__setattr__(k, v)
+
+    def save(self):
+        """
+            save object to db
+        """
+        models.storage.new(self)
+        models.storage.save()
+
+    def delete(self):
+        """
+        delete current object
+        :return: json repr of object
+        """
+        o = self.to_json()
+        models.storage.delete(self)
+        models.storage.save()
+        return o
+
+    def to_json(self):
+        """
+            returns json representation of self
+        """
+        return {k: v for k, v in self.__dict__.items()}

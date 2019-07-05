@@ -184,10 +184,24 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 overview.setLimit(defaultWebsiteKeywords);
                 break;
             case ACCOUNT_ATTRIBUTES:
-                overview.setLimit(DEFAULT_LIMIT);
+                // TODO going to get rid of the try catch after the zookeeper is
+                // updated for all tenants
+                long accounts = DEFAULT_LIMIT;
+                try {
+                    accounts =
+                            (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+                } catch (Exception e) {
+                }
+                overview.setLimit(accounts);
                 break;
             case CONTACT_ATTRIBUTES:
-                overview.setLimit(DEFAULT_LIMIT);
+                long contacts = DEFAULT_LIMIT;
+                try {
+                    contacts =
+                            (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+                } catch (Exception e) {
+                }
+                overview.setLimit(contacts);
                 break;
             default:
                 log.warn("Unsupported" + category);

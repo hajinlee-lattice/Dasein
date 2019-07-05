@@ -190,7 +190,7 @@
                             <dd ng-if="vm.predictionType == 'EXPECTED_VALUE' && bucket.avg_expected_revenue">${{bucket.avg_expected_revenue | number: 2}}</dd>
 
                             <dt ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">Conversion Rate</dt>
-                            <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ (bucket.num_leads / vm.ratingsSummary.total_num_leads) * 100 | number: 2 }}%</dd>
+                            <dd ng-if="vm.predictionType != 'EXPECTED_VALUE' || !bucket.totalAvgRevenue">{{ (bucket.num_converted / bucket.num_leads) * 100 | number: 2 }}%</dd>
                         </dl>
                     </li>
                 </ul>

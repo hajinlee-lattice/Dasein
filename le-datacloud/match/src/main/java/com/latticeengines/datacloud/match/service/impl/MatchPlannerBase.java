@@ -24,13 +24,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.actors.framework.MatchDecisionGraphService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
@@ -76,6 +76,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
 
+    @Inject
+    private DataCloudVersionEntityMgr versionEntityMgr;
+
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
@@ -85,10 +88,18 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Value("${datacloud.match.default.decision.graph.contact}")
     private String defaultContactGraph;
 
+    /**
+     * Default DataCloud version is latest approved version with major version
+     * as 2.0
+     *
+     * @param input
+     */
     void setDataCloudVersion(MatchInput input) {
-        if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
-            log.warn("Found a match request against deprecated RTS source, using input=" + JsonUtils.serialize(input));
-            input.setDataCloudVersion("1.0.0");
+        if (StringUtils.isBlank(input.getDataCloudVersion())) {
+            String dcVersion = versionEntityMgr.currentApprovedVersionAsString();
+            log.warn("Found a match request without DataCloud version, force to use {}. MatchInput={}", dcVersion,
+                    JsonUtils.serialize(input));
+            input.setDataCloudVersion(dcVersion);
         }
     }
 

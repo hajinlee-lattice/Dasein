@@ -66,4 +66,22 @@ public class CSVImportMapperUnitTestNG {
                 { "0.123e1", 1.23, true }
         };
     }
+
+    @Test(groups = "unit", dataProvider = "testDateStr")
+    public void testIsEmptyString(String dateStr, boolean expectedValue) {
+        Assert.assertEquals(mapper.isEmptyString(dateStr), expectedValue);
+    }
+
+    @DataProvider(name = "testDateStr")
+    public Object[][] provideTestDateStrings() {
+        return new Object[][]{
+                {"none", true},
+                {"Null", true},
+                {"nA", true},
+                {"N/A", true},
+                {"blank", true},
+                {"Empty", true},
+                {"test", false}
+        };
+    }
 }

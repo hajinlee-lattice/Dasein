@@ -9,17 +9,17 @@
 
     <properties>
         <component-name>quartzclient</component-name>
-        <le.domain.version>4.17.0-SNAPSHOT</le.domain.version>
-        <le.db.version>4.17.0-SNAPSHOT</le.db.version>
-        <le.network.version>4.17.0-SNAPSHOT</le.network.version>
-        <le.proxy.version>4.17.0-SNAPSHOT</le.proxy.version>
-        <le.security.version>4.17.0-SNAPSHOT</le.security.version>
+        <le.domain.version>4.18.0-SNAPSHOT</le.domain.version>
+        <le.db.version>4.18.0-SNAPSHOT</le.db.version>
+        <le.network.version>4.18.0-SNAPSHOT</le.network.version>
+        <le.proxy.version>4.18.0-SNAPSHOT</le.proxy.version>
+        <le.security.version>4.18.0-SNAPSHOT</le.security.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>4.17.0-SNAPSHOT</version>
+        <version>4.18.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 

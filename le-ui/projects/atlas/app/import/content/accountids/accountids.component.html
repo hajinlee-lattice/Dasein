@@ -1,35 +1,163 @@
-<div class="import-accountid container file-import-content">
-    <div class="header">
-        <h2>Account ID</h2>
-        <p ng-if="!vm.entityMatchEnabled">
-            Select your unique ID to de-duplicate your account records.
-        </p>
-        <p ng-if="vm.entityMatchEnabled">
-            Select your unique ID to be the primary match key for your accounts update in Atlas.
-        </p>
-    </div>
-    <form name="form">
-        <div class="id-options" ng-init="vm.checkFieldsDelay(form)">
-            <div class="id-options-item">
-                <div>
-                    <label for="dedupeField">Unique Identifier</label>
-                    <select 
-                        class="form-control"
-                        ng-model="vm.fieldMapping.account"
-                        ng-init="vm.checkValidDelay(form)"
-                        ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
-                        ng-required="!vm.entityMatchEnabled"
-                        ng-class="{'required': !vm.entityMatchEnabled}">
-                        <option ng-if="!vm.entityMatchEnabled" value="" hidden disabled>-- Unmapped Field --</option>
-                        <option ng-if="vm.entityMatchEnabled" value="">-- Unmapped Field --</option>
-                        <option ng-repeat="AvailableField in vm.AvailableFields" 
-                                value="{{AvailableField.userField}}" 
-                                ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1">
-                            {{AvailableField.userField}}
-    				    </option>
-                   </select>
-                </div>
-            </div>
+<div
+  class="import-accountid container file-import-content"
+  ng-if="!vm.isMultipleTemplates()"
+>
+  <div class="header">
+    <h2>Account ID</h2>
+    <p ng-if="!vm.entityMatchEnabled">
+      Select your unique ID to de-duplicate your account records.
+    </p>
+    <p ng-if="vm.entityMatchEnabled">
+      Select your unique ID to be the primary match key for your accounts update
+      in Atlas.
+    </p>
+  </div>
+  <ng-form name="vm.form">
+    <div class="id-options" ng-init="vm.checkFieldsDelay(form)">
+      <div class="id-options-item">
+        <div>
+          <label for="dedupeField">Unique Identifier</label>
+          <select
+            class="form-control"
+            ng-model="vm.fieldMapping.account"
+            ng-init="vm.checkValidDelay(form)"
+            ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+            ng-required="!vm.entityMatchEnabled"
+            ng-class="{'required': !vm.entityMatchEnabled}"
+          >
+            <option ng-if="!vm.entityMatchEnabled" value="" hidden disabled
+              >-- Unmapped Field --</option
+            >
+            <option ng-if="vm.entityMatchEnabled" value=""
+              >-- Unmapped Field --</option
+            >
+            <option
+              ng-repeat="AvailableField in vm.AvailableFields"
+              value="{{ AvailableField.userField }}"
+              ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+            >
+              {{ AvailableField.userField }}
+            </option>
+          </select>
         </div>
-    </form>
+      </div>
+    </div>
+  </ng-form>
+</div>
+
+<!-- UNIQUE ID -->
+<div
+  class="import-multipletemplates container file-import-content"
+  ng-if="vm.isMultipleTemplates()"
+>
+  <div class="header">
+    <h2>Unique ID</h2>
+    <p>
+      Select your unique IDs to de-duplicate your account records.
+    </p>
+  </div>
+  <ng-form name="vm.form">
+    <div class="unique-id-options" ng-init="vm.checkFieldsDelay(form)">
+      <div class="id-options-item">
+        <select
+          class="form-control"
+          ng-model="vm.fieldMapping.account"
+          ng-init="vm.checkValidDelay(form)"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+        >
+          <option value="">{{ vm.ignoredFieldLabel }}</option>
+          <option
+            ng-repeat="AvailableField in vm.AvailableFields"
+            value="{{ AvailableField.userField }}"
+            ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+          >
+            {{ AvailableField.userField }}
+          </option>
+        </select>
+        <span class="info">
+          This field will be available as 'your system name'.Account ID in My
+          Attributes​
+        </span>
+      </div>
+      <br />
+      <label class="match-contact">
+        <input
+          type="checkbox"
+          ng-model="vm.match"
+          ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
+        />
+        Match this ID to Account ID field in Lattice
+      </label>
+      <p>
+        <strong
+          >Only one of your systems can map to Account ID. Once enabled, this
+          cannot be changed or removed.​</strong
+        >
+      </p>
+    </div>
+  <!--  -->
+  <!-- MATCH IDs -->
+  <div class="match-ids-multi-templates">
+    <div class="header">
+      <h2>Match IDs</h2>
+      <p>
+        Select Other IDS from in your file uploaded. This ids will be used to
+        match you accounts with accounts from other systems
+      </p>
+      <p>Note: These are not used to de-duplicate your accounts</p>
+      <br />
+    </div>
+
+      <ul class="field-mapping multi-templates">
+        <li class="header">
+          <ul class="match-id-header">
+            <li class="system-name">Fields in the uploaded File</li>
+            <li class="system-type">Use ID from System</li>
+          </ul>
+        </li>
+        <li class="field" ng-repeat="field in vm.matchIdItems track by $index">
+          <ul class="match-ids">
+            <li class="system-name">
+              <select
+                class="form-control"
+                ng-model="vm.matchIdItems[$index].userField"
+                ng-change="vm.changeMatchingFields($index, (vm.matchIdItems[$index]), {{vm.matchIdItems[$index]}})"
+              
+              >
+                <option value="">{{ vm.ignoredFieldLabel }}</option>
+                <option
+                  ng-repeat="AvailableField in vm.AvailableFields"
+                  value="{{ field.name }}^/{{ AvailableField.userField }}"
+                  ng-disabled="vm.unavailableFields.indexOf(AvailableField.userField) !== -1"
+                  ng-init="(AvailableField.mappedField == field.name ? vm.fieldMapping[field.name].userField = field.name + '^/' + AvailableField.userField : '')"
+                >
+                  {{ AvailableField.userField }}
+                </option>
+              </select>
+            </li>
+            <li class="system-type">
+                <select class="form-control" ng-model="vm.matchIdItems[$index].system" ng-change="vm.updateSystem($index)"> 
+                  <!-- <option value="">-- Select System --</option> -->
+                  <option
+                    ng-repeat="s in vm.systems"
+                    value="{{s.name}}"
+                    ng-required="true"
+                  >{{s.display_name}}</option>
+                </select>
+              </li>
+            <li class="remove-button" ng-click="vm.removeMatchId($index)">
+              <span title="remove mapping"><i class="fa fa-times"></i></span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </ng-form>
+    <button
+      class="button gray-button match-id-add"
+      type="button"
+      ng-click="vm.addMatchId()"
+    >
+      Add another ID
+    </button>
+  </div>
 </div>

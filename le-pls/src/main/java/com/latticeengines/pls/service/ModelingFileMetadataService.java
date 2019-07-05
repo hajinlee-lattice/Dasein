@@ -8,18 +8,19 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public interface ModelingFileMetadataService {
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean withoutId, boolean enableEntityMatch);
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel, boolean withoutId, boolean enableEntityMatch);
 
     FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             String entity, String source, String feedType);
 
-    void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
-
+    void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, boolean isModel,
+            boolean enableEntityMatch);
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                          String entity, String source, String feedType);
 
@@ -35,4 +36,7 @@ public interface ModelingFileMetadataService {
     List<LatticeSchemaField> getSchemaToLatticeSchemaFields(SchemaInterpretation schemaInterpretation);
 
     List<LatticeSchemaField> getSchemaToLatticeSchemaFields(String entity, String source, String feedType);
+
+    List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+                                                String entity, String source, String feedType);
 }

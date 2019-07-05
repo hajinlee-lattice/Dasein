@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 @Component("dunsGuideValidateMicroEngineActor")
 @Scope("prototype")
 public class DunsGuideValidateMicroEngineActor extends BaseDunsGuideValidateMicroEngineActor {
-    private static final Logger log = LoggerFactory.getLogger(CachedDunsGuideValidateMicroEngineActor.class);
+    private static final Logger log = LoggerFactory.getLogger(DunsGuideValidateMicroEngineActor.class);
 
     @PostConstruct
     public void postConstruct() {

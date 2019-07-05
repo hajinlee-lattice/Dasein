@@ -64,6 +64,7 @@ public class MatchKeyTuple implements Fact {
     @JsonIgnore
     private String uniqueIdForValue;
 
+    @JsonIgnore
     private boolean domainFromMultiCandidates;
 
     @MetricField(name = MatchConstants.DOMAIN_FIELD)

@@ -457,6 +457,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             if (ModelWorkflowConfigurationUtils.skipUseConfiguredModelingAttributesStep(modelIteration)) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
+            if(modelIteration != null && modelIteration > 1){
+                importData.setSkipStep(true);
+            }
             return this;
         }
 
@@ -467,6 +470,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder ratingEngineType(RatingEngineType ratingEngineType) {
             useConfiguredModelingAttributesBuilder.ratingEngineType(ratingEngineType);
+            return this;
+        }
+
+        public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+            generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
             return this;
         }
 

@@ -106,7 +106,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void processMatchHistory(MatchContext matchContext) {
         if (!isMatchHistoryEnabled) {
-            log.debug("MatchHistory not enabled, returning.");
+            log.info("MatchHistory not enabled, returning.");
             return;
         }
         List<InternalOutputRecord> records = matchContext.getInternalResults();
@@ -156,7 +156,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
         if (!isMatchHistoryEnabled) {
-            log.debug("MatchHistory not enabled, returning.");
+            log.info("MatchHistory not enabled, returning.");
             return;
         }
         if (CollectionUtils.isEmpty(matchHistories)) {
@@ -171,6 +171,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
+        log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
         firehoseService.sendBatch(deliveryStreamName, histories);
     }
 
@@ -180,6 +181,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
+        List<String> inputFields = matchContext.getInput().getFields();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
 
@@ -218,13 +220,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
 
-            // NOTE for entity match, check for entityId
-            // otherwise, check for latticeAccountId to determine if we have a
-            // match or not
-            boolean matchedRecord = internalRecord.isMatched()
-                    || (!isEntityMatch && (internalRecord.getLatticeAccountId() != null))
-                    || (isEntityMatch && StringUtils.isNotBlank(internalRecord.getEntityId()));
-
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
@@ -254,8 +249,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
                     value = true;
-                } else if (field.toLowerCase().contains("ismatched")) {
-                    value = StringUtils.isNotEmpty(internalRecord.getLatticeAccountId());
+                } else if (InterfaceName.IsMatched.name().equalsIgnoreCase(field)) {
+                    value = internalRecord.isMatched();
                 } else if (ColumnSelection.Predefined.LeadToAcct
                         .equals(matchContext.getInput().getPredefinedSelection())
                         && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
@@ -319,19 +314,31 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
             }
 
+            if (CollectionUtils.isNotEmpty(internalRecord.getFieldsToClear())) {
+                // clear out specific fields in input (copy new row for now to avoid affecting
+                // input object)
+                List<Object> clearedInput = new ArrayList<>();
+                for (int i = 0; i < inputFields.size(); i++) {
+                    if (internalRecord.getFieldsToClear().contains(inputFields.get(i))) {
+                        clearedInput.add(null);
+                    } else {
+                        clearedInput.add(internalRecord.getInput().get(i));
+                    }
+                }
+                internalRecord.setInput(clearedInput);
+            }
             internalRecord.setOutput(output);
 
-            if (matchedRecord) {
+            // For LDC and Entity match, IsMatched flag is marked in
+            // FuzzyMatchServiceImpl.fetchIdResult
+            if (internalRecord.isMatched()) {
                 totalMatched++;
-                internalRecord.setMatched(true);
-            } else {
-                internalRecord.setMatched(false);
-                internalRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
-            }
 
+            }
             internalRecord.setResultsInPartition(null);
+
             OutputRecord outputRecord = new OutputRecord();
-            if (returnUnmatched || matchedRecord) {
+            if (returnUnmatched || internalRecord.isMatched()) {
                 if (excludeUnmatchedPublicDomain && internalRecord.isPublicDomain()) {
                     log.warn("Excluding the record, because it is using the public domain: "
                             + internalRecord.getParsedDomain());
