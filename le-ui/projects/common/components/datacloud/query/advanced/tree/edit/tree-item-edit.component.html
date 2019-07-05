@@ -87,8 +87,8 @@
 
                             <numerical-range-directive
                                 ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)"
-                                config="{{vm.rangeConfig}}" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
-                                vm="vm" form="form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
+                                config="vm.rangeConfig" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
+                                vm="vm" form="vm.form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                                 changed="vm.callbackChangedNumericalValue(type, position, value)">
                             </numerical-range-directive>
 

@@ -120,7 +120,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.changeCmpValue = function (numerical) {
-                    // console.log('[tree-edit] changeCmpValue start', numerical, vm.operation, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
+                    console.log('[tree-edit] changeCmpValue start', numerical, vm.operation, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
                     vm.clear = true;
                     let _operation = vm.tree.bucketRestriction.bkt.Cmp;
 
@@ -144,12 +144,13 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     }
 
                     if (numerical) {
+                        initNumericalRange(true);
                         QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.operation);
                     } else {
                         QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
                     }
 
-                    // console.log(3, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
+                    console.log(3, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
                 }
 
                 vm.showChips = function () {
@@ -335,14 +336,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         let from = (fromNumerical != null) ? Number(fromNumerical) : undefined;
                         let to = (toNumerical != null) ? Number(toNumerical) : undefined;
                         vm.rangeConfig = {
-                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical' }
+                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical', step: 1 },
+                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical', step: 1 }
                         };
                         showNumericalRange();
                     } else {
                         vm.rangeConfig = {
-                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical', step: 1 },
+                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical', step: 1 }
                         };
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
                         setTimeout(() => { showNumericalRange() }, 0);
