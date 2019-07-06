@@ -457,9 +457,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             if (ModelWorkflowConfigurationUtils.skipUseConfiguredModelingAttributesStep(modelIteration)) {
                 useConfiguredModelingAttributesBuilder.skipStep(false);
             }
-            if(modelIteration != null && modelIteration > 1){
-                importData.setSkipStep(true);
-            }
             return this;
         }
 

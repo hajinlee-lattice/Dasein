@@ -107,13 +107,14 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         List<Attribute> attributes = null;
         try {
             if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+                log.info("CreateTable request for table: {} - Attributes: {} ", tableName,
+                        table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
             }
             post("createTable", url, table, null);
             addTableAttributes(customerSpace, tableName, attributes);
-        } catch(Exception e) {
+        } catch (Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;
         } finally {
@@ -127,9 +128,11 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         if (attributes == null) {
             return;
         }
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace,
+                tableName);
         for (int i = 0; (i * ATTRIBUTE_BATCH_SIZE) < attributes.size(); i++) {
-            List<Attribute> subList = attributes.subList(i * ATTRIBUTE_BATCH_SIZE, Math.min(i * ATTRIBUTE_BATCH_SIZE + ATTRIBUTE_BATCH_SIZE, attributes.size()));
+            List<Attribute> subList = attributes.subList(i * ATTRIBUTE_BATCH_SIZE,
+                    Math.min(i * ATTRIBUTE_BATCH_SIZE + ATTRIBUTE_BATCH_SIZE, attributes.size()));
             post("addTableAttributes", url, subList, null);
         }
     }
@@ -140,10 +143,11 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     }
 
     public void renameTable(String customerSpace, String tableName, String newTableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/rename/{newTableName}", customerSpace, tableName, newTableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/rename/{newTableName}",
+                customerSpace, tableName, newTableName);
         try {
             post("renameTable", url, null);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw e;
         }
     }
@@ -158,15 +162,16 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
                 renameTable(customerSpace, table.getName(), tableName);
                 table.setName(tableName);
             }
-            //- End of rename usecase
+            // - End of rename usecase
             if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
-                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
+                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName,
+                        table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
             }
             put("updateTable", url, table);
             addTableAttributes(customerSpace, tableName, attributes);
-        } catch(Exception e) {
+        } catch (Exception e) {
             deleteTable(customerSpace, tableName);
             throw e;
         } finally {
@@ -176,8 +181,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    public Table cloneTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/clone", customerSpace, tableName);
+    public Table cloneTable(String customerSpace, String tableName, boolean ignoreExtracts) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/tables/{tableName}/clone?ignore-extracts={ignoreExtracts}",
+                customerSpace, tableName, ignoreExtracts);
         return post("cloneTable", url, null, Table.class);
     }
 
@@ -216,9 +223,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return getTableSummary(customerSpace, tableName) != null;
     }
 
-
     public long getTableAttributeCount(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attribute_count", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attribute_count", customerSpace,
+                tableName);
         Long count = get("getTableColumnCount", url, Long.class);
         log.info("GetTableAttributeCount for {}-{} , Count: {}", customerSpace, tableName, count);
         if (count == null) {
@@ -233,7 +240,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
      * @return Table entity without Attributes collection
      */
     public Table getTableSummary(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}?include_attributes=false", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}?include_attributes=false",
+                customerSpace, tableName);
         return get("getTableSummary", url, Table.class);
     }
 
@@ -267,17 +275,20 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         long attributeCount = columnCount == null ? getTableAttributeCount(customerSpace, tableName) : columnCount;
         List<Attribute> attributeLst = Collections.synchronizedList(new ArrayList<>());
 
-        log.info("Getting Table: {} with Attributes: {} in chunks of {} ", tableName, attributeCount, ATTRIBUTE_BATCH_SIZE);
+        log.info("Getting Table: {} with Attributes: {} in chunks of {} ", tableName, attributeCount,
+                ATTRIBUTE_BATCH_SIZE);
 
-        IntStream.range(0, (int) (Math.ceil((double)attributeCount/ATTRIBUTE_BATCH_SIZE))).forEach(page -> {
-            List<Attribute> attributePage = getTableAttributes(customerSpace, tableName, page+1, ATTRIBUTE_BATCH_SIZE);
+        IntStream.range(0, (int) (Math.ceil((double) attributeCount / ATTRIBUTE_BATCH_SIZE))).forEach(page -> {
+            List<Attribute> attributePage = getTableAttributes(customerSpace, tableName, page + 1,
+                    ATTRIBUTE_BATCH_SIZE);
             attributeLst.addAll(attributePage);
         });
         return attributeLst;
     }
 
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, int page, long size) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace,
+                tableName);
         url = String.format("%s?page=%d&size=%d", url, page, size);
         return JsonUtils.convertList(get("get table columns", url, List.class), Attribute.class);
     }

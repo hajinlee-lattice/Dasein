@@ -58,7 +58,7 @@ public class TableResource extends BaseRestResource {
     public Long getTableColumnCount(@PathVariable String customerSpace, @PathVariable String tableName) {
         return tableResourceHelper.getTableAttributeCount(customerSpace, tableName);
     }
-    
+
     @GetMapping(value = "/tables/{tableName}/attributes")
     @ResponseBody
     @ApiOperation(value = "Get table columns by name")
@@ -86,7 +86,7 @@ public class TableResource extends BaseRestResource {
             @RequestBody Table table) {
         return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
-    
+
     @PostMapping(value = "/tables/{tableName}/attributes")
     @ResponseBody
     @ApiOperation(value = "Add table attributes")
@@ -100,7 +100,7 @@ public class TableResource extends BaseRestResource {
     @ResponseBody
     @ApiOperation(value = "Fix table attributes")
     public Boolean fixTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
-                                      @RequestBody List<AttributeFixer> attributeFixerList) {
+            @RequestBody List<AttributeFixer> attributeFixerList) {
         return tableResourceHelper.fixTableAttributes(customerSpace, tableName, attributeFixerList);
     }
 
@@ -112,7 +112,7 @@ public class TableResource extends BaseRestResource {
             @RequestBody Table table) {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
-    
+
     @PostMapping(value = "/tables/{tableName}/rename/{newTableName}")
     @ResponseBody
     @ApiOperation(value = "Update table")
@@ -134,8 +134,9 @@ public class TableResource extends BaseRestResource {
     @ResponseBody
     @ApiOperation(value = "Clone table and underlying extracts")
     public Table cloneTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName) {
-        return tableResourceHelper.cloneTable(customerSpace, tableName);
+            @PathVariable String tableName,
+            @RequestParam(value = "ignore-extracts", required = false, defaultValue = "false") boolean ignoreExtracts) {
+        return tableResourceHelper.cloneTable(customerSpace, tableName, ignoreExtracts);
     }
 
     @PostMapping(value = "/tables/{tableName}/copy")
