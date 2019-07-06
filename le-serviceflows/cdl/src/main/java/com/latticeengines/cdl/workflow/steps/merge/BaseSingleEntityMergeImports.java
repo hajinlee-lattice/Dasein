@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -240,15 +241,25 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return matchInput;
     }
 
+    /*
+     * get the union of all input table columns
+     */
+    Set<String> getInputTableColumnNames() {
+        return getTableColumnNames(inputTableNames.toArray(new String[0]));
+    }
+
     Set<String> getInputTableColumnNames(int tableIdx) {
         String tableName = inputTableNames.get(tableIdx);
         return getTableColumnNames(tableName);
     }
 
-    private Set<String> getTableColumnNames(String tableName) {
-        return metadataProxy.getTableColumns(customerSpace.toString(), tableName) //
-                .stream() //
-                .map(ColumnMetadata::getAttrName) //
+    private Set<String> getTableColumnNames(String... tableNames) {
+        // TODO add a batch retrieve API to optimize this
+        return Arrays.stream(tableNames) //
+                .flatMap(tableName -> metadataProxy //
+                        .getTableColumns(customerSpace.toString(), tableName) //
+                        .stream() //
+                        .map(ColumnMetadata::getAttrName)) //
                 .collect(Collectors.toSet());
     }
 
@@ -271,7 +282,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             return Collections.emptyList();
         }
 
-        log.info("Current systems = {}", systems);
+        log.info("Current systems = {}", JsonUtils.serialize(systems));
 
         return systems.stream() //
                 .filter(Objects::nonNull) //
