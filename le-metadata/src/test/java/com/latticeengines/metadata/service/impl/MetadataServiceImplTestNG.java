@@ -34,9 +34,9 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 import com.latticeengines.metadata.service.MetadataService;
 
 public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
-    
+
     private static final Logger log = LoggerFactory.getLogger(MetadataServiceImplTestNG.class);
-    
+
     @Autowired
     private MetadataService mdService;
 
@@ -58,7 +58,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertTrue(table.getAttributes().size() > 0);
         assertEquals(table.getStorageMechanism().getName(), "HDFS");
         assertTrue(table.getAttributes().size() == table.getColumnMetadata().size());
-        
+
         // Get without attributes
         table = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, false);
         assertNotNull(table);
@@ -70,34 +70,35 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     public void getTableAttributes() {
         Table table = mdService.getTable(CustomerSpace.parse(customerSpace1), TABLE1, true);
         assertNotNull(table.getAttributes());
-        
+
         Pageable pageReq = PageRequest.of(0, 50000);
-        List<Attribute> colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, pageReq);
+        List<Attribute> colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1,
+                pageReq);
         assertNotNull(colMetaList);
         assertEquals(colMetaList.size(), table.getAttributes().size());
-        
+
         // With Pageable as Null
         colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, null);
         assertNotNull(colMetaList);
         assertEquals(colMetaList.size(), table.getAttributes().size());
-        
+
         pageReq = PageRequest.of(0, 10);
         colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, pageReq);
         assertNotNull(colMetaList);
         assertEquals(colMetaList.size(), 10);
-        
+
         pageReq = PageRequest.of(0, 10, Direction.ASC, "displayName");
         colMetaList = mdService.getTableAttributes(CustomerSpace.parse(customerSpace1), TABLE1, pageReq);
         assertNotNull(colMetaList);
         assertEquals(colMetaList.size(), 10);
     }
-    
+
     @Test(groups = "functional")
     public void getTables() {
         List<Table> tables = mdService.getTables(CustomerSpace.parse(customerSpace1));
         assertEquals(tables.size(), 1);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "getTables" })
     public void addStorageMechanism() {
         Table table = mdService.getTables(CustomerSpace.parse(customerSpace1)).get(0);
@@ -105,7 +106,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         jdbcStorage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         jdbcStorage.setTableNameInStorage("TABLE1_IN_REDSHIFT");
         mdService.setStorageMechanism(CustomerSpace.parse(customerSpace1), table.getName(), jdbcStorage);
-        
+
         Table retrievedTable = mdService.getTables(CustomerSpace.parse(customerSpace1)).get(0);
         JdbcStorage storageMechanism = (JdbcStorage) retrievedTable.getStorageMechanism();
         assertEquals(storageMechanism.getDatabaseName(), JdbcStorage.DatabaseName.REDSHIFT);
@@ -113,7 +114,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "addStorageMechanism" })
     public void cloneTable() throws IOException {
-        Table cloned = mdService.cloneTable(CustomerSpace.parse(customerSpace1), TABLE1);
+        Table cloned = mdService.cloneTable(CustomerSpace.parse(customerSpace1), TABLE1, false);
         assertNotNull(cloned);
         List<Extract> extracts = cloned.getExtracts();
         Assert.assertNotNull(extracts);
@@ -180,6 +181,6 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
-        return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };
+        return new Object[][] { { customerSpace1, TABLE1 }, { customerSpace2, TABLE1 }, };
     }
 }

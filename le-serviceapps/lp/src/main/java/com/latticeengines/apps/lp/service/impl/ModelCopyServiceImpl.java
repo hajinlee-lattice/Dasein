@@ -61,6 +61,6 @@ public class ModelCopyServiceImpl implements ModelCopyService {
     public Table cloneTrainingTable(String modelSummaryId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Table trainingTable = modelMetadataService.getTrainingTableFromModelId(modelSummaryId);
-        return metadataProxy.cloneTable(customerSpace, trainingTable.getName());
+        return metadataProxy.cloneTable(customerSpace, trainingTable.getName(), false);
     }
 }
