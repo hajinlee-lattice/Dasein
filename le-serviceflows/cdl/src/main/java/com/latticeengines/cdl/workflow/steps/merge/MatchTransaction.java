@@ -79,7 +79,9 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
     }
 
     private String getMatchConfig() {
-        Set<String> columnNames = getInputTableColumnNames(0);
+        // NOTE get all imports just to be safe, currently txn should only have one
+        // template
+        Set<String> columnNames = getInputTableColumnNames();
         return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
                 Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
     }
