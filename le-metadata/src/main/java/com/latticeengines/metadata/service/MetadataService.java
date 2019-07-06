@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 public interface MetadataService {
 
     Table getTable(CustomerSpace parse, String tableName);
-    
+
     Table getTable(CustomerSpace customerSpace, String name, Boolean includeAttributes);
 
     List<Table> getTables(CustomerSpace customerSpace);
@@ -39,7 +39,7 @@ public interface MetadataService {
 
     Table getImportTable(CustomerSpace customerSpace, String name);
 
-    Table cloneTable(CustomerSpace customerSpace, String tableName);
+    Table cloneTable(CustomerSpace customerSpace, String tableName, boolean ignoreExtracts);
 
     Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName);
 

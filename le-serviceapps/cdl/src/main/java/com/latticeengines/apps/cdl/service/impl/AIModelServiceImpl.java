@@ -208,7 +208,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     modelingConfig.getSourceFileName());
             // Remove this below line and replace it with some code that creates a metadata table but does not copy the
             // underlying data
-            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName());
+            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName(), true);
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());

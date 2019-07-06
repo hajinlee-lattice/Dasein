@@ -26,8 +26,8 @@ public class CdlModelMetadataServiceImpl implements CdlModelMetadataService {
     public List<Table> cloneTrainingTargetTable(ModelSummary modelSummary) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<Table> tables = getTrainingTargetTableFromModelId(modelSummary);
-        Table trainingClone = metadataProxy.cloneTable(customerSpace, tables.get(0).getName());
-        Table targetClone = metadataProxy.cloneTable(customerSpace, tables.get(1).getName());
+        Table trainingClone = metadataProxy.cloneTable(customerSpace, tables.get(0).getName(), false);
+        Table targetClone = metadataProxy.cloneTable(customerSpace, tables.get(1).getName(), false);
         metadataProxy.updateTable(customerSpace, trainingClone.getName() + "_TargetTable", targetClone);
         targetClone.setName(trainingClone.getName() + "_TargetTable");
         return Arrays.asList(trainingClone, targetClone);

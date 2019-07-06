@@ -96,10 +96,8 @@ public class MetadataServiceImpl implements MetadataService {
     private Long getPidByTableName(CustomerSpace customerSpace, String tableName) {
         Table table = tableEntityMgr.findByName(tableName, false);
         /*
-         * // For backward compatibility, we cannot throw the exception. So,
-         * returning null. if (table == null) throw new
-         * LedpException(LedpCode.LEDP_11008, new String[] {tableName,
-         * customerSpace.toString()});
+         * // For backward compatibility, we cannot throw the exception. So, returning null. if (table == null) throw
+         * new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
          */
         return table != null ? table.getPid() : null;
     }
@@ -183,8 +181,8 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public Table cloneTable(CustomerSpace customerSpace, String tableName) {
-        return tableEntityMgr.clone(tableName);
+    public Table cloneTable(CustomerSpace customerSpace, String tableName, boolean ignoreExtracts) {
+        return tableEntityMgr.clone(tableName, ignoreExtracts);
     }
 
     @Override
