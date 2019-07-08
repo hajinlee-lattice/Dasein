@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.core.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 
 public interface PatchBookDao extends BaseDao<PatchBook> {
     /**
@@ -14,5 +16,7 @@ public interface PatchBookDao extends BaseDao<PatchBook> {
      * @param value value to be set, nullable
      */
     void updateField(@NotNull List<Long> pIds, @NotNull String fieldName, Object value);
+
+    Map<String, Long> getMinMaxPid(@NotNull Type type, @NotNull String pidColumn);
 
 }
