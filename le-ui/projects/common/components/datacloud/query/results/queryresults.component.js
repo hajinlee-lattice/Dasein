@@ -14,6 +14,7 @@ angular.module('common.datacloud.query.results', [
         inModel: $state.current.name.split('.')[1] === 'model',
         section: $stateParams.section,
         page: $stateParams.pageTitle,
+        accountQuerySort: $stateParams.accountQuerySort, // used for when we call accounts/data on /supressions page
         accounts: Accounts,
         counts: {},
         contacts: Contacts,
@@ -313,20 +314,13 @@ angular.module('common.datacloud.query.results', [
                                 "attributes": [
                                     {
                                        "attribute" : {
-                                            "entity": vm.page,
-                                            "attribute":vm.sortType   
+                                            "entity": vm.accountQuerySort || vm.page,
+                                            "attribute": vm.sortType   
                                        }
                                     }
                                 ],
                                 "descending": false
                             }
-                            // for PLS-13560
-                            // "sort": {
-                            //     "attributes": [{
-                            //         "entity": "Account",
-                            //         "attribute": "AccountId"
-                            //     }]
-                            // }
                         };
                     
                     PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 

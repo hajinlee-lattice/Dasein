@@ -984,6 +984,7 @@ angular
                 params: {
                     section: 'wizard.targets',
                     currentTargetTab: 'accounts',
+                    accountQuerySort: 'Account',
                     pageIcon: 'ico-playbook',
                     pageTitle: 'Campaign Playbook'
                 },
