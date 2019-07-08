@@ -77,7 +77,7 @@ public class PatchResource {
     @RequestMapping(
             value = "/validate/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
+    @ApiOperation(value = "Validate patch book entries with the given type with pagination and sort by field", response = PatchValidationResponse.class)
     private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
@@ -91,20 +91,19 @@ public class PatchResource {
     @RequestMapping(
             value = "/validatePagination/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
+    @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
     private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
 
         PatchBook.Type type = getPatchBookType(patchBookType);
-        List<PatchBook> books = loadWithPagin(request.getMode(), type, request.getOffset(),
-                request.getLimit(), request.getPid());
+        List<PatchBook> books = loadWithPagin(request.getMode(), type, request.getPid());
         return validate(books, type, request);
     }
 
     @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
+    @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
     private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
             @RequestBody PatchRequest request) {
         checkRequired(request);
@@ -262,8 +261,8 @@ public class PatchResource {
         }
     }
 
-    private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type, int offset,
-            int limit, Object pid) {
+    private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type,
+            Object pid) {
         // finding min and max Pid in patchBook table
         Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type, PatchBook.COLUMN_PID);
         Long minPid = minMaxPid.get(MIN_PID);
