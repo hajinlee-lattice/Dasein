@@ -636,6 +636,7 @@ angular.module('common.datacloud.query')
         };
 
         this.GetDataByQuery = function(resourceType, query) {
+            // console.log(query);
             if (!this.isValidResourceType(resourceType)) {
                 var deferred = $q.defer();
                 deferred.resolve({
@@ -662,6 +663,11 @@ angular.module('common.datacloud.query')
                 if(resourceType === 'accounts') {
                     queryWithRestriction.lookups = query.lookups;
                 }
+                if(query.sort){
+                    queryWithRestriction['sort'] = query.sort;
+                }
+
+                // console.log(queryWithRestriction);
                     
                 deferred.resolve(QueryService.GetDataByQuery(resourceType, queryWithRestriction));
                 return deferred.promise;

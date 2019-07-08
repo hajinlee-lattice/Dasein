@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.dao.ExternalSystemAuthenticationDao;
 import com.latticeengines.apps.cdl.dao.LookupIdMappingDao;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
@@ -24,6 +25,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -40,6 +42,9 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Inject
     private ExternalSystemAuthenticationDao extSysAuthenticationDao;
+
+    @Inject
+    private ExportFieldMetadataMappingDao exportFieldMetadataMappingDao;
 
     @Override
     public BaseDao<LookupIdMap> getDao() {
@@ -81,6 +86,17 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
             lookupIdsMap.getExternalAuthentication().setLookupIdMap(lookupIdsMap);
             extSysAuthenticationDao.create(lookupIdsMap.getExternalAuthentication());
         }
+
+        if (lookupIdsMap.getExportFieldMetadataMappings() != null) {
+            List<ExportFieldMetadataMapping> exportFieldMetadataMappings = lookupIdsMap
+                    .getExportFieldMetadataMappings();
+            exportFieldMetadataMappings.forEach(mapping -> {
+                mapping.setTenant(tenant);
+                mapping.setLookupIdMap(lookupIdsMap);
+            });
+            
+            exportFieldMetadataMappingDao.create(exportFieldMetadataMappings, true);
+        }
         return lookupIdsMap;
     }
 
@@ -108,6 +124,15 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
             ExternalSystemAuthentication updatedAuth = //
                     extSysAuthenticationDao.updateAuthentication(lookupIdMap.getExternalAuthentication());
             lookupIdMap.setExternalAuthentication(updatedAuth);
+        }
+
+        if (lookupIdMap.getExportFieldMetadataMappings() != null) {
+            List<ExportFieldMetadataMapping> exportFieldMetadataMapping = lookupIdMap.getExportFieldMetadataMappings();
+
+            List<ExportFieldMetadataMapping> updatedFieldMetadataMapping = exportFieldMetadataMappingDao
+                    .updateExportFieldMetadataMappings(exportFieldMetadataMapping);
+
+            lookupIdMap.setExportFieldMappings(updatedFieldMetadataMapping);
         }
 
         lookupIdMap.setUpdated(new Date(System.currentTimeMillis()));

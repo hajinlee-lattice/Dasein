@@ -18,9 +18,9 @@ angular.module('lp.import.wizard.validatetemplate', [])
 
         ImportWizardStore.setValidation('validation', false);
 
-        console.log(vm.fileName);
-        console.log(vm.templateData);
-        console.log(vm.fieldDocument);
+        // console.log(vm.fileName);
+        // console.log(vm.templateData);
+        // console.log(vm.fieldDocument);
 
         ImportWizardService.validateTemplate(vm.fileName, vm.templateData, vm.fieldDocument).then(function(result) {
             vm.validation = result;

@@ -113,7 +113,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
         String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
-                getInputTableColumnNames(0), getSystemIds(BusinessEntity.Account),
+                getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
                 getSystemIds(BusinessEntity.Contact), newAccountTableName);
         step.setConfiguration(configStr);
         return step;

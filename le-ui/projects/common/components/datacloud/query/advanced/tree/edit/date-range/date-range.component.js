@@ -16,7 +16,7 @@ angular
                 form: '=',
                 type: '@',
                 bucketrestriction: '=',
-                config: '@',
+                config: '=',
                 showmessage: '=',
                 showfrom: '=',
                 showto: '=',
@@ -36,13 +36,13 @@ angular
                 var toPicker;
 
                 function getConfigField(position) {
-                    var values = JSON.parse($scope.config);
+                    var values = $scope.config;
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
 
                 $scope.getConfig = function(position) {
-                    var values = JSON.parse($scope.config);
+                    var values = $scope.config;
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }

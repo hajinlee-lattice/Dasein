@@ -229,23 +229,23 @@ angular
                 }
 
                 vm.getQtyConfigString = function () {
-                    var ret = JSON.stringify(vm.qtyConf);
+                    var ret = vm.qtyConf;
                     return ret;
                 }
 
                 vm.getAmtConfigString = function () {
-                    var ret = JSON.stringify(vm.amtConf);
+                    var ret = vm.amtConf;
                     return ret;
                 }
                 vm.getPeriodNumericalConfString = function () {
-                    var ret = JSON.stringify(vm.periodNumericalConf);
+                    var ret = vm.periodNumericalConf;
                     return ret;
                 }
                 vm.getPeriodTimeConfString = function () {
                     initDateRange();
                     vm.periodTimeConf.from.visible = vm.showTimeFrom();
                     vm.periodTimeConf.to.visible = vm.showTimeTo();
-                    var ret = JSON.stringify(vm.periodTimeConf);
+                    var ret = vm.periodTimeConf;
                     return ret;
                 }
 

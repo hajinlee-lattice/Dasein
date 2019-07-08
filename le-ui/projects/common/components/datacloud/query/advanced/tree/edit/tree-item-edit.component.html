@@ -27,7 +27,7 @@
                         <input type="text" name="input" ng-model="vm.vals[0]" ng-change="vm.changeValue()" required
                             ng-trim="false" ng-if="vm.showInput(vm.operation) && !vm.showChips()">
 
-                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="{{vm.rangeConfig}}"
+                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="vm.rangeConfig"
                             showfrom="vm.showFromNumerical" showto="vm.showToNumerical" vm="vm" form="form"
                             type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                             changed="vm.callbackChangedNumericalValue(type, position, value)">
@@ -52,9 +52,9 @@
                                 true</option>
                             <option value="No" ng-selected="vm.checkBoolOpSelected('No')">
                                 false</option>
-                            <option value="Present" ng-selected="vm.checkBoolOpSelected('Present')">
+                            <option value="Present" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Present')">
                                 present</option>
-                            <option value="Empty" ng-selected="vm.checkBoolOpSelected('Empty')">empty
+                            <option value="Empty" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Empty')">empty
                             </option>
                         </select>
                     </span>
@@ -87,8 +87,8 @@
 
                             <numerical-range-directive
                                 ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)"
-                                config="{{vm.rangeConfig}}" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
-                                vm="vm" form="form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
+                                config="vm.rangeConfig" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
+                                vm="vm" form="vm.form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                                 changed="vm.callbackChangedNumericalValue(type, position, value)">
                             </numerical-range-directive>
 

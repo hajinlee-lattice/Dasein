@@ -16,18 +16,18 @@ public interface TableEntityMgr {
     Table findByName(String name);
 
     Table findByName(String name, boolean inflate);
-    
+
     Table findByName(String name, boolean inflate, boolean includeAttributes);
-    
+
     void create(Table entity);
-    
+
     void addAttributes(String name, List<Attribute> attributes);
 
     List<Table> findAll();
 
     void deleteByName(String name);
 
-    Table clone(String name);
+    Table clone(String name, boolean ignoreExtracts);
 
     Table copy(String name, CustomerSpace targetCustomerSpace);
 
@@ -36,7 +36,7 @@ public interface TableEntityMgr {
     static void inflateTable(Table table) {
         inflateTable(table, true);
     }
-    
+
     static void inflateTable(Table table, boolean includeAttributes) {
         if (table != null) {
             if (includeAttributes) {

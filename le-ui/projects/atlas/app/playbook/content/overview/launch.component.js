@@ -120,18 +120,23 @@ class LaunchComponent extends Component {
                 actions.fetchPrograms({ // get the programs list
                     externalSystemName: vm.state.externalSystemName
                 }, function(data) {
-                    let programs = (data && data.result ? data.result : []);
-                    vm.state.programs = programs;
-                    vm.state.audienceParams.audienceName = programs[0].name;
-                    vm.setState(vm.state);
+                    if(data.success) {
+                        let programs = (data && data.result ? data.result : []);
+                        vm.state.programs = programs;
+                        vm.state.audienceParams.audienceName = programs[0].name;
+                        vm.setState(vm.state);
 
-                    actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
-                        if(data && data.result) {
-                            let staticList = (data && data.result ? data.result : []);
-                            vm.state.staticList = staticList;
-                            vm.setState(vm.state);
-                        }
-                    });
+                        actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
+                            if(data && data.result) {
+                                let staticList = (data && data.result ? data.result : []);
+                                vm.state.staticList = staticList;
+                                vm.setState(vm.state);
+                            }
+                        });
+                    } else if(data.message) {
+                        vm.state.error = 'Error retrieving Marketo programs. Please retry later.'; //data.message;
+                        vm.setState(vm.state)
+                    }
                 });
             });
         }
@@ -170,7 +175,6 @@ class LaunchComponent extends Component {
 
                 vm.state.unscored = !hasBuckets;
                 vm.state.launchAccountsCoverage = response;
-                console.log(response);
 
                 var coverageObj = vm.getCoverage(response),
                     coverage = coverageObj.coverage,
@@ -357,10 +361,6 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <li>
-                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
-                        <label for="requireEmail">Must have email</label>
-                    </li>
-                    <li>
                         <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
                         <label for="requireAccountId">Must have account ID</label>
                     </li>
@@ -369,6 +369,10 @@ class LaunchComponent extends Component {
         } else if(externalSystemName === 'Marketo') {
             return (
                 <Aux>
+                    <li>
+                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
+                        <label for="requireEmail">Must have email</label>
+                    </li>
                     <li>
                         <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
                         <label for="requireContactIfo">Must have contact info</label>
@@ -650,7 +654,7 @@ class LaunchComponent extends Component {
                 bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),
                 coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
                 engineId = coverageObj.engineId,
-                coverage = coverageObj.coverage,
+                coverage = coverageObj.coverage || {},
                 unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
@@ -736,6 +740,12 @@ class LaunchComponent extends Component {
                         </div>
                     </div>
                 </LeVPanel>
+            );
+        } else if(this.state.error) {
+            return(
+                <Aux>
+                    {this.state.error}
+                </Aux>
             );
         } else {
             return (
