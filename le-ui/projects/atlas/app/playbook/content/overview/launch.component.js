@@ -654,7 +654,7 @@ class LaunchComponent extends Component {
                 bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),
                 coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
                 engineId = coverageObj.engineId,
-                coverage = coverageObj.coverage,
+                coverage = coverageObj.coverage || {},
                 unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
