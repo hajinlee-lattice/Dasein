@@ -105,6 +105,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
+                LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, //
                 LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
