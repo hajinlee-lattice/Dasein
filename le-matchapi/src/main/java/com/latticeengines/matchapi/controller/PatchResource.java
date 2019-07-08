@@ -270,10 +270,11 @@ public class PatchResource {
         Long maxPid = minMaxPid.get(MAX_PID);
         // adding pagination parameters
         if (mode == PatchMode.Normal) {
-            return patchBookEntityMgr.findByTypeWithPagin(minPid, maxPid, type);
+            return patchBookEntityMgr.findByTypeWithPaginNoSort(minPid, maxPid, type);
         } else {
             // hot fix mode
-            return patchBookEntityMgr.findByTypeAndHotFixWithPagin(minPid, maxPid, type, true);
+            return patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(minPid, maxPid, type,
+                    true);
         }
     }
 

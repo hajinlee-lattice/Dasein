@@ -62,10 +62,11 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      * @param fieldAndValues
      * @return list of {@link PatchBook}, will not be {@literal null}
      */
-    List<PatchBook> findByTypeWithPagin(@NotNull long minPid, @NotNull long maxPid, Type type);
+    List<PatchBook> findByTypeWithPaginNoSort(@NotNull long minPid, @NotNull long maxPid,
+            Type type);
 
     /**
-     * Retrieve all {@link PatchBook} entries with specified
+     * jpa Retrieve all {@link PatchBook} entries with specified
      * {@link PatchBook.Type}
      *
      * @param type
@@ -101,7 +102,7 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      * @NotNull PatchBook.Type type, boolean hotfix);
      * 
      */
-    List<PatchBook> findByTypeAndHotFixWithPagin(@NotNull long minPid, @NotNull long maxPid,
+    List<PatchBook> findByTypeAndHotFixWithPaginNoSort(@NotNull long minPid, @NotNull long maxPid,
             PatchBook.Type type, boolean hotfix);
 
     /**

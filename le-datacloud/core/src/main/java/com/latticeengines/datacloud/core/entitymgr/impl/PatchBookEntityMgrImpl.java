@@ -119,7 +119,7 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
-    public List<PatchBook> findByTypeWithPagin(@NotNull long minPid, @NotNull long maxPid,
+    public List<PatchBook> findByTypeWithPaginNoSort(@NotNull long minPid, @NotNull long maxPid,
             Type type) {
         return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
                 type.name());
@@ -127,7 +127,8 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
-    public List<PatchBook> findByTypeAndHotFixWithPagin(@NotNull long minPid, @NotNull long maxPid,
+    public List<PatchBook> findByTypeAndHotFixWithPaginNoSort(@NotNull long minPid,
+            @NotNull long maxPid,
             Type type, boolean hotfix) {
         return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
                 type.name(), PatchBook.COLUMN_HOTFIX, hotfix);

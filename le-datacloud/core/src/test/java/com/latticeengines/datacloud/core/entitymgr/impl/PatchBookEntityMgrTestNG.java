@@ -294,7 +294,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
                 PatchBook.COLUMN_PID);
         Assert.assertNotNull(minMaxPid);
         Assert.assertEquals(minMaxPid.size(), 2);
-        List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPagin(
+        List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
                 minMaxPid.get(MIN_PID), minMaxPid.get(MAX_PID), type,
                 Boolean.parseBoolean(fieldAndValues[0].toString()));
         Assert.assertNotNull(patchBookList);
@@ -374,7 +374,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         Long minPid = minMaxPid.get(MIN_PID);
         Long maxPid = minMaxPid.get(MAX_PID);
         List<PatchBook> patchBookList = patchBookEntityMgr
-                .findByTypeWithPagin(minPid, maxPid, (PatchBook.Type) fieldAndValues[0]);
+                .findByTypeWithPaginNoSort(minPid, maxPid, (PatchBook.Type) fieldAndValues[0]);
         Assert.assertNotNull(patchBookList);
         Assert.assertTrue(patchBookList.size() > 0);
         Assert.assertEquals(patchBookList.size(), fieldAndValues[1]);
