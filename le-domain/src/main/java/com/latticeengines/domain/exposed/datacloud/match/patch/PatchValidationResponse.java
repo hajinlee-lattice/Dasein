@@ -28,6 +28,9 @@ public class PatchValidationResponse {
     @JsonProperty("Total")
     private Integer total;
 
+    @JsonProperty("minPid")
+    private Integer minPid;
+
     @JsonProperty("ValidationErrors")
     private List<PatchBookValidationError> validationErrors;
 
@@ -53,6 +56,14 @@ public class PatchValidationResponse {
 
     public void setMode(PatchMode mode) {
         this.mode = mode;
+    }
+
+    public Integer getMinPid() {
+        return minPid;
+    }
+
+    public void setMinPid(Integer minPid) {
+        this.minPid = minPid;
     }
 
     public String getDataCloudVersion() {

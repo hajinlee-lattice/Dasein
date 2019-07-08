@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import com.latticeengines.datacloud.core.dao.PatchBookDao;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 
 @Component("patchBookEntityMgr")
 public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> implements PatchBookEntityMgr {
@@ -114,4 +116,27 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     public void setExpireAfterVersion(List<Long> pIds, String version) {
         getDao().updateField(pIds, PatchBook.COLUMN_EXPIRE_AFTER_VERSION, version);
     }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByTypeWithPagin(@NotNull long minPid, @NotNull long maxPid,
+            Type type) {
+        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
+                type.name());
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<PatchBook> findByTypeAndHotFixWithPagin(@NotNull long minPid, @NotNull long maxPid,
+            Type type, boolean hotfix) {
+        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
+                type.name(), PatchBook.COLUMN_HOTFIX, hotfix);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    public Map<String, Long> findMinMaxPid(Type type, String pidColumn) {
+        return getDao().getMinMaxPid(type, PatchBook.COLUMN_PID);
+    }
+
 }

@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.core.entitymgr;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 
 public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
 
@@ -57,6 +59,21 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      *            Pagination Logic
      * @param offset
      * @param limit
+     * @param pid
+     * @param fieldAndValues
+     * @return list of {@link PatchBook}, will not be {@literal null}
+     */
+    List<PatchBook> findByTypeWithPagin(@NotNull long minPid, @NotNull long maxPid, Type type);
+
+    /**
+     * Retrieve all {@link PatchBook} entries with specified
+     * {@link PatchBook.Type}
+     *
+     * @param type
+     *            target patch book type, should not be {@literal null} Apply
+     *            Pagination Logic
+     * @param offset
+     * @param limit
      * @param sortByField
      * @param fieldAndValues
      * @return list of {@link PatchBook}, will not be {@literal null}
@@ -67,6 +84,37 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      */
     List<PatchBook> findByTypeAndHotFixWithPagination(@NotNull int offset, @NotNull int limit,
             @NotNull String sortByField, PatchBook.Type type, boolean hotfix);
+
+    /**
+     * Retrieve all {@link PatchBook} entries with specified
+     * {@link PatchBook.Type}
+     *
+     * @param type
+     *            target patch book type, should not be {@literal null} Apply
+     *            Pagination Logic
+     * @param minPid
+     * @param maxPid
+     * @param offset
+     * @param limit
+     * @param pid
+     * @param fieldAndValues
+     * @return list of {@link PatchBook}, will not be {@literal null}
+     *         List<PatchBook> findByTypeAndHotFixWithPagination(@NotNull int
+     *         offset, @NotNull int limit,
+     * @NotNull PatchBook.Type type, boolean hotfix);
+     * 
+     */
+    List<PatchBook> findByTypeAndHotFixWithPagin(@NotNull long minPid, @NotNull long maxPid,
+            PatchBook.Type type, boolean hotfix);
+
+    /**
+     * Retrieve min and max pid with specified {@link PatchBook.Type}
+     *
+     * @param type
+     *            target patch book type, should not be {@literal null}
+     * @return list of {@link PatchBook}, will not be {@literal null}
+     */
+    Map<String, Long> findMinMaxPid(@NotNull PatchBook.Type type, @NotNull String pidColumn);
 
     /**
      * Set hot fix flag for target {@link PatchBook}s identified by the given

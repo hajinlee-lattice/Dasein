@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.SessionFactoryUtils;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -184,6 +185,27 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
         }
         String queryStr = String.format("from %s where %s", getEntityClass().getSimpleName(), sb.toString());
+        Query<T> query = session.createQuery(queryStr);
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);
+        }
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public final List<T> findByFieldsWithPagination(long minPid, long maxPid,
+            Object... fieldsAndValues) {
+        Session session = getCurrentSession();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fieldsAndValues.length / 2; i++) {
+            if (i > 0) {
+                sb.append(" and ");
+            }
+            sb.append(String.format("%s = ?%d", fieldsAndValues[2 * i], i + 1));
+        }
+        String queryStr = String.format(
+                "from %s where %s and %s >= %d and %s <= %d", getEntityClass().getSimpleName(),
+                sb.toString(), PatchBook.COLUMN_PID, minPid, PatchBook.COLUMN_PID, maxPid);
         Query<T> query = session.createQuery(queryStr);
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
             query.setParameter(i + 1, fieldsAndValues[2 * i + 1]);

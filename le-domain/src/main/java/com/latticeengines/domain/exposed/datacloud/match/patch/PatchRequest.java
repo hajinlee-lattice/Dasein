@@ -25,12 +25,23 @@ public class PatchRequest {
     @JsonProperty("sortByField")
     private String sortByField;
 
+    @JsonProperty("pid")
+    private Object pid;
+
     public PatchMode getMode() {
         return mode;
     }
 
     public void setMode(PatchMode mode) {
         this.mode = mode;
+    }
+
+    public Object getPid() {
+        return pid;
+    }
+
+    public void setPid(Object pid) {
+        this.pid = pid;
     }
 
     public String getDataCloudVersion() {

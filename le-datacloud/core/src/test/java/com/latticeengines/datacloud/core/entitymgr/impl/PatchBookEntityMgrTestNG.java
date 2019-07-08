@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +29,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
 
     private static final int NUM_PATCH_BOOKS = 10;
     private static final PatchBook TEST_PATCH_BOOK = new PatchBook();
+    private static final String MIN_PID = "MIN";
+    private static final String MAX_PID = "MAX";
 
     static {
         // init test patch book
@@ -208,8 +211,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional", dataProvider = "createPatchBooks")
-    private void createPatchBooks(@NotNull PatchBook.Type type, String domain, String duns,
-            String companyName, Boolean hotfix, Boolean cleanup) {
+    private void createPatchBooks(@NotNull PatchBook.Type type, String domain,
+            String duns, String companyName, Boolean hotfix, Boolean cleanup) {
         PatchBook testPatchBook = new PatchBook();
         testPatchBook.setType(type);
         testPatchBook.setDomain(domain);
@@ -223,31 +226,80 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "createPatchBooks")
     private Object[][] providePatchBookData() {
         return new Object[][] {
-                // Type, Domain, Duns, CompanyName, HotFix, Cleanup
-                // type = Attribute
-                { PatchBook.Type.Attribute, "google.com", "347827482", "Test_Google", true, true },
-                { PatchBook.Type.Attribute, "citrix.com", "323993299", "Test_Citrix", false, false },
-                { PatchBook.Type.Attribute, "netflix.com", "784728492", "Test_Netflix", true, true },
-                { PatchBook.Type.Attribute, "netapp.com", "327487424", "Test_Netapp", false, true },
-                { PatchBook.Type.Attribute, "vlocity.com", "452356667", "Test_Vlocity", false, false },
+                // Type, Domain, Duns, CompanyName, HotFix, Cleanup, type = Attribute
+                { PatchBook.Type.Attribute, "google.com", "347827482", "Test_Google", true,
+                        true },
+                { PatchBook.Type.Attribute, "citrix.com", "323993299", "Test_Citrix", false,
+                        false },
+                { PatchBook.Type.Attribute, "netflix.com", "784728492", "Test_Netflix", true,
+                        true },
+                { PatchBook.Type.Attribute, "netapp.com", "327487424", "Test_Netapp", false,
+                        true },
+                { PatchBook.Type.Attribute, "vlocity.com", "452356667", "Test_Vlocity", false,
+                        false },
                 { PatchBook.Type.Attribute, "sap.com", "853249205", "Test_Sap", false, true },
-                { PatchBook.Type.Attribute, "oracle.com", "214423513", "Test_Oracle", true, true },
+                { PatchBook.Type.Attribute, "oracle.com", "214423513", "Test_Oracle", true,
+                        true },
                 { PatchBook.Type.Attribute, "craigslist.com", "747772444", "Test_Craigslist",
                         false, true },
                 { PatchBook.Type.Attribute, "box.com", "777777777", "Test_Box", true, true },
-                { PatchBook.Type.Attribute, "splunk.com", "123131111", "Test_Splunk", false, true },
+                { PatchBook.Type.Attribute, "splunk.com", "123131111", "Test_Splunk", false,
+                        true },
                 // type = Lookup
-                { PatchBook.Type.Lookup, "amazon.com", "347827482", "Test_Amazon", true, true },
+                { PatchBook.Type.Lookup, "amazon.com", "347827482", "Test_Amazon", true,
+                        true },
                 { PatchBook.Type.Lookup, "citrix.com", "323993299", "Citrix", false, true },
                 { PatchBook.Type.Lookup, "apple.com", "784728492", "Apple", true, false },
                 { PatchBook.Type.Lookup, "best.com", "327487424", "BEST", false, true },
                 { PatchBook.Type.Lookup, "sbi.com", "452356667", "SBI", true, true },
-                { PatchBook.Type.Lookup, "chipotle.com", "853249205", "Chipotle", false, true },
+                { PatchBook.Type.Lookup, "chipotle.com", "853249205", "Chipotle", false,
+                        true },
                 { PatchBook.Type.Lookup, "rakuten.com", "214423513", "Rakuten", true, true },
                 { PatchBook.Type.Lookup, "toysrus.com", "747772444", "ToysRUs", false, false },
                 { PatchBook.Type.Lookup, "target.com", "777777777", "target", true, false },
-                { PatchBook.Type.Lookup, "macys.com", "123131111", "Macys", false, true } 
+                { PatchBook.Type.Lookup, "macys.com", "123131111", "Macys", false, true }
                 };
+    }
+
+    /*
+     * 
+     */
+    @Test(groups = "functional", dataProvider = "minMaxPatchBook", dependsOnMethods = {
+            "createPatchBooks" })
+    private Map<String, Long> testMinMaxPatchBookId(PatchBook.Type type, int expectedCount) {
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type,
+                PatchBook.COLUMN_PID);
+        Assert.assertNotNull(minMaxPid);
+        Assert.assertEquals(minMaxPid.size(), 2);
+        Assert.assertNotNull(minMaxPid.get(MIN_PID));
+        Assert.assertNotNull(minMaxPid.get(MAX_PID));
+        return minMaxPid;
+    }
+
+    @DataProvider(name = "minMaxPatchBook")
+    private Object[][] provideMinMaxPatchBookData() {
+        return new Object[][] {
+                // Type
+                { PatchBook.Type.Attribute, 10 }, { PatchBook.Type.Lookup, 10 } };
+    }
+    
+    /*
+     * test FindByTypeAndHoFixWithPaginationNoSort : [filter by field value +
+     * pagination] functionality by Type and Hotfix with Pagination
+     */
+    @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfixNoSort", dependsOnMethods = {
+            "createPatchBooks" })
+    private void testFindByTypeAndHotFixWithPagin(PatchBook.Type type, Object... fieldAndValues) throws Exception {
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type,
+                PatchBook.COLUMN_PID);
+        Assert.assertNotNull(minMaxPid);
+        Assert.assertEquals(minMaxPid.size(), 2);
+        List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPagin(
+                minMaxPid.get(MIN_PID), minMaxPid.get(MAX_PID), type,
+                Boolean.parseBoolean(fieldAndValues[0].toString()));
+        Assert.assertNotNull(patchBookList);
+        Assert.assertTrue(patchBookList.size() > 0);
+        Assert.assertEquals(patchBookList.size(), fieldAndValues[1]);
     }
 
     /*
@@ -256,7 +308,8 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
      */
     @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfix", dependsOnMethods = {
             "createPatchBooks" })
-    private void testFindByTypeAndHotFixWithPagin(int offset, int limit, String sortByField,
+    private void testFindByTypeAndHotFixWithPagin(int pid, int offset, int limit,
+            String sortByField,
             int expectedSize,
             Object... fieldAndValues) throws Exception {
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset,
@@ -266,22 +319,32 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(patchBookList.size() > 0);
         Assert.assertEquals(patchBookList.size(), expectedSize);
     }
+    
+    @DataProvider(name = "patchBookPaginationWithTypeAndHotfixNoSort")
+    private Object[][] patchBookPaginDataWithTypeAndHotfixNoSort() {
+        return new Object[][] {
+                // hotfix flag = true
+                { PatchBook.Type.Attribute, true, 4 }, { PatchBook.Type.Lookup, true, 5 },
+                // hotfix flag = false
+                { PatchBook.Type.Attribute, false, 6 }, { PatchBook.Type.Lookup, false, 5 }
+        };
+    }
 
     @DataProvider(name = "patchBookPaginationWithTypeAndHotfix")
     private Object[][] patchBookPaginDataWithTypeAndHotfix() {
         return new Object[][] {
                 // hotfix flag = true
-                { 0, 4, PatchBook.COLUMN_DUNS, 4, PatchBook.Type.Attribute, true },
-                { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, true },
+                { 1, 0, 4, PatchBook.COLUMN_DUNS, 4, PatchBook.Type.Attribute, true, 3 },
+                { 2, 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, true, 1 },
                 // limit = total number of items
-                { 0, 5, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, true },
+                { 3, 0, 5, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, true, 3 },
                 // hotfix flag = false
-                { 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Attribute, false },
-                { 2, 1, PatchBook.COLUMN_DUNS, 1, PatchBook.Type.Attribute, false },
-                { 0, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, false },
-                { 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Lookup, false },
+                { 4, 2, 3, PatchBook.COLUMN_DUNS, 3, PatchBook.Type.Attribute, false, 0 },
+                { 5, 2, 1, PatchBook.COLUMN_DUNS, 1, PatchBook.Type.Attribute, false, 0 },
+                { 6, 0, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Attribute, false, 0 },
+                { 7, 2, 2, PatchBook.COLUMN_DUNS, 2, PatchBook.Type.Lookup, false, 0 },
                 // limit > total number of items
-                { 0, 30, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, false } };
+                { 8, 0, 30, PatchBook.COLUMN_DUNS, 5, PatchBook.Type.Lookup, false, 5 } };
     }
 
     /*
@@ -291,12 +354,35 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "patchBookPaginationWithType", dependsOnMethods = {
             "createPatchBooks" })
     private void testFindByTypeWithPagin(int offset, int limit, String sortByField,
-            int expectedSize, Object... fieldAndValues) throws Exception {
+            int expectedSizeWithSort, Object... fieldAndValues) throws Exception {
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeWithPagination(offset, limit,
                 sortByField, (PatchBook.Type) fieldAndValues[0]);
         Assert.assertNotNull(patchBookList);
         Assert.assertTrue(patchBookList.size() > 0);
-        Assert.assertEquals(patchBookList.size(), expectedSize);
+        Assert.assertEquals(patchBookList.size(), expectedSizeWithSort);
+    }
+
+    /*
+     * test FindByTypeWithPagination : [filter by field value +
+     * pagination] functionality by Type with Pagination
+     */
+    @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeNoSort", dependsOnMethods = {
+            "createPatchBooks" })
+    private void testPaginWithTypeNoSort(Object... fieldAndValues) throws Exception {
+        Map<String, Long> minMaxPid = testMinMaxPatchBookId((PatchBook.Type) fieldAndValues[0],
+                Integer.parseInt(fieldAndValues[1].toString()));
+        Long minPid = minMaxPid.get(MIN_PID);
+        Long maxPid = minMaxPid.get(MAX_PID);
+        List<PatchBook> patchBookList = patchBookEntityMgr
+                .findByTypeWithPagin(minPid, maxPid, (PatchBook.Type) fieldAndValues[0]);
+        Assert.assertNotNull(patchBookList);
+        Assert.assertTrue(patchBookList.size() > 0);
+        Assert.assertEquals(patchBookList.size(), fieldAndValues[1]);
+    }
+
+    @DataProvider(name = "patchBookPaginationWithTypeNoSort")
+    private Object[][] patchBookPaginDataWithTypeNoSort() {
+        return new Object[][] { { PatchBook.Type.Attribute, 10 }, { PatchBook.Type.Lookup, 10 } };
     }
 
     @DataProvider(name = "patchBookPaginationWithType")
