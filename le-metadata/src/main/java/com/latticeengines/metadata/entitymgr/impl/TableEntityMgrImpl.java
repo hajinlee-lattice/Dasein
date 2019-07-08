@@ -253,7 +253,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create table dir at " + cloneTable);
         }
-        if (ignoreExtracts) {
+        if (!ignoreExtracts) {
             Extract newExtract = new Extract();
             newExtract.setPath(cloneTable + "/*.avro");
             newExtract.setName(NamingUtils.uuid("Extract"));
