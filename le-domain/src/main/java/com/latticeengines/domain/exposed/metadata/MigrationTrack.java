@@ -62,7 +62,7 @@ public class MigrationTrack implements HasPid, HasTenant {
     @JsonProperty("curActiveTable")
     @Type(type = "json")
     @Column(name = "CUR_ACTIVE_TABLE_NAME", columnDefinition = "'JSON'")
-    // TODO - Role -> Table.PID
+    // Role -> Table.PID
     private Map<TableRoleInCollection, Long> curActiveTable; // List of all active tables' names under tenant
 
     @Type(type = "json")

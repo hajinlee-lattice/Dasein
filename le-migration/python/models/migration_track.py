@@ -10,7 +10,7 @@ class MigrationTrack(BaseModel, Base):
     # SCHEDULED -> StARTED -> FAILED (COMPLETED)
     status = Column('STATUS', VARCHAR(45), nullable=False)
     version = Column('VERSION', VARCHAR(45), nullable=False)
-    curActiveTable = Column('CUR_ACTIVE_TABLE_NAME', JSON, nullable=True, comment='from METADATA_TABLE.NAME')
+    curActiveTable = Column('CUR_ACTIVE_TABLE_NAME', JSON, nullable=True, comment='DataCollectionTable.ROLE -> Table.PID')
     importAction = Column('IMPORT_ACTION', JSON, nullable=True)
     collectionStatusDetail = Column('DETAIL', JSON, nullable=True, comment='from DATA_COLLECTION_STATUS.Detail')
     statsCubesData = Column('CUBES_DATA', LONGBLOB, nullable=True, comment='from STATISTICS.CUBES_DATA')
