@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,9 @@ public class PatchResource {
     @Inject
     private PatchService patchService;
 
+    private static final String MIN_PID = "MIN";
+    private static final String MAX_PID = "MAX";
+
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Batch update a list of lookup entries", response = LookupUpdateResponse.class)
@@ -81,9 +85,34 @@ public class PatchResource {
         PatchBook.Type type = getPatchBookType(patchBookType);
         List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
                 request.getLimit(), request.getSortByField());
-        patchBookEntityMgr.findByTypeWithPagination(request.getOffset(), request.getLimit(),
-                request.getSortByField(), type);
         return validate(books, type, request);
+    }
+    
+    @RequestMapping(
+            value = "/validatePagination/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
+    private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
+        checkRequired(request);
+        checkAndSetDataCloudVersion(request);
+
+        PatchBook.Type type = getPatchBookType(patchBookType);
+        List<PatchBook> books = loadWithPagin(request.getMode(), type, request.getOffset(),
+                request.getLimit(), request.getPid());
+        return validate(books, type, request);
+    }
+
+    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
+    private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
+            @RequestBody PatchRequest request) {
+        checkRequired(request);
+        checkAndSetDataCloudVersion(request);
+
+        PatchBook.Type type = getPatchBookType(patchBookType);
+        Map<String, Long> pids = loadMinMaxPid(type, PatchBook.COLUMN_PID);
+        return configMinMaxPidResponse(pids, type, request);
     }
 
     @RequestMapping(value = "/lookup", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -169,6 +198,21 @@ public class PatchResource {
         return response;
     }
 
+    /*
+     * configure response with input request
+     */
+    private PatchValidationResponse configMinMaxPidResponse(
+            @NotNull Map<String, Long> pids, @NotNull PatchBook.Type type,
+            @NotNull PatchRequest request) {
+        String dataCloudVersion = request.getDataCloudVersion();
+        PatchValidationResponse response = new PatchValidationResponse();
+        response.setSuccess(true);
+        response.setPatchBookType(type);
+        response.setDataCloudVersion(dataCloudVersion);
+        response.setMode(request.getMode());
+        return response;
+    }
+
     private LookupPatchResponse prepareResponse(@NotNull LookupPatchRequest request) {
         LookupPatchResponse response = new LookupPatchResponse();
         response.setPatchBookType(PatchBook.Type.Lookup);
@@ -206,7 +250,8 @@ public class PatchResource {
         return response;
     }
 
-    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset, int limit, String sortByField) {
+    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset,
+            int limit, String sortByField) {
         // adding pagination parameters
         if (mode == PatchMode.Normal) {
             return patchBookEntityMgr.findByTypeWithPagination(offset, limit, sortByField, type);
@@ -215,6 +260,26 @@ public class PatchResource {
             return patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, limit, sortByField,
                     type, true);
         }
+    }
+
+    private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type, int offset,
+            int limit, Object pid) {
+        // finding min and max Pid in patchBook table
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type, PatchBook.COLUMN_PID);
+        Long minPid = minMaxPid.get(MIN_PID);
+        Long maxPid = minMaxPid.get(MAX_PID);
+        // adding pagination parameters
+        if (mode == PatchMode.Normal) {
+            return patchBookEntityMgr.findByTypeWithPaginNoSort(minPid, maxPid, type);
+        } else {
+            // hot fix mode
+            return patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(minPid, maxPid, type,
+                    true);
+        }
+    }
+
+    private Map<String, Long> loadMinMaxPid(PatchBook.Type type, String pidColumn) {
+        return patchBookEntityMgr.findMinMaxPid(type, pidColumn);
     }
 
     /*
