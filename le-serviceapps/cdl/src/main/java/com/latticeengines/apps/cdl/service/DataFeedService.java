@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -75,4 +76,6 @@ public interface DataFeedService {
     DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace);
 
     Boolean increasedRetryCount(String customerSpace);
+
+    AttributeLimit getAttributeQuotaLimit(String customerSpace);
 }

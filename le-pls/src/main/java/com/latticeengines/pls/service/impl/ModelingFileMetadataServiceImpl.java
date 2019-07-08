@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -44,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
@@ -90,6 +94,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Inject
+    private CommonTenantConfigServiceImpl appTenantConfigService;
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
@@ -503,7 +510,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName,
             boolean checkHeaderFormat) {
-        return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, false);
+        return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, null);
     }
 
     private void decodeFieldMapping(FieldMappingDocument fieldMappingDocument) {
@@ -801,7 +808,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String fileDisplayName, boolean checkHeaderFormat, boolean withCDLHeader) {
+            String fileDisplayName, boolean checkHeaderFormat, String entity) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
@@ -821,6 +828,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
+        if (BusinessEntity.Account.name().equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
+        }
+
         Collection<String> reservedWords = new ArrayList<>(
                 Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
         Collection<String> reservedBeginings = new ArrayList<>(
