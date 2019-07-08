@@ -94,6 +94,9 @@
     }
    
     & > .le-table-cell > .le-cell-template {
+      & > div{
+        display: flex;
+      }
       & > .le-copy-controlls {
         display: inline-flex;
         color: $pearl-white;
