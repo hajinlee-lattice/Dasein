@@ -52,9 +52,9 @@
                                 true</option>
                             <option value="No" ng-selected="vm.checkBoolOpSelected('No')">
                                 false</option>
-                            <option value="Present" ng-selected="vm.checkBoolOpSelected('Present')">
+                            <option value="Present" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Present')">
                                 present</option>
-                            <option value="Empty" ng-selected="vm.checkBoolOpSelected('Empty')">empty
+                            <option value="Empty" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Empty')">empty
                             </option>
                         </select>
                     </span>
