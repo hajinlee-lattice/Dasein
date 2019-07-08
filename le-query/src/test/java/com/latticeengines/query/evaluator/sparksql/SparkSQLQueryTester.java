@@ -80,7 +80,8 @@ public class SparkSQLQueryTester {
     }
 
     private void setupLivyEnvironment() {
-        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, true, null);
+        session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, //
+                "MEMORY_AND_DISK_SER", null);
     }
 
     private void reuseLivyEnvironment(int sessionId) {
@@ -117,7 +118,7 @@ public class SparkSQLQueryTester {
     public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
         List<Map<String, Object>> resultData = new ArrayList<>();
         String avroPath = sparkResult.getPath();
-        AvroUtils.AvroFilesIterator iterator = AvroUtils.avroFileIterator(yarnConfiguration, avroPath + "/*.avro");
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath + "/*.avro");
         iterator.forEachRemaining(record -> {
             Map<String, Object> row = new HashMap<>();
             for (Field field: record.getSchema().getFields()) {

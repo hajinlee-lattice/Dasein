@@ -1,7 +1,7 @@
 angular.module('lp.import.wizard.thirdpartyids', [])
 .controller('ImportWizardThirdPartyIDs', function(
     $state, $stateParams, $scope, $timeout, 
-    ResourceUtility, ImportWizardStore, Identifiers, FieldDocument
+    ResourceUtility, ImportWizardStore, Identifiers, FieldDocument, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name);
@@ -29,6 +29,14 @@ angular.module('lp.import.wizard.thirdpartyids', [])
     });
 
     vm.init = function() {
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+        
         vm.fieldMappings.forEach(function(fieldMapping) {
             vm.availableFields.push(fieldMapping.userField);
         });

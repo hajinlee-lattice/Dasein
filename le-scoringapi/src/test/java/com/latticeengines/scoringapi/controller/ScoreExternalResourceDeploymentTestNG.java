@@ -51,6 +51,7 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_3 = new MarketoScoringMatchField();
 
     private static final int EXPECTED_SCORE_99 = 99;
+    private static final int EXPECTED_SCORE_67 = 67;
 
     @Inject
     private PlsMarketoCredentialProxy marketoCredProxy;
@@ -142,9 +143,9 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNull(exception);
         assertNull(exceptionDetails);
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
     }
 
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})

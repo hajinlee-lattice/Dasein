@@ -11,6 +11,9 @@ public class ApsGenerationStepConfiguration extends SparkScriptStepConfiguration
     @JsonProperty("force_rebuild")
     private Boolean forceRebuild;
 
+    @JsonProperty("aps_imputation_enabled")
+    private boolean apsImputationEnabled;
+
     public String getRollingPeriod() {
         return rollingPeriod;
     }
@@ -26,4 +29,13 @@ public class ApsGenerationStepConfiguration extends SparkScriptStepConfiguration
     public void setForceRebuild(Boolean forceRebuild) {
         this.forceRebuild = forceRebuild;
     }
+
+    public boolean isApsImputationEnabled() {
+        return apsImputationEnabled;
+    }
+
+    public void setApsImputationEnabled(boolean apsImputationEnabled) {
+        this.apsImputationEnabled = apsImputationEnabled;
+    }
+
 }

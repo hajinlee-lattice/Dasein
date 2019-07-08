@@ -1,7 +1,35 @@
 .view-mappings {
+	.back-button .le-link {
+		color: #222;
+		&:hover {
+			color: #26639b
+		}
+	}
+	.le-flex-h-panel.center-v.le-link-container {
+		width: auto;
+		display: inline;
+		padding: 0;
+		margin: 0;
+		div {
+			display: inline;
+			padding: 0;
+		}
+		&:after {
+			content: "|";
+			padding: 0 6px;
+		}
+	}
 	h5 {
 		font-size: 14px;
 		font-weight: bold;
+		button {
+			float: right;
+		}
+		&:after {
+			content: '';
+			clear: both;
+			display: table;
+		}
 	}
 	.le-table {
 		.le-table-cell {

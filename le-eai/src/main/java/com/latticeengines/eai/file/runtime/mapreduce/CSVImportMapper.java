@@ -43,6 +43,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -83,6 +85,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
     private static final Set<String> VAL_TRUE = Sets.newHashSet("true", "t", "1", "yes", "y");
     private static final Set<String> VAL_FALSE = Sets.newHashSet("false", "f", "0", "no", "n");
+    private static final Set<String> EMPTY_SET = Sets.newHashSet("none", "null", "na", "N/A", "Blank",
+            "empty");
 
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
     private static final int MAX_CACHE_IDS = 5000000;
@@ -135,6 +139,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
+        LogManager.getLogger(TimeStampConvertUtils.class).setLevel(Level.WARN);
         conf = context.getConfiguration();
         schema = AvroJob.getOutputKeySchema(conf);
         LOG.info("schema is: " + schema.toString());
@@ -197,7 +203,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             throw new CriticalImportException(
                                     "There's critical exception in import, will fail the job!");
                         }
-                        LOG.debug("Start to processing line: " + lineNum);
                         beforeEachRecord();
                         GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
@@ -302,7 +307,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 } catch (Exception e) { // This catch is for the row error
                     rowError = true;
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn(e.getMessage());
                 }
                 try {
                     validateAttribute(csvRecord, attr, csvColumnName);
@@ -324,14 +329,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                     failMapper = true;
                 } catch (LedpException e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     if (e.getCode().equals(LedpCode.LEDP_17017)) {
                         duplicateMap.put(attr.getDisplayName(), e.getMessage());
                     } else {
+                        LOG.warn(e.getMessage());
                         throw e;
                     }
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage());
+                    // Comment out warnings because log files are too large.
+                    //LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
@@ -384,6 +392,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr, boolean trimInput) {
+        // Track a more descriptive Avro Type for error messages.
+        String errorMsgAvroType = avroType.getName();
         try {
             if (trimInput && StringUtils.isNotEmpty(fieldCsvValue)) {
                 fieldCsvValue = fieldCsvValue.trim();
@@ -396,7 +406,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case INT:
                 return new Integer(parseStringToNumber(fieldCsvValue).intValue());
             case LONG:
+                if (isEmptyString(fieldCsvValue)) {
+                    return null;
+                }
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
+                    errorMsgAvroType = "DATE";
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
@@ -405,9 +419,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         //   https://solutions.lattice-engines.com/browse/DP-9653
                         // We change the behavior of negative timestamps from throwing an exception and failing to
                         // parse the input CSV row to logging a warning and setting the timestamp value to zero.
-                        LOG.warn(String.format(
-                                "Converting date/time %s to timestamp generated negative value %d for column %s",
-                                fieldCsvValue, timestamp, attr.getDisplayName()));
+
+                        // Comment out warnings because log files are too large.
+                        //LOG.warn(String.format(
+                        //        "Converting date/time %s to timestamp generated negative value %d for column %s",
+                        //        fieldCsvValue, timestamp, attr.getDisplayName()));
                         return 0L;
                     }
                     return timestamp;
@@ -416,22 +432,29 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                    errorMsgAvroType = "TIMESTAMP";
+                    if (isEmptyString(fieldCsvValue)) {
+                        return null;
+                    }
                     if (fieldCsvValue.matches("[0-9]+")) {
                         return fieldCsvValue;
                     }
                     try {
                         Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
                         if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                    " using conversion library");
                         }
                         return Long.toString(timestamp);
                     } catch (Exception e) {
-                        LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
-                                "value %s.", attr.getName(), fieldCsvValue));
+                        // Comment out warnings because log files are too large.
+                        //LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
+                        //        "value %s.", attr.getName(), fieldCsvValue));
                         DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
                         Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
                         if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue);
+                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                    " using conversion library or ISO 8601 Format");
                         }
                         return Long.toString(timestamp);
                     }
@@ -442,21 +465,25 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             case BOOLEAN:
                 return convertBooleanVal(fieldCsvValue);
             default:
-                LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
+                // Comment out warnings because log files are too large.
+                //LOG.info("size is:" + fieldCsvValue.length());
+                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDataType:"
                         + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.\n" +
-                    "Error message was: %s", fieldCsvValue, avroType, attr.getDisplayName(), e.getMessage()), e);
+                    "Error message was: %s", fieldCsvValue, errorMsgAvroType, attr.getDisplayName(), e.getMessage()),
+                    e);
         } catch (Exception e) {
             fieldMalFormed = true;
-            LOG.warn(e.getMessage());
+            // Comment out warnings because log files are too large.
+            //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
                     "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
-                    e.getMessage()), e);
+                    e.toString()), e);
         }
     }
 
@@ -479,6 +506,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
         return numberFormatter.parse(inputStr, Locale.getDefault());
+    }
+
+    @VisibleForTesting
+    boolean isEmptyString(String inputStr) {
+        inputStr = inputStr.trim();
+        for (String emptyStr : EMPTY_SET) {
+            if (emptyStr.equalsIgnoreCase(inputStr)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

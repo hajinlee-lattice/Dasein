@@ -1,19 +1,23 @@
 package com.latticeengines.spark.service.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -25,27 +29,36 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Service("livySessionService")
 public class LivySessionServiceImpl implements LivySessionService {
 
+    @Inject
+    private EMRCacheService emrCacheService;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
     private static final String URI_SESSIONS = "/sessions";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
 
     @Override
-    public LivySession startSession(@NotNull String host, @NotNull String name, //
+    public LivySession startSession(@NotNull String name, //
             Map<String, Object> livyConf, Map<String, String> sparkConf) {
         Map<String, Object> payLoad = new HashMap<>();
         payLoad.put("queue", "default");
         if (StringUtils.isNotBlank(name)) {
-            payLoad.put("name", name);
+            payLoad.put("name", name + DATE_FORMAT.format(new Date()));
         }
         Map<String, String> conf = new HashMap<>();
+        conf.put("livy.rsc.launcher.port.range", "10000~10999");
         if (MapUtils.isNotEmpty(sparkConf)) {
             conf.putAll(sparkConf);
         }
@@ -60,8 +73,15 @@ public class LivySessionServiceImpl implements LivySessionService {
             payLoad.putAll(livyConf);
             log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
+        String host = getLivyHost();
         String url = host + URI_SESSIONS;
-        String resp = restTemplate.postForObject(url, payLoad, String.class);
+        String resp;
+        try {
+            resp = restTemplate.postForObject(url, payLoad, String.class);
+        } catch (HttpClientErrorException e) {
+            log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
+            throw e;
+        }
         log.info("Starting new livy session on " + host + ": " + resp);
         int sessionId = parseSessionId(resp);
         LivySession session = new LivySession(host, sessionId);
@@ -84,6 +104,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             restTemplate.delete(url);
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
+    }
+
+    public String getLivyHost() {
+        return Boolean.TRUE.equals(useEmr) ? emrCacheService.getLivyUrl() : "http://localhost:8998";
     }
 
     private String getSessionInfo(LivySession session) {
@@ -161,9 +185,9 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private List<String> getSparkPackages() {
         return Arrays.asList( //
-                "org.apache.livy:livy-scala-api_2.11:0.5.0-incubating", //
-                "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.6", //
-                "org.apache.spark:spark-avro_2.11:2.4.0" //
+                "org.apache.livy:livy-scala-api_2.11:0.6.0-incubating", //
+                "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.8", //
+                "org.apache.spark:spark-avro_2.11:2.4.2" //
         );
     }
 

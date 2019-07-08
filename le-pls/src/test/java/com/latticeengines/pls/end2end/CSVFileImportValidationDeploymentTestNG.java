@@ -31,8 +31,10 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
     private static final String CONTACT_SOURCE_FILE = "Contact_Insufficient_Info.csv";
 
     private static final String PRODUCT_HIERARCHY_SOURCE_FILE = "Product_Without_Family_File.csv";
+
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -63,12 +65,12 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                         .toString(),
                 SourceType.FILE.getName());
         startCDLImport(contactFile, ENTITY_CONTACT);
-        verifyAvroFileNumber(contactFile, 49, contactPath);
+        verifyAvroFileNumber(contactFile, 47, contactPath);
         getDataFeedTask(ENTITY_CONTACT);
         String contactIdentifier = contactDataFeedTask.getUniqueId();
         EaiImportJobDetail contactDetail = eaiJobDetailProxy
                 .getImportJobDetailByCollectionIdentifier(contactIdentifier);
-        verifyEaiJobDetail(contactDetail, 1L, 49);
+        verifyEaiJobDetail(contactDetail, 3L, 47);
 
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
@@ -80,8 +82,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Report contactReport = reports.get(1);
         Report productReport = reports.get(2);
         verifyReport(accountReport, 3L, 3L, 47L);
-        verifyReport(contactReport, 1L, 1L, 49L);
-        verifyReport(productReport, 1L, 1L, 5L);
+        verifyReport(contactReport, 3L, 3L, 47L);
+        verifyReport(productReport, 2L, 2L, 4L);
     }
 
 

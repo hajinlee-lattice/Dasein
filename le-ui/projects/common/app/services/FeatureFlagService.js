@@ -1,3 +1,5 @@
+import {actions} from './featureFlags.redux';
+
 angular.module('common.services.featureflag', [
     'mainApp.core.utilities.RightsUtility',
     'common.utilities.browserstorage'
@@ -113,6 +115,7 @@ angular.module('common.services.featureflag', [
     function GetAllFlagsAsync(promise, ApiHost) {
         // feature flag cached
         if (Object.keys(flagValues).length > 0) {
+            actions.setFeatureFlags(flagValues);
             promise.resolve(flagValues);
             return;
         }
@@ -138,8 +141,9 @@ angular.module('common.services.featureflag', [
             if (ApiHost !== '/ulysses') {
                 UpdateFlagsBasedOnRights();
             }
-
+            actions.setFeatureFlags(flagValues);
             promise.resolve(flagValues);
+            
         }).error(function () {
             // if cannot get feature flags from backend
             SetFlag(flags.ALLOW_PIVOT_FILE, false);
@@ -165,7 +169,7 @@ angular.module('common.services.featureflag', [
             if (ApiHost !== '/ulysses') {
                 UpdateFlagsBasedOnRights();
             }
-
+            actions.setFeatureFlags(flagValues);
             promise.resolve(flagValues);
         });
     }

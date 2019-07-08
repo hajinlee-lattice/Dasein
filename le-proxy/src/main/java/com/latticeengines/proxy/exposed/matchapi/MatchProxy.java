@@ -1,10 +1,12 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -61,6 +63,13 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     public EntityPublishStatistics publishEntity(EntityPublishRequest request) {
         String url = constructUrl("/entity/publish");
         return postKryo("publish_entity", url, request, EntityPublishStatistics.class);
+    }
+
+    @Override
+    public List<EntityPublishStatistics> publishEntity(List<EntityPublishRequest> requests) {
+        String url = constructUrl("/entity/publish/list");
+        List<?> list = postKryo("publish_entity_list", url, requests, List.class);
+        return JsonUtils.convertList(list, EntityPublishStatistics.class);
     }
 
     @Override

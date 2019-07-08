@@ -18,13 +18,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.buckets = vm.buckets || [];
                 vm.loading = vm.buckets.length === 0;
                 vm.form = $scope.form || {};
+                vm.header = ['VALUE', 'RECORDS'];
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
-                    //setTimeout(() => { vm.initVariables() }, 0);
+                    // console.log('[tree-edit] initz start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                     vm.initVariables();
                     vm.resetCmp();
-                    console.log('[tree-edit] init', vm.item.ColumnId, vm.item.FundamentalType + '/' + vm.type, vm);
+                    // console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                 }
 
                 vm.initVariables = function () {
@@ -36,8 +37,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         convertEqualToCollection();
                         let value = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
                         vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
-                        console.log('[tree-edit] initVariables()', value, vm.vals, vm.tree);
-                        vm.vals = value;
+                        // console.log('[tree-edit] initVariables()', value, vm.vals, vm.tree);
+                        vm.vals = value || [];
                     }
                     if (vm.showItem('Enum')) {
                         convertEqualToCollection();
@@ -45,12 +46,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             case 'alpha':
                                 vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
                                 break;
+                            case 'numeric':
                             case 'enum':
                                 vm.operation = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
                                 vm.string_operations = QueryTreeService.numerical_operations;
                                 initNumericalRange();
                                 break;
                         }
+                        vm.header[1] = vm.item.Entity + 's';
                         vm.vals = vm.tree.bucketRestriction.bkt.Vals;
                         vm.getBuckets();
                     }
@@ -62,25 +65,62 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (vm.showItem('Date')) { }
                 };
 
-                vm.changeNumericalCmpValue = function () {
-                    QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.operation);
-                    initNumericalRange(true);
+                vm.changeBooleanValue = function ($event) {
+                    vm.booleanChanged = true;
+
+                    let value = $event.currentTarget.value;
+                    let fn = (operation) => {
+                        vm.tree.bucketRestriction.bkt.Cmp = vm.operation = operation;
+                        QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
+                        return '';
+                    };
+
+                    vm.booleanValue = value;
+
+                    switch (value) {
+                        case "Present":
+                            value = fn('IS_NOT_NULL');
+                            break;
+                        case "Empty":
+                            value = fn('IS_NULL');
+                            break;
+                        case "Yes":
+                            fn('EQUAL');
+                            break;
+                        case "No":
+                            fn('EQUAL');
+                            break;
+                    }
+
+                    QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, value);
                 }
 
-                vm.changeBooleanValue = function () {
-                    vm.booleanChanged = true;
-                    QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, vm.booleanValue);
+                vm.checkBoolOpSelected = function (value) {
+                    let bkt = vm.tree.bucketRestriction.bkt;
+
+                    switch (bkt.Cmp) {
+                        case "EQUAL": return value == (bkt.Vals.length > 0 ? bkt.Vals[0] : '');
+                        case "IS_NULL": return value == 'Empty';
+                        case "IS_NOT_NULL": return value == 'Present';
+                    }
+
+                    return false;
                 }
 
                 vm.changeVals = function () {
                     let bkt = vm.tree.bucketRestriction.bkt;
-                    console.log('[tree-edit] changeCmpValue start', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
+                    //console.log('[tree-edit] changeCmpValue start', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
                     QueryTreeService.changeVals(vm.tree.bucketRestriction, vm.vals);
-                    console.log('[tree-edit] changeCmpValue end', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
+                    // console.log('[tree-edit] changeVals end', vm.operation, vm.vals, bkt.Cmp, bkt.Vals);
                 }
 
-                vm.changeCmpValue = function () {
-                    console.log('[tree-edit] changeCmpValue start', vm.operation, vm.tree.bucketRestriction.bkt.Cmp, vm.vals);
+                vm.changeNumericalCmpValue = function () {
+                    vm.changeCmpValue(true);
+                    initNumericalRange(true);
+                }
+
+                vm.changeCmpValue = function (numerical) {
+                    // console.log('[tree-edit] changeCmpValue start', numerical, vm.operation, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
                     vm.clear = true;
                     let _operation = vm.tree.bucketRestriction.bkt.Cmp;
 
@@ -94,36 +134,42 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             vm.operation = 'NOT_IN_COLLECTION';
                             break;
                         default:
-                            vm.vals.length = 0;
+                            if (vm.vals != '') {
+                                vm.vals.length = 0;
+                            }
                     }
 
                     if (vm.chipsOperations.indexOf(_operation) < 0 && vm.chipsOperations.indexOf(vm.operation) > -1) {
                         vm.vals.length = 0;
                     }
 
-                    QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
-                    console.log('[tree-edit] changeCmpValue end', vm.operation, vm.vals);
+                    if (numerical) {
+                        initNumericalRange(true);
+                        QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.operation);
+                    } else {
+                        QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
+                    }
                 }
 
                 vm.showChips = function () {
                     let equals = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
+                    let isPreset = vm.editMode == 'Preset';
                     let check = vm.showItem;
                     let cmp = equals.indexOf(vm.operation) > -1;
-                    return cmp && (check('Enum') || check('Numerical') || check('String'));
+                    return !isPreset && cmp && (check('Enum') || check('Numerical') || check('String'));
                 }
 
                 vm.updateChips = function (items) {
-                    console.log('[tree-edit] updateChips start', vm.operation, items, vm.vals);
+                    // console.log('[tree-edit] updateChips start', vm.operation, items, vm.vals);
                     items = items || [];
                     vm.changeChips(items);
                     vm.changeVals();
-                    vm.changeCmpValue();
-                    //vm.resetCmp();
-                    console.log('[tree-edit] updateChips end', vm.operation, items, vm.vals);
+                    vm.changeCmpValue(vm.item.FundamentalType == 'numeric');
+                    // console.log('[tree-edit] updateChips end', vm.operation, items, vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt.Cmp, vm.tree.bucketRestriction);
                 }
 
                 vm.changeChips = function (items) {
-                    console.log('[tree-edit] changeChips start', vm.operation, vm.vals);
+                    // console.log('[tree-edit] changeChips start', vm.operation, vm.vals);
                     if (vm.clear) {
                         vm.vals.length = 0;
                         vm.clear = false;
@@ -134,7 +180,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                             vm.vals.push(item.Lbl);
                         }
                     });
-                    console.log('[tree-edit] changeChips end', vm.operation, vm.vals);
+                    // console.log('[tree-edit] changeChips end', vm.operation, vm.vals);
                 }
 
                 vm.getBuckets = function () {
@@ -224,12 +270,58 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     $timeout(() => vm.operation = operation, 16);
                 }
 
+                vm.clickSet = function ($event, unset) {
+                    // add any free text in ChipsController query as an item
+                    if (vm.ChipsController && vm.ChipsController.query && vm.ChipsController.customVals) {
+                        vm.ChipsController.addCustomValue(vm.ChipsController.query);
+                    }
+
+                    // is string operation, make sure vm.vals populates bucketRestriction
+                    if (['IS_NULL', 'IS_NOT_NULL'].indexOf(vm.operation) == -1 && vm.string_operations[vm.operation]) {
+                        vm.tree.bucketRestriction.bkt.Vals = vm.vals;
+                    }
+
+                    // if vals is empty, set operation to check IF PRESENT
+                    let vals = vm.tree.bucketRestriction.bkt.Vals || [];
+
+                    if (['IS_NULL', 'IS_NOT_NULL'].indexOf(vm.operation) == -1 && vals.length == 0) {
+                        vm.tree.bucketRestriction.bkt.Cmp = vm.operation = 'IS_NOT_NULL';
+
+                        if (vm.item.FundamentalType == 'numeric') {
+                            vm.changeNumericalCmpValue();
+                        } else {
+                            vm.changeCmpValue();
+                        }
+                    }
+
+                    vm.editing = false;
+
+                    if (unset) {
+                        vm.unused = true;
+                        vm.tree.bucketRestriction.bkt = {};
+                        vm.tree.bucketRestriction.ignored = true;
+                    } else {
+                        vm.unused = false;
+                        vm.tree.bucketRestriction.ignored = false;
+                    }
+
+                    vm.records_updating = true;
+
+                    vm.root.updateCount();
+                    vm.updateBucketCount();
+
+                    $event.preventDefault();
+                    $event.stopPropagation();
+
+                    // console.log('[tree] clickSet() end', vm.tree.bucketRestriction.bkt.Cmp, vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction)
+                }
+
                 vm.clickEditMode = function (value) {
                     vm.editMode = value;
                     if (value !== 'Custom') {
                         var bucket = vm.getCubeBktList()[0];
                         if (bucket) {
-                            vm.presetOperation = bucket.Lbl;
+                            vm.vm.editMode == 'Preset' == bucket.Lbl;
                         }
                         vm.changePreset(bucket);
                     } else {
@@ -245,18 +337,19 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         let from = (fromNumerical != null) ? Number(fromNumerical) : undefined;
                         let to = (toNumerical != null) ? Number(toNumerical) : undefined;
                         vm.rangeConfig = {
-                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical' }
+                            from: { name: 'from-numerical', value: from, position: 0, type: 'Numerical', step: 1 },
+                            to: { name: 'to-numerical', value: to, position: 1, type: 'Numerical', step: 1 }
                         };
                         showNumericalRange();
                     } else {
                         vm.rangeConfig = {
-                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                            from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical', step: 1 },
+                            to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical', step: 1 }
                         };
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
                         setTimeout(() => { showNumericalRange() }, 0);
                     }
+
                     return vm.rangeConfig;
                 }
 

@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class S3ImportServiceImpl implements S3ImportService {
     private static final Logger log = LoggerFactory.getLogger(S3ImportServiceImpl.class);
 
     private static final String SOURCE = "File";
+    private static final String TEMPLATES = "Templates";
+    private static final String DROPFOLDER = "dropfolder";
 
     @Inject
     private S3ImportMessageService s3ImportMessageService;
@@ -43,8 +46,39 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @Override
     public boolean saveImportMessage(String bucket, String key, String hostUrl) {
-        S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, hostUrl);
-        return message != null;
+        if (isValidKey(key)) {
+            S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, hostUrl);
+            return message != null;
+        } else {
+            log.warn(String.format("Not a valid import message for key: %s, skip save import message", key));
+            return false;
+        }
+    }
+
+    private boolean isValidKey(String key) {
+        if (StringUtils.isEmpty(key)) {
+            return false;
+        }
+        String[] parts = key.split("/");
+        if (parts.length < 5) {
+            return false;
+        }
+        if (!DROPFOLDER.equals(parts[0])) {
+            return false;
+        }
+        if (parts.length == 5) {
+            if (!TEMPLATES.equals(parts[2])) {
+                return false;
+            }
+            return parts[4].toLowerCase().endsWith(".csv");
+        } else if (parts.length == 6) {
+            if (!TEMPLATES.equals(parts[3])) {
+                return false;
+            }
+            return parts[5].toLowerCase().endsWith(".csv");
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -83,7 +117,7 @@ public class S3ImportServiceImpl implements S3ImportService {
                     s3ImportMessageService.deleteMessage(message);
                 }
             } catch (RuntimeException e) {
-                log.error(String.format("Cannot submit import for: %s, error: %s", message.getKey(), e.toString()));
+                log.error(String.format("Cannot submit import for: %s", message.getKey()), e);
             }
         }
         return false;

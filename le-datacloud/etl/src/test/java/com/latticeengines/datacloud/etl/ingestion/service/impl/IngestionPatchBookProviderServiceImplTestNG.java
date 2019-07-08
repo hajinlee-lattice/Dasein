@@ -24,12 +24,14 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.exposed.util.TestPatchBookUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -98,6 +100,11 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         ingestionProviderService.setPatchBookEntityMgr(mockPatchBookEntityMgr());
     }
 
+    @AfterClass(groups = "functional")
+    public void destroy() {
+        prepareCleanPod(this.getClass().getSimpleName());
+    }
+
     @Test(groups = "functional", dataProvider = "Ingestions")
     public void test(Ingestion ingestion) {
         ingestionEntityMgr.save(ingestion);
@@ -118,6 +125,15 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         }
         Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
         verify(ingestion, patchConfig);
+    }
+
+
+    @DataProvider(name = "Ingestions", parallel = false)
+    private Object[][] getIngestions() {
+        return new Object[][] { //
+                { createIngestion(PatchBook.Type.Attribute) }, //
+                { createIngestion(PatchBook.Type.Domain) }, //
+        };
     }
 
     private void verify(Ingestion ingestion, PatchBookConfiguration patchConfig) {
@@ -162,26 +178,27 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_EFFECTIVE_SINCE));
             Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_EXPIRE_AFTER));
 
-            Assert.assertNotNull(record.get(PatchBook.COLUMN_PATCH_ITEMS));
-            Map<?, ?> map = JsonUtils.deserialize(record.get(PatchBook.COLUMN_PATCH_ITEMS).toString(), Map.class);
+            Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_ITEMS));
+            Map<?, ?> map = JsonUtils.deserialize(record.get(DataCloudConstants.ATTR_PATCH_ITEMS).toString(),
+                    Map.class);
             Map<String, Object> patchItems = JsonUtils.convertMap(map, String.class, Object.class);
             switch (type) {
             case Domain:
-                Assert.assertNotNull(record.get(PatchBook.COLUMN_DUNS));
+                Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_DUNS));
                 // All domain patch items are populated with Cleanup = true and
                 // HotFix = false
                 Assert.assertTrue((Boolean) record.get(PatchBook.COLUMN_CLEANUP));
                 Assert.assertFalse((Boolean) record.get(PatchBook.COLUMN_HOTFIX));
                 // Domain, Name, Country, State, ZipCode are not populated,
                 // check whether field exists in schema
-                Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_DOMAIN));
+                Assert.assertNotNull(record.getSchema().getField(DataCloudConstants.ATTR_PATCH_DOMAIN));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_NAME));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_COUNTRY));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_STATE));
                 Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_ZIPCODE));
                 break;
             case Attribute:
-                Assert.assertNotNull(record.get(PatchBook.COLUMN_DOMAIN));
+                Assert.assertNotNull(record.get(DataCloudConstants.ATTR_PATCH_DOMAIN));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_COUNTRY), fakeValue(pid, COUNTRY)));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_STATE), fakeValue(pid, STATE)));
                 Assert.assertTrue(isObjEquals(record.get(PatchBook.COLUMN_ZIPCODE), fakeValue(pid, ZIPCODE)));
@@ -191,7 +208,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
                 Assert.assertFalse((Boolean) record.get(PatchBook.COLUMN_CLEANUP));
                 Assert.assertTrue((Boolean) record.get(PatchBook.COLUMN_HOTFIX));
                 // DUNS is not populated, check whether field exists in schema
-                Assert.assertNotNull(record.getSchema().getField(PatchBook.COLUMN_DUNS));
+                Assert.assertNotNull(record.getSchema().getField(DataCloudConstants.ATTR_PATCH_DUNS));
                 break;
             default:
                 break;
@@ -208,23 +225,24 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     private void verifyUpdatedPatchBook(List<PatchBook> books) {
         books.forEach(book -> {
             boolean expectedEOL = PatchBookUtils.isEndOfLife(book, CURRENT_DATE);
-            Assert.assertEquals(book.isEndOfLife(), expectedEOL);
-            Assert.assertFalse(book.isHotFix());
+            Assert.assertEquals(book.isEndOfLife(), expectedEOL,
+                    "EndOfLife flag validation failed for book (pid=" + book.getPid() + "): "
+                            + JsonUtils.serialize(book));
+            Assert.assertFalse(book.isHotFix(),
+                    "HotFix flag validation failed for book (pid=" + book.getPid() + "): " + JsonUtils.serialize(book));
             if (expectedEOL) {
-                Assert.assertEquals(book.getExpireAfterVersion(), DATACLOUD_VERSION);
+                Assert.assertEquals(book.getExpireAfterVersion(), DATACLOUD_VERSION,
+                        "ExpireAfterVersion validation failed for book (pid=" + book.getPid() + "): "
+                                + JsonUtils.serialize(book));
             } else {
-                Assert.assertEquals(book.getEffectiveSinceVersion(), DATACLOUD_VERSION);
-                Assert.assertNull(book.getExpireAfterVersion());
+                Assert.assertEquals(book.getEffectiveSinceVersion(), DATACLOUD_VERSION,
+                        "EffectiveSinceVersion validation failed for book (pid=" + book.getPid() + "): "
+                                + JsonUtils.serialize(book));
+                Assert.assertNull(book.getExpireAfterVersion(),
+                        "ExpireAfterVersion validation failed for book (pid=" + book.getPid() + "): "
+                                + JsonUtils.serialize(book));
             }
         });
-    }
-
-    @DataProvider(name = "Ingestions", parallel = false)
-    private Object[][] getIngestions() {
-        return new Object[][] { //
-                { createIngestion(PatchBook.Type.Attribute) }, //
-                { createIngestion(PatchBook.Type.Domain) }, //
-        };
     }
 
     private Ingestion createIngestion(PatchBook.Type type) {
@@ -234,6 +252,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         PatchBookConfiguration conf = new PatchBookConfiguration();
         conf.setBookType(type);
         conf.setEmailEnabled(false);
+        conf.setSkipValidation(true);
         // Test HotFix mode for Attribute patch type
         conf.setPatchMode(type == PatchBook.Type.Attribute ? PatchMode.HotFix : PatchMode.Normal);
         ingestion.setConfig(JsonUtils.serialize(conf));
@@ -304,8 +323,8 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     private static PatchBook fakeDomainPatchItem(long pid) {
         MatchKeyTuple tuple = new MatchKeyTuple.Builder().withDuns(String.valueOf(pid)).build();
         Map<String, Object> patchItems = TestPatchBookUtils.newDomainPatchItems("google.com");
-        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Domain, tuple, patchItems);
-        book.setCleanup(true); // Cleanup mode is only for Domain patch
+        // Cleanup mode is only for Domain patch
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Domain, true, tuple, patchItems);
         return book;
     }
 
@@ -318,8 +337,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
                 .build();
         Map<String, Object> patchItems = new HashMap<>();
         patchItems.put(DataCloudConstants.ATTR_ALEXA_RANK, ALEXA_RANK);
-        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Attribute, tuple, patchItems);
-        book.setCleanup(false);
+        PatchBook book = TestPatchBookUtils.newPatchBook(pid, PatchBook.Type.Attribute, false, tuple, patchItems);
         return book;
     }
 
@@ -330,31 +348,49 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     @SuppressWarnings("unchecked")
     private PatchBookEntityMgr mockPatchBookEntityMgr() {
         PatchBookEntityMgr patchBookEntityMgr = Mockito.mock(PatchBookEntityMgr.class);
-        when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Domain), any(boolean.class)))
-                .thenReturn(MOCK_DOMAIN_BOOKS);
 
-        when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Attribute), any(boolean.class)))
-                .thenReturn(MOCK_ATTR_BOOKS);
+        try {
+            when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Domain), any(boolean.class)))
+                    .thenReturn(MOCK_DOMAIN_BOOKS);
 
-        doAnswer(inv -> {
-            mockSetHotFix((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
-            return null;
-        }).when(patchBookEntityMgr).setHotFix(any(), any(boolean.class));
+            when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Attribute), any(boolean.class)))
+                    .thenReturn(MOCK_ATTR_BOOKS);
 
-        doAnswer(inv -> {
-            mockSetEndOfLife((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
-            return null;
-        }).when(patchBookEntityMgr).setEndOfLife(any(), any(boolean.class));
+            doAnswer(inv -> {
+                mockSetHotFix((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
+                return null;
+            }).when(patchBookEntityMgr).setHotFix(any(), any(boolean.class));
 
-        doAnswer(inv -> {
-            mockSetEffectiveSinceVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
-            return null;
-        }).when(patchBookEntityMgr).setEffectiveSinceVersion(any(), any());
+            doAnswer(inv -> {
+                mockSetEndOfLife((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
+                return null;
+            }).when(patchBookEntityMgr).setEndOfLife(any(), any(boolean.class));
 
-        doAnswer(inv -> {
-            mockSetExpireAfterVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
-            return null;
-        }).when(patchBookEntityMgr).setExpireAfterVersion(any(), any());
+            doAnswer(inv -> {
+                mockSetEffectiveSinceVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
+                return null;
+            }).when(patchBookEntityMgr).setEffectiveSinceVersion(any(), any());
+
+            doAnswer(inv -> {
+                mockSetExpireAfterVersion((List<Long>) inv.getArguments()[0], (String) inv.getArguments()[1]);
+                return null;
+            }).when(patchBookEntityMgr).setExpireAfterVersion(any(), any());
+
+            doAnswer(inv -> {
+                return mockFindCountByTypeAndHotFix((PatchBook.Type) inv.getArguments()[0],
+                        (boolean) inv.getArguments()[1]);
+            }).when(patchBookEntityMgr).findCountByTypeAndHotFix(any(), any(boolean.class));
+
+            doAnswer(inv -> {
+                return mockFindByTypeAndHotFixWithPagination((int) inv.getArguments()[0], (int) inv.getArguments()[1],
+                        (String) inv.getArguments()[2], (PatchBook.Type) inv.getArguments()[3],
+                        (boolean) inv.getArguments()[4]);
+            }).when(patchBookEntityMgr).findByTypeAndHotFixWithPagination(any(int.class), any(int.class), any(), any(),
+                    any(boolean.class));
+        } catch (Exception e) {
+            log.error("Mock patchBookEntityMgr failed", e);
+            throw e;
+        }
 
         return patchBookEntityMgr;
     }
@@ -382,4 +418,43 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             PATCH_BOOKS.get(pid).setExpireAfterVersion(version);
         });
     }
+
+    // Test data with Attribute type is all marked as hotfix while that with
+    // Domain type is not hotfix. So no need to do any filter by hotfix here
+    private long mockFindCountByTypeAndHotFix(@NotNull PatchBook.Type type, boolean hotFix) {
+        switch (type) {
+        case Attribute:
+            return MOCK_ATTR_BOOKS.size();
+        case Domain:
+            return MOCK_DOMAIN_BOOKS.size();
+        default:
+            throw new UnsupportedOperationException(
+                    "Unsupported PatchBook type in mockFindCountByTypeAndHotFix: " + type);
+        }
+    }
+
+    // Test data with Attribute type is all marked as hotfix while that with
+    // Domain type is not hotfix. So no need to do any filter by hotfix here
+    private List<PatchBook> mockFindByTypeAndHotFixWithPagination(int offset, int limit, String sortByField,
+            PatchBook.Type type, boolean hotfix) {
+        List<PatchBook> books;
+        switch (type) {
+        case Attribute:
+            books = MOCK_ATTR_BOOKS;
+            break;
+        case Domain:
+            books = MOCK_DOMAIN_BOOKS;
+            break;
+        default:
+            throw new UnsupportedOperationException(
+                    "Unsupported PatchBook type in mockFindCountByTypeAndHotFix: " + type);
+        }
+
+        List<PatchBook> toReturn = new ArrayList<>();
+        for (int i = offset; i < offset + limit; i++) {
+            toReturn.add(books.get(i));
+        }
+        return toReturn;
+    }
+
 }

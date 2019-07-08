@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -16,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
@@ -26,7 +29,10 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.UpsertJob;
 
-public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConfiguration> extends RunSparkJob<T, UpsertConfig, UpsertJob> {
+public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConfiguration> //
+        extends RunSparkJob<T, UpsertConfig> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseMergeTableRoleDiff.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -35,11 +41,17 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
     protected MetadataProxy metadataProxy;
 
     private Table masterTable;
-    private Table diffTable;
-
-    String mergedTableName;
+    private String mergedTableName;
 
     protected abstract TableRoleInCollection getTableRole();
+
+    protected boolean saveParquet() {
+        return false;
+    }
+
+    protected boolean failOnMissingMasterTable() {
+        return true;
+    }
 
     @Override
     protected Class<UpsertJob> getJobClz() {
@@ -56,11 +68,17 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), getTableRole(), active);
         if (masterTable == null || CollectionUtils.isEmpty(masterTable.getExtracts())) {
-            throw new RuntimeException("There is no " + getTableRole() + " master table! " +
-                    "Please rebuild the serving store first.");
+            String msg = "There is no " + getTableRole() + " master table! Please rebuild the serving store first.";
+            if (failOnMissingMasterTable()) {
+                throw new RuntimeException(msg);
+            } else {
+                log.warn(msg);
+                return null;
+            }
         }
+
         log.info("Set masterTable=" + masterTable.getName());
-        diffTable = getDiffTable();
+        Table diffTable = getDiffTable();
         if (diffTable == null) {
             throw new RuntimeException(
                     "Failed to find diff " + getTableRole() + " table in customer " + customerSpace);
@@ -69,6 +87,9 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
         HdfsDataUnit input1 = masterTable.toHdfsDataUnit("Master");
         HdfsDataUnit input2 = diffTable.toHdfsDataUnit("Diff");
         jobConfig.setInput(Arrays.asList(input1, input2));
+        if (saveParquet()) {
+            jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+        }
         return jobConfig;
     }
 

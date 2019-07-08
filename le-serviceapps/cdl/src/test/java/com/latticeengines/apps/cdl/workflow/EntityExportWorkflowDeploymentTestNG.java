@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -19,7 +21,10 @@ import javax.inject.Inject;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 import org.testng.Assert;
@@ -30,10 +35,13 @@ import com.amazonaws.services.s3.model.Tag;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.S3ExportFolderService;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
@@ -47,19 +55,19 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 /**
  * dpltc deploy -a admin,pls,lp,cdl,metadata,matchapi,workflowapi
  */
 public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDeploymentTestNGBase {
 
-    @Inject
-    private CDLAttrConfigProxy cdlAttrConfigProxy;
+    private static final Logger log = LoggerFactory.getLogger(EntityExportWorkflowDeploymentTestNG.class);
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private AttrConfigService attrConfigService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
@@ -83,15 +91,27 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     private String dropFolderTagValue;
 
     private AtlasExport atlasExport;
+    private boolean saveCsvToLocal;
+
+    @BeforeClass(groups = "deployment" )
+    public void setup() throws Exception {
+        setupTestEnvironment();
+        checkpointService.resumeCheckpoint( //
+                "update3", //
+                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
+        configExportAttrs();
+        saveCsvToLocal = false;
+    }
 
     @BeforeClass(groups = "manual" )
-    public void setup() throws Exception {
+    public void setupManual() throws Exception {
         boolean useExistingTenant = false;
         if (useExistingTenant) {
-            testBed.useExistingTenantAsMain("LETest1557310393505");
+            testBed.useExistingTenantAsMain("LETest1558869439194");
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
             mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
+            MultiTenantContext.setTenant(mainTestTenant);
         } else {
             setupTestEnvironment();
             checkpointService.resumeCheckpoint( //
@@ -100,11 +120,12 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             configExportAttrs();
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        saveCsvToLocal = true;
     }
 
-    @Test(groups = "manual")
+    @Test(groups = { "deployment", "manual" })
     public void testWorkflow() throws Exception {
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        DataCollection.Version version = dataCollectionService.getActiveVersion(mainCustomerSpace);
         EntityExportRequest request = new EntityExportRequest();
         request.setDataCollectionVersion(version);
         atlasExport = atlasExportService.createAtlasExport(mainTestCustomerSpace.toString(),
@@ -148,6 +169,16 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             if (fileName.equalsIgnoreCase("Account.csv.gz")) {
                 hasAccountCsv = true;
                 InputStream csvStream = s3Service.readObjectAsStream(s3Bucket, targetPath + fileName);
+                if (saveCsvToLocal) {
+                    try {
+                        File tgtFile = new File("Account.csv.gz");
+                        FileUtils.deleteQuietly(tgtFile);
+                        FileUtils.copyInputStreamToFile(csvStream, tgtFile);
+                    } catch (IOException e) {
+                        log.warn("Failed to save csv to local.");
+                    }
+                    csvStream = s3Service.readObjectAsStream(s3Bucket, targetPath + fileName);
+                }
                 verifyAccountCsvGz(csvStream);
             }
         }
@@ -155,13 +186,14 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     }
 
     private void configExportAttrs() {
-        AttrConfig config1 = enableExport(BusinessEntity.Account, "user_Test_Date");
-        AttrConfig config2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce");
-        AttrConfig config3 = enableExport(BusinessEntity.PurchaseHistory,
-                "AM_g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J__W_1__SW");
-        AttrConfigRequest request = new AttrConfigRequest();
-        request.setAttrConfigs(Arrays.asList(config1, config2, config3));
-        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
+        AttrConfig enable1 = enableExport(BusinessEntity.Account, "user_Test_Date"); // date attr
+        AttrConfig enable2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce"); // bit encode
+        AttrConfig enable3 = enableExport(BusinessEntity.Account, "CHIEF_EXECUTIVE_OFFICER_NAME"); // non-segmentable
+        AttrConfig enable4 = enableExport(BusinessEntity.PurchaseHistory,
+                "AM_g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J__W_1__SW"); // activity metric
+        AttrConfigRequest request2 = new AttrConfigRequest();
+        request2.setAttrConfigs(Arrays.asList(enable1, enable2, enable3, enable4));
+        attrConfigService.saveRequest(request2, AttrConfigUpdateMode.Usage);
     }
 
     private AttrConfig enableExport(BusinessEntity entity, String attribute) {
@@ -170,7 +202,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         attrConfig.setAttrName(attribute);
         AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
         enrichProp.setCustomValue(Boolean.TRUE);
-        attrConfig.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Enrichment.name(), enrichProp));
+        attrConfig.setAttrProps(new HashMap<>(ImmutableMap.of(ColumnSelection.Predefined.Enrichment.name(), enrichProp)));
         return attrConfig;
     }
 
@@ -180,6 +212,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             Reader in = new InputStreamReader(gzipIs);
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
+            Assert.assertTrue(headerMap.containsKey("CEO Name"));
             Assert.assertTrue(headerMap.containsKey("Test Date"));
             Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"));
             Assert.assertTrue(headerMap.containsKey("CMT3: Glassware: % Share of Wallet in last 1 week"));

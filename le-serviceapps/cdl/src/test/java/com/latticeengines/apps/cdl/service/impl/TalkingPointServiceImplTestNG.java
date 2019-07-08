@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
-
 public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Autowired
@@ -69,8 +68,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         testPlay = createTestPlay();
         playProxy = spy(new PlayProxy());
         ((TalkingPointServiceImpl) talkingPointService).setPlayProxy(playProxy);
-        doReturn(testPlay).when(playProxy).getPlay(
-                CustomerSpace.parse(mainTestTenant.getId()).toString(), testPlay.getName());
+        doReturn(testPlay).when(playProxy).getPlay(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                testPlay.getName());
     }
 
     @Test(groups = "functional")
@@ -116,16 +115,13 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         tp2 = tps.get(1);
 
-        TalkingPointPreview preview =
-                talkingPointService.getPreview(tp.getPlayName());
+        TalkingPointPreview preview = talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
         Assert.assertNotNull(preview.getNotionObject());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().size(), tps.size());
-        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
-                tp.getName());
-        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(),
-                tp2.getName());
+        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), tp.getName());
+        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(), tp2.getName());
 
         talkingPointService.publish(tp.getPlayName());
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
@@ -207,14 +203,12 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotEquals(tps.get(1).getPid(), 0);
         Assert.assertNotNull(tps.get(1).getName());
 
-        TalkingPointPreview preview =
-                talkingPointService.getPreview(tp.getPlayName());
+        TalkingPointPreview preview = talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
         Assert.assertNotNull(preview.getNotionObject());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().size(), tps.size());
-        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
-                testtp.getName());
+        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), testtp.getName());
 
         talkingPointService.publish(tp.getPlayName());
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
@@ -222,6 +216,12 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(dtps.size(), tps.size());
         Assert.assertEquals(dtps.get(0).getName(), tp.getName());
         Assert.assertEquals(dtps.get(0).getPlayName(), tp.getPlayName());
+
+        dtps = talkingPointService.findAllPublishedByTenant(mainCustomerSpace);
+        Assert.assertNotNull(dtps);
+        Assert.assertEquals(dtps.size(), tps.size());
+        Assert.assertEquals(dtps.get(0).getPlayName(), testPlay.getName());
+        Assert.assertEquals(dtps.get(0).getPlayDisplayName(), testPlay.getDisplayName());
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(testtp.getName());
@@ -237,8 +237,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void deletePlay(Play play) {
-        PlatformTransactionManager ptm =
-                applicationContext.getBean("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {
@@ -261,8 +261,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setPlayType(testPlayType);
         play.setTargetSegment(targetSegment);
 
-        PlatformTransactionManager ptm =
-                applicationContext.getBean("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {
@@ -279,8 +279,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         segment.setTenant(MultiTenantContext.getTenant());
         segment.setDataCollection(createDataCollection());
 
-        PlatformTransactionManager ptm =
-                applicationContext.getBean("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {
@@ -297,8 +297,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         dc.setVersion(Blue);
 
         dc.setTenant(MultiTenantContext.getTenant());
-        PlatformTransactionManager ptm =
-                applicationContext.getBean("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {
@@ -308,7 +308,6 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         return dc;
     }
-
 
     private PlayType createTestPlayType() {
         PlayType playType = new PlayType();
@@ -320,8 +319,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         playType.setUpdated(new Date());
         playType.setCreated(new Date());
         playType.setId(PlayType.generateId());
-        PlatformTransactionManager ptm =
-                applicationContext.getBean("transactionManager", PlatformTransactionManager.class);
+        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
         tx.execute(new TransactionCallbackWithoutResult() {
             public void doInTransactionWithoutResult(TransactionStatus status) {

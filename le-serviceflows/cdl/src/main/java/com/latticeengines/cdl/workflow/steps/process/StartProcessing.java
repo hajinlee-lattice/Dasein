@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
@@ -143,6 +145,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         addActionAssociateTables();
         determineVersions();
 
+        String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
+        log.info("tenantName is :" + tenantName);
+        if (tenantName.equalsIgnoreCase("QA_Atlas_Auto_Refresh_2")) {
+            List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
+            if (CollectionUtils.isEmpty(warningMessages)) {
+                warningMessages = new LinkedList<>();
+            }
+            warningMessages.add("this warning message from tenant QA_Atlas_Auto_Refresh_2, just for testing.");
+            putObjectInContext(PROCESS_ANALYTICS_WARNING_KEY, warningMessages);
+        }
+
         if (!hasKeyInContext(FULL_REMATCH_PA)) {
             boolean fullRematch = Boolean.TRUE.equals(configuration.isFullRematch());
             putObjectInContext(FULL_REMATCH_PA, fullRematch);
@@ -167,6 +180,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setupInactiveVersion();
         setGrapherContext();
         resetEntityMatchFlagsForRetry();
+        setDataQuotaLimit();
 //        bumpEntityMatchVersion();
     }
 
@@ -547,6 +561,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             // need to rerun entity match steps
             removeObjectFromContext(NEW_ENTITY_MATCH_ENVS);
         }
+    }
+
+    private void setDataQuotaLimit() {
+        DataLimit dataLimit = dataFeedProxy.getDataQuotaLimitMap(customerSpace);
+        if (dataLimit == null) {
+            throw new IllegalArgumentException("Data Quota Limit Can not find.");
+        }
+        putObjectInContext(DATAQUOTA_LIMIT, dataLimit);
     }
 
     /*

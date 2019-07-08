@@ -11,8 +11,7 @@ module.exports = {
             app: path.resolve(__dirname, "./app"),
             assets: path.resolve(__dirname, "./assets"),
             components: path.resolve(__dirname, "./components"),
-            widgets: path.resolve(__dirname, "./widgets")
-        }
+            widgets: path.resolve(__dirname, "./widgets")        }
     },
     entry: {
         widgets: "./widgets/index.js"
@@ -58,14 +57,32 @@ module.exports = {
             { test: /\.(woff|woff2|eot|ttf|otf)$/, use: ["file-loader"] },
             { test: /\.html$/, use: ["raw-loader"] },
             {
-                test: /\.*\.js$/,
-                exclude: /node_modules/,
-                use: ["ng-annotate-loader"]
-            },
-            {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                use: { loader: "babel-loader" }
+                use: { loader: "babel-loader", options:{
+                    presets: [
+                        "@babel/preset-env",
+                        "@babel/preset-react"
+                    ],
+                    plugins: [
+                        "@babel/plugin-transform-spread",
+                        "angularjs-annotate",
+                        "@babel/plugin-syntax-dynamic-import",
+                        "@babel/plugin-syntax-import-meta",
+                        "@babel/plugin-proposal-class-properties",
+                        "@babel/plugin-proposal-json-strings",
+                        [
+                            "@babel/plugin-proposal-decorators",
+                            {
+                                "legacy": true
+                            }
+                        ],
+                        "@babel/plugin-proposal-function-sent",
+                        "@babel/plugin-proposal-export-namespace-from",
+                        "@babel/plugin-proposal-numeric-separator",
+                        "@babel/plugin-proposal-throw-expressions"
+                    ]
+                    }  }
             }
         ]
     }

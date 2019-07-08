@@ -33,6 +33,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -131,7 +132,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         attribute = table.getAttribute("Date");
         assertEquals(attribute.getPhysicalDataType(), UserDefinedType.DATE.getAvroType().toString().toLowerCase());
         assertEquals(attribute.getLogicalDataType(), LogicalDataType.Date);
-        assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_YEAR);
+        assertEquals(attribute.getFundamentalType(), FundamentalType.DATE.getName());
         attribute = table.getAttribute("IsClosed");
         assertEquals(attribute.getApprovedUsage(), Arrays.asList(ModelingMetadata.NONE_APPROVED_USAGE));
         assertEquals(attribute.getFundamentalType(), ModelingMetadata.FT_BOOLEAN);

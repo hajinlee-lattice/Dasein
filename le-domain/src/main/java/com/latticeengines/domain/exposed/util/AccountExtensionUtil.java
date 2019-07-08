@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -164,7 +165,7 @@ public class AccountExtensionUtil {
     /*
      * Reformats date attributes and converts matchOutput to data page
      */
-    public static DataPage processMatchOutputResults(List<ColumnMetadata> dateAttributesMetadata,
+    public static DataPage processMatchOutputResults(String customerSpace, List<ColumnMetadata> dateAttributesMetadata,
             MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         Map<String, ColumnMetadata> dateAttributesMap = dateAttributesMetadata.stream()
@@ -181,7 +182,7 @@ public class AccountExtensionUtil {
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("No match on MatchApi, reverting to ObjectApi");
+                            log.info("No match on MatchApi, reverting to ObjectApi on Tenant: " + customerSpace);
                         } else {
                             log.info("Found full match from lattice data cloud as well as from my data table.");
 
@@ -222,6 +223,8 @@ public class AccountExtensionUtil {
     public static DataPage convertToDataPage(MatchOutput matchOutput) {
         DataPage dataPage = createEmptyDataPage();
         List<String> fields = matchOutput.getOutputFields();
+        AtomicInteger unmatched = new AtomicInteger(0), fullyMatched = new AtomicInteger(0);
+
         IntStream.range(0, matchOutput.getResult().size()) //
                 .forEach(i -> {
                     Map<String, Object> data = null;
@@ -230,11 +233,9 @@ public class AccountExtensionUtil {
                             && matchOutput.getResult().get(i) != null) {
 
                         if (matchOutput.getResult().get(i).isMatched() != Boolean.TRUE) {
-                            log.info("Didn't find any match from lattice data cloud. "
-                                    + "Still continue to process the result as we may "
-                                    + "have found partial match in my data table.");
+                            unmatched.getAndIncrement();
                         } else {
-                            log.info("Found full match from lattice data cloud as well as from my data table.");
+                            fullyMatched.getAndIncrement();
                         }
 
                         final Map<String, Object> tempDataRef = new HashMap<>();
@@ -251,6 +252,8 @@ public class AccountExtensionUtil {
                         dataPage.getData().add(data);
                     }
                 });
+        log.info(String.format("%s Fully matched and %s unmatched from %s requested", fullyMatched.get(),
+                unmatched.get(), matchOutput.getResult().size()));
         return dataPage;
     }
 

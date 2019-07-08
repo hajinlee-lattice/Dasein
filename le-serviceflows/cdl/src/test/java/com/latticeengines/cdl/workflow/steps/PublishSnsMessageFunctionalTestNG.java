@@ -25,8 +25,8 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportPublishToSNSConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -79,10 +79,11 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
     @Test(groups = "manual")
     public void testPublishToSnsTopic() {
 
-        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, UUID.randomUUID().toString());
+        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
+                UUID.randomUUID().toString());
 
-        String workflowRequestId = publishToSNSStep.getObjectFromContext(
-                PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
+        String workflowRequestId = publishToSNSStep
+                .getObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
 
         DropBoxSummary dropbox = new DropBoxSummary();
         dropbox.setDropBox(UUID.randomUUID().toString());

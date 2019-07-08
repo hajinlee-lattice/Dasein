@@ -53,7 +53,7 @@ public class ProductFileValidationService
     private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
 
     @Inject
-    protected DataCollectionProxy dataCollectionProxy;
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
@@ -61,6 +61,7 @@ public class ProductFileValidationService
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
+
         Table currentTable = getCurrentConsolidateProductTable(
                 productFileValidationServiceConfiguration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
@@ -77,14 +78,13 @@ public class ProductFileValidationService
             log.info("Error when copying error file to local");
         }
 
-     // append error message to error file
+        // append error message to error file
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
-       
 
         // copy error file back to hdfs, remove local error.csv
         if (errorLine != 0L) {
@@ -101,13 +101,14 @@ public class ProductFileValidationService
         return errorLine;
     }
 
-    public static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
+
+    private static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
             List<String> productTypes, List<String> productStatuses) {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
         Map<String, Product> productMap = new HashMap<>();
 
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             Product product = new Product();
@@ -150,6 +151,14 @@ public class ProductFileValidationService
             Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
                 continue;
+            }
+            if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null
+                    && inputProduct.getProductName() == null) {
+                errorLine++;
+                csvFilePrinter.printRecord(entry.getKey(), "",
+                        String.format(
+                                "Product name, category, bundle can't be all empty for product with productId =%s",
+                                inputProduct.getProductId()));
             }
             if (inputProduct.getProductCategory() != null) {
                 String category = inputProduct.getProductCategory();
@@ -352,4 +361,5 @@ public class ProductFileValidationService
         newProduct.setProductType(ProductType.Hierarchy.name());
         inputProductMap.put(compositeId, newProduct);
     }
+
 }

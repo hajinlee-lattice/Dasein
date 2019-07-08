@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -41,6 +42,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntity
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
@@ -751,6 +753,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                             workflowContainerService.getJobStatus(applicationId, clusterId);
                     if (yarnStatus == null
                             || JobStatus.fromYarnStatus(yarnStatus.getStatus(), yarnStatus.getState()) == JobStatus.FAILED) {
+                        updateWorkflowJobErrorDetails(workflowJob, applicationId, yarnStatus);
                         workflowJob.setStatus(JobStatus.FAILED.name());
                         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
                         log.warn(String.format("Heartbeat is out-of-sync. Either YARN container cannot be found on EMR "
@@ -812,7 +815,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         // if (yarnStatus is empty) {
                         //     log.warn(...);
                         // }
-
+                        updateWorkflowJobErrorDetails(workflowJob, applicationId, yarnStatus);
                         JobStatus status = yarnStatus == null ? null
                                 : JobStatus.fromString(yarnStatus.getStatus().name(), yarnStatus.getState());
                         if (status != null) {
@@ -862,6 +865,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         return workflowJobs;
+    }
+
+    private void updateWorkflowJobErrorDetails(WorkflowJob workflowJob, String applicationId,
+                                               com.latticeengines.domain.exposed.dataplatform.JobStatus yarnStatus) {
+        if (workflowJob.getErrorDetails() == null && yarnStatus != null) {
+            log.info("Job status for application id %s is %s", applicationId, yarnStatus);
+            LedpException ledpException = new LedpException(WorkflowUtils.getWorkFlowErrorCode(yarnStatus.getDiagnostics()),
+                    new String[]{applicationId,
+                            yarnStatus.getErrorReport()});
+            workflowJob.setErrorDetails(ledpException.getErrorDetails());
+            workflowJobEntityMgr.updateErrorDetails(workflowJob);
+        }
     }
 
     /*

@@ -13,7 +13,9 @@
         { "Node": "Bombora", "Data": 20},
         { "Node": "WebsiteKeywords", "Data": 200},
         { "Node": "CompanyProfile", "Data": 200},
-        { "Node": "Enrichment", "Data": 1000}
+        { "Node": "Enrichment", "Data": 1000},
+        { "Node": "Account", "Data": 500},
+        { "Node": "Contact", "Data": 500}
       ]
     }
   ]

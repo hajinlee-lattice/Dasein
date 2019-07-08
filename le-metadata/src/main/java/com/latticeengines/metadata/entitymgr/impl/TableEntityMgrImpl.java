@@ -33,6 +33,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -233,7 +234,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public Table clone(String name) {
+    public Table clone(String name, boolean ignoreExtracts) {
         Table existing = findByName(name);
         if (existing == null) {
             throw new RuntimeException(String.format("No such table with name %s", name));
@@ -252,62 +253,63 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create table dir at " + cloneTable);
         }
-        Extract newExtract = new Extract();
-        newExtract.setPath(cloneTable + "/*.avro");
-        newExtract.setName(NamingUtils.uuid("Extract"));
-        AtomicLong count = new AtomicLong(0);
-        if (existing.getExtracts() != null && existing.getExtracts().size() > 0) {
-            for (int i = 0; i < existing.getExtracts().size(); i++) {
-                Extract extract = existing.getExtracts().get(i);
-                String srcPath = extract.getPath();
-                boolean singleFile = false;
-                if (!srcPath.endsWith("*.avro")) {
-                    if (srcPath.endsWith(".avro")) {
-                        singleFile = true;
-                    } else {
-                        srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
-                        srcPath += "*.avro";
-                    }
-                }
-                try {
-                    // Multiple extracts could contain files with same name. We
-                    // need to rename to avoid copy failure due to name conflict
-                    String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
-                    if (singleFile) {
-                        srcPath = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, srcPath, false,
-                                s3Bucket);
-                        log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
-                        HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
-                        if (existing.getExtracts().size() > 1) {
-                            String fileName = new org.apache.hadoop.fs.Path(srcPath).getName();
-                            String rename = HdfsUtils.appendSuffixToFileName(fileName, renameSuffix);
-                            HdfsUtils.rename(yarnConfiguration,
-                                    new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
-                                    new org.apache.hadoop.fs.Path(cloneTable, rename).toString());
-                            log.info(String.format(
-                                    "Rename file %s to %s to avoid potential name conflict for files in multiple extracts",
-                                    new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
-                                    new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
+        if (!ignoreExtracts) {
+            Extract newExtract = new Extract();
+            newExtract.setPath(cloneTable + "/*.avro");
+            newExtract.setName(NamingUtils.uuid("Extract"));
+            AtomicLong count = new AtomicLong(0);
+            if (existing.getExtracts() != null && existing.getExtracts().size() > 0) {
+                for (int i = 0; i < existing.getExtracts().size(); i++) {
+                    Extract extract = existing.getExtracts().get(i);
+                    String srcPath = extract.getPath();
+                    boolean singleFile = false;
+                    if (!srcPath.endsWith("*.avro")) {
+                        if (srcPath.endsWith(".avro")) {
+                            singleFile = true;
+                        } else {
+                            srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
+                            srcPath += "*.avro";
                         }
-                    } else {
-                        srcPath = new HdfsToS3PathBuilder(useEmr).getS3Dir(yarnConfiguration, srcPath, s3Bucket);
-                        log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
-                        HdfsUtils.copyGlobToDirWithScheme(yarnConfiguration, srcPath, cloneTable, renameSuffix);
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException(
-                            String.format("Failed to copy in HDFS from %s to %s", srcPath, cloneTable), e);
-                }
+                    try {
+                        // Multiple extracts could contain files with same name. We
+                        // need to rename to avoid copy failure due to name conflict
+                        String renameSuffix = existing.getExtracts().size() > 1 ? "_" + String.valueOf(i) : null;
+                        if (singleFile) {
+                            srcPath = new HdfsToS3PathBuilder(useEmr).getS3PathWithGlob(yarnConfiguration, srcPath,
+                                    false, s3Bucket);
+                            log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
+                            HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
+                            if (existing.getExtracts().size() > 1) {
+                                String fileName = new org.apache.hadoop.fs.Path(srcPath).getName();
+                                String rename = HdfsUtils.appendSuffixToFileName(fileName, renameSuffix);
+                                HdfsUtils.rename(yarnConfiguration,
+                                        new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
+                                        new org.apache.hadoop.fs.Path(cloneTable, rename).toString());
+                                log.info(String.format(
+                                        "Rename file %s to %s to avoid potential name conflict for files in multiple extracts",
+                                        new org.apache.hadoop.fs.Path(cloneTable, fileName).toString(),
+                                        new org.apache.hadoop.fs.Path(cloneTable, rename).toString()));
+                            }
+                        } else {
+                            srcPath = new HdfsToS3PathBuilder(useEmr).getS3Dir(yarnConfiguration, srcPath, s3Bucket);
+                            log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
+                            HdfsUtils.copyGlobToDirWithScheme(yarnConfiguration, srcPath, cloneTable, renameSuffix);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(
+                                String.format("Failed to copy in HDFS from %s to %s", srcPath, cloneTable), e);
+                    }
 
-                if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
-                    count.addAndGet(extract.getProcessedRecords());
+                    if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
+                        count.addAndGet(extract.getProcessedRecords());
+                    }
                 }
             }
+            newExtract.setProcessedRecords(count.get());
+            newExtract.setExtractionTimestamp(System.currentTimeMillis());
+            clone.setExtracts(Collections.singletonList(newExtract));
         }
-        newExtract.setProcessedRecords(count.get());
-        newExtract.setExtractionTimestamp(System.currentTimeMillis());
-        clone.setExtracts(Collections.singletonList(newExtract));
-
         String oldTableSchema = PathBuilder.buildDataTableSchemaPath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(name).toString();
         String cloneTableSchema = oldTableSchema.replace(name, clone.getName());
@@ -445,6 +447,20 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         return attributeDao.findByTablePid(tablePid, pageable);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void fixAttributes(String name, List<AttributeFixer> attributeFixerList) {
+        Table table = tableDao.findByName(name);
+        TableEntityMgr.inflateTable(table, true);
+        for (AttributeFixer attributeFixer : attributeFixerList) {
+            Attribute attribute = table.getAttribute(attributeFixer.getName());
+            if (attribute != null) {
+                attributeFixer.copyToAttribute(attribute);
+                attributeDao.update(attribute);
+            }
+        }
+    }
+
     private void deleteExtractsInBackend(List<String> extractPaths) {
         final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
         new Thread(() -> finalPaths.forEach(p -> {
@@ -491,7 +507,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                         }
                         s3Service.cleanupPrefix(bucket, prefix);
                     } else {
-                        log.warn("s3 data unit " + unit.getName() +" has an invalid url " + s3Url);
+                        log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3Url);
                     }
                 }
             }

@@ -16,7 +16,6 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      *
      * @param type
      *            target patch book type, should not be {@literal null}
-     * @param type
      * @return list of {@link PatchBook}, will not be {@literal null}
      */
     List<PatchBook> findByType(@NotNull PatchBook.Type type);
@@ -27,7 +26,6 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      *
      * @param type
      *            target patch book type, should not be {@literal null}
-     * @param type
      * @param hotFix
      *            specified hot fix flag
      * @return list of {@link PatchBook}, will not be {@literal null}
@@ -113,6 +111,28 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      * @return list of {@link PatchBook}, will not be {@literal null}
      */
     Map<String, Long> findMinMaxPid(@NotNull PatchBook.Type type, @NotNull String pidColumn);
+
+    /**
+     * Retrieve total {@link PatchBook} entry count with specified
+     * {@link PatchBook.Type}
+     *
+     * @param type
+     *            target patch book type, should not be {@literal null}
+     * @return count of {@link PatchBook}, will not be {@literal null}
+     */
+    long findCountByType(@NotNull PatchBook.Type type);
+
+    /**
+     * Retrieve total {@link PatchBook} entry count with specified
+     * {@link PatchBook.Type} and {@link PatchBook#isHotFix()}
+     *
+     * @param type
+     *            target patch book type, should not be {@literal null}
+     * @param hotFix
+     *            specified hot fix flag
+     * @return count of {@link PatchBook}, will not be {@literal null}
+     */
+    long findCountByTypeAndHotFix(@NotNull PatchBook.Type type, boolean hotFix);
 
     /**
      * Set hot fix flag for target {@link PatchBook}s identified by the given

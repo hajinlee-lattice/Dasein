@@ -31,7 +31,7 @@ public class MatchCdlMergeStep extends RunDataFlow<MatchCdlMergeConfiguration> {
     @Override
     public void onConfigurationInitialized() {
         MatchCdlMergeConfiguration configuration = getConfiguration();
-        String targetTableName = NamingUtils.timestamp("MatchCdlMergeTable");
+        String targetTableName = NamingUtils.timestampWithRandom("MatchCdlMergeTable");
         configuration.setTargetTableName(targetTableName);
         log.info("Target table name: " + targetTableName);
         configuration.setDataFlowParams(createDataFlowParameters());

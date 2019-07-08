@@ -56,7 +56,7 @@ public class DynamoItemServiceImplTestNG extends AbstractTestNGSpringContextTest
 
     @AfterClass(groups = "functional")
     private void teardown() {
-//         dynamoService.deleteTable(tableName);
+        dynamoService.deleteTable(tableName);
     }
 
     @Test(groups = "functional")

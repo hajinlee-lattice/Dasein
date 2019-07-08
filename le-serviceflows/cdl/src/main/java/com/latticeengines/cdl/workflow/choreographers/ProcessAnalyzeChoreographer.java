@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
@@ -23,14 +21,10 @@ import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
@@ -195,28 +189,14 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
                 && hasAnalyticProduct(step)) {
             skip = false;
         } else {
-            log.info(
+            log.warn(
                     "Skip APS generation because there is no change in Transaction data, has no analytic product or no enforced rebuild.");
         }
         return skip;
     }
 
     private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {
-        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
-        Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
-                active.complement());
-        if (productTable == null) {
-            log.info("Did not find product table in inactive version.");
-            productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
-                    active);
-            if (productTable == null) {
-                log.info("Did not find product table in active&inactive version.");
-                return false;
-            }
-        }
-        log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
-        return ProductUtils.hasAnalyticProduct(yarnConfiguration, productTable);
+        return transactionChoreographer.hasAnalyticProduct(step, false);
     }
 
     private boolean rebuildAps(AbstractStep<? extends BaseStepConfiguration> step) {

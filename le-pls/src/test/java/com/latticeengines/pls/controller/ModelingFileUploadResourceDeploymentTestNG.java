@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,10 +32,13 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.repository.writer.SourceFileWriterRepository;
@@ -52,7 +56,7 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenant();
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", tenantId));
     }
@@ -129,6 +133,39 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         List<SourceFile> files = sourceFileRepository.findAll();
         String path = fileResponse.getPath();
         foundTheFiles(path, files);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment")
+    public void testValidations() {
+        switchToExternalAdmin();
+        ResponseDocument<SourceFile> response = submitFile(false, PATH, false);
+        SourceFile fileResponse = JsonUtils.convertValue(response.getResult(), SourceFile.class);
+        String fileName = fileResponse.getName();
+        assertTrue(response.isSuccess());
+        String getFieldMappingAPI = String.format(
+                "/pls/models/uploadfile/%s/fieldmappings?entity=Account&feedType=DefaultSystem_AccountData&source=File",
+                fileName);
+        HttpEntity entity = new HttpEntity<>(null, null);
+        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + getFieldMappingAPI,
+                HttpMethod.POST, entity, String.class);
+        ResponseDocument<FieldMappingDocument> responseDcoument = JsonUtils.deserialize(result.getBody(),
+                new TypeReference<ResponseDocument<FieldMappingDocument>>() {
+                });
+        FieldMappingDocument fieldDocument = responseDcoument.getResult();
+        fieldDocument.setIgnoredFields(Arrays.asList("Is Closed"));
+
+        String validateAPI = String.format(
+                "/pls/models/uploadfile/validate?displayName=%s&entity=Account&feedType=DefaultSystem_AccountData&source=File",
+                fileName);
+        entity = new HttpEntity<>(fieldDocument);
+        ResponseEntity<List> list = restTemplate.exchange(getRestAPIHostPort() + validateAPI, HttpMethod.POST,
+                entity, List.class);
+        List<FieldValidation> validations = JsonUtils.convertList(list.getBody(), FieldValidation.class);
+        // verify normal file can pass validation, no warning or error
+        Assert.assertNotNull(validations);
+        Assert.assertEquals(validations.size(), 0);
+
     }
 
     @Test(groups = "deployment")

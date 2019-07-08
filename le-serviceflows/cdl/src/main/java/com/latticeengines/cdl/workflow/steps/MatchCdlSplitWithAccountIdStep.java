@@ -23,7 +23,7 @@ public class MatchCdlSplitWithAccountIdStep extends RunDataFlow<MatchCdlSplitCon
     @Override
     public void onConfigurationInitialized() {
         MatchCdlSplitConfiguration configuration = getConfiguration();
-        String targetTableName = NamingUtils.timestamp("MatchCdlSplitWithAccontIdTable");
+        String targetTableName = NamingUtils.timestampWithRandom("MatchCdlSplitWithAccontIdTable");
         configuration.setTargetTableName(targetTableName);
         log.info("Target table name: " + targetTableName);
         configuration.setDataFlowParams(createDataFlowParameters());

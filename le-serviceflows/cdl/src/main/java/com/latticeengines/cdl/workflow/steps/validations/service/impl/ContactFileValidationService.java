@@ -85,10 +85,41 @@ public class ContactFileValidationService
                                 dataFileWriter.create(schema, new File(avrofileName));
                                 // iterate through record in avro file
                                 for (GenericRecord record : reader) {
-                                    String id = getFieldValue(record, InterfaceName.ContactId.name());
-                                    if (StringUtils.isBlank(id)) {
-                                        id = getFieldValue(record, InterfaceName.Id.name());
+                                    boolean rowError = false;
+                                    String id = StringUtils
+                                            .isNotBlank(getFieldValue(record, InterfaceName.ContactId.name()))
+                                                    ? getFieldValue(record, InterfaceName.ContactId.name())
+                                                    : getFieldValue(record, InterfaceName.Id.name());
+                                    String accountId = getFieldValue(record, InterfaceName.AccountId.name());
+                                    String errorMessage = "";
+                                    if (StringUtils.isNotBlank(id)) {
+                                        boolean isIllegalContacId = invalidChars.stream()
+                                                .anyMatch(e -> id.indexOf(e) != -1);
+                                        if (isIllegalContacId == true) {
+                                            errorMessage += String.format(
+                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
+                                                    id);
+                                        }
                                     }
+                                    if (StringUtils.isNotBlank(accountId)) {
+                                        boolean isIllegalAccountId = invalidChars.stream()
+                                                .anyMatch(e -> accountId.indexOf(e) != -1);
+                                        if (isIllegalAccountId == true) {
+                                            errorMessage += String.format(
+                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
+                                                    accountId);
+                                        }
+                                    }
+
+                                    if (StringUtils.isNotBlank(errorMessage)) {
+                                        String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                        csvFilePrinter.printRecord(lineId, "", errorMessage);
+                                        rowError = true;
+                                        fileError = true;
+                                        errorInPath++;
+                                        errorLine++;
+                                    }
+
                                     String email = getFieldValue(record, InterfaceName.Email.name());
                                     String firstName = getFieldValue(record, InterfaceName.FirstName.name());
                                     String lastName = getFieldValue(record, InterfaceName.LastName.name());
@@ -99,12 +130,15 @@ public class ContactFileValidationService
                                         String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                         String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
                                         csvFilePrinter.printRecord(lineId, "", message);
+                                        rowError = true;
                                         fileError = true;
                                         errorInPath++;
                                         errorLine++;
                                         continue;
                                     }
-                                    dataFileWriter.append(record);
+                                    if (!rowError) {
+                                        dataFileWriter.append(record);
+                                    }
                                 }
                             }
 

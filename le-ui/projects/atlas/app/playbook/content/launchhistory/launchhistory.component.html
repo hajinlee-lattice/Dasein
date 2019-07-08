@@ -30,17 +30,54 @@
             queryscope="displayName"
             displayname="displayName">
         </chips>
-        <ul class="history-metadata">
-        	<li>
+        <ul class="history-metadata" ng-if="!vm.externalIntegrationEnabled">
+        	<li class="cell-border">
         		<dl>
         			<dt>Total Recommendations</dt>
         			<dd class="blue-text">{{vm.summaryData.selectedTargets | number}}</dd>
         		</dl>
         	</li>
+        	<li class="cell-border">
+        		<dl>
+        			<dt>Suppressed</dt>
+        			<dd class="red-text">{{vm.summaryData.accountsSuppressed | number}}</dd>
+        		</dl>
+        	</li>
+            <li class="cell-border">
+                <dl>
+                    <dt>Errors</dt>
+                    <dd class="red-text">{{vm.summaryData.accountErrors | number}}</dd>
+                </dl>
+            </li>
+            <li class="cell-border">
+                <dl>
+                    <dt>Launched Recommendations</dt>
+                    <dd class="green-text">{{vm.summaryData.recommendationsLaunched | number}}</dd>
+                </dl>
+            </li>
+            <li class="cell-border">
+                <dl>
+                    <dt>Contacts within Recommendations</dt>
+                    <dd class="green-text">{{vm.summaryData.contactsWithinRecommendations | number}}</dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="history-metadata" ng-if="vm.externalIntegrationEnabled"> 
+            <li>
+                <dl>
+                    <dt class="centered">Accounts</dt>
+                </dl>
+            </li>
+            <li>
+                <dl>
+                    <dt>Selected</dt>
+                    <dd class="blue-text">{{vm.summaryData.selectedTargets | number}}</dd>
+                </dl>
+            </li>
         	<li>
         		<dl>
         			<dt>Suppressed</dt>
-        			<dd class="red-text">{{vm.summaryData.suppressed | number}}</dd>
+        			<dd class="blue-text">{{vm.summaryData.accountsSuppressed || 0 | number}}</dd>
         		</dl>
         	</li>
             <li>
@@ -49,24 +86,42 @@
                     <dd class="red-text">{{vm.summaryData.accountErrors | number}}</dd>
                 </dl>
             </li>
-<!--             <li>
-                <dl>
-                    <dt>Contact Errors</dt>
-                    <dd class="red-text">{{vm.summaryData.contactErrors | number}}</dd>
-                </dl>
-            </li> -->
         	<li>
         		<dl>
-        			<dt>Launched Recommendations</dt>
+        			<dt>Launched</dt>
         			<dd class="green-text">{{vm.summaryData.recommendationsLaunched | number}}</dd>
         		</dl>
         	</li>
-        	<li>
-        		<dl>
-        			<dt>Contacts within Recommendations</dt>
-        			<dd class="green-text">{{vm.summaryData.contactsWithinRecommendations | number}}</dd>
-        		</dl>
-        	</li>
+            
+            <li>
+                <dl>
+                    <dt class="centered">Contacts</dt>
+                </dl>
+            </li>
+            <li>
+                <dl>
+                    <dt>Selected</dt>
+                    <dd class="blue-text">{{ (vm.summaryData.selectedContacts || 0) | number}}</dd>
+                </dl>
+            </li>
+            <li>
+                <dl>
+                    <dt>Suppressed</dt>
+                    <dd class="blue-text">{{ (vm.summaryData.contactsSuppressed || 0) | number}}</dd>
+                </dl>
+            </li>
+            <li>
+                <dl>
+                    <dt>Errors</dt>
+                    <dd class="red-text">{{vm.summaryData.contactErrors | number}}</dd>
+                </dl>
+            </li>
+            <li>
+                <dl>
+                    <dt>Launched</dt>
+                    <dd class="green-text">{{vm.summaryData.contactsWithinRecommendations | number}}</dd>
+                </dl>
+            </li>
         </ul>
 
     	<div class="table-metadata">
@@ -122,11 +177,15 @@
                                 'fa fa-sort-desc': vm.sortBy === 'accountsErrored' && vm.sortDesc, 
                                 'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
+                    <th ng-if="vm.externalIntegrationEnabled && !vm.allPlaysHistory">
+                        Duplicates
+                   </th>
     				<th>
                         Accounts
                    </th>
     				<th>
                         Contacts
+                    </th>
                     <th class="sortable" ng-click="vm.sort('launchState'); vm.sortDesc = !vm.sortDesc">
                         Status
                         <i  aria-hidden="true" 
@@ -146,12 +205,29 @@
                         <span ng-if="launch.audienceName" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
                         <span ng-if="vm.isS3Launch(launch) && !launch.audienceName" title="{{vm.getSourceFilePath(launch)}}"> {{vm.getSourceFilePath(launch)}} </span>
                     </td>
-    				<td class="blue-text">{{launch.stats.selectedTargets | number}}</td>
-    				<td class="red-text">{{launch.stats.suppressed | number}}</td>
+    				<td class="blue-text">
+                        <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.selectedTargets | number}}</span>
+                        <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.selectedContacts || 0 | number}}</span>
+                    </td>
+
+    				<td class="red-text">
+                        <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.accountsSuppressed | number}} </span>
+                        <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactsSuppressed || 0 | number}}</span>                    
+                    </td>
                     <td class="red-text">
-                        <span ng-if="!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.errorFile"> {{vm.getErrors(launch) | number}} </span>
-                        
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'PartialSync' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile" style="color: #D0242F">{{vm.getErrors(launch) | number}}</a>
+                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">
+                            <i class="fa fa-download" aria-hidden="true"></i>
+                        </a>
+
+                        <span ng-class="{'indent-count': !launch.integrationStatusMonitor || !launch.integrationStatusMonitor.s3Bucket || !launch.integrationStatusMonitor.errorFile}"> 
+                            <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.accountErrors | number}} </span>
+                            <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactErrors | number}}</span>
+                        </span>
+
+                    </td>
+                    <td class="blue-text" ng-if="vm.externalIntegrationEnabled && !vm.allPlaysHistory">
+                        <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.accountsDuplicated | number}} </span>
+                        <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactsDuplicated | number}}</span>
                     </td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
                     <td class="green-text">
@@ -165,19 +241,26 @@
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">
                         <span class="fa fa-check" ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'"></span>
                         <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'"></span>
+                        <span class="fa fa-hourglass-start gray-text" ng-if="launch.launchState === 'Queued'"></span>
                         <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'Failed'"></span>
                         {{launch.launchState}}
                     </td>
                     <td ng-if="launch.launchState === 'PartialSync' || launch.launchState === 'SyncFailed'">
                         <span class="fa fa-exclamation-triangle orange-text" ng-if="launch.launchState === 'PartialSync'"></span>
-                        <!-- <span ng-if="launch.launchState === 'PartialSync'">Partially Synced</span> -->
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'PartialSync' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">Partially Synced</a>
-                        <span ng-if="launch.launchState === 'PartialSync' && (!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.errorFile || !launch.integrationStatusMonitor.s3Bucket)">Partially Synced</span>
-                        
-                        <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
-                        <!-- <span ng-if="launch.launchState === 'SyncFailed'">Sync Failed</span> -->
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.launchState === 'SyncFailed' && launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">Sync Failed</a>
-                        <span ng-if="launch.launchState === 'SyncFailed' && (!launch.integrationStatusMonitor || !launch.integrationStatusMonitor.errorFile || !launch.integrationStatusMonitor.s3Bucket)">Sync Failed</span>
+                        <span ng-if="launch.launchState === 'PartialSync'">Partially Synced</span>
+
+
+                        <span class="show-tooltip top delay" ng-if="launch.launchState === 'SyncFailed'">
+                            <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
+                            <div class="tooltip_ small" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.errorMessage">
+                                <div class="cover">
+                                    <p class="white">
+                                        Error: {{launch.integrationStatusMonitor.errorMessage}}
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                        <span ng-if="launch.launchState === 'SyncFailed'">Sync Failed</span>
                     </td>
     			</tr>
     		</tbody>
@@ -196,7 +279,7 @@
         </pd-pagination-controls>
 
     </div><!-- End .content -->
-    <div class="card-footer" ng-if="!vm.allPlaysHistory">
+    <div class="card-footer" ng-if="!vm.allPlaysHistory && !vm.alwaysOnCampaigns">
         <button 
             type="button"
             class="button blue-button pull-right"

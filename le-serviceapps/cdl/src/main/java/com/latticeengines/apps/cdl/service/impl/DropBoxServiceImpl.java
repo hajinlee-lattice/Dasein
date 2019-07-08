@@ -407,7 +407,10 @@ public class DropBoxServiceImpl implements DropBoxService {
             fileProperty.setFileSize(BitTransferUtils.formatSize(summary.getSize()));
             fileProperty.setFilePath(summary.getBucketName() + delimiter + summary.getKey());
             fileProperty.setLastModified(summary.getLastModified());
-            fileProperty.setFileType(PathUtils.getFileType(fileName));
+            if (StringUtils.isNotEmpty(fileType)) {
+                fileType = fileType.toLowerCase();
+            }
+            fileProperty.setFileType(fileType);
             fileProperty.setDirectory(false);
             fileList.add(fileProperty);
         }
@@ -504,7 +507,9 @@ public class DropBoxServiceImpl implements DropBoxService {
                                 S3Actions.GetObject, //
                                 S3Actions.PutObject, //
                                 S3Actions.DeleteObject, //
-                                S3Actions.SetObjectAcl //
+                                S3Actions.SetObjectAcl, //
+                                () -> "s3:GetObjectTagging", //
+                                () -> "s3:PutObjectTagging"
                         ) //
                         .withResources(new Resource(arnPrefix + WILD_CARD)) //
         );
@@ -638,7 +643,9 @@ public class DropBoxServiceImpl implements DropBoxService {
                         S3Actions.GetObject, //
                         S3Actions.PutObject, //
                         S3Actions.DeleteObject, //
-                        S3Actions.SetObjectAcl //
+                        S3Actions.SetObjectAcl, //
+                        () -> "s3:GetObjectTagging", //
+                        () -> "s3:PutObjectTagging" //
                 ) //
                 .withResources(new Resource(arn + STAR));
     }

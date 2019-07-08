@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.service;
 import java.util.Date;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -60,6 +62,8 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String version);
 
+    List<DataFeed> getDataFeeds(TenantStatus status, String version);
+
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
@@ -67,4 +71,8 @@ public interface DataFeedService {
     Boolean unblockPA(String customerSpace, Long workflowId);
 
     void updateDataFeedScheduleTime(String customerSpace, Boolean scheduleNow, ProcessAnalyzeRequest request);
+
+    DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace);
+
+    Boolean increasedRetryCount(String customerSpace);
 }

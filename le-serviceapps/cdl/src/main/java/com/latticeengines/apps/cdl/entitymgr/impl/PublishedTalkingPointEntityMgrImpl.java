@@ -19,10 +19,11 @@ import com.latticeengines.apps.cdl.repository.writer.PublishedTalkingPointWriter
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
+import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 
 @Controller("publishedTalkingPointEntityMgr")
-public class PublishedTalkingPointEntityMgrImpl extends
-        BaseReadWriteRepoEntityMgrImpl<PublishedTalkingPointRepository, PublishedTalkingPoint, Long>
+public class PublishedTalkingPointEntityMgrImpl
+        extends BaseReadWriteRepoEntityMgrImpl<PublishedTalkingPointRepository, PublishedTalkingPoint, Long>
         implements PublishedTalkingPointEntityMgr {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(TalkingPointEntityMgrImpl.class);
@@ -32,7 +33,6 @@ public class PublishedTalkingPointEntityMgrImpl extends
 
     @Inject
     private PublishedTalkingPointEntityMgrImpl _self;
-
 
     @Inject
     private PublishedTalkingPointWriterRepository writerRepository;
@@ -68,6 +68,11 @@ public class PublishedTalkingPointEntityMgrImpl extends
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public List<PublishedTalkingPoint> findAllByPlayName(String playName) {
         return publishedTalkingPointDao.findAllByPlayName(playName);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<TalkingPointDTO> findAllByTenantPid(Long tenantPid) {
+        return readerRepository.findAllByTenantPid(tenantPid);
     }
 
 }

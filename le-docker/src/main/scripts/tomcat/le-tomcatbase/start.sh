@@ -67,9 +67,8 @@ if [[ -f "/etc/internaladdr.txt" ]]; then
 fi
 
 if [[ ! -z $(java -version 2>&1 |  grep "11.0") ]]; then
-    echo "Java version: $(java -version 2>&1), enabling ZGC"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseZGC"
+    echo "Java version: $(java -version 2>&1), enabling G1GC"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC"
 else
     echo "Java version: $(java -version 2>&1), enabling G1GC"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC -XX:+PrintGCTimeStamps"
@@ -109,6 +108,11 @@ if [[ "${ENABLE_JACOCO}" == "true" ]]; then
         echo "Cannot find /var/lib/jacocoagent.jar"
         exit -1
     fi
+fi
+
+if [[ "${LE_RASP}" == "true" ]] && [[ -f "/etc/ledp/contrast.jar" ]] && [[ -f "/etc/ledp/contrast_security.yaml" ]] ; then
+    export CONTRAST_CONFIG_PATH="/etc/ledp/contrast_security.yaml"
+    export CATALINA_OPTS="${CATALINA_OPTS} -javaagent:/etc/ledp/contrast.jar"
 fi
 
 echo ${CATALINA_OPTS}

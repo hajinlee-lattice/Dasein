@@ -167,7 +167,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     }
 
     private void registerNewEntitiesTable(String customer, MatchCommand matchCommand, String targetTableName) {
-        String avroDir = PathUtils.toAvroDir(matchCommand.getNewEntitiesLocation());
+        String avroDir = PathUtils.toParquetOrAvroDir(matchCommand.getNewEntitiesLocation());
         String avroGlobs = PathUtils.toAvroGlob(avroDir);
         if (AvroUtils.hasRecords(yarnConfiguration, avroGlobs)) {
             log.info("Register avros in " + avroDir + " as table " + targetTableName);

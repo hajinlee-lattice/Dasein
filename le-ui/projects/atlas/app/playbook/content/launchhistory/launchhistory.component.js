@@ -3,9 +3,10 @@ import { MARKETO, SALESFORCE, ELOQUA, AWS_S3 } from 'atlas/connectors/connectors
 angular.module('lp.playbook.dashboard.launchhistory', [])
 .controller('PlaybookDashboardLaunchHistory', function(
     $scope, $state, $stateParams, $q, $filter, $timeout, $interval,  BrowserStorageUtility,
-    ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData
+    ResourceUtility, PlaybookWizardStore, LaunchHistoryData, LaunchHistoryCount, FilterData, FeatureFlagService
 ) {
-    var vm = this;
+    var vm = this,
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         stored: PlaybookWizardStore.settings_form,
@@ -32,7 +33,9 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 items: FilterData
             }
         },
-        systemMap: {}
+        systemMap: {},
+        externalIntegrationEnabled: FeatureFlagService.FlagIsEnabled(flags.ENABLE_EXTERNAL_INTEGRATION),
+        alwaysOnCampaigns: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS)
     });
 
     vm.init = function() {
@@ -101,12 +104,12 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
                 offset: vm.offset,
                 max: 10,
                 orgId: vm.orgId,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 externalSysType: vm.externalSystemType
             },
             countParams = {
                 playName: vm.playName || $stateParams.play_name,
-                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed',
+                launchStates: 'Launching,Launched,Failed,Syncing,Synced,PartialSync,SyncFailed,Queued',
                 offset: 0,
                 startTimestamp: 0,
                 orgId: vm.orgId,
@@ -144,12 +147,15 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
         var stats = vm.launches.cumulativeStats;
         vm.summaryData = {
             selectedTargets: stats.selectedTargets,
-            suppressed: stats.suppressed,
+            selectedContacts: stats.selectedContacts,
+            accountsSuppressed: stats.accountsSuppressed,
+            contactsSuppressed: stats.contactsSuppressed,
             accountErrors: stats.accountErrors,
             contactErrors: stats.contactErrors,
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
+        console.log(vm.summaryData);
 
     }
 
@@ -238,9 +244,11 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     vm.getSourceFilePath = function(launchSummary) {
         var integrationStatusMonitor = launchSummary.integrationStatusMonitor;
-        var filePath = integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
+        var filePath = integrationStatusMonitor && integrationStatusMonitor.sourceFile ? integrationStatusMonitor.sourceFile : '';
         if (filePath) {
             return filePath.substring(filePath.indexOf("dropfolder")); // to ensure backward compatibility
+        } else {
+            return '';
         }
     }
 
@@ -259,6 +267,19 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     vm.isS3Launch = function(launchSummary) {
         var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
         return destinationSysName == AWS_S3;
+    }
+
+    vm.isAccountBasedLaunch = function(launchSummary) {
+        var destinationSysName = vm.systemMap[launchSummary.destinationOrgId] ? vm.systemMap[launchSummary.destinationOrgId].externalSystemName : "";
+        switch (destinationSysName) {
+            case MARKETO:
+                return false;
+            case AWS_S3:
+            case SALESFORCE:
+            case ELOQUA:
+            default: 
+                return true;
+        }
     }
 
     vm.init();

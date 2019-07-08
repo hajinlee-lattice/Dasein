@@ -28,6 +28,9 @@ public abstract class DataUnit {
     @JsonProperty("Count")
     private Long count;
 
+    @JsonProperty("DataFormat")
+    private DataFormat dataFormat;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {
@@ -54,8 +57,20 @@ public abstract class DataUnit {
         this.count = count;
     }
 
+    public DataFormat getDataFormat() {
+        return dataFormat;
+    }
+
+    public void setDataFormat(DataFormat dataFormat) {
+        this.dataFormat = dataFormat;
+    }
+
     public enum StorageType {
         Dynamo, Hdfs, Redshift, S3
+    }
+
+    public enum DataFormat {
+        AVRO, PARQUET
     }
 
 }

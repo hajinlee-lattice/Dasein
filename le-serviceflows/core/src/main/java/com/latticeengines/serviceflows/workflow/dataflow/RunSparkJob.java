@@ -6,9 +6,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -22,15 +23,17 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
-public abstract class RunSparkJob<S extends BaseStepConfiguration, //
-        C extends SparkJobConfig, J extends AbstractSparkJob<C>> extends BaseSparkStep<S> { //
+public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends SparkJobConfig> //
+        extends BaseSparkStep<S> { //
+
+    private static final Logger log = LoggerFactory.getLogger(RunSparkJob.class);
 
     @Inject
     protected SparkJobService sparkJobService;
 
-    protected C jobConfig;
+    private C jobConfig;
 
-    protected abstract Class<J> getJobClz();
+    protected abstract Class<? extends AbstractSparkJob<C>> getJobClz();
     /**
      * Set job config except jobName and workspace.
      */
@@ -53,7 +56,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
                     if (context.getRetryCount() > 0) {
                         log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
                                 + getJobClz().getSimpleName());
-                        log.warn("Previous failure: " + context.getLastThrowable());
+                        log.warn("Previous failure:",  context.getLastThrowable());
                         killLivySession();
                     }
                     String jobName = tenantId + "~" + getJobClz().getSimpleName() + "~" + getClass().getSimpleName();
@@ -70,11 +73,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, //
     }
 
     protected SparkJobResult runSparkJob(LivySession session) {
-        return sparkJobService.runJob(session, getJobClz(), jobConfig);
-    }
-
-    protected String getRandomWorkspace() {
-        return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+        return runSparkJob(session, getJobClz(), jobConfig);
     }
 
     protected CustomerSpace parseCustomerSpace(S stepConfiguration) {

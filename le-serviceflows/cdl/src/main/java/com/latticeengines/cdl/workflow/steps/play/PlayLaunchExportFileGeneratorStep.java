@@ -27,10 +27,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.serviceflows.cdl.PlayLaunchWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("playLaunchExportFileGeneratorStep")
@@ -80,7 +81,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
             AvroUtils.convertAvroToCSV(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
                     new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
-                            config.getContactDisplayNames()));
+                            config.getContactDisplayNames(),
+                            config.getDestinationSysType() == CDLExternalSystemType.MAP));
         }
 
         @Override
@@ -130,7 +132,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         public abstract String getFileFormat();
 
         @Override
-        public String call() throws Exception {
+        public String call() {
             try {
                 File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.%s",
                         config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),

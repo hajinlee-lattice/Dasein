@@ -75,7 +75,7 @@ public class PatchResource {
     }
 
     @RequestMapping(
-            value = "/validate/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+            value = "/validate/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type", response = PatchValidationResponse.class)
     private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType, @RequestBody PatchRequest request) {

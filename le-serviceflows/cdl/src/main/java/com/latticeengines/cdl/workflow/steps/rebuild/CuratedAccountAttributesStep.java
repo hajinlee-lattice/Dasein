@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -123,12 +124,12 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         if (!skipTransformation) {
             Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
             Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
-            long accCnt = ScalingUtils.getTableCount(accountTable);
-            long ctcCnt = ScalingUtils.getTableCount(contactTable);
-            int multiplier = ScalingUtils.getMultiplier(Math.max(accCnt, ctcCnt));
+            double accSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, accountTable);
+            double ctcSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, contactTable);
+            int multiplier = ScalingUtils.getMultiplier(Math.max(accSize, ctcSize));
             if (multiplier > 1) {
-                log.info("Set multiplier=" + multiplier + " base on account table count=" //
-                        + accCnt + " and contact table count=" + ctcCnt);
+                log.info("Set multiplier=" + multiplier + " base on account table size=" //
+                        + accSize + " gb and contact table size=" + ctcSize + " gb.");
                 scalingMultiplier = multiplier;
             }
         }
@@ -282,7 +283,12 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
             if (InterfaceName.NumberOfContacts.name().equals(attr.getName())) {
+                attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                attr.setSubcategory(null);
                 attr.setDisplayName(NUMBER_OF_CONTACTS_DISPLAY_NAME);
+                attr.setDescription("This curated attribute is calculated by counting the number of contacts " +
+                        "matching each account");
+                attr.setFundamentalType(FundamentalType.NUMERIC.getName());
             }
         });
     }

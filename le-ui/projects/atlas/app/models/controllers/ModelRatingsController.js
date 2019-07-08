@@ -86,8 +86,6 @@ angular.module('lp.models.ratings', [
 
                 vm.activeIteration = vm.activeIterations.filter(iteration => iteration.modelSummaryId === $stateParams.modelId)[0];
 
-                console.log(vm.workingBuckets);
-
                 // Update UI data if user got to the UI from either the "Activate" button 
                 // or used the Iteration select menu from within the UI.
                 var id = $stateParams.modelId;
@@ -107,7 +105,6 @@ angular.module('lp.models.ratings', [
                 // If the model has been published previously and is Active
                 if (vm.dashboard.summary.publishedIterationId && vm.dashboard.summary.status == 'ACTIVE'){
 
-                    console.log("here");
                     // Set active iteration and working buckets (determines what is displayed in the chart)
                     vm.activeIteration = vm.activeIterations.filter(iteration => iteration.id === vm.dashboard.summary.publishedIterationId)[0];
                     vm.workingBuckets = vm.dashboard.summary.bucketMetadata ? vm.dashboard.summary.bucketMetadata : [];
@@ -123,7 +120,6 @@ angular.module('lp.models.ratings', [
                     
 
                 } else {
-                    console.log("here 2");
                     // If the model has not been published or is inactive, 
                     // select the most recent iteration in the select menu
                     vm.activeIteration = vm.activeIterations[vm.activeIterations.length - 1];
@@ -150,9 +146,12 @@ angular.module('lp.models.ratings', [
 
         vm.Math = window.Math;
         vm.chartNotUpdated = (vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') ? false : true;
-
+        
         // Give the above code time to catch up before rendering the chart
         $timeout(function() {
+
+
+
             renderChart();
         }, 500);
     }
@@ -269,7 +268,6 @@ angular.module('lp.models.ratings', [
                 // secondVal += (score.num_leads * score.num_leads);
                 
             }
-
             bucket.conversionRate = (bucketConverted / bucketLeads) * 100;
             // bucket.conversionRate = (firstVal / secondVal) * 100;
             bucket.bucket_name = vm.bucketNames[i];
@@ -539,6 +537,8 @@ angular.module('lp.models.ratings', [
 
     vm.init = function() {
         
+        console.log(vm.scoringHistory);
+
         vm.latest_iteration = vm.currentRating.latest_iteration;
         vm.predictionType = vm.latest_iteration.AI.predictionType;
 

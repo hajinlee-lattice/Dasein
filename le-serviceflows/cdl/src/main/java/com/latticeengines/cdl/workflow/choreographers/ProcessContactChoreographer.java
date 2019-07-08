@@ -18,6 +18,7 @@ import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -48,6 +49,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     private boolean hasAttrLifeCycleChange = false;
     private boolean hasAccounts = false;
+    private boolean hasNonTrivialAccountChange = false;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -106,7 +108,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
         } else {
             boolean commonRebuild = super.shouldRebuild(step);
             if (!commonRebuild && !reset) {
-                if (accountChoreographer.hasNonTrivialChange()) {
+                if (hasNonTrivialAccountChange(step)) {
                     log.info("Should rebuild, since account has non-trivial change");
                     return true;
                 } else if (hasAttrLifeCycleChange) {
@@ -125,24 +127,33 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     protected Set<String> getExtraDecisions() {
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(hasAttrLifeCycleChange ? "hasAttrLifeCycleChange=true" : "");
-        decisions.add(accountChoreographer.hasNonTrivialChange() ? "hasNonTrivialChange=true" : "");
+        decisions.add(hasNonTrivialAccountChange ? "hasNonTrivialChange=true" : "");
         decisions.add(hasAccounts && !hasActiveServingStore ? "hasNoActiveServingStore=true" : "");
         return decisions;
     }
 
     @Override
-    protected boolean shouldUpdate() {
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!hasAccounts) {
             log.info("Should not update, since no accounts.");
             return false;
         } else {
-            return super.shouldUpdate();
+            return super.shouldUpdate(step);
         }
     }
 
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return false;
+    }
+
+    private boolean hasNonTrivialAccountChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean isEntityMatchEnabled = false;
+        if (step.getConfiguration() != null && step.getConfiguration() instanceof ProcessContactStepConfiguration) {
+            isEntityMatchEnabled = ((ProcessContactStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
+        }
+        hasNonTrivialAccountChange = !isEntityMatchEnabled && accountChoreographer.hasNonTrivialChange();
+        return hasNonTrivialAccountChange;
     }
 
 }

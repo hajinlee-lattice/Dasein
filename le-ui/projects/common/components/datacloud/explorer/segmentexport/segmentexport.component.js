@@ -17,9 +17,12 @@ angular
         });
 
         vm.init = function() {
-            if (!vm.isExpired()) {
-                vm.downloadSegmentExport(); //automatic download
-            } else {
+            var clientSession = BrowserStorageUtility.getClientSession();
+            vm.tenantId = clientSession.Tenant.Identifier;
+            vm.auth = BrowserStorageUtility.getTokenDocument();
+            if (vm.isExpired()) {
+            //     vm.downloadSegmentExport(); //automatic download
+            // } else {
                 vm.disableDownload = true;
                 vm.showErrorMessage = true;
             }

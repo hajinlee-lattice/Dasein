@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
-import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
+import com.latticeengines.cdl.workflow.steps.rating.ExtractRuleBasedRatings;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
@@ -61,7 +61,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private GenerateAIRatingWorkflow generateAIRatingWorkflow;
 
     @Inject
-    private IngestRuleBasedRating ingestRuleBasedRating;
+    private ExtractRuleBasedRatings extractRuleBasedRatings;
 
     @Inject
     private ProcessAccountChoreographer accountChoreographer;
@@ -231,7 +231,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean isIngestRuleRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().endsWith(ingestRuleBasedRating.name());
+        return step.name().endsWith(extractRuleBasedRatings.name());
     }
 
     private boolean isAIWorkflow(int seq) {

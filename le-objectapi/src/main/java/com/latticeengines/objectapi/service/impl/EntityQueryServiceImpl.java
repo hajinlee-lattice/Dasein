@@ -62,6 +62,10 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         this.transactionService = transactionService;
     }
 
+    protected TransactionService getTransactionService() {
+        return this.transactionService;
+    }
+
     @Override
     public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -107,8 +111,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
     }
 
-    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery,
-            String sqlUser, boolean isCountQuery) {
+    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, String sqlUser,
+            boolean isCountQuery) {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
         QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), !isCountQuery);
@@ -169,7 +173,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                         if (!counts.containsKey(ratingField)) {
                             counts.put(rating, 0L);
                         }
-                        System.out.println(String.format("DEBUG: SQL User: %s, Rating: %s, Value: %s", sqlUser, rating,  map.get("count")));
+                        System.out.println(String.format("DEBUG: SQL User: %s, Rating: %s, Value: %s", sqlUser, rating,
+                                map.get("count")));
                         counts.put(rating, counts.get(rating) + (Long) map.get("count"));
                     }
                 });

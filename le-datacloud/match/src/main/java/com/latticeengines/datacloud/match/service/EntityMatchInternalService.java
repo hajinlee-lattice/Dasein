@@ -58,7 +58,17 @@ public interface EntityMatchInternalService {
      */
     List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds);
 
-    // TODO consider to add get seed by lookup entry (not sure will be needed)
+    /**
+     * Retrieve anonymoous seed for target tenant/entity. Create if it does not
+     * already exist. isNewlyAllocated flag will be set accordingly.
+     *
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @return anonymous seed object, will not be {@literal null}
+     */
+    EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity);
 
     /**
      * Allocate a new ID for given entity in the specified tenant.

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +16,7 @@ import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,15 +49,48 @@ public class S3ImportResource {
 
     @RequestMapping(value = "/system", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Move file to Succeed folder")
+    @ApiOperation(value = "Create an Import System")
     public void createS3ImoprtSystem(@PathVariable String customerSpace, @RequestBody S3ImportSystem system) {
         s3ImportSystemService.createS3ImportSystem(customerSpace, system);
     }
 
+    @RequestMapping(value = "/system/update", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update an Import System")
+    public ResponseDocument<Boolean> updateS3ImoprtSystem(@PathVariable String customerSpace,
+                                                          @RequestBody S3ImportSystem system) {
+        try {
+            s3ImportSystemService.updateS3ImportSystem(customerSpace, system);
+            return ResponseDocument.successResponse(Boolean.TRUE);
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     @RequestMapping(value = "/system", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Move file to Succeed folder")
+    @ApiOperation(value = "Get Import System by system name")
     public S3ImportSystem getS3ImoprtSystem(@PathVariable String customerSpace, @RequestParam String systemName) {
         return s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @RequestMapping(value = "/system/list", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get All Import Systems")
+    public List<S3ImportSystem> getS3ImoprtSystem(@PathVariable String customerSpace) {
+        return s3ImportSystemService.getAllS3ImportSystem(customerSpace);
+    }
+
+    @RequestMapping(value = "/system/list", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update All System priority")
+    public ResponseDocument<Boolean> updateAllSystemPriority(@PathVariable String customerSpace,
+                                                             @RequestBody List<S3ImportSystem> systemList) {
+        try {
+            s3ImportSystemService.updateAllS3ImportSystemPriority(customerSpace, systemList);
+            return ResponseDocument.successResponse(Boolean.TRUE);
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
 }

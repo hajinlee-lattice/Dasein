@@ -466,6 +466,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 attribute.setSubcategory(productName);
                 if (ActivityMetricsUtils.isHasPurchasedAttr(attribute.getName())) {
                     attribute.setFundamentalType(FundamentalType.BOOLEAN);
+                } else if (ActivityMetricsUtils.isTotalSpendAttr(attribute.getName())
+                        || ActivityMetricsUtils.isAvgSpendAttr(attribute.getName())) {
+                    attribute.setFundamentalType(FundamentalType.CURRENCY);
                 } else {
                     attribute.setFundamentalType(FundamentalType.NUMERIC);
                 }

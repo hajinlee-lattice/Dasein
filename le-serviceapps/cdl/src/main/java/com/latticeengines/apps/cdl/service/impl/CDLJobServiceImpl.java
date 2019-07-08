@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,7 +23,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
@@ -30,12 +30,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
-import com.latticeengines.apps.cdl.util.PriorityQueueUtils;
+import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -48,22 +48,14 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ActivityObject;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionStatus;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
@@ -74,7 +66,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -89,8 +80,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String QUARTZ_STACK = "quartz";
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
-    private static final String HIGH_PRIORITY_QUEUE = "HIGH_PRIORITY_QUEUE";
-    private static final String LOW_PRIORITY_QUEUE = "LOW_PRIORITY_QUEUE";
+
+    private static final String RETRY_KEY = "RETRY_KEY";
+    private static final String OTHER_KEY = "OTHER_KEY";
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
@@ -104,7 +96,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
 
     @Inject
-    private DataFeedEntityMgr dataFeedEntityMgr;
+    private DataFeedService dataFeedService;
 
     @Inject
     private BatonService batonService;
@@ -120,6 +112,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private SchedulingPAService schedulingPAService;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -156,28 +151,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private boolean isQuartzStack;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
-
-    @Inject
     private WorkflowProxy workflowProxy;
 
     private CDLProxy cdlProxy;
-
-    @VisibleForTesting
-    @Value("${cdl.processAnalyze.maximum.high.priority.scheduled.job.count}")
-    int maximumHighPriorityScheduledJobCount;
-
-    @VisibleForTesting
-    @Value("${cdl.processAnalyze.minimum.high.priority.scheduled.job.count}")
-    int minimumHighPriorityScheduledJobCount;
-
-    @VisibleForTesting
-    @Value("${cdl.processAnalyze.maximum.low.priority.scheduled.job.count}")
-    int maximumLowPriorityScheduledJobCount;
-
-    @VisibleForTesting
-    @Value("${cdl.processAnalyze.minimum.low.priority.scheduled.job.count}")
-    int minimumLowPriorityScheduledJobCount;
 
     @VisibleForTesting
     @Value("${cdl.activity.based.pa}")
@@ -186,13 +162,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${cdl.app.public.url:https://localhost:9081}")
     private String appPublicUrl;
 
-    @Inject
-    private RedisTemplate<String, Object> redisTemplate;
-
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-
-    private Map<String, List<Object>> highMap = null;
-    private Map<String, List<Object>> lowMap = null;
 
     @PostConstruct
     public void init() {
@@ -212,12 +182,12 @@ public class CDLJobServiceImpl implements CDLJobService {
     public void initialize() {
         if (isQuartzStack) {
             cdlProxy = new CDLProxy(quartzMicroserviceHostPort);
-            log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
-                    cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
+            log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, workflowHostPort=%s",
+                    cdlProxy.getHostport(), workflowProxy.getHostport()));
         } else {
             cdlProxy = new CDLProxy(microserviceHostPort);
-            log.info(String.format("CDLJobService running with cdlHostPort=%s, dataFeedHostPort=%s, workflowHostPort=%s",
-                    cdlProxy.getHostport(), dataFeedProxy.getHostport(), workflowProxy.getHostport()));
+            log.info(String.format("CDLJobService running with cdlHostPort=%s, workflowHostPort=%s",
+                    cdlProxy.getHostport(), workflowProxy.getHostport()));
         }
     }
 
@@ -227,21 +197,24 @@ public class CDLJobServiceImpl implements CDLJobService {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
                 if (!systemCheck()) {
-                    if (isActivityBasedPA) {
-                        orchestrateJob_New();
-                    } else {
-                        orchestrateJob();
-                    }
+                    orchestrateJob();
                 }
             } catch (Exception e) {
-                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed" + e);
+                log.error("orchestrateJob CDLJobType.PROCESSANALYZE failed: ", e);
                 throw e;
             }
         } else if (cdlJobType == CDLJobType.EXPORT) {
             try {
                 exportScheduleJob();
             } catch (Exception e) {
-                log.error("schedule CDLJobType.EXPORT failed" + e);
+                log.error("schedule CDLJobType.EXPORT failed" + e.getMessage());
+                throw e;
+            }
+        } else if (cdlJobType == CDLJobType.SCHEDULINGPA) {
+            try {
+                schedulePAJob();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.SCHEDULINGPA failed" + e.getMessage());
                 throw e;
             }
         }
@@ -258,15 +231,15 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public Date getNextInvokeTime(CustomerSpace customerSpace) {
-            Tenant tenantInContext = MultiTenantContext.getTenant();
-            try {
-                Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
-                MultiTenantContext.setTenant(tenant);
-                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                return getNextInvokeTime(customerSpace, tenant, processAnalyzeJobDetail);
-            } finally {
-                MultiTenantContext.setTenant(tenantInContext);
-            }
+        Tenant tenantInContext = MultiTenantContext.getTenant();
+        try {
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+            MultiTenantContext.setTenant(tenant);
+            CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+            return getNextInvokeTime(customerSpace, tenant, processAnalyzeJobDetail);
+        } finally {
+            MultiTenantContext.setTenant(tenantInContext);
+        }
     }
 
     @VisibleForTesting
@@ -275,7 +248,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         boolean allowAutoSchedule = false;
         try {
-            allowAutoSchedule = batonService.isEnabled(customerSpace,LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         } catch (Exception e) {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
@@ -302,7 +275,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         long currentTimeMillis = System.currentTimeMillis();
         Date currentTime = new Date(currentTimeMillis);
 
-        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
+        List<SimpleDataFeed> allDataFeeds = dataFeedService.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
 
         List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<>();
@@ -322,7 +295,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, cdlJobDetail);
                 if (invokeTime != null) {
                     if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
-                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
+                        dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                     }
                     if (currentTimeMillis > invokeTime.getTime()) {
                         list.add(new HashMap.SimpleEntry<>(invokeTime,
@@ -334,7 +307,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         log.info(String.format("Need to run PA job count: %d.", list.size()));
 
         StringBuilder sb = new StringBuilder();
-        if (clusterIdIsEmpty ) {
+        if (clusterIdIsEmpty) {
             sb.append(String.format("Have %d running PA jobs. ", runningPAJobsCount));
             for (SimpleDataFeed dataFeed : processAnalyzingDataFeeds) {
                 sb.append(String.format("Tenant %s is running PA job. ", dataFeed.getTenant().getId()));
@@ -382,228 +355,38 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void orchestrateJob_New() {
-        String clusterId = getCurrentClusterID();
-        log.debug(String.format("Current cluster id is : %s.", clusterId));
-        boolean clusterIdIsEmpty = StringUtils.isEmpty(clusterId);
-
-        String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
-        log.debug(String.format("Current build number is : %s.", currentBuildNumber));
-
-        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
-        log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
-
-        int runningPAJobsCount = 0;
-        List<SimpleDataFeed> processAnalyzingDataFeeds = new ArrayList<>();
-
-        List<ActivityObject> activityObjects = new ArrayList<>();
-        Map<String, List<Object>> list = new HashMap<>();
-
-        for (SimpleDataFeed dataFeed : allDataFeeds) {
-            Tenant tenant = dataFeed.getTenant();
-            if (clusterIdIsEmpty && dataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
-                runningPAJobsCount++;
-                processAnalyzingDataFeeds.add(dataFeed);
-            } else if (dataFeed.getStatus() == DataFeed.Status.Active) {
-                MultiTenantContext.setTenant(tenant);
-                CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-                CDLJobDetail cdlJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                List<Action> actions = actionService.findByOwnerIdAndActionStatus(null, ActionStatus.ACTIVE);
-
-                List<Object> objects = new ArrayList<>();
-                objects.add(dataFeed);
-                objects.add(cdlJobDetail);
-                objects.add(actions);
-                list.put(tenant.getName(), objects);
-
-                ActivityObject activityObject = new ActivityObject();
-                activityObject.setTenant(tenant);
-                activityObject.setScheduleNow(dataFeed.isScheduleNow());
-                activityObject.setScheduleTime(dataFeed.getScheduleTime());
-                activityObject.setActions(actions);
-
+    private void schedulePAJob() {
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        Set<String> canRunRetryJobSet = canRunJobTenantMap.get(RETRY_KEY);
+        if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
+            for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
-                    boolean allowAutoDataCloudRefresh = batonService.isEnabled(customerSpace,
-                            LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY);
-                    if (allowAutoDataCloudRefresh) {
-                        activityObject.setDataCloudRefresh(checkDataCloudChange(currentBuildNumber, customerSpace.toString()));
+                    if (isActivityBasedPA) {
+                        cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
                     }
                 } catch (Exception e) {
-                    log.warn("get 'allow auto data cloud refresh' value failed: " + e.getMessage());
-                }
-
-                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, cdlJobDetail);
-                if (invokeTime != null) {
-                    if (dataFeed.getNextInvokeTime() == null || !dataFeed.getNextInvokeTime().equals(invokeTime)) {
-                        dataFeedProxy.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
-                    }
-                    activityObject.setInvokeTime(invokeTime);
-                }
-
-                activityObjects.add(activityObject);
-            }
-        }
-        PriorityQueueUtils.createOrUpdateQueue(activityObjects);
-
-        highMap = getMap(HIGH_PRIORITY_QUEUE);
-        lowMap = getMap(LOW_PRIORITY_QUEUE);
-
-        StringBuilder sb = new StringBuilder();
-        if (clusterIdIsEmpty ) {
-            sb.append(String.format("Have %d running PA jobs. ", runningPAJobsCount));
-            for (SimpleDataFeed dataFeed : processAnalyzingDataFeeds) {
-                sb.append(String.format("Tenant %s is running PA job. ", dataFeed.getTenant().getId()));
-            }
-        } else {
-            List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types, jobStatuses);
-            runningPAJobsCount = runningPAJobs.size();
-
-            List<String> runningJobAppId = new ArrayList<>();
-            for (WorkflowJob job : runningPAJobs) {
-                runningJobAppId.add(job.getApplicationId());
-            }
-
-            List<String> notStartRunningHithTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : highMap.entrySet()) {
-                if (runningJobAppId.contains(entry.getKey())) {
-                    if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
-                        entry.getValue().set(1, JobStatus.RUNNING);
-                    }
-                } else {
-                    if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        highMap.remove(entry.getKey());
-                    } else {
-                        notStartRunningHithTenants.add((String)entry.getValue().get(0));
-                        runningPAJobsCount++;
+                    log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
+                    if (isActivityBasedPA) {
+                        updateRetryCount(needRunJobTenantId);
                     }
                 }
-                if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    highMap.remove(entry.getKey());
-                }
-            }
-
-            List<String> notStartRunningLowTenants = new ArrayList<>();
-            for(Map.Entry<String, List<Object>> entry : lowMap.entrySet()) {
-                if (runningJobAppId.contains(entry.getKey())) {
-                    if (JobStatus.PENDING.equals(entry.getValue().get(1))) {
-                        entry.getValue().set(1, JobStatus.RUNNING);
-                    }
-                } else {
-                    if (JobStatus.RUNNING.equals(entry.getValue().get(1))) {
-                        lowMap.remove(entry.getKey());
-                    } else {
-                        notStartRunningLowTenants.add((String)entry.getValue().get(0));
-                        runningPAJobsCount++;
-                    }
-                }
-                if (System.currentTimeMillis() - (long)entry.getValue().get(2) > TimeUnit.HOURS.toMillis(2)) {
-                    lowMap.remove(entry.getKey());
-                }
-            }
-
-            sb.append(String.format("Have %d running PA jobs. ", runningPAJobsCount));
-            for (WorkflowJob workflowJob : runningPAJobs) {
-                sb.append(String.format("Tenant %s run by %s. ", workflowJob.getTenant().getId(), workflowJob.getUserId()));
-            }
-            for (String tenant : notStartRunningHithTenants) {
-                sb.append(String.format("Tenant %s is submitted, but not run. ", tenant));
-            }
-            for (String tenant : notStartRunningLowTenants) {
-                sb.append(String.format("Tenant %s is submitted, but not run. ", tenant));
             }
         }
-        log.info(sb.toString());
-
-        int highPriorityRunningPAJobCount = highMap.size();
-        int lowPriorityRunningPAJobCount = lowMap.size();
-
-        String needScheduleTenantFromHighPriority = PriorityQueueUtils.pickFirstFromHighPriority();
-        while (needScheduleTenantFromHighPriority != null &&
-                (highMap.containsKey(needScheduleTenantFromHighPriority) || lowMap.containsKey(needScheduleTenantFromHighPriority))) {
-            PriorityQueueUtils.pollFirstFromHighPriority();
-            needScheduleTenantFromHighPriority = PriorityQueueUtils.pickFirstFromHighPriority();
-        }
-        log.info(String.format("Need to schedule high priority tenant is : %s.", needScheduleTenantFromHighPriority));
-
-        String needScheduleTenantFromLowPriority = PriorityQueueUtils.pickFirstFromLowPriority();
-        while (needScheduleTenantFromLowPriority != null &&
-                (needScheduleTenantFromHighPriority.equals(needScheduleTenantFromLowPriority) ||
-                        highMap.containsKey(needScheduleTenantFromLowPriority) ||
-                        lowMap.containsKey(needScheduleTenantFromLowPriority))) {
-            PriorityQueueUtils.pollFirstFromLowPriority();
-            needScheduleTenantFromLowPriority = PriorityQueueUtils.pickFirstFromLowPriority();
-        }
-        log.info(String.format("Need to schedule low priority tenant is : %s.", needScheduleTenantFromLowPriority));
-
-        if (StringUtils.isNotEmpty(needScheduleTenantFromHighPriority)) {
-            if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < maximumHighPriorityScheduledJobCount) ||
-                    runningPAJobsCount >= concurrentProcessAnalyzeJobs && highPriorityRunningPAJobCount < minimumHighPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromHighPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromHighPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromHighPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, true, getImportActions(actions))) {
-                    log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromHighPriority));
-                    runningPAJobsCount++;
+        Set<String> canRunJobSet = canRunJobTenantMap.get(OTHER_KEY);
+        if (CollectionUtils.isNotEmpty(canRunJobSet)) {
+            for (String needRunJobTenantId : canRunJobSet) {
+                if (isActivityBasedPA) {
+                    submitProcessAnalyzeJob(needRunJobTenantId);
                 }
             }
         }
-        if (StringUtils.isNotEmpty(needScheduleTenantFromLowPriority)) {
-            if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < maximumLowPriorityScheduledJobCount) ||
-                    runningPAJobsCount >= concurrentProcessAnalyzeJobs && lowPriorityRunningPAJobCount < minimumLowPriorityScheduledJobCount) {
-                SimpleDataFeed dataFeed = (SimpleDataFeed) list.get(needScheduleTenantFromLowPriority).get(0);
-                CDLJobDetail cdlJobDetail = (CDLJobDetail) list.get(needScheduleTenantFromLowPriority).get(1);
-                List<Action> actions = (List<Action>) list.get(needScheduleTenantFromLowPriority).get(2);
-                if (submitProcessAnalyzeJob(dataFeed, cdlJobDetail, false, getImportActions(actions))) {
-                    log.info(String.format("Run PA  job for tenant: %s.", needScheduleTenantFromLowPriority));
-                }
-            }
-        }
-
-        updateRedisTemplate(HIGH_PRIORITY_QUEUE, highMap);
-        updateRedisTemplate(LOW_PRIORITY_QUEUE, lowMap);
     }
 
-    private List<Action> getImportActions(List<Action> actions) {
-        List<Action> importActions = new ArrayList<>();
-        if (actions != null) {
-            for (Action action : actions) {
-                if (action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW) {
-                    importActions.add(action);
-                }
-            }
-        }
-        return importActions;
+    private void updateRetryCount(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        MultiTenantContext.setTenant(tenant);
+        dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
     }
-
-    @SuppressWarnings("unchecked")
-    @VisibleForTesting
-    Map<String, List<Object>> getMap(String key) {
-        if (redisTemplate.opsForValue().get(key) == null) {
-            redisTemplate.opsForValue().set(key, new HashMap<>());
-        }
-        return (Map<String, List<Object>>)redisTemplate.opsForValue().get(key);
-    }
-
-    @VisibleForTesting
-    void updateRedisTemplate(String key, Map<String, List<Object>> map) {
-        redisTemplate.opsForValue().set(key, map);
-    }
-
-    @VisibleForTesting
-    Boolean checkDataCloudChange(String currentBuildNumber, String customerSpace) {
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, null);
-
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-        String accountTableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedAccount, activeVersion);
-
-        return (status != null
-                && (status.getDataCloudBuildNumber() == null
-                || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
-                || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
-                && StringUtils.isNotBlank(accountTableName));
-    }
-
 
     @SuppressWarnings("unchecked")
     @VisibleForTesting
@@ -646,9 +429,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             return null;
         } else {
             if ((processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL) &&
-                (processAnalyzeJobDetail.getRetryCount() <= processAnalyzeJobRetryCount)) {
-                calendar.setTime(processAnalyzeJobDetail.getLastUpdateDate());
-                calendar.add(Calendar.HOUR_OF_DAY, 2);
+                    (processAnalyzeJobDetail.getRetryCount() < processAnalyzeJobRetryCount)) {
+                calendar.setTime(processAnalyzeJobDetail.getCreateDate());
             } else {
                 calendar.setTime(processAnalyzeJobDetail.getCreateDate());
                 int hour_create = calendar.get(Calendar.HOUR_OF_DAY);
@@ -706,7 +488,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
         try {
             if (retry) {
-                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
+                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId(), Boolean.TRUE);
             } else {
                 ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
@@ -723,80 +505,55 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         cdlJobDetail.setRetryCount(retryCount);
         cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-        log.info(String.format("Submit process analyze job with job detail id: %d, retry: %s, success %s",
-                               cdlJobDetail.getPid(), retry ? "y" : "n", success ? "y" : "n"));
+        log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, retry: %s, success" +
+                        " %s",
+                applicationId.toString(), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
         return true;
     }
 
     @VisibleForTesting
-    boolean submitProcessAnalyzeJob(SimpleDataFeed dataFeed, CDLJobDetail cdlJobDetail,
-                                    boolean setHighMap, List<Action> actions) {
-        Tenant tenant = dataFeed.getTenant();
+    boolean submitProcessAnalyzeJob(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
-
-        ApplicationId applicationId;
-        int retryCount;
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getShortTenantId());
+        ApplicationId applicationId = null;
         boolean success = true;
 
-        if ((cdlJobDetail == null) || (cdlJobDetail.getCdlJobStatus() != CDLJobStatus.FAIL)) {
-            retryCount = 0;
-        } else {
-            retryCount = cdlJobDetail.getRetryCount() + 1;
-        }
-        boolean retry = retryProcessAnalyze(tenant, cdlJobDetail);
-        cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
         try {
-            if (retry) {
-                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId());
+            ProcessAnalyzeRequest request;
+            if (StringUtils.isNotEmpty(dataFeed.getScheduleRequest())) {
+                request = JsonUtils.deserialize(dataFeed.getScheduleRequest(), ProcessAnalyzeRequest.class);
             } else {
-                ProcessAnalyzeRequest request;
-                if (StringUtils.isNotEmpty(dataFeed.getScheduleRequest())) {
-                    request = JsonUtils.deserialize(dataFeed.getScheduleRequest(), ProcessAnalyzeRequest.class);
-                } else {
-                    request = new ProcessAnalyzeRequest();
-                    request.setUserId(USERID);
-                }
-
-                applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
+                request = new ProcessAnalyzeRequest();
+                request.setUserId(USERID);
             }
-            List<Object> list = new ArrayList<>();
-            list.add(tenant.getName());
-            list.add(JobStatus.PENDING);
-            list.add(System.currentTimeMillis());
-            list.add(actions);
-
-            if (setHighMap) {
-                highMap.put(applicationId.toString(), list);
-            } else {
-                lowMap.put(applicationId.toString(), list);
+            if (dataFeed.isScheduleNow()) {
+                dataFeedService.updateDataFeedScheduleTime(tenantId, false, null);
             }
-            cdlJobDetail.setApplicationId(applicationId.toString());
-            cdlJobDetail.setCdlJobStatus(CDLJobStatus.RUNNING);
+            applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
+
         } catch (Exception e) {
-            cdlJobDetail.setCdlJobStatus(CDLJobStatus.FAIL);
             log.info(String.format("Failed to submit job for tenant name: %s", tenant.getName()));
             success = false;
         }
-        cdlJobDetail.setRetryCount(retryCount);
-        cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
-        dataFeedProxy.updateDataFeedScheduleTime(tenant.getId(), false, null);
-        log.info(String.format("Submit process analyze job with job detail id: %d, retry: %s, success %s",
-                cdlJobDetail.getPid(), retry ? "y" : "n", success ? "y" : "n"));
-        return true;
+        log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, success" +
+                        " %s",
+                applicationId.toString(), tenant.getName(), success ? "y" : "n"));
+        return success;
     }
 
     @VisibleForTesting
     boolean retryProcessAnalyze(Tenant tenant, CDLJobDetail cdlJobDetail) {
         DataFeedExecution execution;
         try {
-            DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
+            DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(tenant.getId());
             execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
-                DataFeedExecutionJobType.PA);
+                    DataFeedExecutionJobType.PA);
         } catch (Exception e) {
             execution = null;
         }
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
-            if ((cdlJobDetail == null) || (cdlJobDetail.getRetryCount() < processAnalyzeJobRetryCount)) {
+            if ((cdlJobDetail == null) || !reachRetryLimit(CDLJobType.PROCESSANALYZE, cdlJobDetail.getRetryCount())) {
                 return true;
             } else {
                 log.info(String.format("Tenant %s exceeds retry limit and skip failed exeuction", tenant.getName()));
@@ -807,7 +564,8 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void updateOneJobStatus(CDLJobType cdlJobType, CDLJobDetail cdlJobDetail, Job job) {
         JobStatus jobStatus = job.getJobStatus();
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(cdlJobDetail.getTenant().getId());
+        String customerSpace = cdlJobDetail.getTenant().getId();
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         if (jobStatus == JobStatus.COMPLETED) {
             cdlJobDetail.setCdlJobStatus(CDLJobStatus.COMPLETE);
             cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
@@ -816,7 +574,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
             if (reachRetryLimit(cdlJobType, cdlJobDetail.getRetryCount()) &&
                     dataFeed.getDrainingStatus() != DrainingStatus.NONE) {
-                dataFeedProxy.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(), DrainingStatus.NONE.name());
+                dataFeedService.updateDataFeedDrainingStatus(cdlJobDetail.getTenant().getId(), DrainingStatus.NONE.name());
             }
         }
     }
@@ -830,9 +588,9 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private boolean isAutoScheduledPAJob (String tenantId) {
+    private boolean isAutoScheduledPAJob(String tenantId) {
         List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false, tenantId);
-        if(jobs != null) {
+        if (jobs != null) {
             if (jobs.size() == 1) {
                 return USERID.equals(jobs.get(0).getUser());
             } else {
@@ -846,7 +604,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         updateExportAppIdMap();
         List<AtlasScheduling> atlasSchedulingList =
                 atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.Export);
-        log.info(JsonUtils.serialize(atlasSchedulingList));
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
             log.info(String.format("Need export entity tenant count: %d.", atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
@@ -888,7 +645,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         if (EXPORT_APPID_MAP.containsValue(customerSpace)) {
                             continue;
                         }
-                        if(submitExportJob(customerSpace, tenant)) {
+                        if (submitExportJob(customerSpace, tenant)) {
                             log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
                                     atlasScheduling.getPrevFireTime(),
                                     tenant.getName()));
@@ -962,4 +719,5 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         MultiTenantContext.setTenant(tenant);
     }
+
 }

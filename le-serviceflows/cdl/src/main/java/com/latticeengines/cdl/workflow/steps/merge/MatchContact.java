@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -17,17 +19,19 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.C
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactStepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(MatchContact.class);
 
     static final String BEAN_NAME = "matchContact";
 
     private String matchTargetTablePrefix = null;
-    private String newAccountTableName = NamingUtils.timestamp("NewAccounts");
+    private String newAccountTableName = NamingUtils.timestamp("NewAccountsFromContact");
 
 
     @Override
@@ -109,7 +113,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
         String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
-                getInputTableColumnNames(0), newAccountTableName);
+                getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
+                getSystemIds(BusinessEntity.Contact), newAccountTableName);
         step.setConfiguration(configStr);
         return step;
     }

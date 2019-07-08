@@ -35,5 +35,7 @@ public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Lon
 
     List<SimpleDataFeed> getSimpleDataFeeds(TenantStatus status, String versoin);
 
+    List<DataFeed> getDataFeeds(TenantStatus status, String version);
+
     DataFeed updateStatus(DataFeed dataFeed);
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -137,4 +138,13 @@ public class JobStatus implements HasId<String> {
         this.appResUsgReport = appResUsgReport;
     }
 
+    public String getErrorReport() {
+        StringBuffer errorReport = new StringBuffer();
+        errorReport.append(status.toString());
+        if (StringUtils.isNotBlank(diagnostics)) {
+            errorReport.append(": ");
+            errorReport.append(diagnostics);
+        }
+        return errorReport.toString();
+    }
 }

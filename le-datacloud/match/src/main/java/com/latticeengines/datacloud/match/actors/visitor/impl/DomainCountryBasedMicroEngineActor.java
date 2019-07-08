@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("domainCountryBasedMicroEngineActor")
@@ -30,6 +32,12 @@ public class DomainCountryBasedMicroEngineActor extends AMLookupMicroEngineTempl
         } else {
             return (matchKeyTuple.getDomain() != null && matchKeyTuple.getCountry() != null);
         }
+    }
+
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_DOMAIN_COUNTRY, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override

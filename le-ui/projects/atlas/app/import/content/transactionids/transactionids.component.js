@@ -4,6 +4,8 @@ angular.module('lp.import.wizard.transactionids', [])
 ) {
     var vm = this;
 
+    var entityMatchEnabled = ImportWizardStore.entityMatchEnabled;
+
     angular.extend(vm, {
         state: ImportWizardStore.getAccountIdState(),
         fieldMapping: {},
@@ -14,14 +16,15 @@ angular.module('lp.import.wizard.transactionids', [])
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             product: 'ProductId',
-            contact: 'ContactId',
-            account: 'AccountId',
+            contact: (entityMatchEnabled ? 'CustomerContactId' : 'ContactId'),
+            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
         keyMap: {},
-        saveMap: {}
+        saveMap: {},
+        entityMatchEnabled: entityMatchEnabled
     });
 
     vm.init = function() {

@@ -6,12 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
@@ -66,6 +68,14 @@ public class ImportTableResource {
             @PathVariable String tableName, //
             @RequestBody Table table) {
         return tableResourceHelper.updateTable(customerSpace, tableName, table);
+    }
+
+    @PostMapping(value = "/importtables/{tableName}/fixattributes")
+    @ResponseBody
+    @ApiOperation(value = "Fix table attributes")
+    public Boolean fixTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
+                                      @RequestBody List<AttributeFixer> attributeFixerList) {
+        return tableResourceHelper.fixTableAttributes(customerSpace, tableName, attributeFixerList);
     }
 
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")

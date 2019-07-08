@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match.entity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -15,18 +16,23 @@ public class EntityAssociationResponse {
     private final String entity;
     private final boolean isNewlyAllocated; // should be false if associatedEntityId is null
     private final String associatedEntityId;
-    private final EntityRawSeed associatedSeed;
+    // snapshot of target seed before update
+    private final EntityRawSeed seedBeforeAssociation;
+    // state of target seed after update
+    private final EntityRawSeed seedAfterAssociation;
+    private final Set<EntityLookupEntry> conflictEntries;
     private final List<String> associationErrors;
 
     public EntityAssociationResponse(@NotNull Tenant tenant, @NotNull String entity, String associatedEntityId,
-            EntityRawSeed associatedSeed,
+            EntityRawSeed seedBeforeAssociation, EntityRawSeed seedAfterAssociation,
             boolean isNewlyAllocated) {
-        this(tenant, entity, isNewlyAllocated, associatedEntityId, associatedSeed, Collections.emptyList());
+        this(tenant, entity, isNewlyAllocated, associatedEntityId, seedBeforeAssociation, seedAfterAssociation,
+                null, Collections.emptyList());
     }
 
     public EntityAssociationResponse(Tenant tenant, String entity, boolean isNewlyAllocated, String associatedEntityId,
-            EntityRawSeed associatedSeed,
-            List<String> associationErrors) {
+            EntityRawSeed seedBeforeAssociation, EntityRawSeed seedAfterAssociation,
+            Set<EntityLookupEntry> conflictEntries, List<String> associationErrors) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(associationErrors);
@@ -34,7 +40,9 @@ public class EntityAssociationResponse {
         this.entity = entity;
         this.isNewlyAllocated = isNewlyAllocated;
         this.associatedEntityId = associatedEntityId;
-        this.associatedSeed = associatedSeed;
+        this.seedBeforeAssociation = seedBeforeAssociation;
+        this.seedAfterAssociation = seedAfterAssociation;
+        this.conflictEntries = conflictEntries == null ? Collections.emptySet() : conflictEntries;
         this.associationErrors = associationErrors;
     }
 
@@ -54,8 +62,16 @@ public class EntityAssociationResponse {
         return associatedEntityId;
     }
 
-    public EntityRawSeed getAssociatedSeed() {
-        return associatedSeed;
+    public EntityRawSeed getSeedBeforeAssociation() {
+        return seedBeforeAssociation;
+    }
+
+    public Set<EntityLookupEntry> getConflictEntries() {
+        return conflictEntries;
+    }
+
+    public EntityRawSeed getSeedAfterAssociation() {
+        return seedAfterAssociation;
     }
 
     public List<String> getAssociationErrors() {

@@ -69,7 +69,7 @@ public class ProductUtils {
         log.info("Load products from " + filePath + "/*.avro");
         List<Product> productList = new ArrayList<>();
 
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             Product product = new Product();
@@ -107,7 +107,7 @@ public class ProductUtils {
         Set<String> productIds = new HashSet<>();
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             String productId = getString(record, InterfaceName.Id.name());
@@ -258,7 +258,7 @@ public class ProductUtils {
         boolean foundProductType = false;
         String filePath = getPath(productTable.getExtracts().get(0).getPath());
         log.info("Load products from " + filePath + "/*.avro");
-        Iterator<GenericRecord> iter = AvroUtils.avroFileIterator(yarnConfiguration, filePath + "/*.avro");
+        Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             String typeInFile = getString(record, InterfaceName.ProductType.name());

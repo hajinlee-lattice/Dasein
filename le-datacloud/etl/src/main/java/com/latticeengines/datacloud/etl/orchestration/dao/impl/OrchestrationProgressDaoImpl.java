@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.orchestration.dao.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryI
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
+
 @Component("orchestrationProgressDao")
 public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<OrchestrationProgress>
         implements OrchestrationProgressDao {
@@ -28,10 +30,13 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
 
     /*
      * Map Fields: ColumnName -> Value Requires to pass in column name in table,
-     * not variable name in OrchestrationProgress entity class
+     * not variable name in OrchestrationProgress entity class, also foreign key
+     * not working using column name
      */
+
     @SuppressWarnings("unchecked")
     @Override
+
     public List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields) {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
@@ -57,6 +62,19 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
     }
 
     @Override
+    public boolean hasJobInProgress(String orchName) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<OrchestrationProgress> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s p where p.orchestration.name = :name and p.status in (:ProgressStatus) ",
+                entityClz.getSimpleName());
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
+        query.setParameter("name", orchName);
+        query.setParameterList("ProgressStatus", new Object[] { ProgressStatus.PROCESSING, ProgressStatus.NEW });
+        return CollectionUtils.isNotEmpty(query.list());
+    }
+
+    @Override
     public boolean isDuplicateVersion(String orchName, String version) {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
@@ -65,7 +83,7 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
         query.setParameter("version", version);
         query.setParameter("name", orchName);
-        return !CollectionUtils.isEmpty(query.list());
+        return CollectionUtils.isNotEmpty(query.list());
     }
 
     @Override
@@ -82,4 +100,15 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
         return query.list();
     }
 
+    @Override
+    public boolean hasTriggeredSince(String orchName, Date since) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<OrchestrationProgress> entityClz = getEntityClass();
+        String queryStr = String.format("from %s p where p.orchestration.name = :name and p.startTime >= :since",
+                entityClz.getSimpleName());
+        Query<OrchestrationProgress> query = session.createQuery(queryStr, OrchestrationProgress.class);
+        query.setParameter("name", orchName);
+        query.setParameter("since", since);
+        return CollectionUtils.isNotEmpty(query.list());
+    }
 }

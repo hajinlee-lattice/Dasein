@@ -120,7 +120,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         // orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
         launchTime = new Date();
         Long count = createDummyRecommendations(maxUpdateRows * 2, launchTime);
-        playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(), playLaunch.getLaunchId(), 100.0, count, count, 0L, 0L);
+        playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(), playLaunch.getLaunchId(), 100.0, count,
+                count, 0L, 0L, 0L, 0L);
         playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
     }
 

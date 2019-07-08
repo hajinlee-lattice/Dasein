@@ -1,5 +1,6 @@
 package com.latticeengines.datacloudapi.api.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,8 +22,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
@@ -40,7 +42,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
 /**
- * workflowapi,datacloudapi,modeling,eai,sqoop
+ * dpltc deploy -a workflowapi,datacloudapi,eai
  */
 @Component
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
@@ -50,12 +52,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_INGESTION = "DnBCacheSeedTest";
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
-    private static final String ALEXA_INGESTION = "AlexaTest";
-    private static final String ALEXA_VERSION_OLD = "2015-10-01_00-00-00_UTC";
-    private static final String ALEXA_VERSION_NEW = "2015-11-01_00-00-00_UTC";
     private static final String ORB_INGESTION = "OrbTest";
-    private static final String SEMRUSH_INGESTION = "SemrushTest";
-    private static final String SEMRUSH_VERSION = "2017-07-01_00-00-00_UTC";
 
     @Inject
     private IngestionEntityMgr ingestionEntityMgr;
@@ -72,6 +69,9 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @Inject
     private IngestionAPIProviderService apiProviderService;
 
+    @Inject
+    private HdfsPathBuilder hdfsPathBuilder;
+
     private ExecutorService verificationWorkers;
     private List<Ingestion> ingestions = new ArrayList<>();
     private String orbVersion;
@@ -82,7 +82,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static Object[][] getIngestions1() {
         return new Object[][] {
                 { ORB_INGESTION,
-                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"FileName\":\"orb-db2-export-sample.zip\"}",
+                        "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"FileName\":\"orb-db2-export-sample.zip\"}",
                         IngestionType.API } //
         };
     }
@@ -91,18 +91,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         return new Object[][] {
                 { DNB_INGESTION,
                         "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
-                        IngestionType.SFTP }, //
-                { ALEXA_INGESTION,
-                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"ConcurrentNum\":1,\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Alexa\", \"Source\":\"Alexa\",\"TimestampColumn\":\"Creation_Date\",\"CollectCriteria\":\"NEW_DATA\",\"Mappers\":4}",
-                        IngestionType.SQL_TO_SOURCE }
-        };
-    }
-
-    private static Object[][] getIngestions3() {
-        return new Object[][] {
-                { SEMRUSH_INGESTION,
-                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"ConcurrentNum\":1,\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Semrush_MostRecent\", \"Source\":\"SemrushMostRecent\",\"TimestampColumn\":\"LE_Last_Upload_Date\",\"CollectCriteria\":\"ALL_DATA\",\"Mappers\":4}",
-                        IngestionType.SQL_TO_SOURCE }, //
+                        IngestionType.SFTP },
         };
     }
 
@@ -115,14 +104,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     private static Object[][] getExpectedResult2() {
         return new Object[][] { //
-                { DNB_INGESTION, 3, DNB_VERSION, null }, //
-                { ALEXA_INGESTION, 1, ALEXA_VERSION_NEW, 195 } //
-        };
-    }
-
-    private static Object[][] getExpectedResult3() {
-        return new Object[][] { //
-                { SEMRUSH_INGESTION, 1, SEMRUSH_VERSION, 10 } //
+                { DNB_INGESTION, 3, DNB_VERSION, null }
         };
     }
 
@@ -144,10 +126,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     public void testIngestions() {
         // no sequential dependencies among groups
         // can comment out any group(s)
-        // Disable Orb test as Orb Key is expired
-        // testIngestions1();
+        testIngestions1();
         testIngestions2();
-        testIngestions3();
     }
 
     // group1: Orb
@@ -163,44 +143,22 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         verifyIngestions(getExpectedResult1());
     }
 
-    // group2: DnB and Alexa
+    // group2: DnB
     private void testIngestions2() {
-        log.info("Test ingestion group 2: DnB, Alexa");
+        log.info("Test ingestion group 2: DnB");
         createIngestions(getIngestions2());
-        Ingestion alexaIngestion = ingestionEntityMgr.getIngestionByName(ALEXA_INGESTION);
-        ingestionVersionService.updateCurrentVersion(alexaIngestion, ALEXA_VERSION_OLD);
 
         IngestionRequest request = new IngestionRequest();
         request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
         request.setFileName(DNB_FILE);
+        request.setStartNow(true);
         IngestionProgress progress = ingestionProxy.ingestInternal(DNB_INGESTION, request, POD_ID);
         Assert.assertNotNull(progress);
-
-        request = new IngestionRequest();
-        request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
-        request.setSourceVersion(ALEXA_VERSION_NEW);
-        progress = ingestionProxy.ingestInternal(ALEXA_INGESTION, request, POD_ID);
-        Assert.assertNotNull(progress);
+        Assert.assertNotNull(progress.getApplicationId());
 
         scan();
 
         verifyIngestions(getExpectedResult2());
-    }
-
-    // group3: SEMRush
-    private void testIngestions3() {
-        log.info("Test ingestion group 3: SEMRush");
-        createIngestions(getIngestions3());
-
-        IngestionRequest request = new IngestionRequest();
-        request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
-        request.setSourceVersion(SEMRUSH_VERSION);
-        IngestionProgress progress = ingestionProxy.ingestInternal(SEMRUSH_INGESTION, request, POD_ID);
-        Assert.assertNotNull(progress);
-
-        scan();
-
-        verifyIngestions(getExpectedResult3());
     }
 
     private void createIngestions(Object[][] ingestionData) {
@@ -281,10 +239,19 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         for (IngestionProgress progress : progresses) {
             assertProgress(ingestion, progress, size, version);
         }
+        String ingestionPath = hdfsPathBuilder.constructIngestionDir(name, version).toString();
+        try {
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, ingestionPath);
+            log.info("Ingested files: " + String.join(",", files));
+            Assert.assertTrue(files.stream().anyMatch(file -> file.contains(HdfsPathBuilder.SUCCESS_FILE)));
+            Assert.assertEquals(files.size() - 1, expectedProgresses);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to ", e);
+        }
     }
 
     private void assertProgress(Ingestion ingestion, IngestionProgress progress, Integer size, String version) {
-        ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
+        ApplicationId appId = ApplicationId.fromString(progress.getApplicationId());
         FinalApplicationStatus appStatus = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
         Assert.assertEquals(appStatus, FinalApplicationStatus.SUCCEEDED);
         Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);

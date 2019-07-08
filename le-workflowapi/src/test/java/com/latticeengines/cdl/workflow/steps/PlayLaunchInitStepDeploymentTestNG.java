@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -143,13 +143,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().excludeItemsWithoutSalesforceId(true)
                 .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())))
-                .destinationSystemType(CDLExternalSystemType.MAP)
-                .destinationSystemName(CDLExternalSystemName.Marketo)
+                .destinationSystemType(CDLExternalSystemType.MAP).destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_" + System.currentTimeMillis())
-                .trayAuthenticationId(UUID.randomUUID().toString())
-                .topNCount(topNCount)
-                .playLaunchDryRun(true)
-                .build();
+                .trayAuthenticationId(UUID.randomUUID().toString()).topNCount(topNCount).playLaunchDryRun(true).build();
 
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
         testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
@@ -159,7 +155,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         rulesBasedPlay = testPlayCreationHelper.getPlay();
         rulesBasedPlayLaunch = testPlayCreationHelper.getPlayLaunch();
 
-        // Update play types so that
+        // Update channelId types so that
         types = playProxy.getPlayTypes(tenant.getId());
         Assert.assertNotNull(types);
         rulesBasedPlay.setPlayType(types.get(1));
@@ -188,21 +184,21 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     }
 
     @AfterClass(groups = { "deployment" })
-    public void teardown() throws Exception {
+    public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
 
         List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
 
-        recommendations.stream().forEach(rec -> {
+        recommendations.forEach(rec -> {
             log.info("Cleaning up recommendation: " + rec.getId());
             recommendationService.delete(rec, false);
         });
         recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
 
         Assert.assertNotNull(recommendations);
-        Assert.assertTrue(recommendations.size() == 0);
+        Assert.assertEquals(recommendations.size(), 0);
     }
 
     // @Test(groups = "deployment")
@@ -265,7 +261,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         AtomicInteger contactCounts = new AtomicInteger();
         Set<String> accountIds = ConcurrentHashMap.newKeySet();
 
-        recommendations.stream().forEach(rec -> {
+        recommendations.forEach(rec -> {
             Assert.assertNotNull(rec.getAccountId());
             Assert.assertNotNull(rec.getId());
             Assert.assertNotNull(rec.getLastUpdatedTimestamp());

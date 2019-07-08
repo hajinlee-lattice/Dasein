@@ -1,20 +1,14 @@
 import React, { Component } from "common/react-vendor";
 import { store, injectAsyncReducer } from 'store';
 import { actions, reducer } from './multipletemplates.redux';
-import LeHPanel from 'common/widgets/container/le-h-panel';
-import ReactRouter from '../../../react/router';
 import NgState from "atlas/ng-state";
-import {
-    SPACEBETWEEN,
-    SPACEEVEN,
-    CENTER
-} from "common/widgets/container/le-alignments";
+import { s3actions } from 'atlas/import/s3files/s3files.redux';
+import ReactRouter from '../../../react/router';
 import TemplatesRowActions, {
     CREATE_TEMPLATE,
     EDIT_TEMPLATE,
     IMPORT_DATA
 } from "../templates-row-actions";
-import EditControl from "common/widgets/table/controlls/edit-controls";
 import CopyComponent from "common/widgets/table/controlls/copy-controll";
 import EditorText from "common/widgets/table/editors/editor-text";
 
@@ -23,24 +17,26 @@ import Message, {
     NOTIFICATION
 } from "common/app/utilities/message";
 
+import  LeHPanel from '../../../../../common/widgets/container/le-h-panel';
 import LeTable from "common/widgets/table/table";
 import './multiple-templates.list.scss';
 import LeButton, {RIGHT} from "common/widgets/buttons/le-button";
 import ReactMainContainer from "atlas/react/react-main-container";
 import { LeToolBar, SPACE_BETWEEN } from "common/widgets/toolbar/le-toolbar";
 
-import {actions as bannerActions} from '../../../../../common/widgets/banner/le-banner.redux';
-import { TYPE_SUCCESS } from "../../../../../common/widgets/banner/le-banner.utils";
 export default class MultipleTemplatesList extends Component {
 
     constructor(props) {
         super(props);
+        this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
+        this.TemplatesStore = ReactRouter.getRouter().ngservices.TemplatesStore;
+
         this.actionCallbackHandler = this.actionCallbackHandler.bind(this);
         this.saveTemplateNameHandler = this.saveTemplateNameHandler.bind(this);
         this.state = {
             forceReload: false,
             showEmpty: false,
-            showLoading: false,
+            showLoading: true,
             data: []
         };
     }
@@ -63,29 +59,32 @@ export default class MultipleTemplatesList extends Component {
     handleChange = () => {
 
         const data = store.getState()['multitemplates'];
+       
         let templates = data.templates;
+        let tmp = !templates.loaded;
         this.setState({
-            forceReload: true,
-            showEmpty: templates && templates.length == 0,
-            showLoading: false,
-            data: templates
+            showEmpty: templates.data && templates.data.length == 0,
+            showLoading: tmp,
+            data: templates.data,
+            forceReload: true
         });
         this.setState({ forceReload: false });
     }
 
     componentWillUnmount() {
+        actions.resetTemplates();
         this.unsubscribe();
     }
 
     componentDidMount() {
         injectAsyncReducer(store, 'multitemplates', reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
-        actions.fetchTemplates();
         this.setState({
-            forceReload: false,
+            showLoading: true,
             showEmpty: false,
-            showLoading: true
+            forceReload: true
         });
+        actions.fetchTemplates();
     }
 
     saveTemplateNameHandler(cell, value) {
@@ -98,10 +97,20 @@ export default class MultipleTemplatesList extends Component {
     getConfig() {
         let config = {
             name: "import-templates",
+            selectable: false,
+            sorting:{
+                initial: 'none',
+                direction: 'none'
+            },
             header: [
                 {
                     name: "Active",
                     displayName: "Active",
+                    sortable: false
+                },
+                {
+                    name: "ImportSystem.priority",
+                    displayName: "Priority",
                     sortable: false
                 },
                 {
@@ -110,9 +119,9 @@ export default class MultipleTemplatesList extends Component {
                     sortable: false
                 },
                 {
-                    name: "System",
+                    name: "ImportSystem.system_type",
                     displayName: "System",
-                    sortable: false
+                    sortable: true
                 },
                 {
                     name: "Object",
@@ -133,6 +142,7 @@ export default class MultipleTemplatesList extends Component {
             columns: [
                 {
                     colSpan: 1,
+                    onlyTemplate: true,
                     template: cell => {
 
                         let rowData = cell.props.rowData;
@@ -153,16 +163,15 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
+                    colSpan: 1
+                },
+                {
                     colSpan: 2,
+                    onlyTemplate: true,
                     template: cell => {
                         if (!cell.state.saving && !cell.state.editing) {
-                            if (cell.props.rowData.Exist) {
-                                return (
-                                    null
-                                );
-                            } else {
-                                return null;
-                            }
+                            let displayName = cell.props.rowData.ImportSystem ? cell.props.rowData.ImportSystem.display_name : '';
+                            return (<span>{displayName}</span>);
                         }
                         if (cell.state.editing && !cell.state.saving) {
                             if (cell.props.rowData.Exist) {
@@ -219,7 +228,8 @@ export default class MultipleTemplatesList extends Component {
                     }
                 },
                 {
-                    colSpan: 4,
+                    colSpan: 3,
+                    onlyTemplate: true,
                     template: cell => {
                         let lastEditedDate = '';
                         let lastEditedDateNumeric = null;
@@ -248,7 +258,7 @@ export default class MultipleTemplatesList extends Component {
 
                         return (
                             <div>
-                                {/* {lastEditedDate} */}
+                                {lastEditedDate}
                                 <TemplatesRowActions
                                     rowData={cell.props.rowData}
                                     callback={this.setDataTypes}
@@ -262,23 +272,110 @@ export default class MultipleTemplatesList extends Component {
 
         return config;
     }
+
+    setDataTypes = (response) => {
+        let state = Object.assign({}, this.state);
+
+        switch (response.type) {
+            case "Accounts": {
+                state.entity = "accounts";
+                state.entityType = 'Account';
+                break;
+            }
+            case "Contacts": {
+                state.entity = "contacts";
+                state.entityType = 'Contact';
+                break;
+            }
+            case "Product Purchases": {
+                state.entity = "productpurchases";
+                state.entityType = 'Product';
+                break;
+            }
+            case "Product Bundles": {
+                state.entity = "productbundles";
+                state.entityType = 'Product';
+                break;
+            }
+            case "Product Hierarchy": {
+                state.entity = "producthierarchy";
+                state.entityType = 'Product';
+                break;
+            }
+        }
+
+        state.feedType = response.data.FeedType;
+        state.object = response.data.Object;
+
+        this.setState(state, function () {
+            
+            // Wait until setState is completed and do some stuff.
+            let action = response.action;
+            let data = response.data;
+            let ImportWizardStore = this.ImportWizardStore;
+            ImportWizardStore.setEntityType(this.state.entityType);
+            ImportWizardStore.setFeedType(this.state.feedType);
+            ImportWizardStore.setTemplateAction(action);
+            ImportWizardStore.setTemplateData(data);
+            ImportWizardStore.setObject(this.state.object);
+            if (action == 'view-template') {
+                this.viewTemplate(response);
+            } else {
+                this.createTemplate(response);
+            }
+
+        });
+    }
+
+    createTemplate = (response) => {
+        let params = {
+            importOnly: (response.action == 'import-data') ? true : false,
+            action: response.action,
+            data: response.data
+        }
+
+        let goTo = `home.import.entry.${this.state.entity}`;
+        s3actions.setPath(response.data.Path);
+        NgState.getAngularState().go(goTo, params);
+    }
+
+    viewTemplate(response) {
+        let params = {
+            data: response.data
+        }
+        NgState.getAngularState().go('home.viewmappings', params);
+    }
     render() {
         return (
             <ReactMainContainer>
                 <LeToolBar justifycontent={SPACE_BETWEEN}>
                     <p>You can find access tokens to your automation drop folder under connection – S3 – Get Access Tokens</p>
-                    <LeButton
-                        name="add"
-                        config={{
-                            label: "Add System",
-                            classNames: "blue-button",
-                            iconside: RIGHT,
-                            icon: 'fa fa-plus-circle'
-                        }}
-                        callback={() => {
-                            ReactRouter.getStateService().go('sistemcreation');
-                        }}
-                    />
+                    <LeHPanel className="multitemplates-toolbar">
+                        <LeButton
+                            name="matchpriority"
+                            config={{
+                                label: "Manage Priorities",
+                                classNames: "blue-button manage-priorities",
+                                iconside: RIGHT,
+                                icon: 'fa fa-list-ol'
+                            }}
+                            callback={() => {
+                                ReactRouter.getStateService().go('matchpriority');
+                            }}
+                        />
+                        <LeButton
+                            name="add"
+                            config={{
+                                label: "Add System",
+                                classNames: "blue-button",
+                                iconside: RIGHT,
+                                icon: 'fa fa-plus-circle'
+                            }}
+                            callback={() => {
+                                ReactRouter.getStateService().go('sistemcreation');
+                            }}
+                        />
+                    </LeHPanel>
                 </LeToolBar>
                 <LeTable
                     name="multiple-templates"

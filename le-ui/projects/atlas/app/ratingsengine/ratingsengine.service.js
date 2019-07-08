@@ -57,7 +57,7 @@ angular.module('lp.ratingsengine')
         this.modelTrainingOptions = {
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
-            "transformationGroup": null
+            "transformationGroup": 'none'
         },
         this.customEventModelingType = "";
         this.FieldDocument = {};
@@ -1162,8 +1162,18 @@ angular.module('lp.ratingsengine')
     }
 
     this.getIterationFromDashboard = function(ratingEngineDashboard, iterationId) {
-        var iterations = $filter('filter')(ratingEngineDashboard.iterations, {id:iterationId});
-        return iterations && iterations.length != 1 ? null : iterations[0];
+        let dashboardIterations = ratingEngineDashboard.iterations;
+        let validIterations = dashboardIterations.filter(iteration => iteration.modelingJobStatus == 'Completed');        
+        let filterValid = $filter('filter')(validIterations, {id:iterationId});
+
+        if (validIterations.length == 0) {
+            return null;
+        } else if (filterValid.length == 0) {
+            let lastValidIndex = validIterations.length-1;
+            return validIterations[lastValidIndex];
+        } else {
+            return filterValid[0];
+        }
     }
 
 })

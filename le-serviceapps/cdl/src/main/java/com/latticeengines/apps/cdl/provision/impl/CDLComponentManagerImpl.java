@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -49,6 +50,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     private DropBoxService dropBoxService;
 
     @Inject
+    private S3ImportSystemService s3ImportSystemService;
+
+    @Inject
     private AtlasSchedulingService atlasSchedulingService;
 
     @Override
@@ -66,6 +70,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
         dropBoxService.createTenantDefaultFolder(space.toString());
+        s3ImportSystemService.createDefaultImportSystem(space.toString());
         if (configDir.get("/ExportCronExpression") != null) {
             String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
             log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));

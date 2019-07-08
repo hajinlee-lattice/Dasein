@@ -1,95 +1,107 @@
 // @import "common/widgets/layout/layout.scss";
 @import "common/widgets/colors.scss";
-    .multiple-templates{
-        .no-name {
-            color: gray;
-          }
-          .cell-error {
-            background-color: $ruby;
-          }
-          .disabled-error {
-            pointer-events: all;
-            background-color: $orange-text;
-          }
-          .menu-content {
-            margin-left: -134px;
-            margin-top: 24px;
-          }
-          .le-cell-template > div {
-            width: 100%;
-          }
-          .le-menu {
-            float: right;
-            .menu-container {
-              padding: 0.5em 1em;
-            }
-          }
-          .le-table-cell {
-            display: flex;
-            overflow: inherit;
-            .actions{
-              flex: 1;
-            }
-            &.Path{
-                display: flex;
-                flex-wrap: nowrap;
-            }
-            &.LastEditedDate{
-                display: flex;
-            } 
-          }
-          .le-table-row > .le-table-cell > .le-cell-template {
-            flex: 1;
-            .le-blu-link {
-              .le-link{
-                border-bottom: 0px solid white;
-                color: none;
-              }
-              color: $blue-text;
-              justify-content: center;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              
-              &.edit-button > .wrapper,
-              &.import-button > .wrapper {
-                width: 100%;
-                text-align: center;
-              }
-            }
-            .initially-hidden {
-              display: none;
-            }
-          }
-        
-          .le-table-row:hover {
-            & > .le-table-cell > * {
-              color: $pearl-white;
-            }
-            & > .le-table-cell {
-              .no-name {
-                color: $pearl-white;
-              }
-              .fa.play-pause {
-                border-color: rgba(255,255,255,0.5);
-              }
-              .le-blu-link {
-                color: $pearl-white;
-        
-                & > .wrapper {
-                  border: 1px solid $pearl-white;
-                  border-radius: 6px;
-                  .le-link{
-                    color: $pearl-white;
-                  }
-                }
-              }
-            }
-            & > .le-table-cell > .le-cell-template {
-              .initially-hidden {
-                display: initial;
-                color: $pearl-white;
-              }
-            }
-          }
+.multitemplates-toolbar {
+  overflow: hidden;
+  .manage-priorities{
+    margin-right: 6px;
+  }
+}
+.multiple-templates {
+  .no-name {
+    color: gray;
+  }
+  .cell-error {
+    background-color: $ruby;
+  }
+  .disabled-error {
+    pointer-events: all;
+    background-color: $orange-text;
+  }
+  .menu-content {
+    margin-left: -134px;
+    margin-top: 24px;
+  }
+  .le-cell-template > div {
+    width: 100%;
+  }
+  .le-menu {
+    float: right;
+    .menu-container {
+      padding: 0.5em 1em;
     }
+  }
+  .le-table-cell {
+    display: flex;
+    overflow: inherit;
+    .actions {
+      flex: 1;
+    }
+    &.Path {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+    &.LastEditedDate {
+      display: flex;
+    }
+  }
+  .le-table-row > .le-table-cell > .le-cell-template {
+    flex: 1;
+    .le-blu-link {
+      .le-link {
+        border-bottom: 0px solid white;
+        color: none;
+      }
+      color: $blue-text;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.edit-button > .wrapper,
+      &.import-button > .wrapper {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    .le-copy-controlls {
+      display: none;
+      width: 0px;
+    }
+  }
+
+  .le-table-row:hover {
+    & > .le-table-cell > * {
+      color: $pearl-white;
+    }
+    & > .le-table-cell {
+      .no-name {
+        color: $pearl-white;
+      }
+      .fa.play-pause {
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+      .le-blu-link {
+        color: $pearl-white;
+
+        & > .wrapper {
+          border: 1px solid $pearl-white;
+          border-radius: 6px;
+          .le-link {
+            color: $pearl-white;
+          }
+        }
+      }
+    }
+   
+    & > .le-table-cell > .le-cell-template {
+      & > div{
+        display: flex;
+      }
+      & > .le-copy-controlls {
+        display: inline-flex;
+        color: $pearl-white;
+        width: 100%;
+      }
+    }
+  }
+}

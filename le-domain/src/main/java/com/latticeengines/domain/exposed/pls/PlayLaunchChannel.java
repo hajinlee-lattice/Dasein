@@ -1,34 +1,51 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.CronExpression;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -38,6 +55,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @FilterDef(name = "tenantFilter", defaultCondition = "TENANT_ID = :tenantFilterId", parameters = {
         @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@NamedEntityGraph(name = "PlayLaunchChannel.play", attributeNodes = { @NamedAttributeNode("play") })
 public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
 
     private static final String PLAY_LAUNCH_CHANNEL_NAME_PREFIX = "channel";
@@ -54,7 +72,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "ID", nullable = false)
     private String id;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -81,6 +99,37 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "UPDATED_BY", nullable = false)
     private String updatedBy;
 
+    @JsonProperty("bucketsToLaunch")
+    @Column(name = "BUCKETS_TO_LAUNCH")
+    @Type(type = "text")
+    private String bucketsToLaunch;
+
+    @JsonProperty("launchUnscored")
+    @Column(name = "LAUNCH_UNSCORED", nullable = false)
+    private boolean launchUnscored = false;
+
+    @JsonProperty("launchType")
+    @Column(name = "LAUNCH_TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LaunchType launchType;
+
+    @JsonProperty("maxAccountsToLaunch")
+    @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
+    private Long maxAccountsToLaunch;
+
+    @JsonProperty("cronScheduleExpression")
+    @Column(name = "CRON_SCHEDULE_EXPRESSION")
+    private String cronScheduleExpression;
+
+    @JsonProperty("nextScheduledLaunch")
+    @Column(name = "NEXT_SCHEDULED_LAUNCH")
+    private Date nextScheduledLaunch;
+
+    @JsonProperty("channelConfig")
+    @Column(name = "CHANNEL_CONFIG")
+    @Lob
+    private String channelConfig;
+
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
@@ -92,13 +141,12 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @OnDelete(action = OnDeleteAction.CASCADE)
     private LookupIdMap lookupIdMap;
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_PLAY_LAUNCH_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private PlayLaunch playLaunch;
+    @JsonProperty("lastLaunch")
+    @Transient
+    private PlayLaunch lastLaunch;
 
     @JsonProperty("isAlwaysOn")
-    @Column(name = "ALWAYS_ON", nullable = true)
+    @Column(name = "ALWAYS_ON")
     private Boolean isAlwaysOn = Boolean.FALSE;
 
     public PlayLaunchChannel() {
@@ -206,20 +254,96 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.lookupIdMap = lookupIdMap;
     }
 
-    public PlayLaunch getPlayLaunch() {
-        return playLaunch;
-    }
-
-    public void setPlayLaunch(PlayLaunch playLaunch) {
-        this.playLaunch = playLaunch;
-    }
-
     public Boolean getIsAlwaysOn() {
         return isAlwaysOn;
     }
 
     public void setIsAlwaysOn(Boolean isAlwaysOn) {
         this.isAlwaysOn = isAlwaysOn;
+    }
+
+    public Long getMaxAccountsToLaunch() {
+        return maxAccountsToLaunch;
+    }
+
+    public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
+        this.maxAccountsToLaunch = maxAccountsToLaunch;
+    }
+
+    public Set<RatingBucketName> getBucketsToLaunch() {
+        if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
+            return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RatingBucketName.class));
+        }
+
+        return new TreeSet<>();
+    }
+
+    public void setBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
+        this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
+    }
+
+    public Boolean isLaunchUnscored() {
+        return launchUnscored;
+    }
+
+    public void setLaunchUnscored(Boolean launchUnscored) {
+        this.launchUnscored = launchUnscored;
+    }
+
+    public LaunchType getLaunchType() {
+        return launchType;
+    }
+
+    public void setLaunchType(LaunchType launchType) {
+        this.launchType = launchType;
+    }
+
+    public String getCronScheduleExpression() {
+        return cronScheduleExpression;
+    }
+
+    public void setCronScheduleExpression(String cronScheduleExpression) {
+        this.cronScheduleExpression = cronScheduleExpression;
+    }
+
+    public Date getNextScheduledLaunch() {
+        return nextScheduledLaunch;
+    }
+
+    public void setNextScheduledLaunch(Date nextScheduledLaunch) {
+        this.nextScheduledLaunch = nextScheduledLaunch;
+    }
+
+    public PlayLaunch getLastLaunch() {
+        return lastLaunch;
+    }
+
+    public void setLastLaunch(PlayLaunch lastLaunch) {
+        this.lastLaunch = lastLaunch;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        ChannelConfig newChannelConfig = null;
+        if (channelConfig != null) {
+            newChannelConfig = JsonUtils.deserialize(channelConfig, ChannelConfig.class);
+        }
+        return newChannelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = JsonUtils.serialize(channelConfig);
+    }
+
+    public static Date getNextDateFromCronExpression(PlayLaunchChannel channel) {
+        try {
+            return new CronExpression(channel.getCronScheduleExpression()).getNextValidTimeAfter(
+                    channel.getNextScheduledLaunch() == null ? new Date() : channel.getNextScheduledLaunch());
+        } catch (ParseException e) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format("Invalid Cron Schedule %s in Channel for channel id: %s",
+                            channel.getCronScheduleExpression(), channel.getId()) });
+        }
     }
 
 }

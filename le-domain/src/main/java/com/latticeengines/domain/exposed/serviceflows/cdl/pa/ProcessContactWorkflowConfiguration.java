@@ -52,6 +52,7 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            rebuildContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
@@ -63,13 +64,6 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     rebuildContactWorkflowBuilder.rebuildEntities(entities);
                 }
             }
-            return this;
-        }
-
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            updateContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            rebuildContactWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
             return this;
         }
 

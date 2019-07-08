@@ -59,8 +59,8 @@ angular.module('lp.import.entry', [
         vm.displayType = $stateParams.type ? $stateParams.type : ImportWizardStore.getDisplayType();
         ImportWizardStore.setDisplayType(vm.displayType);        
 
-        // ImportWizardStore.clear();
-        ImportWizardStore.setThirdpartyidFields([], []); // we don't clear all the stores but we should clear thirdparty ids
+        ImportWizardStore.clear();
+        //ImportWizardStore.setThirdpartyidFields([], []); // we don't clear all the stores but we should clear thirdparty ids
 
         if ($stateParams.data){
             ImportWizardStore.setPostBody($stateParams.data);
@@ -183,26 +183,21 @@ angular.module('lp.import.entry', [
             var fileName = ImportWizardStore.getCsvFileName(),
                 importOnly = true,
                 autoImportData = ImportWizardStore.getAutoImport(),
-                postBody = $stateParams.data;
+                postBody = ImportWizardStore.getTemplateData();
 
             console.log(fileName, importOnly, autoImportData, postBody);
-
-            // Import Only
-            // file_1556901861309.csv 
-            // true 
-            // true 
-            // Exist: true
-            // FeedType: "HierarchySchema"
-            // ImportStatus: "Active"
-            // LastEditedDate: 1556825524000
-            // Object: "Product Hierarchy"
-            // Path: "latticeengines-qa-customers/dropfolder/k9adsbgl/Templates/HierarchySchema/"
-            // SystemName: ""
-            // TemplateName: "k"
-
             ImportWizardService.templateDataIngestion(fileName, importOnly, autoImportData, postBody).then(function(){
                 $state.go('home.importtemplates');
             });
+        }
+    }
+
+    vm.goBack = () => {
+        var flags = FeatureFlagService.Flags();
+        if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+            $state.go('home.multipletemplates');
+        }else{
+            $state.go('home.importtemplates');
         }
     }
 

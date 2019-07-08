@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -13,6 +14,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
@@ -30,6 +32,12 @@ public class CachedDunsGuideValidateMicroEngineActor extends BaseDunsGuideValida
     @PostConstruct
     public void postConstruct() {
         log.info("Started actor: " + self());
+    }
+
+    @Override
+    protected void recordActorAndTuple(MatchTraveler traveler) {
+        traveler.addEntityLdcMatchTypeToTupleList(
+                Pair.of(EntityMatchType.LDC_CACHED_DUNS_GUIDE_VALIDATE, traveler.getMatchKeyTuple()));
     }
 
     @Override

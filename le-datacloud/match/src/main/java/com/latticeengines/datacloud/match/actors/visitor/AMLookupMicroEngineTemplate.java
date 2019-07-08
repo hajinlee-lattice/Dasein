@@ -1,9 +1,14 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
+import java.util.Collections;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineTemplate<DynamoLookupActor> {
 
@@ -31,6 +36,10 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
                     "Found a precious LatticeAccountId=" + traveler.getLatticeAccountId() + " at "
                             + getClass().getSimpleName()
                             + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
+
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(traveler.getLatticeAccountId()))));
             if (lookupEntry != null) {
                 String logMessage = "The cacheId was " + lookupEntry.getId() + ".";
                 if (lookupEntry.isPatched()) {
@@ -39,6 +48,9 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
                 traveler.debug(logMessage);
             }
         } else {
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             traveler.debug("Did not get any luck at " + getClass().getSimpleName() + " with "
                     + usedKeys(traveler.getMatchKeyTuple()));
         }

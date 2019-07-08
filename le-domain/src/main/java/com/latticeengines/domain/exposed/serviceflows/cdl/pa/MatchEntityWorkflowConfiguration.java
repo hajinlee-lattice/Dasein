@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfigu
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 
 public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -14,12 +15,14 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
 
         private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
         private ProcessContactStepConfiguration processContactStepConfiguration = new ProcessContactStepConfiguration();
+        private ProcessTransactionStepConfiguration processTxnStepConfiguration = new ProcessTransactionStepConfiguration();
         private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
             processContactStepConfiguration.setCustomerSpace(customerSpace);
+            processTxnStepConfiguration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
@@ -28,6 +31,7 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             processAccountStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processContactStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processTxnStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -40,13 +44,8 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            processTxnStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
-            return this;
-        }
-
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processAccountStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
             return this;
         }
 
@@ -55,6 +54,7 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
                     configuration.getClass().getSimpleName());
             configuration.add(processAccountStepConfiguration);
             configuration.add(processContactStepConfiguration);
+            configuration.add(processTxnStepConfiguration);
             configuration.add(processStepConfiguration);
             return configuration;
         }

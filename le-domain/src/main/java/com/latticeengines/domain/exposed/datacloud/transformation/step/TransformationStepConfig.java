@@ -26,8 +26,22 @@ public class TransformationStepConfig {
     @JsonProperty("BaseSources")
     private List<String> baseSources;
 
+    // SourceName -> SourceTable: If a source is a TableSource, add to this map
+    // Generic source location:
+    // /Pods/{{POD_ID}}/Services/PropData/Sources/{{SOURCE_NAME}}
+    // Table source location:
+    // /Pods/{{POD_ID}}/Contracts/{{TENANT_ID}}/Tenants/{{TENANT_ID}}/Spaces/Production/Data/Tables/{{TABLE_NAME}}
     @JsonProperty("BaseTables")
     private Map<String, SourceTable> baseTables;
+
+    // SourceName -> SourceIngestion: If a source is a IngestionSource, add to
+    // this map
+    // Generic source location:
+    // /Pods/{{POD_ID}}/Services/PropData/Sources/{{SOURCE_NAME}}
+    // Ingestion source location:
+    // /Pods/{{POD_ID}}/Services/PropData/Ingestion/{{SOURCE_NAME}}
+    @JsonProperty("BaseIngestions")
+    private Map<String, SourceIngestion> baseIngestions;
 
     @JsonProperty("BaseVersions")
     private List<String> baseVersions;
@@ -171,5 +185,13 @@ public class TransformationStepConfig {
 
     public void setNoInput(boolean noInput) {
         this.noInput = noInput;
+    }
+
+    public Map<String, SourceIngestion> getBaseIngestions() {
+        return baseIngestions;
+    }
+
+    public void setBaseIngestions(Map<String, SourceIngestion> baseIngestions) {
+        this.baseIngestions = baseIngestions;
     }
 }

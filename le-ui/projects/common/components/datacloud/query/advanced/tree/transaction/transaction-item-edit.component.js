@@ -16,7 +16,7 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, moment, QueryTreeTransactionStore, QueryTreeService) {
+            controller: function ($scope, $timeout, moment, QueryTreeTransactionStore, QueryTreeService) {
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
@@ -119,23 +119,23 @@ angular
                     vm.timeCmp = tmpTimeCmp !== '' ? tmpTimeCmp : 'Month';
                 }
 
-                function setInitialValueNumericalPeriod(){
-                    if(vm.showPeriodFrom() && vm.showPeriodTo()){
+                function setInitialValueNumericalPeriod() {
+                    if (vm.showPeriodFrom() && vm.showPeriodTo()) {
                         vm.periodNumericalConf.from.value = 1;
                         vm.periodNumericalConf.to.value = 2;
                         QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.value, vm.periodNumericalConf.from.position, 'Time');
                         QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.value, vm.periodNumericalConf.to.position, 'Time');
-                    }else if(vm.showPeriodFrom() && !vm.showPeriodTo()){
+                    } else if (vm.showPeriodFrom() && !vm.showPeriodTo()) {
                         vm.periodNumericalConf.from.value = 1;
                         vm.periodNumericalConf.to.value = undefined;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
                         QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.value, vm.periodNumericalConf.from.position, 'Time');
-                    }else if(!vm.showPeriodFrom() && vm.showPeriodTo()){
+                    } else if (!vm.showPeriodFrom() && vm.showPeriodTo()) {
                         vm.periodNumericalConf.from.value = undefined;
                         vm.periodNumericalConf.to.value = 1;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
                         QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.value, vm.periodNumericalConf.to.position, 'Time');
-                    }else{
+                    } else {
                         vm.periodNumericalConf.from.value = undefined;
                         vm.periodNumericalConf.to.value = undefined;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
@@ -208,18 +208,18 @@ angular
                     initTimePeriod();
                 }
 
-                vm.showSubTypeSelection = function(subType){
-                    if($scope.booleanchanged === true){
+                vm.showSubTypeSelection = function (subType) {
+                    if ($scope.booleanchanged === true) {
                         QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, 'Qty');
                         QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, 'Amt');
                         $scope.booleanchanged = false;
                     }
-                    switch(subType){
+                    switch (subType) {
                         case 'Amt':
                         case 'Qty': {
-                            if($scope.purchased == 'Yes'){
+                            if ($scope.purchased == 'Yes') {
                                 return true;
-                            }else{
+                            } else {
                                 return false;
                             }
                         }
@@ -229,23 +229,23 @@ angular
                 }
 
                 vm.getQtyConfigString = function () {
-                    var ret = JSON.stringify(vm.qtyConf);
+                    var ret = vm.qtyConf;
                     return ret;
                 }
 
                 vm.getAmtConfigString = function () {
-                    var ret = JSON.stringify(vm.amtConf);
+                    var ret = vm.amtConf;
                     return ret;
                 }
                 vm.getPeriodNumericalConfString = function () {
-                    var ret = JSON.stringify(vm.periodNumericalConf);
+                    var ret = vm.periodNumericalConf;
                     return ret;
                 }
                 vm.getPeriodTimeConfString = function () {
                     initDateRange();
                     vm.periodTimeConf.from.visible = vm.showTimeFrom();
                     vm.periodTimeConf.to.visible = vm.showTimeTo();
-                    var ret = JSON.stringify(vm.periodTimeConf);
+                    var ret = vm.periodTimeConf;
                     return ret;
                 }
 
@@ -277,7 +277,7 @@ angular
                             if (vm.showTimeFrameDate()) {
                                 vm.timeframePeriod = 'Date';
                                 vm.changeTimeFramePeriod();
-                            }else{
+                            } else {
                                 vm.timeframePeriod = vm.periodList[0].name;
                                 vm.changeTimeFramePeriod();
                             }
@@ -316,10 +316,10 @@ angular
                     return valid;
                 }
 
-                vm.getErrorMsg = function(){
-                    if(vm.showPeriodFrom() && vm.showPeriodTo()){
+                vm.getErrorMsg = function () {
+                    if (vm.showPeriodFrom() && vm.showPeriodTo()) {
                         return 'Enter a valid range';
-                    }else {
+                    } else {
                         return 'Enter a valid number';
                     }
                 }
@@ -383,8 +383,8 @@ angular
                         case 'BETWEEN_DATE':
                         case 'BEFORE':
                         case 'AFTER':
-                        case 'WITHIN': 
-                        case 'PRIOR_ONLY':{
+                        case 'WITHIN':
+                        case 'PRIOR_ONLY': {
                             return false;
                         }
                         default:
@@ -394,8 +394,8 @@ angular
                 vm.showPeriodTo = function () {
                     switch (vm.timeCmp) {
                         case 'BETWEEN':
-                        case 'WITHIN': 
-                        case 'PRIOR_ONLY':{
+                        case 'WITHIN':
+                        case 'PRIOR_ONLY': {
                             return true;
                         }
                         default:

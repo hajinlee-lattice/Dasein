@@ -34,9 +34,10 @@ const GraphQLParser = {
         }
     },
     getSolutionInstance(data){
-        if (data.viewer.solutionInstances && data.viewer.solutionInstances.edges[0] && data.viewer.solutionInstances.edges[0].node) {
+        if (data.viewer.solutionInstances && data.viewer.solutionInstances.edges[0] && data.viewer.solutionInstances.edges[0].node && data.viewer.authentications && data.viewer.authentications.edges) {
             var solutionInstance = data.viewer.solutionInstances.edges[0].node;
-            return solutionInstance;
+            var authentications = data.viewer.authentications.edges;
+            return {solutionInstance: solutionInstance, authentications: authentications};
         }
     },
     getUpdateSolutionInstanceInfo(data) {

@@ -147,4 +147,9 @@ public class TenantServiceImpl implements TenantService {
         return tenantEntityMgr.findByTenantName(tenantName);
     }
 
+    @Override
+    public void setNotificationStateByTenantId(String tenantId, String notificationLevel) {
+        tenantEntityMgr.setNotificationStateByTenantId(tenantId, notificationLevel);
+    }
+
 }

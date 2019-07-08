@@ -8,7 +8,7 @@ public class ScoreAggregateFlowConfiguration extends BaseCDLDataFlowStepConfigur
 
     public ScoreAggregateFlowConfiguration() {
         setBeanName("scoreAggregate");
-        setTargetTableName(NamingUtils.timestamp("ScoreAggregateFlow"));
+        setTargetTableName(NamingUtils.timestampWithRandom("ScoreAggregateFlow"));
     }
 
     public Boolean getExpectedValue() {

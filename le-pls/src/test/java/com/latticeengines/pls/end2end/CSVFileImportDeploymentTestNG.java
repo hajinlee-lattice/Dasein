@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -51,6 +52,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -119,8 +122,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
     }
 
     @Test(groups = "deployment")
@@ -316,8 +319,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_CONTACT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
+        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {
@@ -442,6 +445,16 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
             exp = e;
         }
         Assert.assertNotNull(exp);
+    }
+
+    @Test(groups = "deployment")
+    public void verifyRequiredFieldMissingV2() {
+        List<FieldValidation> validations = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
+        Assert.assertNotNull(validations);
+        List<FieldValidation> errorValidations = validations.stream()
+                .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
+                .collect(Collectors.toList());
+        Assert.assertNotNull(errorValidations);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

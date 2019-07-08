@@ -23,12 +23,12 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -201,46 +201,33 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             throw new UnsupportedOperationException(
                     "Do not know how to extract versioned table for " + CollectedSource.class);
         }
+        if (source instanceof TableSource) {
+            return ((TableSource) source).getTable();
+        }
+        String path = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
         if (source instanceof HasSqlPresence) {
-            String path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
             return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         } else {
-            String path = null;
-            if (source instanceof TableSource) {
-                return ((TableSource) source).getTable();
-            } else if (source instanceof TransformedToAvroSource || source instanceof IngestedRawSource) {
-                path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
-            } else {
-                path = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString();
-            }
             return MetaDataTableUtils.createTable(yarnConfiguration, source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         }
-
     }
 
     @Override
     public Table getTableAtVersions(Source source, List<String> versions) {
-        if (source instanceof CollectedSource) {
+        if (source instanceof CollectedSource || source instanceof TableSource) {
             throw new UnsupportedOperationException(
-                    "Do not know how to extract versioned table for " + CollectedSource.class);
+                    "Do not know how to extract versioned table for " + CollectedSource.class + " or "
+                            + TableSource.class);
         }
-        List<String> paths = new ArrayList<String>();
-        for (String version : versions) {
-            if (source instanceof TransformedToAvroSource) {
-                log.info(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-                paths.add(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-            } else {
-                log.info(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
-                        + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-                paths.add(hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), version).toString()
-                        + HDFS_PATH_SEPARATOR
-                        + WILD_CARD + AVRO_FILE_EXTENSION);
-            }
+        List<String> paths = new ArrayList<>();
+        if (CollectionUtils.isEmpty(versions)) {
+            paths.add(hdfsPathBuilder.constructTransformationSourceDir(source, null).toString());
+        } else {
+            versions.forEach(version -> {
+                paths.add(hdfsPathBuilder.constructTransformationSourceDir(source, version).toString());
+            });
         }
         if (source instanceof HasSqlPresence) {
             return MetaDataTableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
@@ -281,7 +268,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             Schema.Parser parser = new Schema.Parser();
             try {
                 InputStream is = HdfsUtils.getInputStream(yarnConfiguration, path);
-                return parser.parse(is);
+                Schema parsed = parser.parse(is);
+                log.info("Parsed avsc schema in " + path);
+                return parsed;
             } catch (Exception e) {
                 log.error("Failed to extract schema from avsc file " + path, e);
                 return null;
@@ -307,13 +296,28 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         CustomerSpace customerSpace = tableSource.getCustomerSpace();
         Table table;
         String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
+        String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
         if (expandBucketed) {
-            String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
             table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avroDir, avscPath,
                     tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
         } else {
             table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
                     tableSource.getLastModifiedKey());
+            try {
+                boolean avscExists = HdfsUtils.fileExists(yarnConfiguration, avscPath);
+                if (avscExists) {
+                    List<Extract> extracts = table.getExtracts();
+                    InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
+                    Schema schema = new Schema.Parser().parse(is);
+                    Table table2 = MetadataConverter.getTable(schema, extracts, tableSource.getSinglePrimaryKey(), //
+                            tableSource.getLastModifiedKey(), false);
+                    table.setAttributes(table2.getAttributes());
+                    log.info("Overwrite table schema by provided avsc at " + avscPath);
+                }
+            } catch (IOException e) {
+                log.warn("Failed to overwrite table schema by provided avsc.");
+            }
+
         }
         table.setName(tableName);
         if (count != null) {

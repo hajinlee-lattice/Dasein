@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -36,7 +35,7 @@ import com.latticeengines.spark.exposed.job.common.CopyJob;
 @Component(FilterAccountFeatureDiff.BEAN_NAME)
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
+public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(FilterAccountFeatureDiff.class);
 
@@ -47,9 +46,6 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Value("${common.le.environment}")
-    private String leEnv;
 
     private Table activeFeaturesTable;
 
@@ -73,7 +69,7 @@ public class FilterAccountFeatureDiff extends RunSparkJob<ProcessAccountStepConf
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String filteredTableName = NamingUtils.timestamp("FilterAccountFeatures");
+        String filteredTableName = NamingUtils.timestamp("AccountFeaturesDiff");
         Table filteredTable = toTable(filteredTableName, InterfaceName.AccountId.name(), result.getTargets().get(0));
 
         Map<String, Attribute> attributeMap = new HashMap<>();

@@ -33,6 +33,8 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ParquetUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -59,7 +61,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     private EMRCacheService emrCacheService;
 
     @Inject
-    private Configuration yarnConfiguration;
+    protected Configuration yarnConfiguration;
 
     @Inject
     private SparkJobService sparkJobService;
@@ -98,12 +100,14 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     // override this to enforce ordering between inputs
-    protected List<String> getInputOrder() { return null; }
+    protected List<String> getInputOrder() {
+        return null;
+    }
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupLivyEnvironment();
-//        reuseLivyEnvironment(7);
+        // reuseLivyEnvironment(7);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
@@ -112,13 +116,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected void setupLivyEnvironment() {
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
-        session = sessionService.startSession(livyHost, this.getClass().getSimpleName(), //
+        session = sessionService.startSession(this.getClass().getSimpleName(), //
                 Collections.emptyMap(), Collections.emptyMap());
     }
 
@@ -156,7 +154,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
                 resources = resolver.getResources(dataRoot + "/*/*.avro");
                 log.info("Resolved resources for " + dataRoot);
             } catch (Exception e) {
-                log.warn("Cannot resolve resource for " + dataRoot);
+                log.error("Cannot resolve resource for " + dataRoot, e);
             }
 
             Map<String, String> dataSetPaths = new HashMap<>();
@@ -198,7 +196,6 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
             });
         }
     }
-
 
     protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
@@ -275,7 +272,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         String path = target.getPath();
         try {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
-            return AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+            if (DataUnit.DataFormat.PARQUET.equals(target.getDataFormat())) {
+                log.info("Read parquet files in " + path + " as avro records.");
+                return ParquetUtils.iteratorParquetFiles(yarnConfiguration, PathUtils.toParquetGlob(path));
+            } else {
+                return AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(path));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -20,11 +20,17 @@ public class DebugGatewayWatcherUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
+        DebugGatewayWatcher.initialize();
     }
 
     @AfterClass(groups = "unit")
     public void tearDown() throws Exception {
         CamilleTestEnvironment.stop();
+    }
+
+    @Test(groups = "unit", enabled = false)
+    public void testSimpleCheck() {
+        simpleCheck("T0", "PT5S", 5000).run();
     }
 
     @Test(groups = "unit", enabled = false)

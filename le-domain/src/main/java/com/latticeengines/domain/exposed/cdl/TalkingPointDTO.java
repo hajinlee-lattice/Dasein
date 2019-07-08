@@ -16,6 +16,9 @@ public class TalkingPointDTO {
     @JsonProperty("playname")
     private String playName;
 
+    @JsonProperty("playDisplayName")
+    private String playDisplayName;
+
     @JsonProperty("title")
     private String title;
 
@@ -56,6 +59,11 @@ public class TalkingPointDTO {
         updated = tp.getUpdated();
     }
 
+    public TalkingPointDTO(PublishedTalkingPoint tp, String playDisplayName) {
+        this(tp);
+        this.playDisplayName = playDisplayName;
+    }
+
     public TalkingPoint convertToTalkingPoint(Play play) {
         TalkingPoint tp = new TalkingPoint();
         tp.setPid(getPid());
@@ -91,6 +99,14 @@ public class TalkingPointDTO {
 
     public void setPlayName(String playName) {
         this.playName = playName;
+    }
+
+    public String getPlayDisplayName() {
+        return playDisplayName;
+    }
+
+    public void setPlayDisplayName(String playDisplayName) {
+        this.playDisplayName = playDisplayName;
     }
 
     public String getTitle() {

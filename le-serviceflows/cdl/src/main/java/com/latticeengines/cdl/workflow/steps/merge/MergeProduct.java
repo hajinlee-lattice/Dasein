@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -94,13 +95,14 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         }
 
         productCounts = countProducts(productList);
-        if (configuration.getDataQuotaLimit(ProductType.Analytic) < productCounts.get("nProductAnalytics"))
+        DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+        if ( dataLimit.getProductBundleDataQuotaLimit() < productCounts.get("nProductAnalytics"))
             throw new IllegalStateException(
-                    "the Analytics Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Analytic)
+                    "the Analytics Product data quota limit is " + dataLimit.getProductBundleDataQuotaLimit()
                             + ", The data you uploaded has exceeded the limit.");
-        if (configuration.getDataQuotaLimit(ProductType.Spending) < productCounts.get("nProductSpendings"))
+        if (dataLimit.getProductSkuDataQuotaLimit() < productCounts.get("nProductSpendings"))
             throw new IllegalStateException(
-                    "the Spending Product data quota limit is " + configuration.getDataQuotaLimit(ProductType.Spending)
+                    "the Spending Product data quota limit is " + dataLimit.getProductSkuDataQuotaLimit()
                             + ", The data you uploaded has exceeded the limit.");
         updateMergeReport(inputProducts.size(), nInvalids, productList.size(), productCounts);
         updateEntityValueMapInContext(FINAL_RECORDS, (Integer) mergeReport.get("Merged_NumProductAnalytics"),

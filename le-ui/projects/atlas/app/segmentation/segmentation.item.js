@@ -79,8 +79,6 @@ export default class LeSegmentItem extends Component {
 		}
 	}
 
-
-
 	renderTile(TileComponent, content, editform) {
 		return (
 			<TileComponent>
@@ -95,36 +93,43 @@ export default class LeSegmentItem extends Component {
 				<h2 title={item.display_name}>
 					{item.display_name}
 				</h2>
-				<div class="edit">
-					<button type="button"
-						onClick={this.toggleCustomMenu}
-						className={this.state.openCustomMenu ? 'open' : ''}>
-						<span
-							className={"fa fa-ellipsis-v" + (this.state.openCustomMenu ? ' fa-rotate-180' : '')}>
-						</span>
-					</button>
-					{this.state.openCustomMenu ? this.renderCustomMenu(item) : ''}
-				</div>
+				{
+					console.log('renderHeader', this.props.view, this.state.openCustomMenu, item, this)
+				}{
+					this.props.view == 'grid' ? this.renderCustomMenu(item) : ''
+				}
 			</div>
 		);
 	}
 
 	renderCustomMenu(item) {
+		console.log('renderCustomMenu', item, this.props.view)
 		return (
-			<ul class="model-menu">
-				<li onClick={this.toggleEditMode}>
-					<a href="javascript:void(0)">Edit</a>
-					<i class="fa fa-edit"></i>
-				</li>
-				<li onClick={this.clickDuplicateSegment}>
-					<a href="javascript:void(0)">Duplicate</a>
-					<i class="fa fa-copy"></i>
-				</li>
-				<li onClick={this.clickDeleteSegment}>
-					<a href="javascript:void(0)">Delete</a>
-					<i class="fa fa-trash"></i>
-				</li>
-			</ul>
+			<div class="edit">
+				<button type="button"
+					onClick={this.toggleCustomMenu}
+					className={this.state.openCustomMenu ? 'open' : ''}>
+					<span
+						className={"fa fa-ellipsis-v" + (this.state.openCustomMenu ? ' fa-rotate-180' : '')}>
+					</span>
+				</button>
+				{() => {
+					return (this.state.openCustomMenu ? (<ul class="model-menu">
+						<li onClick={this.toggleEditMode}>
+							<a href="javascript:void(0)">Edit</a>
+							<i class="fa fa-edit"></i>
+						</li>
+						<li onClick={this.clickDuplicateSegment}>
+							<a href="javascript:void(0)">Duplicate</a>
+							<i class="fa fa-copy"></i>
+						</li>
+						<li onClick={this.clickDeleteSegment}>
+							<a href="javascript:void(0)">Delete</a>
+							<i class="fa fa-trash"></i>
+						</li>
+					</ul>) : '')
+				}}
+			</div>
 		);
 	}
 
@@ -203,6 +208,7 @@ export default class LeSegmentItem extends Component {
 						{item.contacts || 0}
 					</div>
 				</div>
+				{this.props.view == 'list' ? this.renderCustomMenu(item) : ''}
 			</div>
 		);
 	}

@@ -143,7 +143,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             if (resource.getURI().toString().endsWith(".avro")) {
                 InputStream is = resource.getInputStream();
                 String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
-                        .append(String.format("part-%04d.avro", fileIdx)).toString();
+                        .append(String.format("part-%04d.avro", fileIdx++)).toString();
                 log.info("Upload " + resource.getURI().toString() + " to " + targetPath);
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, targetPath);
             }
@@ -168,12 +168,29 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         }
     }
 
+    protected void uploadBaseSourceData(Source baseSource, String baseSourceVersion,
+            List<Pair<String, Class<?>>> schema,
+            Object[][] data) {
+        com.latticeengines.domain.exposed.camille.Path targetPath = hdfsPathBuilder
+                .constructTransformationSourceDir(baseSource, baseSourceVersion);
+        String targetDir = targetPath.toString();
+        String successPath = targetPath.append(HdfsPathBuilder.SUCCESS_FILE).toString();
+        uploadToHdfs(targetDir, successPath, schema, data);
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
     protected void uploadBaseSourceData(String baseSource, String baseSourceVersion,
                                         List<Pair<String, Class<?>>> schema, Object[][] data) {
         String targetDir = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
                 .toString();
         String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
                 .append("_SUCCESS").toString();
+        uploadToHdfs(targetDir, successPath, schema, data);
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
+    private void uploadToHdfs(String targetDir, String successPath, List<Pair<String, Class<?>>> schema,
+            Object[][] data) {
         try {
             AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, targetDir, "part-00000.avro");
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
@@ -181,7 +198,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
     protected void extractSchema(Source source, String version, String avroDir) throws Exception {

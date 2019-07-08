@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class MatchKeyUtils {
@@ -333,5 +334,49 @@ public class MatchKeyUtils {
 
     public static boolean isEntityReservedField(String field) {
         return ENTITY_RESERVED_FIELDS.contains(field);
+    }
+
+    // Map from EntityLookupEntry.Type to EntityMatchType.
+    public static EntityMatchType getEntityMatchType(EntityLookupEntry.Type lookupType, MatchKeyTuple tuple) {
+        switch (lookupType) {
+            // Account Match Cases
+            case DOMAIN_COUNTRY:
+                return EntityMatchType.DOMAIN_COUNTRY;
+            case NAME_COUNTRY:
+                return EntityMatchType.NAME_COUNTRY;
+            case DUNS:
+                return EntityMatchType.DUNS;
+
+            // Contact Match Cases
+            case EMAIL:
+                return EntityMatchType.EMAIL;
+            case ACCT_EMAIL:
+                return EntityMatchType.EMAIL_ACCOUNTID;
+            case NAME_PHONE:
+                return EntityMatchType.NAME_PHONE;
+            case ACCT_NAME_PHONE:
+                return EntityMatchType.NAME_PHONE_ACCOUNTID;
+
+            // Joint Cases
+            case EXTERNAL_SYSTEM:
+                if (tuple.getSystemIds().size() > 1) {
+                    log.error("Should be only one system ID per MatchKeyTyple in LookupEntry");
+                    break;
+                } else if (tuple.getSystemIds().size() < 1) {
+                    log.error("Should be one system ID per MatchKeyTyple in LookupEntry");
+                    break;
+                }
+                if (InterfaceName.CustomerAccountId.name().equals(tuple.getSystemIds().get(0).getKey())) {
+                    return EntityMatchType.ACCOUNTID;
+                } else if (InterfaceName.CustomerContactId.name().equals(tuple.getSystemIds().get(0).getKey())) {
+                    return EntityMatchType.CONTACTID;
+                } else {
+                    return EntityMatchType.SYSTEMID;
+                }
+
+            default:
+                log.error("Unsupported EntityLookupEntry.Type: " + lookupType.name());
+        }
+        return null;
     }
 }

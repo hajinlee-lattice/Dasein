@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.export;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -20,35 +21,34 @@ import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportModelFromS3 extends BaseImportExportS3<ImportExportS3StepConfiguration> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportModelFromS3.class);
+
+    private Version version;
 
     protected void buildRequests(List<ImportExportRequest> requests) {
         if (CustomEventModelingType.LPI.equals(getConfiguration().getCustomEventModelingType())) {
             return;
         }
-        List<Table> tables = new ArrayList<>();
-        getTables(tables);
-        tables.forEach(table -> {
-            addTableToRequestForImport(table, requests);
-        });
-
+        version = getConfiguration().getVersion();
+        List<Table> tables = getTables();
+        tables.forEach(table -> addTableToRequestForImport(table, requests));
     }
 
-    private void getTables(List<Table> tables) {
-        Version version = getConfiguration().getVersion();
-        Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                TableRoleInCollection.ConsolidatedAccount, version);
-        if (accountTable != null) {
-            tables.add(accountTable);
+    private List<Table> getTables() {
+        List<Table> tables = new ArrayList<>();
+        for (TableRoleInCollection role: TableRoleInCollection.values()) {
+            addTableIfExists(tables, role);
         }
-        Table featureTable = dataCollectionProxy.getTable(customer, TableRoleInCollection.AccountFeatures, version);
-        if (featureTable != null) {
-            tables.add(featureTable);
-        }
-        Table apsTable = dataCollectionProxy.getTable(customer, TableRoleInCollection.AnalyticPurchaseState, version);
-        if (apsTable != null) {
-            tables.add(apsTable);
+        return tables;
+    }
+
+    private void addTableIfExists(List<Table> accumulator, TableRoleInCollection role) {
+        String tableName = dataCollectionProxy.getTableName(customer, role, version);
+        if (StringUtils.isNotBlank(tableName)) {
+            Table table = metadataProxy.getTableSummary(customer, tableName);
+            accumulator.add(table);
+        } else {
+            log.warn("Did not find a " + role + " table in version " + version);
         }
     }
 

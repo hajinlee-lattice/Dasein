@@ -220,7 +220,7 @@ public class BucketedScoreSummaryUtils {
                 double totalBucketExpectedRevenue = lowerBound.getLeftExpectedRevenue()
                         + lowerBound.getExpectedRevenue();
                 totalBucketExpectedRevenue -= upperBound.getLeftExpectedRevenue() + upperBound.getExpectedRevenue();
-                double averageBucketExpectedRevenue = totalBucketExpectedRevenue / totolLeads;
+                double averageBucketExpectedRevenue = totolLeads == 0 ? 0 : totalBucketExpectedRevenue / totolLeads;
                 bucketMetadataList.get(i).setTotalExpectedRevenue(totalBucketExpectedRevenue);
                 bucketMetadataList.get(i).setAverageExpectedRevenue(averageBucketExpectedRevenue);
                 if (overallAverageExpectedRevenue > 0) {

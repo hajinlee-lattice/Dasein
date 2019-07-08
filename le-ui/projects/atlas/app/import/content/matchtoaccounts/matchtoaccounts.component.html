@@ -5,7 +5,7 @@
             <strong>Select your Account ID to match your contact records to exsiting accounts.</strong>
         </p>
     </div>
-    <form name="form">
+    <ng-form name="vm.form">
         <div class="id-option" ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
@@ -25,7 +25,20 @@
                    </select>
                 </div>
             </div>
+            <div class="system-options-item">
+                <div ng-if="vm.isMultipleTemplates()">
+                    <label>System Name</label>
+                    <select class="form-control" ng-model="vm.systemName" ng-change="vm.updateSystem($index)"> 
+                        <!-- <option value="">-- Select System --</option> -->
+                        <option
+                        ng-repeat="s in vm.systems"
+                        value="{{s.name}}"
+                        >{{s.display_name}}</option>
+                    </select>
+                </div>
+            </div>
         </div>
+        
         <div class="matching-fields" ng-if="vm.entityMatchEnabled">
             <p>
                 If a contact doesn't have an account ID, Atlas will use the following account information to match your contacts to the accounts. Please map as many fields as possible.
@@ -50,5 +63,5 @@
             </ul>
         </div>
 
-    </form>
+    </ng-form>
 </div>

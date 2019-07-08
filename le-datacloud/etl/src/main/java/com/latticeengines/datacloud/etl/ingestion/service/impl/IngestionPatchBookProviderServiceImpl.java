@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,28 +18,45 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.BatchUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.PatchBookConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchRequest;
+import com.latticeengines.domain.exposed.datacloud.match.patch.PatchValidationResponse;
+import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 
 @Component("ingestionPatchBookProviderService")
 public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServiceImpl {
 
     private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
+
+    @Value("${datacloud.patcher.ingest.batch.size.min}")
+    private int minBatchSize;
+
+    @Value("${datacloud.patcher.ingest.batch.size.max}")
+    private int maxBatchSize;
+
+    @Value("${datacloud.patcher.ingest.concurrent.batch.cnt.max}")
+    private int maxConcurrentBatchCnt;
 
     @Inject
     private PatchBookEntityMgr patchBookEntityMgr;
@@ -52,32 +71,127 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Inject
+    private PatchProxy patchProxy;
+
+    @Inject
     private IngestionVersionService ingestionVersionService;
 
 
-    // TODO:
-    // Support partition (in case PatchBook list is not fit into
-    // memory) / parallel ingestion
-    // Support more general way to support ingesting from sql table to hdfs/s3
-    // without sqoop
     @Override
     public void ingest(IngestionProgress progress) throws Exception {
         Ingestion ingestion = progress.getIngestion();
         PatchBookConfiguration patchConfig = (PatchBookConfiguration) ingestion.getProviderConfiguration();
         Date currentDate = new Date();
+        if (HdfsUtils.isDirectory(yarnConfiguration, progress.getDestination())) {
+            log.info(progress.getDestination() + " already exists. Delete first.");
+            HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
+        }
+        HdfsUtils.mkdir(yarnConfiguration, progress.getDestination());
 
-        List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFix(patchConfig.getBookType(),
+        long totalSize = patchBookEntityMgr.findCountByTypeAndHotFix(patchConfig.getBookType(),
                 PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-        List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
+        int batchCnt = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
+        log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize, batchCnt));
+        int[] batches = BatchUtils.divideBatches(totalSize, batchCnt);
 
-        long count = importToHdfs(activeBooks, progress.getDestination(), patchConfig);
+        List<Ingester> ingesters = initializeIngester(patchConfig, currentDate, progress, batches);
+        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("patchbook-ingest", maxConcurrentBatchCnt);
+        ThreadPoolUtils.runRunnablesInParallel(executors, ingesters, (int) TimeUnit.DAYS.toMinutes(1), 10);
+
         updateCurrentVersion(ingestion, progress.getVersion());
 
-        postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
-
-        progress = ingestionProgressService.updateProgress(progress).size(count).status(ProgressStatus.FINISHED)
+        progress = ingestionProgressService.updateProgress(progress).size(totalSize).status(ProgressStatus.FINISHED)
                 .commit(true);
         log.info("Ingestion finished. Progress: " + progress.toString());
+    }
+
+    private List<Ingester> initializeIngester(PatchBookConfiguration patchConfig, Date currentDate,
+            IngestionProgress progress, int[] batches) {
+        List<Ingester> ingesters = new ArrayList<>();
+        int offset = 0;
+        for (int i = 0; i < batches.length; i++) {
+            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i], offset);
+            offset += batches[i];
+            ingesters.add(ingester);
+        }
+        return ingesters;
+    }
+
+    private class Ingester implements Runnable {
+
+        private final PatchBookConfiguration patchConfig;
+        private final Date currentDate;
+        private final IngestionProgress progress;
+        private final int batchSeq;
+        private final int batchSize;
+        private final int offset;
+
+        Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
+                int batchSize, int offset) {
+            this.patchConfig = patchConfig;
+            this.currentDate = currentDate;
+            this.progress = progress;
+            this.batchSeq = batchSeq;
+            this.batchSize = batchSize;
+            this.offset = offset;
+        }
+
+        @Override
+        public void run() {
+            if (!patchConfig.isSkipValidation()) {
+                validate();
+            }
+            ingest();
+        }
+
+        private void validate() {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    String.format("Validated PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
+                log.info(String.format("Validating PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
+                PatchRequest patchRequest = new PatchRequest();
+                patchRequest.setMode(patchConfig.getPatchMode());
+                patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
+                patchRequest.setOffset(offset);
+                patchRequest.setLimit(batchSize);
+                patchRequest.setSortByfield(PatchBook.COLUMN_PID);
+
+                PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
+                        patchRequest);
+                if (!patchResponse.isSuccess()) {
+                    log.error(String.format("PatchBook validation failed. PatchRequest: %s. PatchResponse: %s",
+                            JsonUtils.serialize(patchRequest), JsonUtils.serialize(patchResponse)));
+                    throw new RuntimeException("PatchBook validation failed");
+                }
+            }
+        }
+
+        private void ingest() {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    String.format("Imported PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
+                log.info(String.format("Importing PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
+                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, batchSize,
+                        PatchBook.COLUMN_PID, patchConfig.getBookType(),
+                        PatchMode.HotFix.equals(patchConfig.getPatchMode()));
+                List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
+                String fileName = "part-" + batchSeq + ".avro";
+                try {
+                    long importSize = importToHdfs(activeBooks, progress.getDestination(), fileName, patchConfig);
+                    if (importSize != activeBooks.size()) {
+                        throw new RuntimeException(
+                                String.format("For batch %d: expected to import %d rows, but actually imported %d rows",
+                                        batchSeq, activeBooks.size(), importSize));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
+            }
+        }
+
     }
 
     private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate) {
@@ -144,25 +258,27 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         }
     }
 
-    private long importToHdfs(List<PatchBook> books, String dest, PatchBookConfiguration patchConfig) throws Exception {
+    private long importToHdfs(List<PatchBook> books, String destDir, String fileName,
+            PatchBookConfiguration patchConfig) throws Exception {
         if (CollectionUtils.isEmpty(books)) {
             throw new RuntimeException("Nothing to ingest for patch type " + patchConfig.getBookType() + " in mode "
                     + patchConfig.getPatchMode());
         }
-        if (HdfsUtils.isDirectory(yarnConfiguration, dest)) {
-            log.info(dest + " already exists. Delete first.");
-            HdfsUtils.rmdir(yarnConfiguration, dest);
-        }
         List<Pair<String, Class<?>>> schema = constructSchema();
         Object[][] data = prepareData(books);
-        String fileName = "part-00000.avro";
-        AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, dest, fileName);
-        String glob = new Path(dest, fileName).toString();
+        if (StringUtils.isBlank(fileName)) {
+            fileName = "part-00000.avro";
+        }
+        AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, destDir, fileName);
+        String glob = new Path(destDir, fileName).toString();
         return AvroUtils.count(yarnConfiguration, glob);
     }
 
     /**
      * Only ingest columns which are needed or for reference in transformer
+     * 
+     * For Domain, DUNS and Items, add PATCH_ prefix to avoid potential
+     * attribute name conflict in dataflow
      * 
      * @return
      */
@@ -170,14 +286,14 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(PatchBook.COLUMN_PID, Long.class));
         columns.add(Pair.of(PatchBook.COLUMN_TYPE, String.class));
-        columns.add(Pair.of(PatchBook.COLUMN_DOMAIN, String.class));
-        columns.add(Pair.of(PatchBook.COLUMN_DUNS, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_PATCH_DOMAIN, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_PATCH_DUNS, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_NAME, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_COUNTRY, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_STATE, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_CITY, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_ZIPCODE, String.class));
-        columns.add(Pair.of(PatchBook.COLUMN_PATCH_ITEMS, String.class));
+        columns.add(Pair.of(DataCloudConstants.ATTR_PATCH_ITEMS, String.class));
         columns.add(Pair.of(PatchBook.COLUMN_CLEANUP, Boolean.class));
         columns.add(Pair.of(PatchBook.COLUMN_HOTFIX, Boolean.class));
         columns.add(Pair.of(PatchBook.COLUMN_CREATEDATE, Long.class));
@@ -213,12 +329,14 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             // Following columns are only for reference so that we have some
             // history to track since we don't support generating logs for
             // ingestion jobs for now
-            objs[idx][12] = books.get(idx).getCreatedDate().getTime();
+            objs[idx][12] = books.get(idx).getCreatedDate() == null ? null : books.get(idx).getCreatedDate().getTime();
             objs[idx][13] = books.get(idx).getCreatedBy();
-            objs[idx][14] = books.get(idx).getLastModifiedDate().getTime();
+            objs[idx][14] = books.get(idx).getLastModifiedDate() == null ? null
+                    : books.get(idx).getLastModifiedDate().getTime();
             objs[idx][15] = books.get(idx).getLastModifiedBy();
-            objs[idx][16] = books.get(idx).getEffectiveSince().getTime();
-            objs[idx][17] = books.get(idx).getExpireAfter().getTime();
+            objs[idx][16] = books.get(idx).getEffectiveSince() == null ? null
+                    : books.get(idx).getEffectiveSince().getTime();
+            objs[idx][17] = books.get(idx).getExpireAfter() == null ? null : books.get(idx).getExpireAfter().getTime();
         });
         return objs;
     }

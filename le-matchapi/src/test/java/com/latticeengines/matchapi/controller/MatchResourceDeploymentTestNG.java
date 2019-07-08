@@ -14,12 +14,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
@@ -28,7 +28,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -59,7 +58,7 @@ import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-@Component
+// dpltc deploy -a matchapi,workflowapi
 public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final String avroDir = "/tmp/MatchResourceDeploymentTestNG";
@@ -121,8 +120,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         cleanupAvroDir(avroDir);
     }
 
-    // Test against DerivedColumnsCache
-    @Test(groups = "deployment", enabled = true)
+    // Test against retired V1.0 matcher -- DerivedColumnsCache
+    // Disable the test as SQL Server is shutdown
+    @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
@@ -155,7 +155,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (Object res : output.getResult().get(0).getOutput()) {
             String field = output.getOutputFields().get(idx++);
             if (!StringUtils.isEmpty(res)) {
-                System.out.print(field + " = " + res + ", ");
+                log.info(field + " = " + res + ", ");
             }
         }
     }
@@ -169,12 +169,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         input.setHomogeneous(false);
         input.setInputList(inputList);
 
-        ObjectMapper om = new ObjectMapper();
-        System.out.println(om.writeValueAsString(input));
+        log.info("Match input: " + JsonUtils.serialize(input));
 
         long startLookup = System.currentTimeMillis();
         BulkMatchOutput output = matchProxy.matchRealTime(input);
-        System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
+        log.info("Time taken to do dnb based AM lookup for " + size + " entries (with "
                 + (size > domains.size() ? domains.size() : size) + " unique domains) = "
                 + (System.currentTimeMillis() - startLookup) + " millis");
         Assert.assertNotNull(output);
@@ -204,15 +203,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         long startLookup = System.currentTimeMillis();
         MatchOutput output = matchProxy.matchRealTime(matchInput);
-        if (version.equals("1.0.0")) {
-            System.out.println("Time taken to do DerivedColumnsCache lookup for " + size + " entries (with "
-                    + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                    + (System.currentTimeMillis() - startLookup) + " millis");
-        } else {
-            System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
-                    + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                    + (System.currentTimeMillis() - startLookup) + " millis");
-        }
+        log.info("Time taken to do dnb based AM lookup for " + size + " entries (with "
+                + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                + (System.currentTimeMillis() - startLookup) + " millis");
         Assert.assertNotNull(output);
         Assert.assertNotNull(output.getResult());
         Assert.assertEquals(output.getResult().size(), size);
@@ -297,6 +290,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
+        String latestVersion = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
+        input.setDataCloudVersion(latestVersion);
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
 
@@ -387,6 +382,10 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
     public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+        // Skip default version testing as it's already covered in other test
+        if (version == null) {
+            return;
+        }
         HdfsPodContext.changeHdfsPodId(podId);
         String path = avroDir + "/" + version;
         cleanupAvroDir(path);
@@ -400,10 +399,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 version, appId.toString(), expectedTotal);
 
         // mimic one block failed
-        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(5000L);
-            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        }
+        command = waitForMatchBlockCreated(command, appId);
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
         // Kill one block and expect it will be retried automatically
         jobService.killJob(ApplicationId.fromString(blockAppId));
@@ -431,10 +427,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         log.info("Test failing multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
                 appId.toString());
         Set<String> killedAppIds = new HashSet<>();
-        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-            Thread.sleep(5000L);
-            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-        }
+        command = waitForMatchBlockCreated(command, appId);
         while (killedAppIds.size() < 2) {
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
             blockAppId = command.getMatchBlocks().get(0).getApplicationId();
@@ -481,15 +474,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             String currApprVerForMajVer = dataCloudVersionService
                     .latestApprovedForMajorVersion(majVer).getVersion();
             // returning current datacloud version
-            // TODO: 2.0.17 introduced new schema in AccountMasterLookup table,
-            // which is not compatible with 2.0.16 versions. So removed previous
-            // version from test. Add previous version back after we release
-            // 2.0.18
             prevAndCurrentApprovedVer
                     .addAll(dataCloudVersionService.priorVersions(currApprVerForMajVer, 2));
         }
         Object[][] objs = new Object[prevAndCurrentApprovedVer.size() + 1][1];
-        objs[0] = new Object[] { "1.0.0" };
+        objs[0][0] = null;
         int i = 1;
         for (String version : prevAndCurrentApprovedVer) {
             objs[i++] = new Object[] { version };
@@ -511,7 +500,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             }
         }
         Object[][] objs = new Object[latestVersions.size() + 1][1];
-        objs[0] = new Object[] { "1.0.0" };
+        objs[0][0] = null; // Test default datacloud version
         int i = 1;
         for (String latestVersion : latestVersions) {
             objs[i++] = new Object[] { latestVersion };
@@ -536,6 +525,26 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         matchInput.setInputBuffer(inputBuffer);
         matchInput.setDataCloudVersion(dataCloudVersion);
         return matchInput;
+    }
+
+    /*
+     * Wait for match block to be created and return the updated match command. Fail
+     * if application terminates before block is created.
+     */
+    private MatchCommand waitForMatchBlockCreated(MatchCommand command, ApplicationId appId)
+            throws InterruptedException {
+        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
+            Thread.sleep(5000L);
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+
+            ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
+            Assert.assertNotNull(report, String.format("ApplicationReport for application ID %s should exist", appId));
+            boolean jobTerminated = YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState());
+            Assert.assertFalse(jobTerminated,
+                    String.format("Application %s should not be terminated already. State=%s, FinalStatus=%s", appId,
+                            report.getYarnApplicationState(), report.getFinalApplicationStatus()));
+        }
+        return command;
     }
 
     private void uploadTestAVro(String avroDir, String fileName) {

@@ -24,7 +24,7 @@ public class FirehoseServiceImpl implements FirehoseService {
 
     private static final Logger log = LoggerFactory.getLogger(FirehoseServiceImpl.class);
 
-    private AmazonKinesisFirehose firehoseClient = null;
+    private AmazonKinesisFirehose firehoseClient;
 
     @Value("${aws.etl.firehose.batch.size:200}")
     private int firehoseBatchSize;
@@ -48,10 +48,9 @@ public class FirehoseServiceImpl implements FirehoseService {
             Record record = createRecord(data);
             putRecordRequest.setRecord(record);
             firehoseClient.putRecord(putRecordRequest);
-
         } catch (Throwable t) {
-            log.warn("Can not send message to Aws Firehose delivery stream name=" + deliveryStreamName + " error="
-                    + t.getMessage());
+            log.warn("Cannot send message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
+                    + t.getClass().getName() + ": " + t.getMessage());
         }
     }
 
@@ -73,8 +72,8 @@ public class FirehoseServiceImpl implements FirehoseService {
             }
 
         } catch (Throwable t) {
-            log.warn("Can not sendBatch message to Aws Firehose delivery stream name=" + deliveryStreamName + " error="
-                    + t.getMessage());
+            log.warn("Cannot sendBatch message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
+                    + t.getClass().getName() + ": " + t.getMessage());
         }
     }
 

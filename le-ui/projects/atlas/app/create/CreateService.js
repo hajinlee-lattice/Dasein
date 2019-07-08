@@ -196,7 +196,7 @@ angular
                     deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
                     excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
                     excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true,
-                    transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'NONE',
+                    transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'none',
                 }
             })
                 .success(function (data, status, headers, config) {
@@ -272,7 +272,7 @@ angular
                 deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
                 excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
                 excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true,
-                transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'NONE',
+                transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'none',
                 displayName: MetaData.displayName
             };
 

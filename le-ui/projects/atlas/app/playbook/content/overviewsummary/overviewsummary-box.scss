@@ -1,18 +1,35 @@
 @import "../../../../../common/widgets/layout/layout.scss";
 @import "../../../../../common/widgets/colors.scss";
-.le-summary-box {
-    // border: 5px solid green;
-    flex: 1;
-    background: rgba(28, 56, 75, 0.5);
-    padding: 0.8em;
-    justify-content: center;
-    .title {
-        font-size: 12px;
-        text-transform: uppercase;
-        opacity: .7;
+
+.overview-summary {
+    .le-summary-container {
+        .boxes-container {
+            justify-content: space-between;
+            flex-wrap: wrap;
+            flex: 1;
+            max-width: 1200px;
+        }
     }
-    .body {
-        font-size: 14px;
-        font-weight: bold;
+    .le-summary-box {
+        // border: 5px solid green;
+        flex: 1;
+        //background: rgba(28, 56, 75, 0.5);
+        background: rgba(0,0,0,0.55);
+        padding: 16px;
+        justify-content: normal;
+        .title {
+            font-size: 12px;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            opacity: .7;
+        }
+        .body {
+            font-size: 16px;
+            font-weight: bold;
+            width: 99.9%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     }
 }

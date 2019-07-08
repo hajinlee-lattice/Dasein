@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -60,7 +61,7 @@ public class TableResourceHelper {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.getTableAttributes(space, tableName, pageable);
     }
-    
+
     public ModelingMetadata getTableMetadata(String customerSpace, String tableName) {
         log.info(String.format("getTableMetadata(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
@@ -83,7 +84,8 @@ public class TableResourceHelper {
         log.info(String.format("updateTable(%s), with Attributes: %d", table.getName(), table.getAttributes().size()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         if (!tableName.equals(table.getName())) {
-            log.info(String.format("renameTable (Deprecated. Instead use renameTable) from (%s), to : (%s)", table.getName(), tableName));
+            log.info(String.format("renameTable (Deprecated. Instead use renameTable) from (%s), to : (%s)",
+                    table.getName(), tableName));
             mdService.renameTable(space, table.getName(), tableName);
             table.setName(tableName);
         } else {
@@ -91,7 +93,7 @@ public class TableResourceHelper {
         }
         return true;
     }
-    
+
     public Boolean renameTable(String customerSpace, //
             String tableName, //
             String newTableName) {
@@ -118,10 +120,10 @@ public class TableResourceHelper {
     }
 
     public Table cloneTable(String customerSpace, //
-            String tableName) {
+            String tableName, boolean ignoreExtracts) {
         log.info(String.format("cloneTable(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        return mdService.cloneTable(space, tableName);
+        return mdService.cloneTable(space, tableName, ignoreExtracts);
     }
 
     public Table copyTable(String customerSpace, //
@@ -178,9 +180,15 @@ public class TableResourceHelper {
     }
 
     public Boolean createTableAttributes(String customerSpace, String tableName, List<Attribute> attributes) {
-        log.info(String.format("createTableAttributes(%s, %s, %d)", customerSpace, tableName, (attributes!=null ? attributes.size() : 0)));
+        log.info(String.format("createTableAttributes(%s, %s, %d)", customerSpace, tableName,
+                (attributes != null ? attributes.size() : 0)));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.addAttributes(space, tableName, attributes);
+    }
+
+    public Boolean fixTableAttributes(String customerSpace, String tableName, List<AttributeFixer> attributeFixerList) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.fixAttributes(space, tableName, attributeFixerList);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /*
  * Base actor that contains the DUNS redirection logic and delegate the post processing of the match result from
@@ -60,8 +63,12 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
         if (!isDunsInAM || !isMatchResultValid) {
             // clear duns
             tuple.setDuns(null);
+            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                            Collections.singletonList(null))));
             return;
         }
+
 
         /* redirect (only when match result is valid and DUNS is in AM) */
 
@@ -83,6 +90,9 @@ public abstract class BaseDunsGuideValidateMicroEngineActor
             tuple.setDuns(duns);
             updateDunsOriginMap(traveler, duns);
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(duns))));
     }
 
     /**

@@ -2,7 +2,9 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
 import static com.latticeengines.datacloud.match.util.EntityMatchUtils.shouldSetTTL;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
@@ -88,6 +90,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private volatile Cache<Pair<String, EntityLookupEntry>, String> lookupCache;
     // [ [ tenant ID, entity ], seed ID ] => raw seed
     private volatile Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache;
+    // cache for anonymous entities
+    // [ tenant ID, entity] => raw seed
+    private volatile Cache<Pair<String, String>, EntityRawSeed> anonymousSeedCache;
 
     private BlockingQueue<Triple<Tenant, EntityLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
     private AtomicLong nProcessingLookupEntries = new AtomicLong(0L);
@@ -154,6 +159,40 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @Override
+    public EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity) {
+        checkNotNull(tenant, entity);
+        if (!isAllocateMode()) {
+            throw new UnsupportedOperationException("Not allowed to create anonymous seed in lookup mode");
+        }
+
+        // make sure required service are loaded properly
+        lazyInitServices();
+
+        Pair<String, String> cacheKey = Pair.of(tenant.getId(), entity);
+        EntityRawSeed seed = anonymousSeedCache.getIfPresent(cacheKey);
+        if (seed != null) {
+            // already have anonymous in cache
+            return seed;
+        }
+
+        seed = get(tenant, entity, ENTITY_ANONYMOUS_ID);
+        boolean isNewSeed = false;
+        if (seed == null) {
+            // no anonymous entity in staging & serving, create one
+            seed = new EntityRawSeed(ENTITY_ANONYMOUS_ID, entity, false);
+
+            // is considered new if we set the staging seed successfully
+            isNewSeed = entityRawSeedService.setIfNotExists(STAGING, tenant, seed, shouldSetTTL(STAGING));
+        }
+
+        // populate cache (isNewlyAllocated=false since it's already created for the
+        // following calls)
+        anonymousSeedCache.put(cacheKey, seed);
+        // return seed with isNewlyAllocated=true if anonymous entity is just created
+        return isNewSeed ? new EntityRawSeed(ENTITY_ANONYMOUS_ID, entity, true) : seed;
+    }
+
+    @Override
     public String allocateId(@NotNull Tenant tenant, @NotNull String entity) {
         checkNotNull(tenant, entity);
         if (!isAllocateMode()) {
@@ -187,7 +226,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @Override
     public Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
             @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries) {
-        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
+        EntityMatchEnvironment env = STAGING; // only change staging seed
         checkNotNull(tenant, seed);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
@@ -222,7 +261,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         // cleanup staging first so the seed ID cannot be allocated before we cleanup
         // all environments
-        entityRawSeedService.delete(EntityMatchEnvironment.STAGING, tenant, entity, seedId);
+        entityRawSeedService.delete(STAGING, tenant, entity, seedId);
         entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId);
     }
 
@@ -232,7 +271,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled) {
         sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
         destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
-        EntityMatchEnvironment sourceEnv = EntityMatchEnvironment.STAGING;
+        EntityMatchEnvironment sourceEnv = STAGING;
         if (sourceTenant.getId().equals(destTenant.getId()) && sourceEnv == destEnv) {
             // return with default publish count as 0
             return new EntityPublishStatistics();
@@ -451,7 +490,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         // now in allocate mode
-        Map<EntityLookupEntry, String> results = getIdsInEnvironment(tenant, EntityMatchEnvironment.STAGING, keys);
+        Map<EntityLookupEntry, String> results = getIdsInEnvironment(tenant, STAGING, keys);
         if (results.size() == keys.size()) {
             return results;
         }
@@ -536,7 +575,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             throw new IllegalStateException("Should not reach here in lookup mode.");
         }
 
-        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
+        EntityMatchEnvironment env = STAGING;
         // allocate mode
         Map<String, EntityRawSeed> results = getSeedsInEnvironment(tenant, env, entity, seedIds);
         if (results.size() == seedIds.size()) {
@@ -645,6 +684,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         initStagingWorkers();
         initSeedCache();
         initLookupCache();
+        initAnonymousSeedCache();
     }
 
     /*
@@ -687,6 +727,37 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @VisibleForTesting
     protected long getMaxSeedCacheWeight() {
         return entityMatchConfigurationService.getMaxSeedCacheMemoryInMB() * 2500;
+    }
+
+    /*
+     * Lazily instantiate anonymous seed cache
+     */
+    private void initAnonymousSeedCache() {
+        if (anonymousSeedCache != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (anonymousSeedCache == null) {
+                log.info("Instantiating anonymous seed cache, maxSize = {}, maxIdleDuration = {}",
+                        getMaxSeedCacheWeight(),
+                        entityMatchConfigurationService.getMaxAnonymousSeedCacheIdleDuration());
+                anonymousSeedCache = Caffeine.newBuilder()
+                        // max number of lookup entries allowed in cache
+                        .maximumSize(getMaxAnonymousSeedCacheWeight())
+                        // expire after idle for a certain amount of time
+                        .expireAfterAccess(entityMatchConfigurationService.getMaxAnonymousSeedCacheIdleDuration())
+                        .recordStats() //
+                        .build();
+            }
+        }
+    }
+
+    /*
+     * use the same estimation as seed
+     */
+    protected long getMaxAnonymousSeedCacheWeight() {
+        return entityMatchConfigurationService.getMaxAnonymousSeedCacheInMB() * 2500;
     }
 
     /*
@@ -824,7 +895,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         private void populate(Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches) {
-            EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
+            EntityMatchEnvironment env = STAGING;
             // since allocate mode should only have one tenant, map is probably not required, use map just in case
             batches.values().forEach(list -> {
                 if (CollectionUtils.isEmpty(list)) {

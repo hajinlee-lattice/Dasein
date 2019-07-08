@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.springframework.retry.support.RetryTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -127,7 +129,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     @SuppressWarnings("unchecked")
     protected boolean transformInternal(TransformationProgress progress, String workflowDir,
                                         TransformStep step) {
-        LivySession session = null;
+        ThreadLocal<LivySession> sessionHolder = new ThreadLocal<>();
         try {
             sparkJobConfig = getSparkJobConfig(step.getConfig());
 
@@ -138,25 +140,33 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             configuration = getConfiguration(step.getConfig());
             modifySparkJobConfig(sparkJobConfig, configuration);
 
-            Map<String, String> sparkProps = getSparkProps(step.getConfig());
-            if (sparkProps == null) {
-                sparkProps = new HashMap<>();
+            final Map<String, String> sparkProps = new HashMap<>();
+            Map<String, String> extraProps = getSparkProps(step.getConfig());
+            if (MapUtils.isNotEmpty(extraProps)) {
+                sparkProps.putAll(extraProps);
             }
-            session = createLivySession(step, progress, sparkProps);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            SparkJobResult sparkJobResult = retry.execute(ctx -> {
+                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
+                        + getSparkJobClz().getSimpleName());
+                log.warn("Previous failure:",  ctx.getLastThrowable());
+                if (sessionHolder.get() != null) {
+                    livySessionService.stopSession(sessionHolder.get());
+                }
+                sessionHolder.set(createLivySession(step, progress, sparkProps));
+                return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
+            });
 
-            SparkJobResult sparkJobResult = sparkJobService.runJob(session, getSparkJobClz(), sparkJobConfig);
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
             step.setCount(output.getCount());
-
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(output, sparkJobConfig, configuration, baseSchemas));
-
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             return false;
         } finally {
-            if (session != null) {
-                livySessionService.stopSession(session);
+            if (sessionHolder.get() != null) {
+                livySessionService.stopSession(sessionHolder.get());
             }
         }
         return true;
@@ -233,20 +243,33 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         for (int i = 0; i < baseSources.length; i++) {
             Source source = baseSources[i];
             String version = baseSourceVersions.get(i);
+            Schema schema;
             if (source instanceof TableSource) {
                 Table table = hdfsSourceEntityMgr.getTableAtVersion(source, version);
-                Schema schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
-                schemas.add(schema);
+                schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
+                log.info("Created schema from table for " + table.getName());
             } else {
-                Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
-                schemas.add(schema);
+                schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source.getSourceName(), version);
+                log.info("Read avsc schema for source " + source.getSourceName());
             }
+            schemas.add(schema);
         }
         return schemas;
     }
 
     protected Schema getTargetSchema(HdfsDataUnit result, S sparkJobConfig, T configuration, List<Schema> baseSchemas) {
-        return null;
+        if (CollectionUtils.isNotEmpty(baseSchemas)) {
+            Map<String, Schema.Field> inputFields = new HashMap<>();
+            baseSchemas.forEach(schema -> {
+                if (schema != null) {
+                    schema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
+                }
+            });
+            Schema resultSchema = AvroParquetUtils.parseAvroSchema(yarnConfiguration, result.getPath());
+            return AvroUtils.overwriteFields(resultSchema, inputFields);
+        } else {
+            return null;
+        }
     }
 
     private LivySession createLivySession(TransformStep step, TransformationProgress progress, //
@@ -263,7 +286,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             livyHost = "http://localhost:8998";
         }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(context -> livySessionService.startSession(livyHost, jobName, //
+        return retry.execute(context -> livySessionService.startSession(jobName, //
                 getLivyConf(sparkProps), getSparkConf(sparkProps)));
     }
 

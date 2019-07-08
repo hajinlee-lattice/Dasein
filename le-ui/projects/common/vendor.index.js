@@ -18,6 +18,8 @@ require('./lib/js/ui-bootstrap.js');
 
 require('./lib/bower/min/ocLazyLoad.min');
 
+export const moment = require('./lib/bower/moment.js');
+
 WebFont.load({
   google: {
     families: ['Droid Sans', 'Droid Serif']

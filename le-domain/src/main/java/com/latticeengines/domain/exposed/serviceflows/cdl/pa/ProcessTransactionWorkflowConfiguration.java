@@ -57,10 +57,10 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processTransactionStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
-            updateTransactionWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
-            rebuildTransactionWorkflowBuilder.dataQuotaLimit(dataQuotaLimit);
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            rebuildTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            updateTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
 

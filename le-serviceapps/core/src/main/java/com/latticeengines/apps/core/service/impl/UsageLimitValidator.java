@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -38,7 +39,8 @@ public class UsageLimitValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            AttrValidation validation) {
         String tenantId = MultiTenantContext.getShortTenantId();
         log.info("validate usage limit for tenant " + tenantId);
         LimitValidatorUtils.checkAmbiguityInFieldNames(userProvidedAttrConfigs);

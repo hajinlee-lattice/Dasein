@@ -27,8 +27,8 @@
                 </div>
                 <div class="stats stats-group">
                     <h3>Scorable Accounts</h3>
-                    <span ng-if="!scorableAccounts" class="fa fa-spinner fa-pulse fa-fw"></span>
-                    <h4 ng-if="scorableAccounts">{{ scorableAccounts | number }}</h4>
+                    <span ng-if="scorableAccounts == undefined" class="fa fa-spinner fa-pulse fa-fw"></span>
+                    <h4 ng-if="scorableAccounts != undefined">{{ scorableAccounts | number }}</h4>
                 </div>
                 <div class="stats stats-group" ng-if="!IsRuleBased">
                     <h3>Iterations Created</h3>

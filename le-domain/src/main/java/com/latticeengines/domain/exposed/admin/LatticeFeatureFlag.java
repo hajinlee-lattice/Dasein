@@ -16,6 +16,8 @@ public enum LatticeFeatureFlag {
     LATTICE_MARKETO_SCORING("LatticeMarketoScoring", "Lattice Integration for Marketo Scoring"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_ENTITY_MATCH("EnableEntityMatch", "Enable Entity Match"), //
+    ENABLE_TARGET_SCORE_DERIVATION("EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
+    ENABLE_APS_IMPUTATION("EnableApsImputation", "Enable APS null imputation with 0"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
     ENABLE_DATA_CLOUD_REFRESH_ACTIVITY("EnableDataCloudRefreshActivity", "Enable Data Cloud Refresh Activity"), //

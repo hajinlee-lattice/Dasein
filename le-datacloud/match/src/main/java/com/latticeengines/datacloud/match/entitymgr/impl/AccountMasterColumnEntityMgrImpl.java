@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.match.dao.AccountMasterColumnDao;
@@ -37,6 +38,7 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
 
     private static final Logger log = LoggerFactory.getLogger(AccountMasterColumnEntityMgrImpl.class);
 
+    private static final int MAX_CONCURRENCY = 2;
     private static final int PAGE_SIZE = 10000;
 
     private Scheduler scheduler;
@@ -128,7 +130,12 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
         if (scheduler == null) {
             synchronized (this) {
                 if (scheduler == null) {
-                    scheduler = Schedulers.newParallel("am-metadata");
+                    BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+                    if (BeanFactoryEnvironment.Environment.AppMaster.equals(currentEnv)) {
+                        scheduler = Schedulers.newParallel("am-metadata", MAX_CONCURRENCY);
+                    } else {
+                        scheduler = Schedulers.newParallel("am-metadata");
+                    }
                 }
             }
         }

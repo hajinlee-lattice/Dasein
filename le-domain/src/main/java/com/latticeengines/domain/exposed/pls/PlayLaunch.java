@@ -19,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -111,6 +112,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    @JsonIgnore
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private PlayLaunchChannel playLaunchChannel;
+
     @JsonProperty("applicationId")
     @Column(name = "APPLICATION_ID")
     private String applicationId;
@@ -127,6 +134,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "ACCOUNTS_SELECTED")
     private Long accountsSelected;
 
+    @JsonProperty("contactsSelected")
+    @Column(name = "CONTACTS_SELECTED")
+    private Long contactsSelected;
+
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
@@ -138,6 +149,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("accountsSuppressed")
     @Column(name = "ACCOUNTS_SUPPRESSED")
     private Long accountsSuppressed;
+
+    @JsonProperty("contactsSuppressed")
+    @Column(name = "CONTACTS_SUPPRESSED")
+    private Long contactsSuppressed;
 
     @JsonProperty("accountsErrored")
     @Column(name = "ACCOUNTS_ERRORED")
@@ -296,6 +311,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.play = play;
     }
 
+    public PlayLaunchChannel getPlayLaunchChannel() {
+        return playLaunchChannel;
+    }
+
+    public void setPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
+        this.playLaunchChannel = playLaunchChannel;
+    }
+
     public String getApplicationId() {
         return applicationId;
     }
@@ -375,6 +398,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAccountsErrored(Long accountsErrored) {
         this.accountsErrored = accountsErrored;
+    }
+
+    public Long getContactsSelected() {
+        return contactsSelected;
+    }
+
+    public void setContactsSelected(Long contactsSelected) {
+        this.contactsSelected = contactsSelected;
+    }
+
+    public Long getContactsSuppressed() {
+        return contactsSuppressed;
+    }
+
+    public void setContactsSuppressed(Long contactsSuppressed) {
+        this.contactsSuppressed = contactsSuppressed;
     }
 
     public Long getContactsErrored() {

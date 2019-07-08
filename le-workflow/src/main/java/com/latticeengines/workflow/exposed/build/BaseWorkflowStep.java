@@ -23,7 +23,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -120,6 +119,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_ENGINE_ID_TO_ACTIVATE = "RATING_ENGINE_ID_TO_ACTIVATE";
     protected static final String RULE_RAW_RATING_TABLE_NAME = "RULE_RAW_RATING_TABLE_NAME";
     protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
+    protected static final String PIVOTED_RATINGS_TABLE_NAME = "PIVOTED_RATINGS_TABLE_NAME";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
@@ -150,11 +150,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ENTITY_MATCH_COMPLETED = "ENTITY_MATCH_COMPLETED";
     protected static final String ENTITY_MATCH_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_ACCOUNT_TARGETTABLE";
     protected static final String ENTITY_MATCH_CONTACT_TARGETTABLE = "ENTITY_MATCH_CONTACT_TARGETTABLE";
+    protected static final String ENTITY_MATCH_TXN_TARGETTABLE = "ENTITY_MATCH_TXN_TARGETTABLE";
     public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
+    public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
+    protected static final String ACCOUNT_EXPORT_TABLE_NAME = "ACCOUNT_EXPORT_TABLE_NAME";
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
@@ -184,7 +187,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String INPUT_SKIPPED_ATTRIBUTES_KEY = "INPUT_SKIPPED_ATTRIBUTES_KEY";
 
     public static final String PROCESS_ANALYTICS_DECISIONS_KEY = "PROCESS_ANALYTICS_DECISIONS_KEY";
+    public static final String PROCESS_ANALYTICS_WARNING_KEY = "PROCESS_ANALYTICS_WARNING_KEY";
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
+
+    public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -232,11 +238,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
-
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28015, new String[] { appId, status.getStatus().toString() });
+            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()), new String[]{appId,
+                    status.getErrorReport()});
         }
-
     }
 
     protected String getHdfsDir(String path) {

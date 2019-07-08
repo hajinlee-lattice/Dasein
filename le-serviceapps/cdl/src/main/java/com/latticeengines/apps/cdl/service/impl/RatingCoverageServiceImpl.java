@@ -989,9 +989,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
         }
 
-        if (request.isRestrictNullLookupId() && StringUtils.isBlank(request.getLookupId())) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "Cannot restrict nulls if no lookupId is provided" });
+        if (StringUtils.isBlank(request.getLookupId())) {
+            request.setRestrictNullLookupId(false);
         }
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {

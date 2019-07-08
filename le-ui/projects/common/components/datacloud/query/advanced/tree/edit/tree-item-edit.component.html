@@ -13,9 +13,9 @@
                             ng-trim="false" ng-if="vm.showInput(vm.operation) && !vm.showChips()">
 
                         <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
-                            initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true"
+                            initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true" nosort=true
                             single-selection="false" allowcustomvalues="true" dontrandomizeid="true" icon="fa fa-plus"
-                            ng-show="vm.showChips()">
+                            ng-show="vm.showChips()" name="ChipsController" context="vm">
                         </chips>
                     </span>
 
@@ -27,17 +27,17 @@
                         <input type="text" name="input" ng-model="vm.vals[0]" ng-change="vm.changeValue()" required
                             ng-trim="false" ng-if="vm.showInput(vm.operation) && !vm.showChips()">
 
-                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="{{vm.rangeConfig}}"
-                            showfrom="vm.showFromNumerical" showto="vm.showToNumerical" vm="vm" form="vm.form"
+                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="vm.rangeConfig"
+                            showfrom="vm.showFromNumerical" showto="vm.showToNumerical" vm="vm" form="form"
                             type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                             changed="vm.callbackChangedNumericalValue(type, position, value)">
                         </numerical-range-directive>
 
-                        <chips placeholder="Search for attributes" datasource="vm.buckets" context="vm"
-                            sortreverse="true" callback-function="vm.updateChips(args)" initialvalue="vm.vals"
-                            displayname="Lbl" ng-model="vm.vals" showicon="true" delayinit="true"
-                            single-selection="false" sortid="Cnt" icon="fa fa-search" ng-show="vm.showChips()"
-                            altlabel="Cnt" name="ChipsController" showloading="vm.loading">
+                        <chips placeholder="Search for attributes" datasource="vm.buckets" context="vm" sortreverse=true
+                            callback-function="vm.updateChips(args)" initialvalue="vm.vals" displayname="Lbl"
+                            ng-model="vm.vals" showicon="true" delayinit="true" nosort=true single-selection="false"
+                            sortid="Cnt" icon="fa fa-search" ng-show="vm.showChips()" altlabel="Cnt"
+                            name="ChipsController" showloading="vm.loading" header="vm.header">
                         </chips>
                     </span>
 
@@ -47,10 +47,15 @@
                             <strong>is</strong>
                         </span>
 
-                        <select ng-model="vm.booleanValue" ng-change="vm.changeBooleanValue()">
-                            <option value="Yes">True</option>
-                            <option value="No">False</option>
-                            <option value="" ng-if="vm.showEmptyOption()">Empty</option>
+                        <select ng-click="vm.changeBooleanValue($event)">
+                            <option value="Yes" ng-selected="vm.checkBoolOpSelected('Yes')">
+                                true</option>
+                            <option value="No" ng-selected="vm.checkBoolOpSelected('No')">
+                                false</option>
+                            <option value="Present" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Present')">
+                                present</option>
+                            <option value="Empty" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Empty')">empty
+                            </option>
                         </select>
                     </span>
 
@@ -82,15 +87,15 @@
 
                             <numerical-range-directive
                                 ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)"
-                                config="{{vm.rangeConfig}}" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
+                                config="vm.rangeConfig" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
                                 vm="vm" form="vm.form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                                 changed="vm.callbackChangedNumericalValue(type, position, value)">
                             </numerical-range-directive>
 
                             <chips placeholder="Add new value" datasource="[]" callback-function="vm.updateChips(args)"
                                 initialvalue="vm.vals" displayname="Lbl" ng-model="vm.vals" showicon="true"
-                                single-selection="false" allowcustomvalues="true" dontrandomizeid="true"
-                                icon="fa fa-plus" ng-show="vm.showChips()">
+                                single-selection="false" allowcustomvalues="true" dontrandomizeid="true" context="vm"
+                                icon="fa fa-plus" ng-show="vm.showChips()" nosort=true name="ChipsController">
                             </chips>
 
                             <span ng-if="vm.editMode == 'Preset'">
@@ -104,18 +109,18 @@
 
                     <span ng-if="vm.showItem('Transaction')  && !vm.showItem('Percent')">
                         <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type"
-                            form="vm.form" purchased="vm.booleanValue" booleanchanged='vm.booleanChanged'>
+                            form="form" purchased="vm.booleanValue" booleanchanged='vm.booleanChanged'>
                         </transaction-edit-directive>
                     </span>
 
                     <span ng-if="vm.showItem('Percent')" class="query-section-item-operation">
                         <percent-edit-attribute bucketrestriction="vm.tree.bucketRestriction" type="vm.type"
-                            form="vm.form"></percent-edit-attribute>
+                            form="form"></percent-edit-attribute>
                     </span>
 
                     <span ng-if="vm.showItem('Date')" class="query-section-item-operation">
                         <date-attribute-edit vm='vm' bucketrestriction="vm.tree.bucketRestriction" type="vm.type"
-                            form="vm.form"></date-attribute-edit>
+                            form="form"></date-attribute-edit>
                     </span>
                 </div>
             </div>
@@ -123,10 +128,10 @@
             <div class="le-col-span-2">
                 <div class="flex-container-controller">
                     <!-- <div ng-class="vm.showUnsetButton() ? 'edit-controllers' : 'edit-controller'"> -->
-                    <button class="button blue-button set" ng-click="vm.setBucket($event)"
+                    <button class="button blue-button set" ng-click="vm.clickSet($event)"
                         ng-disabled="!vm.isValid()">SET</button>
                     <button class="button gray-button unset" ng-if="vm.showUnsetButton()"
-                        ng-click="vm.setBucket($event, true)">UNSET</button>
+                        ng-click="vm.clickSet($event, true)">UNSET</button>
                     <!-- </div> -->
                 </div>
             </div>

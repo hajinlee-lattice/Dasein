@@ -29,11 +29,15 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
     private List<String> contactFields;
     private Map<String, String> accountDisplayNames;
     private Map<String, String> contactDisplayNames;
+    private boolean ignoreAccountsWithoutContacts;
+
+    private final String defaultContactFieldPrefix = "CONTACT:";
 
     public RecommendationAvroToCsvTransformer(Map<String, String> accountDisplayNames,
-            Map<String, String> contactDisplayNames) {
+            Map<String, String> contactDisplayNames, boolean ignoreAccountsWithoutContacts) {
         this.accountDisplayNames = MapUtils.isNotEmpty(accountDisplayNames) ? accountDisplayNames : new HashMap<>();
         this.contactDisplayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
+        this.ignoreAccountsWithoutContacts = ignoreAccountsWithoutContacts;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
                 .filter(f -> MapUtils.isEmpty(contactDisplayNames) || contactDisplayNames.containsKey(f))
                 .collect(Collectors.toList());
 
-        contactFields.forEach(f -> fieldNames.add(contactDisplayNames.getOrDefault(f, f)));
+        contactFields.forEach(f -> fieldNames.add(contactDisplayNames.getOrDefault(f, defaultContactFieldPrefix + f)));
 
         log.info("Fields: " + String.join(", ", fieldNames));
         return fieldNames;
@@ -85,6 +89,8 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
                     // Add to Global CSV Rows List
                     csvRowsForRecord.add(csvRow.toArray(new String[0]));
                 }
+            } else if (!ignoreAccountsWithoutContacts) {
+                csvRowsForRecord.add(accountValues.toArray(new String[0]));
             }
             return csvRowsForRecord;
         };

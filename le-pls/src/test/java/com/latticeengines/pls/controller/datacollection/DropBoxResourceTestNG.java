@@ -93,7 +93,7 @@ public class DropBoxResourceTestNG extends PlsFunctionalTestNGBase {
         dropBoxSummary.setAccessKeyId("key");
         uiAction = dropBoxResource.generateUIActionBasedOnDropBox(dropBoxSummary);
         Assert.assertNotNull(uiAction);
-        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GET_DROPBOX_WARNING_TITLE);
+        Assert.assertEquals(uiAction.getTitle(), DropBoxResource.GENERATE_DROPBOX_WARNING_TITLE);
         Assert.assertEquals(uiAction.getView(), View.Modal);
         Assert.assertEquals(uiAction.getStatus(), Status.Warning);
         Assert.assertNotNull(uiAction.getMessage());

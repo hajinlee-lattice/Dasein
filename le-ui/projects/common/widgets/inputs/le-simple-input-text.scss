@@ -1,0 +1,30 @@
+@import "widgets/colors.scss";
+
+.le-simple-text-container {
+  display: inline-flex;
+  // border: 1px solir gray;
+  width: 100%;
+  align-items: center;
+
+  .le-simple-input-label {
+    margin-right: 1em;
+  }
+  & > input[type=text] {
+    background: #fff;
+    border: 0.1px solid $silver;
+    height: 30px;
+    font-size: 14px;
+    flex: 0.5;
+    padding-left: 0.4em;
+  }
+  & > input[type=text]:focus {
+    // border: 0.1px solid #66afe9;
+    border-color: #66afe9;
+    outline: none;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+      0 0 8px rgba(102, 175, 233, 0.6);
+  }
+
+  .le-simple-input {
+  }
+}

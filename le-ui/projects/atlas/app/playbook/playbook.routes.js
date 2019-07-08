@@ -109,7 +109,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: '',
-                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                 sortby: 'created',
                                 descending: true,
                                 offset: 0,
@@ -125,7 +125,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: '',
-                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                 startTimestamp: 0
                             };
 
@@ -141,7 +141,7 @@ angular
                             launches = LaunchHistoryData,
                             uniqueLookupIdMapping = launches.uniqueLookupIdMapping,
                             allCountQuery = {
-                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                 offset: 0,
                                 startTimestamp: 0,
                                 orgId: '',
@@ -163,7 +163,7 @@ angular
                                     if (val.orgName) {
                                         var countParams = {
                                             playName: $stateParams.play_name,
-                                            launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                            launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                             offset: 0,
                                             startTimestamp: 0,
                                             orgId: val.orgId,
@@ -492,9 +492,11 @@ angular
                     // ContactsCount: [function(){
                     //     return null;
                     // }],
+
                     Config: [function () {
                         return null;
                     }],
+                    orgs: [function() { return null; }]
                 },
                 views: {
                     "summary@": {
@@ -577,7 +579,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: $stateParams.play_name,
-                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                 sortBy: 'created',
                                 descending: true,
                                 offset: 0,
@@ -592,7 +594,7 @@ angular
                         var deferred = $q.defer(),
                             params = {
                                 playName: $stateParams.play_name,
-                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced',
+                                launchStates: 'Launching,Launched,Failed,Syncing,PartialSync,SyncFailed,Synced,Queued',
                                 startTimestamp: 0
                             };
 
@@ -982,6 +984,7 @@ angular
                 params: {
                     section: 'wizard.targets',
                     currentTargetTab: 'accounts',
+                    accountQuerySort: 'Account',
                     pageIcon: 'ico-playbook',
                     pageTitle: 'Campaign Playbook'
                 },
@@ -1111,6 +1114,23 @@ angular
                     }],
                     Contacts: [function () {
                         return null;
+                    }],
+                    orgs: ['$q', 'SfdcStore', 'featureflags', function ($q, SfdcStore, featureflags) {
+                        var deferred = $q.defer();
+
+                        SfdcStore.getOrgs().then(function (result) {
+                            let orgs = [];
+                            let keys = Object.keys(result);
+                            if (keys) {
+                                keys.forEach((key) => {
+                                    let ret = result[key] || [];
+                                    orgs = orgs.concat(ret)
+                                });
+                            }
+                            deferred.resolve(orgs);
+                        });
+
+                        return deferred.promise;
                     }]
                 },
                 views: {

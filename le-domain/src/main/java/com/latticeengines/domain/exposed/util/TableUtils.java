@@ -76,7 +76,7 @@ public class TableUtils {
                         attr.getCleanedUpEnumValuesAsString());
             }
 
-            Type type = Type.valueOf(attr.getPhysicalDataType().toUpperCase());
+            Type type = getTypeFromPhysicalDataType(attr.getPhysicalDataType().toUpperCase());
 
             switch (type) {
                 case DOUBLE:
@@ -114,6 +114,29 @@ public class TableUtils {
             }
         }
         return fieldAssembler.endRecord();
+    }
+
+    public static Type getTypeFromPhysicalDataType(String dataType) {
+        if (StringUtils.isEmpty(dataType)) {
+            throw new IllegalArgumentException("Physical data type cannot be null!");
+        }
+        dataType = dataType.toUpperCase();
+        if (dataType.startsWith("VARCHAR") || dataType.startsWith("NVARCHAR")) {
+            return Type.STRING;
+        }
+        switch (dataType) {
+            case "BIT":
+                return Type.BOOLEAN;
+            case "BYTE":
+            case "SHORT":
+                return Type.INT;
+            case "DATE":
+            case "DATETIME":
+            case "DATETIMEOFFSET":
+                return Type.LONG;
+            default:
+                return Type.valueOf(dataType);
+        }
     }
 
     public static String getFullTableName(String tableNamePrefix, String version) {

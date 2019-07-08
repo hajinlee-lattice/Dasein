@@ -137,7 +137,7 @@ public class AdminResource extends InternalResourceBase {
 
         if (accessLevel != null) {
             userService.assignAccessLevel(accessLevel, tenantId, username, MultiTenantContext.getEmailAddress(),
-                    userUpdateData.getExpirationDate());
+                    userUpdateData.getExpirationDate(), false);
             LOGGER.info(String.format("User %s has been updated to %s for the tenant %s through the internal API",
                     username, accessLevel.name(), tenantId));
         }
@@ -191,6 +191,14 @@ public class AdminResource extends InternalResourceBase {
         checkHeader(request);
         User user = userService.findByEmail(userEmail);
         return user != null;
+    }
+
+    @RequestMapping(value = "/setSendImportEmailState", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "set S3Import Email Notification state")
+    public void setImportNotifictionStatus(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
+            "notificationLevel") String notificationLevel) {
+        tenantService.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
 }

@@ -1,13 +1,14 @@
+import  { underscore } from 'common/vendor.index';
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
  * ]
  */
 angular.module('lp.import.utils', ['mainApp.core.redux'])
-.service('ImportUtils', function(ReduxService){
+.service('ImportUtils', function($state){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
-    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId'}};
+    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId', CustomerAccountId:'CustomerAccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId', CustomerContactId: 'CustomerContactId'}};
     var latticeSchema = {};
 
     function setFields(fieldObj, field){
@@ -105,10 +106,10 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         return inschema;
     };
 
-    this.remapTypes = function(fieldsMapped, newTypesObj){
+    this.remapTypes = function(fieldsMapped, newTypesObj, entity){
         var userFields = Object.keys(newTypesObj);
         userFields.forEach(function(userFieldName){
-            updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName]);
+            updateUserFieldType(fieldsMapped,userFieldName, newTypesObj[userFieldName], entity);
         });
     };
     this.updateLatticeDateField = (fieldMapped, dateObject) => {
@@ -119,25 +120,56 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         // console.log(fieldMapped);
     };
 
-    function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj){
-        fieldsMapped.forEach(function(fieldMapped){
+    function updateUserFieldType(fieldsMapped, userFieldName, newTypeObj, entity){
+        for(var i=0; i<fieldsMapped.length ; i++){
+            let fieldMapped = fieldsMapped[i];
             if(fieldMapped.userField == userFieldName){
                 fieldMapped.fieldType = newTypeObj.type;
-                updateFieldDate(fieldMapped, newTypeObj);
+                updateFieldDate(fieldMapped, newTypeObj, entity);
                 return;
             }
-        });
+        }
+        // fieldsMapped.forEach(function(fieldMapped){
+        //     if(fieldMapped.userField == userFieldName){
+        //         fieldMapped.fieldType = newTypeObj.type;
+        //         updateFieldDate(fieldMapped, newTypeObj, entity);
+        //         return;
+        //     }
+        // });
     }
 
-    function updateFieldDate(fieldMapped, newTypeObj) {
-        if(fieldMapped.fieldType !== 'DATE'){
-            delete fieldMapped.dateFormatString;
-            delete fieldMapped.timeFormatString;
-            delete fieldMapped.timezone;
+    function updateFieldDate(fieldMapped, newTypeObj, entity) {
+        if(newTypeObj.type){
+            if(newTypeObj.type !== 'DATE'){
+                delete fieldMapped.dateFormatString;
+                delete fieldMapped.timeFormatString;
+                delete fieldMapped.timezone;
+            }else{
+                fieldMapped.dateFormatString = newTypeObj.dateFormatString;
+                fieldMapped.timeFormatString = newTypeObj.timeFormatString;
+                fieldMapped.timezone = newTypeObj.timezone;
+            }
         }else{
+            
+            let newMapped = newTypeObj.mappedField;
+            if(!newMapped){
+                return;
+            }
             fieldMapped.dateFormatString = newTypeObj.dateFormatString;
             fieldMapped.timeFormatString = newTypeObj.timeFormatString;
             fieldMapped.timezone = newTypeObj.timezone;
+            let toLattice = fieldMapped.mappedToLatticeField;
+            if(toLattice == true){
+                let field = ImportUtils.getFieldFromLaticeSchema(entity, newMapped);
+                fieldMapped.fieldType = field.fieldType;
+                return;
+            }else{
+                let redux = $state.get('home.import').data.redux;
+                let field = redux.store.fieldMappings.map[newMapped]
+                if(field){
+                    fieldMapped.fieldType = field.fieldType;
+                }
+            }
         }
     }
     
@@ -170,27 +202,53 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 if(savedObj.cdlExternalSystemType){
                     fieldsMapped[mapped].cdlExternalSystemType = savedObj.cdlExternalSystemType;
                 }
-                updateFieldDate(fieldsMapped[mapped], savedObj);
+                if(savedObj.IdType || savedObj.SystemName){
+                    fieldsMapped[mapped].idType = savedObj.IdType;
+                    fieldsMapped[mapped].systemName = savedObj.SystemName;
+                }
+                updateFieldDate(fieldsMapped[mapped], savedObj, entity);
             }
             
         });
     }
     
-    function updateUniqueIdMapping(uniqueIdsList, obj){
-        uniqueIdsList.forEach(uniqueId => {
-            if(uniqueId.mappedField == obj.mappedField){
-                uniqueId.userField = obj.userField;
-                return;
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId, IdType){
+        if(uniqueId && fieldName){
+            let keys = Object.keys(fieldsMapping);
+            for(var i = 0; i < keys.length; i++){
+                let field = fieldsMapping[keys[i]];
+                if(field.userField == fieldName){
+                    switch(unmap){
+                        case true:
+                            if(field.mappedField == uniqueId){
+                                field.mappedToLatticeField = false;
+                                field.mapToLatticeId = false;
+                                field.idType = null;
+                                delete field.mappedField;
+                            }
+                            break;
+                        case false:
+                            if(!field.fieldMapped){
+                                field.mappedToLatticeField = true;
+                                field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
+                                field.mappedField = uniqueId;
+                                field.idType = IdType;
+                            }
+                            break;
+                    }
+                    return;
+                }
             }
-        });
+        }
     }
-    function updateUniqueIdsMapping(entity, savedObj, uniquiIdslist){
+    function updateUniqueIdsMapping(entity, fieldsMapping, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
-            if(ImportUtils.uniqueIds[entity] && ImportUtils.uniqueIds[entity][savedObj[index].mappedField]){
-                updateUniqueIdMapping(uniquiIdslist, savedObj[index]);
+            let saved = savedObj[index];
+            if(saved.originalUserField && saved.append != true){
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
             }
         });
-
     }
     function isUniqueIdAlreadyAdded(uniqueIdsList, mappedField, userField){
         let already = false;
@@ -218,13 +276,12 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
             var keysSaved = Object.keys(savedObj);
+            updateUniqueIdsMapping(entity, fieldsMapping, savedObj);
             let copyUniqueIds = removeUniqueIdsMapped(entity, fieldsMapping);
-            updateUniqueIdsMapping(entity,savedObj,copyUniqueIds);
             keysSaved.forEach(function(keySaved){
                 setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
             let ret =  fieldsMapping.concat(copyUniqueIds);
-            // console.log(ret);
             return ret;
         }else{
             return fieldsMapping;

@@ -7,11 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
 
-@Component("DynamoDataUnitService")
-public class DynamoDataUnitService extends DataUnitRuntimeService<DynamoDataUnit> {
+@Component("dynamoDataUnitService")
+public class DynamoDataUnitService extends AbstractDataUnitRuntimeServiceImpl<DynamoDataUnit> //
+        implements DataUnitRuntimeService {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoDataUnitService.class);
 
@@ -19,15 +21,17 @@ public class DynamoDataUnitService extends DataUnitRuntimeService<DynamoDataUnit
     private DynamoService dynamoService;
 
     @Override
-    public Boolean delete(DynamoDataUnit dataUnit) {
-        log.info("delete DynamoTable " + dataUnit.getName());
-        dynamoService.deleteTable(dataUnit.getName());
-        log.info("delete DynamoDataUnit record : tenant is " + dataUnit.getTenant() + ", name is " + dataUnit.getName());
-        return true;
+    protected Class<DynamoDataUnit> getUnitClz() {
+        return DynamoDataUnit.class;
     }
 
     @Override
-    public Boolean renameTableName(DynamoDataUnit dataUnit, String tablename) {
-        throw new UnsupportedOperationException("DynamoDataUnitService can not support this method.");
+    public Boolean delete(DataUnit dataUnit) {
+        log.info("deleting DynamoTable " + dataUnit.getName());
+        dynamoService.deleteTable(dataUnit.getName());
+        log.info("deleted DynamoDataUnit record : tenant is " + dataUnit.getTenant() //
+                + ", name is " + dataUnit.getName());
+        return true;
     }
+
 }

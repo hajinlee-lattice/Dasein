@@ -123,9 +123,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 TableRoleInCollection.ConsolidatedRawTransaction, active);
         hasRawStore = StringUtils.isNotBlank(rawTableName);
         if (hasRawStore) {
-            log.info("Found raw period store.");
+            log.info("Found raw transaction store.");
         } else {
-            log.info("No raw period store");
+            log.info("No raw transaction store");
         }
     }
 
@@ -235,8 +235,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
-    protected boolean shouldUpdate() {
-        boolean should = super.shouldUpdate();
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean should = super.shouldUpdate(step);
 
         log.info(String.format("Important flag to decide transaction update: hasProducts=%b", hasProducts));
 
@@ -289,12 +289,12 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
 
         if (shouldCalc) {
-            shouldCalc = hasAnalyticProduct(step);
+            shouldCalc = hasAnalyticProduct(step, true);
         }
         return shouldCalc;
     }
 
-    private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {
+    boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step, boolean addWarning) {
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
         Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
@@ -312,8 +312,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean foundAnalyticProduct = ProductUtils.hasAnalyticProduct(yarnConfiguration, productTable);
         if (!foundAnalyticProduct) {
             log.info("Didn't find Analytic Product in " + productTable.getName());
-            String warning = "No analytic product found. Skip generating curated attributes.";
-            addWarningToProductReport(step, warning);
+            if (addWarning) {
+                String warning = "No analytic product found. Skip generating curated attributes.";
+                addWarningToProductReport(step, warning);
+            }
             return false;
         }
 
@@ -337,8 +339,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             return true;
         } else {
             log.info("Did not find Analytic Product in table " + yearTable.getName());
-            String warning = "No analytic product id matched between products and transactions. Skip generating curated attributes.";
-            addWarningToProductReport(step, warning);
+            if (addWarning) {
+                String warning = "No analytic product id matched between products and transactions. Skip generating curated attributes.";
+                addWarningToProductReport(step, warning);
+            }
         }
         return false;
     }

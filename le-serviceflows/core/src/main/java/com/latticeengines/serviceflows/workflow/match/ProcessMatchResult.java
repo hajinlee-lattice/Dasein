@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -30,8 +32,9 @@ import com.latticeengines.spark.exposed.job.match.ParseMatchResultJob;
 
 @Component("processMatchResult")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, //
-        ParseMatchResultJobConfig, ParseMatchResultJob> {
+public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfiguration, ParseMatchResultJobConfig> {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -81,7 +84,7 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
     @Override
     protected void postJobExecution(SparkJobResult result) {
         String customer = configuration.getCustomer();
-        String eventTableName = NamingUtils.timestamp("MatchDataCloud");
+        String eventTableName = NamingUtils.timestampWithRandom("MatchDataCloud");
         Table eventTable = toTable(eventTableName, result.getTargets().get(0));
         overlayMetadata(eventTable);
         metadataProxy.createTable(customer, eventTableName, eventTable);

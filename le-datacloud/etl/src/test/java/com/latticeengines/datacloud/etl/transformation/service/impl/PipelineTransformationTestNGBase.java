@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,10 +19,10 @@ public abstract class PipelineTransformationTestNGBase
 
     private ObjectMapper om = new ObjectMapper();
 
-    @Autowired
+    @Inject
     PipelineSource source;
 
-    @Autowired
+    @Inject
     protected DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override
@@ -47,6 +47,7 @@ public abstract class PipelineTransformationTestNGBase
         }
     }
 
+    @Override
     protected String getPathToUploadBaseData() {
         return "";
     }

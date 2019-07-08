@@ -52,6 +52,7 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -737,7 +738,14 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         HdfsDataUnit unit = new HdfsDataUnit();
         unit.setName(alias);
-        unit.setPath(PathUtils.toAvroGlob(this.getExtracts().get(0).getPath()));
+        String globPath = this.getExtracts().get(0).getPath();
+        if (!globPath.endsWith(".avro") && !globPath.endsWith(".parquet")) {
+            globPath = PathUtils.toAvroGlob(globPath);
+        }
+        unit.setPath(globPath);
+        if (globPath.endsWith(".parquet")) {
+            unit.setDataFormat(DataUnit.DataFormat.PARQUET);
+        }
         unit.setCount(this.getExtracts().get(0).getProcessedRecords());
         return unit;
     }

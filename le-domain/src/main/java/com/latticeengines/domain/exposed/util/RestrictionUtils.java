@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -90,10 +91,8 @@ public class RestrictionUtils {
 
     private static void cleanupBucketRestriction(BucketRestriction bucketRestriction) {
         Bucket bkt = bucketRestriction.getBkt();
-        bkt.setId(null);
-        bkt.setLabel(null);
         if (isValueFreeOperator(bkt.getComparisonType())) {
-            bkt.setValues(null);
+            bkt.setValues(Collections.emptyList());
         }
         bucketRestriction.setBkt(bkt);
     }

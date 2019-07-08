@@ -19,14 +19,14 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataBothBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataNewTechBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotHGDataConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Buffer;
 
 @Component(PivotHGData.BEAN_NAME)
-public class PivotHGData extends ConfigurableFlowBase<PivotHGDataConfig> {
+public class PivotHGData extends ConfigurableFlowBase<PivotTransformerConfig> {
     public static final String BEAN_NAME = "pivotHGData";
 
     private String rowIdField = "RowId" + UUID.randomUUID().toString().replace("-", "");
@@ -37,7 +37,7 @@ public class PivotHGData extends ConfigurableFlowBase<PivotHGDataConfig> {
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return PivotHGDataConfig.class;
+        return PivotTransformerConfig.class;
     }
 
     @Override
@@ -47,12 +47,12 @@ public class PivotHGData extends ConfigurableFlowBase<PivotHGDataConfig> {
 
     @Override
     public String getTransformerName() {
-        return "pivotHGDataTransformer";
+        return "pivotTransformer";
     }
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        PivotHGDataConfig config = getTransformerConfig(parameters);
+        PivotTransformerConfig config = getTransformerConfig(parameters);
         domainField = config.getJoinFields()[0];
 
         Node source = addSource(parameters.getBaseTables().get(0));

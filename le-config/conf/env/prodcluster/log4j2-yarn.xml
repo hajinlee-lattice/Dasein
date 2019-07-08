@@ -36,7 +36,7 @@
             <AppenderRef ref="ConsoleWarn"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
-        <Logger name="com.latticeengines" additivity="false" level="DEBUG">
+        <Logger name="com.latticeengines" additivity="false" level="${sys:LOG4J_LE_LEVEL}">
             <AppenderRef ref="ConsoleInfo"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>

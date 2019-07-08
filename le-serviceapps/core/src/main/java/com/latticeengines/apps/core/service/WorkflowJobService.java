@@ -15,4 +15,6 @@ public interface WorkflowJobService {
 
     ApplicationId restart(Long jobId, String customerSpace, Integer memory);
 
+    ApplicationId restart(Long jobId, String customerSpace, Integer memory, Boolean autoRetry);
+
 }

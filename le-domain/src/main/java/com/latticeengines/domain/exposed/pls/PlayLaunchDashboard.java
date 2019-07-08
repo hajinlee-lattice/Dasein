@@ -49,7 +49,11 @@ public class PlayLaunchDashboard {
 
         private long selectedTargets;
 
-        private long suppressed;
+        private long selectedContacts;
+
+        private long accountsSuppressed;
+
+        private long contactsSuppressed;
 
         private long accountErrors;
 
@@ -71,12 +75,20 @@ public class PlayLaunchDashboard {
             this.selectedTargets = selectedTargets;
         }
 
-        public long getSuppressed() {
-            return suppressed;
+        public long getSelectedContacts() {
+            return selectedContacts;
         }
 
-        public void setSuppressed(long suppressed) {
-            this.suppressed = suppressed;
+        public void setSelectedContacts(long selectedContacts) {
+            this.selectedContacts = selectedContacts;
+        }
+
+        public long getAccountsSuppressed() {
+            return accountsSuppressed;
+        }
+
+        public void setAccountsSuppressed(long accountsSuppressed) {
+            this.accountsSuppressed = accountsSuppressed;
         }
 
         public long getAccountErrors() {
@@ -93,6 +105,14 @@ public class PlayLaunchDashboard {
 
         public void setContactErrors(long contactErrors) {
             this.contactErrors = contactErrors;
+        }
+
+        public long getContactsSuppressed() {
+            return contactsSuppressed;
+        }
+
+        public void setContactsSuppressed(long contactsSuppressed) {
+            this.contactsSuppressed = contactsSuppressed;
         }
 
         public long getRecommendationsLaunched() {

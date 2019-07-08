@@ -4,7 +4,7 @@ angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
     $state, $stateParams, $scope, ResourceUtility, 
     ImportWizardStore, FieldDocument, mergedFieldDocument,
-    ImportUtils, $transition$
+    ImportUtils, $transition$, Banner
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name),
@@ -36,6 +36,14 @@ angular.module('lp.import.wizard.customfields', [])
         return vm.fieldDateTooltip;
     }
     vm.init = function() {
+
+        let validationStatus = ImportWizardStore.getValidationStatus();
+        let banners = Banner.get();
+        if (validationStatus && banners.length == 0) {
+            let messageArr = validationStatus.map(function(error) { return error['message']; });
+            Banner.error({ message: messageArr });
+        }
+
         vm.size = vm.AvailableFields.length;
         if(vm.fieldMappings) { //vm.mergedFields This was the original code
             vm.fieldMappings.forEach(function(item) {
@@ -117,7 +125,7 @@ angular.module('lp.import.wizard.customfields', [])
     }
     vm.changeSingleType = function(fieldMapping){
         let userField = fieldMapping.userField;
-        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone});
+        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone}, ImportWizardStore.getEntityType());
         ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
         vm.validate();
     }
@@ -125,6 +133,7 @@ angular.module('lp.import.wizard.customfields', [])
     vm.updateFormats = (formats) => {
         let field = formats.field;
         ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
+        ImportWizardStore.remapType(field.userField, {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone}, ImportWizardStore.getEntityType());
         vm.validate();
     }
 

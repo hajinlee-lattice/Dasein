@@ -8,14 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -39,8 +36,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(ProcessAccountDiff.BEAN_NAME)
 @Lazy
@@ -50,24 +45,6 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountDiff.class);
 
     static final String BEAN_NAME = "processAccountDiff";
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    @Inject
-    private EMREnvService emrEnvService;
-
-    @Resource(name = "distCpConfiguration")
-    protected Configuration distCpConfiguration;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${camille.zk.pod.id}")
-    protected String podId;
-
-    @Value("${aws.customer.s3.bucket}")
-    protected String s3Bucket;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;

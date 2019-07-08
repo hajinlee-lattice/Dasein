@@ -38,11 +38,17 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
 
     /**
      * Whether match traveler is accepted
-     * 
+     *
      * @param traveler
      * @return
      */
     protected abstract boolean accept(MatchTraveler traveler);
+
+    /**
+     * Record the LDC Match actor and tuple for Match Report.
+     */
+    protected abstract void recordActorAndTuple(MatchTraveler traveler);
+
 
     @Autowired
     @Qualifier("matchActorSystem")
@@ -70,7 +76,12 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
     @Override
     protected boolean accept(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        return accept(matchTraveler);
+        if (accept(matchTraveler)) {
+            recordActorAndTuple(matchTraveler);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

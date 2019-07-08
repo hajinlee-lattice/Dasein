@@ -138,15 +138,22 @@ angular
                         return deferred.promise;
                     },
                     JobStatus : function($q, $stateParams, Dashboard, RatingsEngineStore){
-                        var jobStatus = $stateParams.modelingJobStatus;
-                        var deferred = $q.defer();
-                        if (jobStatus == null){
-                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
-                            var modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus || '';
+                        var deferred = $q.defer(),
+                            jobStatus = $stateParams.modelingJobStatus,
+                            iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId,
+                            modelingStatus = '';
+
+                        if (jobStatus) {
+                            modelingStatus = jobStatus;
                             deferred.resolve({modelingJobStatus: modelingStatus});
-                        }else{
-                            deferred.resolve({modelingJobStatus: jobStatus});
+                        } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                            modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus;
+                            deferred.resolve({modelingJobStatus: modelingStatus});
+                        } else {
+                            modelingStatus = '';
+                            deferred.resolve({modelingJobStatus: modelingStatus});
                         }
+
                         return deferred.promise;
                     },
                     RatingEngine: function($q, $stateParams, RatingsEngineStore) {
@@ -162,7 +169,15 @@ angular
                     Model: function($q, $stateParams, ModelStore, RatingEngine, RatingsEngineStore, Dashboard) {
                         var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
                         var deferred = $q.defer(),
-                            id = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            id = '';
+
+                        if ($stateParams.modelId) {
+                            id = $stateParams.modelId;
+                        } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                            id = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId;
+                        } else {
+                            id = '';
+                        }
 
                         if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
@@ -293,7 +308,14 @@ angular
                             } else {
                                 var iterationId = Dashboard.summary.latestIterationId;
                             }
-                            $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            // $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            if ($stateParams.modelId) {
+                                $scope.modelId = $stateParams.modelId;
+                            } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                                $scope.modelId = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId;
+                            } else {
+                                $scope.modelId = '';
+                            }
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -755,16 +777,23 @@ angular
             .state('home.ratingsengine.dashboard.notes', {
                 url: '/notes',
                 resolve: {
-                    JobStatus : function($q, $stateParams, Dashboard, RatingsEngineStore) {
-                        var jobStatus = $stateParams.modelingJobStatus;
-                        var deferred = $q.defer();
-                        if(jobStatus == null){
-                            var iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId;
-                            var modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus || '';
+                    JobStatus : function($q, $stateParams, Dashboard, RatingsEngineStore){
+                        var deferred = $q.defer(),
+                            jobStatus = $stateParams.modelingJobStatus,
+                            iterationId = Dashboard.summary.publishedIterationId ? Dashboard.summary.publishedIterationId : Dashboard.summary.latestIterationId,
+                            modelingStatus = '';
+
+                        if (jobStatus) {
+                            modelingStatus = jobStatus;
                             deferred.resolve({modelingJobStatus: modelingStatus});
-                        }else{
-                            deferred.resolve({modelingJobStatus: jobStatus});
+                        } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                            modelingStatus = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelingJobStatus;
+                            deferred.resolve({modelingJobStatus: modelingStatus});
+                        } else {
+                            modelingStatus = '';
+                            deferred.resolve({modelingJobStatus: modelingStatus});
                         }
+                        
                         return deferred.promise;
                     },
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -810,7 +839,15 @@ angular
                             } else {
                                 var iterationId = Dashboard.summary.latestIterationId;
                             }
-                            $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            
+                            // $scope.modelId = $stateParams.modelId || RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId || '';
+                            if ($stateParams.modelId) {
+                                $scope.modelId = $stateParams.modelId;
+                            } else if (RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId)) {
+                                $scope.modelId = RatingsEngineStore.getIterationFromDashboard(Dashboard, iterationId).modelSummaryId;
+                            } else {
+                                $scope.modelId = '';
+                            }
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -951,7 +988,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Select Segment'
+                    pageTitle: 'Models'
                 },
                 resolve: {
                     Segments: function (SegmentService) {
@@ -983,7 +1020,7 @@ angular
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Add Attributes',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
@@ -1091,7 +1128,7 @@ angular
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Add Attributes',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
@@ -1107,7 +1144,7 @@ angular
                 url: '/rules',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Create Rules'
+                    pageTitle: 'Models'
                 },
                 onEnter: ['$stateParams', 'RatingsEngineService', function($stateParams, RatingsEngineService) {
                     var id = $stateParams.rating_id;
@@ -1183,7 +1220,7 @@ angular
                 url: '/summary',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models - Review Summary',
+                    pageTitle: 'Models',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {

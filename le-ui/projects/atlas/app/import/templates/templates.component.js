@@ -29,7 +29,7 @@ import {
 import "./templates.scss";
 
 import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
+import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
 import messageService from "common/app/utilities/messaging-service";
 import Message, {
     NOTIFICATION
@@ -55,48 +55,44 @@ export default class TemplatesComponent extends Component {
             data: [],
             entity: '',
             entityType: '',
-            feedType: ''
+            feedType: '',
+            object: ''
         };
 
     }
 
     setDataTypes = (response) => {
         let state = Object.assign({}, this.state);
-
-        console.log(response);
-
         switch (response.type) {
             case "Accounts": {
                 state.entity = "accounts";
                 state.entityType = 'Account';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Contacts": {
                 state.entity = "contacts";
                 state.entityType = 'Contact';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Purchases": {
                 state.entity = "productpurchases";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Bundles": {
                 state.entity = "productbundles";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
             case "Product Hierarchy": {
                 state.entity = "producthierarchy";
                 state.entityType = 'Product';
-                state.feedType = response.data.FeedType;
                 break;
             }
         }
+
+        state.feedType = response.data.FeedType;
+        state.object = response.data.Object;
 
         this.setState(state, function () {
             
@@ -108,6 +104,7 @@ export default class TemplatesComponent extends Component {
             ImportWizardStore.setFeedType(this.state.feedType);
             ImportWizardStore.setTemplateAction(action);
             ImportWizardStore.setTemplateData(data);
+            ImportWizardStore.setObject(this.state.object);
             if (action == 'view-template') {
                 this.viewTemplate(response);
             } else {
@@ -183,7 +180,8 @@ export default class TemplatesComponent extends Component {
         if (value && value != "") {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
-            copy[cell.props.colName] = value;
+
+            copy['TemplateName'] = value;
             httpService.put(
                 "/pls/cdl/s3/template/displayname",
                 copy,
@@ -192,9 +190,7 @@ export default class TemplatesComponent extends Component {
                         cell.toogleEdit();
                         if (response.getStatus() === SUCCESS) {
                             let newState = [...this.state.data];
-                            newState[cell.props.rowIndex][
-                                cell.props.colName
-                            ] = value;
+                            newState[cell.props.rowIndex]['TemplateName'] = value;
                             this.setState({ data: newState });
                         }
                     },
@@ -214,35 +210,67 @@ export default class TemplatesComponent extends Component {
             ImportStatus: newStatus,
             FeedType: dataItem.FeedType            
         }
+        let modalAction = newStatus == 'Pause' ? 'Pause' : 'Activate';
+        let modalTitle = newStatus == 'Pause' ? 'Pause Folder Syncing' : 'Activate Folder Syncing';
+        let modalBody = newStatus == 'Pause' ? 'Once you pause syncing, the data will STOP flow into the system.' : 'Once you activate syncing, the data will flow into the system automatically based on your current template mappings.';
+        let succesMessage = dataItem.ImportStatus == 'Pause' ? `Folder syncing is now activated for the ${dataItem.Object} template` : `Folder syncing is now paused for the ${dataItem.Object} template`;
 
-        httpService.put(
-            "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
-            postBody,
-            new Observer(
-                response => {
-                    if (response.getStatus() === SUCCESS) {
-                    
-                        let newTemplatesState = [...templates];
-                        let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
-                        updatedDataItem.ImportStatus = newStatus;
-                        this.setState({ data: newTemplatesState });
+        let config = {
+            callback: (action) => {
 
-                        messageService.sendMessage(
-                            new Message(
-                                null,
-                                NOTIFICATION,
-                                "success",
-                                "",
-                                "Status updated"
-                            )
-                        );
-                    }
-                },
-                error => {
-                    console.log("error");
+                console.log(action);
+                if (action == 'close') {
+                    modalActions.closeModal(store);
+                } else {
+                    httpService.put(
+                        "/pls/cdl/s3/template/status?value=source&required=false&defaultValue=file",
+                        postBody,
+                        new Observer(
+                            response => {
+                                if (response.getStatus() === SUCCESS) {
+                                
+                                    modalActions.closeModal(store);
+
+                                    messageService.sendMessage(
+                                        new Message(
+                                            null,
+                                            NOTIFICATION,
+                                            "success",
+                                            "",
+                                            succesMessage
+                                        )
+                                    );
+
+                                    let newTemplatesState = [...templates];
+                                    let updatedDataItem = newTemplatesState.find( template => template.FeedType == rowData.FeedType);
+                                    updatedDataItem.ImportStatus = newStatus;
+                                    this.setState({ data: newTemplatesState });
+
+                                    
+                                }
+                            },
+                            error => {
+                                console.log("error");
+                            }
+                        )
+                    );
                 }
-            )
-        );
+
+            },
+            template: () => {
+                return (<p>{modalBody}</p>)
+            },
+            title: () => {
+                return (<p>{modalTitle}</p>);
+            },
+            confirmLabel: modalAction,
+            oneButton: false,
+            hideFooter: false,
+            size: SMALL_SIZE
+        }
+        modalActions.info(store, config);
+
+        
     }
 
     getConfig() {
@@ -442,12 +470,11 @@ export default class TemplatesComponent extends Component {
                 <ReactMainContainer className="templates">
                     <LeToolBar justifycontent="space-between">
                         <div>
-                            S3 Root Folder: {rootFolder}
-                            <ul className="unstyled">
+                            <ul>
                                 <CopyComponent
                                     title="Copy Link"
                                     data={
-                                        rootFolder
+                                        `${'S3 Root Folder: '}${rootFolder}`
                                     }
                                     callback={() => {
                                         messageService.sendMessage(
@@ -469,17 +496,6 @@ export default class TemplatesComponent extends Component {
                                 config={this.emailCredentialConfig}
                                 callback={() => {
                                     this.TemplatesStore.newToken();
-                                    // httpService.get(
-                                    //     "/pls/dropbox",
-                                    //     new Observer(response => {
-                                    //         // console.log("BACK HERE ", response);
-                                    //     }),
-                                    //     {
-                                    //         ErrorDisplayMethod: "Banner",
-                                    //         ErrorDisplayOptions: '{"title": "Warning"}',
-                                    //         ErrorDisplayCallback: "TemplatesStore.checkIfRegenerate"
-                                    //     }
-                                    // );
                                 }}
                             />
                         </div>

@@ -19,6 +19,8 @@ import java.util.Scanner;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
@@ -62,15 +64,6 @@ public class AvroUtilsUnitTestNG {
         uuids = ((Schema) combinedSchema[0]).getProp("uuids");
         assertNotNull(uuids);
         assertEquals("abc,abc,xyz", uuids);
-    }
-
-    @Test(groups = "unit", dataProvider = "avscFileProvider")
-    public void generateHiveCreateTableStatement(String avscFileName) {
-        URL url = ClassLoader.getSystemResource(
-                String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
-        File avscFile = new File(url.getFile());
-        String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", avscFile.getPath());
-        System.out.println(hiveTableDDL);
     }
 
     @Test(groups = "unit")
@@ -161,6 +154,23 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void tesCount() throws Exception {
+        InputStream is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("com/latticeengines/common/exposed/util/avroUtilsData/compressed.avro");
+        Assert.assertNotNull(is);
+
+        String tempDir = "/tmp/AvroUnitTest";
+        String avroPath = tempDir + "/compressed.avro";
+        FileUtils.deleteQuietly(new File(tempDir));
+        FileUtils.copyInputStreamToFile(is, new File(avroPath));
+
+        long count = AvroUtils.count(new Configuration(), avroPath);
+        Assert.assertEquals(count, 192);
+
+        FileUtils.deleteQuietly(new File(tempDir));
+    }
+
+    @Test(groups = "unit")
     public void convertRecommendationsAvroToJSON() throws IOException {
         URL avroUrl = ClassLoader
                 .getSystemResource("com/latticeengines/common/exposed/util/avroUtilsData/launch_recommendations.avro");
@@ -205,13 +215,25 @@ public class AvroUtilsUnitTestNG {
         AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
                 new RecommendationAvroToCsvTransformer(
                         readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
-                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv")));
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv"), true));
 
         log.info("Created CSV File at: " + csvFile.getAbsolutePath());
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             List<String[]> csvRows = reader.readAll();
             log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
             assertEquals(csvRows.size(), 15);
+        }
+
+        AvroUtils.convertAvroToCSV(avroUrl.getFile(), csvFile,
+                new RecommendationAvroToCsvTransformer(
+                        readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv"),
+                        readCsvIntoMap("com/latticeengines/play/launch/contact_display_names.csv"), false));
+
+        log.info("Created CSV File at: " + csvFile.getAbsolutePath());
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
+            List<String[]> csvRows = reader.readAll();
+            log.info(String.format("There are %d rows in file %s.", csvRows.size(), csvFile.getName()));
+            assertEquals(csvRows.size(), 24);
         }
     }
 

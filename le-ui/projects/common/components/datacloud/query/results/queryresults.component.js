@@ -5,7 +5,7 @@ angular.module('common.datacloud.query.results', [
     $q, $scope, $state, $stateParams, $filter, $rootScope, $timeout, 
     BrowserStorageUtility, NumberUtility, QueryStore, QueryService, 
     SegmentService, SegmentStore, LookupStore, Config, Accounts,
-    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount
+    AccountsCoverage, Contacts, PlaybookWizardStore, PlaybookWizardService, NoSFIdsCount, orgs
 ) {
     var vm = this;
     angular.extend(vm, {
@@ -14,6 +14,7 @@ angular.module('common.datacloud.query.results', [
         inModel: $state.current.name.split('.')[1] === 'model',
         section: $stateParams.section,
         page: $stateParams.pageTitle,
+        accountQuerySort: $stateParams.accountQuerySort, // used for when we call accounts/data on /supressions page
         accounts: Accounts,
         counts: {},
         contacts: Contacts,
@@ -48,7 +49,10 @@ angular.module('common.datacloud.query.results', [
         tmpContacts: [],
         recommendationCounts: {},
         launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
-        bypassBuckets: false
+        bypassBuckets: false,
+        destinationOrgId: PlaybookWizardStore.getDestinationOrgId(),
+        orgs: orgs,
+        exportFolder: ''
     });
     vm.isEmpty = (obj) => {
         for(var key in obj) {
@@ -113,6 +117,7 @@ angular.module('common.datacloud.query.results', [
                     });
                     PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
                 }
+                vm.getExportFolder(vm.destinationOrgId, vm.orgs);
             } else if (vm.section === 'dashboard.targets') {
                 PlaybookWizardStore.getPlay($stateParams.play_name, true).then(function(data){
                     if(data && data.ratingEngine && data.ratingEngine.bucketMetadata) {
@@ -185,8 +190,10 @@ angular.module('common.datacloud.query.results', [
                 },
                 "sort": {
                     "attributes": [{
-                        "attribute": vm.sortType,
-                        "entity": "Account"
+                        "attribute":{
+                            "attribute": vm.sortType,
+                            "entity": "Account"
+                        }
                     }]
                 }
             };
@@ -203,6 +210,10 @@ angular.module('common.datacloud.query.results', [
                 });
             }
 
+            // "property": 'attribute',
+            // "attribute": vm.sortType,
+            // "entity": vm.page
+
             var query = {
                "free_form_text_search": vm.search,
                "account_restriction": vm.accountRestriction,
@@ -211,7 +222,18 @@ angular.module('common.datacloud.query.results', [
                "page_filter":{  
                     "num_rows": vm.pagesize,
                     "row_offset": offset
-               }
+               },
+               "sort": {
+                    "attributes": [
+                        {
+                           "attribute" : {
+                                "entity": vm.page,
+                                "attribute":vm.sortType   
+                           }
+                        }
+                    ],
+                    "descending": false
+                }
             };
 
             QueryStore.getEntitiesCounts(query).then(function(data){ 
@@ -287,6 +309,17 @@ angular.module('common.datacloud.query.results', [
                             "page_filter": {
                                 "num_rows": vm.pagesize,
                                 "row_offset": offset
+                            },
+                            "sort": {
+                                "attributes": [
+                                    {
+                                       "attribute" : {
+                                            "entity": vm.accountQuerySort || vm.page,
+                                            "attribute": vm.sortType   
+                                       }
+                                    }
+                                ],
+                                "descending": false
                             }
                         };
                     
@@ -496,6 +529,18 @@ angular.module('common.datacloud.query.results', [
         //reset topNcount on bucket click, issue with sync and faster update speed
         updatePage();
         vm.makeRecommendationCounts();
+    }
+
+    vm.getExportFolder = function(orgId, orgs) {
+        var folder = '';
+        if(orgId === 'Lattice_S3') {
+            folder = orgs.find(function(org) {
+                return org.orgId === orgId;
+            });
+        }
+        if(folder.exportFolder) {
+            vm.exportFolder = folder.exportFolder;
+        }
     }
 
     vm.launchUnscoredClick = function() {

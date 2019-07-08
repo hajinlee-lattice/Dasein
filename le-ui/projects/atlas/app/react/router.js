@@ -3,8 +3,8 @@ import {
     servicesPlugin,
     hashLocationPlugin
 } from "common/react-vendor";
-import mainStates  from "./mainstates";
-import {actions as bannerActions} from 'common/widgets/banner/le-banner.redux';
+import mainStates from "./mainstates";
+import { actions as bannerActions } from 'common/widgets/banner/le-banner.redux';
 import { store } from 'store';
 
 class ReactRouter {
@@ -24,7 +24,7 @@ class ReactRouter {
 
         // Register each state
         const states = mainStates;
-        console.log('STATE ',states);
+        // console.log('STATE ',states);
         states.forEach(state => this.routing.router.stateRegistry.register(state));
 
         // Set initial and fallback states
@@ -48,9 +48,9 @@ class ReactRouter {
     }
 
     getRouter() {
-        if(this.routing.router){
+        if (this.routing.router) {
             return this.routing.router;
-        }else{
+        } else {
             this.initRouter();
             return this.routing.router;
         }

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -94,10 +96,8 @@ public class MetadataServiceImpl implements MetadataService {
     private Long getPidByTableName(CustomerSpace customerSpace, String tableName) {
         Table table = tableEntityMgr.findByName(tableName, false);
         /*
-         * // For backward compatibility, we cannot throw the exception. So,
-         * returning null. if (table == null) throw new
-         * LedpException(LedpCode.LEDP_11008, new String[] {tableName,
-         * customerSpace.toString()});
+         * // For backward compatibility, we cannot throw the exception. So, returning null. if (table == null) throw
+         * new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
          */
         return table != null ? table.getPid() : null;
     }
@@ -181,8 +181,8 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public Table cloneTable(CustomerSpace customerSpace, String tableName) {
-        return tableEntityMgr.clone(tableName);
+    public Table cloneTable(CustomerSpace customerSpace, String tableName, boolean ignoreExtracts) {
+        return tableEntityMgr.clone(tableName, ignoreExtracts);
     }
 
     @Override
@@ -204,6 +204,15 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes) {
         tableEntityMgr.addAttributes(tableName, attributes);
+        return true;
+    }
+
+    @Override
+    public Boolean fixAttributes(CustomerSpace space, String tableName, List<AttributeFixer> attributeFixerList) {
+        if (CollectionUtils.isEmpty(attributeFixerList)) {
+            return true;
+        }
+        tableEntityMgr.fixAttributes(tableName, attributeFixerList);
         return true;
     }
 

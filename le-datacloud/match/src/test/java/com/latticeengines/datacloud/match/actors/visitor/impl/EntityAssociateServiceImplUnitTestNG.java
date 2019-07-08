@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.newSeed;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.DC_FACEBOOK_2;
@@ -15,12 +16,14 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_2;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -55,7 +58,7 @@ public class EntityAssociateServiceImplUnitTestNG {
     private void testAssociate(
             EntityAssociationRequest request, EntityRawSeed currentTargetSnapshot, List<EntityRawSeed> expectedParams,
             List<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> results,
-            String expectedAssociatedEntityId, boolean hasAssociationError) throws Exception {
+            String expectedAssociatedEntityId, Set<EntityLookupEntry> expectedConflictEntries) throws Exception {
         List<EntityRawSeed> params = new ArrayList<>();
         Iterator<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> it = results.iterator();
         EntityAssociateServiceImpl service = mock(params, it);
@@ -76,11 +79,15 @@ public class EntityAssociateServiceImplUnitTestNG {
         } else {
             Assert.assertEquals(response.isNewlyAllocated(), currentTargetSnapshot.isNewlyAllocated());
         }
-        if (hasAssociationError) {
-            Assert.assertFalse(response.getAssociationErrors().isEmpty());
+        if (!expectedConflictEntries.isEmpty()) {
+            Assert.assertFalse(response.getAssociationErrors().isEmpty(), "Should have association errors");
         } else {
-            Assert.assertTrue(response.getAssociationErrors().isEmpty());
+            Assert.assertTrue(response.getAssociationErrors().isEmpty(), "Should not have any association error");
         }
+
+        Assert.assertNotNull(response.getConflictEntries(), "Conflict entry set should not be null");
+        Assert.assertEquals(response.getConflictEntries(), expectedConflictEntries,
+                "Conflict entries in response should match the expected ones");
 
         // verify captured params
         Assert.assertEquals(params.size(), expectedParams.size());
@@ -193,7 +200,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         // seed before association has no lookup entry (newly allocated)
                         // therefore no association error
                         singletonList(noConflictResult(newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]))),
-                        TEST_ENTITY_ID, false
+                        TEST_ENTITY_ID, emptySet()
                 },
                 /*
                  * Case #2: empty target seed (newly allocated), more than 1 lookup entries in request
@@ -211,7 +218,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         // therefore no association error
                         asList(noConflictResult(newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0])),
                                 noConflictResult(newSeed(TEST_ENTITY_ID, SFDC_1))),
-                        TEST_ENTITY_ID, false
+                        TEST_ENTITY_ID, emptySet()
                 },
                 /*
                  * Case #3: existing target seed, only one system ID, already mapped to target entity
@@ -225,7 +232,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         // no need to associate
                         emptyList(),
                         emptyList(),
-                        TEST_ENTITY_ID, false
+                        TEST_ENTITY_ID, emptySet()
                 },
                 /*
                  * Case #4: existing seed already has some system ID, has association error
@@ -242,7 +249,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_FACEBOOK_2),
                                 emptyList(),
                                 emptyList())),
-                        TEST_ENTITY_ID, true
+                        TEST_ENTITY_ID, newHashSet(MKTO_1)
                 },
                 {
                         // only difference than the previous one is that now there is no DC_FACEBOOK_1 and there
@@ -252,7 +259,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2),
                         emptyList(),
                         emptyList(),
-                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                        TEST_ENTITY_ID, newHashSet(MKTO_1) // still has error (MKTO_1 with MKTO_2 in target entity)
                 },
                 /*
                  * Case #5: non-highest priority system ID already associated to other entity
@@ -265,7 +272,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         newSeed(TEST_ENTITY_ID, SFDC_1),
                         emptyList(),
                         emptyList(),
-                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                        TEST_ENTITY_ID, newHashSet(MKTO_1)
                 },
                 /*
                  * Case #6: non-highest priority lookup entry (many to X) already associate to other entity
@@ -283,7 +290,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, SFDC_1),
                                 emptyList(),
                                 asList(DUNS_1, DC_FACEBOOK_1))),
-                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                        TEST_ENTITY_ID, newHashSet(DUNS_1, DC_FACEBOOK_1)
                 },
                 /*
                  * Case #7: mixing #5 & #6 & some entries not mapped to any entity
@@ -300,7 +307,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, SFDC_1),
                                 emptyList(),
                                 asList(MKTO_1, DUNS_1, DC_FACEBOOK_1))),
-                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                        TEST_ENTITY_ID, newHashSet(DUNS_1, MKTO_1, DC_FACEBOOK_1)
                 },
                 /*
                  * Case #8: two association required
@@ -320,7 +327,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2),
                                 emptyList(),
                                 asList(MKTO_1, DUNS_1, DC_FACEBOOK_1))),
-                        TEST_ENTITY_ID, true // still has error (MKTO_1 with MKTO_2 in target entity)
+                        TEST_ENTITY_ID, newHashSet(DUNS_1, DC_FACEBOOK_1, MKTO_1, ELOQUA_3)
                 },
                 /*
                  * Case #9: highest priority entry is many to many
@@ -335,7 +342,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         asList(noConflictResult(newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_GOOGLE_3)), Triple.of(
                                 newSeed(TEST_ENTITY_ID, SFDC_1, MKTO_2, DC_FACEBOOK_1, DC_GOOGLE_3),
                                 emptyList(), emptyList())),
-                        TEST_ENTITY_ID, false
+                        TEST_ENTITY_ID, emptySet()
                 },
                 /*
                  * Case #10: conflict caused multiple processes trying to associate at the same time
@@ -351,7 +358,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
                                 singletonList(SFDC_1), emptyList())),
                         // NOTE failed to associate highest priority entry, get null ID in response
-                        null, true
+                        null, newHashSet(SFDC_1)
                 },
                 {
                         // conflict during updating lookup mapping
@@ -364,7 +371,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, new EntityLookupEntry[0]),
                                 emptyList(), singletonList(SFDC_1))),
                         // NOTE failed to associate highest priority entry, get null ID in response
-                        null, true
+                        null, newHashSet(SFDC_1)
                 },
                 /*
                  * Case #11: entry many to one mapping
@@ -376,7 +383,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                         emptyList(),
                         emptyList(),
                         // has conflict because DUNS_1 has conflict with DUNS_2 in target seed
-                        TEST_ENTITY_ID, true
+                        TEST_ENTITY_ID, newHashSet(DUNS_1)
                 },
                 {
                         newRequest(new Object[][] {{ SFDC_1, TEST_ENTITY_ID }, { DUNS_1, TEST_ENTITY_ID2 }}),
@@ -387,7 +394,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 newSeed(TEST_ENTITY_ID, SFDC_1),
                                 emptyList(), emptyList())),
                         // no conflict even if DUNS_1 already mapped to another entity (cuz mapping is many to one)
-                        TEST_ENTITY_ID, false
+                        TEST_ENTITY_ID, emptySet()
                 },
                 /*
                  * Case #12: empty target seed (newly allocated), one system ID in request, and
@@ -404,7 +411,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 Triple.of(newSeed(TEST_ENTITY_ID, false), //
                                         emptyList(), //
                                         singletonList(SFDC_1))), //
-                        null, true },
+                        null, newHashSet(SFDC_1) },
                 /*
                  * Case #13: empty target seed (newly allocated), more than 1 lookup entries in
                  * request, conflict in lower priority key's lookup mapping
@@ -427,7 +434,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                                 Triple.of( //
                                         newSeed(TEST_ENTITY_ID, false, SFDC_1), //
                                         emptyList(), singletonList(MKTO_1))), //
-                        TEST_ENTITY_ID, true },
+                        TEST_ENTITY_ID, newHashSet(MKTO_1) },
         };
     }
 

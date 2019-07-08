@@ -1,5 +1,5 @@
 import React, { Component } from "common/react-vendor";
-import { store, injectAsyncReducer } from 'store';
+import { store } from 'store';
 import ReactRouter from '../../../react/router';
 import NgState from "atlas/ng-state";
 
@@ -9,13 +9,16 @@ import { SUCCESS } from "common/app/http/response";
 import Observer from "common/app/http/observer";
 
 import LeTable from "common/widgets/table/table";
+import LeLink from "common/widgets/link/le-link";
 import LeButton from "common/widgets/buttons/le-button";
 import './viewMappings.component.scss';
+import FeatureFlagsUtilities, { ENABLE_MULTI_TEMPLATE_IMPORT } from 'common/app/services/featureFlags.utilities';
 
 export default class ViewMappings extends Component {
 
     constructor(props) {
         super(props);
+        // console.log('STORE ', store.getState());
 
         this.ImportWizardStore = ReactRouter.getRouter().ngservices.ImportWizardStore;
 
@@ -24,42 +27,43 @@ export default class ViewMappings extends Component {
             showEmpty: false,
             showLoading: false,
             entity: '',
+            object: '',
+            allMappings: [],
             latticeMappings: [],
-            customMappings: []
+            customMappings: [],
+            downloadData: []
         };
-
-        console.log(props);
     }
 
-    componentWillUnmount() {
+    componentWillUnmount () {
         this.unsubscribe();
     }
 
-    componentDidMount() {
+    componentDidMount () {
         this.unsubscribe = store.subscribe(this.handleChange);
 
         let ImportWizardStore = this.ImportWizardStore;
         let postBody = ImportWizardStore.getTemplateData();
+        let feedType = {
+            FeedType: postBody.FeedType
+        };
         let latticeMappings = [];
         let customMappings = [];
+        
         httpService.post(
             "/pls/cdl/s3import/template/preview",
             postBody,
             new Observer(
                 response => {
                     if (response.getStatus() === SUCCESS) {
-                        console.log(response);
-                        // state.latticeMappings = response;
-
+                        // state.latticeMappings = respons;
                         let data = response.data;
                         latticeMappings = data.filter(field => field.field_category == "LatticeField");
                         customMappings = data.filter(field => field.field_category == "CustomField");
 
-                        console.log(latticeMappings);
-                        console.log(customMappings);
-
                         this.setState({
                             forceReload: true,
+                            allMappings: data,
                             latticeMappings: latticeMappings,
                             customMappings: customMappings
                         }, function () {
@@ -73,24 +77,46 @@ export default class ViewMappings extends Component {
                 }
             )
         );
+
+        httpService.post(
+            "/pls/cdl/s3import/template/downloadcsv?source=File",
+            feedType,
+            new Observer(
+                response => {
+                    if (response.getStatus() === SUCCESS) {
+                        let data = response.data;
+                        this.setState({
+                            downloadData: data
+                        });
+                    }
+                },
+                error => {
+                    console.log("error");
+                }
+            )
+        );
+
+
+        console.log(this.state.allMappings);
+        console.log(this.state.downloadData);
     }
 
     handleChange = () => {
         let ImportWizardStore = this.ImportWizardStore;
         let entity = ImportWizardStore.getEntityType();
         let feedType = ImportWizardStore.getFeedType();
-
-        console.log(ImportWizardStore.getTemplateData());
+        let object = ImportWizardStore.getObject();
 
         let state = Object.assign({}, this.state);
         state.forceReload = true;
         state.entity = entity;
+        state.object = object
         this.setState(state, function () {
             this.setState({ forceReload: false });    
         });
     }
     
-    getLatticeFieldsConfig() {
+    getLatticeFieldsConfig () {
 
         let config = {
             name: "lattice-mappings",
@@ -133,7 +159,7 @@ export default class ViewMappings extends Component {
         return config;
     }
 
-    getCustomFieldsConfig() {
+    getCustomFieldsConfig () {
         let config = {
             name: "custom-mappings",
             selectable: false,
@@ -145,7 +171,7 @@ export default class ViewMappings extends Component {
                 },
                 {
                     name: "name_in_template",
-                    displayName: "Lattice Field",
+                    displayName: "Custom Field",
                     sortable: false
                 },
                 {
@@ -175,16 +201,73 @@ export default class ViewMappings extends Component {
         return config;
     }
 
+    getDownloadButton () {
+        let ImportWizardStore = this.ImportWizardStore;
+        let object = ImportWizardStore.getObject();
+
+        if (object == 'Accounts' || object == 'Contacts') {
+            return (
+                <LeButton
+                    name="downloadMappings"
+                    config={{
+                        label: "Download Mappings",
+                        classNames: "white-button"
+                    }}
+                    callback={() => {
+                        this.downloadMappings()
+                    }}
+                />
+            )
+        } else {
+            return null;
+        }
+    }
+
+    downloadMappings () {
+        let ImportWizardStore = this.ImportWizardStore;
+        let object = ImportWizardStore.getObject();
+        let fileName = object.toLowerCase() + "-mappings.csv";
+        let downloadData = this.state.downloadData;
+
+        var element = document.createElement("a"); 
+        element.download = fileName; 
+        var file = new Blob([downloadData], { 
+            type: "text/csv;charset=utf-8;" 
+        }); 
+        var fileURL = window.URL.createObjectURL(file); 
+        element.href = fileURL; 
+        document.body.appendChild(element); 
+        element.click(); 
+        document.body.removeChild(element); 
+    }
+
     render() {
         return (
             <ReactMainContainer>
                 <section className="container setup-import data-import">
                     <div className="row">
-                        <div className="columns twelve box-outline">
-                            <div className="section-header"><h4>View {this.state.entity} Mappings</h4></div>
+                        <div className="columns twelve box-outline view-mappings">
+                            <div className="section-header">
+                                <h4>
+                                    <LeLink
+                                      config={{
+                                        label: "< Back",
+                                        classes: "back-button",
+                                        name: ""
+                                      }}
+                                      callback={() => {
+                                        NgState.getAngularState().go('home.importtemplates', {});
+                                      }}
+                                    />
+                                    View {this.state.object} Mappings
+                                </h4>
+                            </div>
                             <hr />
-                            <div className="section-body view-mappings with-padding">
-                                <h5><i className="ico ico-lattice-dots-color"></i> Lattice Fields</h5>
+                            <div className="section-body with-padding">
+                                <h5>
+                                    <i className="ico ico-lattice-dots-color"></i> Lattice Fields
+                                    {this.getDownloadButton()}
+                                </h5>
                                 <LeTable
                                     name="lattice-mappings"
                                     config={this.getLatticeFieldsConfig()}
@@ -214,7 +297,13 @@ export default class ViewMappings extends Component {
                                             classNames: "white-button"
                                         }}
                                         callback={() => {
-                                            NgState.getAngularState().go('home.importtemplates', {});
+                                            
+                                            // console.log('VIEW STATE ', FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT));
+                                            if(FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT)){
+                                                NgState.getAngularState().go('home.multipletemplates', {});
+                                            }else {
+                                                NgState.getAngularState().go('home.importtemplates', {});
+                                            }
                                         }}
                                     />
                                 </div>

@@ -17,6 +17,7 @@ angular
     'lp.import.wizard.productids',
     'lp.import.wizard.producthierarchyids',
     'lp.import.wizard.producthierarchy',
+    'lp.import.wizard.validatetemplate',
     'lp.import.utils',
     'mainApp.core.utilities.AuthorizationUtility',
     'mainApp.core.redux'
@@ -250,7 +251,6 @@ angular
                 FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
                     var deferred = $q.defer();
                     ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType(), null, ImportWizardStore.getFeedType()).then(function(result) {
-                        console.log(result.Result);
                         ImportWizardStore.setFieldDocument(result.Result);
                         deferred.resolve(result.Result);
                     });
@@ -375,9 +375,33 @@ angular
                 }
             }
         })
-        //app/import/content/customfields/custom-fields.component.html
-        //app/import/content/customfields/customfields.component.html
-        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', {
+        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.validation', {
+            url: '/validatetemplate',
+            resolve: {
+                FileName: function (ImportWizardStore) {
+                    return ImportWizardStore.getCsvFileName();
+                },
+                FieldDocument: function(ImportWizardStore, $transition$) {
+                    var from = $transition$._targetState._definition.parent.name;
+                    let mapping = ImportWizardStore.getSavedDocumentCopy(from);
+                    
+                    let ret = ImportWizardStore.getFieldDocument();
+                    ret.fieldMappings = mapping;
+                    return ret;
+                },
+                TemplateData: function(ImportWizardStore) {
+                    return ImportWizardStore.getTemplateData();
+                }
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardValidateTemplate',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/validatetemplate/validatetemplate.component.html'
+                }
+            }
+        })
+        .state('home.import.data.accounts.ids.thirdpartyids.latticefields.customfields.validation.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {
@@ -596,7 +620,7 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Email', displayName: '' },
+                        // { name: 'Email', displayName: '' },
                         { name: 'Website', displayName: '' },
                         { name: 'CompanyName', displayName: 'Company Name' },
                         { name: 'DUNS', displayName: '' },
@@ -639,7 +663,33 @@ angular
                 }
             }
         })
-        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.jobstatus', {
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation', {
+            url: '/validatetemplate',
+            resolve: {
+                FileName: function (ImportWizardStore) {
+                    return ImportWizardStore.getCsvFileName();
+                },
+                FieldDocument: function(ImportWizardStore, $transition$) {
+                    var from = $transition$._targetState._definition.parent.name;
+                    let mapping = ImportWizardStore.getSavedDocumentCopy(from);
+                    
+                    let ret = ImportWizardStore.getFieldDocument();
+                    ret.fieldMappings = mapping;
+                    return ret;
+                },
+                TemplateData: function(ImportWizardStore) {
+                    return ImportWizardStore.getTemplateData();
+                }
+            },
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardValidateTemplate',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/validatetemplate/validatetemplate.component.html'
+                }
+            }
+        })
+        .state('home.import.data.contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields.validation.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {

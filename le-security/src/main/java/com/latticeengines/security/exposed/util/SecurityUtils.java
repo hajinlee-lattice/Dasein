@@ -15,7 +15,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public final class SecurityUtils {
 
     public static Tenant getTenantFromRequest(HttpServletRequest request,
-                                                    SessionService sessionService) {
+                                              SessionService sessionService) {
         Session session = getSessionFromRequest(request, sessionService);
         return session.getTenant();
     }
@@ -26,6 +26,9 @@ public final class SecurityUtils {
         Session session = getSessionFromRequest(request, sessionService);
         String email = session.getEmailAddress();
         User user = userService.findByEmail(email);
+        if (user == null) {
+            return null;
+        }
         user.setAccessLevel(session.getAccessLevel());
         return user;
     }

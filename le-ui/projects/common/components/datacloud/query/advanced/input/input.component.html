@@ -1,7 +1,6 @@
-<span   class="query-input-number category-{{ vm.categoryClass(vm.item.Category) | lowercase }} noselect-children" 
-        ng-if="vm.tree.bucketRestriction" 
-        ng-init="data = vm.items[vm.tree.bucketRestriction.attr]"
-        title="{{ vm.item.Category }} - {{ vm.item.Subcategory }} - {{ vm.item.DisplayName }}">
+<span class="query-input-number category-{{ vm.categoryClassInput(vm.item.Category) | lowercase }} noselect-children"
+    ng-if="vm.tree.bucketRestriction" ng-init="data = vm.items[vm.tree.bucketRestriction.attr]"
+    title="{{ vm.item.Category }} - {{ vm.item.Subcategory }} - {{ vm.item.DisplayName }}">
 
     {{ vm.root.getBucketLabel(vm.tree) }}
 </span>
@@ -15,20 +14,21 @@
     (
 </span>
 <ul ng-if="vm.tree.logicalRestriction.restrictions.length > 0" class="query-input">
-    <li     query-input-directive
-            class="{{ vm.tree.logicalRestriction.operator ? 'query-input-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
-            ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}" 
-            ng-repeat="tree in vm.tree.logicalRestriction.restrictions"
-            ng-if="(tree.bucketRestriction && tree.bucketRestriction.bkt.Id) || tree.logicalRestriction"
-            items="vm.items" tree="tree" root="vm.root">
+    <li query-input-directive
+        class="{{ vm.tree.logicalRestriction.operator ? 'query-input-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}"
+        ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}"
+        ng-repeat="tree in vm.tree.logicalRestriction.restrictions"
+        ng-if="(tree.bucketRestriction && tree.bucketRestriction.bkt.Id) || tree.logicalRestriction" items="vm.items"
+        tree="tree" root="vm.root">
     </li>
 </ul>
-<span ng-if="vm.tree.logicalRestriction.restrictions.length > 0" class="query-input-parenthesis query-input-section-end">
+<span ng-if="vm.tree.logicalRestriction.restrictions.length > 0"
+    class="query-input-parenthesis query-input-section-end">
     )
 </span>
 
-<span ng-if="vm.tree.logicalRestriction.restrictions.length > 0" class="query-input-operator query-input-operator-alternate noselect-children"
-        ng-class="{
+<span ng-if="vm.tree.logicalRestriction.restrictions.length > 0"
+    class="query-input-operator query-input-operator-alternate noselect-children" ng-class="{
             'input-section-all': vm.tree.logicalRestriction.operator == 'AND',
             'input-section-any': vm.tree.logicalRestriction.operator == 'OR'
         }">

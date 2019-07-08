@@ -114,7 +114,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
         playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 8L, 25L,
-                0L, (totalRatedAccounts - 8L - 0L));
+                0L, (totalRatedAccounts - 8L - 0L), 0L, 0L);
 
         launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));

@@ -129,7 +129,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
         step.setBaseSources(baseSources);
         step.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step.setConfiguration(setDataFlowEngine(JsonUtils.serialize(constructProfileConfig()), "TEZ"));
+        step.setConfiguration(JsonUtils.serialize(constructProfileConfig()));
         return step;
     }
 
@@ -165,7 +165,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(0, 2));
         step.setTransformer(CalculateStats.TRANSFORMER_NAME);
-        step.setConfiguration(setDataFlowEngine("{}", "TEZ"));
+        step.setConfiguration("{}");
         step.setTargetSource("AccountMasterBucketedStats");
         return step;
     }
@@ -220,7 +220,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void verifyStats() throws IOException {
+    private void verifyStats() {
         Iterator<GenericRecord> records = iterateSource("AccountMasterBucketedStats");
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -234,7 +234,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
                 }
             }
             long attrCount = (long) record.get(STATS_ATTR_COUNT);
-            Assert.assertTrue(attrCount <= expectedCount.longValue());
+            Assert.assertTrue(attrCount <= expectedCount);
             if (attrName.equals("OUT_OF_BUSINESS_INDICATOR")) {
                 System.out.print(record);
             }

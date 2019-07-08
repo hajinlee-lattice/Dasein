@@ -7,7 +7,7 @@ PRIORITY_ID,Lattice Rating
 LIFT,Lift
 RATING_MODEL_ID,Model ID
 EXTERNAL_ID,Recommendation ID
-LAUNCH_ID,Campaign ID
+LAUNCH_ID,Campaign Launch ID
 DESCRIPTION,Campaign Description
 LAUNCH_DATE,Campaign Launch Date
 LAST_UPDATED_TIMESTAMP,Campaign Launch Time

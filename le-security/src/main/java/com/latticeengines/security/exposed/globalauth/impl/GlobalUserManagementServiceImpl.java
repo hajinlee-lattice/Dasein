@@ -100,7 +100,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return globalAuthRegisterUser(userName, user, creds);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
+            throw new LedpException(LedpCode.LEDP_18004, e, new String[]{creds.getUsername()});
         }
     }
 
@@ -113,7 +113,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         } catch (LedpException le) {
             throw le;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18004, e, new String[] { "External: " + user.getEmail() });
+            throw new LedpException(LedpCode.LEDP_18004, e, new String[]{"External: " + user.getEmail()});
         }
     }
 
@@ -177,25 +177,25 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return globalAuthGrantRight(right, tenant, username, null, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
-                    new String[] { right, username, tenant });
+                    new String[]{right, username, tenant});
         }
     }
 
     @Override
     public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser,
-            Long expirationDate) {
+                                           Long expirationDate) {
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s with expiration period %s.", right,
                     username, tenant, expirationDate));
             return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
-                    new String[] { right, username, tenant });
+                    new String[]{right, username, tenant});
         }
     }
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser,
-            Long expirationDate)
+                                        Long expirationDate)
             throws Exception {
 
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
@@ -212,8 +212,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (rightData != null) {
             // update expiration date of tenant for user
             // if expiration date changes, update tenant right
-            if (expirationDate != rightData.getExpirationDate()
-                    || (expirationDate != null && !expirationDate.equals(rightData.getExpirationDate()))) {
+            if (expireDateChanged(rightData.getExpirationDate(), expirationDate)) {
                 rightData.setExpirationDate(expirationDate);
                 gaUserTenantRightEntityMgr.update(rightData);
             }
@@ -275,6 +274,26 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    private List<GlobalAuthUserTenantRight> globalAuthGetRightsDetail(String email, String tenantId) {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (tenantData == null) {
+            return new ArrayList<>();
+        }
+        GlobalAuthUser userData = gaUserEntityMgr.findByEmailJoinAuthentication(email);
+        if (userData == null) {
+            return new ArrayList<>();
+        }
+        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
+                .findByUserIdAndTenantId(userData.getPid(),
+                        tenantData.getPid());
+        if (rightsData != null) {
+            return rightsData;
+        } else {
+            return new ArrayList<>();
+        }
+
+    }
+
     private List<String> globalAuthGetRights(String tenantId, String username) throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
@@ -311,7 +330,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return globalAuthRevokeRight(right, tenant, username);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18006, e,
-                    new String[] { right, username, tenant });
+                    new String[]{right, username, tenant});
         }
     }
 
@@ -349,7 +368,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     public synchronized Boolean forgotLatticeCredentials(String username) {
 
         if (getUserByUsername(username) == null) {
-            throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
+            throw new LedpException(LedpCode.LEDP_18018, new String[]{username});
         }
 
         EmailSettings emailsettings = new EmailSettings();
@@ -364,7 +383,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Resetting credentials for user %s.", username));
             return globalAuthForgotLatticeCredentials(username, emailsettings);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[]{username});
         }
     }
 
@@ -416,12 +435,12 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds,
-            Credentials newCreds) {
+                                                         Credentials newCreds) {
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
             return globalAuthModifyLatticeCredentials(ticket, oldCreds, newCreds, null);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[]{oldCreds.getUsername()});
         }
     }
 
@@ -444,7 +463,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 }
             });
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[]{oldCreds.getUsername()});
         }
     }
 
@@ -483,7 +502,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Resetting credentials for %s.", username));
             return globalAuthResetLatticeCredentials(username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[]{username});
         }
     }
 
@@ -546,7 +565,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new Exception("Unable to find the user requested.");
         }
         GlobalAuthAuthentication authData = null;
-        if(userData.getAuthentications() != null && userData.getAuthentications().size() > 0) {
+        if (userData.getAuthentications() != null && userData.getAuthentications().size() > 0) {
             authData = userData.getAuthentications().get(0);
         }
         if (authData != null) {
@@ -629,7 +648,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Deleting user %s success = %s", username, result));
             return result;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18015, e, new String[] { username });
+            throw new LedpException(LedpCode.LEDP_18015, e, new String[]{username});
         }
     }
 
@@ -685,7 +704,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
             return globalFindAllUserRightsByTenant(tenantId);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18016, e, new String[] { tenantId });
+            throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
         }
     }
 
@@ -704,7 +723,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         HashMap<Long, String> userIdToUsername = gaUserEntityMgr.findUserInfoByTenant(tenantData);
 
         HashMap<Long, AbstractMap.SimpleEntry<User, HashSet<String>>> userRights = new HashMap<>();
-        for(GlobalAuthUserTenantRight userRightData : userRightDatas) {
+        for (GlobalAuthUserTenantRight userRightData : userRightDatas) {
             GlobalAuthUser userData = userRightData.getGlobalAuthUser();
             if (userRights.containsKey(userData.getPid())) {
                 AbstractMap.SimpleEntry<User, HashSet<String>> uRights = userRights.get(userData.getPid());
@@ -764,7 +783,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     public String deactiveUserStatus(String userName, String emails) {
         String[] emailStr = emails.trim().split(",");
         Set<String> emailSet = new HashSet<>();
-        for(String email : emailStr) {
+        for (String email : emailStr) {
             emailSet.add(email.trim());
         }
         StringBuilder filterEmails = new StringBuilder("");
@@ -795,14 +814,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public boolean deleteUserByEmail(String email){
+    public boolean deleteUserByEmail(String email) {
         GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email);
-        if(gaUser == null)
+        if (gaUser == null)
             return true;
 
         GlobalAuthAuthentication gaAuthentication = gaAuthenticationEntityMgr.findByUserId(gaUser.getPid());
-        if(gaAuthentication != null)
-        {
+        if (gaAuthentication != null) {
             gaAuthenticationEntityMgr.delete(gaAuthentication);
             log.info(String.format("current user's auth id %s is deleted", gaAuthentication.getPid()));
         }
@@ -825,7 +843,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     public String addUserAccessLevel(String userName, String emails, AccessLevel level) {
         String[] emailStr = emails.trim().split(",");
         Set<String> emailSet = new HashSet<>();
-        for(String email : emailStr) {
+        for (String email : emailStr) {
             emailSet.add(email.trim());
         }
         StringBuilder filterEmails = new StringBuilder("");
@@ -839,7 +857,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             if (tenants != null) {
                 filterEmails.append(email + ",");
             }
-            for(GlobalAuthTenant tenant : tenants) {
+            for (GlobalAuthTenant tenant : tenants) {
                 GlobalAuthUserTenantRight gaUserTenantRight = new GlobalAuthUserTenantRight();
                 gaUserTenantRight.setGlobalAuthTenant(tenant);
                 gaUserTenantRight.setGlobalAuthUser(gaUser);
@@ -868,6 +886,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return filterEmails.toString();
     }
 
+    @Override
+    public boolean userExpireIntenant(String email, String tenantId) {
+        log.info(String.format("Check  user expire in this tenant %s with email %s.", tenantId, email));
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRightsDetail(email, tenantId);
+        long currentTime = System.currentTimeMillis();
+        for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+            if (globalAuthUserTenantRight.getExpirationDate() != null && currentTime >= globalAuthUserTenantRight.getExpirationDate()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isZendeskEnabled(String email) {
         if (!zendeskEnabled || email == null) {
             return false;
@@ -878,6 +909,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     /**
      * Make sure a zendesk user with specified email exists and update its name/verified/suspended properties
+     *
      * @param user target zendesk user info
      * @return entire zendesk user after the operation
      */
@@ -898,5 +930,37 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         String firstName = Optional.ofNullable(user.getFirstName()).orElse("");
         String lastName = Optional.ofNullable(user.getLastName()).orElse("");
         return String.format("%s %s", firstName, lastName);
+    }
+
+    private boolean expireDateChanged(Long before, Long current) {
+        boolean expirationDateChange = false;
+        if (current == null) {
+            if (before != null) {
+                expirationDateChange = true;
+            }
+        } else {
+            expirationDateChange = !current.equals(before);
+        }
+        return expirationDateChange;
+    }
+
+    @Override
+    public Boolean existExpireDateChanged(String username, String tenant, String right, Long expirationDate) {
+        GlobalAuthUser globalAuthUser = null;
+        try {
+            globalAuthUser = findGlobalAuthUserByUsername(username, true);
+            GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
+            if (tenantData != null) {
+                GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
+                        .findByUserIdAndTenantIdAndOperationName(
+                                globalAuthUser.getPid(),
+                                tenantData.getPid(), right);
+                Long before = rightData == null ? null : rightData.getExpirationDate();
+                return expireDateChanged(before, expirationDate);
+            }
+        } catch (Exception e) {
+            log.error("Unexpected exception: ", e);
+        }
+        return false;
     }
 }

@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateAccountWorkfl
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateContactWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = GenerateRatingWorkflowConfiguration.class, name = "GenerateRatingWorkflowConfiguration"),
         @Type(value = GenerateAIRatingWorkflowConfiguration.class, name = "GenerateAIRatingWorkflowConfiguration"),
         @Type(value = PlayLaunchWorkflowConfiguration.class, name = "PlayLaunchWorkflowConfiguration"),
+        @Type(value = CampaignLaunchWorkflowConfiguration.class, name = "CampaignLaunchWorkflowConfiguration"),
         @Type(value = ProcessAnalyzeWorkflowConfiguration.class, name = "ProcessAnalyzeWorkflowConfiguration"),
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
         @Type(value = UpdateAccountWorkflowConfiguration.class, name = "UpdateAccountWorkflowConfiguration"),
@@ -63,7 +66,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = EntityExportWorkflowConfiguration.class, name = "EntityExportWorkflowConfiguration"),
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
-        @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration") })
+        @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration"),
+
+        @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration") })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 
     @Override

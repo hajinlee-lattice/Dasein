@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
+import com.latticeengines.apps.cdl.service.DeltaCalculationService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
@@ -20,6 +22,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
     private RedShiftCleanupService redShiftCleanupService;
     private S3ImportService s3ImportService;
+    private CampaignLaunchTriggerService campaignLaunchTriggerService;
+    private DeltaCalculationService deltaCalculationService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -28,20 +32,27 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.dataFeedExecutionCleanupService = builder.dataFeedExecutionCleanupService;
         this.redShiftCleanupService = builder.redShiftCleanupService;
         this.s3ImportService = builder.s3ImportService;
+        this.campaignLaunchTriggerService = builder.campaignLaunchTriggerService;
+        this.deltaCalculationService = builder.deltaCalculationService;
         this.jobArguments = builder.jobArguments;
     }
 
     @Override
     public Boolean call() throws Exception {
         log.info(String.format("Calling with job type: %s", cdlJobType.name()));
-        if (CDLJobType.DFEXECUTIONCLEANUP.equals(cdlJobType)) {
-            return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
-        } else if (CDLJobType.REDSHIFTCLEANUP.equals(cdlJobType)){
-            return redShiftCleanupService.removeUnusedTables();
-        } else if (CDLJobType.IMPORT.equals(cdlJobType)) {
-            return s3ImportService.submitImportJob();
-        } else {
-            return cdlJobService.submitJob(cdlJobType, jobArguments);
+        switch (cdlJobType) {
+            case DFEXECUTIONCLEANUP:
+                return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
+            case REDSHIFTCLEANUP:
+                return redShiftCleanupService.removeUnusedTables();
+            case IMPORT:
+                return s3ImportService.submitImportJob();
+            case CAMPAIGNlAUNCH:
+                return campaignLaunchTriggerService.triggerQueuedLaunches();
+            case DELTACALCULATION:
+                return deltaCalculationService.triggerScheduledCampaigns();
+            default:
+                return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
     }
 
@@ -52,6 +63,9 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
         private RedShiftCleanupService redShiftCleanupService;
         private S3ImportService s3ImportService;
+        private CampaignLaunchTriggerService campaignLaunchTriggerService;
+        private DeltaCalculationService deltaCalculationService;
+
         private String jobArguments;
 
         public Builder() {
@@ -68,7 +82,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder dataFeedExecutionCleanupService(DataFeedExecutionCleanupService dataFeedExecutionCleanupService) {
+        public Builder dataFeedExecutionCleanupService(
+                DataFeedExecutionCleanupService dataFeedExecutionCleanupService) {
             this.dataFeedExecutionCleanupService = dataFeedExecutionCleanupService;
             return this;
         }
@@ -80,6 +95,16 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
         public Builder s3ImportService(S3ImportService s3ImportService) {
             this.s3ImportService = s3ImportService;
+            return this;
+        }
+
+        public Builder campaignLaunchTriggerService(CampaignLaunchTriggerService campaignLaunchTriggerService) {
+            this.campaignLaunchTriggerService = campaignLaunchTriggerService;
+            return this;
+        }
+
+        public Builder deltaCalculationService(DeltaCalculationService deltaCalculationService) {
+            this.deltaCalculationService = deltaCalculationService;
             return this;
         }
 

@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -82,6 +83,11 @@ public class PlayLaunchContext {
         this.counter = counter;
         this.recommendationTable = recommendationTable;
         this.schema = schema;
+    }
+
+    public PlayLaunchSparkContext toPlayLaunchSparkContext() {
+        return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
+                this.launchTimestampMillis, this.ratingId, this.publishedIteration);
     }
 
     public CustomerSpace getCustomerSpace() {
@@ -308,9 +314,9 @@ public class PlayLaunchContext {
 
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
-                    launchTimestampMillis, ratingEngine, segment, segmentName, publishedIterationId, ratingId, publishedIteration,
-                    accountFrontEndQuery, contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter,
-                    recommendationTable, schema);
+                    launchTimestampMillis, ratingEngine, segment, segmentName, publishedIterationId, ratingId,
+                    publishedIteration, accountFrontEndQuery, contactFrontEndQuery,
+                    modifiableAccountIdCollectionForContacts, counter, recommendationTable, schema);
         }
     }
 
@@ -318,11 +324,13 @@ public class PlayLaunchContext {
         private AtomicLong accountLaunched;
         private AtomicLong contactLaunched;
         private AtomicLong accountErrored;
+        private AtomicLong contactErrored;
 
         public Counter() {
             accountLaunched = new AtomicLong();
             contactLaunched = new AtomicLong();
             accountErrored = new AtomicLong();
+            contactErrored = new AtomicLong();
         }
 
         public AtomicLong getAccountLaunched() {
@@ -335,6 +343,10 @@ public class PlayLaunchContext {
 
         public AtomicLong getAccountErrored() {
             return accountErrored;
+        }
+
+        public AtomicLong getContactErrored() {
+            return contactErrored;
         }
     }
 }

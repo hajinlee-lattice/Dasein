@@ -47,6 +47,9 @@ sed -i "/export LOGGING=/d" ${APP_ROOT}/ENV_VARS
 source ${APP_ROOT}/ENV_VARS
 
 cd ${APP_ROOT}
-npm install ecdsa-sig-formatter
-npm install debug
+npm install --no-optional ecdsa-sig-formatter
+npm install --no-optional debug
+num_libs=`find ./node_modules -maxdepth 1 -type d | wc -l`
+num_js_files=`find . -path "./node_modules/*/*.js" | wc -l`
+echo "Number of js files in ${num_libs} libraries in the node_modules folder: ${num_js_files}"
 node app.js

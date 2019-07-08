@@ -11,8 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -286,6 +289,22 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
                 shortenCustomerSpace(customerSpace), isRebuild.toString());
         return post("rebuildTransaction", url, null, DataFeed.class);
+    }
+
+    public DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace) {
+            log.info(customerSpace.toString());
+            String tenantId = customerSpace.getTenantId();
+        String url = constructUrl(String.format("/datafeed/internal/dataQuotaLimitMap?customerSpace=%s"
+                , tenantId));
+        return get("get all data quota limit list", url, DataLimit.class);
+    }
+
+    public List<Table> getTemplateTables(String customerSpace, String entity) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{entity}/getTables",
+                shortenCustomerSpace(customerSpace), entity);
+        List<?> res = get("getTemplateTables", url, List.class);
+        return JsonUtils.convertList(res, Table.class);
     }
 
 }

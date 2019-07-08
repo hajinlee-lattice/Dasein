@@ -50,6 +50,8 @@ public class WorkflowResource {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(WorkflowResource.class);
 
+    private static final String AUTO_RETRY_USER = "Auto Retry";
+
     @Inject
     private JobEntityMgr jobEntityMgr;
 
@@ -69,7 +71,9 @@ public class WorkflowResource {
     @PostMapping(value = "/job/{workflowId}/restart", headers = "Accept=application/json")
     @ApiOperation(value = "Restart a previous workflow execution")
     public AppSubmission restartWorkflowExecution(@PathVariable String workflowId, @RequestParam String customerSpace,
-            @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) Integer memory) {
+            @ApiParam(value = "Memory in MB", required = false)
+            @RequestParam(value = "memory", required = false) String memoryStr,
+            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry) {
         long wfId = Long.valueOf(workflowId);
 
         Job job = workflowJobService.getJobByWorkflowId(customerSpace, wfId, false);
@@ -85,7 +89,12 @@ public class WorkflowResource {
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         workflowConfig.setInputProperties(job.getInputs());
-        workflowConfig.setUserId(job.getUser());
+        if (Boolean.TRUE.equals(autoRetry)) {
+            workflowConfig.setUserId(AUTO_RETRY_USER);
+        } else {
+            workflowConfig.setUserId(job.getUser());
+        }
+        int memory = StringUtils.isNotBlank(memoryStr) ? Integer.parseInt(memoryStr) : 0;
         setupMemory(memory, job, workflowConfig);
 
         return new AppSubmission(workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));

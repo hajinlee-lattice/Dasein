@@ -39,6 +39,7 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
         exportConfig.setExportDestination(configuration.getExportDestination());
         exportConfig.setCustomerSpace(configuration.getCustomerSpace());
         exportConfig.setUsingDisplayName(configuration.getUsingDisplayName());
+        exportConfig.setExclusionColumns(getExclusionColumns());
         exportConfig.setTable(retrieveTable());
         exportConfig.setExportInputPath(getExportInputPath());
         Map<String, String> properties = configuration.getProperties();
@@ -60,6 +61,10 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
     private Table retrieveTable() {
         String tableName = getTableName();
         return metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
+    }
+
+    protected String getExclusionColumns() {
+        return null;
     }
 
     protected abstract String getTableName();

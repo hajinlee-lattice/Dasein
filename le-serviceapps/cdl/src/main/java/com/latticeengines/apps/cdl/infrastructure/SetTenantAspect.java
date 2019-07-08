@@ -56,6 +56,8 @@ public class SetTenantAspect {
             + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllDataFeeds(..)) "
             + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..)) "
             + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getSimpleDataFeeds(..)) "
+            + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getDataFeeds(..)) "
+            + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getDataQuotaLimitMap(..)) "
             + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataFeedService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];

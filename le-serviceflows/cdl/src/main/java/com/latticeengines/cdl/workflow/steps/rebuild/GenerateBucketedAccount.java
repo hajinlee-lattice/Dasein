@@ -109,7 +109,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         }
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ProfileAccountStep");
+        request.setName("GenerateBucketedAccount");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
@@ -186,7 +186,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         conf.setPartitions(1);
         conf.setCompressResult(true);
         conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
-        String confStr = appendEngineConf(conf, lightEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
 
         setTargetTable(step, profileTablePrefix);

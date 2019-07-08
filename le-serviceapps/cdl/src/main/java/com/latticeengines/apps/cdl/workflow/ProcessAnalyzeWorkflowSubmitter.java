@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,19 +48,20 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -80,23 +82,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
+    @Value("${cdl.processAnalyze.actions.import.count}")
+    private int importActionCount;
+
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
-
-    @Value("${cdl.account.dataquota.limit}")
-    private Long defaultAccountQuotaLimit;
-
-    @Value("${cdl.contact.dataquota.limit}")
-    private Long defaultContactQuotaLimit;
-
-    @Value("${cdl.product.dataquota.limit}")
-    private Long defaultProductBundlesQuotaLimit;
-
-    @Value("${cdl.productsku.dataquota.limit}")
-    private Long defaultProductSkuQuotaLimit;
-
-    @Value("${cdl.transaction.dataquota.limit}")
-    private Long defaultTransactionQuotaLimit;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -115,10 +105,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final ZKConfigService zkConfigService;
 
+    private final CDLAttrConfigProxy cdlAttrConfigProxy;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
                                            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-                                           BatonService batonService, ZKConfigService zkConfigService) {
+            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -126,6 +118,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.actionService = actionService;
         this.batonService = batonService;
         this.zkConfigService = zkConfigService;
+        this.cdlAttrConfigProxy = cdlAttrConfigProxy;
     }
 
     @WithWorkflowJobPid
@@ -144,11 +137,17 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
 
+        AttrConfigRequest configRequest = cdlAttrConfigProxy.validateAttrConfig(customerSpace, new AttrConfigRequest(),
+                AttrConfigUpdateMode.Limit);
+        if (configRequest.hasError()) {
+            throw new RuntimeException("User activate or enable more allowed attribute.");
+        }
+
         try {
             List<Map<String, Object>> props = jdbcTemplate.queryForList("show variables like '%wait_timeout%'");
             log.info("Timeout Configuration from DB Session: " + props);
         } catch(Exception e) {
-            //Ignore. It is only for logging purpose
+            log.warn("Failed to check timeout configuration from DB session.", e);
         }
 
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
@@ -245,33 +244,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
+        Set<Long> importActionIds = new HashSet<>();
         List<Long> completedActionIds = actions.stream()
-                .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobPids))
+                .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds))
                 .map(Action::getPid).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
-
-        List<Long> attrManagementActionIds = actions.stream()
-                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType())).map(Action::getPid)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
-            log.info(
-                    String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
-            completedActionIds.addAll(attrManagementActionIds);
-        }
-
-        List<Long> businessCalendarChangeActionIds = actions.stream()
-                .filter(action -> action.getType().equals(ActionType.BUSINESS_CALENDAR_CHANGE)).map(Action::getPid)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(businessCalendarChangeActionIds)) {
-            log.info(String.format("Actions that associated with business calendar change are: %s",
-                    businessCalendarChangeActionIds));
-            completedActionIds.addAll(businessCalendarChangeActionIds);
-        }
-
-        List<Long> ratingEngineActionIds = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
-                .collect(Collectors.toList());
-        log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
         return completedActionIds;
     }
@@ -414,15 +391,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private boolean isCompleteAction(Action action, Set<ActionType> selectedTypes,
-                                     List<Long> completedImportAndDeleteJobPids) {
+    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids, Set<Long> importActionIds) {
         boolean isComplete = true; // by default every action is valid
-        if (selectedTypes.contains(action.getType())) {
+        if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
             // special check if is selected type
             isComplete = false;
+            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
+                return false;
+            }
             if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                importActionIds.add(action.getPid());
                 isComplete = true;
-            } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+            } else {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
                         .getActionConfiguration();
                 if (importActionConfiguration == null) {
@@ -430,8 +410,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     return false;
                 }
                 if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    importActionIds.add(action.getPid());
                     isComplete = true;
                 }
+            }
+        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+            isComplete = false;
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                isComplete = true;
             }
         }
         return isComplete;
@@ -446,10 +432,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
         TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
+        boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
+        boolean alwaysOnCampain = FeatureFlagUtils.isAlwaysOnCampaign(flags);
         log.info("Entity Match Enabled=" + entityMatchEnabled);
         if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
         }
+        boolean apsImputationEnabled = FeatureFlagUtils.isApsImputationEnabled(flags);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
@@ -457,11 +446,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
                 .getRollingPeriod(CustomerSpace.parse(customerSpace), CDLComponent.componentName).getPeriodName();
-        getDataQuotaLimit(CustomerSpace.parse(customerSpace), CDLComponent.componentName);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName());
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS, String.valueOf(alwaysOnCampain));
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
@@ -483,22 +472,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .dynamoSignature(signature) //
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
+                .apsImputationEnabled(apsImputationEnabled) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
-                .dataQuotaLimit(defaultAccountQuotaLimit, BusinessEntity.Account)// put dataQuotaLimit into
-                // stepConfiguration
-                .dataQuotaLimit(defaultContactQuotaLimit, BusinessEntity.Contact)
-                .dataQuotaLimit(defaultProductBundlesQuotaLimit, ProductType.Analytic)
-                .dataQuotaLimit(defaultProductSkuQuotaLimit, ProductType.Spending)
-                .dataQuotaLimit(defaultTransactionQuotaLimit, BusinessEntity.Transaction)
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
                 .build();
     }
 
-    public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {
+    public ApplicationId retryLatestFailed(String customerSpace, Integer memory, Boolean autoRetry) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
@@ -506,7 +491,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             log.info(String.format("restarted execution with workflowId=%s", workflowId));
-            ApplicationId appId = workflowJobService.restart(workflowId, customerSpace, memory);
+            ApplicationId appId = workflowJobService.restart(workflowId, customerSpace, memory, autoRetry);
             if (appId != null && CollectionUtils.isNotEmpty(lastFailedActions)) {
                 Job retryJob = workflowProxy.getWorkflowJobFromApplicationId(appId.toString());
                 // get IDs before we clear them
@@ -543,23 +528,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
-    }
-
-    private void getDataQuotaLimit(CustomerSpace customerSpace, String componentName) {
-        Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
-                componentName, BusinessEntity.Account);
-        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
-        Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
-        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                ProductType.Analytic);
-        defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
-        Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                ProductType.Spending);
-        defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
-        Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                BusinessEntity.Transaction);
-        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
     }
 
 }

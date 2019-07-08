@@ -133,7 +133,7 @@ export default function (
 
 
         // Only run in Atlas
-        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team') {
+        if (vm.section != 'insights' && vm.section != 'edit' && vm.section != 'team' && vm.section != 'lookup') {
             if (vm.section == 're.model_iteration') {
                 var ratingId = $stateParams['rating_id'],
                     aiModel = $stateParams['aiModel'],
@@ -154,6 +154,7 @@ export default function (
                     vm.checkEnrichmentsForDisable(Enrichments);
                 }
             });
+
         }
 
         vm.processCategories();
@@ -185,6 +186,7 @@ export default function (
         }
 
         DataCloudStore.setMetadata('current', 1);
+
     }
 
     vm.checkEnrichmentsForDisable = function(enrichments) {
@@ -935,13 +937,14 @@ export default function (
                 ret.push(category);
             }
         });
+        DataCloudStore.setPresentCategories(ret);
         return ret;
     }
 
     vm.processCategories = function () {
-        //console.log(EnrichmentTopAttributes);
-        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+        // console.log(EnrichmentTopAttributes);
 
+        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
             DataCloudStore.topCategories.forEach(function (category, index) {
                 if (vm.categories.indexOf(category) >= 0) {
@@ -1353,6 +1356,13 @@ export default function (
         } else {
             return '';
         }
+    }
+
+    vm.getTotalBucketCounts = function (stats) {
+        var bucketsTotal = stats.reduce(function(prev, cur) {
+          return prev + cur.Cnt;
+        }, 0);
+        return bucketsTotal;
     }
 
     vm.getHighestStat = function (stats) {

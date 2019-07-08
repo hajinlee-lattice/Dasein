@@ -53,10 +53,10 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-    public Builder dataQuotaLimit(Long dataQuotaLimit) {
-            processContactStepConfiguration.setDataQuotaLimit(dataQuotaLimit);
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
-    }
+        }
 
         public RebuildContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildContactWorkflow",

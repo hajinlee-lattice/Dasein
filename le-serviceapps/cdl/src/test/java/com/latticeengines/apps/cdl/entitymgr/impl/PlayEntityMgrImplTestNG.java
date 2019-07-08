@@ -31,6 +31,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImplTestNG.class);
+    private static final String DISPLAY_NAME = "playHard!";
     private static final String NEW_DISPLAY_NAME = "playHarder!";
     private static final String DESCRIPTION = "playHardest";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
@@ -89,6 +90,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
+        play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);
         play.setPlayType(types.get(0));
         play.setCreatedBy(CREATED_BY);

@@ -395,8 +395,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
         if (schema != null) {
             verifySchemaCorrectness(parsedSchema, schema);
+            log.info("Saving provided schema at " + avscPath);
             HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
         } else {
+            log.info("Saving parsed schema at " + avscPath);
             HdfsUtils.writeToFile(yarnConfiguration, avscPath, parsedSchema.toString());
         }
     }
@@ -418,8 +420,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             String parsedType = AvroUtils.getJavaType(AvroUtils.getType(parsedField)).getCanonicalName();
             String providedType = AvroUtils.getJavaType(AvroUtils.getType(provideField)).getCanonicalName();
             if (!parsedType.equals(providedType)) {
-                throw new IllegalStateException("For " + i + "-th attribute, provided schema uses the type "
-                        + providedType + ", while the parsed schema is " + parsedType);
+                throw new IllegalStateException("For " + i + "-th attribute, " +
+                        "provided schema [" + provideField.name() + "] uses the type " + providedType //
+                        + ", while the parsed schema [" + parsedField.name() + "] is " + parsedType);
             }
         }
     }

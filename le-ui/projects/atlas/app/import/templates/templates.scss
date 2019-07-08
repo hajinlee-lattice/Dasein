@@ -24,6 +24,10 @@
     float: right;
     .menu-container {
       padding: 0.5em 1em;
+      &:hover {
+        background-color: #2b5f96;
+        box-shadow: none;
+      }
     }
   }
   .le-table-cell {
@@ -52,11 +56,15 @@
         text-align: center;
       }
     }
-    .initially-hidden {
+    .le-copy-controlls {
       display: none;
+      width: 0px;
     }
   }
-
+  .le-table-row{
+    min-height: 55px;
+    align-items: center;
+  }
   .le-table-row:hover {
     & > .le-table-cell > * {
       color: $pearl-white;
@@ -81,9 +89,10 @@
       }
     }
     & > .le-table-cell > .le-cell-template {
-      .initially-hidden {
-        display: initial;
+      & .le-copy-controlls {
+        display: inline-flex;
         color: $pearl-white;
+        width: 100%;
       }
     }
   }

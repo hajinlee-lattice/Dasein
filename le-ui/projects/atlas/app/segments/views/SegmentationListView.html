@@ -28,7 +28,8 @@
                         orderBy: vm.header.sort.order + vm.header.sort.property |
                         startFrom: (vm.currentPage - 1) * pagesize |
                         limitTo: pagesize"
-                    ng-click="vm.tileStates[segment.name].editSegment || vm.tileClick($event, segment)" ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null">
+                    ng-click="vm.tileStates[segment.name].editSegment || vm.tileClick($event, segment)"
+                    ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null">
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
                         <h2 title="{{segment.display_name}}">
                             {{segment.display_name | limitTo: 44 }}{{segment.display_name.length > 44 ? '&hellip;' :
@@ -36,8 +37,10 @@
                             <i class="fa fa-spinner fa-pulse fa-fw" ng-if="vm.tileStates[segment.name].loading"></i>
                         </h2>
                         <div class="edit" ng-if="!segment.is_master_segment">
-                            <button type="button" ng-click="vm.customMenuClick($event, segment)" ng-class="{ 'open': vm.tileStates[segment.name].showCustomMenu }">
-                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[segment.name].showCustomMenu }"></span>
+                            <button type="button" ng-click="vm.customMenuClick($event, segment)"
+                                ng-class="{ 'open': vm.tileStates[segment.name].showCustomMenu }">
+                                <span class="fa fa-ellipsis-v"
+                                    ng-class="{ 'fa-rotate-180': vm.tileStates[segment.name].showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[segment.name].showCustomMenu">
                                 <li data-ng-click="vm.editSegmentClick($event, segment)">
@@ -57,10 +60,11 @@
                     </div>
                     <div class="tile-metadata" ng-if="!vm.tileStates[segment.name].editSegment">
                         <ul>
-                            <li>Created by <span class="blue-text">{{segment.created_by}}</span> on <span class="blue-text">{{segment.created
+                            <li>Created by <span class="blue-text">{{segment.created_by}}</span> on <span
+                                    class="blue-text">{{segment.created
                                     | date}}</span></li>
-                            <!--                             <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
-                            <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li> -->
+                            <!--<li>Created on <span class="blue-text">{{segment.created | date}}</span></li>-->
+                            <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li>
                             <li>
                                 <p title="{{segment.description}}" class="description" ng-if="segment.description">
                                     Description:
@@ -90,7 +94,8 @@
                                 Add description
                             </span>
                         </p> -->
-                        <p ng-if="!vm.invalidSegments.has(segment.name)" ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index"
+                        <p ng-if="!vm.invalidSegments.has(segment.name)"
+                            ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index"
                             class="attributesDisplay">
                             {{attr.label}}<em>{{attr.value}}</em>
                         </p>
@@ -129,7 +134,8 @@
 
     <div class="row" ng-init="pagesize = 12" ng-show="max > 1">
         <div class="pull-right">
-            <pd-pagination-controls current="vm.currentPage" max="max = (vm.segments | filter: vm.query).length / pagesize">
+            <pd-pagination-controls current="vm.currentPage"
+                max="max = (vm.segments | filter: vm.query).length / pagesize">
             </pd-pagination-controls>
         </div>
     </div>

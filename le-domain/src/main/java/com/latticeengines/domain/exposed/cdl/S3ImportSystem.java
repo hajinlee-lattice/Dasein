@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -55,6 +56,10 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
+    @Column(name = "DISPLAY_NAME")
+    @JsonProperty("display_name")
+    private String displayName;
+
     @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
     private String name;
@@ -64,6 +69,26 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Enumerated(EnumType.STRING)
     private SystemType systemType;
 
+    @Column(name = "PRIORITY", nullable = false)
+    @JsonProperty("priority")
+    private int priority = Integer.MAX_VALUE;
+
+    @Column(name = "ACCOUNT_SYSTEM_ID")
+    @JsonProperty("account_system_id")
+    private String accountSystemId;
+
+    @Column(name = "CONTACT_SYSTEM_ID")
+    @JsonProperty("contact_system_id")
+    private String contactSystemId;
+
+    @Column(name = "MAP_TO_LATTICE_ACCOUNT")
+    @JsonProperty("map_to_lattice_account")
+    private Boolean mapToLatticeAccount = false;
+
+    @Column(name = "MAP_TO_LATTICE_CONTACT")
+    @JsonProperty("map_to_lattice_contact")
+    private Boolean mapToLatticeContact = false;
+
     @Override
     public Long getPid() {
         return pid;
@@ -72,6 +97,14 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
@@ -113,6 +146,61 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
 
     public void setSystemType(SystemType systemType) {
         this.systemType = systemType;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @JsonIgnore
+    public boolean isPrimarySystem() {
+        return priority == 1;
+    }
+
+    public String getAccountSystemId() {
+        return accountSystemId;
+    }
+
+    public void setAccountSystemId(String accountSystemId) {
+        this.accountSystemId = accountSystemId;
+    }
+
+    public String getContactSystemId() {
+        return contactSystemId;
+    }
+
+    public void setContactSystemId(String contactSystemId) {
+        this.contactSystemId = contactSystemId;
+    }
+
+    @JsonIgnore
+    public String generateAccountSystemId() {
+        return String.format("user_%s_%s_AccountId", name, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+    }
+
+    @JsonIgnore
+    public String generateContactSystemId() {
+        return String.format("user_%s_%s_ContactId", name, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+    }
+
+    public Boolean isMapToLatticeAccount() {
+        return mapToLatticeAccount;
+    }
+
+    public void setMapToLatticeAccount(Boolean mapToLatticeAccount) {
+        this.mapToLatticeAccount = mapToLatticeAccount;
+    }
+
+    public Boolean isMapToLatticeContact() {
+        return mapToLatticeContact;
+    }
+
+    public void setMapToLatticeContact(Boolean mapToLatticeContact) {
+        this.mapToLatticeContact = mapToLatticeContact;
     }
 
     public enum SystemType {

@@ -1,5 +1,5 @@
 import React, { Component } from "../../../react-vendor";
-
+import './copy-control.scss';
 class CopyComponent extends Component {
   constructor(props) {
     super(props);
@@ -7,29 +7,33 @@ class CopyComponent extends Component {
   }
 
   clickHandler(event){
-    // copyPath(text) {
         let text = this.props.data;
         window.navigator.clipboard.writeText(text).then(
           () => {
               if(this.props.callback){
                   this.props.callback(event);
               }
-            // console.log("Async: Copying to clipboard was successful!");
           },
           err => {
             console.error("Async: Could not copy text: ", err);
           }
         );
-    //   }
+  }
+  getData(){
+    if(this.props.data){
+      return (<span>{this.props.data}</span>)
+    }else{
+      return null;
+    }
   }
   render() {
     return (
       <li
-        className="le-table-cell-icon le-table-cell-icon-actions initially-hidden"
-        title="Copy Link"
+        className="le-copy-controlls"
         onClick={this.clickHandler}
       >
-        <i className="fa fa-files-o" />
+        {this.getData()}
+        <i className="fa fa-files-o le-copy-control" title="Copy Link"/>
       </li>
     );
   }

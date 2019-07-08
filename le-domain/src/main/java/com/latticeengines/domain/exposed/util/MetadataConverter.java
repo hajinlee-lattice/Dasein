@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ParquetUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -60,6 +61,18 @@ public class MetadataConverter {
         }
     }
 
+    public static Table getParquetTable(Configuration configuration, String path, String primaryKeyName,
+                                 String lastModifiedKeyName, boolean skipCount) {
+        try {
+            List<Extract> extracts = convertToParquetExtracts(configuration, path, skipCount);
+            Schema schema = ParquetUtils.getAvroSchema(configuration, extracts.get(0).getPath());
+            return getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("Failed to parse metadata for parquet file located at %s", path), e);
+        }
+    }
+
     public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath,
             String avscPath, String primaryKeyName, String lastModifiedKeyName) {
         try {
@@ -86,7 +99,7 @@ public class MetadataConverter {
             isDirectory = true;
         }
         List<String> matches = HdfsUtils.getFilesByGlob(configuration, avroPath);
-        List<Extract> extracts = new ArrayList<Extract>();
+        List<Extract> extracts = new ArrayList<>();
         for (String match : matches) {
             Extract extract = new Extract();
             try (FileSystem fs = FileSystem.newInstance(configuration)) {
@@ -104,6 +117,43 @@ public class MetadataConverter {
             extracts.add(extract);
             if (isDirectory) {
                 extract.setPath(avroPath);
+                break;
+            } else {
+                extract.setPath(match);
+            }
+        }
+        return extracts;
+    }
+
+    private static List<Extract> convertToParquetExtracts(Configuration configuration, String parquetPath,
+                                                   boolean skipCount) throws Exception {
+        boolean isDirectory = false;
+        if (HdfsUtils.isDirectory(configuration, parquetPath)) {
+            if (parquetPath.endsWith("/")) {
+                parquetPath = parquetPath.substring(0, parquetPath.length() - 2);
+            }
+            parquetPath = parquetPath + "/*.parquet";
+            isDirectory = true;
+        }
+        List<String> matches = HdfsUtils.getFilesByGlob(configuration, parquetPath);
+        List<Extract> extracts = new ArrayList<>();
+        for (String match : matches) {
+            Extract extract = new Extract();
+            try (FileSystem fs = FileSystem.newInstance(configuration)) {
+                extract.setExtractionTimestamp(
+                        fs.getFileStatus(new Path(match)).getModificationTime());
+            }
+            extract.setName("extract");
+            if (!skipCount) {
+                if (isDirectory) {
+                    extract.setProcessedRecords(ParquetUtils.countParquetFiles(configuration, parquetPath));
+                } else {
+                    extract.setProcessedRecords(ParquetUtils.countParquetFiles(configuration, match));
+                }
+            }
+            extracts.add(extract);
+            if (isDirectory) {
+                extract.setPath(parquetPath);
                 break;
             } else {
                 extract.setPath(match);

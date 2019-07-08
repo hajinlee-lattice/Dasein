@@ -41,6 +41,37 @@ public class FeatureFlagUtils {
         }
     }
 
+    public static boolean isTargetScoreDerivation(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION.getName() + " feature flag!", e);
+            return false;
+        }
+    }
+
+    public static boolean isAlwaysOnCampaign(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName() + " feature flag!", e);
+            return false;
+        }
+    }
+
+    public static boolean isApsImputationEnabled(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName() + " feature flag!",
+                    e);
+            return false;
+        }
+    }
+
     @SuppressWarnings("deprecation")
     public static boolean isFuzzyMatchEnabled(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())

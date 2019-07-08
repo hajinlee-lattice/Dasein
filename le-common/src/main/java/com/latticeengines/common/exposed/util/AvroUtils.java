@@ -1,6 +1,5 @@
 package com.latticeengines.common.exposed.util;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,8 +27,8 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -72,6 +71,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.transformer.AvroToCsvTransformer;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -93,6 +93,19 @@ public class AvroUtils {
             reader = DataFileReader.openReader(input, fileReader);
         } catch (IOException e) {
             throw new RuntimeException("Getting avro file reader from path: " + path.toString(), e);
+        }
+        return reader;
+    }
+
+    public static FileReader<GenericRecord> getLocalFileReader(File file) {
+        FileReader<GenericRecord> reader;
+
+        try {
+            GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<>();
+            reader = DataFileReader.openReader(file, fileReader);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Getting avro file reader from path: " + file, e);
         }
         return reader;
     }
@@ -245,45 +258,34 @@ public class AvroUtils {
         }
     }
 
-    public static Long count(final Configuration configuration, String glob) {
-        Long count = 0L;
-        try {
-            List<String> matches = HdfsUtils.getFilesByGlob(configuration, glob);
-
-            log.info("Counting " + matches.size() + " avro files at " + glob);
-
-            if (matches.size() == 0) {
-                throw new IllegalArgumentException("There is no file to be counted.");
-            }
-
-            if (matches.size() == 1) {
-                return countOneFile(configuration, matches.get(0));
-            }
-
-            ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
-            Map<String, Future<Long>> futures = new HashMap<>();
-            for (final String match : matches) {
-                Future<Long> future = executorService.submit(() -> countOneFile(configuration, match));
-                futures.put(match, future);
-            }
-
-            for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
-                String file = entry.getKey();
-                Long partialCount;
-                try {
-                    partialCount = entry.getValue().get();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to count file " + file, e);
-                }
-                count += partialCount;
-            }
-            executorService.shutdown();
-            log.info(String.format("Totally %d records in %s", count.longValue(), glob));
-            return count;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public static Long count(final Configuration configuration, String... globs) {
+        List<String> matches = HdfsUtils.getAllMatchedFiles(configuration, globs);
+        log.info("Counting " + matches.size() + " avro files at " + StringUtils.join(globs, ","));
+        if (matches.size() == 0) {
+            throw new IllegalArgumentException("There is no file to be counted.");
         }
+        if (matches.size() == 1) {
+            return countOneFile(configuration, matches.get(0));
+        }
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(4, matches.size()));
+
+        List<Callable<Long>> counters = new ArrayList<>();
+        long count = 0L;
+        for (int i = 0; i < matches.size(); i++) {
+            String match = matches.get(i);
+            counters.add(() -> countOneFile(configuration, match));
+            if (counters.size() >= 256 || i == matches.size() - 1) {
+                List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
+                count += partialCounts.stream().mapToLong(c -> c).sum();
+                counters.clear();
+            }
+        }
+
+        executorService.shutdown();
+        log.info(String.format("Totally %d records in %s", count, StringUtils.join(globs, ",")));
+        return count;
     }
+
 
     private static Long countOneFile(Configuration configuration, String path) {
         // log.info("Counting number of records in " + path);
@@ -718,6 +720,33 @@ public class AvroUtils {
         return assembler.endRecord();
     }
 
+    public static Schema overwriteFields(Schema schema, Map<String, Schema.Field> fields) {
+        List<Schema.Field> newFields = schema.getFields().stream() //
+                .map(field -> {
+                    Schema.Field srcField = fields.getOrDefault(field.name(), field);
+                    Schema.Field newField = new Schema.Field( //
+                            field.name(), //
+                            field.schema(), //
+                            field.doc(), //
+                            field.defaultVal() //
+                    );
+                    Set<String> reserveKeys = Sets.newHashSet("name", "type", "default");
+                    srcField.getObjectProps().forEach((k, v) -> {
+                        if (!reserveKeys.contains(k)) {
+                            newField.addProp(k, v);
+                        }
+                    });
+                    return newField;
+                }) //
+                .collect(Collectors.toList());
+        return Schema.createRecord(
+                schema.getName(),
+                schema.getDoc(),
+                schema.getNamespace(),
+                false,
+                newFields);
+    }
+
     public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)
             throws IOException {
         appendToHdfsFile(configuration, filePath, data, false);
@@ -783,6 +812,58 @@ public class AvroUtils {
                 }
             }
         }
+    }
+
+    public static DataFileWriter<GenericRecord> getLocalFileWriter(File avroFile,
+                                                              boolean snappy,
+                                                              boolean create,
+                                                              Schema schema) {
+        create = !avroFile.exists() || create;
+        if (!avroFile.exists() && !create){
+
+            log.error(avroFile + " does not exist and create == false");
+            throw new RuntimeException("try to write to an non-existing file without creating it");
+
+        }
+
+        if (create && schema == null) {
+
+            log.error("try to create " + avroFile + " with schema == null");
+            throw new RuntimeException("try to create an avro file without schema");
+
+        }
+
+        DataFileWriter<GenericRecord> writer = null;
+
+        try {
+            writer = new DataFileWriter<>(new GenericDatumWriter<>());
+
+            if (snappy) {
+
+                writer.setCodec(CodecFactory.snappyCodec());
+
+            }
+
+            if (create) {
+
+                FileUtils.deleteQuietly(avroFile);
+                writer.create(schema, avroFile);
+
+            } else {
+
+                writer.appendTo(avroFile);
+
+            }
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("getting avro file writer from " + avroFile, e);
+
+        }
+
+        return writer;
+
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
@@ -891,7 +972,7 @@ public class AvroUtils {
     }
 
     public static void writeAvroToJsonFile(File jsonFile, Function<GenericRecord, GenericRecord> recProcessor,
-            FileReader<GenericRecord> avroReader) throws IOException, FileNotFoundException {
+            FileReader<GenericRecord> avroReader) throws IOException {
         final GenericData genericData = GenericData.get();
         try (FileOutputStream writer = new FileOutputStream(jsonFile)) {
             writer.write("[".getBytes());
@@ -1056,29 +1137,21 @@ public class AvroUtils {
 
     public static boolean hasRecords(Configuration configuration, String path) {
         String glob = PathUtils.toAvroGlob(path);
-        try (AvroFilesIterator iterator = avroFileIterator(configuration, glob)) {
+        try (AvroFilesIterator iterator = iterateAvroFiles(configuration, glob)) {
             return iterator.hasNext();
         }
     }
 
     @Deprecated
     public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
-        try {
-            return new AvroFilesIterator(configuration, path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return new AvroFilesIterator(configuration, path);
     }
 
-    public static AvroFilesIterator avroFileIterator(Configuration configuration, String path) {
-        try {
-            return new AvroFilesIterator(configuration, path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static AvroFilesIterator iterateAvroFiles(Configuration configuration, String... paths) {
+        return new AvroFilesIterator(configuration, paths);
     }
 
-    public static AvroFilesIterator avroFileIterator(Configuration configuration, Collection<String> paths) {
+    public static AvroFilesIterator iterateAvroFiles(Configuration configuration, Collection<String> paths) {
         try {
             return new AvroFilesIterator(configuration, paths);
         } catch (IOException e) {
@@ -1086,17 +1159,18 @@ public class AvroUtils {
         }
     }
 
-    public static class AvroFilesIterator implements Iterator<GenericRecord>, Closeable {
+    public static class AvroFilesIterator implements AvroRecordIterator {
 
         private List<String> matchedFiles;
         private Integer fileIdx = 0;
         private FileReader<GenericRecord> reader;
         private Configuration configuration;
 
-        AvroFilesIterator(Configuration configuration, String path) throws IOException {
-            matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
+        AvroFilesIterator(Configuration configuration, String... paths) {
+            matchedFiles = HdfsUtils.getAllMatchedFiles(configuration, paths);
             if (CollectionUtils.isEmpty(matchedFiles)) {
-                log.warn("Could not find any avro file that matches the path pattern [" + path + "]");
+                log.warn("Could not find any avro file that matches the path pattern [" //
+                        + StringUtils.join(paths, ",") + "]");
             } else {
                 this.configuration = configuration;
                 reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));

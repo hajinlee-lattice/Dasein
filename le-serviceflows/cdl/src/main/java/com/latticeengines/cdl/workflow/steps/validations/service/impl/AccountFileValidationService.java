@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -36,7 +35,6 @@ public class AccountFileValidationService
         extends InputFileValidationService<AccountFileValidationConfiguration> {
 
 
-    private static final List<Character> invalidChars = Arrays.asList('/', '&');
     private static Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
 
     public AccountFileValidationService() {

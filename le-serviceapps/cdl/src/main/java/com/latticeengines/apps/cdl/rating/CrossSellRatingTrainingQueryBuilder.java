@@ -59,7 +59,8 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
                 if (config == null) {
                     throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
                 }
-                productTxnRestriction = (config.getValue() == null || config.getValue() < 1) ? null
+                productTxnRestriction = (config.getValue() == null || config.getValue() < 1)
+                        ? new TransactionRestriction(productIds, TimeFilter.ever(periodTypeName), false, null, null)
                         : new TransactionRestriction(productIds,
                                 TimeFilter.priorOnly(config.getValue() - 1, periodTypeName), false, null, null);
                 break;

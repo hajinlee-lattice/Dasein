@@ -529,6 +529,21 @@ angular.module('lp.models.ratings', [
             vm.modelType = "Accounts";
         }
 
+        vm.scoringHistoryArray = [];
+        angular.forEach(vm.scoringHistory, function (val, key) {
+            var configurationObj = {
+                timestamp: key,
+                buckets: val
+            }
+            vm.scoringHistoryArray.push(configurationObj);
+        });
+
+        vm.scoringHistoryArray.sort(function (a, b) {
+            return a.timestamp - b.timestamp;
+        });
+
+        console.log(vm.scoringHistoryArray);
+
         // vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
 
          // Set value for total leads in set

@@ -1,10 +1,10 @@
 angular
     .module('common.datacloud.tabs.subheader', [])
     .controller('SubHeaderTabsController', function (
-        $state, $rootScope, $stateParams, $timeout, StateHistory,
+        $state, $rootScope, $scope, $stateParams, $timeout, StateHistory,
         FeatureFlagService, DataCloudStore, QueryStore, SegmentService,
         SegmentStore, HealthService, QueryTreeService, ModelStore,
-        TopPredictorService, RatingsEngineStore, Banner
+        TopPredictorService, RatingsEngineStore, Banner, EnrichmentTopAttributes
     ) {
         var vm = this,
             flags = FeatureFlagService.Flags();
@@ -79,6 +79,7 @@ angular
             DataCloudStore.getEnrichments().then((result) => {
                 vm.enrichments = result;
             });
+
         };
 
         vm.getPickerItem = function () {
@@ -98,16 +99,26 @@ angular
                         return item.HasWarnings;
                     }).length;
                 case 'disabled':
-                    return vm.enrichments.filter((item) => {
+
+                    var disabled = vm.enrichments.filter((item) => {
                         return item.ApprovedUsage[0] == 'None';
-                    }).length;
+                    });                    
+                    return disabled.length;
             };
 
             return 0;
         }
 
-        vm.clickIterationFilter = function (type) {
+        vm.clickIterationFilter = function (type) {      
             DataCloudStore.ratingIterationFilter = type;
+            if (vm.section == 're.model_iteration') {
+                var presentCategories = DataCloudStore.getPresentCategories();
+                $scope.$watch(presentCategories, function(){
+                    if (presentCategories.length > 0) {
+                        DataCloudStore.setMetadata('category', presentCategories[0]);
+                    }
+                });                
+            }
         }
 
         vm.checkIterationFilter = function (type) {

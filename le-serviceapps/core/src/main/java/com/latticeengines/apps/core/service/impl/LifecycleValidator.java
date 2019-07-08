@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
@@ -30,7 +31,8 @@ public class LifecycleValidator extends AttrValidator {
     }
 
     @Override
-    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs) {
+    public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
+            AttrValidation validation) {
         log.info(String.format("start to validate lifecycle for tenant %s", MultiTenantContext.getShortTenantId()));
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkState(attrConfig);

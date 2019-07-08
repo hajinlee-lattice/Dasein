@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.validations.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 public abstract class InputFileValidationService<T extends InputFileValidationConfiguration> {
     private static Logger log = LoggerFactory.getLogger(InputFileValidationService.class);
     private static Map<String, InputFileValidationService<? extends InputFileValidationConfiguration>> map = new HashMap<>();
+    protected static final List<Character> invalidChars = Arrays.asList('/', '&');
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -50,7 +52,6 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
             String[] dirs = avroDir.trim().split("/");
             avroDir = "";
             for (int i = 0; i < (dirs.length - 1); i++) {
-                log.info("Get avro path dir " + dirs[i]);
                 if (!dirs[i].isEmpty()) {
                     avroDir = avroDir + "/" + dirs[i];
                 }

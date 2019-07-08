@@ -6,16 +6,18 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -28,6 +30,7 @@ import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.DynamoDestination;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
@@ -37,26 +40,29 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
 
     private static Logger log = LoggerFactory.getLogger(PublicationProgressServiceImpl.class);
 
-    @Autowired
+    @Inject
     private PublicationEntityMgr publicationEntityMgr;
 
-    @Autowired
+    @Inject
     private PublicationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     private PublicationNewProgressValidator newProgressValidator;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private DataCloudVersionEntityMgr datacloudVersionEntityMgr;
 
     @Override
     public PublicationProgress kickoffNewProgress(Publication publication, String creator) throws IOException {
@@ -72,7 +78,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
             String ingestionDir = hdfsPathBuilder.constructIngestionDir(ingestionName).toString();
             List<String> versions = HdfsUtils.getFilesForDir(yarnConfiguration, ingestionDir);
             if (versions != null && !versions.isEmpty()) {
-                Path currentVersionPath = new Path((String) Collections.max(versions));
+                Path currentVersionPath = new Path(Collections.max(versions));
                 currentVersion = currentVersionPath.getName();
             }
             break;
@@ -109,6 +115,9 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         if (existingProgress != null) {
             return null;
         }
+        if (destination == null) {
+            destination = constructDestination(publication, version);
+        }
         PublicationProgress progress = progressEntityMgr.runNewProgress(publication, destination, version, creator);
         log.info("Kick off and run new progress [" + progress + "]");
         return progress;
@@ -137,6 +146,8 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
             switch (publication.getPublicationType()) {
             case SQL:
                 return constructSqlDestination(publication, version);
+            case DYNAMO:
+                return constructDynamoDestination(publication);
             default:
                 throw new UnsupportedOperationException(
                         "Unknown publication type: " + publication.getPublicationType());
@@ -163,6 +174,12 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         }
         SqlDestination destination = new SqlDestination();
         destination.setTableName(tableName);
+        return destination;
+    }
+
+    private DynamoDestination constructDynamoDestination(Publication publication) {
+        DynamoDestination destination = new DynamoDestination();
+        destination.setVersion(datacloudVersionEntityMgr.currentApprovedVersionAsString());
         return destination;
     }
 

@@ -40,8 +40,7 @@ public class TalkingPointResource {
     @PostMapping("")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(
-            value = "Create/Update a Talking Point. PID value of null or zero will create a TP.")
+    @ApiOperation(value = "Create/Update a Talking Point. PID value of null or zero will create a TP.")
     public List<TalkingPointDTO> createOrUpdate(@PathVariable String customerSpace,
             @RequestBody List<TalkingPointDTO> talkingPoints) {
         return talkingPointService.createOrUpdate(talkingPoints);
@@ -50,17 +49,15 @@ public class TalkingPointResource {
     @GetMapping("/{talkingPointName}")
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
-    public TalkingPointDTO findByName(@PathVariable String customerSpace,
-            @PathVariable String talkingPointName) {
+    public TalkingPointDTO findByName(@PathVariable String customerSpace, @PathVariable String talkingPointName) {
         return talkingPointService.findByName(talkingPointName);
     }
 
     @GetMapping("/play/{playName}")
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
-    public List<TalkingPointDTO> findAllByPlayName(@PathVariable String customerSpace,
-            @PathVariable String playName, @RequestParam(name = "publishedonly", required = false,
-                    defaultValue = "false") boolean publishedOnly) {
+    public List<TalkingPointDTO> findAllByPlayName(@PathVariable String customerSpace, @PathVariable String playName,
+            @RequestParam(name = "publishedonly", required = false, defaultValue = "false") boolean publishedOnly) {
         return talkingPointService.findAllByPlayName(playName, publishedOnly);
     }
 
@@ -82,17 +79,14 @@ public class TalkingPointResource {
     @PostMapping("/publish")
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public void publish(@PathVariable String customerSpace,
-            @RequestParam("playName") String playName) {
+    public void publish(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
         talkingPointService.publish(playName);
     }
 
     @PostMapping("/revert")
     @ResponseBody
-    @ApiOperation(
-            value = "Revert the given play's talking points to the version last published to dante")
-    public List<TalkingPointDTO> revert(@PathVariable String customerSpace,
-            @RequestParam("playName") String playName) {
+    @ApiOperation(value = "Revert the given play's talking points to the version last published to dante")
+    public List<TalkingPointDTO> revert(@PathVariable String customerSpace, @RequestParam("playName") String playName) {
         return talkingPointService.revertToLastPublished(playName);
     }
 
@@ -106,8 +100,15 @@ public class TalkingPointResource {
     @GetMapping("/attributes/{playName}")
     @ResponseBody
     @ApiOperation(value = "get all depending attributes in talkingpoint of a play")
-    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(
-            @PathVariable String customerSpace, @PathVariable("playName") String playName) {
+    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(@PathVariable String customerSpace,
+            @PathVariable("playName") String playName) {
         return talkingPointService.getAttributesInTalkingPointOfPlay(playName);
+    }
+
+    @GetMapping("/all-published")
+    @ResponseBody
+    @ApiOperation(value = "Return all published Talking Points for the tenant")
+    public List<TalkingPointDTO> findAllPublishedByTenant(@PathVariable String customerSpace) {
+        return talkingPointService.findAllPublishedByTenant(customerSpace);
     }
 }

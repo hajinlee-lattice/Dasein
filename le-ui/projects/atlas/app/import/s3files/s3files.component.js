@@ -32,7 +32,8 @@ export default class S3FileList extends Component {
             path: '',
             angularGoTo: '',
             angularBack: '',
-            breadcrumbs: []
+            breadcrumbs: [],
+            loadingButton: false
         };
     }
 
@@ -46,12 +47,13 @@ export default class S3FileList extends Component {
         let path = store.getState()['s3files'].path;
 
         let ImportWizardStore = this.ImportWizardStore;
-        let entityType = ImportWizardStore.getEntityType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
         this.setState({
             showLoading: true,
             breadcrumbs: [
                 {
-                    label: `${entityType} Data`
+                    label: `${templateType} Data`
                 }
             ]
         });
@@ -61,41 +63,43 @@ export default class S3FileList extends Component {
     handleChange = () => {
         const data = store.getState()['s3files'];
         let s3Files = data.s3Files;
+        let s3FilesSorted = s3Files.sort((a, b) => b['last_modified'] - a['last_modified']);
 
         let state = Object.assign({}, this.state);
         state.showEmpty = s3Files && s3Files.length == 0;
         state.showLoading = false;
-        state.data = s3Files;
+        state.data = s3FilesSorted;
         state.path = data.path;
         state.forceReload = true;
 
         let ImportWizardStore = this.ImportWizardStore;
-        let feedType = ImportWizardStore.getFeedType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
         
         let angularGoTo = '';
         let angularBack = '';
-        switch (feedType) {
-            case "DefaultSystem_AccountData": {
+        switch (templateType) {
+            case "Accounts": {
                 angularGoTo = 'home.import.data.accounts.ids';
                 angularBack = 'home.import.entry.accounts';
                 break;
             }
-            case "DefaultSystem_ContactData": {
+            case "Contacts": {
                 angularGoTo = 'home.import.data.contacts.ids';
                 angularBack = 'home.import.entry.contacts';
                 break;
             }
-            case "DefaultSystem_TransactionData": {
+            case "Product Purchases": {
                 angularGoTo = 'home.import.data.productpurchases.ids';
                 angularBack = 'home.import.entry.productpurchases';
                 break;
             }
-            case "DefaultSystem_ProductBundle": {
+            case "Product Bundles": {
                 angularGoTo = 'home.import.data.productbundles.ids';
                 angularBack = 'home.import.entry.productbundles';
                 break;
             }
-            case "DefaultSystem_ProductHierarchy": {
+            case "Product Hierarchy": {
                 angularGoTo = 'home.import.data.producthierarchy.ids';
                 angularBack = 'home.import.entry.producthierarchy';
                 break;
@@ -109,6 +113,11 @@ export default class S3FileList extends Component {
     }
 
     nextStep = () => {
+
+        let state = Object.assign({}, this.state);
+        state.enableButton = false;
+        state.loadingButton = true;
+        this.setState(state);
 
         // Get feedtype from selection on template list (AccountSchema, ContactSchema, etc.)
         let ImportWizardStore = this.ImportWizardStore;
@@ -127,7 +136,6 @@ export default class S3FileList extends Component {
                         switch (action) {
                             case "create-template": 
                             case "edit-template": {
-                                console.log(response);
                                 let sourceFile = response.data.Result;
                                 ImportWizardStore.setCsvFileName(sourceFile.name);
                                 NgState.getAngularState().go(this.state.angularGoTo, {});
@@ -148,7 +156,6 @@ export default class S3FileList extends Component {
     }
 
     goBack = () => {
-        console.log(this.state.angularBack);
         NgState.getAngularState().go(this.state.angularBack, {});
     }
 
@@ -157,9 +164,6 @@ export default class S3FileList extends Component {
         if (file.is_directory) {
             this.getFilesFromFolder(file.file_name);
         } else {
-
-
-            console.log(file);
             let state = Object.assign({}, this.state);
             state.selectedItem = file;
             // state.entity = ;
@@ -170,11 +174,13 @@ export default class S3FileList extends Component {
 
     getFilesFromFolder = (folder) => {
         let ImportWizardStore = this.ImportWizardStore;
-        let entityType = ImportWizardStore.getEntityType();
+        let templateData = ImportWizardStore.getTemplateData();
+        let templateType = templateData.Object;
+
         let state = Object.assign({}, this.state);
         state.breadcrumbs = [
             {
-                "label": `${entityType} Data`
+                "label": `${templateType} Data`
             },
             {
                 "label": folder
@@ -188,7 +194,7 @@ export default class S3FileList extends Component {
             s3actions.fetchS3Files(path);
             state.breadcrumbs = [
                 {
-                    "label": `${entityType} Data`
+                    "label": `${templateType} Data`
                 }
             ];
         } else {
@@ -206,12 +212,12 @@ export default class S3FileList extends Component {
             name: "file-list",
             selectable: true,
             sorting:{
-                initial: 'lastModified',
+                initial: 'last_modified',
                 direction: 'desc'
             },
             header: [
                 {
-                    name: "fileName",
+                    name: "file_name",
                     displayName: "File",
                     sortable: true
                 },
@@ -221,12 +227,12 @@ export default class S3FileList extends Component {
                     sortable: false
                 },
                 {
-                    name: "file_size",
+                    name: "byte_size",
                     displayName: "File Size",
                     sortable: true
                 },
                 {
-                    name: "lastModified",
+                    name: "last_modified",
                     displayName: "Time",
                     sortable: true
                 }
@@ -234,6 +240,7 @@ export default class S3FileList extends Component {
             columns: [
                 {
                     colSpan: 7,
+                    onlyTemplate: true,
                     template: cell => {
                         if (cell.props.rowData.file_type != null) {
                             return (
@@ -254,10 +261,17 @@ export default class S3FileList extends Component {
                     colSpan: 1
                 },
                 {
-                    colSpan: 1
+                    colSpan: 1,
+                    onlyTemplate: true,
+                    template: cell => {
+                        return (
+                            <span>{cell.props.rowData.file_size}</span>
+                        );
+                    }
                 },
                 {
                     colSpan: 3,
+                    onlyTemplate: true,
                     template: cell => {
 
                         if (cell.props.rowData.file_type != null) {
@@ -285,6 +299,14 @@ export default class S3FileList extends Component {
         };
 
         return config;
+    }
+
+    getLoadingIcon() {
+        if (this.state.loadingButton) {
+            return <i className="fa fa-spinner fa-pulse fa-fw"></i>;
+        } else {
+            return null;
+        }
     }
 
     render() {
@@ -332,18 +354,18 @@ export default class S3FileList extends Component {
                                     />
                                 </div>
                                 <div className="pull-right">
+                                    {this.getLoadingIcon()}
                                     <LeButton
                                         name="add"
                                         disabled={!this.state.enableButton}
                                         config={{
                                             label: "Select",
-                                            classNames: "blue-button"
+                                            classNames: "blue-button",
+                                            icon: "fa fa-spinner fa-pulse fa-fw",
+                                            iconside: "LEFT"
                                         }}
                                         callback={() => {
-
                                             this.nextStep();
-
-                                            // Same functionality as Next, Field mappings 
                                         }}
                                     />
                                 </div>

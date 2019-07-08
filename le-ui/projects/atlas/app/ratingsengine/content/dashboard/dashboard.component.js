@@ -72,13 +72,20 @@ angular.module('lp.ratingsengine.dashboard', [
                 'vlines': {
                     'suffix': 'x'
                 },
-                'columns': [{
-                    'field': 'lift',
-                    'label': 'Lift',
-                    'type': 'string',
-                    'suffix': 'x',
-                    'chart': true
-                }
+                'columns': [
+                    {
+                        'field': 'lift',
+                        'label': 'Lift',
+                        'type': 'string',
+                        'suffix': 'x',
+                        'chart': true
+                    },
+                    {
+                        'field': 'num_leads',
+                        'label': 'Accounts',
+                        'type': 'number',
+                        'chart': true
+                    }
                 ]
             },
             modalConfig: {

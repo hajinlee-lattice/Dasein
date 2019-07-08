@@ -18,6 +18,7 @@ import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -37,7 +38,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return PlayLaunch.class;
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByLaunchId(String launchId) {
         if (StringUtils.isBlank(launchId)) {
@@ -51,7 +52,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                         + " WHERE launch_id = :launchId ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("launchId", launchId);
+        query.setParameter("launchId", launchId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -59,7 +60,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
         if (playId == null) {
@@ -74,8 +75,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                         + " AND created = :created ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
-        query.setDate("created", created);
+        query.setParameter("playId", playId);
+        query.setParameter("created", created);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -83,7 +84,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId) {
         if (playId == null) {
@@ -101,8 +102,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
-        query.setString("orgId", orgId.trim());
+        query.setParameter("playId", playId);
+        query.setParameter("orgId", orgId.trim());
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -110,7 +111,32 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return (PlayLaunch) list.get(0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public PlayLaunch findLatestByChannel(Long playLaunchChannelId) {
+        if (playLaunchChannelId == null) {
+            return null;
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+        String queryStr = String.format(
+                " FROM %s "//
+                        + " WHERE fk_play_launch_channel_id = :playLaunchChannelId ", //
+                entityClz.getSimpleName());
+
+        queryStr += " ORDER BY created DESC ";
+
+        Query query = session.createQuery(queryStr);
+        query.setParameter("playLaunchChannelId", playLaunchChannelId);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (PlayLaunch) list.get(0);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states) {
         if (playId == null) {
@@ -132,7 +158,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
-        query.setLong("playId", playId);
+        query.setParameter("playId", playId);
 
         if (CollectionUtils.isNotEmpty(states)) {
             List<String> statesNameList = states.stream()//
@@ -144,7 +170,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByState(LaunchState state) {
         if (state == null) {
@@ -158,7 +184,29 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                         + " ORDER BY created DESC ", //
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("state", state.name());
+        query.setParameter("state", state.name());
+        return query.list();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
+        if (state == null) {
+            throw new RuntimeException("Valid launch state is needed");
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                " FROM %s " //
+                        + " WHERE state = :state and deleted = :deleted" //
+                        + " ORDER BY created DESC ", //
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("state", state.name());
+        query.setParameter("deleted", Boolean.FALSE);
+        if (max != null) {
+            query.setMaxResults(max.intValue());
+        }
         return query.list();
     }
 
@@ -172,7 +220,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<LaunchSummary> findByPlayStatesAndPagination(Long playId, List<LaunchState> states, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
             String externalSysType) {
@@ -187,7 +235,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public Long findCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
@@ -202,7 +250,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -215,7 +263,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> states,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -228,7 +276,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
         List<Pair<String, String>> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(queryResult)) {
-            queryResult.stream().forEach(org -> {
+            queryResult.forEach(org -> {
                 List<Object> obj = JsonUtils.convertList(JsonUtils.deserialize(JsonUtils.serialize(org), List.class),
                         Object.class);
                 Object orgIdObj = obj.get(0);
@@ -236,7 +284,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 Object sysTypeObj = obj.get(1);
                 String extractedSysType = sysTypeObj == null ? null : sysTypeObj.toString();
                 if (StringUtils.isNotBlank(extractedOrgId) && StringUtils.isNotBlank(extractedSysType)) {
-                    result.add(new ImmutablePair<String, String>(extractedOrgId, extractedSysType));
+                    result.add(new ImmutablePair<>(extractedOrgId, extractedSysType));
                 }
             });
         }
@@ -244,7 +292,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Stats findTotalCountByPlayStatesAndTimestamps(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, String orgId, String externalSysType) {
         Session session = getSessionFactory().getCurrentSession();
@@ -254,13 +302,20 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         String totalAccountsSuppressed = "totalAccountsSuppressed";
         String totalAccountsErrored = "totalAccountsErrored";
         String totalContactsLaunched = "totalContactsLaunched";
+        String totalContactsSelected = "totalContactsSelected";
+        String totalContactsSuppressed = "totalContactsSuppressed";
+        String totalContactsErrored = "totalContactsErrored";
 
         String queryStr = "SELECT new map " + "( " //
                 + " SUM(COALESCE(accountsSelected)) AS " + totalAccountsSelected + ", " //
                 + " SUM(COALESCE(accountsLaunched)) AS " + totalAccountsLaunched + ", " //
                 + " SUM(COALESCE(accountsSuppressed)) AS " + totalAccountsSuppressed + ", " //
                 + " SUM(COALESCE(accountsErrored)) AS " + totalAccountsErrored + ", " //
-                + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + " " + ") ";
+                + " SUM(COALESCE(contactsLaunched)) AS " + totalContactsLaunched + ", " //
+                + " SUM(COALESCE(contactsSelected)) AS " + totalContactsSelected + ", " //
+                + " SUM(COALESCE(contactsSuppressed)) AS " + totalContactsSuppressed + ", " //
+                + " SUM(COALESCE(contactsErrored)) AS " + totalContactsErrored + " " //
+                + ") ";
 
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
                 session, entityClz, queryStr, false, orgId, externalSysType);
@@ -269,9 +324,12 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         Stats totalCounts = new Stats();
         Map<String, Object> res = queryResult.get(0);
         totalCounts.setSelectedTargets(getVal(res, totalAccountsSelected));
+        totalCounts.setSelectedContacts(getVal(res, totalContactsSelected));
         totalCounts.setRecommendationsLaunched(getVal(res, totalAccountsLaunched));
-        totalCounts.setSuppressed(getVal(res, totalAccountsSuppressed));
+        totalCounts.setAccountsSuppressed(getVal(res, totalAccountsSuppressed));
         totalCounts.setAccountErrors(getVal(res, totalAccountsErrored));
+        totalCounts.setContactsSuppressed(getVal(res, totalContactsSuppressed));
+        totalCounts.setContactErrors(getVal(res, totalContactsErrored));
         totalCounts.setContactsWithinRecommendations(getVal(res, totalContactsLaunched));
 
         return totalCounts;
@@ -282,7 +340,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return val == null ? 0L : (Long) val;
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, boolean sortNeeded, String orgId, String externalSysType) {
@@ -290,15 +348,15 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
                 session, entityClz, queryStr, null, sortNeeded, orgId, externalSysType);
     }
 
-    @SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private Query createQueryForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, String sortby, boolean descending, Long endTimestamp, Session session,
             Class<PlayLaunch> entityClz, String queryStr, String closingQueryStr, boolean sortNeeded, String orgId,
             String externalSysType) {
 
-
-        queryStr += String.format(" FROM %s pl"//
-                + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
+        queryStr += String.format(
+                " FROM %s pl"//
+                        + " WHERE deleted = :deleted AND pl.created >= :startTimestamp ", //
                 entityClz.getSimpleName());
 
         if (endTimestamp != null) {
@@ -359,8 +417,8 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         }
 
         if (orgIdFilterNeeded) {
-            query.setString(DEST_ORG_ID, orgId.trim());
-            query.setString(DEST_SYS_TYPE, externalSysType.trim());
+            query.setParameter(DEST_ORG_ID, orgId.trim());
+            query.setParameter(DEST_SYS_TYPE, CDLExternalSystemType.valueOf(externalSysType.trim()));
         }
 
         if (CollectionUtils.isNotEmpty(states)) {

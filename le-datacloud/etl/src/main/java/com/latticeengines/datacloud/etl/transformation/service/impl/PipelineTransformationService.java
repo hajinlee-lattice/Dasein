@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
 import com.latticeengines.datacloud.core.source.Source;
@@ -48,9 +47,9 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -256,8 +255,13 @@ public class PipelineTransformationService extends AbstractTransformationService
             if (baseTables == null) {
                 baseTables = Collections.emptyMap();
             }
+            Map<String, SourceIngestion> baseIngestions = config.getBaseIngestions();
+            if (baseIngestions == null) {
+                baseIngestions = Collections.emptyMap();
+            }
 
             Map<String, TableSource> involvedTableSources = new HashMap<>();
+            Map<String, IngestionSource> involvedIngestionSources = new HashMap<>();
 
             if ((baseSourceNames != null) && (baseSourceNames.size() != 0)) {
                 for (int i = 0; i < baseSourceNames.size(); i++, baseSourceIdx++) {
@@ -279,25 +283,16 @@ public class PipelineTransformationService extends AbstractTransformationService
                         }
                         source = new TableSource(table, baseTable.getCustomerSpace());
                         involvedTableSources.put(sourceName, (TableSource) source);
-                    } else {
+                    } else if (baseIngestions.containsKey(sourceName)) {
+                        SourceIngestion baseIngestion = baseIngestions.get(sourceName);
+                        source = new IngestionSource(baseIngestion.getIngestionName());
+                        involvedIngestionSources.put(sourceName, (IngestionSource) source);
+                    }else {
                         source = sourceService.findBySourceName(sourceName);
                     }
                     if (source == null) {
                         updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
                         return null;
-                    }
-                    if (source instanceof IngestionSource) {
-                        try {
-                            IngestedFileToSourceTransformerConfig ingestedFileToSourceTransformerConfig = new ObjectMapper()
-                                    .readValue(config.getConfiguration(), IngestedFileToSourceTransformerConfig.class);
-                            ((IngestionSource) source)
-                                    .setIngestionName(ingestedFileToSourceTransformerConfig.getIngestionName());
-                        } catch (IOException e) {
-                            updateStatusToFailed(progress, "Failed to parse IngestedFileToSourceTransformerConfig "
-                                    + config.getConfiguration(), null);
-                            return null;
-                        }
-
                     }
                     baseSources[baseSourceIdx] = source;
 
@@ -306,8 +301,11 @@ public class PipelineTransformationService extends AbstractTransformationService
                     if (involvedTableSources.containsKey(templateName)) {
                         template = involvedTableSources.get(templateName);
                     }
+                    if (involvedIngestionSources.containsKey(templateName)) {
+                        template = involvedIngestionSources.get(templateName);
+                    }
                     if (template == null) {
-                        updateStatusToFailed(progress, "Base source " + templateName + " not found", null);
+                        updateStatusToFailed(progress, "Base template " + templateName + " not found", null);
                         return null;
                     }
                     baseTemplates[baseSourceIdx] = template;
@@ -618,6 +616,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             Source baseSource = baseSources[j];
             baseSourceNames = baseSourceNames + baseSource.getSourceName();
             baseSourceVersions = baseSourceVersions + baseVersions.get(j);
+            if (baseSourceNames.length() > 1000 || baseSourceVersions.length() > 1000) {
+                break;
+            }
         }
         stepReport.setBaseSources(baseSourceNames);
         stepReport.setBaseVersions(baseSourceVersions);
@@ -788,7 +789,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         configuration.setServiceBeanName(getServiceBeanName());
         configuration.setKeepTemp(inputRequest.getKeepTemp());
         configuration.setSteps(steps);
-        configuration.setEnableSlack(inputRequest.isEnableSlack());
+        configuration.setEnableSlack(request.isEnableSlack());
         configuration.setContainerMemMB(inputRequest.getContainerMemMB());
 
         return configuration;

@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,14 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.repository.TenantRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Long> implements TenantEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(TenantEntityMgrImpl.class);
 
     private final TenantRepository tenantRepository;
 
@@ -82,6 +87,18 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void setNotificationStateByTenantId(String tenantId, String notificationLevel) {
+        Tenant tenant1 = findByTenantId(tenantId);
+        if (tenant1 == null) {
+            log.error("can not find the tenant using tenantId " + tenantId);
+        } else {
+            tenant1.setNotificationLevel(TenantEmailNotificationLevel.getByName(notificationLevel));
+            super.update(tenant1);
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -91,6 +108,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
             // expired date = registered + 90
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
             tenant.setExpiredTime(expiredTime);
+        }
+        if(tenant.getNotificationLevel() == null) {
+            tenant.setNotificationLevel(TenantEmailNotificationLevel.ERROR);
         }
         super.create(tenant);
     }

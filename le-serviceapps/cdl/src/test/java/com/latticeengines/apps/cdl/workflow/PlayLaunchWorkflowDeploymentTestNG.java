@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,8 +33,9 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -81,16 +84,21 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
+        featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
+        featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
 
         marketoPlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
                 .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.MAP)
                 .destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_" + System.currentTimeMillis())
+                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B)))
                 .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
                 .topNCount(160L).featureFlags(featureFlags).build();
 
         s3PlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
                 .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.FILE_SYSTEM)
+                .bucketsToLaunch(
+                        new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B, RatingBucketName.C)))
                 .destinationSystemName(CDLExternalSystemName.AWS_S3).destinationSystemId("Lattice_S3").topNCount(200L)
                 .featureFlags(featureFlags).build();
 
@@ -146,6 +154,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertNotNull(s3Objects);
         assertEquals(s3Objects.size(), 2);
         assertTrue(s3Objects.get(0).getKey().contains("Recommendations"));
+        // 426 rows
 
         boolean csvFileExists = false, jsonFileExists = false;
         for (S3ObjectSummary s3Obj : s3Objects) {
@@ -204,7 +213,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         assertEquals(s3Objects.size(), 2);
         assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getDisplayName()));
         assertTrue(s3Objects.get(0).getKey().contains(defaultPlay.getName()));
-
+        // 392 rows
         boolean csvFileExists = false, jsonFileExists = false;
         for (S3ObjectSummary s3Obj : s3Objects) {
             if (s3Obj.getKey().contains(".csv")) {

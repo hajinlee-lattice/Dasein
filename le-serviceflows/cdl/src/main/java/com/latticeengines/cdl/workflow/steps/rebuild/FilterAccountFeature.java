@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
-import com.latticeengines.cdl.workflow.steps.update.FilterAccountFeatureDiff;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -47,9 +45,9 @@ import com.latticeengines.spark.exposed.job.common.CopyJob;
 @Component(FilterAccountFeature.BEAN_NAME)
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig, CopyJob> {
+public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfiguration, CopyConfig> {
 
-    private static final Logger log = LoggerFactory.getLogger(FilterAccountFeatureDiff.class);
+    private static final Logger log = LoggerFactory.getLogger(FilterAccountFeature.class);
 
     static final String BEAN_NAME = "filterAccountFeature";
 
@@ -64,9 +62,6 @@ public class FilterAccountFeature extends RunSparkJob<ProcessAccountStepConfigur
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Value("${common.le.environment}")
-    private String leEnv;
 
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
