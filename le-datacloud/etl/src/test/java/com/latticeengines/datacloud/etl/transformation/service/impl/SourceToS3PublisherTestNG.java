@@ -2,11 +2,9 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +73,39 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
+
+    // Sources with schema directory
+    private Set<String> expectedSrcWithSchema = ImmutableSet.of( //
+            baseSrc1.getSourceName(), //
+            baseSrc2.getSourceName(), //
+            baseSrc4.getSourceName(), //
+            baseSrc6.getSourceName());
+
+    // Base source -> expected snapshot file names
+    @SuppressWarnings("serial")
+    private Map<Source, List<String>> expectedDataFiles = new HashMap<Source, List<String>>() {
+        {
+            put(baseSrc1, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc2, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc3, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc4, Arrays.asList("part-0000.avro", "part-0001.avro"));
+            put(baseSrc5, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc6, Arrays.asList("AccountTable1.avro"));
+        }
+    };
+
+    // Base source -> expected _CURRENT_VERSION
+    @SuppressWarnings("serial")
+    private Map<Source, String> expectedVersions = new HashMap<Source, String>() {
+        {
+            put(baseSrc1, basedSourceVersion);
+            put(baseSrc2, basedSourceVersion);
+            put(baseSrc3, basedSourceVersion);
+            put(baseSrc4, basedSourceVersion);
+            put(baseSrc5, laterSourceVersion);
+            put(baseSrc6, basedSourceVersion);
+        }
+    };
 
     @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
@@ -147,54 +178,25 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
      * Initialization
      *******************/
 
-    // Sources with schema directory
-    private Set<String> expectedSrcWithSchema = ImmutableSet.of( //
-            baseSrc1.getSourceName(), //
-            baseSrc2.getSourceName(), //
-            baseSrc4.getSourceName(), //
-            baseSrc6.getSourceName());
+    private void prepareData() {
+        try {
+            s3FilePrepare();
 
-    // Base source -> expected snapshot file names
-    @SuppressWarnings("serial")
-    private Map<Source, List<String>> expectedDataFiles = new HashMap<Source, List<String>>() {
-        {
-            put(baseSrc1, Arrays.asList("AccountMaster206.avro"));
-            put(baseSrc2, Arrays.asList("AccountMaster206.avro"));
-            put(baseSrc3, Arrays.asList("AccountMaster206.avro"));
-            put(baseSrc4, Arrays.asList("part-0000.avro", "part-0001.avro"));
-            put(baseSrc5, Arrays.asList("AccountMaster206.avro"));
-            put(baseSrc6, Arrays.asList("AccountTable1.avro"));
+            uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc3, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceDir(baseSrc4.getSourceName(), SourceToS3PublisherTestNG.class.getSimpleName(),
+                    basedSourceVersion);
+            uploadBaseSourceFile(baseSrc5, "AccountMaster206.avro", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc6, "AccountTable1", basedSourceVersion);
+
+            createSchema(baseSrc1, basedSourceVersion);
+            createSchema(baseSrc2, basedSourceVersion);
+            createSchema(baseSrc4, basedSourceVersion);
+            createSchema(baseSrc6, basedSourceVersion);
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to prepare data.");
         }
-    };
-
-    // Base source -> expected _CURRENT_VERSION
-    @SuppressWarnings("serial")
-    private Map<Source, String> expectedDates = new HashMap<Source, String>() {
-        {
-            put(baseSrc1, basedSourceVersion);
-            put(baseSrc2, basedSourceVersion);
-            put(baseSrc3, basedSourceVersion);
-            put(baseSrc4, basedSourceVersion);
-            put(baseSrc5, laterSourceVersion);
-            put(baseSrc6, basedSourceVersion);
-        }
-    };
-
-    private void prepareData() throws IOException {
-        s3FilePrepare();
-
-        uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc3, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceDir(baseSrc4.getSourceName(), SourceToS3PublisherTestNG.class.getSimpleName(),
-                basedSourceVersion);
-        uploadBaseSourceFile(baseSrc5, "AccountMaster206.avro", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc6, "AccountTable1", basedSourceVersion);
-
-        createSchema(baseSrc1, basedSourceVersion);
-        createSchema(baseSrc2, basedSourceVersion);
-        createSchema(baseSrc4, basedSourceVersion);
-        createSchema(baseSrc6, basedSourceVersion);
     }
 
     private void createSchema(Source baseSource, String version) {
@@ -208,7 +210,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void s3FilePrepare() throws IOException {
+    private void s3FilePrepare() {
         // Prepare _CURRENT_VERION file
         uploadToS3(baseSrc1, earlySourceVersion, false);
         uploadToS3(baseSrc2, basedSourceVersion, false);
@@ -218,18 +220,21 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         uploadToS3(baseSrc2, basedSourceVersion, true);
     }
 
-    private void uploadToS3(Source baseSource, String sourceVerion, boolean isDataDir) throws IOException {
+    private void uploadToS3(Source baseSource, String sourceVerion, boolean isDataDir) {
 
-        InputStream inputStream = isDataDir
-                ? Thread.currentThread().getContextClassLoader().getResourceAsStream("sources/" + "AccountTable1.avro")
-                : IOUtils.toInputStream(sourceVerion, "UTF-8");
+        try {
+            InputStream inputStream = isDataDir
+                    ? Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream("sources/" + "AccountTable1.avro")
+                    : IOUtils.toInputStream(sourceVerion, "UTF-8");
 
-        String s3Key = isDataDir
-                ? hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion)//
-                        + "/" + "AccountTable1.avro"
-                : hdfsPathBuilder.constructVersionFile(baseSource).toString();
+            String s3Key = isDataDir ? hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion)//
+                    + "/" + "AccountTable1.avro" : hdfsPathBuilder.constructVersionFile(baseSource).toString();
 
-        s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
+            s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     
@@ -270,7 +275,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             // Verify current version file
             String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
             validateCopySuccess(Arrays.asList(versionFilePath));
-            isUpdatedDate(baseSource, versionFilePath);
+            verifyVersionFile(baseSource, versionFilePath);
            
         } catch (Exception e) {
             log.error("Fail to validate publising source {} at version {}", sourceName, version);
@@ -278,13 +283,16 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
     
-    private void isUpdatedDate(Source baseSource, String versionFilePath) throws ParseException, IOException {
-        Date hdfsDate = HdfsPathBuilder.dateFormat.parse(expectedDates.get(baseSource));
+    private void verifyVersionFile(Source baseSource, String versionFilePath) {
+        try {
+            String hdfsDate = expectedVersions.get(baseSource);
 
-        @SuppressWarnings("deprecation")
-        Date s3Date = HdfsPathBuilder.dateFormat
-                .parse(IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath)));
-        Assert.assertEquals(hdfsDate, s3Date);
+            @SuppressWarnings("deprecation")
+            String s3Date = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath));
+            Assert.assertEquals(hdfsDate, s3Date);
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to validate version of file:" + versionFilePath);
+        }
     }
 
     private List<String> getExpectedDataFiles(Source baseSource) {
@@ -298,9 +306,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files) throws IOException {
+    private void validateCopySuccess(List<String> files) {
         files.forEach(file -> {
-            Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
+            try {
+                Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate publishing:" + file);
+            }
         });
     }
 
@@ -318,9 +330,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void cleanupS3Path(String path) throws IOException {
-        if (s3Service.isNonEmptyDirectory(s3Bucket, path)) {
-            s3Service.cleanupPrefix(s3Bucket, path);
+    private void cleanupS3Path(String path) {
+        try {
+            if (s3Service.isNonEmptyDirectory(s3Bucket, path)) {
+                s3Service.cleanupPrefix(s3Bucket, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to clean up s3: " + path);
         }
     }
 
