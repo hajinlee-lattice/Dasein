@@ -399,7 +399,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
-        return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        return playLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
     }
 
