@@ -152,6 +152,10 @@ public class PlayServiceImpl implements PlayService {
             throw new LedpException(LedpCode.LEDP_18144);
         }
         Play play = playEntityMgr.getPlayByName(name, considerDeleted);
+        if (play == null) {
+            log.warn(String.format("Error finding play by name %s in tenant %s", name,
+                    tenant != null ? tenant.getName() : "null"));
+        }
         if (play != null && play.getRatingEngine() != null) {
             updateLastRefreshedDate(play.getRatingEngine());
             setBucketMetadata(tenant, play);
