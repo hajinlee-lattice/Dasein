@@ -44,7 +44,7 @@ export default class TemplatesRowControlles extends Component {
     return (
       <LeMenuItem
         name="edit"
-        label="View Mappings"
+        label="View Template"
         image="fa fa-list-alt"
         callback={name => {
           this.props.callback({
