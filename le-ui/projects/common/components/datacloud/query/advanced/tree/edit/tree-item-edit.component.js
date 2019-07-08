@@ -22,10 +22,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
-                    console.log('[tree-edit] initz start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
+                    // console.log('[tree-edit] initz start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                     vm.initVariables();
                     vm.resetCmp();
-                    console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
+                    // console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
                 }
 
                 vm.initVariables = function () {
@@ -37,8 +37,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         convertEqualToCollection();
                         let value = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
                         vm.operation = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
-                        console.log('[tree-edit] initVariables()', value, vm.vals, vm.tree);
-                        vm.vals = value;
+                        // console.log('[tree-edit] initVariables()', value, vm.vals, vm.tree);
+                        vm.vals = value || [];
                     }
                     if (vm.showItem('Enum')) {
                         convertEqualToCollection();
@@ -120,7 +120,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.changeCmpValue = function (numerical) {
-                    console.log('[tree-edit] changeCmpValue start', numerical, vm.operation, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
+                    // console.log('[tree-edit] changeCmpValue start', numerical, vm.operation, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
                     vm.clear = true;
                     let _operation = vm.tree.bucketRestriction.bkt.Cmp;
 
@@ -149,8 +149,6 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     } else {
                         QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
                     }
-
-                    console.log(3, vm.vals, vm.tree.bucketRestriction.bkt.Vals);
                 }
 
                 vm.showChips = function () {
@@ -273,11 +271,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.clickSet = function ($event, unset) {
-                    // console.log('[tree] clickSet() start', vm.tree.bucketRestriction.bkt.Cmp, vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction)
-
                     // add any free text in ChipsController query as an item
                     if (vm.ChipsController && vm.ChipsController.query && vm.ChipsController.customVals) {
                         vm.ChipsController.addCustomValue(vm.ChipsController.query);
+                    }
+
+                    // is string operation, make sure vm.vals populates bucketRestriction
+                    if (['IS_NULL', 'IS_NOT_NULL'].indexOf(vm.operation) == -1 && vm.string_operations[vm.operation]) {
+                        vm.tree.bucketRestriction.bkt.Vals = vm.vals;
                     }
 
                     // if vals is empty, set operation to check IF PRESENT
