@@ -57,9 +57,8 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      * @param type
      *            target patch book type, should not be {@literal null} Apply
      *            Pagination Logic
-     * @param offset
-     * @param limit
-     * @param pid
+     * @param minPid
+     * @param maxPid
      * @param fieldAndValues
      * @return list of {@link PatchBook}, will not be {@literal null}
      */
@@ -94,8 +93,6 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      *            Pagination Logic
      * @param minPid
      * @param maxPid
-     * @param offset
-     * @param limit
      * @param pid
      * @param fieldAndValues
      * @return list of {@link PatchBook}, will not be {@literal null}
