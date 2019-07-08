@@ -139,15 +139,18 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     }
 
     function updateFieldDate(fieldMapped, newTypeObj, entity) {
+        // console.log('DATE UPDATE ', newTypeObj);
         if(newTypeObj.type){
             if(newTypeObj.type !== 'DATE'){
                 delete fieldMapped.dateFormatString;
                 delete fieldMapped.timeFormatString;
                 delete fieldMapped.timezone;
+                fieldMapped.fieldType = newTypeObj.type;
             }else{
                 fieldMapped.dateFormatString = newTypeObj.dateFormatString;
                 fieldMapped.timeFormatString = newTypeObj.timeFormatString;
                 fieldMapped.timezone = newTypeObj.timezone;
+                fieldMapped.fieldType = newTypeObj.type;
             }
         }else{
             
