@@ -19,7 +19,7 @@
     <div ng-if="$ctrl.showTimeFrame">
       <date-range-directive
         ng-if="$ctrl.showTimeFrame"
-        config="{{$ctrl.periodTimeConfig}}"
+        config="$ctrl.periodTimeConfig"
         vm="$ctrl.vm"
         showfrom="$ctrl.showFromTime"
         showto="$ctrl.showToTime"
@@ -33,7 +33,7 @@
     <!--  -->
     <numerical-range-directive
       ng-if="$ctrl.showPeriodNumber"
-      config="{{ $ctrl.periodNumberConfig }}"
+      config="$ctrl.periodNumberConfig"
       showmessage="false"
       showfrom="$ctrl.showFromPeriod"
       showto="$ctrl.showToPeriod"
