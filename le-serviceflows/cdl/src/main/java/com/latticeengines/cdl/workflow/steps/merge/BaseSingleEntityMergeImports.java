@@ -98,7 +98,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             Set<String> names = table.getAttributes().stream().map(entry -> entry.getName()).collect(Collectors.toSet());
             // currently LatticeAccountId/InternalId, CDLCreateTime, CDLUpdateTime
             Integer attrCount = names.size();
-            trimAttrCount(names, attrCount);
+            attrCount = trimAttrCount(names, attrCount);
             switch(configuration.getMainEntity()) {
                 case Account:
                     attrQuota = limit.getAccountAttributeQuotaLimit();
@@ -117,7 +117,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     //
-    private void trimAttrCount(Set<String> names, Integer attrCount) {
+    private Integer trimAttrCount(Set<String> names, Integer attrCount) {
         if (names.contains(InterfaceName.InternalId.name())) {
             attrCount--;
         }
@@ -130,6 +130,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         if (names.contains(InterfaceName.LatticeAccountId.name())) {
             attrCount--;
         }
+        return attrCount;
     }
 
     private void isDataQuotaLimit(Table table) {
