@@ -142,7 +142,7 @@ angular.module('lp.import.wizard.contactids', [])
             vm.changeMatchIds(mapped);
             vm.updateMatch(mapped);
         }
-        // console.log('Saving', mapped);
+        console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };

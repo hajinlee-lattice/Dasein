@@ -36,7 +36,9 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             contact: (entityMatchEnabled ? 'CustomerContactId' : 'ContactId'),
-            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId')
+            account: (entityMatchEnabled ? 'CustomerAccountId' : 'AccountId'),
+            contactUniqueId: {}
+
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
@@ -77,6 +79,9 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
         var userFields = [];
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+            if(fieldMapping.mappedField == vm.mappedFieldMap.contact){
+                vm.mappedFieldMap.contactUniqueId = Object.assign({}, fieldMapping);
+            }
             if(userFields.indexOf(fieldMapping.userField) === -1) {
                 userFields.push(fieldMapping.userField);
                 vm.AvailableFields.push(fieldMapping);
@@ -161,7 +166,10 @@ angular.module('lp.import.wizard.matchtoaccounts', [])
             
             if(item.mappedField == "CustomerAccountId"){
                 item.SystemName = vm.systemName;
-                item.IdType = 'Contact'
+                item.IdType = 'Account'
+            }else if(item.mappedField == "CustomerContactId") {
+                item.mapToLatticeId = vm.mappedFieldMap.contactUniqueId.mapToLatticeId;
+                item.IdType = 'Contact';
             }else{
                 item.SystemName = null;
                 item.IdType = null;

@@ -133,16 +133,17 @@ angular.module('lp.import.wizard.customfields', [])
         vm.changeSingleType(field);
     }
     vm.changeSingleType = function(fieldMapping){
-        let userField = fieldMapping.userField;
-        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone}, ImportWizardStore.getEntityType());
-        ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
+        let usField = fieldMapping.userField;
+        let obj = { userField: usField, type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
+        ImportWizardStore.updateSavedObjectCustomFields(obj, $state.current.name);
         vm.validate();
     }
     
     vm.updateFormats = (formats) => {
         let field = formats.field;
-        ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
-        ImportWizardStore.remapType(field.userField, {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone}, ImportWizardStore.getEntityType());
+        let usField = field.userField;
+        let obj = { userField: usField, type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
+        ImportWizardStore.updateSavedObjectCustomFields(obj, $state.current.name);
         vm.validate();
     }
 
