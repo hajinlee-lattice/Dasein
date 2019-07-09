@@ -197,6 +197,10 @@
             margin-bottom: 10px;
         }
     }
+    &.alert {
+        position: fixed;
+        border-color: rgb(253,188,84);
+    }
     &.saved {
         border-color: rgb(111,190,74);
         .icon {
