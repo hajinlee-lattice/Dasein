@@ -385,12 +385,12 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected List<Integer> getExpectedScoresForScoreCorrectness() {
         List<Integer> expectedScores = new ArrayList<>();
-        int[] expected = {90, 71, 91, 88};
+        int[] expected = { 90, 71, 91, 88 };
         // (YSong) When cutting M25 release RC, 3rd expected changed from 89 to 91.
         // The reason for the score change is still unknown, might be DC 2.0.16
         // release.
-        int[] newExpected = {5, 57, 64, 20};
-        // TODO - replacing data models changes this list. Reason unknown.
+        int[] newExpected = { 96, 89, 96, 94 };
+        // TODO - data model score not match with csv records
         for (int score : newExpected) {
             expectedScores.add(score);
         }
@@ -452,7 +452,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"2.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"12.0\",\"Activity_Count_Interesting_Moment_Any\":\"8.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Dowbor\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Alexandre\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Whitepaper - Financial Services Digital Transformation\",\"kickboxDisposable\":null,\"PhoneNumber\":\"6472036970\",\"Source_Detail__c\":null,\"CompanyName\":\"Bank of Montreal\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"Canada\",\"Activity_Count_Interesting_Moment_Email\":\"2.0\",\"Activity_Count_Visit_Webpage\":\"18.0\",\"Title\":\"Sr Business Technology Specialist\",\"City\":\"Toronto\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"3.0\",\"InternalId\":\"9053\",\"State\":\"ON\",\"Email\":\"alexdowbor@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1453754541000\",\"Id\":\"14091144\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"4.0\",\"Industry\":\"Financial Services\""
+                "    \"Id\":\"1726380\",\"Email\":\"vasanthi.sontha@j2.com\",\"CompanyName\":\"J2 Global\",\"City\":\"Hollywood\",\"State\":\"CA\",\"Country\":\"United States\",\"PostalCode\":\"90028\""
                 + //
                 "    }" + //
                 "    }";
@@ -462,7 +462,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"HasCEDownload\":\"true\",\"Activity_Count_Click_Email\":\"0\",\"HasAnypointLogin\":\"true\",\"Activity_Count_Click_Link\":\"5\",\"Activity_Count_Interesting_Moment_Any\":\"0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Jobs\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Steve\",\"Unsubscribed\":null,\"kickboxStatus\":\"invalid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"1000.0\",\"Interest_tcat__c\":null,\"Event\":\"true\",\"Lead_Source_Asset__c\":\"\",\"kickboxDisposable\":null,\"PhoneNumber\":\"999 999 9999\",\"Source_Detail__c\":null,\"CompanyName\":\"solyndra\",\"Free_Email_Address__c\":\"false\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"China\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Vegas\",\"HasEEDownload\":\"true\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"steve@solyndra.com\",\"kickboxFree\":\"false\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"1111\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":\"\"}"
+                "    \"Id\":\"1723589\",\"Email\":\"mdixon@cbiz.com\",\"CompanyName\":\"Missouri\",\"City\":\"FIndependence\",\"State\":\"MO\",\"Country\":\"United States\",\"PostalCode\":\"44131-6951\"}"
                 + //
                 "    }";
     }
@@ -471,7 +471,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"0.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"0.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":\"true\",\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Schoger\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"John\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Inbound Phone/Email/Chat\",\"kickboxDisposable\":null,\"PhoneNumber\":\"(212) 906-0130\",\"Source_Detail__c\":null,\"CompanyName\":\"Strategas\",\"Free_Email_Address__c\":null,\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"0.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":\"Managing Director, Head of Corporate Services\",\"City\":\"New York\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":null,\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"987\",\"State\":\"NY\",\"Email\":\"jschoger@strategasrp.com\",\"kickboxFree\":null,\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1437511481000\",\"Id\":\"1713466\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null"
+                "    \"Id\":\"1723653\",\"Email\":\"andy.chu@mineralstech.com\",\"CompanyName\":\"Minerals Tech\",\"City\":\"New York\",\"State\":\"NY\",\"Country\":\"United States\",\"PostalCode\":\"10017-6729\""
                 + //
                 "    }" + //
                 "    }";
@@ -481,46 +481,77 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"1.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"1.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Cox\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Landon\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"eBook - Becoming a Customer Company\",\"kickboxDisposable\":null,\"PhoneNumber\":\"817 375 8606\",\"Source_Detail__c\":null,\"CompanyName\":\"VIP Villas\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Dallas\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"jhcox11@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"5878228\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
+                "    \"Id\":\"1723736\",\"Email\":\"ybelenky@miraclesoft.com\",\"CompanyName\":\"Miracle Software Systems, Inc.\",\"City\":\"Novi\",\"State\":\"MI\",\"Country\":\"United States\",\"PostalCode\":\"48374\"}"
                 + //
                 "    }";
     }
 
     private String bulkRecordInputForErrorCorrectnessTest() {
-        return
-
-        "    {\"source\":\"Dummy Source\",\"records\":[" + //
-                "    {\"recordId\":\"2\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID + "\":{" + //
-                "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"2.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"12.0\",\"Activity_Count_Interesting_Moment_Any\":\"8.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Dowbor\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Alexandre\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Whitepaper - Financial Services Digital Transformation\",\"kickboxDisposable\":null,\"PhoneNumber\":\"6472036970\",\"Source_Detail__c\":null,\"CompanyName\":\"Bank of Montreal\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"Canada\",\"Activity_Count_Interesting_Moment_Email\":\"2.0\",\"Activity_Count_Visit_Webpage\":\"18.0\",\"Title\":\"Sr Business Technology Specialist\",\"City\":\"Toronto\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"3.0\",\"InternalId\":\"9053\",\"State\":\"ON\",\"Email\":\"alexdowbor@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1453754541000\",\"Id\":\"14091144\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"4.0\",\"Industry\":\"Financial Services\"}"
-                + //
-                "    }" + //
-                "    }," + //
-                "    {\"recordId\":\"4\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID
-                + "\":{\"HasCEDownload\":\"true\",\"Activity_Count_Click_Email\":\"0\",\"HasAnypointLogin\":\"true\",\"Activity_Count_Click_Link\":\"5\",\"Activity_Count_Interesting_Moment_Any\":\"0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Jobs\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Steve\",\"Unsubscribed\":null,\"kickboxStatus\":\"invalid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"1000.0\",\"Interest_tcat__c\":null,\"Event\":\"true\",\"Lead_Source_Asset__c\":\"\",\"kickboxDisposable\":null,\"PhoneNumber\":\"999 999 9999\",\"Source_Detail__c\":null,\"CompanyName\":\"solyndra\",\"Free_Email_Address__c\":\"false\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"China\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Vegas\",\"HasEEDownload\":\"true\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"steve@solyndra.com\",\"kickboxFree\":\"false\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"1111\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":\"\"}"
-                + //
-                "    }" + //
-                "    }," + //
-                "    {\"recordId\":\"3\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID + "\":{" + //
-                "    " + //
-                "    \"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"0.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"0.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":\"true\",\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Schoger\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"John\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"Inbound Phone/Email/Chat\",\"kickboxDisposable\":null,\"PhoneNumber\":\"(212) 906-0130\",\"Source_Detail__c\":null,\"CompanyName\":\"Strategas\",\"Free_Email_Address__c\":null,\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"0.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":\"Managing Director, Head of Corporate Services\",\"City\":\"New York\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":null,\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"987\",\"State\":\"NY\",\"Email\":\"jschoger@strategasrp.com\",\"kickboxFree\":null,\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1437511481000\",\"Id\":\"1713466\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
-                + //
-                "    }" + //
-                "    }," + //
-                "    {\"recordId\":\"36c5c666-1eb4-4221-b5d3-93b23be72a6e\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID
-                + "\":{\"HasCEDownload\":\"false\",\"Activity_Count_Click_Email\":\"1.0\",\"HasAnypointLogin\":\"false\",\"Activity_Count_Click_Link\":\"0.0\",\"Activity_Count_Interesting_Moment_Any\":\"1.0\",\"Activity_Count_Interesting_Moment_Webinar\":\"0.0\",\"kickboxAcceptAll\":null,\"Activity_Count_Interesting_Moment_Event\":\"0.0\",\"LastName\":\"Cox\",\"IsClosed\":null,\"Activity_Count_Interesting_Moment_Pricing\":\"0.0\",\"FirstName\":\"Landon\",\"Unsubscribed\":null,\"kickboxStatus\":\"valid\",\"SICCode\":null,\"StageName\":null,\"Activity_Count_Interesting_Moment_Search\":\"0.0\",\"Activity_Count_Interesting_Moment_key_web_page\":\"0.0\",\"Interest_tcat__c\":null,\"Event\":\"false\",\"Lead_Source_Asset__c\":\"eBook - Becoming a Customer Company\",\"kickboxDisposable\":null,\"PhoneNumber\":\"817 375 8606\",\"Source_Detail__c\":null,\"CompanyName\":\"VIP Villas\",\"Free_Email_Address__c\":\"true\",\"Activity_Count_Interesting_Moment_Multiple\":\"0.0\",\"Country\":\"United States\",\"Activity_Count_Interesting_Moment_Email\":\"1.0\",\"Activity_Count_Visit_Webpage\":\"0.0\",\"Title\":null,\"City\":\"Dallas\",\"HasEEDownload\":\"false\",\"Interest_esb__c\":\"true\",\"Activity_Count_Open_Email\":\"0.0\",\"InternalId\":\"5236\",\"State\":\"Texas\",\"Email\":\"jhcox11@gmail.com\",\"kickboxFree\":\"true\",\"SourceColumn\":null,\"Activity_Count_Email_Bounced_Soft\":\"0.0\",\"CreatedDate\":\"1389754813000\",\"Id\":\"5878228\",\"Activity_Count_Unsubscribe_Email\":\"0.0\",\"Cloud_Plan__c\":null,\"Activity_Count_Fill_Out_Form\":\"0.0\",\"Industry\":null}"
-                + //
-                "    }" + //
-                "    }" + //
-                "    ]" + //
-                "    }";
+        return "{\n" +
+                "  \"source\": \"Dummy Source\",\n" +
+                "  \"records\": [\n" +
+                "    {\n" +
+                "      \"recordId\": \"2\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"vasanthi.sontha@j2.com\",\n" +
+                "          \"Id\": \"1726380\",\n" +
+                "          \"CompanyName\": \"J2 Global\",\n" +
+                "          \"City\": \"Hollywood\",\n" +
+                "          \"State\": \"CA\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"90028\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"4\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"mdixon@cbiz.com\",\n" +
+                "          \"Id\": \"1723589\",\n" +
+                "          \"CompanyName\": \"Missouri\",\n" +
+                "          \"City\": \"FIndependence\",\n" +
+                "          \"State\": \"MO\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"44131-6951\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"3\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"andy.chu@mineralstech.com\",\n" +
+                "          \"Id\": \"1723653\",\n" +
+                "          \"CompanyName\": \"Minerals Tech\",\n" +
+                "          \"City\": \"New York\",\n" +
+                "          \"State\": \"NY\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"10017-6729\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"36c5c666-1eb4-4221-b5d3-93b23be72a6e\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"ybelenky@miraclesoft.com\",\n" +
+                "          \"Id\": \"1723736\",\n" +
+                "          \"CompanyName\": \"Miracle Software Systems, Inc.\",\n" +
+                "          \"City\": \"Novi\",\n" +
+                "          \"State\": \"MI\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"48374\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
     private String pmmlImputJson() {

@@ -216,6 +216,11 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                         DebugScoreResponse.class);
                 signleRecordScoreResponseList.add(response.getBody());
             }
+            System.out.println("*****\nSingleRecordScore\n\n\n");
+            for (int i = 0; i < signleRecordScoreResponseList.size(); i++) {
+                System.out.println(signleRecordScoreResponseList.get(i).getScore());
+            }
+            System.out.println("\n\n\n*****");
 
             url = apiHostPort + "/score/records/debug";
             bulkScoreRequest = getBulkScoreRequestForScoreCorrectness();
@@ -223,6 +228,15 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             List<?> resultObjList = null;
             ResponseEntity<List> response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
             resultObjList = response.getBody();
+
+            System.out.println("*****\nBulkRecordScore\n\n\n");
+            ObjectMapper temp = new ObjectMapper();
+            for (Object res : resultObjList) {
+                DebugRecordScoreResponse result = temp.readValue(temp.writeValueAsString(res),
+                        DebugRecordScoreResponse.class);
+                System.out.println(result.getScores().get(0).getScore().intValue());
+            }
+            System.out.println("\n\n\n*****");
 
             ObjectMapper om = new ObjectMapper();
             for (Object res : resultObjList) {
@@ -362,9 +376,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             if (skipMissingDUNSKey && key.equals("DUNS")) {
                 continue;
             }
-            // TODO - resolve issue
-//            Assert.assertTrue(batchScoreTransformedRecord.containsKey(key), "Missing key:::" + key);
-            Assert.assertEquals(singleRecordScoreTransformedRecord.get(key), batchScoreTransformedRecord.get(key));
+            Assert.assertTrue(batchScoreTransformedRecord.containsKey(key), "Missing key:::" + key);
+            Assert.assertEquals(singleRecordScoreTransformedRecord.get(key), batchScoreTransformedRecord.get(key), "Mismatching key:::" + key);
         }
     }
 
