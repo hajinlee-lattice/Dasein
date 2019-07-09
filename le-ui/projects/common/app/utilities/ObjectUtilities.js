@@ -8,3 +8,9 @@
     return true;
 }
 
+export const deepCopy = (obj) => {
+    if(obj && Object.keys(obj).length) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+    return {};
+}
