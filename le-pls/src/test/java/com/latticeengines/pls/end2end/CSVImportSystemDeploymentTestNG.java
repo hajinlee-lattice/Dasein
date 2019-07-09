@@ -192,8 +192,13 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfContactFeedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
-                fieldMapping.setSystemName(sfSystemName);
                 fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMapToLatticeId(true);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMappedToLatticeField(true);
             }
         }
         modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
