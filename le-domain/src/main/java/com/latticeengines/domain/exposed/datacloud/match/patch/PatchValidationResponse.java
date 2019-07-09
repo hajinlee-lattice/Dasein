@@ -29,7 +29,10 @@ public class PatchValidationResponse {
     private Integer total;
 
     @JsonProperty("minPid")
-    private Integer minPid;
+    private Long minPid;
+
+    @JsonProperty("maxPid")
+    private Long maxPid;
 
     @JsonProperty("ValidationErrors")
     private List<PatchBookValidationError> validationErrors;
@@ -58,12 +61,20 @@ public class PatchValidationResponse {
         this.mode = mode;
     }
 
-    public Integer getMinPid() {
+    public Long getMinPid() {
         return minPid;
     }
 
-    public void setMinPid(Integer minPid) {
+    public void setMinPid(Long minPid) {
         this.minPid = minPid;
+    }
+
+    public Long getMaxPid() {
+        return maxPid;
+    }
+
+    public void setMaxPid(Long maxPid) {
+        this.maxPid = maxPid;
     }
 
     public String getDataCloudVersion() {

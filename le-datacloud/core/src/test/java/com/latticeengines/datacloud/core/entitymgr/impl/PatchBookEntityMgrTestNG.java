@@ -271,8 +271,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "minMaxPatchBook", dependsOnMethods = {
             "createPatchBooks" })
     private Map<String, Long> testMinMaxPatchBookId(PatchBook.Type type, int expectedCount) {
-        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type,
-                PatchBook.COLUMN_PID);
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type);
         Assert.assertNotNull(minMaxPid);
         Assert.assertEquals(minMaxPid.size(), 2);
         Assert.assertNotNull(minMaxPid.get(MIN_PID));
@@ -294,8 +293,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "patchBookPaginationWithTypeAndHotfixNoSort", dependsOnMethods = {
             "createPatchBooks" })
     private void testFindByTypeAndHotFixWithPagin(PatchBook.Type type, Object... fieldAndValues) throws Exception {
-        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type,
-                PatchBook.COLUMN_PID);
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type);
         Assert.assertNotNull(minMaxPid);
         Assert.assertEquals(minMaxPid.size(), 2);
         List<PatchBook> patchBookList = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
@@ -330,7 +328,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
                 // hotfix flag = true
                 { PatchBook.Type.Attribute, true, 4 }, { PatchBook.Type.Lookup, true, 5 },
                 // hotfix flag = false
-                { PatchBook.Type.Attribute, false, 6 }, { PatchBook.Type.Lookup, false, 5 }
+                { PatchBook.Type.Attribute, false, 5 }, { PatchBook.Type.Lookup, false, 4 }
         };
     }
 
@@ -386,7 +384,7 @@ public class PatchBookEntityMgrTestNG extends AbstractTestNGSpringContextTests {
 
     @DataProvider(name = "patchBookPaginationWithTypeNoSort")
     private Object[][] patchBookPaginDataWithTypeNoSort() {
-        return new Object[][] { { PatchBook.Type.Attribute, 10 }, { PatchBook.Type.Lookup, 10 } };
+        return new Object[][] { { PatchBook.Type.Attribute, 9 }, { PatchBook.Type.Lookup, 9 } };
     }
 
     @DataProvider(name = "patchBookPaginationWithType")

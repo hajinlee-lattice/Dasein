@@ -47,7 +47,8 @@ public interface BaseDao<T> {
 
     List<T> findAllByFields(Object... fieldsAndValues);
 
-    List<T> findByFieldsWithPagination(long minPid, long maxPid, Object... fieldsAndValues);
+    List<T> findByFieldsWithPagination(long minPid, long maxPid, String primIdField,
+            Object... fieldsAndValues);
 
     List<T> findAllSortedByFieldWithPagination(int offset, int limit, String sortByField,
             Object... fieldsAndValues);

@@ -136,8 +136,8 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED, readOnly = true)
     public List<PatchBook> findByTypeWithPaginNoSort(@NotNull long minPid, @NotNull long maxPid,
             Type type) {
-        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
-                type.name());
+        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_PID,
+                PatchBook.COLUMN_TYPE, type.name());
     }
 
     @Override
@@ -145,14 +145,14 @@ public class PatchBookEntityMgrImpl extends BaseEntityMgrImpl<PatchBook> impleme
     public List<PatchBook> findByTypeAndHotFixWithPaginNoSort(@NotNull long minPid,
             @NotNull long maxPid,
             Type type, boolean hotfix) {
-        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_TYPE,
-                type.name(), PatchBook.COLUMN_HOTFIX, hotfix);
+        return getDao().findByFieldsWithPagination(minPid, maxPid, PatchBook.COLUMN_PID,
+                PatchBook.COLUMN_TYPE, type.name(), PatchBook.COLUMN_HOTFIX, hotfix);
     }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
-    public Map<String, Long> findMinMaxPid(Type type, String pidColumn) {
-        return getDao().getMinMaxPid(type, PatchBook.COLUMN_PID);
+    public Map<String, Long> findMinMaxPid(Type type) {
+        return getDao().getMinMaxPid(type);
     }
 
 }
