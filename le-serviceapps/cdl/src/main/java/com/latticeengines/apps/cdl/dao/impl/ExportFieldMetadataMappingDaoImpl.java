@@ -21,15 +21,13 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
     }
 
     @Override
-    public List<ExportFieldMetadataMapping> updateExportFieldMetadataMappings(
+    public List<ExportFieldMetadataMapping> updateExportFieldMetadataMappings(LookupIdMap lookupIdMap,
             List<ExportFieldMetadataMapping> exportFieldMetadataMappings) {
-        LookupIdMap lookupIdMap = exportFieldMetadataMappings.size() > 0
-                ? exportFieldMetadataMappings.get(0).getLookupIdMap()
-                : null;
 
         if (lookupIdMap == null) {
             throw new LedpException(LedpCode.LEDP_00002);
         }
+
         List<ExportFieldMetadataMapping> retrievedFieldMapping = super.findAllByField("FK_LOOKUP_ID_MAP",
                 lookupIdMap.getPid());
 

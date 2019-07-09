@@ -15,6 +15,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.NamedQuery;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,11 +49,13 @@ public class ExportFieldMetadataMapping implements HasPid, HasTenant, HasAuditin
 
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_LOOKUP_ID_MAP", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private LookupIdMap lookupIdMap;
 
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Tenant tenant;
 
