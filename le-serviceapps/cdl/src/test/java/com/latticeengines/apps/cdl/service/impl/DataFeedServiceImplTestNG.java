@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -249,6 +250,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         feed.setName(NamingUtils.uuid("test_datafeed"));
         feed.setTenant(mainTestTenant);
         feed.setDataCollection(dataCollection);
+        feed.setSchedulingGroup(SchedulingGroup.QATesting);
         datafeedEntityMgr.create(feed);
 
         Long workflowId = 999L;
@@ -269,6 +271,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         execution = datafeedExecutionEntityMgr.findByPid(execution.getPid());
         feed = datafeedEntityMgr.findByPid(feed.getPid());
         assertEquals(feed.getStatus(), Status.Active);
+        assertEquals(feed.getSchedulingGroup(), SchedulingGroup.QATesting);
         assertEquals(execution.getStatus(), DataFeedExecution.Status.Failed);
 
         dataCollectionEntityMgr.delete(dataCollection);

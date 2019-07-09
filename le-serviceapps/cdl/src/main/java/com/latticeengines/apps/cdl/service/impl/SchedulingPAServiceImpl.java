@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
@@ -32,6 +33,9 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -54,6 +58,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -67,6 +72,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
+    private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
+    private static final String DEFAULT_SCHEDULING_GROUP = "Default";
+
+    private static ObjectMapper om = new ObjectMapper();
 
     private static final Set<String> TEST_TENANT_PREFIX = Sets.newHashSet("LETest", "letest",
             "ScoringServiceImplDeploymentTestNG", "RTSBulkScoreWorkflowDeploymentTestNG",
@@ -109,6 +118,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
 
+    @Value("${common.le.stack}")
+    private String leStack;
+
     @Override
     public Map<String, Object> setSystemStatus() {
 
@@ -120,7 +132,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> runningPATenantId = new HashSet<>();
 
         List<TenantActivity> tenantActivityList = new LinkedList<>();
-        List<DataFeed> allDataFeeds = dataFeedService.getDataFeeds(TenantStatus.ACTIVE, "4.0");
+        SchedulingGroup schedulingGroup = getSchedulingGroup();
+        List<DataFeed> allDataFeeds = dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.ACTIVE, "4.0", schedulingGroup);
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
         log.debug(String.format("Current build number is : %s.", currentBuildNumber));
@@ -238,11 +251,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     public List<SchedulingPAQueue> initQueue() {
-        List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
         Map<String, Object> map = setSystemStatus();
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
         List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
+        return initQueue(systemStatus, tenantActivityList);
+    }
+
+    public List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
         SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+        List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
         SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
                 RetrySchedulingPAObject.class, schedulingPATimeClock, true);
         SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(
@@ -486,5 +503,26 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Unable to check datacloud refresh for tenant {}. Error = {}", tenant.getId(), e);
         }
         return false;
+    }
+
+    private SchedulingGroup getSchedulingGroup() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String content = c.get(PathBuilder.buildSchedulingGroupPath(CamilleEnvironment.getPodId())).getData();
+            log.info("stack is " + leStack);
+            HashMap jsonMap = om.readValue(content, HashMap.class);
+            return SchedulingGroup.valueOf(filterDetail(leStack, jsonMap));
+        }catch (Exception e) {
+            log.error("Get json node from zk failed.");
+            return null;
+        }
+    }
+
+    private static String filterDetail(String stackName, HashMap nodes) {
+        String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
+        if (nodes.containsKey(filterName)) {
+            nodes.get(filterName);
+        }
+        return DEFAULT_SCHEDULING_GROUP;
     }
 }

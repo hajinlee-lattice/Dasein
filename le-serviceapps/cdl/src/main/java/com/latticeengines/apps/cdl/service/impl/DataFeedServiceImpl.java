@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
+import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -474,6 +475,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<DataFeed> getDataFeeds(TenantStatus status, String version) {
         return datafeedEntityMgr.getDataFeeds(status, version);
+    }
+
+    @Override
+    public List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, SchedulingGroup schedulingGroup) {
+        return datafeedEntityMgr.getDataFeedsBySchedulingGroup(status, version, schedulingGroup);
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 
@@ -63,6 +64,23 @@ public class DataFeedInternalResource {
             return dataFeedService.getAllDataFeeds();
         } else {
             return dataFeedService.getDataFeeds(TenantStatus.valueOf(tenantStatus), version);
+        }
+    }
+
+    @RequestMapping(value = "/datafeedlistBySchedulingGroup", method = RequestMethod.GET, headers = "Accept" +
+            "=application/json")
+    @ResponseBody
+    @NoCustomerSpace
+    @ApiOperation(value = "get all data feeds by schedulingGroup.")
+    public List<DataFeed> getAllDataFeedsBySchedulingGroup(
+            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus,
+            @RequestParam(value = "version", required = false, defaultValue = "")String version,
+            @RequestParam(value = "schedulingGroup", required = false, defaultValue = "")String schedulingGroup) {
+        if (StringUtils.isEmpty(tenantStatus) && StringUtils.isEmpty(version) && StringUtils.isEmpty(schedulingGroup)) {
+            return dataFeedService.getAllDataFeeds();
+        } else {
+            return dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.valueOf(tenantStatus), version,
+                    SchedulingGroup.valueOf(schedulingGroup));
         }
     }
 

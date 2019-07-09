@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
@@ -274,6 +275,12 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DataFeed> getDataFeeds(TenantStatus status, String version) {
         return datafeedRepository.getDataFeedsByTenantStatus(status, version);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, SchedulingGroup schedulingGroup) {
+        return datafeedRepository.getDataFeedsByTenantStatusAndSchedulingType(status, version, schedulingGroup);
     }
 
     @Override
