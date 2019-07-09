@@ -134,7 +134,6 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
             assertNotNull(fm.getSourceField());
             assertNotNull(fm.getDestinationField());
         });
-        
     }
 
 }
