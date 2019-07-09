@@ -28,7 +28,7 @@ public class PatchRequest {
     private String sortByField;
 
     @JsonProperty("pid")
-    private Object pid;
+    private Long pid;
 
     public PatchMode getMode() {
         return mode;
@@ -38,11 +38,11 @@ public class PatchRequest {
         this.mode = mode;
     }
 
-    public Object getPid() {
+    public Long getPid() {
         return pid;
     }
 
-    public void setPid(Object pid) {
+    public void setPid(Long pid) {
         this.pid = pid;
     }
 

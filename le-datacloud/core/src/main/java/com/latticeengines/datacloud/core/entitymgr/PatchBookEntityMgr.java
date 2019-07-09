@@ -110,7 +110,7 @@ public interface PatchBookEntityMgr extends BaseEntityMgr<PatchBook> {
      *            target patch book type, should not be {@literal null}
      * @return list of {@link PatchBook}, will not be {@literal null}
      */
-    Map<String, Long> findMinMaxPid(@NotNull PatchBook.Type type, @NotNull String pidColumn);
+    Map<String, Long> findMinMaxPid(@NotNull PatchBook.Type type);
 
     /**
      * Retrieve total {@link PatchBook} entry count with specified
