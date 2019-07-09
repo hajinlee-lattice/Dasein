@@ -239,7 +239,7 @@ class SystemsComponent extends Component {
         //var connections = this.getConnectionsList(connections),
         var connectionTemplates = [];
         connections.forEach(function(connection) {
-            connectionTemplates.push(this.connectionTemplate(connection, play))
+            connectionTemplates.push(this.connectionTemplate(connection, play));
         }, this);
         return connectionTemplates;
     }
