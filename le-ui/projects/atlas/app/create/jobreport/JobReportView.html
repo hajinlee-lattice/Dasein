@@ -1,4 +1,8 @@
 <section class="container import-summary">
+	<div class="jobs-report-breadcrumbs">
+		<a ui-sref="home.jobs.status">Back to Jobs</a> | Jobs Report
+	</div>
+	<h1>Summary of Imported Data</h1>
 	<ul class="statuses">
 		<li class="uploaded-leads">
 			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_UPLOADED')}}</h2>
@@ -7,28 +11,28 @@
 		<li class="excluded-leads">
 			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_EXCLUDED')}}</h2>
 			<h3 class="error-text">{{data.ignored_records || 0}}</h3>
+			<div class="summary-list-container">
+				<dl class="summary-list">
+					<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MISSING')}}</dt>
+					<dd class="error-text">{{data.required_field_missing || 0}}</dd>
+					<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MALFORMED')}}</dt>
+					<dd class="error-text">{{data.field_malformed || 0}}</dd>
+					<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_ROWERROR')}}</dt>
+					<dd class="error-text">{{data.row_error || 0}}</dd>
+				</dl>
+				<a
+					type="button" 
+					href="{{errorlog}}"
+					class="button white-button block-button download-button"
+					ng-if="data.ignored_records > 0">
+					{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_BUTTON_DOWNLOAD')}}
+				</a>
+			</div>
 		</li>
 		<li class="used-leads">
 			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_ACCEPTED')}}</h2>
 			<h3 class="success-text">{{data.imported_records || 0}}</h3>
 		</li>
 	</ul>
-	<div class="summary-list-container">
-		<dl class="summary-list">
-			<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MISSING')}}</dt>
-			<dd class="error-text">{{data.required_field_missing || 0}}</dd>
-			<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MALFORMED')}}</dt>
-			<dd class="error-text">{{data.field_malformed || 0}}</dd>
-			<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_ROWERROR')}}</dt>
-			<dd class="error-text">{{data.row_error || 0}}</dd>
-		</dl>
-		<a
-			type="button" 
-			href="{{errorlog}}"
-			class="button white-button block-button download-button"
-			ng-if="data.ignored_records > 0">
-			{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_BUTTON_DOWNLOAD')}}
-		</a>
-	</div>
 
 </section>
