@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -32,6 +33,9 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
 
     @Inject
     ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
+
+    @Inject
+    ExportFieldMetadataMappingDao exportFieldMetadataMappingDao;
 
     private LookupIdMap lookupIdMap;
 
@@ -58,6 +62,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_1.setDestinationField("CompanyId");
         fieldMapping_1.setOverwriteValue(false);
         fieldMapping_1.setLookupIdMap(lookupIdMap);
+        fieldMapping_1.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_1);
 
         ExportFieldMetadataMapping fieldMapping_2 = new ExportFieldMetadataMapping();
@@ -65,6 +70,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_2.setDestinationField("CompanyName");
         fieldMapping_2.setOverwriteValue(false);
         fieldMapping_2.setLookupIdMap(lookupIdMap);
+        fieldMapping_2.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_2);
 
         ExportFieldMetadataMapping fieldMapping_3 = new ExportFieldMetadataMapping();
@@ -72,6 +78,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_3.setDestinationField("Email");
         fieldMapping_3.setOverwriteValue(false);
         fieldMapping_3.setLookupIdMap(lookupIdMap);
+        fieldMapping_3.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_3);
 
         exportFieldMappings = exportFieldMetadataMappingEntityMgr.createAll(exportFieldMappings);
@@ -113,7 +120,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_2.setOverwriteValue(false);
         exportFieldMappings.add(fieldMapping_2);
 
-        exportFieldMetadataMappingEntityMgr.update(exportFieldMappings);
+        exportFieldMetadataMappingEntityMgr.update(lookupIdMap, exportFieldMappings);
 
         List<ExportFieldMetadataMapping> updatedExportFieldMappings = exportFieldMetadataMappingEntityMgr
                 .findByOrgId(lookupIdMap.getOrgId());
@@ -127,7 +134,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
             assertNotNull(fm.getSourceField());
             assertNotNull(fm.getDestinationField());
         });
-
+        
     }
 
 }
