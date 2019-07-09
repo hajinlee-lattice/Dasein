@@ -74,7 +74,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             s.setTicket(ticket);
             return s;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_19016, e, new String[] { ticket.getData(), e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_19016, e, new String[] {});
         }
     }
 
@@ -240,7 +240,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
             return session;
         }
-        
+
         private void interpretGARights(Session session) {
             List<String> GARights = session.getRights();
             try {
