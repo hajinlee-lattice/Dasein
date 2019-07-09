@@ -152,15 +152,21 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             if (!s3Service.objectExist(s3Bucket, filePath)) {
                 throw new RuntimeException(filePath + " wasn't successfully copied to S3 bucket " + s3Bucket);
             }
-            try {
-                long s3Len = s3Service.getObjectMetadata(s3Bucket, filePath).getContentLength();
-                long hdfsLen = HdfsUtils.getFileStatus(distCpConfiguration, filePath).getLen();
-                if (s3Len != hdfsLen) {
-                    throw new RuntimeException("File size not the same on hdfs and s3.");
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Fail to get hdfs file size:" + filePath, e);
-            }
+            validateFileSize(filePath);
+        }
+    }
+
+    private void validateFileSize(String filePath) {
+        long s3Len = s3Service.getObjectMetadata(s3Bucket, filePath).getContentLength();
+        long hdfsLen;
+        try {
+            hdfsLen = HdfsUtils.getFileStatus(distCpConfiguration, filePath).getLen();
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to get hdfs file size:" + filePath, e);
+        }
+        if (s3Len != hdfsLen) {
+            throw new RuntimeException(
+                    "File:" + filePath + "size not the same on hdfs: " + hdfsLen + " and s3: " + s3Len);
         }
     }
 
