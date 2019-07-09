@@ -2,9 +2,11 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +27,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -62,6 +63,18 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private GeneralSource source = new GeneralSource(
             SourceToS3PublisherTestNG.class.getSimpleName() + UUID.randomUUID().toString());
 
+    private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
+
+    // Test for _CURRENT_VERSION file update
+    private String laterSourceVersion = "2019-06-29_21-05-11_UTC";
+
+    private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String s3Bucket;
+
     // Sources with schema directory
     private Set<String> expectedSrcWithSchema = ImmutableSet.of( //
             baseSrc1.getSourceName(), //
@@ -69,21 +82,31 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             baseSrc4.getSourceName(), //
             baseSrc6.getSourceName());
 
-    // Base source name -> expected snapshot file names -- initialized in
-    // initExpectedSnapshotFiles()
-    private Map<String, List<String>> expectedSnapshotFiles;
+    // Base source -> expected snapshot file names
+    @SuppressWarnings("serial")
+    private Map<Source, List<String>> expectedDataFiles = new HashMap<Source, List<String>>() {
+        {
+            put(baseSrc1, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc2, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc3, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc4, Arrays.asList("part-0000.avro", "part-0001.avro"));
+            put(baseSrc5, Arrays.asList("AccountMaster206.avro"));
+            put(baseSrc6, Arrays.asList("AccountTable1.avro"));
+        }
+    };
 
-    @Inject
-    private S3Service s3Service;
-
-    @Value("${datacloud.collection.s3bucket}")
-    private String s3Bucket;
-
-    private String basedSourceVersion = "2019-06-25_19-01-34_UTC";
-
-    private String laterSourceVersion = "2019-06-29_21-05-11_UTC";
-
-    private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
+    // Base source -> expected _CURRENT_VERSION
+    @SuppressWarnings("serial")
+    private Map<Source, String> expectedVersions = new HashMap<Source, String>() {
+        {
+            put(baseSrc1, basedSourceVersion);
+            put(baseSrc2, basedSourceVersion);
+            put(baseSrc3, basedSourceVersion);
+            put(baseSrc4, basedSourceVersion);
+            put(baseSrc5, laterSourceVersion);
+            put(baseSrc6, basedSourceVersion);
+        }
+    };
 
     @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
@@ -91,7 +114,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
-        verifyPublishExistS3(progress);
+        verifyPublishExistS3();
         cleanupProgressTables();
     }
 
@@ -111,19 +134,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             configuration.setName("HdfsToS3Publish");
             configuration.setVersion(targetVersion);
 
-            List<String> baseSources = Arrays.asList(baseSrc5.getSourceName(), baseSrc6.getSourceName());
-
             List<TransformationStepConfig> steps = new ArrayList<>();
 
-            TransformationStepConfig step1 = createStep(baseSrc1);
-            TransformationStepConfig step2 = createStep(baseSrc2);
-            TransformationStepConfig step3 = createStep(baseSrc3);
-            TransformationStepConfig step4 = createStep(baseSrc4);
-            TransformationStepConfig step5 = createStep(baseSrc5);
-
-            step5.setBaseSources(baseSources);
-            step5.setBaseIngestions(Collections.singletonMap(baseSrc5.getSourceName(),
-                    new SourceIngestion(baseSrc5.getIngestionName())));
+            TransformationStepConfig step1 = createStep(Collections.singletonList(baseSrc1));
+            TransformationStepConfig step2 = createStep(Collections.singletonList(baseSrc2));
+            TransformationStepConfig step3 = createStep(Collections.singletonList(baseSrc3));
+            TransformationStepConfig step4 = createStep(Collections.singletonList(baseSrc4));
+            TransformationStepConfig step5 = createStep(Arrays.asList(baseSrc5, baseSrc6));
 
             steps.add(step1);
             steps.add(step2);
@@ -139,11 +156,22 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private TransformationStepConfig createStep(Source baseSource) {
+    private TransformationStepConfig createStep(List<Source>  baseSources) {
+        List<String> baseSourceNames = baseSources.stream().map(baseSource -> baseSource.getSourceName())
+                .collect(Collectors.toList());
+
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setBaseSources(Collections.singletonList(baseSource.getSourceName()));
+        step.setBaseSources(baseSourceNames);
         step.setTransformer(SourceToS3Publisher.TRANSFORMER_NAME);
         step.setTargetSource(source.getSourceName());
+
+        for (Source source : baseSources) {
+            if (source instanceof IngestionSource) {
+                step.setBaseIngestions(Collections.singletonMap(((IngestionSource) source).getSourceName(),
+                        new SourceIngestion(((IngestionSource) source).getIngestionName())));
+            }
+        }
+
         return step;
     }
 
@@ -151,23 +179,25 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
      * Initialization
      *******************/
 
-    private void prepareData() throws IOException {
-        initExpectedSnapshotFiles();
+    private void prepareData() {
+        try {
+            s3FilePrepare();
 
-        s3FilePrepare();
+            uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc3, "AccountMaster206", basedSourceVersion);
+            uploadBaseSourceDir(baseSrc4.getSourceName(), SourceToS3PublisherTestNG.class.getSimpleName(),
+                    basedSourceVersion);
+            uploadBaseSourceFile(baseSrc5, "AccountMaster206.avro", basedSourceVersion);
+            uploadBaseSourceFile(baseSrc6, "AccountTable1", basedSourceVersion);
 
-        uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc3, "AccountMaster206", basedSourceVersion);
-        uploadBaseSourceDir(baseSrc4.getSourceName(), SourceToS3PublisherTestNG.class.getSimpleName(),
-                basedSourceVersion);
-        uploadBaseSourceFile(baseSrc5, "AccountMaster206.avro", basedSourceVersion);
-        uploadBaseSourceFile(baseSrc6, "AccountTable1", basedSourceVersion);
-
-        createSchema(baseSrc1, basedSourceVersion);
-        createSchema(baseSrc2, basedSourceVersion);
-        createSchema(baseSrc4, basedSourceVersion);
-        createSchema(baseSrc6, basedSourceVersion);
+            createSchema(baseSrc1, basedSourceVersion);
+            createSchema(baseSrc2, basedSourceVersion);
+            createSchema(baseSrc4, basedSourceVersion);
+            createSchema(baseSrc6, basedSourceVersion);
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to prepare data.", e);
+        }
     }
 
     private void createSchema(Source baseSource, String version) {
@@ -181,53 +211,40 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void s3FilePrepare() throws IOException {
-
+    private void s3FilePrepare() {
+        // Prepare _CURRENT_VERION file
         uploadToS3(baseSrc1, earlySourceVersion, false);
         uploadToS3(baseSrc2, basedSourceVersion, false);
         uploadToS3(baseSrc5, laterSourceVersion, false);
 
+        // Prepare data file
         uploadToS3(baseSrc2, basedSourceVersion, true);
     }
 
-    private void uploadToS3(Source baseSource, String sourceVerion, boolean isFile) throws IOException {
-        String s3Key;
-        InputStream inputStream;
-        String path = hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion) + "/";
+    private void uploadToS3(Source baseSource, String sourceVerion, boolean isDataDir) {
 
-        if (isFile) {
-            inputStream = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("sources/" + "AccountTable1.avro");
-            s3Key = path + "AccountTable1.avro";
-        } else {
-            inputStream = IOUtils.toInputStream(sourceVerion, "UTF-8");
-            if (baseSource instanceof IngestionSource) {
-                s3Key = path.substring(0, path.lastIndexOf(((IngestionSource) baseSource).getIngestionName()) + 12)
-                        + hdfsPathBuilder.VERSION_FILE;
-            } else {
-                s3Key = path.substring(0, path.lastIndexOf(baseSource.getSourceName()) + 12)
-                        + hdfsPathBuilder.VERSION_FILE;
-            }
+        try {
+            InputStream inputStream = isDataDir
+                    ? Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream("sources/" + "AccountTable1.avro")
+                    : IOUtils.toInputStream(sourceVerion, "UTF-8");
+
+            String s3Key = isDataDir ? hdfsPathBuilder.constructTransformationSourceDir(baseSource, sourceVerion)//
+                    + "/" + "AccountTable1.avro" : hdfsPathBuilder.constructVersionFile(baseSource).toString();
+
+            s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        s3Service.uploadInputStream(s3Bucket, s3Key, inputStream, true);
     }
 
-
-    private void initExpectedSnapshotFiles() {
-        expectedSnapshotFiles = ImmutableMap.of(//
-                baseSrc1.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc2.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc3.getSourceName(), Arrays.asList("AccountMaster206.avro"), //
-                baseSrc4.getSourceName(), Arrays.asList("part-0000.avro", "part-0001.avro"), //
-                baseSrc6.getSourceName(), Arrays.asList("AccountTable1.avro") //
-        );
-    }
-
+    
+   
     /*****************
      * Verification
      *****************/
 
-    private void verifyPublishExistS3(TransformationProgress progress) {
+    private void verifyPublishExistS3() {
         stepSuccessValidate(baseSrc1, basedSourceVersion);
         stepSuccessValidate(baseSrc2, basedSourceVersion);
         stepSuccessValidate(baseSrc3, basedSourceVersion);
@@ -236,38 +253,18 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         stepSuccessValidate(baseSrc6, basedSourceVersion);
     }
 
+
+
+    
     private void stepSuccessValidate(Source baseSource, String version) {
         String sourceName = baseSource.getSourceName();
         try {
             log.info("Checking the objects of Source: {}", sourceName);
 
-            String versionFilePath;
+            // Verify data files
+            List<String> dataFiles = getExpectedDataFiles(baseSource);
+            validateCopySuccess(dataFiles);
 
-            if (baseSource instanceof IngestionSource) {
-
-                Path ingestionVerDir = hdfsPathBuilder
-                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
-                        .append(basedSourceVersion);
-
-                List<String> IngestionVerFiles = Arrays.asList(
-                        ingestionVerDir.append("AccountMaster206.avro").toString(),
-                        ingestionVerDir.append(HdfsPathBuilder.SUCCESS_FILE).toString());
-
-                // Verify Ingestion baseVersion files
-                validateCopySuccess(IngestionVerFiles);
-
-                versionFilePath = hdfsPathBuilder
-                        .constructIngestionDir(((IngestionSource) baseSource).getIngestionName())
-                        .append(HdfsPathBuilder.VERSION_FILE).toString();
-                
-            } else {
-             // Verify snapshot files
-                List<String> snapshotFiles = getExpectedSnapshotFiles(baseSource);
-                validateCopySuccess(snapshotFiles);
-
-                versionFilePath = hdfsPathBuilder.constructVersionFile(sourceName).toString();
-
-            }
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
@@ -275,29 +272,48 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
                 validateCopySuccess(Arrays.asList(schemaFile));
 
             }
+
             // Verify current version file
+            String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
             validateCopySuccess(Arrays.asList(versionFilePath));
-            
+            verifyVersionFile(baseSource, versionFilePath);
+           
         } catch (Exception e) {
             log.error("Fail to validate publising source {} at version {}", sourceName, version);
             throw new RuntimeException(e);
         }
     }
+    
+    private void verifyVersionFile(Source baseSource, String versionFilePath) {
+        try {
+            String hdfsDate = expectedVersions.get(baseSource);
 
-    private List<String> getExpectedSnapshotFiles(Source baseSource) {
-        Path snapshotPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, basedSourceVersion);
-        List<String> expectedFiles = expectedSnapshotFiles.get(baseSource.getSourceName());
+            String s3Date = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath),
+                    Charset.defaultCharset());
+            Assert.assertEquals(hdfsDate, s3Date);
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to validate version of file:" + versionFilePath, e);
+        }
+    }
+
+    private List<String> getExpectedDataFiles(Source baseSource) {
+        Path dataPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, basedSourceVersion);
+        List<String> expectedFiles = expectedDataFiles.get(baseSource);
         Assert.assertTrue(CollectionUtils.isNotEmpty(expectedFiles));
 
         List<String> lists = expectedFiles.stream() //
-                .map(file -> snapshotPath.append(file).toString()).collect(Collectors.toList());
-        lists.add(snapshotPath.append(HdfsPathBuilder.SUCCESS_FILE).toString());
+                .map(file -> dataPath.append(file).toString()).collect(Collectors.toList());
+        lists.add(dataPath.append(HdfsPathBuilder.SUCCESS_FILE).toString());
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files) throws IOException {
+    private void validateCopySuccess(List<String> files) {
         files.forEach(file -> {
-            Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
+            try {
+                Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate publishing:" + file, e);
+            }
         });
     }
 
@@ -315,9 +331,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void cleanupS3Path(String path) throws IOException {
-        if (s3Service.isNonEmptyDirectory(s3Bucket, path)) {
-            s3Service.cleanupPrefix(s3Bucket, path);
+    private void cleanupS3Path(String path) {
+        try {
+            if (s3Service.isNonEmptyDirectory(s3Bucket, path)) {
+                s3Service.cleanupPrefix(s3Bucket, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to clean up s3: " + path, e);
         }
     }
 
