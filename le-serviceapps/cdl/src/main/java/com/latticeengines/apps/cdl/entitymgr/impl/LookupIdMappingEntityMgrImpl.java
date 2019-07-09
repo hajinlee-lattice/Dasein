@@ -130,7 +130,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
             List<ExportFieldMetadataMapping> exportFieldMetadataMapping = lookupIdMap.getExportFieldMetadataMappings();
 
             List<ExportFieldMetadataMapping> updatedFieldMetadataMapping = exportFieldMetadataMappingDao
-                    .updateExportFieldMetadataMappings(exportFieldMetadataMapping);
+                    .updateExportFieldMetadataMappings(lookupIdMap, exportFieldMetadataMapping);
 
             lookupIdMap.setExportFieldMappings(updatedFieldMetadataMapping);
         }
