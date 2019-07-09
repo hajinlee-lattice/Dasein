@@ -8,7 +8,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
 .service('ImportUtils', function($state){
     var ImportUtils = this;
     ImportUtils.ACCOUNT_ENTITY = 'Account';
-    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId', CustomerAccountId:'CustomerAccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId', CustomerContactId: 'CustomerContactId'}};
+    ImportUtils.uniqueIds = { Account : {AccountId: 'AccountId', CustomerAccountId:'CustomerAccountId'}, Contact: {ContactId: 'ContactId', AccountId: 'AccountId', CustomerContactId: 'CustomerContactId', CustomerAccountId:'CustomerAccountId'}};
     var latticeSchema = {};
 
     function setFields(fieldObj, field){
@@ -247,10 +247,13 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
     function updateUniqueIdsMapping(entity, fieldsMapping, savedObj, uniquiIdslist){
         Object.keys(savedObj).forEach(index => {
             let saved = savedObj[index];
-            if(saved.originalUserField && saved.append != true){
+            if((saved.originalUserField && saved.append != true) || (!saved.originalUserField && saved.append != true)){
                 mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null);
                 mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
             }
+            // else if(!saved.originalUserField && saved.append != true){
+            //     mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
+            // }
         });
     }
     function isUniqueIdAlreadyAdded(uniqueIdsList, mappedField, userField){

@@ -609,8 +609,14 @@ angular
                 
             },
             resolve: {
-                FieldDocument: function($q, ImportWizardStore) {
-                    return ImportWizardStore.getFieldDocument();
+                FieldDocument: function($transition$, ImportWizardStore) {
+                    var from = $transition$._targetState._definition.parent.name;
+                    let mapping = ImportWizardStore.getSavedDocumentCopy(from);
+                    
+                    let ret = ImportWizardStore.getFieldDocument();
+                    ret.fieldMappings = mapping;
+                    return ret;
+                    // return ImportWizardStore.getFieldDocument();
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     return ImportWizardStore.getUnmappedFields();
