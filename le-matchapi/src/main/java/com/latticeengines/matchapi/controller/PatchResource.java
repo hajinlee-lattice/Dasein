@@ -209,6 +209,8 @@ public class PatchResource {
         response.setPatchBookType(type);
         response.setDataCloudVersion(dataCloudVersion);
         response.setMode(request.getMode());
+        response.setMinPid(pids.get(MIN_PID));
+        response.setMaxPid(pids.get(MAX_PID));
         return response;
     }
 
@@ -264,7 +266,7 @@ public class PatchResource {
     private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type,
             Object pid) {
         // finding min and max Pid in patchBook table
-        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type, PatchBook.COLUMN_PID);
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type);
         Long minPid = minMaxPid.get(MIN_PID);
         Long maxPid = minMaxPid.get(MAX_PID);
         // adding pagination parameters
@@ -278,7 +280,7 @@ public class PatchResource {
     }
 
     private Map<String, Long> loadMinMaxPid(PatchBook.Type type, String pidColumn) {
-        return patchBookEntityMgr.findMinMaxPid(type, pidColumn);
+        return patchBookEntityMgr.findMinMaxPid(type);
     }
 
     /*

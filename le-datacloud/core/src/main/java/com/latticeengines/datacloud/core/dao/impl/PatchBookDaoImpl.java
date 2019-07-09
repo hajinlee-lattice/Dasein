@@ -18,8 +18,6 @@ public class PatchBookDaoImpl
         extends BaseDaoWithAssignedSessionFactoryImpl<PatchBook> implements PatchBookDao {
 
     private static final String PID_LIST_PARAMETER_NAME = "pIds";
-    private static final String MIN_PID = "MIN";
-    private static final String MAX_PID = "MAX";
 
     @Override
     protected Class<PatchBook> getEntityClass() {
@@ -51,23 +49,20 @@ public class PatchBookDaoImpl
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, Long> getMinMaxPid(@NotNull Type type, @NotNull String fieldName) {
+    public Map<String, Long> getMinMaxPid(@NotNull Type type) {
         Preconditions.checkNotNull(type);
-        Preconditions.checkNotNull(fieldName);
+        String fieldName = PatchBook.COLUMN_PID.toLowerCase();
         Session session = getCurrentSession();
-        String minPidQueryStr = String.format("FROM %s WHERE Type = '%s' ORDER BY %s",
-                getEntityClass().getSimpleName(), type.name(), fieldName);
-        Query<?> minPidQuery = session.createQuery(minPidQueryStr);
-        List<PatchBook> sortedAscPidList = (List<PatchBook>) minPidQuery.list();
-        Long minPid = sortedAscPidList.get(0).getPid();
-        String maxPidQueryStr = String.format("FROM %s WHERE Type = '%s' ORDER BY %s DESC",
-                getEntityClass().getSimpleName(), type.name(), fieldName);
-        Query<?> maxPidQuery = session.createQuery(maxPidQueryStr);
-        List<PatchBook> sortedDescPidList = (List<PatchBook>) maxPidQuery.list();
-        Long maxPid = sortedDescPidList.get(0).getPid();
+        String minMaxPidQueryStr = String.format(
+                "SELECT new map (min(%s) as MIN, max(%s) as MAX) FROM %s WHERE Type = '%s'",
+                fieldName, fieldName,
+                getEntityClass().getSimpleName(),
+                type.name());
+        Query<?> minMaxPidQuery = session.createQuery(minMaxPidQueryStr);
+        Map<String, Long> minMaxPid = (Map<String, Long>) minMaxPidQuery.list().get(0);
         Map<String, Long> result = new HashMap<>();
-        result.put(MIN_PID, minPid);
-        result.put(MAX_PID, maxPid);
+        result.put(MIN_PID, minMaxPid.get(MIN_PID));
+        result.put(MAX_PID, minMaxPid.get(MAX_PID));
         return result;
     }
 
