@@ -184,9 +184,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long NEW_ACCOUNT_UT_EM = 190L;
     // Number of new account after UpdateAccount entity match test
     // FIXME change back to 111 after using new ProcessAccount checkpoint. currently
-    // it is 112 cuz one anonymous account created. It will be created by
-    // ProcessAccount by one of its contact after updating checkpoint.
-    static final Long NEW_ACCOUNT_UA_EM = 112L;
+    // it is 113 cuz one anonymous account created and one legacy account due to
+    // case insensitive ID match. Anonymous account will be created by
+    // ProcessAccount by one of its contact after updating checkpoint (back to 111).
+    static final Long NEW_ACCOUNT_UA_EM = 113L;
     // Number of updated account after UpdateAccount test
     static final Long UPDATED_ACCOUNT_UA = 100L;
     // Number of updated account after UpdateAccount entity match test
@@ -200,7 +201,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     // -- 1184
     static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
-    // Number of total account after UpdateAccount entity match test -- 1015
+    // Number of total account after UpdateAccount entity match test -- 1016
     static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
 
     /* Expected contact result */
