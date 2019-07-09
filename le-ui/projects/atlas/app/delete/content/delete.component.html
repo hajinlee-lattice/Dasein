@@ -36,7 +36,7 @@
                     <input  type="radio"
                             data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID'"
                             ng-click="$ctrl.setCleanupType('BYUPLOAD_ID', 'DeleteAccountTemplate')" />
-                      <div 
+                        <div 
                         ng-if="$ctrl.currentTab == 'account' "
                         file-uploader-container
                         params="$ctrl.uploadParams['BYUPLOAD_ID']"
@@ -84,30 +84,32 @@
         </div>
         <div ng-if="$ctrl.currentTab == 'transaction' && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text"> 
                 <ul>
-                  <li>
-                      <label>
-                        <input  type="radio" 
+                    <li>
+                        <label>
+                            <input 
+                                type="radio" 
                                 data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYDATERANGE'"
-                                ng-click="$ctrl.setCleanupType('BYDATERANGE')" />
-                        Select start and end date </label>
-                      <date-range-directive   
-                                              config="{{$ctrl.getPeriodTimeConfString()}}"
-                                              vm="$ctrl" 
-                                              showfrom="$ctrl.showFromTime"
-                                              showto="$ctrl.showToTime"
-                                              form="delete_form"
-                                              type="TimeSeries" 
-                                              bucketrestriction="$ctrl.bucketRestriction"
-                                              showinline="{{true}}"
-                                              tolabel="To"
-                                              fromlabel="Date Range: From "
-                                              changed="$ctrl.callbackChangedValue(type, position, value)"
-                                              startplaceholder="Start Date"
-                                              endplaceholder="End Date"
-                                              hidepristineerror="true"
-                                              ng-click="$ctrl.setCleanupType('BYDATERANGE')"
-                                              >
-                      </date-range-directive>
+                                ng-click="$ctrl.setCleanupType('BYDATERANGE')" 
+                            />
+                            Select start and end date
+                        </label>
+                        <date-range-directive   
+                            config="$ctrl.getPeriodTimeConfString()"
+                            vm="$ctrl" 
+                            showfrom="$ctrl.showFromTime"
+                            showto="$ctrl.showToTime"
+                            form="delete_form"
+                            type="TimeSeries" 
+                            bucketrestriction="$ctrl.bucketRestriction"
+                            showinline="{{true}}"
+                            tolabel="To"
+                            fromlabel="Date Range: From "
+                            changed="$ctrl.callbackChangedValue(type, position, value)"
+                            startplaceholder="Start Date"
+                            endplaceholder="End Date"
+                            hidepristineerror="true"
+                            ng-click="$ctrl.setCleanupType('BYDATERANGE')">
+                        </date-range-directive>
                   </li>
                   <li>
                       <input  type="radio" 

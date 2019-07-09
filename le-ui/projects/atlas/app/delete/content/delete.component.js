@@ -165,7 +165,7 @@ angular.module('lp.delete.entry', [])
         vm.getPeriodTimeConfString = function () {
             vm.periodTimeConf.from.visible = vm.showFromTime;
             vm.periodTimeConf.to.visible = vm.showToTime;
-            var ret = JSON.stringify(vm.periodTimeConf);
+            var ret = vm.periodTimeConf;
             return ret;
         }
 

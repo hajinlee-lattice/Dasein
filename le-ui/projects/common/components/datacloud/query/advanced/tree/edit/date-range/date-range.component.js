@@ -165,10 +165,9 @@ angular
                     var fromConf = getConfigField(0);
                     if (fromConf.visible && fromConf.visible == true) {
                         var from = document.getElementById($scope.getFromDateId());
-
                         if (from != null) {
                             // var triggerFrom = document.getElementById($scope.getFromDateTriggerId());
-                                fromPicker = new Pikaday({
+                            fromPicker = new Pikaday({
                                 field: from,
                                 format: DATE_FORMAT,
                                 onSelect: function (date) {
@@ -186,7 +185,6 @@ angular
                                 }
 
                             });
-
                         }
                     }
                     var toConf = getConfigField(1);
