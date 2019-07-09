@@ -133,45 +133,46 @@ class SystemsComponent extends Component {
     }
 
     getLaunchStateText(connection, play) {
-        var launch = connection.lastLaunch,
-            launchState = (launch ? launch.launchState : 'Unlaunched'),
-            launched = (launchState === 'Launched' ? true : false),
-            launching = (launchState === 'Launching' ? true : false),
-            text = [];
+        var text = [];
+        if(connection && connection.lastLaunch && connection.created && connection.accountsLaunched && connection.contactsLaunched) {
+            var launch = connection.lastLaunch,
+                launchState = (launch ? launch.launchState : 'Unlaunched'),
+                launched = (launchState === 'Launched' ? true : false),
+                launching = (launchState === 'Launching' ? true : false);
 
-            if(launching) {
-                this.checkLaunching();
+                if(launching) {
+                    this.checkLaunching();
+                }
+
+            if(launched) {
+                text.push(
+                    <div class="launch-text launched">
+                        <ul>
+                            <li>
+                                Last Launched: {new Date(connection.created).toLocaleDateString("en-US")}
+                            </li>
+                            <li>
+                                Accounts Sent: {connection.accountsLaunched.toLocaleString()}
+                            </li>
+                            <li>
+                                Contacts Sent: {connection.contactsLaunched.toLocaleString()}
+                            </li>
+                        </ul>
+                    </div>
+                );
+            } else if(launching) {
+                text.push(
+                    <div class="launch-text unlaunched">
+                        Launching...
+                    </div>
+                );
+            } else {
+                text.push(
+                    <div class="launch-text unlaunched">
+                        No previous launch
+                    </div>
+                );
             }
-
-
-        if(launched) {
-            text.push(
-                <div class="launch-text launched">
-                    <ul>
-                        <li>
-                            Last Launched: {new Date(connection.created).toLocaleDateString("en-US")}
-                        </li>
-                        <li>
-                            Accounts Sent: {connection.accountsLaunched.toLocaleString()}
-                        </li>
-                        <li>
-                            Contacts Sent: {connection.contactsLaunched.toLocaleString()}
-                        </li>
-                    </ul>
-                </div>
-            );
-        } else if(launching) {
-            text.push(
-                <div class="launch-text unlaunched">
-                    Launching...
-                </div>
-            );
-        } else {
-            text.push(
-                <div class="launch-text unlaunched">
-                    No previous launch
-                </div>
-            );
         }
         return text;
     }
