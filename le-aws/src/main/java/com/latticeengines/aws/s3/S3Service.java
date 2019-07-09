@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
@@ -58,6 +59,8 @@ public interface S3Service {
     void addTagToObject(String bucket, String key, String tagKey, String tagValue);
 
     List<Tag> getObjectTags(String bucket, String key);
+
+    ObjectMetadata getObjectMetadata(String bucket, String path);
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
 

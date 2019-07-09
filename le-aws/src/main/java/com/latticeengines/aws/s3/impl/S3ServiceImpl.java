@@ -419,6 +419,10 @@ public class S3ServiceImpl implements S3Service {
         return bucketPolicy.getPolicyText();
     }
 
+    public ObjectMetadata getObjectMetadata(String bucket, String path) {
+        return s3Client.getObjectMetadata(bucket, sanitizePathToKey(path));
+    }
+
     @Override
     public void setBucketPolicy(String bucket, String policyDoc) {
         s3Client().setBucketPolicy(bucket, policyDoc);
