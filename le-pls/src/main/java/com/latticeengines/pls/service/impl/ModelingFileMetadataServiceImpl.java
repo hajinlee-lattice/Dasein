@@ -588,6 +588,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         importSystem.setContactSystemId(contactSystemId);
                                         importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
                                         cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        fieldMapping.setMappedToLatticeField(false);
                                         fieldMapping.setMappedField(contactSystemId);
                                     }
                                     else {

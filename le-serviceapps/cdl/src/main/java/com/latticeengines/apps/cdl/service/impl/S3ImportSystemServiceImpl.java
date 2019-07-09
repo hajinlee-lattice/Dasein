@@ -170,9 +170,9 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         Optional<S3ImportSystem> newPrimarySystem = systemList.stream().filter(system -> system.getPriority() == 1).findFirst();
         if (primarySystem.isPresent() && newPrimarySystem.isPresent()) {
             if (!primarySystem.get().getName().equals(newPrimarySystem.get().getName())
-                    && (primarySystem.get().isMapToLatticeAccount() || primarySystem.get().isMapToLatticeContact())) {
+                    && (primarySystem.get().isMapToLatticeAccount())) {
                 throw new LedpException(LedpCode.LEDP_40061,
-                        new String[] {String.format("System %s already set map to lattice!",
+                        new String[] {String.format("System %s already set map to lattice Account!",
                                 primarySystem.get().getDisplayName())});
             }
         }
