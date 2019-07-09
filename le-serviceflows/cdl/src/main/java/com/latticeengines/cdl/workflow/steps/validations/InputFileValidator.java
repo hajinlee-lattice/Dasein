@@ -94,11 +94,11 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
 
         // add report for this step and import data step
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
-            getJson().put(entity.toString(), 0L)
-                            .put("total_rows", 0L)
+            getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
+                            .put("total_rows", eaiImportJobDetail.getTotalRows())
                             .put("ignored_rows", 0L)
                             .put("imported_rows", 0L)
-                            .put("deduped_rows", 0L).put("total_failed_rows", 0L);
+                            .put("deduped_rows", 0L).put("total_failed_rows", eaiImportJobDetail.getTotalRows());
         } else {
             Long totalFailed = 0L;
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
