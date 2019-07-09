@@ -215,28 +215,12 @@ angular
                     }
                 }
             })
-            /*
-        .state('home.jobs.status.ready', {
-            url: '/ready/:jobId',
-            params: {
-                pageIcon: 'ico-jobs',
-                pageTitle: 'View Report'
-            },
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/table/TableView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/jobs/import/ready/ReadyView.html'
-                }
-            }
-        })
-        */
             .state("home.jobs.status.csv", {
                 url: "/csv/:jobId",
                 params: {
                     pageIcon: "ico-jobs",
-                    pageTitle: "View Report"
+                    pageTitle: "View Report",
+                    inJobs: false
                 },
                 resolve: {
                     JobResult: function(
@@ -265,9 +249,14 @@ angular
                     }
                 },
                 views: {
+                    // "summary@": {
+                    //     controller: "OneLineController",
+                    //     templateUrl: "app/navigation/summary/OneLineView.html"
+                    // },
                     "summary@": {
-                        controller: "OneLineController",
-                        templateUrl: "app/navigation/summary/OneLineView.html"
+                        controller: "JobsTabsController",
+                        controllerAs: "vm",
+                        templateUrl: "app/jobs/tabs/jobstabs.component.html"
                     },
                     "main@": {
                         controller: "CSVReportController",
