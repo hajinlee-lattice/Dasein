@@ -93,14 +93,22 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         }
 
         // add report for this step and import data step
-        Long totalFailed = 0L;
-        totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
-        totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
-        getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
-                .put("total_rows", eaiImportJobDetail.getTotalRows())
-                .put("ignored_rows", eaiImportJobDetail.getIgnoredRows())
-                .put("imported_rows", eaiImportJobDetail.getProcessedRecords())
-                .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
+        if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
+            getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
+                            .put("total_rows", eaiImportJobDetail.getTotalRows())
+                            .put("ignored_rows", 0L)
+                            .put("imported_rows", 0L)
+                            .put("deduped_rows", 0L).put("total_failed_rows", eaiImportJobDetail.getTotalRows());
+        } else {
+            Long totalFailed = 0L;
+            totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
+            totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
+            getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
+                    .put("total_rows", eaiImportJobDetail.getTotalRows())
+                    .put("ignored_rows", eaiImportJobDetail.getIgnoredRows())
+                    .put("imported_rows", eaiImportJobDetail.getProcessedRecords())
+                    .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
+        }
         super.execute();
         // make sure report first, then throw exception if necessary
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
