@@ -24,6 +24,9 @@ angular.module('lp.jobs')
     });
 
     vm.inJob = function() {
+        if(vm.stateParams.inJobs === false) {
+            return false;
+        }
         return $state.params.jobId != undefined;
     }
 });
