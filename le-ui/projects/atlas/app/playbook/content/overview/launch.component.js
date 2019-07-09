@@ -17,11 +17,11 @@ import LeCardBody from 'common/widgets/container/card/le-card-body';
 import LeButton from "common/widgets/buttons/le-button";
 import { debounce } from 'lodash';
 import {
-  LEFT,
-  CENTER,
-  SPACEAROUND,
-  SPACEBETWEEN,
-  SPACEEVEN
+    LEFT,
+    CENTER,
+    SPACEAROUND,
+    SPACEBETWEEN,
+    SPACEEVEN
 } from "common/widgets/container/le-alignments";
 import './launch.component.scss';
 
@@ -181,6 +181,7 @@ class LaunchComponent extends Component {
                     coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
 
                 if(coverageBuckets) { // this pre-selects all the buckets
+                    vm.state.selectedBuckets = [];
                     coverageBuckets.forEach(function(bucket) {
                         vm.state.selectedBuckets.push(bucket.bucket);
                     });
