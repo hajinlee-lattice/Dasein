@@ -22,6 +22,8 @@ angular.module('lp.import.wizard.validatetemplate', [])
         // console.log(vm.templateData);
         // console.log(vm.fieldDocument);
 
+        ImportWizardStore.fieldDocument.ignoredFields = vm.fieldDocument.ignoredFields;
+
         ImportWizardService.validateTemplate(vm.fileName, vm.templateData, vm.fieldDocument).then(function(result) {
             vm.validation = result;
             vm.validating = false;
