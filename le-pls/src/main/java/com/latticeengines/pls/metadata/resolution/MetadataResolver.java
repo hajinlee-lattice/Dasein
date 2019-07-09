@@ -436,11 +436,9 @@ public class MetadataResolver {
                         List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
                         MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
                         if (result != null) {
-                            knownColumn.setDateFormatString(
-                                    TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
-                            knownColumn.setTimeFormatString(
-                                    TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
-                            knownColumn.setTimezone(TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
+                            knownColumn.setDateFormatString(result.getLeft());
+                            knownColumn.setTimeFormatString(result.getMiddle());
+                            knownColumn.setTimezone(result.getRight());
                             knownColumn.setMappedToDateBefore(false);
                         }
                     }
