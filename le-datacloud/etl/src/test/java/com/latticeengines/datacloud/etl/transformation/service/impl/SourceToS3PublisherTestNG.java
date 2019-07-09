@@ -195,7 +195,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             createSchema(baseSrc4, basedSourceVersion);
             createSchema(baseSrc6, basedSourceVersion);
         } catch (Exception e) {
-            throw new RuntimeException("Fail to prepare data.");
+            throw new RuntimeException("Fail to prepare data.", e);
         }
     }
 
@@ -291,7 +291,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             String s3Date = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath));
             Assert.assertEquals(hdfsDate, s3Date);
         } catch (Exception e) {
-            throw new RuntimeException("Fail to validate version of file:" + versionFilePath);
+            throw new RuntimeException("Fail to validate version of file:" + versionFilePath, e);
         }
     }
 
@@ -311,7 +311,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
             try {
                 Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
             } catch (Exception e) {
-                throw new RuntimeException("Fail to validate publishing:" + file);
+                throw new RuntimeException("Fail to validate publishing:" + file, e);
             }
         });
     }
@@ -336,7 +336,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
                 s3Service.cleanupPrefix(s3Bucket, path);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Fail to clean up s3: " + path);
+            throw new RuntimeException("Fail to clean up s3: " + path, e);
         }
     }
 
