@@ -143,9 +143,9 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
         assertNull(exception);
         assertNull(exceptionDetails);
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_67);
+        Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getBucket());
-        Assert.assertEquals(scoreResponse.getBucket(), BucketName.C.toValue());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A.toValue());
     }
 
     @Test(groups="deployment", dependsOnMethods = {"testCreateScoringRequestConfig"})

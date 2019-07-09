@@ -389,8 +389,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         // (YSong) When cutting M25 release RC, 3rd expected changed from 89 to 91.
         // The reason for the score change is still unknown, might be DC 2.0.16
         // release.
-        int[] newExpected = { 5, 57, 64, 20 };
-        // TODO - replacing data models changes this list. Reason unknown.
+        int[] newExpected = { 96, 89, 96, 94 };
+        // TODO - data model score not match with csv records
         for (int score : newExpected) {
             expectedScores.add(score);
         }
@@ -452,7 +452,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"Email\":\"mochael.sanderson@untsystem.edu\",\"CompanyName\":\"UNT\",\"City\":\"Fort Worth\",\"State\":\"TX\",\"Country\":\"United States\",\"PostalCode\":\"76107-2690\""
+                "    \"Id\":\"1726380\",\"Email\":\"vasanthi.sontha@j2.com\",\"CompanyName\":\"J2 Global\",\"City\":\"Hollywood\",\"State\":\"CA\",\"Country\":\"United States\",\"PostalCode\":\"90028\""
                 + //
                 "    }" + //
                 "    }";
@@ -462,7 +462,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"Email\":\"mdixon@cbiz.com\",\"CompanyName\":\"Missouri\",\"City\":\"FIndependence\",\"State\":\"MO\",\"Country\":\"United States\",\"PostalCode\":\"44131-6951\"}"
+                "    \"Id\":\"1723589\",\"Email\":\"mdixon@cbiz.com\",\"CompanyName\":\"Missouri\",\"City\":\"FIndependence\",\"State\":\"MO\",\"Country\":\"United States\",\"PostalCode\":\"44131-6951\"}"
                 + //
                 "    }";
     }
@@ -471,7 +471,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"Email\":\"andy.chu@mineralstech.com\",\"CompanyName\":\"Minerals Tech\",\"City\":\"New York\",\"State\":\"NY\",\"Country\":\"United States\",\"PostalCode\":\"10017-6729\""
+                "    \"Id\":\"1723653\",\"Email\":\"andy.chu@mineralstech.com\",\"CompanyName\":\"Minerals Tech\",\"City\":\"New York\",\"State\":\"NY\",\"Country\":\"United States\",\"PostalCode\":\"10017-6729\""
                 + //
                 "    }" + //
                 "    }";
@@ -481,46 +481,77 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         return "    {\"modelId\":\"" + MODEL_ID
                 + "\",\"source\":\"APIConsole\",\"performEnrichment\":false,\"rule\":\"manual\"," + //
                 "    \"record\":{" + //
-                "    \"Email\":\"ybelenky@miraclesoft.com\",\"CompanyName\":\"Miracle Software Systems, Inc.\",\"City\":\"Novi\",\"State\":\"MI\",\"Country\":\"United States\",\"PostalCode\":\"48374\"}"
+                "    \"Id\":\"1723736\",\"Email\":\"ybelenky@miraclesoft.com\",\"CompanyName\":\"Miracle Software Systems, Inc.\",\"City\":\"Novi\",\"State\":\"MI\",\"Country\":\"United States\",\"PostalCode\":\"48374\"}"
                 + //
                 "    }";
     }
 
     private String bulkRecordInputForErrorCorrectnessTest() {
-        return
-
-        "    {\"source\":\"Dummy Source\",\"records\":[" + //
-                "    {\"recordId\":\"2\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID + "\":{" + //
-                "    \"Email\":\"mochael.sanderson@untsystem.edu\",\"CompanyName\":\"UNT\",\"City\":\"Fort Worth\",\"State\":\"TX\",\"Country\":\"United States\",\"PostalCode\":\"76107-2690\""
-                + //
-                "    }" + //
-                "    }," + //
-                "    \"recordId\":\"4\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID
-                + "\":{\"Email\":\"mdixon@cbiz.com\",\"CompanyName\":\"Missouri\",\"City\":\"FIndependence\",\"State\":\"MO\",\"Country\":\"United States\",\"PostalCode\":\"44131-6951\"}"
-                + //
-                "    }" + //
-                "    }," + //
-                "    {\"recordId\":\"3\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID + "\":{" + //
-                "    " + //
-                "    \"Email\":\"andy.chu@mineralstech.com\",\"CompanyName\":\"Minerals Tech\",\"City\":\"New York\",\"State\":\"NY\",\"Country\":\"United States\",\"PostalCode\":\"10017-6729\"}"
-                + //
-                "    }" + //
-                "    }," + //
-                "    {\"recordId\":\"36c5c666-1eb4-4221-b5d3-93b23be72a6e\",\"idType\":\"LATTICE\"," + //
-                "    \"modelAttributeValuesMap\":" + //
-                "    {\"" + MODEL_ID
-                + "\":{\"Email\":\"ybelenky@miraclesoft.com\",\"CompanyName\":\"Miracle Software Systems, Inc.\",\"City\":\"Novi\",\"State\":\"MI\",\"Country\":\"United States\",\"PostalCode\":\"48374\"}"
-                + //
-                "    }" + //
-                "    }" + //
-                "    ]" + //
-                "    }";
+        return "{\n" +
+                "  \"source\": \"Dummy Source\",\n" +
+                "  \"records\": [\n" +
+                "    {\n" +
+                "      \"recordId\": \"2\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"vasanthi.sontha@j2.com\",\n" +
+                "          \"Id\": \"1726380\",\n" +
+                "          \"CompanyName\": \"J2 Global\",\n" +
+                "          \"City\": \"Hollywood\",\n" +
+                "          \"State\": \"CA\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"90028\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"4\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"mdixon@cbiz.com\",\n" +
+                "          \"Id\": \"1723589\",\n" +
+                "          \"CompanyName\": \"Missouri\",\n" +
+                "          \"City\": \"FIndependence\",\n" +
+                "          \"State\": \"MO\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"44131-6951\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"3\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"andy.chu@mineralstech.com\",\n" +
+                "          \"Id\": \"1723653\",\n" +
+                "          \"CompanyName\": \"Minerals Tech\",\n" +
+                "          \"City\": \"New York\",\n" +
+                "          \"State\": \"NY\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"10017-6729\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"recordId\": \"36c5c666-1eb4-4221-b5d3-93b23be72a6e\",\n" +
+                "      \"idType\": \"LATTICE\",\n" +
+                "      \"modelAttributeValuesMap\": {\n" +
+                "        \"" + MODEL_ID + "\": {\n" +
+                "          \"Email\": \"ybelenky@miraclesoft.com\",\n" +
+                "          \"Id\": \"1723736\",\n" +
+                "          \"CompanyName\": \"Miracle Software Systems, Inc.\",\n" +
+                "          \"City\": \"Novi\",\n" +
+                "          \"State\": \"MI\",\n" +
+                "          \"Country\": \"United States\",\n" +
+                "          \"PostalCode\": \"48374\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
     }
 
     private String pmmlImputJson() {
