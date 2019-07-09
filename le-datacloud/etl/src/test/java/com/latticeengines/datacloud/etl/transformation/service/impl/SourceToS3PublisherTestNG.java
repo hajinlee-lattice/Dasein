@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -287,8 +288,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         try {
             String hdfsDate = expectedVersions.get(baseSource);
 
-            @SuppressWarnings("deprecation")
-            String s3Date = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath));
+            String s3Date = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath),
+                    Charset.defaultCharset());
             Assert.assertEquals(hdfsDate, s3Date);
         } catch (Exception e) {
             throw new RuntimeException("Fail to validate version of file:" + versionFilePath, e);
