@@ -221,10 +221,15 @@ angular
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'account');
                 },
-                WizardControlsOptions: function() {
+                WizardControlsOptions: function(FeatureFlagService) {
+                    var flags = FeatureFlagService.Flags();
+                    let nextVar = 'home.importtemplates';
+                    if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+                        nextVar = 'home.multipletemplates';
+                    }
                     return { 
                         backState: 'home.import.entry.accounts', 
-                        nextState: 'home.importtemplates' 
+                        nextState: nextVar 
                     };
                 }
             },
@@ -426,10 +431,16 @@ angular
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 },
-                WizardControlsOptions: function() {
+                WizardControlsOptions: function(FeatureFlagService) {
+                    var flags = FeatureFlagService.Flags();
+                    let nextVar = 'home.importtemplates';
+                    if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_MULTI_TEMPLATE_IMPORT)){
+                        nextVar = 'home.multipletemplates';
+                    }
+                    
                     return { 
                         backState: 'home.import.entry.contacts', 
-                        nextState: 'home.importtemplates' 
+                        nextState: nextVar 
                     };
                 }
             },
