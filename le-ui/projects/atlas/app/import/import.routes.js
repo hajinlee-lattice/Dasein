@@ -360,10 +360,10 @@ angular
                 
             },
             resolve: {
-                FieldDocument: function($q, ImportWizardStore) {
+                FieldDocument: function(ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();
                 },
-                mergedFieldDocument: function($q, ImportWizardStore) {
+                mergedFieldDocument: function(ImportWizardStore) {
                     return ImportWizardStore.mergeFieldDocument({segment: true, save: false});
                 }
             },
