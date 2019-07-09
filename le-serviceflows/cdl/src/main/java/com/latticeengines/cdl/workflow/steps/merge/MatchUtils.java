@@ -126,7 +126,6 @@ public final class MatchUtils {
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Email, InterfaceName.Email.name());
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.SystemId, InterfaceName.CustomerContactId.name());
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Contact);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Contact match keys = {}", JsonUtils.serialize(matchKeys));
