@@ -368,7 +368,7 @@ public enum LedpCode {
     LEDP_19013("Service not found."), //
     LEDP_19014("Unsupport error."), //
     LEDP_19015("Your account has been locked, please reset password."), //
-    LEDP_19016("Could not authenticate ticket {0}. Reason: {1}"), //
+    LEDP_19016("Your login session has expired, please log in again."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //
