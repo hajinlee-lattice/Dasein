@@ -15,13 +15,14 @@ import LeCard from 'common/widgets/container/card/le-card';
 import LeCardImg from 'common/widgets/container/card/le-card-img';
 import LeCardBody from 'common/widgets/container/card/le-card-body';
 import LeButton from "common/widgets/buttons/le-button";
+import { deepCopy } from 'common/app/utilities/ObjectUtilities.js';
 import { debounce } from 'lodash';
 import {
-    LEFT,
-    CENTER,
-    SPACEAROUND,
-    SPACEBETWEEN,
-    SPACEEVEN
+  LEFT,
+  CENTER,
+  SPACEAROUND,
+  SPACEBETWEEN,
+  SPACEEVEN
 } from "common/widgets/container/le-alignments";
 import './launch.component.scss';
 
@@ -62,7 +63,7 @@ function isAudience(externalSystemName, showlist) {
     return (list.indexOf(externalSystemName) !== -1);
 }
 
-function audienceParamsDefault() { // Oh, you'll be immutable alright.  I'll make you immutable
+function audienceParamsDefault() { // Oh, you'll be immutable alright. I'll make you immutable
     return {
         audienceName: '',
         audienceId: '',
@@ -74,7 +75,7 @@ class LaunchComponent extends Component {
     constructor(props) {
         super(props);
 
-        let connection = this.props.connection,
+        let connection = deepCopy(this.props.connection), //deep copy
             config = this.props.config || {},
             type = (config.name ? config.name.toLowerCase() : 'none');
 
@@ -96,15 +97,16 @@ class LaunchComponent extends Component {
             launchingState: 'unlaunching',
             programs: null,
             staticList: null,
-            showNewFolderName: true,
-            audienceParams: audienceParamsDefault()
+            showNewAudienceName: true,
+            audienceParams: audienceParamsDefault(),
+            connection: connection
         };
     }
 
     componentDidMount() {
         let playstore = store.getState()['playbook'],
             vm = this;
-        
+
         this.setState({launchLoading: playstore.launchLoading});
 
         if(playstore.play.ratingEngine) {
@@ -123,7 +125,7 @@ class LaunchComponent extends Component {
                     if(data.success) {
                         let programs = (data && data.result ? data.result : []);
                         vm.state.programs = programs;
-                        vm.state.audienceParams.audienceName = programs[0].name;
+                        vm.state.audienceParams.folderName = programs[0].name;
                         vm.setState(vm.state);
 
                         actions.fetchStaticLists(programs[0].name, {externalSystemName: vm.state.externalSystemName}, function(data) {
@@ -144,7 +146,7 @@ class LaunchComponent extends Component {
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: true,
-            getDestinationAccountId: this.props.connection.lookupIdMap.accountId
+            getDestinationAccountId: this.state.connection.lookupIdMap.accountId
         });
 
         this.unsubscribe = store.subscribe(this.handleChange);
@@ -181,7 +183,6 @@ class LaunchComponent extends Component {
                     coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
 
                 if(coverageBuckets) { // this pre-selects all the buckets
-                    vm.state.selectedBuckets = [];
                     coverageBuckets.forEach(function(bucket) {
                         vm.state.selectedBuckets.push(bucket.bucket);
                     });
@@ -191,7 +192,6 @@ class LaunchComponent extends Component {
             });
         } else {
             actions.fetchAccountsCount({ 'preexisting_segment_name': playstore.play.targetSegment.name }, function(data) {
-                console.log('fetchAccountsCount', data);
                 vm.state.launchAccountsCoverage = {
                     accountsCount: data
                 };
@@ -385,13 +385,16 @@ class LaunchComponent extends Component {
 
 
     makeProgramsList(programs) {
+        // program name = folder name
+        // static list name dropdwon is audience name/id
+        // static list name input is audience name/no id (makes new audience)
         var vm = this,
             list = [];
 
-        var newFolderNameInput = [];
-        if(this.state.showNewFolderName) {
-            newFolderNameInput.push(<input name={'newFolderName'} onBlur={(event) => {
-                this.state.audienceParams.folderName = event.target.value;
+        var newAudienceNameInput = [];
+        if(this.state.showNewAudienceName) {
+            newAudienceNameInput.push(<input name={'newAudienceName'} onBlur={(event) => {
+                this.state.audienceParams.audienceName = event.target.value;
                 this.setState(this.state);
             }} />);
         }
@@ -415,7 +418,7 @@ class LaunchComponent extends Component {
                         <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
                             <label for={'staticList'}>Static list name</label>
                             {vm.makeStaticList(this.state.staticList)}
-                            {newFolderNameInput}
+                            {newAudienceNameInput}
                         </LeHPanel>
                     </LeVPanel>
 
@@ -438,11 +441,11 @@ class LaunchComponent extends Component {
             return(
                 <select id={'staticList'} onChange={(event) => {
                     if(!this.state.showNewListInput && event.target.value === '') {
-                        this.state.showNewFolderName = true;
+                        this.state.showNewAudienceName = true;
                     } else {
                         let item = list.find(function(_item) { return (_item.id == event.target.value) });
-                        this.state.showNewFolderName = false;
-                        this.state.audienceParams.folderName = (item && item.name ? item.name : '');
+                        this.state.showNewAudienceName = false;
+                        this.state.audienceParams.audienceName = (item && item.name ? item.name : '');
                     }
                     this.state.audienceParams.audienceId = event.target.value;
                     this.setState(this.state);
@@ -457,17 +460,17 @@ class LaunchComponent extends Component {
         var vm = this;
 
         vm.state.staticList = [{name: 'loading...', loadingState: true}];
-        vm.state.showNewFolderName = false;
+        vm.state.showNewAudienceName = false;
 
         vm.state.audienceParams = audienceParamsDefault(); // reset this
-        vm.state.audienceParams.audienceName = programName;
+        vm.state.audienceParams.folderName = programName;
 
         vm.setState(vm.state);
 
         actions.fetchStaticLists(programName, {externalSystemName: vm.state.externalSystemName}, function(data) {
             if(data && data.result) {
                 let staticList = (data && data.result ? data.result : []);
-                vm.state.showNewFolderName = true;
+                vm.state.showNewAudienceName = true;
                 vm.state.staticList = staticList;
                 vm.setState(vm.state);
             }
@@ -502,7 +505,6 @@ class LaunchComponent extends Component {
             lastIncompleteLaunch = opts.lastIncompleteLaunch || null,
             channelConfigKey = (this.state.externalSystemName ? this.state.externalSystemName.toLowerCase() : null);
 
-
         var channelConfigDefault = {};
         channelConfigDefault[channelConfigKey] = {
             supressAccountWithoutAccountId: this.state.excludeItemsWithoutSalesforceId,
@@ -512,7 +514,6 @@ class LaunchComponent extends Component {
         };
 
         var channelConfig = connection.channelConfig || channelConfigDefault;
-
 
         if(this.state.audienceParams && this.state.audienceParams.audienceName && this.state.audienceParams.folderName) {
             channelConfig[channelConfigKey].audienceId = this.state.audienceParams.audienceId;
@@ -529,13 +530,12 @@ class LaunchComponent extends Component {
                 };
 
             if(lastIncompleteLaunch) {
-                launchObj = Object.assign({},lastIncompleteLaunch, launchObj);
+                launchObj = Object.assign({}, lastIncompleteLaunch, launchObj);
             } else if(lastIncompleteLaunchId) {
                 launchObj = Object.assign({}, PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch, launchObj);
             } else {
                 launchObj = launchObj;
             }
-
             actions.saveChannel(play.name, {
                 id: connection.id,
                 lookupIdMap: connection.lookupIdMap,
@@ -571,7 +571,7 @@ class LaunchComponent extends Component {
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: e.target.checked,
-            getDestinationAccountId: this.props.connection.accountId
+            getDestinationAccountId: this.state.connection.accountId
         });
     }
 
@@ -649,7 +649,7 @@ class LaunchComponent extends Component {
         }
         if(loaded) {
             var play = this.state.play,
-                connection = this.props.connection,
+                connection = this.state.connection,
                 config = this.props.config,
                 type = (config.name ? config.name.toLowerCase() : 'none'),
                 bucketsToLaunch = (play.launchHistory.mostRecentLaunch ? play.launchHistory.mostRecentLaunch.bucketsToLaunch : []),

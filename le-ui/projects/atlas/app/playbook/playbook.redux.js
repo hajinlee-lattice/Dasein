@@ -231,7 +231,6 @@ export const actions = {
     // trayAuthenticationId is from lookup-id-mapping api when it's marketo gets externalAuthentication object which has trayAuthenticationId
     // useraccesstoken is from getTrayAuthorizationToken
     fetchPrograms: (opts, cb) => {
-        // Q: what happens if nothign is returned, do we show the launch without it?
         var opts = opts || {};
 
         let playstore = store.getState()['playbook'];
