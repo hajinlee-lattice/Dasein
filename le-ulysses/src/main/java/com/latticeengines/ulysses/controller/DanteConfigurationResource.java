@@ -3,8 +3,10 @@ package com.latticeengines.ulysses.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,13 +28,19 @@ import com.latticeengines.domain.exposed.dante.metadata.NotionMetadata;
 import com.latticeengines.domain.exposed.dante.metadata.PropertyMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Flux;
 
 @Api(value = "DanteConfiguration", description = "Common REST resource to serve configuration for Dante UI")
 @RestController
@@ -68,8 +76,13 @@ public class DanteConfigurationResource {
     private static final String salesForceAccountIdAttributeName = "SalesforceAccountID";
     private static final String danteAccountNotionName = "DanteAccount";
 
+    private final ColumnSelection.Predefined TalkingPointAttributeGroup = ColumnSelection.Predefined.TalkingPoint;
+
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private EntityProxy entityProxy;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -82,9 +95,52 @@ public class DanteConfigurationResource {
             MetadataDocument metadataDocument = JsonUtils.deserialize(
                     getStaticDocument(commonResourcePath + metadataDocumentTemplatePath), MetadataDocument.class);
 
-            List<PropertyMetadata> talkingPointAttributes = servingStoreProxy
-                    .getDecoratedMetadata(customerSpace, BusinessEntity.Account,
-                            Collections.singletonList(ColumnSelection.Predefined.TalkingPoint))
+            List<ColumnMetadata> allAttrs = new ArrayList<>();
+            List<ColumnMetadata> accountAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Account);
+            if (CollectionUtils.isNotEmpty(accountAttrs)) {
+                accountAttrs = accountAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .collect(Collectors.toList());
+                allAttrs.addAll(accountAttrs);
+            }
+            List<ColumnMetadata> ratingAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.Rating);
+            if (CollectionUtils.isNotEmpty(ratingAttrs)) {
+                ratingAttrs = ratingAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
+                        .collect(Collectors.toList());
+                allAttrs.addAll(ratingAttrs);
+            }
+            List<ColumnMetadata> phAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.PurchaseHistory);
+            if (CollectionUtils.isNotEmpty(phAttrs)) {
+                DataPage dataPage = entityProxy.getProducts(customerSpace);
+                Map<String, String> productNameMap = new HashMap<>();
+                if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
+                    dataPage.getData()
+                            .forEach(map -> productNameMap.put( //
+                                    map.get(InterfaceName.ProductId.name()).toString(), //
+                                    map.get(InterfaceName.ProductName.name()).toString() //
+                    ));
+                }
+                phAttrs = phAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).peek(cm -> {
+                    String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
+                    String productName = productNameMap.get(productId);
+                    cm.setDisplayName(productName + ": " + cm.getDisplayName());
+                }).collect(Collectors.toList());
+                allAttrs.addAll(phAttrs);
+            }
+            List<ColumnMetadata> curatedAccountAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.CuratedAccount);
+            if (CollectionUtils.isNotEmpty(curatedAccountAttrs)) {
+                curatedAccountAttrs = curatedAccountAttrs.stream()
+                        .filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).collect(Collectors.toList());
+                allAttrs.addAll(curatedAccountAttrs);
+            }
+
+            if (CollectionUtils.isEmpty(allAttrs)) {
+                throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
+            }
+            List<PropertyMetadata> talkingPointAttributes = Flux.fromIterable(allAttrs)
                     // Dante has a special meaning for "SalesforceAccountID"
                     // so ignore the attribute info from CDL
                     .filter(attr -> !attr.getAttrName().equals(salesForceAccountIdAttributeName))
