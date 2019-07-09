@@ -46,6 +46,9 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     private Configuration distCpConfiguration;
 
     @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Inject
@@ -85,7 +88,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String versionFilePath = getBaseSourceVersionFilePath(step, i);
 
                 copyAndValidate(sourceName, dataPath, true);
-                if (schemaPath != null && HdfsUtils.fileExists(distCpConfiguration, schemaPath)) {
+                if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                     copyAndValidate(sourceName, schemaPath, true);
                 }
                 if (shouldCopyVersionFile(source, versionFilePath)) {
@@ -121,14 +124,14 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             log.info("Copying from {} to {}", hdfsDir, s3nDir);
 
             if (isDir) {
-                if (!HdfsUtils.onlyGetFilesForDirRecursive(distcpConfiguration, hdfsDir, (HdfsFileFilter) null, false)
+                if (!HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false)
                         .isEmpty()) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
                     throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);
                 }
             } else {
-                if (HdfsUtils.fileExists(distcpConfiguration, hdfsDir)) {
+                if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir)) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
                     throw new RuntimeException("File not exist: " + hdfsDir);
@@ -142,7 +145,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     private void validateCopySuccess(String hdfsDir) {
         List<String> files = null;
         try {
-            files = HdfsUtils.onlyGetFilesForDirRecursive(distCpConfiguration, hdfsDir, (HdfsFileFilter) null, false);
+            files = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false);
         } catch (IOException e) {
             throw new RuntimeException("Fail to list files under HDFS path " + hdfsDir, e);
         }
@@ -160,13 +163,13 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         long s3Len = s3Service.getObjectMetadata(s3Bucket, filePath).getContentLength();
         long hdfsLen;
         try {
-            hdfsLen = HdfsUtils.getFileStatus(distCpConfiguration, filePath).getLen();
+            hdfsLen = HdfsUtils.getFileStatus(yarnConfiguration, filePath).getLen();
         } catch (Exception e) {
             throw new RuntimeException("Fail to get hdfs file size:" + filePath, e);
         }
         if (s3Len != hdfsLen) {
             throw new RuntimeException(
-                    "File:" + filePath + "size not the same on hdfs: " + hdfsLen + " and s3: " + s3Len);
+                    String.format("File %s size not the same on hdfs: %d and s3: %d", filePath, hdfsLen, s3Len));
         }
     }
 
@@ -177,7 +180,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private Configuration createConfiguration(String sourceName, String jobNameSuffix) {
-        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, new Properties());
+        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, new Properties());
         String jobName = SERVICE_TENANT + "~" + sourceName + "~" + jobNameSuffix;
         hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
         if (StringUtils.isNotEmpty(hadoopConfiguration.get("mapreduce.application.classpath"))) {
