@@ -120,10 +120,9 @@ class SystemsComponent extends Component {
 
                 let connections = playstore.connections,
                     launchingConnection = connections.find(function(connection) {
-                        var state = (connection  && connection.lastLaunch && connection.lastLaunch.launchState ? connection.lastLaunch.launchState : '');
+                        var launchState = (connection  && connection.lastLaunch && connection.lastLaunch.launchState ? connection.lastLaunch.launchState : '');
                         return (launchState === 'Launching' || launchState === 'Queued');
                     });
-
                 if(!launchingConnection) {
                     clearInterval(checkLaunch);
                     vm.setState({checkLaunch: null});
