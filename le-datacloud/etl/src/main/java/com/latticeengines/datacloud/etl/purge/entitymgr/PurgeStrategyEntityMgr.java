@@ -10,9 +10,9 @@ public interface PurgeStrategyEntityMgr {
 
     List<PurgeStrategy> findStrategiesByType(SourceType sourceType);
 
-    PurgeStrategy findStrategiesBySource(String source);
+    PurgeStrategy findStrategyBySource(String source);
 
-    PurgeStrategy findStrategiesBySourceAndType(String source, SourceType sourceType);
+    PurgeStrategy findStrategyBySourceAndType(String source, SourceType sourceType);
 
     void insertAll(List<PurgeStrategy> strategies);
 
