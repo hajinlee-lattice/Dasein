@@ -6,7 +6,6 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 
@@ -38,7 +37,7 @@ public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Lon
 
     List<DataFeed> getDataFeeds(TenantStatus status, String version);
 
-    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, SchedulingGroup schedulingGroup);
+    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup);
 
     DataFeed updateStatus(DataFeed dataFeed);
 }

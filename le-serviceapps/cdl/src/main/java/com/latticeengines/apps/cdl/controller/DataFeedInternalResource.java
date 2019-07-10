@@ -16,7 +16,6 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 
@@ -80,7 +79,7 @@ public class DataFeedInternalResource {
             return dataFeedService.getAllDataFeeds();
         } else {
             return dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.valueOf(tenantStatus), version,
-                    SchedulingGroup.valueOf(schedulingGroup));
+                    schedulingGroup);
         }
     }
 

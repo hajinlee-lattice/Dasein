@@ -162,8 +162,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "SCHEDULING_GROUP")
     @JsonProperty("scheduling_group")
-    @Enumerated(EnumType.STRING)
-    private SchedulingGroup schedulingGroup;
+    private String schedulingGroup;
 
     @Transient
     @JsonIgnore
@@ -396,11 +395,11 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.scheduleRequest = scheduleRequest;
     }
 
-    public SchedulingGroup getSchedulingGroup() {
+    public String getSchedulingGroup() {
         return schedulingGroup;
     }
 
-    public void setSchedulingGroup(SchedulingGroup schedulingGroup) {
+    public void setSchedulingGroup(String schedulingGroup) {
         this.schedulingGroup = schedulingGroup;
     }
 

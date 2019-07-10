@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 
@@ -65,7 +64,7 @@ public interface DataFeedService {
 
     List<DataFeed> getDataFeeds(TenantStatus status, String version);
 
-    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, SchedulingGroup schedulingGroup);
+    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup);
 
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 

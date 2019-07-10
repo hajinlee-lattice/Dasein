@@ -58,7 +58,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
-import com.latticeengines.domain.exposed.metadata.datafeed.SchedulingGroup;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -132,7 +131,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> runningPATenantId = new HashSet<>();
 
         List<TenantActivity> tenantActivityList = new LinkedList<>();
-        SchedulingGroup schedulingGroup = getSchedulingGroup();
+        String schedulingGroup = getSchedulingGroup();
         List<DataFeed> allDataFeeds = dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.ACTIVE, "4.0", schedulingGroup);
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
@@ -505,24 +504,22 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return false;
     }
 
-    private SchedulingGroup getSchedulingGroup() {
+    private String getSchedulingGroup() {
         try {
             Camille c = CamilleEnvironment.getCamille();
             String content = c.get(PathBuilder.buildSchedulingGroupPath(CamilleEnvironment.getPodId())).getData();
             log.info("stack is " + leStack);
-            HashMap jsonMap = om.readValue(content, HashMap.class);
-            return SchedulingGroup.valueOf(filterDetail(leStack, jsonMap));
+            Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
+                    String.class);
+            return filterDetail(leStack, jsonMap);
         }catch (Exception e) {
             log.error("Get json node from zk failed.");
             return null;
         }
     }
 
-    private static String filterDetail(String stackName, HashMap nodes) {
+    private static String filterDetail(String stackName, Map<String, String> nodes) {
         String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
-        if (nodes.containsKey(filterName)) {
-            nodes.get(filterName);
-        }
-        return DEFAULT_SCHEDULING_GROUP;
+        return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
     }
 }
