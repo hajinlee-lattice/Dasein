@@ -114,6 +114,20 @@ public class SystemStatus {
         }
     }
 
+    /**
+     * will change canRunJobCount when PA finished using fir simulation
+     *
+     */
+    public void changeSystemStateAfterPAFinished(TenantActivity tenantActivity) {
+        this.canRunJobCount = this.canRunJobCount + 1;
+        if (tenantActivity.isLarge()) {
+            this.canRunLargeJobCount = this.canRunLargeJobCount + 1;
+        }
+        if (tenantActivity.isScheduledNow()) {
+            this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount + 1;
+        }
+    }
+
     public Set<String> getScheduleTenants() {
         if (scheduleTenants == null) {
             scheduleTenants = new HashSet<>();
