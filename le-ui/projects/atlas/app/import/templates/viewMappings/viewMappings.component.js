@@ -262,7 +262,11 @@ export default class ViewMappings extends Component {
                                         name: ""
                                       }}
                                       callback={() => {
-                                        NgState.getAngularState().go('home.importtemplates', {});
+                                        if(FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT)){
+                                            NgState.getAngularState().go('home.multipletemplates', {});
+                                        }else {
+                                            NgState.getAngularState().go('home.importtemplates', {});
+                                        }
                                       }}
                                     />
                                     View {this.state.object} Mappings
