@@ -112,8 +112,8 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
      */
     private ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion, int nPages) {
         List<AccountMasterColumn> attrs = new ArrayList<>();
-        // start backoff at 15s, grows 2x (total wait time ~ 30min)
-        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(7, 15000, 2.0D, null);
+        // start backoff at [15s,30s], grows 2x (total wait time ~ [30min,60min])
+        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(8, 15000, 2.0D, 15 * 64 * 1000, true, null);
         for (int i = 0; i < nPages; i++) {
             int page = i;
             try (PerformanceTimer timer = new PerformanceTimer()) {
