@@ -98,17 +98,15 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = null;//"LETest1546299140564";
+        String existingTenant = null;// "LETest1546299140564";
 
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder()
-                .existingTenant(existingTenant)
-                .mockRatingTable(true)
-                .build();
+        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant)
+                .mockRatingTable(true).build();
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         play = testPlayCreationHelper.getPlay();
         String ratingEngineId = play.getRatingEngine().getId();
-        //ratingEngineId = "engine_3r2jgb3stpy5heu0rm8nda";
+        // ratingEngineId = "engine_3r2jgb3stpy5heu0rm8nda";
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(), ratingEngineId);
 
         Assert.assertNotNull(ratingEngine);
@@ -531,17 +529,17 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         RatingEngine crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(currentSegment);
         crossSellRatingEngine.setCreatedBy("CREATED_BY");
+        crossSellRatingEngine.setUpdatedBy("UPDATED_BY");
         crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
 
-        RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(testPlayCreationHelper.getTenant().getId(),
-                crossSellRatingEngine);
+        RatingEngine createdRatingEngine = ratingEngineProxy
+                .createOrUpdateRatingEngine(testPlayCreationHelper.getTenant().getId(), crossSellRatingEngine);
         Assert.assertNotNull(createdRatingEngine);
         ProductsCoverageRequest productsCoverageRequest = new ProductsCoverageRequest();
         productsCoverageRequest.setRatingEngine(createdRatingEngine);
         productsCoverageRequest.setProductIds(productIds);
         RatingEnginesCoverageResponse response = ratingCoverageService
-                .getProductCoveragesForSegment(testPlayCreationHelper.getTenant().getId(),
-                        productsCoverageRequest, 6);
+                .getProductCoveragesForSegment(testPlayCreationHelper.getTenant().getId(), productsCoverageRequest, 6);
 
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingModelsCoverageMap());
@@ -567,8 +565,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
             log.info(JsonUtils.serialize(data.getData()));
             productIds = data.getData().stream()
-                    .map(product -> (String) product.get(InterfaceName.ProductId.toString()))
-                    .limit(5)
+                    .map(product -> (String) product.get(InterfaceName.ProductId.toString())).limit(5)
                     .collect(Collectors.toList());
         } else {
             productIds = new ArrayList<>();

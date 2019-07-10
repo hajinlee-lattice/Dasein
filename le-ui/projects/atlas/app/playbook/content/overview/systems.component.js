@@ -111,7 +111,7 @@ class SystemsComponent extends Component {
         if(this.state.checkLaunch) {
             return false;
         }
-        var interval = .1 * (1000 * 60),
+        var interval = 30 * 1000, // 30 seconds
             vm = this,
             checkLaunch = setInterval(function() {
                 let playstore = store.getState()['playbook'];
@@ -120,7 +120,8 @@ class SystemsComponent extends Component {
 
                 let connections = playstore.connections,
                     launchingConnection = connections.find(function(connection) {
-                        return (connection  && connection.lastLaunch && connection.lastLaunch.launchState === 'Launching');
+                        var state = (connection  && connection.lastLaunch && connection.lastLaunch.launchState ? connection.lastLaunch.launchState : '');
+                        return (launchState === 'Launching' || launchState === 'Queued');
                     });
 
                 if(!launchingConnection) {
@@ -134,41 +135,48 @@ class SystemsComponent extends Component {
 
     getLaunchStateText(connection, play) {
         var text = [];
-        if(connection && connection.lastLaunch && connection.created && connection.accountsLaunched && connection.contactsLaunched) {
+        if(connection && connection.lastLaunch) {
             var launch = connection.lastLaunch,
                 launchState = (launch ? launch.launchState : 'Unlaunched'),
                 launched = (launchState === 'Launched' ? true : false),
-                launching = (launchState === 'Launching' ? true : false);
+                launching = (launchState === 'Launching' ? true : false),
+                queued = (launchState === 'Queued' ? true : false);
 
-                if(launching) {
+                if(launching || queued) {
                     this.checkLaunching();
                 }
 
-            if(launched) {
+            if(launched && launch && launch.created && launch.accountsLaunched && launch.contactsLaunched) {
                 text.push(
                     <div class="launch-text launched">
                         <ul>
                             <li>
-                                Last Launched: {new Date(connection.created).toLocaleDateString("en-US")}
+                                Last Launched: {new Date(launch.created).toLocaleDateString("en-US")}
                             </li>
                             <li>
-                                Accounts Sent: {connection.accountsLaunched.toLocaleString()}
+                                Accounts Sent: {launch.accountsLaunched.toLocaleString()}
                             </li>
                             <li>
-                                Contacts Sent: {connection.contactsLaunched.toLocaleString()}
+                                Contacts Sent: {launch.contactsLaunched.toLocaleString()}
                             </li>
                         </ul>
                     </div>
                 );
+            } else if(queued) {
+                text.push(
+                    <div class="launch-text launched queued">
+                        Queued...
+                    </div>
+                );
             } else if(launching) {
                 text.push(
-                    <div class="launch-text unlaunched">
+                    <div class="launch-text unlaunched launching">
                         Launching...
                     </div>
                 );
             } else {
                 text.push(
-                    <div class="launch-text unlaunched">
+                    <div class="launch-text unlaunched no-previous-launch">
                         No previous launch
                     </div>
                 );

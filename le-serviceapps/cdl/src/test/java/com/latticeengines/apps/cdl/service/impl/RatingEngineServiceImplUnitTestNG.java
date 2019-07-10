@@ -38,6 +38,7 @@ public class RatingEngineServiceImplUnitTestNG {
     private static final String TENANT = "tenant";
     private static final String ID = "ratingId";
     private static final String DISPLAY_NAME = "rating engine";
+    private static final String DESCRIPTION = "description";
     private static final String CREATED_BY = "testuser@lattice-engines.com";
     private static final Date DATE = new Date();
     private static final String id1 = "id1";
@@ -120,11 +121,13 @@ public class RatingEngineServiceImplUnitTestNG {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ID);
         ratingEngine.setDisplayName(DISPLAY_NAME);
+        ratingEngine.setDescription(DESCRIPTION);
         ratingEngine.setNote(null);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
         ratingEngine.setSegment(null);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setCreated(DATE);
         ratingEngine.setUpdated(DATE);
         AIModel am = new AIModel();

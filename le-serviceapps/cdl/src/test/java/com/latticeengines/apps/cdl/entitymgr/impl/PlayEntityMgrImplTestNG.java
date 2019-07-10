@@ -67,6 +67,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(testSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
+        ratingEngine1.setUpdatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setId(UUID.randomUUID().toString());
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine1);
@@ -77,6 +78,7 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine2 = new RatingEngine();
         ratingEngine2.setSegment(testSegment);
         ratingEngine2.setCreatedBy(CREATED_BY);
+        ratingEngine1.setUpdatedBy(CREATED_BY);
         ratingEngine2.setType(RatingEngineType.RULE_BASED);
         ratingEngine2.setId(UUID.randomUUID().toString());
         createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine2);

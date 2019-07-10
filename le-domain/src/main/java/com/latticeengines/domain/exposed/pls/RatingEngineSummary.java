@@ -36,6 +36,8 @@ public class RatingEngineSummary {
     private Date lastRefreshedDate;
     @JsonProperty("createdBy")
     private String createdBy;
+    @JsonProperty("updatedBy")
+    private String updatedBy;
     @JsonProperty("accountsInSegment")
     private Long accountsInSegment;
     @JsonProperty("contactsInSegment")
@@ -142,6 +144,14 @@ public class RatingEngineSummary {
 
     public void setCreatedBy(String user) {
         this.createdBy = user;
+    }
+
+    public String getUpdatedBy() {
+        return this.updatedBy;
+    }
+
+    public void setUpdatedBy(String user) {
+        this.updatedBy = user;
     }
 
     public Date getLastRefreshedDate() {

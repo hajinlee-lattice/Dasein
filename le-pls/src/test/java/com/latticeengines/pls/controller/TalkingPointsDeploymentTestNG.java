@@ -82,6 +82,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
+        ratingEngine1.setUpdatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         RatingEngine createdRatingEngine =
                 ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine1);
