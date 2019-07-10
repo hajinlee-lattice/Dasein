@@ -43,6 +43,12 @@ public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
     }
 
     @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public PurgeStrategy findStrategiesBySourceAndType(String source, SourceType sourceType) {
+        return purgeStrategyDao.findByFields("source", source, "sourceType", sourceType);
+    }
+
+    @Override
     @VisibleForTesting
     @Transactional(value = "propDataManage")
     public void insertAll(List<PurgeStrategy> strategies) {
@@ -57,4 +63,5 @@ public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
     public void delete(PurgeStrategy strategy) {
         purgeStrategyDao.delete(strategy);
     }
+
 }

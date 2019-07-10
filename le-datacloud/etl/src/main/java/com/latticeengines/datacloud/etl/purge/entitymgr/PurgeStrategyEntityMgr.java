@@ -12,6 +12,8 @@ public interface PurgeStrategyEntityMgr {
 
     PurgeStrategy findStrategiesBySource(String source);
 
+    PurgeStrategy findStrategiesBySourceAndType(String source, SourceType sourceType);
+
     void insertAll(List<PurgeStrategy> strategies);
 
     void delete(PurgeStrategy strategy);
