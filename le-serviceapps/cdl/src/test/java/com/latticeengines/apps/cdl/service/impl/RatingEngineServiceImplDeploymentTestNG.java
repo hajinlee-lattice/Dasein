@@ -116,6 +116,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(reTestSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         // test basic creation
@@ -445,6 +446,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         aiModel.setId(AIModel.generateIdStr());
         aiModel.setRatingEngine(aiRatingEngine);
         ((RatingModel) aiModel).setCreatedBy(CREATED_BY);
+        ((RatingModel) aiModel).setUpdatedBy(CREATED_BY);
         aiModel.setAdvancedModelingConfig(new CrossSellModelingConfig());
         return aiModel;
     }
@@ -602,6 +604,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(segment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
 

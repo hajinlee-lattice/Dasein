@@ -42,6 +42,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     private static final String RATING_ENGINE_NOTE_1 = "This is a Rating Engine that covers North America market";
     private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "lattice@lattice-engines.com";
 
     private static final String ATTR1 = "Employ Number";
     private static final String ATTR2 = "Revenue";
@@ -285,6 +286,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(UPDATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE_1);
         // set rule based rating engine to be active by default
@@ -298,6 +300,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(UPDATED_BY);
         ratingEngine.setType(RatingEngineType.CROSS_SELL);
         // not set the status of ai rating engine, whose default value is
         // inactive, and thus no action will be created

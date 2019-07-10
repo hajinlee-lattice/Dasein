@@ -273,6 +273,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         AIModel newIteration = new AIModel();
         newIteration.setCreatedBy(CREATED_BY);
+        newIteration.setUpdatedBy(CREATED_BY);
         newIteration.setAdvancedModelingConfig(new CrossSellModelingConfig());
         newIteration.setRatingEngine(aiRatingEngine);
         Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
@@ -282,8 +283,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertThrows(LedpException.class, () -> aiModelService.createNewIteration(newIteration, aiRatingEngine));
         AIModel derivedModel = (AIModel) createdRatingEngine.getLatestIteration();
         derivedModel.setModelingJobStatus(JobStatus.COMPLETED);
-        ratingEngineService.updateRatingModel(aiRatingEngineId, derivedModel.getId(),
-                derivedModel);
+        ratingEngineService.updateRatingModel(aiRatingEngineId, derivedModel.getId(), derivedModel);
         iteration2 = aiModelService.createNewIteration(newIteration, createdRatingEngine);
 
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);
@@ -313,6 +313,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(reTestSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         // test basic creation
         ratingEngine = createRatingEngine(ratingEngine);

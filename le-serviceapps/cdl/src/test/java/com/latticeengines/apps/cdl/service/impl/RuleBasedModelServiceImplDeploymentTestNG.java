@@ -81,6 +81,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(reTestSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         // test basic creation
         ratingEngine = ratingEngineService.createOrUpdate(ratingEngine);
