@@ -113,6 +113,11 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 sendS3ImportEmail(hostPort, customerSpace, result,
                         importJobIdentifier, emailInfo, message);
             }
+            List<String> pathList = eaiImportJobDetail.getPathDetail();
+            if (CollectionUtils.isNotEmpty(pathList)) {
+                setErrorFileContext(pathList, job);
+                workflowJobEntityMgr.updateWorkflowJob(job);
+            }
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             try {
