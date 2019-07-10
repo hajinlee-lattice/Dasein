@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -38,7 +39,6 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
 
     private static final Logger log = LoggerFactory.getLogger(AccountMasterColumnEntityMgrImpl.class);
 
-    private static final int MAX_CONCURRENCY = 2;
     private static final int PAGE_SIZE = 10000;
 
     private Scheduler scheduler;
@@ -73,7 +73,6 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
     }
 
     @Override
-    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion) {
         long count;
         try (PerformanceTimer timer = new PerformanceTimer()) {
@@ -83,6 +82,13 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
             timer.setTimerMessage(msg);
         }
         int pages = (int) Math.ceil(1.0 * count / PAGE_SIZE);
+
+        BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+        if (BeanFactoryEnvironment.Environment.AppMaster.equals(currentEnv)) {
+            // in yarn container
+            return findAll(dataCloudVersion, pages);
+        }
+
         return Flux.range(0, pages).parallel().runOn(getScheduler()) //
                 .map(k -> {
                     try (PerformanceTimer timer = new PerformanceTimer()) {
@@ -99,6 +105,29 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
                         return attrs;
                     }
                 }).flatMap(Flux::fromIterable);
+    }
+
+    /*
+     * Retrieve each page of AM metadata sequentially
+     */
+    private ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion, int nPages) {
+        List<AccountMasterColumn> attrs = new ArrayList<>();
+        // start backoff at [15s,30s], grows 2x (total wait time ~ [30min,60min])
+        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(8, 15000, 2.0D, 15 * 64 * 1000, true, null);
+        for (int i = 0; i < nPages; i++) {
+            int page = i;
+            try (PerformanceTimer timer = new PerformanceTimer()) {
+                attrs.addAll(retry.execute(ctx -> {
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("Attempt #{} to get {}-th page of AM metadata", ctx.getRetryCount() + 1, page);
+                    }
+                    PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by("amColumnId"));
+                    return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+                }));
+                timer.setTimerMessage(String.format("Fetch page #%d. Total AM attrs = %d", page, attrs.size()));
+            }
+        }
+        return ParallelFlux.from(Flux.fromIterable(attrs));
     }
 
     @Override
@@ -130,12 +159,7 @@ public class AccountMasterColumnEntityMgrImpl extends BaseEntityMgrRepositoryImp
         if (scheduler == null) {
             synchronized (this) {
                 if (scheduler == null) {
-                    BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
-                    if (BeanFactoryEnvironment.Environment.AppMaster.equals(currentEnv)) {
-                        scheduler = Schedulers.newParallel("am-metadata", MAX_CONCURRENCY);
-                    } else {
-                        scheduler = Schedulers.newParallel("am-metadata");
-                    }
+                    scheduler = Schedulers.newParallel("am-metadata");
                 }
             }
         }

@@ -7,12 +7,14 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 public class RetryUtils {
 
     private static final long INITIAL_WAIT_INTERVAL = 100L;
+    private static final long DEFAULT_MAX_WAIT_TIME = 30000L; // 30s
 
     public static long getExponentialWaitTime(int retryCount) {
         return retryCount == 0 ? 0 : ((long) Math.pow(2, retryCount) * INITIAL_WAIT_INTERVAL);
@@ -42,6 +44,13 @@ public class RetryUtils {
     public static RetryTemplate getExponentialBackoffRetryTemplate(int maxAttempts,
             long initialWaitMsec, double multiplier,
             Map<Class<? extends Throwable>, Boolean> retryExceptionMap) {
+        return getExponentialBackoffRetryTemplate(maxAttempts, initialWaitMsec, multiplier, DEFAULT_MAX_WAIT_TIME,
+                false, retryExceptionMap);
+    }
+
+    public static RetryTemplate getExponentialBackoffRetryTemplate(int maxAttempts, long initialWaitMsec,
+            double multiplier, long maxWaitMSec, boolean randomBackOff,
+            Map<Class<? extends Throwable>, Boolean> retryExceptionMap) {
         RetryTemplate template = new RetryTemplate();
         SimpleRetryPolicy retryPolicy;
         if (MapUtils.isNotEmpty(retryExceptionMap)) {
@@ -50,9 +59,18 @@ public class RetryUtils {
             retryPolicy = new SimpleRetryPolicy(maxAttempts);
         }
         template.setRetryPolicy(retryPolicy);
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        ExponentialBackOffPolicy backOffPolicy;
+        if (randomBackOff) {
+            // random backoff
+            backOffPolicy = new ExponentialRandomBackOffPolicy();
+        } else {
+            backOffPolicy = new ExponentialBackOffPolicy();
+        }
+        // set backoff parameters
         backOffPolicy.setInitialInterval(initialWaitMsec);
         backOffPolicy.setMultiplier(multiplier);
+        backOffPolicy.setMaxInterval(maxWaitMSec);
+
         template.setBackOffPolicy(backOffPolicy);
         template.setThrowLastExceptionOnExhausted(true);
         return template;
