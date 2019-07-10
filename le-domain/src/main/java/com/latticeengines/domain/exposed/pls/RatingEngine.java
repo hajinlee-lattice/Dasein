@@ -329,7 +329,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @JsonProperty("updatedBy")
-    @Column(name = "UPDATED_BY", nullable = false)
+    @Column(name = "UPDATED_BY", nullable = true)
     public String getUpdatedBy() {
         return this.updatedBy;
     }
