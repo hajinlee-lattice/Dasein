@@ -89,17 +89,17 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void destroy() {
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("Pipeline_"));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("LDCDEV_"));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(ingestionToPurge.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("Pipeline_"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("LDCDEV_"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(ingestionToPurge.getSourceName()));
         purgeStrategyEntityMgr
-                .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToBak.getSourceName()));
+                .delete(purgeStrategyEntityMgr.findStrategyBySource(generalSourceToBak.getSourceName()));
         purgeStrategyEntityMgr
-                .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amLookupToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(mlDailyToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("Hive"));
+                .delete(purgeStrategyEntityMgr.findStrategyBySource(generalSourceToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(amToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(amLookupToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(mlDailyToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("Hive"));
     }
 
     /**

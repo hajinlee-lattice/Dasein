@@ -36,10 +36,20 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
         Assert.assertEquals(list.size(), 1);
     }
 
+    @Test(groups = "functional")
+    public void testFindStrategiesBySourceAndType() {
+        PurgeStrategy ps1 = purgeStrategyEntityMgr.findStrategyBySourceAndType(TEST_SRC1, SourceType.AM_SOURCE);
+        PurgeStrategy ps2 = purgeStrategyEntityMgr.findStrategyBySourceAndType(TEST_SRC2, SourceType.GENERAL_SOURCE);
+        PurgeStrategy ps3 = purgeStrategyEntityMgr.findStrategyBySourceAndType(TEST_SRC2, SourceType.AM_SOURCE);
+        Assert.assertNotNull(ps1);
+        Assert.assertNotNull(ps2);
+        Assert.assertNull(ps3);
+    }
+
     @AfterClass(groups = "functional")
     public void destroy() throws Exception {
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(TEST_SRC1));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(TEST_SRC2));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(TEST_SRC1));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(TEST_SRC2));
     }
 
     private void prepareStrategies() {
