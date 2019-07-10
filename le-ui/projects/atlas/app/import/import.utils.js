@@ -1,4 +1,5 @@
-import  { underscore } from 'common/vendor.index';
+// import  { underscore } from 'common/vendor.index';
+import {isEquivalent} from 'common/app/utilities/ObjectUtilities.js'
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}
@@ -281,8 +282,24 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
         return savedObj;
     }
+
+    function cleanDuplicates (arr){
+        const filteredArr = arr.reduce((acc, current) => {
+            const x = acc.find((item) => {
+               return (item.userField === current.userField && item.mappedField == current.mappedField && item.cdlExternalSystemType == current.cdlExternalSystemType);
+            });
+            if (!x) {
+              return acc.concat([current]);
+            } else {
+              return acc;
+            }
+          }, []);
+
+          return filteredArr;
+    }
     this.updateDocumentMapping = function(entity, savedObj, fieldsMapping){
         if(savedObj && fieldsMapping){
+            // console.log(fieldsMapping);
             var keysSaved = Object.keys(savedObj);
             updateUniqueIdsMapping(entity, fieldsMapping, savedObj);
             let copyUniqueIds = removeUniqueIdsMapped(entity, fieldsMapping);
@@ -290,7 +307,11 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                 setMapping(entity, savedObj[keySaved], fieldsMapping);
             });
             let ret =  fieldsMapping.concat(copyUniqueIds);
-            return ret;
+            let filtered = cleanDuplicates(ret);
+            // console.log(ret);
+            // console.log(filtered);
+            // console.log('============');
+            return filtered;
         }else{
             return fieldsMapping;
         }
