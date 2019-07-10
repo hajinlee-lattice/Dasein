@@ -298,7 +298,7 @@ class LaunchComponent extends Component {
         if(buckets && buckets.length) {
             return(
                 <Aux>
-                    <h2>Ratings</h2>
+                    <h2>Model Ratings</h2>
                     <LeHPanel 
                         hstretch={!littleBuckets} 
                         halignment={LEFT} 
@@ -347,7 +347,7 @@ class LaunchComponent extends Component {
                     <div className={'unscored-accounts-container'}>
                         <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
                         <label for="unscored">
-                            Include the <strong>{(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%)</strong> unscored accounts
+                            Include the {(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%) unscored account
                         </label>
                     </div>
                 </Aux>
@@ -405,10 +405,9 @@ class LaunchComponent extends Component {
             });
             return (
                 <div className={'launch-section programs'}>
-                    <h2>{this.state.externalSystemName} Destination List</h2>
                     <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
                         <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'programName-container'}>
-                            <label for={'programName'}>Program name</label>
+                            <label for={'programName'}>{this.state.externalSystemName} Program Name</label>
                             <select id={'programName'} onChange={(event) => { 
                                 this.getStaticList(event.target.value);
                             }}>
@@ -416,7 +415,7 @@ class LaunchComponent extends Component {
                             </select>
                         </LeHPanel>
                         <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
-                            <label for={'staticList'}>Static list name</label>
+                            <label for={'staticList'}>{this.state.externalSystemName} Static List Name</label>
                             {vm.makeStaticList(this.state.staticList)}
                             {newAudienceNameInput}
                         </LeHPanel>
@@ -695,11 +694,11 @@ class LaunchComponent extends Component {
                             {this.makeBucketList(play, coverage, {
                                 unscoredAccountCountPercent: unscoredAccountCountPercent
                             })}
-                        </div>
-                        <div className={'launch-section account-options'}>
                             <ul>
                                 {this.makeAccountOptions()}
                             </ul>
+                        </div>
+                        <div className={'launch-section account-options'}>
                         </div>
                         {this.makeProgramsList(this.state.programs)}
                         <div className="launch-section schedule">
