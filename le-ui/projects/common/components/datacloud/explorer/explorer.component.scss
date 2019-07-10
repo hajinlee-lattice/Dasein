@@ -369,6 +369,15 @@ attr-categories,
                         top: 5px;
                         right: 15px;
                         font-size: 20px;
+                        .tooltip_ {
+                            color: white;
+                            font-size: 12px;
+                            width: auto;
+                            .cover {
+                                white-space: nowrap;
+                                padding-right: 20px;
+                            }
+                        }
                     }
                     .attributes {
                         .attribute {
