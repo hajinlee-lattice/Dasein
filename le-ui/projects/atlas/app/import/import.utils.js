@@ -215,7 +215,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         });
     }
     
-    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId, IdType){
+    function mapUnmapUniqueId(fieldsMapping, uniqueId, fieldName, unmap, mapToLatticeId, IdType, systemName){
         if(uniqueId && fieldName){
             let keys = Object.keys(fieldsMapping);
             for(var i = 0; i < keys.length; i++){
@@ -227,6 +227,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                                 field.mappedToLatticeField = false;
                                 field.mapToLatticeId = false;
                                 field.idType = null;
+                                field.systemName = systemName;
                                 delete field.mappedField;
                             }
                             break;
@@ -236,6 +237,7 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
                                 field.mapToLatticeId = mapToLatticeId ? mapToLatticeId : false;
                                 field.mappedField = uniqueId;
                                 field.idType = IdType;
+                                field.systemName = systemName;
                             }
                             break;
                     }
@@ -248,8 +250,8 @@ angular.module('lp.import.utils', ['mainApp.core.redux'])
         Object.keys(savedObj).forEach(index => {
             let saved = savedObj[index];
             if((saved.originalUserField && saved.append != true) || (!saved.originalUserField && saved.append != true)){
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null);
-                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.originalUserField, true, false, null, null);
+                mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType, saved.SystemName);
             }
             // else if(!saved.originalUserField && saved.append != true){
             //     mapUnmapUniqueId(fieldsMapping, saved.mappedField, saved.userField, false, saved.mapToLatticeId, saved.IdType);
