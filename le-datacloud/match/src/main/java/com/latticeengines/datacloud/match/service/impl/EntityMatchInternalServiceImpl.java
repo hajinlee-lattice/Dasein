@@ -225,8 +225,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Override
     public Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries) {
-        EntityMatchEnvironment env = STAGING; // only change staging seed
+            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
+            Set<EntityLookupEntry> entriesMapToOtherSeed) {
+        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, seed);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
@@ -238,7 +239,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 getExistingLookupPairs(seedBeforeUpdate);
         Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
         List<EntityLookupEntry> entriesFailedToSetLookup =
-                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed, clearAllFailedLookupEntries);
+                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed, clearAllFailedLookupEntries,
+                        entriesMapToOtherSeed);
 
         // clear one to one entries in seed that we failed to set in the lookup table
         List<EntityLookupEntry> entriesToClear = entriesFailedToSetLookup
@@ -408,7 +410,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     protected List<EntityLookupEntry> mapLookupEntriesToSeed(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs,
-            @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries) {
+            @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
+            Set<EntityLookupEntry> entriesMapToOtherSeed) {
         return seed.getLookupEntries()
                 .stream()
                 .filter(entry -> {
@@ -441,6 +444,13 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 // NOTE use setIfEquals because two threads might be mapping the same entry to the same seed
                 //      need to consider this case as success in both threads
                 .map(entry -> {
+                    if (CollectionUtils.isNotEmpty(entriesMapToOtherSeed) && entriesMapToOtherSeed.contains(entry)) {
+                        // we already know this entry map to other seed, not bother trying to set
+                        log.debug(
+                                "Lookup entry {} already map to another seed, skip setting lookup mapping. Target seed ID = {}",
+                                entry, seed.getId());
+                        return Pair.of(entry, false);
+                    }
                     boolean setSucceeded = entityLookupEntryService.setIfEquals(env, tenant, entry, seed.getId(),
                             shouldSetTTL(env));
                     // NOTE for debugging concurrency issue.
