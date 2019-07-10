@@ -83,6 +83,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private RatingEngine re2;
     private RatingEngine re3;
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -329,6 +330,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE_1);
         if (shouldCreateActionWithRatingEngine1) {
@@ -341,6 +343,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         if (shouldCreateActionWithRatingEngine2) {
             ratingEngine.setStatus(RatingEngineStatus.ACTIVE);

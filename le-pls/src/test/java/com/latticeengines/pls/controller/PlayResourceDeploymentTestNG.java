@@ -120,6 +120,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(retrievedSegment);
         crossSellRatingEngine.setCreatedBy(CREATED_BY);
+        crossSellRatingEngine.setUpdatedBy(CREATED_BY);
         crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
 
         RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),
@@ -184,6 +185,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         ruleBasedRatingEngine = new RatingEngine();
         ruleBasedRatingEngine.setSegment(retrievedSegment);
         ruleBasedRatingEngine.setCreatedBy(CREATED_BY);
+        ruleBasedRatingEngine.setUpdatedBy(CREATED_BY);
         ruleBasedRatingEngine.setType(RatingEngineType.RULE_BASED);
         ruleBasedRatingEngine.setStatus(RatingEngineStatus.ACTIVE);
 
@@ -367,8 +369,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
 
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
+        playLaunch = restTemplate.postForObject(
+                getRestAPIHostPort() + //
+                        "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
                 new Object(), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, isDryRunMode);
@@ -379,8 +382,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
         logInterceptor();
 
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
+        playLaunch = restTemplate.postForObject(
+                getRestAPIHostPort() + //
+                        "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
                 createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, bucketsToLaunch, isDryRunMode);
@@ -408,8 +412,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         try {
             launch = restTemplate.postForObject(getRestAPIHostPort() + //
                     "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
-            restTemplate.postForObject(getRestAPIHostPort() + //
-                    "/pls/play/" + name + "/launches/" + launch.getId() + "/launch", new Object(), PlayLaunch.class);
+            restTemplate.postForObject(
+                    getRestAPIHostPort() + //
+                            "/pls/play/" + name + "/launches/" + launch.getId() + "/launch",
+                    new Object(), PlayLaunch.class);
             Assert.fail("Play launch submission should fail");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18176.name()));

@@ -74,6 +74,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());
         aiModel.setCreatedBy(ratingEngine.getCreatedBy());
+        aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
 

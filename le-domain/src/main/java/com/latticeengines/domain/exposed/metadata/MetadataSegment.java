@@ -48,8 +48,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "TENANT_ID", "NAME" }))
+@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
+        "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
@@ -79,6 +79,10 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("created_by")
     @Column(name = "CREATED_BY")
     private String createdBy;
+
+    @JsonProperty("updated_by")
+    @Column(name = "UPDATED_BY")
+    private String updatedBy;
 
     @Column(name = "RESTRICTION")
     @Type(type = "text")
@@ -296,6 +300,14 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.createdBy = createdBy;
     }
 
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
     public Long getAccounts() {
         return accounts;
     }
@@ -327,32 +339,30 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setEntityCount(BusinessEntity entity, Long count) {
         switch (entity) {
-            case Account:
-                setAccounts(count);
-                break;
-            case Contact:
-                setContacts(count);
-                break;
-            case Product:
-                setProducts(count);
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        "Did not reserve a column for " + entity + " count.");
+        case Account:
+            setAccounts(count);
+            break;
+        case Contact:
+            setContacts(count);
+            break;
+        case Product:
+            setProducts(count);
+            break;
+        default:
+            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
     public Long getEntityCount(BusinessEntity entity) {
         switch (entity) {
-            case Account:
-                return getAccounts();
-            case Contact:
-                return getContacts();
-            case Product:
-                return getProducts();
-            default:
-                throw new UnsupportedOperationException(
-                        "Did not reserve a column for " + entity + " count.");
+        case Account:
+            return getAccounts();
+        case Contact:
+            return getContacts();
+        case Product:
+            return getProducts();
+        default:
+            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
@@ -379,16 +389,15 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
                 ? getAccountFrontEndRestriction().getRestriction() : getAccountRestriction();
         if (!BusinessEntity.Account.equals(mainEntity)) {
             if (innerAccountRestriction != null) {
-                innerAccountRestriction = Restriction.builder()
-                        .and(innerAccountRestriction, accountNotNullBucket()).build();
+                innerAccountRestriction = Restriction.builder().and(innerAccountRestriction, accountNotNullBucket())
+                        .build();
             } else {
                 innerAccountRestriction = accountNotNullBucket();
             }
         }
 
         FrontEndRestriction accountRestriction = new FrontEndRestriction(innerAccountRestriction);
-        FrontEndRestriction contactRestriction = getContactRestriction() == null
-                ? getContactFrontEndRestriction()
+        FrontEndRestriction contactRestriction = getContactRestriction() == null ? getContactFrontEndRestriction()
                 : new FrontEndRestriction(getContactRestriction());
 
         frontEndQuery.setAccountRestriction(accountRestriction);
@@ -406,6 +415,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         MetadataSegment clone = new MetadataSegment();
         clone.setCreated(new Date());
         clone.setCreatedBy(this.getCreatedBy());
+        clone.setUpdatedBy(this.getUpdatedBy());
         clone.setMasterSegment(this.getMasterSegment());
         clone.setDataCollection(this.getDataCollection());
         clone.setAccountFrontEndRestriction(this.getAccountFrontEndRestriction());

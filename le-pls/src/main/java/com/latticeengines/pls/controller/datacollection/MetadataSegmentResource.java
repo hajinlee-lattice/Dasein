@@ -76,8 +76,7 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, UIAction> getDependenciesModelAndView(@PathVariable String segmentName) {
         UIAction uiAction = metadataSegmentService.getDependenciesModelAndView(segmentName);
-        return uiAction == null ? null
-                : ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        return uiAction == null ? null : ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PostMapping("")
@@ -89,6 +88,7 @@ public class MetadataSegmentResource {
             String email = principal.toString();
             if (StringUtils.isNotBlank(email)) {
                 metadataSegment.setCreatedBy(email);
+                metadataSegment.setUpdatedBy(email);
             }
         }
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);

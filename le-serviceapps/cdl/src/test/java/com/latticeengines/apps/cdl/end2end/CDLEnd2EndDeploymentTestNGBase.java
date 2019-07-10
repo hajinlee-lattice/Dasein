@@ -183,10 +183,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     static final Long NEW_ACCOUNT_UT_EM = 190L;
     // Number of new account after UpdateAccount entity match test
-    // FIXME change back to 111 after using new ProcessAccount checkpoint. currently
+    // FIXME change back to 111 after using new ProcessAccount checkpoint.
+    // currently
     // it is 113 cuz one anonymous account created and one legacy account due to
     // case insensitive ID match. Anonymous account will be created by
-    // ProcessAccount by one of its contact after updating checkpoint (back to 111).
+    // ProcessAccount by one of its contact after updating checkpoint (back to
+    // 111).
     static final Long NEW_ACCOUNT_UA_EM = 113L;
     // Number of updated account after UpdateAccount test
     static final Long UPDATED_ACCOUNT_UA = 100L;
@@ -224,7 +226,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long UPDATED_CONTACT_UC = 100L;
     // Number of updated contact after ProcessAccount entity match test
     static final Long UPDATED_CONTACT_UA_EM = 100L;
-
 
     /* Expected transaction result */
 
@@ -421,6 +422,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected void cleanup() throws Exception {
         checkpointService.cleanup();
     }
+
     protected void setupEnd2EndTestEnvironment() throws Exception {
         setupEnd2EndTestEnvironment(null);
     }
@@ -608,8 +610,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3 bucket.
-     * Filename format: "System_<SYSTEM_NAME>.json"
+     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3
+     * bucket. Filename format: "System_<SYSTEM_NAME>.json"
      */
     private S3ImportSystem getMockSystem(@NotNull String systemName) {
         String filename = String.format("System_%s.json", systemName);
@@ -769,9 +771,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Modify field mapping for match IDs. Fields need to have the following format
-     * to be mapped to other system (for unique ID, need to specify its own system
-     * name)
+     * Modify field mapping for match IDs. Fields need to have the following
+     * format to be mapped to other system (for unique ID, need to specify its
+     * own system name)
      *
      * Format: <PREFIX>_<SystemName>_<Entity>_<map_to_lattice_id> E.g.,
      * LETest_MapTo_DefaultSystem_Account_True will map this column to default
@@ -1381,6 +1383,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(constructTestSegment2());
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        ratingEngine.setUpdatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
 
@@ -1430,6 +1433,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         ratingEngine.setType(engineType);
         ratingEngine.setSegment(targetSegment);
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        ratingEngine.setUpdatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setCreated(new Date());
         return ratingEngine;
     }
@@ -1520,9 +1524,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
-        expectedEntityCount
-                .forEach((key, value) -> log.info("Row count for batch store of {}: {}", key.getBatchStore().name(),
-                countTableRole(key.getBatchStore())));
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for batch store of {}: {}",
+                key.getBatchStore().name(), countTableRole(key.getBatchStore())));
         expectedEntityCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
@@ -1534,13 +1537,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {}",
                 key.getServingStore().name(), countTableRole(key.getServingStore())));
         expectedEntityCount.forEach((key, value) -> {
-            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value, key.getServingStore().name());
-//            if (key != BusinessEntity.ProductHierarchy) {
-//                Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value);
-//            } else {
-//                int count = periodTransactionProxy.getProductHierarchy(mainCustomerSpace, null).size();
-//                Assert.assertEquals(Long.valueOf(count), value);
-//            }
+            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value,
+                    key.getServingStore().name());
+            // if (key != BusinessEntity.ProductHierarchy) {
+            // Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())),
+            // value);
+            // } else {
+            // int count =
+            // periodTransactionProxy.getProductHierarchy(mainCustomerSpace,
+            // null).size();
+            // Assert.assertEquals(Long.valueOf(count), value);
+            // }
         });
     }
 
@@ -1549,7 +1556,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             return;
         }
         expectedTableCount.forEach((key, value) -> //
-                Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
+        Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
     }
 
     void verifyRedshift(Map<BusinessEntity, Long> expectedEntityCount) {
@@ -1608,7 +1615,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void verifyTxnDailyStore(int totalDays, String minDate, String maxDate, //
-                             double amount, double quantity, double cost) {
+            double amount, double quantity, double cost) {
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         Table dailyTable = dataCollectionProxy.getTable(mainCustomerSpace,
                 TableRoleInCollection.ConsolidatedDailyTransaction, activeVersion);
@@ -1630,12 +1637,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertEquals((int) minMaxPeriods.getRight(), maxDay);
         // Verify daily aggregated result
         int dayPeriod = DateTimeUtils.dateToDayPeriod(VERIFY_DAILYTXN_TXNDATE);
-        String dailyFileContainingTargetDay = dailyFiles.stream()
-                .filter(f -> f.contains(String.valueOf(dayPeriod))).findFirst().orElse(null);
+        String dailyFileContainingTargetDay = dailyFiles.stream().filter(f -> f.contains(String.valueOf(dayPeriod)))
+                .findFirst().orElse(null);
         Assert.assertNotNull(dailyFileContainingTargetDay);
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, dailyFileContainingTargetDay);
         GenericRecord verifyRecord = null;
-        String aidFld = isEntityMatchEnabled() ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
+        String aidFld = isEntityMatchEnabled() ? InterfaceName.CustomerAccountId.name()
+                : InterfaceName.AccountId.name();
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             if (VERIFY_DAILYTXN_ACCOUNTID.equals(record.get(aidFld).toString())
