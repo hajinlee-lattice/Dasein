@@ -368,12 +368,13 @@ class LaunchComponent extends Component {
                 </Aux>
             );
         } else if(externalSystemName === 'Marketo') {
+                    // <li>
+                    //     <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
+                    //     <label for="requireEmail">Must have email</label>
+                    // </li>
+
             return (
                 <Aux>
-                    <li>
-                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
-                        <label for="requireEmail">Must have email</label>
-                    </li>
                     <li>
                         <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
                         <label for="requireContactIfo">Must have contact info</label>
