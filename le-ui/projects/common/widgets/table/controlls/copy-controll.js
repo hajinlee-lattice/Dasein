@@ -26,13 +26,20 @@ class CopyComponent extends Component {
       return null;
     }
   }
+  getLabel() {
+    if(this.props.label){
+      return (<span>{this.props.label}</span>);
+    }else {
+      return null;
+    }
+  }
   render() {
     return (
       <li
         className="le-copy-controlls"
         onClick={this.clickHandler}
       >
-        {this.getData()}
+        {this.getLabel()}{this.getData()}
         <i className="fa fa-files-o le-copy-control" title="Copy Link"/>
       </li>
     );
