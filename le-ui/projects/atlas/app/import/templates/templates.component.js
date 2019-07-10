@@ -473,9 +473,8 @@ export default class TemplatesComponent extends Component {
                             <ul>
                                 <CopyComponent
                                     title="Copy Link"
-                                    data={
-                                        `${'S3 Root Folder: '}${rootFolder}`
-                                    }
+                                    label={`${'S3 Root Folder: '}`}
+                                    data={`${rootFolder}`}
                                     callback={() => {
                                         messageService.sendMessage(
                                             new Message(
