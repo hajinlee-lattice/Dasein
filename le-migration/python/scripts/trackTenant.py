@@ -7,7 +7,7 @@ from models.migration_track import MigrationTrack
 """
 import migrating tenant into MIGRATION_TRACK table
 
-Arguments required for db connection are set from environment variables. If any of them doesn't exist, cmd options are used instead.
+Usage: trackTenant -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID
 """
 
 def checkEnvironment():
@@ -26,7 +26,6 @@ def checkEnvironment():
 
 def getArgs():
     WSHOME = getenv('WSHOME')
-    MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_DB = None, None, None, None
     parser = argparse.ArgumentParser(description='Parse conn variables')
     parser.add_argument('-u', dest='user', type=str)
     parser.add_argument('-p', dest='pwd', type=str)
