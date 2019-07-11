@@ -144,7 +144,7 @@ public class TestEntityMatchService {
      * @param env
      *            target environment
      */
-    void bumpVersion(@NotNull String tenantId, @NotNull EntityMatchEnvironment env) {
+    public void bumpVersion(@NotNull String tenantId, @NotNull EntityMatchEnvironment env) {
         Preconditions.checkNotNull(tenantId);
 
         // standardize tenant ID

@@ -464,7 +464,7 @@ public class EntityAssociateServiceImplUnitTestNG {
             throws Exception {
         EntityAssociateServiceImpl service = new EntityAssociateServiceImpl();
         EntityMatchInternalService internalService = Mockito.mock(EntityMatchInternalService.class);
-        Mockito.when(internalService.associate(Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        Mockito.when(internalService.associate(Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any()))
                 .thenAnswer(invocation -> {
             Tenant inputTenant = invocation.getArgument(0);
             EntityRawSeed seed = invocation.getArgument(1);

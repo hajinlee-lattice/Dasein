@@ -318,7 +318,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                         targetEntitySeed.getId(), targetEntitySeed.getEntity(),
                         Collections.emptyList(), request.getExtraAttributes());
                 // ignore result as attribute update won't fail
-                entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false);
+                entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false, null);
             }
             return getResponse(request, targetEntitySeed.getId(), targetEntitySeed,
                     mergeSeed(targetEntitySeed, seedToUpdate, null), targetEntitySeed.isNewlyAllocated());
@@ -334,7 +334,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             // try to associate with the highest priority entry, if fail, return as match failure
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> maxPriorityResult =
                     entityMatchInternalService.associate(tenant, prepareSeedToAssociate(
-                            targetEntitySeed, Collections.singletonList(maxPriorityEntry), null), true);
+                            targetEntitySeed, Collections.singletonList(maxPriorityEntry), null), true, null);
             if (hasAssociationError(maxPriorityResult)) {
                 log.debug("Failed to associate highest priority lookup entry {} to target entity (ID={})," +
                         " requestId={}, tenant (ID={}), entity={}",
@@ -374,8 +374,15 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             //      Even though we can filter out some of them (e.g., one to one lookup entry that is already in target)
             //      , it does not actually save anything (except for a few bytes sent over network).
             EntityRawSeed seedToUpdate = prepareSeedToAssociate(request, targetEntitySeed, seedConflictEntries);
+            Set<EntityLookupEntry> entriesMapToOtherSeed = request.getLookupResults() //
+                    .stream() //
+                    .filter(pair -> StringUtils.isNoneBlank(pair.getRight())) //
+                    .filter(pair -> !pair.getRight().equals(targetEntitySeed.getId())) // entries map to other seed
+                    .map(Pair::getKey) //
+                    .map(tuple -> getEntry(request.getEntity(), tuple)) //
+                    .collect(Collectors.toSet());
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
-                    entityMatchInternalService.associate(tenant, seedToUpdate, false);
+                    entityMatchInternalService.associate(tenant, seedToUpdate, false, entriesMapToOtherSeed);
             Preconditions.checkNotNull(result);
 
             log.debug("Association result = {}, mapping conflict entries = {}," +
