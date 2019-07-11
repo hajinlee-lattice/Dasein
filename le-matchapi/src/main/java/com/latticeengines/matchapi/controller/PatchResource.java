@@ -209,6 +209,8 @@ public class PatchResource {
         response.setPatchBookType(type);
         response.setDataCloudVersion(dataCloudVersion);
         response.setMode(request.getMode());
+        System.out.println("## pids.get(MIN_PID) : " + pids.get(MIN_PID) + "## pids.get(MAX_PID) : "
+                + pids.get(MAX_PID));
         response.setMinPid(pids.get(MIN_PID));
         response.setMaxPid(pids.get(MAX_PID));
         return response;
@@ -233,7 +235,6 @@ public class PatchResource {
     private PatchValidationResponse validate(
             @NotNull List<PatchBook> books, @NotNull PatchBook.Type type, @NotNull PatchRequest request) {
         String dataCloudVersion = request.getDataCloudVersion();
-
         Pair<Integer, List<PatchBookValidationError>> validationResult = patchBookValidator
                 .validate(type, dataCloudVersion, books);
         Integer total = validationResult.getKey();
