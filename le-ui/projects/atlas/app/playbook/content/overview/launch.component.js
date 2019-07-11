@@ -24,6 +24,8 @@ import {
     SPACEBETWEEN,
     SPACEEVEN
 } from "common/widgets/container/le-alignments";
+import "../../../../../common/assets/sass/mixins.scss";
+import "../../../../../common/assets/sass/_tooltips.scss";
 import './launch.component.scss';
 
 /**
@@ -99,7 +101,8 @@ class LaunchComponent extends Component {
             staticList: null,
             showNewAudienceName: true,
             audienceParams: audienceParamsDefault(),
-            connection: connection
+            connection: connection,
+            lookupIdMapping: null
         };
     }
 
@@ -115,6 +118,12 @@ class LaunchComponent extends Component {
             } else {
                 this.setState({ratings: playstore.ratings});
             }
+        }
+
+        if(!playstore.lookupIdMapping) {
+            actions.fetchLookupIdMapping();
+        } else {
+            this.setState({lookupIdMapping: playstore.lookupIdMapping});
         }
 
         if(this.state.externalSystemName && isAudience(this.state.externalSystemName)) {
@@ -639,6 +648,42 @@ class LaunchComponent extends Component {
         }
     }
 
+    makeDropFolder(externalSystemName, lookupIdMapping) {
+        var system = null;
+        if(externalSystemName && lookupIdMapping && lookupIdMapping.FILE_SYSTEM) {
+            system = lookupIdMapping.FILE_SYSTEM.find(function(item) {
+                return (item.externalSystemName === externalSystemName);
+            });
+            if(system && externalSystemName === 'AWS_S3') {
+                return(
+                    <div className={'launch-section drop-folder'}>
+                        <h2>
+                            S3 Drop Folder 
+                            <i className={'more-info show-tooltip left bottom'}> i
+                                <div className={'tooltip_'}>
+                                    <div className={'cover'}>
+                                        <p>Data Rentention</p>
+                                        <p>Audience data generated on S3 will be automatically removed after 30 days.</p>
+                                        <p>Identifying Audience Data</p>
+                                        <p>Audience data (accounts and contacts with-in accounts) will be available as CSV formatted file</p>
+                                    </div>
+                                </div>
+                            </i>
+                        </h2>
+                        <p className={'folder'}>
+                            <strong>{system.exportFolder}</strong>
+                        </p>
+                        <p className={'subtext'}>
+                            After launching the campaign, audience data is generated and will be available in the S3 drop location. 
+                            You will need the access token to S3 to access this data. 
+                            You can obtain token from the connection page.
+                        </p>
+                    </div>
+                );
+            }
+        }
+    }
+
     render() {
         var loaded = (this.state.launchAccountsCoverage);
         if(isAudience(this.state.externalSystemName)) {
@@ -661,7 +706,9 @@ class LaunchComponent extends Component {
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
-                canLaunch = recommendationCounts.launched;
+                canLaunch = recommendationCounts.launched,
+                lookupIdMapping = this.state.lookupIdMapping,
+                externalSystemName = this.state.externalSystemName;
 
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
@@ -692,6 +739,7 @@ class LaunchComponent extends Component {
                                 </li>
                             </ul>
                         </div>
+                        {this.makeDropFolder(externalSystemName, lookupIdMapping)}
                         <div className={'launch-section model-ratings'}>
                             {this.makeBucketList(play, coverage, {
                                 unscoredAccountCountPercent: unscoredAccountCountPercent
