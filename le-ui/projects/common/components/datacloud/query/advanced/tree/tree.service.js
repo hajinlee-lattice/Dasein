@@ -815,7 +815,24 @@ angular.module('common.datacloud.query.builder.tree.service', [
             console.warn('Not implemented');
         }
         this.getBooleanModel = function (bucketRestriction) {
-            return bucketRestriction.bkt.Vals[0];
+            let val = bucketRestriction.bkt.Vals[0];
+            let cmp = bucketRestriction.bkt.Cmp;
+            switch(val) {
+                case undefined: 
+                    if(cmp == 'IS_NULL'){
+                        return 'Empty';
+                    }
+                    if(cmp == 'IS_NOT_NULL'){
+                        return 'Present';
+                    }
+                case 'IS_NULL':
+                    return 'Empty';
+                case 'IS_NOT_NULL':
+                    return 'Present';
+                default:
+                    return val;
+            }
+            // return bucketRestriction.bkt.Vals[0];
         }
         this.getStringCmpModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Cmp;
