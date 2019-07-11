@@ -32,7 +32,7 @@
 
             <numerical-range-directive  
                                     ng-if="vm.showFromPeriod || vm.showToPeriod" 
-                                    config="vm.getPeriodNumericalConfString()"
+                                    config="{{vm.getPeriodNumericalConfString()}}"
                                     showmessage="false"
                                     showfrom="vm.showFromPeriod"
                                     showto="vm.showToPeriod"
@@ -63,7 +63,7 @@
         </div>
         <numerical-range-directive class="transaction-element" 
                                     ng-if="vm.showFromUnit || vm.showToUnit" 
-                                    config ="vm.getQtyConfigString()"
+                                    config ="{{vm.getQtyConfigString()}}"
                                     showfrom="vm.showFromUnit"
                                     showto="vm.showToUnit"
                                     vm="vm" 
@@ -84,7 +84,7 @@
         </div>
         <numerical-range-directive class="transaction-element" 
                                     ng-if="vm.showFromAmt || vm.showToAmt" 
-                                    config ="vm.getAmtConfigString()"
+                                    config ="{{vm.getAmtConfigString()}}"
                                     showfrom="vm.showFromAmt"
                                     showto="vm.showToAmt" 
                                     vm="vm" 
