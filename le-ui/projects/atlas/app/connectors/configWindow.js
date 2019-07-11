@@ -196,6 +196,10 @@ export const openConfigWindow = () => {
                     errors[externalId] = `The Marketo field ${mapping.field_right} has been mapped multiple times.`;
                     return;
                 }
+                if (isEmptyObject(mapping.field_left)) {
+                    errors[externalId] = `Lattice field cannot be blank.`;
+                    return;  
+                }
                 marketoFields.add(mapping.field_right);
             });
             if (!marketoFields.has(EMAIL)) {
@@ -205,6 +209,10 @@ export const openConfigWindow = () => {
             break;
         }
 
+    }
+
+    function isEmptyObject(obj) {
+        return obj === Object(obj) && Object.entries(obj).length === 0;
     }
 
     checkWindow();
