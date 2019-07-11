@@ -572,7 +572,7 @@ class LaunchComponent extends Component {
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: e.target.checked,
-            getDestinationAccountId: this.state.connection.accountId
+            getDestinationAccountId: this.state.connection.lookupIdMap.accountId
         });
     }
 
