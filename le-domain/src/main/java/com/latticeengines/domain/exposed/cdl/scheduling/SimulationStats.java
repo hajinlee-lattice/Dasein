@@ -2,65 +2,44 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.DataCloudRefreshEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAEndEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
-import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SimulationStats {
 
-    public static Map<String, TenantActivity> canRunTenantActivityMap;
-    public static Map<String, TenantActivity> runningTenantActivityMap;
-    public static List<String> tenantList;
-    public static Map<String, List<Event>> tenantEventMap = new HashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(SimulationStats.class);
 
-    public SchedulingPATestTimeClock schedulingPATestTimeClock;
+    public Map<String, TenantActivity> canRunTenantActivityMap;
+    public Map<String, TenantActivity> runningTenantActivityMap;
+    public List<String> tenantList;
+    public Map<String, List<Event>> tenantEventMap = new HashMap<>();
+
+    public TimeClock timeClock;
     public List<SchedulingPAQueue> schedulingPAQueues;
 
-    static {
-        initTenant();
-        setTenantInitState();
-    }
-
-    public SimulationStats(SchedulingPATestTimeClock schedulingPATestTimeClock) {
-        this.schedulingPATestTimeClock = schedulingPATestTimeClock;
+    public SimulationStats(List<String> tenantList, Map<String, TenantActivity> canRunTenantActivityMap) {
+        this.tenantList = tenantList;
+        this.canRunTenantActivityMap = canRunTenantActivityMap;
+        this.runningTenantActivityMap = new HashMap<>();
     }
 
     public void setSchedulingPAQueues(List<SchedulingPAQueue> schedulingPAQueues) {
         this.schedulingPAQueues = schedulingPAQueues;
     }
 
-    public void setTimeClock(SchedulingPATestTimeClock schedulingPATestTimeClock) {
-        this.schedulingPATestTimeClock = schedulingPATestTimeClock;
-    }
-
-    private static void initTenant() {
-        tenantList = new LinkedList<>();
-        for (int i = 1; i < 21; i ++) {
-            tenantList.add("testTenant" + i);
-        }
-    }
-
-    private static void setTenantInitState() {
-        canRunTenantActivityMap = new HashMap<>();
-        runningTenantActivityMap = new HashMap<>();
-        int index = 0;
-        for (String tenant : tenantList) {
-            TenantActivity tenantActivity = new TenantActivity();
-            tenantActivity.setTenantId(tenant);
-            if (index % 2 == 0) {
-                tenantActivity.setTenantType(TenantType.CUSTOMER);
-            } else {
-                tenantActivity.setTenantType(TenantType.QA);
-            }
-            canRunTenantActivityMap.put(tenant, tenantActivity);
-            index++;
-        }
+    public void setTimeClock(TimeClock timeClock) {
+        this.timeClock = timeClock;
     }
 
     public List<TenantActivity> getCanRunTenantActivity() {
@@ -123,6 +102,18 @@ public class SimulationStats {
         return tenantActivity;
     }
 
+    public void printSummary() {
+        log.info(JsonUtils.serialize(tenantEventMap));
+    }
+
+    public void printMyself() {
+        log.info(JsonUtils.serialize(this));
+    }
+
+    /**
+     * according the pushed event, edit the tenantActivity states
+     * waiting for next scheduling
+     */
     public void push(String tenantId, Event e) {
         List<Event> events;
         if (!tenantEventMap.containsKey(tenantId)) {
@@ -142,10 +133,26 @@ public class SimulationStats {
                 }
             } else if (e.getClass().equals(ScheduleNowEvent.class)) {
                 tenantActivity.setScheduledNow(true);
+            } else if (e.getClass().equals(DataCloudRefreshEvent.class)) {
+                tenantActivity.setDataCloudRefresh(true);
             }
             canRunTenantActivityMap.put(tenantId, tenantActivity);
         }
         tenantEventMap.put(tenantId, events);
+    }
+
+    /**
+     * if this PA job is large job, the failure probability is 2/5
+     * if not, the failure probability is 1/10
+     */
+    public boolean isSucceed(TenantActivity tenantActivity) {
+        Random r = new Random();
+        int num = r.nextInt(100);
+        if (tenantActivity.isLarge()) {
+            return num >= 40;
+        } else {
+            return num >= 10;
+        }
     }
 
 }

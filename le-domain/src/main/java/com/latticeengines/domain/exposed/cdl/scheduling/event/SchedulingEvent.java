@@ -35,9 +35,9 @@ public class SchedulingEvent extends Event {
         if (CollectionUtils.isNotEmpty(tenantSet)) {
             for (String tenantId : tenantSet) {
                 PAStartEvent paStartEvent = new PAStartEvent(tenantId,
-                        simulationStats.schedulingPATestTimeClock.getCurrentTime());
+                        simulationStats.timeClock.getCurrentTime());
                 PAEndEvent paEndEvent = new PAEndEvent(tenantId,
-                        simulationStats.schedulingPATestTimeClock.getCurrentTime());
+                        simulationStats.timeClock.getCurrentTime());
                 events.add(paStartEvent);
                 events.add(paEndEvent);
             }

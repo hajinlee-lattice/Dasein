@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
@@ -238,11 +239,17 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     public List<SchedulingPAQueue> initQueue() {
-        List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
+
         Map<String, Object> map = setSystemStatus();
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
         List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
         SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+        return initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
+    }
+
+    @Override
+    public List<SchedulingPAQueue> initQueue(TimeClock schedulingPATimeClock, SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
+        List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
         SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
                 RetrySchedulingPAObject.class, schedulingPATimeClock, true);
         SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(

@@ -20,7 +20,19 @@ public class PAEndEvent extends Event {
         TenantActivity tenantActivity = simulationStats.getRuningTenantActivityByTenantId(tenantId);
         if (tenantActivity != null) {
             status.changeSystemStateAfterPAFinished(tenantActivity);
-            tenantActivity = simulationStats.cleanTenantActivity(tenantActivity);
+            boolean isSuccessed = simulationStats.isSucceed(tenantActivity);
+            if (isSuccessed || (!isSuccessed && tenantActivity.isRetry())) {
+                tenantActivity = simulationStats.cleanTenantActivity(tenantActivity);
+                if (tenantActivity.isAutoSchedule() && tenantActivity.getInvokeTime() < simulationStats.timeClock.getCurrentTime()) {
+                    while (tenantActivity.getInvokeTime() - simulationStats.timeClock.getCurrentTime() < 0) {
+                        long time = tenantActivity.getInvokeTime() + 24 * 3600;
+                        tenantActivity.setInvokeTime(time);
+                    }
+                }
+            } else {
+                tenantActivity.setRetry(true);
+                tenantActivity.setLastFinishTime(simulationStats.timeClock.getCurrentTime());
+            }
             tenantActivity = simulationStats.setTenantActivityAfterPAFinished(tenantActivity);
             simulationStats.changeSimulationStateAfterPAFinished(tenantActivity);
         }
