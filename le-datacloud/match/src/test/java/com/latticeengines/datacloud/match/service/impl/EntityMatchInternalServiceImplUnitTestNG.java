@@ -74,7 +74,7 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                 service.getExistingLookupPairs(currentState);
         Assert.assertNotNull(existingLookupPairs);
         List<EntityLookupEntry> result = service.mapLookupEntriesToSeed(
-                null, null, existingLookupPairs, seedToAssociate, false);
+                null, null, existingLookupPairs, seedToAssociate, false, null);
         Assert.assertNotNull(result);
         Map<EntityLookupEntry, String> expectedMap = expectedLookupEntriesToUpdate
                 .stream()
