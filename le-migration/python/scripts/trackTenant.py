@@ -1,14 +1,17 @@
 import argparse
 import sys
 from os import getenv, getcwd
+
 sys.path.append('{}/le-migration/python'.format(getenv('WSHOME')))
 import models
 from models.migration_track import MigrationTrack
+
 """
 import migrating tenant into MIGRATION_TRACK table
 
 Usage: trackTenant -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID
 """
+
 
 def checkEnvironment():
     valid = True
@@ -22,6 +25,21 @@ def checkEnvironment():
     print('\n===== Finish checking environment ===\n')
     if not valid:
         quit(-1)
+
+
+def checkCanTrack(storage, tenant=None):
+    if not tenant:
+        print('Tenant not found.')
+        return False
+    elif not len(tenant.metadataDataCollection):
+        print("Tenant doesn't have an active data collection.")
+        return False
+    exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
+    if len(exist):
+        print('Tenant already in tracking table:\n')
+        print(exist[0])
+        return False
+    return True
 
 
 def getArgs():
@@ -44,6 +62,7 @@ def getStorage(args):
         print('Missing required option(s) for connections.')
         print('Usage: trackTenant -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID\n')
         quit(-1)
+
 
 def createTenantTrack(tenant):
     track = MigrationTrack()
@@ -71,19 +90,9 @@ if __name__ == '__main__':
     storage = getStorage(args)
     models.storage = storage
     tenant = storage.getByPid('Tenant', args.tenant)
-    if not tenant:
-        print('Tenant not found.')
-    elif not len(tenant.metadataDataCollection):
-        print("Tenant doesn't have an active data collection.")
-    else:
-        exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
-        if len(exist):
-            print('Tenant already in tracking table:\n')
-            print(exist[0])
-        else:
-            migrationTrack = createTenantTrack(tenant)
-            print('Tenant added to tracking table:\n')
-            print(migrationTrack)
+    if checkCanTrack(storage, tenant):
+        migrationTrack = createTenantTrack(tenant)
+        print('Tenant added to tracking table:\n')
+        print(migrationTrack)
     storage.close()
     print('\n=====\n')
-
