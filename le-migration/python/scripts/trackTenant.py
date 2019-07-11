@@ -34,6 +34,9 @@ def checkCanTrack(storage, tenant=None):
     elif not len(tenant.metadataDataCollection):
         print("Tenant doesn't have an active data collection.")
         return False
+    elif len(tenant.metadataDataCollection) != 1:
+        print("Tenant has invalid number of active data collections")
+        return False
     exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
     if len(exist):
         print('Tenant already in tracking table:\n')
@@ -43,7 +46,6 @@ def checkCanTrack(storage, tenant=None):
 
 
 def getArgs():
-    WSHOME = getenv('WSHOME')
     parser = argparse.ArgumentParser(description='Parse conn variables')
     parser.add_argument('-u', dest='user', type=str)
     parser.add_argument('-p', dest='pwd', type=str)
