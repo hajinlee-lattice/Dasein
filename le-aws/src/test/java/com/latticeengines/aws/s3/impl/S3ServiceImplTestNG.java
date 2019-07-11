@@ -90,6 +90,23 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         s3Client.deleteBucketPolicy(testBucket);
     }
 
+    @Test(groups = "functional")
+    public void testListSubFolders() {
+        List<String> subFolders = Arrays.asList("folder1", "folder2", "folder3");
+        List<String> secondaryFolders = Arrays.asList("sub1", "sub2", "sub3");
+        subFolders.forEach(folder -> s3Service.createFolder(testBucket, dropBoxDir + "/" + folder));
+        secondaryFolders.forEach(folder -> s3Service.createFolder(testBucket, dropBoxDir + "/folder3/" + folder));
+        List<String> rootSubFolders = s3Service.listSubFolders(testBucket, dropBoxDir);
+        Assert.assertNotNull(rootSubFolders);
+        Assert.assertEquals(rootSubFolders.size(), 3);
+        Assert.assertTrue(rootSubFolders.containsAll(subFolders));
+        List<String> secondarySubFolders = s3Service.listSubFolders(testBucket, dropBoxDir + "/folder3");
+        Assert.assertNotNull(secondarySubFolders);
+        Assert.assertEquals(secondarySubFolders.size(), 3);
+        Assert.assertTrue(secondarySubFolders.containsAll(secondaryFolders));
+
+    }
+
     @Test(groups = "functional", enabled = false)
     public void testUploadMultiPart() {
         long MB = 1024 * 1024;
