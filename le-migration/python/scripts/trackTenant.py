@@ -56,7 +56,7 @@ def createTenantTrack(tenant):
         track.curActiveTable[roleTable.role] = roleTable.fkTableId
     # TODO - double check with Jinyang for import action (maybe list of ACTION.PID).
     # TODO - May need to write model for ACTION table
-    track.importAction = []
+    track.importAction = {'actions': []}
     track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
     track.statsCubesData = tenant.metadataStatistics[0].cubesData
     track.statsData = tenant.metadataStatistics[0].data
