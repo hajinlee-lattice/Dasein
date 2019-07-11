@@ -65,17 +65,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (vm.showItem('Date')) { }
                 };
 
-                vm.changeBooleanValue = function ($event) {
+                vm.changeBooleanValue = function () {
                     vm.booleanChanged = true;
-
-                    let value = $event.currentTarget.value;
+                    let value = vm.booleanValue;
                     let fn = (operation) => {
                         vm.tree.bucketRestriction.bkt.Cmp = vm.operation = operation;
                         QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);
                         return '';
                     };
-
-                    vm.booleanValue = value;
 
                     switch (value) {
                         case "Present":
@@ -93,6 +90,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     }
 
                     QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, value);
+                    vm.checkBoolOpSelected(value);
+
                 }
 
                 vm.checkBoolOpSelected = function (value) {

@@ -46,8 +46,17 @@
                         <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
                             <strong>is</strong>
                         </span>
-
-                        <select ng-click="vm.changeBooleanValue($event)">
+                        <select ng-change="vm.changeBooleanValue()" ng-model="vm.booleanValue">
+                            <option value="Yes">
+                                true</option>
+                            <option value="No">
+                                false</option>
+                            <option value="Present" ng-if="!vm.showItem('Transaction')">
+                                present</option>
+                            <option value="Empty" ng-if="!vm.showItem('Transaction')">empty
+                            </option>
+                        </select>
+                        <!-- <select ng-click="vm.changeBooleanValue($event)">
                             <option value="Yes" ng-selected="vm.checkBoolOpSelected('Yes')">
                                 true</option>
                             <option value="No" ng-selected="vm.checkBoolOpSelected('No')">
@@ -56,7 +65,7 @@
                                 present</option>
                             <option value="Empty" ng-if="!vm.showItem('Transaction')" ng-selected="vm.checkBoolOpSelected('Empty')">empty
                             </option>
-                        </select>
+                        </select> -->
                     </span>
 
                     <span ng-if="vm.showItem('Numerical') && !vm.showItem('Percent')"
