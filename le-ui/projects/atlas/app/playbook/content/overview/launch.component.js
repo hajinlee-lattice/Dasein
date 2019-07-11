@@ -18,11 +18,11 @@ import LeButton from "common/widgets/buttons/le-button";
 import { deepCopy } from 'common/app/utilities/ObjectUtilities.js';
 import { debounce } from 'lodash';
 import {
-  LEFT,
-  CENTER,
-  SPACEAROUND,
-  SPACEBETWEEN,
-  SPACEEVEN
+    LEFT,
+    CENTER,
+    SPACEAROUND,
+    SPACEBETWEEN,
+    SPACEEVEN
 } from "common/widgets/container/le-alignments";
 import './launch.component.scss';
 
@@ -183,6 +183,7 @@ class LaunchComponent extends Component {
                     coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
 
                 if(coverageBuckets) { // this pre-selects all the buckets
+                    vm.state.selectedBuckets = [];
                     coverageBuckets.forEach(function(bucket) {
                         vm.state.selectedBuckets.push(bucket.bucket);
                     });
@@ -571,7 +572,7 @@ class LaunchComponent extends Component {
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: e.target.checked,
-            getDestinationAccountId: this.state.connection.accountId
+            getDestinationAccountId: this.state.connection.lookupIdMap.accountId
         });
     }
 
