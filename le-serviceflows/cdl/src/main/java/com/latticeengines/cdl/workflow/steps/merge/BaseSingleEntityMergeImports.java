@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
@@ -84,21 +85,24 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (table == null) {
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
             }
-            checkAttributeLimit(table);
             isDataQuotaLimit(table);
             enrichTableSchema(table);
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
         }
     }
 
-    private void checkAttributeLimit(Table table) {
+    protected void checkAttributeLimit(String batchStoreName, boolean entityMatch) {
+        Table table = metadataProxy.getTable(customerSpace.toString(), batchStoreName);
         if (businessEntities.contains(configuration.getMainEntity())) {
             AttributeLimit limit = getObjectFromContext(ATTRIBUTE_QUOTA_LIMIT, AttributeLimit.class);
             Integer attrQuota = 0;
             Set<String> names = table.getAttributes().stream().map(entry -> entry.getName()).collect(Collectors.toSet());
-            // currently LatticeAccountId/InternalId, CDLCreateTime, CDLUpdateTime
-            Integer attrCount = names.size();
-            attrCount = trimAttrCount(names, attrCount);
+            Set<String> internalNames = SchemaRepository.getSystemAttributes(configuration.getMainEntity(),
+                    entityMatch).stream().map(InterfaceName::name).collect(Collectors.toSet());
+            Set<String> namesExculdeInternal =
+                    names.stream().filter(name -> !internalNames.contains(name)).collect(Collectors.toSet());
+
+            Integer attrCount = namesExculdeInternal.size();
             switch(configuration.getMainEntity()) {
                 case Account:
                     attrQuota = limit.getAccountAttributeQuotaLimit();
@@ -114,23 +118,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                         String.valueOf(configuration.getMainEntity())});
             }
         }
-    }
-
-    //
-    private Integer trimAttrCount(Set<String> names, Integer attrCount) {
-        if (names.contains(InterfaceName.InternalId.name())) {
-            attrCount--;
-        }
-        if (names.contains(InterfaceName.CDLCreatedTime.name())) {
-            attrCount--;
-        }
-        if (names.contains(InterfaceName.CDLUpdatedTime.name())) {
-            attrCount--;
-        }
-        if (names.contains(InterfaceName.LatticeAccountId.name())) {
-            attrCount--;
-        }
-        return attrCount;
     }
 
     private void isDataQuotaLimit(Table table) {
