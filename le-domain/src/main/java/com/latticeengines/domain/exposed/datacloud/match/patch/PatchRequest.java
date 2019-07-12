@@ -27,8 +27,11 @@ public class PatchRequest {
     @JsonProperty("sortByField")
     private String sortByField;
 
-    @JsonProperty("pid")
-    private Long pid;
+    @JsonProperty("StartPid")
+    private Long startPid;
+
+    @JsonProperty("EndPid")
+    private Long endPid;
 
     public PatchMode getMode() {
         return mode;
@@ -38,12 +41,20 @@ public class PatchRequest {
         this.mode = mode;
     }
 
-    public Long getPid() {
-        return pid;
+    public Long getStartPid() {
+        return startPid;
     }
 
-    public void setPid(Long pid) {
-        this.pid = pid;
+    public void setStartPid(Long startPid) {
+        this.startPid = startPid;
+    }
+
+    public Long getEndPid() {
+        return endPid;
+    }
+
+    public void setEndPid(Long endPid) {
+        this.endPid = endPid;
     }
 
     public String getDataCloudVersion() {

@@ -42,18 +42,29 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-    }
 
-    @Test(groups = "functional")
-    public void testCreate() {
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
-        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + System.currentTimeMillis());
+        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + this.getClass().getSimpleName() + "_" + System.currentTimeMillis());
         lookupIdMap.setOrgName(lookupIdMap.getExternalSystemName() + "_Test");
         lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         assertNotNull(lookupIdMap);
         assertNotNull(lookupIdMap.getId());
+    }
+
+    @Test(groups = "functional")
+    public void testEmptyMappings() {
+        List<ExportFieldMetadataMapping> fieldMappings = exportFieldMetadataMappingEntityMgr
+                .findByOrgId(lookupIdMap.getOrgId());
+        assertNotNull(fieldMappings);
+
+        assertEquals(fieldMappings.size(), 0);
+
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testEmptyMappings")
+    public void testCreate() {
 
         List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<ExportFieldMetadataMapping>();
 
@@ -135,5 +146,6 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
             assertNotNull(fm.getDestinationField());
         });
     }
+
 
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -130,7 +131,7 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
 
         MultiTenantContext.setTenant(tenant1);
         summary1 = new ModelSummary();
-        summary1.setId("123");
+        summary1.setId(UUID.randomUUID().toString());
         summary1.setName("Model1");
         summary1.setRocScore(0.75);
         summary1.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
