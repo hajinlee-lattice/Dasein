@@ -1,7 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -31,9 +30,9 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.spark.testframework.TestJoinTestNGBase;
 
-public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
+public class TestSqoopTestNG extends TestJoinTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(TestRecommendationGenTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(TestSqoopTestNG.class);
 
     private static final String ratingId = RatingEngine.generateIdStr();
     private static final String destinationAccountId = "D41000001Q3z4EAC";
@@ -41,19 +40,14 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private String accountData;
     private String contactData;
 
-    @Test(groups = "functional")
+    @Test(groups = "manual")
     public void runTest() {
         uploadInputAvro();
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         PlayLaunchSparkContext playLaunchContext = generatePlayLaunchSparkContext();
         createRecConfig.setPlayLaunchSparkContext(playLaunchContext);
-        SparkJobResult result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
-        verifyResult(result);
-
-        // mimic the case where there is no contact data
-        inputs = Collections.singletonList(accountData);
-        result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
-        verifyResult(result);
+        SparkJobResult result = runSparkJob(Sqoop.class, createRecConfig);
+        // verifyResult(result);
     }
 
     private PlayLaunchSparkContext generatePlayLaunchSparkContext() {
@@ -76,7 +70,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());
         aiModel.setCreatedBy(ratingEngine.getCreatedBy());
-        aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
 

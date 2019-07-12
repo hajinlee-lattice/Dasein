@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.pls.{AIModel, PlayLaunch, PlayLaunchSpa
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum}
+import org.apache.spark.sql.functions.{col, count, lit, sum, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -127,7 +127,7 @@ object CreateRecommendationsJob {
       playLaunchId, // LAUNCH_ID
       description, // DESCRIPTION
       launchTime, // LAUNCH_DATE
-      null, // LAST_UPDATED_TIMESTAMP
+      launchTime, // LAST_UPDATED_TIMESTAMP
       monetaryValue, // MONETARY_VALUE
       likelihood, // LIKELIHOOD
       companyName, // COMPANY_NAME
@@ -230,20 +230,13 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     }
 
     // Manipulate Contact Table
+    var finalRecommendations: DataFrame = null
+    var finalOutput: String = null
+    
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
-      val contactWithoutJoinKey = contactTable.drop(joinKey)
-      spark.udf.register("flatten", new Flatten(contactWithoutJoinKey.schema))
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema)
-      val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
-        flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
-        count(lit(1)).as("CONTACT_NUM") //
-      )
-      //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
-      println("----- BEGIN SCRIPT OUTPUT -----")
-	    aggregatedContacts.printSchema
-	    println("----- END SCRIPT OUTPUT -----")
-    
+      val aggregatedContacts = aggregateContacts(contactTable, joinKey)
+        
       // join
       val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
       //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
@@ -253,20 +246,39 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
-      recommendations.drop("CONTACT_NUM")
-      val finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID")
-
-      // finish
-      lattice.output = finalRecommendations :: Nil
-      lattice.outputStr = contactCount.toString
+      finalRecommendations = recommendations//
+        .withColumnRenamed(joinKey,"ACCOUNT_ID") //
+        .drop("CONTACT_NUM")
+      finalOutput = contactCount.toString
     } else {
       // join
-      val recommendations = limitedAccountTable.withColumn("CONTACTS", lit(null).cast(StringType))
-      val finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID")
-      
-      // finish
-      lattice.output = finalRecommendations :: Nil
-      lattice.outputStr = "0"
+      val recommendations = limitedAccountTable.withColumn("CONTACTS", lit("[]").cast(StringType))
+      finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID")
+      finalOutput = "0"
     }
+    
+    // finish
+    val orderedRec = finalRecommendations.select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
+        "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
+        "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
+        "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
+    lattice.output = orderedRec :: Nil
+    lattice.outputStr = finalOutput
   }
+  
+  private def aggregateContacts(contactTable: DataFrame, joinKey: String): DataFrame = {
+      val contactWithoutJoinKey = contactTable.drop(joinKey)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema)
+      val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
+        flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
+        count(lit(1)).as("CONTACT_NUM") //
+      )
+      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("[]").cast(StringType)).otherwise(col("CONTACTS")))
+      //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
+      println("----- BEGIN SCRIPT OUTPUT -----")
+	    processedAggrContacts.printSchema
+	    println("----- END SCRIPT OUTPUT -----")
+      return processedAggrContacts
+  }
+  
 }

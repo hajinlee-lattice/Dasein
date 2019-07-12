@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -58,6 +60,25 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
 
+    @Test(groups = "manual")
+    public void testAvro() {
+        String path1 = "/Pods/Default/Contracts/LETest1562104495390/Tenants/LETest1562104495390/Spaces/Production/Workspaces/cca77ff4-e62b-48e6-b6b2-5fa7268ef5a4/Output1/part-00016-caec2d6d-6ac5-4f08-9c72-64fa2f68b2f5-c000.avro";
+        String path2 = "/Pods/Default/Contracts/LETest1562104495390/Tenants/LETest1562104495390/Spaces/Production/Data/Tables/1562195635944/avro/launch__4d90850e-12ab-4ffe-b6e8-407e0ac5790b.avro";
+        Schema s1 = AvroUtils.getSchemaFromGlob(yarnConfiguration, path1);
+        Schema s2 = AvroUtils.getSchemaFromGlob(yarnConfiguration, path2);
+        assertEquals(s1.getFields().size(), s2.getFields().size());
+        for (int i = 0; i < s1.getFields().size(); i++) {
+            assertTrue(s1.getFields().get(i).name().equals(s2.getFields().get(i).name()),
+                    s1.getFields().get(i).name() + "!= " + s2.getFields().get(i).name());
+            assertTrue(s1.getFields().get(i).schema().getType().equals(s2.getFields().get(i).schema().getType()),
+                    s1.getFields().get(i).name() + ":" + s1.getFields().get(i).schema().getType() + "\n"
+                            + s1.getFields().get(i).name() + ":" + s2.getFields().get(i).schema().getType());
+        }
+        log.info("s1" + s1);
+        log.info("s2" + s2);
+
+    }
+
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
         String path = ClassLoader
@@ -82,8 +103,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Set<String> expectedUnknownColumns = Sets.newHashSet(
                 new String[] { "Some Column", "Boolean Column", "Number Column", "Almost Boolean Column", "Date" });
         expectedUnknownColumns
-                .addAll(SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceAccount).stream()
-                        .flatMap(attr -> attr.getAllowedDisplayNames().stream()).collect(Collectors.toSet()));
+                .addAll(SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceAccount)
+                        .stream().flatMap(attr -> attr.getAllowedDisplayNames().stream()).collect(Collectors.toSet()));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
