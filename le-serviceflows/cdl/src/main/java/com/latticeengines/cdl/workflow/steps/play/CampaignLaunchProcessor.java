@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -150,6 +151,7 @@ public class CampaignLaunchProcessor {
                 .setCustomer(tenant) //
                 .build();
 
+        log.info("exporter is " + JsonUtils.serialize(exporter));
         String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
         log.info("Submitted sqoop jobs: " + appId);
 
