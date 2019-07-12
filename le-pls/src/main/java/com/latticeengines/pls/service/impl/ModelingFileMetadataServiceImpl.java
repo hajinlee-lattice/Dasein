@@ -320,7 +320,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         bestEffortMapping.getFieldType());
                         validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
                                 message));
-                    } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
+                    } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType())) {
                         String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
                                 fieldMapping.getDateFormatString() :
                                 fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
@@ -330,20 +330,31 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 bestEffortMapping.getDateFormatString() :
                                 bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                         + bestEffortMapping.getTimeFormatString();
-                        String message;
-                        // deal with special case that format in field mapping provided by system and field mapping
-                        // after user changed are inconsistent
-                        if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
-                            message = String
-                                    .format("%s is set as %s from the system-provided %s in your file.", userField,
-                                            userFormat, correctFormat);
-                        } else {
-                            message = String
-                                    .format("%s is set as %s which can't parse the value in your file.", userField,
+
+                        // deal with case format can't parse the value
+                        if (!resolver.checkUserDateType(fieldMapping)){
+                            // deal with special case that format in field mapping provided by system and field mapping
+                            // after user changed are inconsistent
+                            String message;
+                            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                                message = String
+                                        .format("%s is set as %s from the system-provided %s in your file.", userField,
+                                                userFormat, correctFormat);
+                            } else {
+                                message = String
+                                        .format("%s is set as %s which can't parse the value in your file.", userField,
+                                                userFormat);
+                            }
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                    message));
+                        } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                            // this is case that user change the date/time format which can be parsed
+                            String message =  String
+                                    .format("%s is set as %s which can parse the value in your file.", userField,
                                             userFormat);
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                    message));
                         }
-                        validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                message));
                     }
                 }
             }
