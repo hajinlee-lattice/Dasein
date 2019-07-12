@@ -1,17 +1,17 @@
-from models.base_model import BaseModel, Base
-from models.metadata_data_collection import MetadataDataCollection
-from models.metadata_data_collection_status import MetadataDataCollectionStatus
-from models.metadata_data_collection_table import MetadataDataCollectionTable
-from models.metadata_table import MetadataTable
-from models.metadata_statistics import MetadataStatistics
-from models.migration_track import MigrationTrack
 from sqlalchemy import Column
 from sqlalchemy.dialects.mysql import VARCHAR, BIGINT, BIT
 from sqlalchemy.orm import relationship
 
+from models.base_model import BaseModel, Base
+from models.metadata_data_collection import MetadataDataCollection
+from models.metadata_data_collection_status import MetadataDataCollectionStatus
+from models.metadata_data_collection_table import MetadataDataCollectionTable
+from models.metadata_statistics import MetadataStatistics
+from models.metadata_table import MetadataTable
+from models.migration_track import MigrationTrack
+
 
 class Tenant(BaseModel, Base):
-
     __tablename__ = 'TENANT'
     tenantPid = Column('TENANT_PID', BIGINT(20), nullable=False, primary_key=True)
     contract = Column('CONTRACT', VARCHAR(255), nullable=True)
@@ -29,4 +29,4 @@ class Tenant(BaseModel, Base):
     metadataDataCollectionTable = relationship(MetadataDataCollectionTable, backref='tenant', cascade='delete')
     metadataTable = relationship(MetadataTable, backref='tenant', cascade='delete')
     metadataStatistics = relationship(MetadataStatistics, backref='tenant', cascade='delete')
-    migrationTrack = relationship(MigrationTrack, backref='tenant', cascade='delete')
+    migrationTrack = relationship(MigrationTrack, cascade='delete', backref='tenant')

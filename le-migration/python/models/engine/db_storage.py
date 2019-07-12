@@ -67,3 +67,17 @@ class DBStorage:
         """call remove() method on the private session attribute"""
         self.__session.close()
 
+    def getByPid(self, cls=None, pid=None):
+        """get an object based on class and pid"""
+        if cls is not None and isinstance(cls, str):
+            cls = clsd.get(cls)
+        return None if cls is None or pid is None else self.__session.query(cls).get(pid)
+
+    def getByColumn(self, cls=None, col=None, val=None):
+        """get objects filtered by column value"""
+        if cls is not None and isinstance(cls, str):
+            cls = clsd.get(cls)
+        try:
+            return None if cls is None or col is None or val is None else self.__session.query(cls).filter(cls.__getattribute__(cls, col) == val).all()
+        except AttributeError:
+            raise AttributeError('{} doesn not have column {}'.format(cls.__tablename__, col))
