@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_LOOKUP;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DUNS_GUIDE_BOOK;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,19 +26,23 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
     private String latestMajorVersion;
 
 
+    @Override
     public List<DataCloudVersion> allVerions() {
         return versionEntityMgr.allVerions();
     }
 
+    @Override
     public DataCloudVersion currentApprovedVersion() {
         return latestApprovedForMajorVersion(latestMajorVersion);
     }
 
+    @Override
     public DataCloudVersion latestApprovedForMajorVersion(String version) {
         String majorVersion = DataCloudVersion.parseMajorVersion(version);
         return versionEntityMgr.latestApprovedForMajorVersion(majorVersion);
     }
 
+    @Override
     public String nextMinorVersion(String version) {
         if (StringUtils.isBlank(version)) {
             return null;
@@ -44,6 +52,7 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         return majorVersion + "." + (Integer.valueOf(minorVersion) + 1);
     }
 
+    @Override
     public List<String> priorVersions(String version, int num) {
         List<String> list = new ArrayList<>();
         String majorVersion = DataCloudVersion.parseMajorVersion(version);
@@ -54,7 +63,32 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         return list;
     }
 
+    @Override
     public void updateRefreshVersion() {
         versionEntityMgr.updateRefreshVersion();
+    }
+
+    @Override
+    public String currentDynamoVersion(String sourceName) {
+        DataCloudVersion latestVersion = latestApprovedForMajorVersion(latestMajorVersion);
+        switch (sourceName) {
+        case ACCOUNT_MASTER:
+            return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignature());
+        case ACCOUNT_MASTER_LOOKUP:
+            return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignatureLookup());
+        case DUNS_GUIDE_BOOK:
+            return constructDynamoVersion(latestVersion.getVersion(),
+                    latestVersion.getDynamoTableSignatureDunsGuideBook());
+        default:
+            throw new UnsupportedOperationException(sourceName + " is not available in Dynamo");
+        }
+    }
+
+    private String constructDynamoVersion(String datacloudVersion, String dynamoSignature) {
+        if (StringUtils.isBlank(dynamoSignature)) {
+            return datacloudVersion;
+        } else {
+            return datacloudVersion + "_" + dynamoSignature;
+        }
     }
 }

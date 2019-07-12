@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
@@ -62,7 +62,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     private Configuration yarnConfiguration;
 
     @Inject
-    private DataCloudVersionEntityMgr datacloudVersionEntityMgr;
+    private DataCloudVersionService dataCloudVersionService;
 
     @Override
     public PublicationProgress kickoffNewProgress(Publication publication, String creator) throws IOException {
@@ -179,7 +179,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
 
     private DynamoDestination constructDynamoDestination(Publication publication) {
         DynamoDestination destination = new DynamoDestination();
-        destination.setVersion(datacloudVersionEntityMgr.currentApprovedVersionAsString());
+        destination.setVersion(dataCloudVersionService.currentDynamoVersion(publication.getSourceName()));
         return destination;
     }
 

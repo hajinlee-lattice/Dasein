@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
@@ -24,6 +25,8 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
     PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);
 
     PlayLaunch findLatestByChannel(Long playLaunchChannelId);
+
+    PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 
     List<PlayLaunch> findByState(LaunchState state);
 
