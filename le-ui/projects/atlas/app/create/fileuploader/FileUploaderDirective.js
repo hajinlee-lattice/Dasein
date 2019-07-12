@@ -399,7 +399,7 @@ angular
                     if (!vm.readOnly) {
                         if ($state.includes('home.import.entry')) {
                             var fileName = "file_" + (new Date).getTime() + ".csv",
-                                entityType = ImportWizardStore.getEntityType();
+                                entityType = ImportWizardStore.getEntityType().toLowerCase();
 
                             ImportWizardStore.setCsvFileName(fileName);
                             options = {
