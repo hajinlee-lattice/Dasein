@@ -106,6 +106,12 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         sourceFieldNames.contains(InterfaceName.CompanyName.toString());
         sourceFieldNames.contains(InterfaceName.Email.toString());
 
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
