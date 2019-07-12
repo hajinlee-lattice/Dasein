@@ -109,20 +109,17 @@ angular
             return 0;
         }
 
-        vm.clickIterationFilter = function (type) {      
-            DataCloudStore.ratingIterationFilter = type;
-            if (vm.section == 're.model_iteration') {
-                var presentCategories = DataCloudStore.getPresentCategories();
-                $scope.$watch(presentCategories, function(){
-                    if (presentCategories.length > 0) {
-                        DataCloudStore.setMetadata('category', presentCategories[0]);
-                    }
-                });                
-            }
+        vm.clickIterationFilter = function (type) {
+            DataCloudStore.setRatingIterationFilter(type);
+            var presentCategories = DataCloudStore.getPresentCategories();
+            if (presentCategories.length > 0) {
+                DataCloudStore.setMetadata('category', presentCategories[0]);
+            }            
         }
 
         vm.checkIterationFilter = function (type) {
-            return DataCloudStore.ratingIterationFilter == type;
+            let filter = DataCloudStore.getRatingIterationFilter();
+            return filter == type;
         }
 
         vm.checkState = function (type) {
