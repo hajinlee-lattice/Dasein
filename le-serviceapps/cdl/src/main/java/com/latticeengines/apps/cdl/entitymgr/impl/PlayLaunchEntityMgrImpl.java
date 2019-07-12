@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 @Component("playLaunchEntityMgr")
@@ -56,6 +57,12 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunch findByLaunchId(String launchId) {
         return playLaunchDao.findByLaunchId(launchId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId) {
+        return playLaunchDao.findPlayLaunchChannelByLaunchId(launchId);
     }
 
     @Override

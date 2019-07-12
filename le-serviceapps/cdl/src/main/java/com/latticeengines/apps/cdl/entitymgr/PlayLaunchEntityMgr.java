@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
@@ -18,6 +19,8 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     void create(PlayLaunch entity);
 
     PlayLaunch findByLaunchId(String launchId);
+
+    PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 
     void deleteByLaunchId(String launchId, boolean hardDelete);
 
