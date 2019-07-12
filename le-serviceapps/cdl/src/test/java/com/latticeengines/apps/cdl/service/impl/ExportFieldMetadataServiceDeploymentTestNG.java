@@ -1,11 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -60,6 +59,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private String CREATED_BY = "lattice@lattice-engines.com";
     private Date timestamp = new Date(System.currentTimeMillis());
     private Play play;
+    private String PLAY_ID = "PLAY_ID";
 
     @Inject
     private PlayEntityMgr playEntityMgr;
@@ -86,6 +86,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     public void setup() throws Exception {
         setupTestEnvironment();
         cdlTestDataService.populateMetadata(mainTestTenant.getId(), 3);
+
+        cleanupExportDefaults();
 
         MetadataSegment segment = constructSegment(PLAY_TARGET_SEGMENT_NAME);
         segment = segmentService.createOrUpdateSegment(segment);
@@ -118,10 +120,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         defaultExportFields.add(defaultField_1);
         
         ExportFieldMetadataDefaults defaultField_2 = new ExportFieldMetadataDefaults();
-        defaultField_2.setAttrName("PLAY_ID");
+        defaultField_2.setAttrName(PLAY_ID);
         defaultField_2.setDisplayName("Campaign Id");
         defaultField_2.setEntity(BusinessEntity.Account);
-        defaultField_2.setExternalSystemName(CDLExternalSystemName.Marketo);
+        defaultField_2.setExternalSystemName(CDLExternalSystemName.AWS_S3);
         defaultField_2.setStandardField(false);
         defaultField_2.setHistoryEnabled(true);
         defaultField_2.setExportEnabled(true);
@@ -129,7 +131,22 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         defaultExportFields.add(defaultField_2);
         
         exportFieldMetadataDefaultsService.createDefaultExportFields(defaultExportFields);
+    }
 
+    @AfterClass(groups = { "deployment-app" })
+    public void teardown() {
+        cleanupExportDefaults();
+    }
+
+    private void cleanupExportDefaults() {
+        List<ExportFieldMetadataDefaults> defaultFields = exportFieldMetadataDefaultsService
+                .getAttributes(CDLExternalSystemName.AWS_S3);
+
+        defaultFields.addAll(exportFieldMetadataDefaultsService
+                .getAttributes(CDLExternalSystemName.Marketo));
+
+        log.info(JsonUtils.serialize(defaultFields));
+        exportFieldMetadataDefaultsService.delete(defaultFields);
     }
 
     @Test(groups = "deployment-app")
@@ -143,14 +160,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 3);
+        assertEquals(columnMetadata.size(), 2);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
-        assertEquals(nonStandardFields.size(), 1);
-        assertEquals(nonStandardFields.get(0).getAttrName(), "PLAY_ID");
-        assertEquals(nonStandardFields.get(0).getDisplayName(), "Campaign Id");
-        assertEquals(nonStandardFields.get(0).getEntity(), BusinessEntity.Account);
+        assertEquals(nonStandardFields.size(), 0);
 
     }
 
@@ -167,12 +181,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 54);
+        assertEquals(columnMetadata.size(), 55);
         
-        columnMetadata.forEach(cm -> {
-            assertFalse(cm.isCampaignDerivedField());
-            assertNotNull(cm.getEntity());
-        });
+        List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
+                .collect(Collectors.toList());
+        assertEquals(nonStandardFields.size(), 1);
 
     }
 
@@ -199,12 +212,17 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setOrgId(org1);
         lookupIdMap.setOrgName("org1name");
 
-        ExportFieldMetadataMapping fieldMapping = new ExportFieldMetadataMapping();
-        fieldMapping.setSourceField("CHIEF_EXECUTIVE_OFFICER_TITLE");
-        fieldMapping.setDestinationField("ContactName");
-        fieldMapping.setOverwriteValue(false);
+        ExportFieldMetadataMapping fieldMapping_1 = new ExportFieldMetadataMapping();
+        fieldMapping_1.setSourceField("CHIEF_EXECUTIVE_OFFICER_TITLE");
+        fieldMapping_1.setDestinationField("ContactName");
+        fieldMapping_1.setOverwriteValue(false);
 
-        lookupIdMap.setExportFieldMappings(Collections.singletonList(fieldMapping));
+        ExportFieldMetadataMapping fieldMapping_2 = new ExportFieldMetadataMapping();
+        fieldMapping_2.setSourceField("Email");
+        fieldMapping_2.setDestinationField("Email");
+        fieldMapping_2.setOverwriteValue(false);
+
+        lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2));
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }
 

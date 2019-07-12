@@ -31,4 +31,9 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     public List<ExportFieldMetadataDefaults> getAttributes(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsEntityMgr.getDefaultExportFieldMetadata(systemName);
     }
+
+    @Override
+    public void delete(List<ExportFieldMetadataDefaults> defaultExportFields) {
+        defaultExportFields.forEach(field -> exportFieldMetadataDefaultsEntityMgr.deleteByPid(field.getPid()));
+    }
 }

@@ -11,4 +11,6 @@ public interface ExportFieldMetadataDefaultsService {
 
     List<ExportFieldMetadataDefaults> getAttributes(CDLExternalSystemName systemName);
 
+    void delete(List<ExportFieldMetadataDefaults> defaultExportFields);
+
 }
