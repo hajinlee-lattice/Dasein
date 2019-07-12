@@ -6,6 +6,8 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -95,6 +97,14 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         exportFieldMappings = exportFieldMetadataMappingEntityMgr.createAll(exportFieldMappings);
 
         assertNotNull(exportFieldMappings);
+        assertEquals(exportFieldMappings.size(), 3);
+        
+        Set<String> sourceFieldNames = exportFieldMappings.stream().map(ExportFieldMetadataMapping::getSourceField)
+                .collect(Collectors.toSet());
+        
+        sourceFieldNames.contains(InterfaceName.AccountId.toString());
+        sourceFieldNames.contains(InterfaceName.CompanyName.toString());
+        sourceFieldNames.contains(InterfaceName.Email.toString());
 
     }
 
@@ -132,6 +142,12 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         exportFieldMappings.add(fieldMapping_2);
 
         exportFieldMetadataMappingEntityMgr.update(lookupIdMap, exportFieldMappings);
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
 
         List<ExportFieldMetadataMapping> updatedExportFieldMappings = exportFieldMetadataMappingEntityMgr
                 .findByOrgId(lookupIdMap.getOrgId());
