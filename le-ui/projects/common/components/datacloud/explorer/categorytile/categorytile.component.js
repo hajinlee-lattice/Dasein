@@ -15,6 +15,11 @@ export default function () {
 
             angular.extend(vm, {});
 
+            let setCategory = DataCloudStore.getMetadata('category');
+            $scope.$watch(setCategory, function() {
+                vm.setCategory(setCategory);
+            });
+
             vm.setCategory = function (category) {
                 vm.category = category;
                 DataCloudStore.setMetadata('category', category);

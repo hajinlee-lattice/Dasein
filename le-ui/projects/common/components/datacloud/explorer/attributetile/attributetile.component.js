@@ -230,7 +230,7 @@ export default function () {
             }
 
             vm.select = function (quantity) {
-                let iterationFilter = DataCloudStore.ratingIterationFilter;
+                let iterationFilter = DataCloudStore.getRatingIterationFilter();
                 let categoryAttributes = vm.getAttributes([vm.category]);
                 switch (quantity) {
                     case 'selectall':

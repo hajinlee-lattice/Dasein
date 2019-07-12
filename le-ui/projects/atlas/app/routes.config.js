@@ -323,7 +323,7 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
 
                     // clear DataCloudStore (tried this in onEnter, didn't work right)                   
                     DataCloudStore.clear();
-                    DataCloudStore.ratingIterationFilter = 'all';
+                    DataCloudStore.setRatingIterationFilter('all');
 
                     DataCloudStore.getAllEnrichmentsConcurrently(opts, true).then((result) => {
 

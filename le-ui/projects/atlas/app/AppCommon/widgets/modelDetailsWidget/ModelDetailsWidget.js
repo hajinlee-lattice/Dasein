@@ -54,8 +54,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 }
             }
 
-            console.log($scope.scorableAccounts);
-
             $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
             $scope.segmentAccountsString = "(" + $scope.segmentAccounts + " total accounts)";
 
@@ -184,8 +182,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                         $scope.scorableAccounts = 0;
                     }
                 }
-
-                console.log($scope.scorableAccounts);
 
                 $scope.segmentAccounts = ratingEngine.segment.accounts.toLocaleString('en');
                 $scope.segmentAccountsString = "(" + $scope.segmentAccounts + " total accounts)";
