@@ -188,11 +188,13 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 switch (lookupIdMap.getExternalSystemType()) {
                     case MAP:
                         lookupIdMap.setExportFolder(new HdfsToS3PathBuilder()
-                                .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox()));
+                                .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())
+                                .replace(new HdfsToS3PathBuilder().getProtocol(), ""));
                         break;
                     case FILE_SYSTEM:
-                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket,
-                                dropbox.getDropBox()));
+                        lookupIdMap.setExportFolder(
+                                new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox())
+                                        .replace(new HdfsToS3PathBuilder().getProtocol(), ""));
                         break;
                 }
         }
