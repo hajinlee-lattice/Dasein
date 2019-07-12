@@ -46,7 +46,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
-        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + System.currentTimeMillis());
+        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + this.getClass().getSimpleName() + "_" + System.currentTimeMillis());
         lookupIdMap.setOrgName(lookupIdMap.getExternalSystemName() + "_Test");
         lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         assertNotNull(lookupIdMap);
