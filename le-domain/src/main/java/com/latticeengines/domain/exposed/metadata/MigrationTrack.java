@@ -40,7 +40,7 @@ public class MigrationTrack implements HasPid, HasTenant {
     private Long pid;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
+    @JoinColumn(name = "FK_COLLECTION_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
@@ -170,20 +170,5 @@ public class MigrationTrack implements HasPid, HasTenant {
 
     public enum Status {
         SCHEDULED, STARTED, FAILED, COMPLETED;
-
-        public Status complement() {
-            switch (this) {
-                case SCHEDULED:
-                    return SCHEDULED;
-                case STARTED:
-                    return STARTED;
-                case FAILED:
-                    return FAILED;
-                case COMPLETED:
-                default:
-                    return COMPLETED;
-            }
-        }
-
     }
 }

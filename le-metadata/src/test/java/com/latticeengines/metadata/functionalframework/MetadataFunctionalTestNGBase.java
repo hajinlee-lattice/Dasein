@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.metadata.entitymgr.AttributeEntityMgr;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.hive.util.HiveUtils;
@@ -46,10 +47,11 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:common-testclient-env-context.xml", "classpath:metadata-aspects-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-metadata-context.xml",
+        "classpath:common-testclient-env-context.xml", "classpath:metadata-aspects-context.xml" })
 @Listeners({ GlobalAuthCleanupTestListener.class })
 public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-    
+
     private static final Logger log = LoggerFactory.getLogger(MetadataFunctionalTestNGBase.class);
 
     protected String customerSpace1;
@@ -81,6 +83,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    protected MigrationTrackEntityMgr migrationTrackEntityMgr;
 
     @Autowired
     private DataSource hiveDataSource;

@@ -37,6 +37,12 @@ def checkCanTrack(storage, tenant=None):
     elif len(tenant.metadataDataCollection) != 1:
         print("Tenant has invalid number of active data collections")
         return False
+    elif len(tenant.metadataStatistics) > 1:
+        print("Tenant has invalid number of statistics records")
+        return False
+    elif len(tenant.metadataDataCollectionStatus) > 1:
+        print("Tenant has invalid number of status records")
+        return False
     exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
     if len(exist):
         print('Tenant already in tracking table:\n')
@@ -78,10 +84,12 @@ def createTenantTrack(tenant):
     # TODO - double check with Jinyang for import action (maybe list of ACTION.PID).
     # TODO - May need to write model for ACTION table
     track.importAction = {'actions': []}
-    track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
-    track.statsCubesData = tenant.metadataStatistics[0].cubesData
-    track.statsData = tenant.metadataStatistics[0].data
-    track.statsName = tenant.metadataStatistics[0].name
+    if tenant.metadataDataCollectionStatus:
+        track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
+    if tenant.metadataStatistics:
+        track.statsCubesData = tenant.metadataStatistics[0].cubesData
+        track.statsData = tenant.metadataStatistics[0].data
+        track.statsName = tenant.metadataStatistics[0].name
     track.save()
     return track
 
