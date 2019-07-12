@@ -283,9 +283,6 @@ public class PlayResource {
             @PathVariable("channelId") String channelId) {
         return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
     }
-    // -------------
-    // Channels
-    // -------------
 
     // -------------
     // Play Launches
@@ -298,6 +295,15 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates) {
         return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
+    }
+
+    @GetMapping(value = "/{playName}/launches/{launchId}/channel")
+    @ResponseBody
+    @ApiOperation(value = "Get play launch channel from play launch")
+    public PlayLaunchChannel getPlayLaunchChannelFromPlayLaunch(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId) {
+        return playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
     }
 
     @PostMapping(value = "/{playName}/launches", headers = "Accept=application/json")
@@ -639,11 +645,8 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (playLaunch.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
