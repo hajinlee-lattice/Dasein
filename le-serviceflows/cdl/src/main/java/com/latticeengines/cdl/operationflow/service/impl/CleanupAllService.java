@@ -82,7 +82,12 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         String customerSpace = config.getCustomerSpace();
         BusinessEntity entity = config.getEntity();
         if (CleanupOperationType.ALLDATA.equals(config.getCleanupOperationType())) {
+            log.info(String.format("begin clean up cdl data for CustomerSpace %s", customerSpace));
             deleteData(config, entity, customerSpace);
+        } else if (CleanupOperationType.ALLDATAANDATTRCONFIG.equals(config.getCleanupOperationType())) {
+            log.info(String.format("begin clean up cdl data and attr config for CustomerSpace %s", customerSpace));
+            deleteData(config, entity, customerSpace);
+            deleteAttrConfig(entity, customerSpace);
         } else if (CleanupOperationType.ALLDATAANDMETADATA.equals(config.getCleanupOperationType())) {
             log.info(String.format("begin clean up cdl data and metadata for CustomerSpace %s", customerSpace));
             deleteData(config, entity, customerSpace);

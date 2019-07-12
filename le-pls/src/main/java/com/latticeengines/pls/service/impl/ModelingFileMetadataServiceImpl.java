@@ -330,9 +330,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 bestEffortMapping.getDateFormatString() :
                                 bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                         + bestEffortMapping.getTimeFormatString();
-                        String message = String
-                                .format("%s is set as %s but appears to be %s in your file.", userField,
-                                        userFormat, correctFormat);
+                        String message;
+                        // deal with special case that format in field mapping provided by system and field mapping
+                        // after user changed are inconsistent
+                        if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                            message = String
+                                    .format("%s is set as %s from the system-provided %s in your file.", userField,
+                                            userFormat, correctFormat);
+                        } else {
+                            message = String
+                                    .format("%s is set as %s which can't parse the value in your file.", userField,
+                                            userFormat);
+                        }
                         validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
                                 message));
                     }
