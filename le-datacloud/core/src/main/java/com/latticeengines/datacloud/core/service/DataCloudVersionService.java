@@ -16,4 +16,6 @@ public interface DataCloudVersionService {
     List<String> priorVersions(String version, int num);
 
     void updateRefreshVersion();
+
+    String currentDynamoVersion(String sourceName);
 }
