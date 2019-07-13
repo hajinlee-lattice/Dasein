@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,5 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 public interface ChannelConfig {
 
     ChannelConfig copyConfig(ChannelConfig config);
+
+    CDLExternalSystemName getSystemName();
 
 }
