@@ -5,10 +5,13 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class S3ChannelConfig implements ChannelConfig {
+
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.AWS_S3;
 
     @JsonProperty("audienceType")
     private AudienceType audienceType;
@@ -75,6 +78,11 @@ public class S3ChannelConfig implements ChannelConfig {
 
     public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
         this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    }
+
+    @Override
+    public CDLExternalSystemName getSystemName() {
+        return systemName;
     }
 
     @Override
