@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -180,6 +181,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setupInactiveVersion();
         setGrapherContext();
         resetEntityMatchFlagsForRetry();
+        setAttributeQuotaLimit();
         setDataQuotaLimit();
 //        bumpEntityMatchVersion();
     }
@@ -561,6 +563,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             // need to rerun entity match steps
             removeObjectFromContext(NEW_ENTITY_MATCH_ENVS);
         }
+    }
+
+    private void setAttributeQuotaLimit(){
+        AttributeLimit attrLimit = dataFeedProxy.getAttributeQuotaLimit(customerSpace.toString());
+        if (attrLimit == null) {
+            throw new IllegalArgumentException("Attribute quota limit can not be found.");
+        }
+        putObjectInContext(ATTRIBUTE_QUOTA_LIMIT, attrLimit);
     }
 
     private void setDataQuotaLimit() {

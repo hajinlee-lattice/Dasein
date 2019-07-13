@@ -110,4 +110,11 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         }
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
+    }
 }

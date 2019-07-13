@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -307,4 +308,9 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, Table.class);
     }
 
+    public AttributeLimit getAttributeQuotaLimit(String customerSpace) {
+        String url = constructUrl(String.format("/datafeed/internal/attributeQuotaLimit?customerSpace=%s",
+                shortenCustomerSpace(customerSpace)));
+        return get("get all attribute quota limit", url, AttributeLimit.class);
+    }
 }
