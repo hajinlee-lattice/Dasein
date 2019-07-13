@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -87,7 +88,7 @@ public class PatchResource {
         return validate(books, type, request);
     }
 
-    @RequestMapping(value = "/validatePagination/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/validatePagination/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
     private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType,
@@ -101,13 +102,19 @@ public class PatchResource {
         return validate(books, type, request);
     }
 
-    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
     private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
-            @RequestBody PatchRequest request) {
-        checkRequired(request);
-        checkAndSetDataCloudVersion(request);
+            @RequestParam(value = "dataCloudVersion", required = false) String dataCloudVersion,
+            @RequestParam(value = "mode", required = false) PatchMode mode) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(dataCloudVersion), "DataCloudVersion should not be blank");
+        Preconditions.checkNotNull(mode, "PatchMode should not be null");
+
+        // fake patch request
+        PatchRequest request = new PatchRequest();
+        request.setDataCloudVersion(dataCloudVersion);
+        request.setMode(mode);
 
         PatchBook.Type type = getPatchBookType(patchBookType);
         Map<String, Long> pids = loadMinMaxPid(type);
