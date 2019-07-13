@@ -1,0 +1,93 @@
+{
+  "ConfigDirectories": [
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+      ]
+    },
+    {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[\"ysong@lattice-engines.com\"]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[\"ga_dev@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        },
+        { "Node": "DataCloudLicense",
+          "Children" : [
+            { "Node": "Account", "Data": 30},
+            { "Node": "Contact", "Data": 500}
+          ]
+        }
+      ]
+    },
+    {
+      "RootPath": "/DataCloud",
+      "Nodes": [
+        {
+          "Node": "BypassDnBCache",
+          "Data": "false"
+        }
+      ]
+    },
+    {
+      "RootPath": "/CDL",
+      "Nodes": [
+        {
+          "Node": "FakeCurrentDate",
+          "Data": "2017-08-01"
+        },
+        {
+          "Node": "InvokeTime",
+          "Data": "-1"
+        },
+        {
+          "Node": "ModelingProfilingVersion",
+          "Data": "v2"
+        }
+      ]
+    }
+  ],
+  "CustomerSpaceInfo": {
+    "properties": {
+      "displayName": "${TENANT}_CG",
+      "description": "A CG solution for ${TENANT} in ${TENANT}"
+    },
+    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableTalkingPoints\":true}"
+  },
+  "TenantInfo": {
+    "properties": {
+      "displayName": "${TENANT}_CG",
+      "description": "A CG tenant under the contract ${TENANT}",
+      "status": "ACTIVE"
+    }
+  },
+  "ContractInfo": {
+    "properties": {}
+  },
+  "SpaceConfig": {
+    "Product": "Customer Growth",
+    "Products": [
+      "Customer Growth", "Lead Prioritization 3.0"
+    ]
+  }
+}
