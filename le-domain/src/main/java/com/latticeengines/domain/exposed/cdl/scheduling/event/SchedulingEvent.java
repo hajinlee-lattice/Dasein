@@ -20,6 +20,7 @@ public class SchedulingEvent extends Event {
 
     public SchedulingEvent(long time) {
         super(time);
+        this.tenantId = "";
     }
 
     @Override
@@ -38,7 +39,7 @@ public class SchedulingEvent extends Event {
                         simulationStats.timeClock.getCurrentTime());
                 PAEndEvent paEndEvent = new PAEndEvent(tenantId,
                         simulationStats.timeClock.getCurrentTime());
-                events.add(paStartEvent);
+                paStartEvent.changeState(status, simulationStats);
                 events.add(paEndEvent);
             }
         }

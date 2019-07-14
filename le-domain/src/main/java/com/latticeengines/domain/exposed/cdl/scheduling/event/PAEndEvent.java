@@ -8,8 +8,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class PAEndEvent extends Event {
 
-    private String tenantId;
-
     public PAEndEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;

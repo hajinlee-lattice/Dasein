@@ -7,8 +7,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 
 public class ImportActionEvent extends Event {
 
-    private String tenantId;
-
     public ImportActionEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;

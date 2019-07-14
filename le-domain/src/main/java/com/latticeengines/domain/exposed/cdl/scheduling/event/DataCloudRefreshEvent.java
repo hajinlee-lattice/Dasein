@@ -8,8 +8,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 
 public class DataCloudRefreshEvent extends Event {
 
-    private String tenantId;
-
     public DataCloudRefreshEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;

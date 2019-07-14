@@ -7,9 +7,12 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 
 public abstract class Event implements Comparable<Event> {
     private Long time;
+    private String className;
+    protected String tenantId;
 
     public Event(Long time) {
         this.time = time;
+        this.className = this.getClass().getName();
     }
 
     // change current state & tenant activities and other things etc.
@@ -27,5 +30,13 @@ public abstract class Event implements Comparable<Event> {
     @Override
     public int compareTo(Event e) {
         return e.getTime() - time > 0 ? -1 : 1;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public String getTenantId() {
+        return tenantId;
     }
 }

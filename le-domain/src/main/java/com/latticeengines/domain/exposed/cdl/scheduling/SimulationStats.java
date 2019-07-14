@@ -43,7 +43,7 @@ public class SimulationStats {
     }
 
     public List<TenantActivity> getCanRunTenantActivity() {
-        return (List<TenantActivity>) canRunTenantActivityMap.values();
+        return new ArrayList<>(canRunTenantActivityMap.values());
     }
 
     public TenantActivity getcanRunTenantActivityByTenantId(String tenantId) {
@@ -72,10 +72,10 @@ public class SimulationStats {
         if (tenantActivity.isScheduledNow()) {
             tenantActivity.setScheduledNow(false);
         }
-        if (tenantActivity.getFirstActionTime() != 0L) {
+        if (tenantActivity.getFirstActionTime() != null && tenantActivity.getFirstActionTime() != 0L) {
             tenantActivity.setFirstActionTime(0L);
         }
-        if (tenantActivity.getLastActionTime() != 0L) {
+        if (tenantActivity.getLastActionTime() != null && tenantActivity.getLastActionTime() != 0L) {
             tenantActivity.setLastActionTime(0L);
         }
         if (tenantActivity.isRetry()) {
@@ -125,17 +125,19 @@ public class SimulationStats {
         if (canRunTenantActivityMap.containsKey(tenantId)) {
             TenantActivity tenantActivity = canRunTenantActivityMap.get(tenantId);
             if (e.getClass().equals(ImportActionEvent.class)) {
-                if (tenantActivity.getFirstActionTime() == 0L) {
+                if (tenantActivity.getFirstActionTime() == null || tenantActivity.getFirstActionTime() == 0L) {
                     tenantActivity.setFirstActionTime(e.getTime());
                 }
-                if (tenantActivity.getLastActionTime() - e.getTime() < 0) {
+                if (tenantActivity.getLastActionTime() == null || tenantActivity.getLastActionTime() - e.getTime() < 0) {
                     tenantActivity.setLastActionTime(e.getTime());
                 }
             } else if (e.getClass().equals(ScheduleNowEvent.class)) {
                 tenantActivity.setScheduledNow(true);
+                tenantActivity.setScheduleTime(this.timeClock.getCurrentTime());
             } else if (e.getClass().equals(DataCloudRefreshEvent.class)) {
                 tenantActivity.setDataCloudRefresh(true);
             }
+            log.info("tenant: " + tenantId + " , tenantActivity is : " + JsonUtils.serialize(tenantActivity));
             canRunTenantActivityMap.put(tenantId, tenantActivity);
         }
         tenantEventMap.put(tenantId, events);

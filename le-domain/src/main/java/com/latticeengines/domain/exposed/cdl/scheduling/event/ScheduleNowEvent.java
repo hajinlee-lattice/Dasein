@@ -7,8 +7,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 
 public class ScheduleNowEvent extends Event {
 
-    private String tenantId;
-
     public ScheduleNowEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;
