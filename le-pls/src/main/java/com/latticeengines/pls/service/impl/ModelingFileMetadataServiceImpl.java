@@ -65,6 +65,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -130,6 +131,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
@@ -162,6 +164,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true,
                             withoutId, enableEntityMatch));
         }
+        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument);
         return resultDocument;
     }
 
@@ -496,14 +499,21 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         if (dataFeedTask == null) {
-            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                    enableEntityMatch || enableEntityMatchGA);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
+            EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
         } else {
             table = dataFeedTask.getImportTemplate();
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
+            if (table.getAttribute(InterfaceName.AccountId) == null) {
+                EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
+            }
         }
-        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                enableEntityMatch || enableEntityMatchGA);
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
     }
 
