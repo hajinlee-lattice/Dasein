@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,10 +108,11 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
 
             // The Prefix is added since Dante UI looks for it to identify
             // Account attributes
+            Comparator<TalkingPointAttribute> comparator = Comparator.comparing(TalkingPointAttribute::getName);
             return JsonUtils.convertList(allAttrs, ColumnMetadata.class).stream()
                     .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
                             accountAttributePrefix + attr.getAttrName(), attr.getCategoryAsString()))
-                    .sorted().collect(Collectors.toList());
+                    .sorted(comparator).collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
