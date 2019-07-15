@@ -12,4 +12,8 @@ public interface RawCollectionRequestWriterRepository extends RawCollectionReque
     @Modifying
     @Transactional
     void removeByRequestedTimeBetween(Timestamp start, Timestamp end);
+
+    @Modifying
+    @Transactional
+    void removeByTransferred(Boolean transferred);
 }

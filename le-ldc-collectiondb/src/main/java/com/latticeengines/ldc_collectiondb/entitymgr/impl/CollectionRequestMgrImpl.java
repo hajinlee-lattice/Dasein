@@ -125,4 +125,11 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     public void cleanupRequestBetween(Timestamp start, Timestamp end) {
         repository.removeByRequestedTimeBetween(start, end);
     }
+
+    @Override
+    public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before) {
+
+        repository.removeByStatusInAndVendorAndRequestedTimeBefore(statuses, vendor, before);
+
+    }
 }

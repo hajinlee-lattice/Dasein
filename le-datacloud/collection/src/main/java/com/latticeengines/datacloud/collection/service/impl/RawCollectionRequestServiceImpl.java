@@ -173,4 +173,10 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
         rawCollectionRequestMgr.cleanupRequestsBetween(start, end);
     }
 
+    @Override
+    public void cleanup() {
+
+        rawCollectionRequestMgr.cleanupTransferred();
+
+    }
 }
