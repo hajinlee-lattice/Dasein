@@ -27,7 +27,7 @@
                         <input type="text" name="input" ng-model="vm.vals[0]" ng-change="vm.changeValue()" required
                             ng-trim="false" ng-if="vm.showInput(vm.operation) && !vm.showChips()">
 
-                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="{{vm.rangeConfig}}"
+                        <numerical-range-directive ng-if="vm.showNumericRange(vm.operation)" config="vm.rangeConfig"
                             showfrom="vm.showFromNumerical" showto="vm.showToNumerical" vm="vm" form="form"
                             type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                             changed="vm.callbackChangedNumericalValue(type, position, value)">
@@ -96,7 +96,7 @@
 
                             <numerical-range-directive
                                 ng-if="vm.editMode == 'Custom' && (vm.showFromNumerical || vm.showToNumerical)"
-                                config="{{vm.rangeConfig}}" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
+                                config="vm.rangeConfig" showfrom="vm.showFromNumerical" showto="vm.showToNumerical"
                                 vm="vm" form="vm.form" type="{{vm.type}}" bucketrestriction="vm.tree.bucketRestriction"
                                 changed="vm.callbackChangedNumericalValue(type, position, value)">
                             </numerical-range-directive>
