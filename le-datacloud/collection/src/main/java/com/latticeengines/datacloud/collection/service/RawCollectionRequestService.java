@@ -17,4 +17,5 @@ public interface RawCollectionRequestService {
 
     void cleanupRequestsBetween(Timestamp start, Timestamp end);
 
+    void cleanup();
 }
