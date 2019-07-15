@@ -73,21 +73,21 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @ClearModelSummary
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void delete(ModelSummary modelSummary) {
         super.delete(modelSummary);
     }
 
     @ClearModelSummary
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void update(ModelSummary modelSummary) {
         super.update(modelSummary);
     }
 
     @ClearModelSummary
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void createOrUpdate(ModelSummary modelSummary) {
         super.createOrUpdate(modelSummary);
