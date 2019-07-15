@@ -73,18 +73,19 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
     public void testStatusDetail(Tenant tenant, MigrationTrack track) {
-        Assert.assertEquals(track.getCollectionStatusDetail(),
-                migrationTrackEntityMgr.findByKey(track).getCollectionStatusDetail());
+        Assert.assertNull(track.getCollectionStatusDetail());
+        Assert.assertNull(migrationTrackEntityMgr.findByKey(track).getCollectionStatusDetail());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
     public void testStatsCubesData(Tenant tenant, MigrationTrack track) {
-        Assert.assertEquals(track.getStatsCubesData(), migrationTrackEntityMgr.findByKey(track).getStatsCubesData());
+        Assert.assertArrayEquals(track.getStatsCubesData(),
+                migrationTrackEntityMgr.findByKey(track).getStatsCubesData());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
     public void testStatsData(Tenant tenant, MigrationTrack track) {
-        Assert.assertEquals(track.getStatsData(), migrationTrackEntityMgr.findByKey(track).getStatsData());
+        Assert.assertArrayEquals(track.getStatsData(), migrationTrackEntityMgr.findByKey(track).getStatsData());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
@@ -129,6 +130,9 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
             track1.setStatsName(STATSNAME);
             track1.setTenant(tenant1);
             track1.setCurActiveTable(ACTIVETABLE);
+            track1.setCollectionStatusDetail(null);
+            track1.setStatsCubesData(new byte[1]);
+            track1.setStatsData(new byte[1]);
             Assert.assertNotNull(track1);
             migrationTrackEntityMgr.create(track1);
         } else {
@@ -142,6 +146,9 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
             track2.setStatsName(STATSNAME);
             track2.setTenant(tenant2);
             track2.setCurActiveTable(ACTIVETABLE);
+            track2.setCollectionStatusDetail((null));
+            track2.setStatsCubesData(new byte[5]);
+            track2.setStatsData(new byte[5]);
             Assert.assertNotNull(track2);
             migrationTrackEntityMgr.create(track2);
         } else {
