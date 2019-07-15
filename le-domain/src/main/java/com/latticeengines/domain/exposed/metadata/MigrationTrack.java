@@ -63,12 +63,16 @@ public class MigrationTrack implements HasPid, HasTenant {
     @Type(type = "json")
     @Column(name = "CUR_ACTIVE_TABLE_NAME", columnDefinition = "'JSON'")
     // Role -> Table.PID
-    private Map<TableRoleInCollection, Long> curActiveTable; // List of all active tables' names under tenant
+    private Map<String, Long> curActiveTable; // List of all active tables' id under tenant
 
     @Type(type = "json")
     @JsonProperty("importAction")
     @Column(name = "IMPORT_ACTION", columnDefinition = "'JSON'")
     private MigrationTrackImportAction importAction; // mimic import actions
+
+    @Type(type = "json")
+    @Column(name = "DETAIL", columnDefinition = "'JSON'")
+    private DataCollectionStatusDetail collectionStatusDetail;
 
     @Column(name = "CUBES_DATA")
     @Lob
@@ -128,11 +132,11 @@ public class MigrationTrack implements HasPid, HasTenant {
         this.version = version;
     }
 
-    public Map<TableRoleInCollection, Long> getCurActiveTable() {
+    public Map<String, Long> getCurActiveTable() {
         return curActiveTable;
     }
 
-    public void setCurActiveTable(Map<TableRoleInCollection, Long> curActiveTable) {
+    public void setCurActiveTable(Map<String, Long> curActiveTable) {
         this.curActiveTable = curActiveTable;
     }
 
@@ -142,6 +146,14 @@ public class MigrationTrack implements HasPid, HasTenant {
 
     public void setImportAction(MigrationTrackImportAction importAction) {
         this.importAction = importAction;
+    }
+
+    public DataCollectionStatusDetail getCollectionStatusDetail() {
+        return collectionStatusDetail;
+    }
+
+    public void setCollectionStatusDetail(DataCollectionStatusDetail collectionStatusDetail) {
+        this.collectionStatusDetail = collectionStatusDetail;
     }
 
     public byte[] getStatsCubesData() {
