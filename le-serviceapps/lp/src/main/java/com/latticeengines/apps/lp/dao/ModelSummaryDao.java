@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -33,5 +34,7 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 
     boolean hasBucketMetadata(String modelId);
+
+    List<ModelSummary> findModelSummariesByIds(Set<String> ids);
 
 }

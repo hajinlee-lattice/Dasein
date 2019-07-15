@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.dao.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Table;
 
@@ -212,6 +213,17 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         query.setParameter("modelId", modelId);
         List list = query.list();
         return CollectionUtils.isNotEmpty(list);
+    }
+
+    @Override
+    public List<ModelSummary> findModelSummariesByIds(Set<String> ids) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where id in (:ids)",
+                entityClz.getSimpleName());
+        Query<ModelSummary> query = session.createQuery(queryStr);
+        query.setParameter("ids", ids);
+        return query.list();
     }
 
 }

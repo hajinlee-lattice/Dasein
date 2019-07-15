@@ -19,6 +19,8 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.core.annotation.ClearModelSummary;
+import com.latticeengines.apps.lp.cache.ModelSummaryCacheWriter;
 import com.latticeengines.apps.lp.dao.ModelSummaryDao;
 import com.latticeengines.apps.lp.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.apps.lp.dao.PredictorDao;
@@ -62,11 +64,36 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Inject
     private ModelSummaryProvenancePropertyDao modelSummaryProvenancePropertyDao;
 
+    @Inject
+    private ModelSummaryCacheWriter modelSummaryCacheWriter;
+
     @Override
     public BaseDao<ModelSummary> getDao() {
         return dao;
     }
 
+    @ClearModelSummary
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void delete(ModelSummary modelSummary) {
+        super.delete(modelSummary);
+    }
+
+    @ClearModelSummary
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void update(ModelSummary modelSummary) {
+        super.update(modelSummary);
+    }
+
+    @ClearModelSummary
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void createOrUpdate(ModelSummary modelSummary) {
+        super.createOrUpdate(modelSummary);
+    }
+
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
@@ -235,13 +262,14 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return MultiTenantContext.getTenant().getPid();
     }
 
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByModelId(String modelId) {
         ModelSummary summary = findValidByModelId(modelId);
 
         if (summary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18007, new String[]{modelId});
         }
         super.delete(summary);
 
@@ -265,13 +293,14 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         keyValueDao.delete(kv);
     }
 
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
         String modelId = modelSummary.getId();
 
         if (modelId == null) {
-            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
+            throw new LedpException(LedpCode.LEDP_18008, new String[]{"Id"});
         }
 
         // If it's a status update, then allow for getting deleted models
@@ -280,7 +309,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         ModelSummary summary = findByModelId(modelId, false, true, !statusUpdate);
 
         if (summary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18007, new String[]{modelId});
         }
 
         // Update status
@@ -290,13 +319,14 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         updateDisplayName(summary, attrMap);
     }
 
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
         ModelSummary summary = findByModelId(modelId, false, true, false);
 
         if (summary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18007, new String[]{modelId});
         }
 
         if (status == ModelSummaryStatus.DELETED && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
@@ -330,6 +360,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
 
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public void updateLastUpdateTime(ModelSummary summary) {
@@ -408,6 +439,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return summary;
     }
 
+    @ClearModelSummary
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByModelIdForInternalOperations(String modelId) {
@@ -416,7 +448,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             keyValueDao.delete(summary.getDetails());
         }
         if (summary.getPredictors() != null) {
-            for (Predictor predictor: summary.getPredictors()) {
+            for (Predictor predictor : summary.getPredictors()) {
                 predictorDao.delete(predictor);
             }
         }
@@ -550,13 +582,19 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> findModelSummariesByIds(Set<String> ids) {
+        return dao.findModelSummariesByIds(ids);
+    }
+
+    @ClearModelSummary
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateLastUpdateTime(String modelGuid) {
         ModelSummary summary = dao.findByModelId(modelGuid);
         if (summary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelGuid });
+            throw new LedpException(LedpCode.LEDP_18007, new String[]{modelGuid});
         }
-
         summary.setLastUpdateTime(System.currentTimeMillis());
         dao.merge(summary);
     }
