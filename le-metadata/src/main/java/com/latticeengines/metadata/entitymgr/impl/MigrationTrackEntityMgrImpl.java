@@ -2,6 +2,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
@@ -32,6 +34,7 @@ public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Mig
         return migrationTrackRepository;
     }
 
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public MigrationTrack findByTenant(Tenant tenant) {
         return migrationTrackRepository.findByTenant(tenant);
