@@ -41,7 +41,8 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             return;
         }
         if (s3ImportSystemEntityMgr.findS3ImportSystem(importSystem.getName()) != null) {
-            throw new RuntimeException("Already have import system with name: " + importSystem.getName());
+            throw new LedpException(LedpCode.LEDP_40066, new String[] {
+                    "Already have import system with name: " + importSystem.getName()});
         }
         List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
         if (CollectionUtils.isEmpty(currentSystems)) {
