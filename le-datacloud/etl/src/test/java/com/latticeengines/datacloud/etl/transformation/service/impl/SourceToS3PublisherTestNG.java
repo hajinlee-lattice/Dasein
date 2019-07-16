@@ -77,7 +77,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     @Inject
     private S3Service s3Service;
 
-    @Autowired
+    @Inject
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Value("${datacloud.collection.s3bucket}")
