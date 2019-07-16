@@ -115,6 +115,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     };
 
+    // Source -> [S3ToGlacierDays,ExpireDays]
     @SuppressWarnings("serial")
     private Map<Source, List<Integer>> expectedDays = new HashMap<Source, List<Integer>>() {
         {
@@ -139,7 +140,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     @AfterClass(groups = "pipeline1", enabled = true)
     private void destroy() {
-        cleanup();
+        cleanupPods();
         cleanupPurgeStrategy();
     }
 
@@ -303,7 +304,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         String sourceName = baseSource.getSourceName();
         try {
             log.info("Checking the objects of Source: {}", sourceName);
-            List<Integer> days = expectedDays.get(baseSource);///
+
+            List<Integer> days = expectedDays.get(baseSource);
 
             // Verify data files
             List<String> dataFiles = getExpectedDataFiles(baseSource);
@@ -340,6 +342,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     }
 
     private void validateTagSuccess(List<Integer> days, List<Tag> tags) {
+        Assert.assertNotNull(tags);
         Assert.assertEquals(tags.size(), 2);
         Assert.assertEquals(tags.get(0).getKey(), "S3ToGlacierDays");
         Assert.assertEquals(tags.get(1).getKey(), "ExpireDays");
@@ -376,7 +379,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
      * Final cleanup
      *****************/
 
-    private void cleanup() {
+    private void cleanupPods() {
         String podDir = hdfsPathBuilder.podDir().toString();
         try {
             cleanupS3Path(podDir);

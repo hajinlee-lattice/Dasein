@@ -1,9 +1,12 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.publish;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.EXPIRE_DAYS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.S3_TO_GLACIER_DAYS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.SERVICE_TENANT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOURCE_TO_S3_PUBLISHER;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -12,6 +15,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.slf4j.Logger;
@@ -52,10 +56,10 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     private Configuration yarnConfiguration;
 
     @Inject
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Inject
-    protected PurgeStrategyEntityMgr purgeStrategyEntityMgr;
+    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -92,14 +96,21 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String dataPath = getSourceHdfsDir(step, i);
                 String versionFilePath = getBaseSourceVersionFilePath(step, i);
 
-                copyAndValidate(sourceName, dataPath, true);
-                objectTagging(source, dataPath);
+                PurgeStrategy ps = getPurgeStrategy(source);
+
+                List<String> files = getDirFiles(dataPath);
+                copyAndValidate(sourceName, dataPath, files, true);
+                objectTagging(ps, dataPath, files);
+
                 if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
-                    copyAndValidate(sourceName, schemaPath, true);
-                    objectTagging(source, schemaPath);
+                    files = getDirFiles(schemaPath);
+                    copyAndValidate(sourceName, schemaPath, files, true);
+                    objectTagging(ps, dataPath, files);
                 }
+
                 if (shouldCopyVersionFile(source, versionFilePath)) {
-                    copyAndValidate(sourceName, versionFilePath, false);
+                    files = getDirFiles(versionFilePath);
+                    copyAndValidate(sourceName, versionFilePath, files, false);
                 }
             }
             step.setTarget(null);
@@ -112,33 +123,41 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private void objectTagging(Source source, String prefix) {///
-        PurgeStrategy ps = purgeStrategyEntityMgr.findStrategyBySourceAndType(source.getSourceName(),
-                PurgeStrategyUtils.getSourceType(source));
-        boolean isDefaultSetting = (ps == null) || (ps.getGlacierDays() == null) || (ps.getS3Days() == null);
-        Integer glacierDays = isDefaultSetting ? 180 : ps.getGlacierDays();
-        Integer s3Days = isDefaultSetting ? 180 : ps.getS3Days();
-        singleTagS3Object(prefix, "S3ToGlacierDays", s3Days.toString());
-        singleTagS3Object(prefix, "ExpireDays", Integer.toString(s3Days + glacierDays));
+    private void objectTagging(PurgeStrategy ps, String prefix, List<String> files) {
+        Integer glacierDays = (ps == null) || (ps.getGlacierDays() == null) ? 180 : ps.getGlacierDays();
+        Integer s3Days = (ps == null) || (ps.getS3Days() == null) ? 180 : ps.getS3Days();
+        List<Pair<String, String>> keyAndValues = Arrays.asList(Pair.of(S3_TO_GLACIER_DAYS, s3Days.toString()),
+                Pair.of(EXPIRE_DAYS, Integer.toString(s3Days + glacierDays)));
+        keyAndValues.forEach(keyAndValue -> log.info("Adding tag {} with value {} on objects with prefix {}",
+                keyAndValue.getKey(), keyAndValue.getValue(), prefix));
+        tagS3Objects(files, keyAndValues);
     }
 
-    private void singleTagS3Object(String prefix, String tagKey, String tagValue) {///
-        List<String> files = getDirFiles(prefix);
+    private PurgeStrategy getPurgeStrategy(Source source) {
+        return purgeStrategyEntityMgr.findStrategyBySourceAndType(source.getSourceName(),
+                PurgeStrategyUtils.getSourceType(source));
+    }
+
+    private void tagS3Objects(List<String> files, List<Pair<String, String>> keyAndValues) {
         files.forEach(s3Path -> {
-            try {
-                String s3Key = sanitizePrefix(s3Path);
-                log.info("Tagging s3 file {} with tag {}", s3Key, tagKey);
-                s3Service.addTagToObject(s3Bucket, s3Key, tagKey, tagValue);
-            } catch (Exception e) {
-                log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, tagKey, tagValue));
+            String s3Key = sanitizePrefix(s3Path);
+            for (Pair<String, String> keyAndValue : keyAndValues) {
+                try {
+                    s3Service.addTagToObject(s3Bucket, s3Key, keyAndValue.getKey(), keyAndValue.getValue());
+                }
+                catch (Exception e) {
+                    log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, keyAndValue.getKey(),
+                            keyAndValue.getValue()));
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
 
-    private void copyAndValidate(String sourceName, String hdfsDir, boolean isDir) {
+    private void copyAndValidate(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
         String s3Prefix = gets3nPath(hdfsDir);
         copyToS3(sourceName, hdfsDir, s3Prefix, isDir);
-        validateCopySuccess(hdfsDir);
+        validateCopySuccess(hdfsDir, files);
     }
 
     private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir) {
@@ -172,10 +191,8 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private void validateCopySuccess(String hdfsDir) {
+    private void validateCopySuccess(String hdfsDir, List<String> files) {
         try {
-            List<String> files = getDirFiles(hdfsDir);
-
             for (String file : files) {
                 String filePath = file.substring(file.indexOf(hdfsDir));
                 if (!s3Service.objectExist(s3Bucket, filePath)) {
@@ -188,7 +205,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private List<String> getDirFiles(String hdfsDir) {///
+    private List<String> getDirFiles(String hdfsDir) {
         try {
             return HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false);
         } catch (IOException e) {
@@ -249,7 +266,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private String sanitizePrefix(String prefix) {///
+    private String sanitizePrefix(String prefix) {
         if (prefix.startsWith("hdfs://localhost:9000")) {
             prefix = prefix.substring(22);
         }
