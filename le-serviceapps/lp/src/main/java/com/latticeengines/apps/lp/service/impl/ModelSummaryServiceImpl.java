@@ -35,6 +35,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.apps.lp.service.ModelSummaryCacheService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -49,6 +50,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.EntityListCache;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -107,6 +109,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Inject
     private FeatureImportanceParser featureImportanceParser;
 
+    @Inject
+    private ModelSummaryCacheService modelSummaryCacheService;
+
     @Autowired
     @Qualifier("commonTaskExecutor")
     private ThreadPoolTaskExecutor modelSummaryDownloadExecutor;
@@ -134,7 +139,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
-            boolean validOnly) {
+                                      boolean validOnly) {
         return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
     }
 
@@ -190,7 +195,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public List<ModelSummary> findPaginatedModels(long lastUpdateTime, boolean considerAllStatus, int offset,
-            int maximum) {
+                                                  int maximum) {
         return modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum);
     }
 
@@ -237,6 +242,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     @Override
     public boolean hasBucketMetadata(String modelId) {
         return modelSummaryEntityMgr.hasBucketMetadata(modelId);
+    }
+
+    @Override
+    public List<ModelSummary> findModelSummariesByIds(Set<String> ids) {
+        return modelSummaryEntityMgr.findModelSummariesByIds(ids);
     }
 
     @Override
@@ -521,11 +531,28 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public List<ModelSummary> getModelSummaries(String selection) {
         List<ModelSummary> summaries;
         if (selection != null && selection.equalsIgnoreCase("all")) {
-            summaries = getAll();
+            try {
+                Tenant tenant = MultiTenantContext.getTenant();
+                EntityListCache<ModelSummary> entityListCache = modelSummaryCacheService.getEntitiesAndNonExistEntitityIdsByTenant(tenant);
+                summaries = entityListCache.getExistEntities();
+                Set<String> nonExistIds = entityListCache.getNonExistIds();
+                if (summaries.size() == 0) {
+                    summaries = getAll();
+                    if (summaries.size() > 0) {
+                        modelSummaryCacheService.buildEntitiesCache(tenant);
+                    }
+                } else if (nonExistIds.size() > 0) {
+                    summaries.addAll(findModelSummariesByIds(nonExistIds));
+                    // need to rebuild cache here
+                    modelSummaryCacheService.buildEntitiesCache(tenant);
+                }
+            } catch (Exception exception) {
+                // redis cache is in building, so don't use the redis data
+                summaries = getAll();
+            }
         } else {
             summaries = findAllValid();
         }
-
         List<SourceFile> sourceFiles = sourceFileService.findAllSourceFiles();
         Set<String> trainingTableNames = new HashSet<>();
         if (CollectionUtils.isNotEmpty(sourceFiles)) {
@@ -571,7 +598,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     public void updateModelSummary(String modelId, AttributeMap attrMap) {
         ModelSummary modelSummary = getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18007, new String[]{modelId});
         }
         updateModelSummary(modelSummary, attrMap);
     }
@@ -594,10 +621,10 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     }
 
     private boolean downloadModelSummaryForTenant(String tenantId,
-            Map<String, String> modelApplicationIdToEventColumn) {
+                                                  Map<String, String> modelApplicationIdToEventColumn) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+            throw new LedpException(LedpCode.LEDP_18074, new String[]{tenantId});
         }
 
         Set<String> applicationFilters = null;
@@ -656,7 +683,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public Map<String, ModelSummary> getEventToModelSummary(String tenantId,
-            Map<String, String> modelApplicationIdToEventColumn) {
+                                                            Map<String, String> modelApplicationIdToEventColumn) {
         Map<String, ModelSummary> eventToModelSummary = new HashMap<>();
         Set<String> foundModels = new HashSet<>();
 
@@ -707,7 +734,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
             Joiner joiner = Joiner.on(",").skipNulls();
             throw new LedpException(LedpCode.LEDP_28013,
-                    new String[] { joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels) });
+                    new String[]{joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels)});
         }
 
         return eventToModelSummary;

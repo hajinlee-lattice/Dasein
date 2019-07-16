@@ -6,7 +6,10 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.cache.ModelSummaryCacheWriter;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
@@ -45,6 +49,9 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     private ModelSummary summary1;
     private ModelSummary summary2;
 
+    @Autowired
+    private ModelSummaryCacheWriter modelSummaryCacheWriter;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         testBed.bootstrap(2);
@@ -59,6 +66,8 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     public void teardown() throws Exception {
         testBed.deleteTenant(tenant1);
         testBed.deleteTenant(tenant2);
+        assertEquals(modelSummaryCacheWriter.getEntitiesByTenant(tenant1).size(), 0);
+        assertNull(modelSummaryCacheWriter.getEntityById(summary1.getId()));
     }
 
     private void setDetails(ModelSummary summary) throws Exception {
@@ -142,6 +151,12 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         s1el2.setVisible(true);
         s1p1.addPredictorElement(s1el2);
 
+
+        List<Predictor> predictors = summary1.getPredictors();
+        KeyValue keyValue = summary1.getDetails();
+        modelSummaryCacheWriter.setIdsAndEntitiesByTenant(tenant1, Collections.singletonList(summary1));
+        summary1.setPredictors(predictors);
+        summary1.setDetails(keyValue);
         modelSummaryEntityMgr.create(summary1);
         return summary1;
     }
@@ -461,6 +476,25 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
             assertEquals(details.getTenantId(), ms.getTenantId());
             assertEquals(ms.getDataCloudVersion(), "2.0.3");
         }
+    }
+
+    private void verifyFindModelSummariesByIds(ModelSummary modelSummary) {
+        setupSecurityContext(modelSummary);
+        Set<String> ids = new HashSet<>();
+        ids.add(modelSummary.getId());
+        List<ModelSummary> summaries = modelSummaryEntityMgr
+                .findModelSummariesByIds(ids);
+        assertNotNull(summaries);
+        Object[] result = summaries.stream()
+                .filter(summary -> summary.getId().equals(modelSummary.getId()))
+                .toArray();
+        assertEquals(result.length, 1);
+    }
+
+    @Test(groups = "functional")
+    public void testFindModelSummariesByIds() {
+        verifyFindModelSummariesByIds(summary1);
+        verifyFindModelSummariesByIds(summary2);
     }
 
     private AttributeMap createValidMap() {
