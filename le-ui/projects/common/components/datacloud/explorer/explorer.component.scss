@@ -2119,7 +2119,9 @@ attr-categories,
             }
         }
     }
-    .category-product, .category-product-spend, .category-product-spend-profile {
+    .category-product, 
+    .category-product-spend, 
+    .category-product-spend-profile {
         &.color {
             color: #cd80bc;
         }
@@ -2202,12 +2204,102 @@ attr-categories,
             }
         }
     }
-    .category-contact-attributes, 
-    .category-my-contact, 
-    .category-my-account,
     .category-curated-account,
-    .category-curated-account-attributes,
+    .category-curated-account-attributes {
+        &.color {
+            color: #a5bd46;
+        }
+        .category-icon,
+        &.border {
+            border-color: #a5bd46;
+        }
+        &.border-top {
+            border-top-color: #a5bd46;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(165,189,70);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
+            border-color: #a5bd46 !important;
+        }
+        .background-color {
+            background-color: #a5bd46;
+        }
+        &.box-inner {
+            li.attribute .column.checkspace i {
+                color: #a5bd46;
+            }
+            li.attribute:hover {
+                background-color: #a5bd46 !important;
+            }
+        }
+    }
+    .category-contact-attributes {
+        &.color {
+            color: #21a585;
+        }
+        .category-icon,
+        &.border {
+            border-color: #21a585;
+        }
+        &.border-top {
+            border-top-color: #21a585;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(33,165,133);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
+            border-color: #21a585 !important;
+        }
+        .background-color {
+            background-color: #21a585;
+        }
+        &.box-inner {
+            li.attribute .column.checkspace i {
+                color: #21a585;
+            }
+            li.attribute:hover {
+                background-color: #21a585 !important;
+            }
+        }
+    }
     .category-my-attributes {
+        &.color {
+            color: #5f529e;
+        }
+        .category-icon,
+        &.border {
+            border-color: #5f529e;
+        }
+        &.border-top {
+            border-top-color: #5f529e;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(95,82,158);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
+            border-color: #5f529e !important;
+        }
+        .background-color {
+            background-color: #5f529e;
+        }
+        &.box-inner {
+            li.attribute .column.checkspace i {
+                color: #5f529e;
+            }
+            li.attribute:hover {
+                background-color: #5f529e !important;
+            }
+        }
+    }
+    .category-my-contact, 
+    .category-my-account {
         &.color {
             color: #457EBA;
         }
@@ -2262,14 +2354,14 @@ attr-categories,
 
     .category-lattice-ratings {
         &.color {
-            color: #2E6099;
+            color: #f2702f;
         }
         .category-icon,
         &.border {
-            border-color: #2E6099;
+            border-color: #f2702f;
         }
         &.border-top {
-            border-top-color: #2E6099;
+            border-top-color: #f2702f;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2277,17 +2369,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #2E6099 !important;
+            border-color: #f2702f !important;
         }
         .background-color {
-            background-color: #2E6099;
+            background-color: #f2702f;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #2E6099;
+                color: #f2702f;
             }
             li.attribute:hover {
-                background-color: #2E6099 !important;
+                background-color: #f2702f !important;
             }
         }
         &.button {
@@ -2298,14 +2390,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #2E6099;
+                color: #f2702f;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #2E6099;
+                background-color: #f2702f;
                 .free-text {
                     color: #ffffff;
                 }
