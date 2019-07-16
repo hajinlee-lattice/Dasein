@@ -223,7 +223,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels, boolean enableS3) {
-        if (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3) {
+        if (mapping.getExternalSystemName() == null
+                || (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3)) {
             return;
         }
         String configId = mapping.getId();
