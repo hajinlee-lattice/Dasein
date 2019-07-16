@@ -5,9 +5,13 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -21,12 +25,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.apps.lp.service.ModelSummaryCacheService;
 import com.latticeengines.apps.lp.service.ModelSummaryService;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.CompressionUtils;
@@ -35,6 +39,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.EntityListCache;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -52,6 +57,9 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
     @InjectMocks
     @Inject
     private ModelSummaryService modelSummaryService;
+
+    @Inject
+    private ModelSummaryCacheService modelSummaryCacheService;
 
     @Spy
     @Inject
@@ -77,6 +85,8 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
 
     private String editedDisplayName = "Industry Rollup edited";
 
+    private List<ModelSummary> allModelSummaries;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -85,8 +95,14 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-
-        summary1 = createModelSummaryForTenant1();
+        tenant1 = new Tenant();
+        tenant1.setId("TENANT1");
+        tenant1.setName("TENANT1");
+        tenantEntityMgr.create(tenant1);
+        MultiTenantContext.setTenant(tenant1);
+        summary1 = createModelSummaryForTenant1(tenant1);
+        allModelSummaries = createModelSummariesForTenant(tenant1);
+        allModelSummaries.add(summary1);
         List<AttrConfig> attrConfigs = attrConfigEntityMgr.findAllForEntity(tenant1.getId(), BusinessEntity.Account);
         if (CollectionUtils.isNotEmpty(attrConfigs)) {
             attrConfigEntityMgr.deleteAllForEntity(tenant1.getId(), BusinessEntity.Account);
@@ -111,6 +127,8 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         tenantService.discardTenant(tenant1);
 
         attrConfigEntityMgr.deleteAllForEntity(tenant1.getId(), BusinessEntity.Account);
+        modelSummaryCacheService.deleteIdsAndEntitiesByTenant(tenant1);
+        assertTrue(modelSummaryCacheService.getEntitiesByTenant(tenant1).isEmpty());
     }
 
     private void setDetails(ModelSummary summary) throws Exception {
@@ -123,32 +141,26 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         summary.setDetails(details);
     }
 
-    private ModelSummary createModelSummaryForTenant1() throws Exception {
-        tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
-
-        MultiTenantContext.setTenant(tenant1);
-        summary1 = new ModelSummary();
-        summary1.setId(UUID.randomUUID().toString());
-        summary1.setName("Model1");
-        summary1.setRocScore(0.75);
-        summary1.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
-        summary1.setTrainingRowCount(8000L);
-        summary1.setTestRowCount(2000L);
-        summary1.setTotalRowCount(10000L);
-        summary1.setTrainingConversionCount(80L);
-        summary1.setTestConversionCount(20L);
-        summary1.setTotalConversionCount(100L);
-        summary1.setConstructionTime(System.currentTimeMillis());
-        summary1.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
-        if (summary1.getConstructionTime() == null) {
-            summary1.setConstructionTime(System.currentTimeMillis());
+    private ModelSummary createModelSummaryForTenant1(Tenant tenant) throws Exception {
+        ModelSummary modelSummary = new ModelSummary();
+        modelSummary.setId(UUID.randomUUID().toString());
+        modelSummary.setName("Model1");
+        modelSummary.setRocScore(0.75);
+        modelSummary.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
+        modelSummary.setTrainingRowCount(8000L);
+        modelSummary.setTestRowCount(2000L);
+        modelSummary.setTotalRowCount(10000L);
+        modelSummary.setTrainingConversionCount(80L);
+        modelSummary.setTestConversionCount(20L);
+        modelSummary.setTotalConversionCount(100L);
+        modelSummary.setConstructionTime(System.currentTimeMillis());
+        modelSummary.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
+        if (modelSummary.getConstructionTime() == null) {
+            modelSummary.setConstructionTime(System.currentTimeMillis());
         }
-        summary1.setLastUpdateTime(summary1.getConstructionTime());
-        summary1.setTenant(tenant1);
-        setDetails(summary1);
+        modelSummary.setLastUpdateTime(modelSummary.getConstructionTime());
+        modelSummary.setTenant(tenant1);
+        setDetails(modelSummary);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
         s1p1.setCategory("Banking");
@@ -157,7 +169,7 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         s1p1.setFundamentalType("");
         s1p1.setUncertaintyCoefficient(0.151911);
         s1p1.setUsedForBuyerInsights(true);
-        summary1.addPredictor(s1p1);
+        modelSummary.addPredictor(s1p1);
         Predictor s1p2 = new Predictor();
         s1p2.setApprovedUsage("ModelAndModelInsights");
         s1p2.setCategory(Category.LEAD_INFORMATION.getName());
@@ -166,7 +178,7 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         s1p2.setFundamentalType("");
         s1p2.setUncertaintyCoefficient(0.251911);
         s1p2.setUsedForBuyerInsights(true);
-        summary1.addPredictor(s1p2);
+        modelSummary.addPredictor(s1p2);
         Predictor s1p3 = new Predictor();
         s1p3.setApprovedUsage("ModelAndModelInsights");
         s1p3.setCategory("Finance");
@@ -175,8 +187,8 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         s1p3.setFundamentalType("numeric");
         s1p3.setUncertaintyCoefficient(0.171911);
         s1p3.setUsedForBuyerInsights(false);
-        summary1.addPredictor(s1p3);
-        summary1.setModelType(ModelType.PYTHONMODEL.getModelType());
+        modelSummary.addPredictor(s1p3);
+        modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
 
         PredictorElement s1el1 = new PredictorElement();
         s1el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
@@ -200,12 +212,12 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         s1el2.setVisible(true);
         s1p1.addPredictorElement(s1el2);
 
-        modelSummaryService.createModelSummary(summary1, tenant1.getId());
-        return summary1;
+        modelSummaryService.createModelSummary(modelSummary, tenant.getId());
+        return modelSummary;
     }
 
     @Test(groups = "functional")
-    public void findByModelId() throws JsonProcessingException, IOException {
+    public void findByModelId() throws IOException, ExecutionException, InterruptedException {
         ModelSummary retrievedSummary = modelSummaryService.getModelSummary(summary1.getId());
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
@@ -241,6 +253,30 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         KeyValue keyValue2 = retrievedSummary.getDetails();
         String uncompressedStr2 = new String(CompressionUtils.decompressByteArray(keyValue2.getData()));
         assertEquals(uncompressedStr, uncompressedStr2);
+        modelSummaryCacheService.setIdsAndEntitiesByTenant(tenant1, allModelSummaries);
+        List<ModelSummary> modelSummaries = modelSummaryService.getModelSummaries("all");
+        assertEquals(modelSummaries.size(), 6);
+        Future<?> future = modelSummaryCacheService.clearCache(tenant1, allModelSummaries.get(0).getId());
+        future.get();
+        EntityListCache entityListCache = modelSummaryCacheService.getEntitiesAndNonExistEntitityIdsByTenant(tenant1);
+        assertEquals(entityListCache.getNonExistIds().size(), 0);
+        assertEquals(entityListCache.getExistEntities().size(), 0);
+        modelSummaries = modelSummaryService.getModelSummaries("all");
+        assertEquals(modelSummaries.size(), 6);
+        List<String> ids = allModelSummaries.stream().map(ModelSummary::getId).collect(Collectors.toList());
+        int time = 3;
+        // make sure build cache process is completed
+        while (modelSummaryCacheService.getEntitiesByIds(ids).size() != 6 && time > 0) {
+            time--;
+            Thread.sleep(500);
+        }
+        ids = ids.subList(0, 3);
+        modelSummaryCacheService.deleteEntitiesByIds(ids);
+        entityListCache = modelSummaryCacheService.getEntitiesAndNonExistEntitityIdsByTenant(tenant1);
+        assertEquals(entityListCache.getNonExistIds().size(), 3);
+        assertEquals(entityListCache.getExistEntities().size(), 3);
+        modelSummaries = modelSummaryService.getModelSummaries("all");
+        assertEquals(modelSummaries.size(), 6);
     }
 
     private void testFixCustomDisplayNames(JsonNode predictor) {
@@ -264,5 +300,13 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
     private void testFixAccountCategory(JsonNode predictor) {
         String category = predictor.get(ModelSummaryServiceImpl.CATEGORY).asText();
         assertEquals(category, Category.ACCOUNT_INFORMATION.getName());
+    }
+
+    private List<ModelSummary> createModelSummariesForTenant(Tenant tenant) throws Exception {
+        List<ModelSummary> modelSummaries = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            modelSummaries.add(createModelSummaryForTenant1(tenant));
+        }
+        return modelSummaries;
     }
 }
