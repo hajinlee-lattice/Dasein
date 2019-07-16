@@ -150,7 +150,13 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         s1el2.setUncertaintyCoefficient(0.000499);
         s1el2.setVisible(true);
         s1p1.addPredictorElement(s1el2);
+
+
+        List<Predictor> predictors = summary1.getPredictors();
+        KeyValue keyValue = summary1.getDetails();
         modelSummaryCacheWriter.setIdsAndEntitiesByTenant(tenant1, Collections.singletonList(summary1));
+        summary1.setPredictors(predictors);
+        summary1.setDetails(keyValue);
         modelSummaryEntityMgr.create(summary1);
         return summary1;
     }
