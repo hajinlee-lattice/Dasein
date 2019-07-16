@@ -21,12 +21,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.services.s3.model.Tag;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -34,8 +36,11 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.publish.SourceToS3Publisher;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
@@ -57,7 +62,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     // Sources for multi-source step
     private IngestionSource baseSrc5 = new IngestionSource("TestSource5");
-    private GeneralSource baseSrc6 = new GeneralSource("TestSource6");
+    private GeneralSource baseSrc6 = new GeneralSource("AccountMaster");
 
     // Place holder of target source whose name is used as pod
     private GeneralSource source = new GeneralSource(
@@ -71,6 +76,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
     @Inject
     private S3Service s3Service;
+
+    @Autowired
+    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
@@ -108,6 +116,18 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     };
 
+    @SuppressWarnings("serial")
+    private Map<Source, List<Integer>> expectedDays = new HashMap<Source, List<Integer>>() {
+        {
+            put(baseSrc1, Arrays.asList(180, 360));
+            put(baseSrc2, Arrays.asList(180, 360));
+            put(baseSrc3, Arrays.asList(180, 360));
+            put(baseSrc4, Arrays.asList(70, 470));
+            put(baseSrc5, Arrays.asList(50, 550));
+            put(baseSrc6, Arrays.asList(30, 1200));
+        }
+    };
+
     @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
         prepareData();
@@ -121,6 +141,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     @AfterClass(groups = "pipeline1", enabled = true)
     private void destroy() {
         cleanup();
+        cleanupPurgeStrategy();
     }
 
     /****************************************
@@ -182,6 +203,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void prepareData() {
         try {
             s3FilePrepare();
+            preparePurgeStrategySource();
 
             uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
             uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
@@ -198,6 +220,28 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         } catch (Exception e) {
             throw new RuntimeException("Fail to prepare data.", e);
         }
+    }
+
+    private void preparePurgeStrategySource() {
+        PurgeStrategy ps1 = new PurgeStrategy();
+        ps1.setSource(baseSrc6.getSourceName());
+        ps1.setSourceType(SourceType.AM_SOURCE);
+        ps1.setS3Days(30);
+        ps1.setGlacierDays(1170);
+        ps1.setNoBak(false);
+
+        PurgeStrategy ps2 = new PurgeStrategy();
+        ps2.setSource(baseSrc5.getSourceName());
+        ps2.setSourceType(SourceType.INGESTION_SOURCE);
+        ps2.setS3Days(50);
+        ps2.setGlacierDays(500);
+
+        PurgeStrategy ps3 = new PurgeStrategy();
+        ps3.setSource(baseSrc4.getSourceName());
+        ps3.setSourceType(SourceType.GENERAL_SOURCE);
+        ps3.setS3Days(70);
+        ps3.setGlacierDays(400);
+        purgeStrategyEntityMgr.insertAll(Arrays.asList(ps1, ps2, ps3));
     }
 
     private void createSchema(Source baseSource, String version) {
@@ -260,22 +304,22 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         String sourceName = baseSource.getSourceName();
         try {
             log.info("Checking the objects of Source: {}", sourceName);
+            List<Integer> days = expectedDays.get(baseSource);///
 
             // Verify data files
             List<String> dataFiles = getExpectedDataFiles(baseSource);
-            validateCopySuccess(dataFiles);
+            validateCopySuccess(dataFiles, days, true);
 
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
                         .append(sourceName + ".avsc").toString();
-                validateCopySuccess(Arrays.asList(schemaFile));
-
+                validateCopySuccess(Arrays.asList(schemaFile), days, true);
             }
 
             // Verify current version file
             String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
-            validateCopySuccess(Arrays.asList(versionFilePath));
+            validateCopySuccess(Arrays.asList(versionFilePath), days, false);
             verifyVersionFile(baseSource, versionFilePath);
            
         } catch (Exception e) {
@@ -296,6 +340,15 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
+    private void validateTag(List<Integer> days, String key) {
+        List<Tag> tags = s3Service.getObjectTags(s3Bucket, key);
+        Assert.assertEquals(tags.size(), 2);
+        Assert.assertEquals(tags.get(0).getKey(), "S3ToGlacierDays");
+        Assert.assertEquals(tags.get(1).getKey(), "ExpireDays");
+        Assert.assertEquals(tags.get(0).getValue(), days.get(0).toString());
+        Assert.assertEquals(tags.get(1).getValue(), days.get(1).toString());
+    }
+
     private List<String> getExpectedDataFiles(Source baseSource) {
         Path dataPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, basedSourceVersion);
         List<String> expectedFiles = expectedDataFiles.get(baseSource);
@@ -307,12 +360,15 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files) {
+    private void validateCopySuccess(List<String> files, List<Integer> days, boolean isTagCheck) {
         files.forEach(file -> {
             try {
                 Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
             } catch (Exception e) {
                 throw new RuntimeException("Fail to validate publishing:" + file, e);
+            }
+            if (isTagCheck) {
+                validateTag(days, file);
             }
         });
     }
@@ -339,6 +395,12 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         } catch (Exception e) {
             throw new RuntimeException("Fail to clean up s3: " + path, e);
         }
+    }
+
+    private void cleanupPurgeStrategy() {
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc4.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc5.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc6.getSourceName()));
     }
 
     @Override

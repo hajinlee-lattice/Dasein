@@ -30,6 +30,8 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Rule;
 import com.amazonaws.services.s3.model.BucketPolicy;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
@@ -459,6 +461,15 @@ public class S3ServiceImpl implements S3Service {
         GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucket, key);
         GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
         return getTagsResult.getTagSet();
+    }
+
+    @Override
+    public List<Rule> getBucketLifecycleConfigurationRules(String bucket) {
+        BucketLifecycleConfiguration configuration = s3Client.getBucketLifecycleConfiguration(bucket);
+        if (configuration != null) {
+            return configuration.getRules();
+        }
+        return null;
     }
 
     private AmazonS3 s3Client() {

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
@@ -49,6 +50,8 @@ public interface S3Service {
     boolean isNonEmptyDirectory(String bucket, String prefix);
 
     void changeKeyRecursive(String bucket, String srcFolder, String tgtFolder, String keyId);
+
+    List<BucketLifecycleConfiguration.Rule> getBucketLifecycleConfigurationRules(String bucket);
 
     String getBucketPolicy(String bucket);
 
