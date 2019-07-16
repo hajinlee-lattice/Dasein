@@ -102,7 +102,9 @@ class LaunchComponent extends Component {
             showNewAudienceName: true,
             audienceParams: audienceParamsDefault(),
             connection: connection,
-            lookupIdMapping: null
+            lookupIdMapping: null,
+            fetching: false,
+            dirty: {}
         };
     }
 
@@ -174,6 +176,9 @@ class LaunchComponent extends Component {
         let playstore = store.getState()['playbook'],
             vm = this;
 
+        this.state.fetching = true;
+        this.setState(this.state);
+
         // creates this.state.launchAccountsCoverage, needed to load launch
         if(playstore.play.ratingEngine) {
             playstore.playbookWizardStore.launchAccountsCoverage(play.name, { 
@@ -184,7 +189,9 @@ class LaunchComponent extends Component {
                 var coverage = vm.getCoverage(response).coverage,
                     hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
 
-                vm.state.unscored = !hasBuckets;
+                if(!vm.state.dirty.unscored) {
+                    vm.state.unscored = !hasBuckets; // if there are buckets this should be checked by default
+                }
                 vm.state.launchAccountsCoverage = response;
 
                 var coverageObj = vm.getCoverage(response),
@@ -198,6 +205,7 @@ class LaunchComponent extends Component {
                     });
                 }
 
+                vm.state.fetching = false;
                 vm.setState(vm.state);
             });
         } else {
@@ -205,6 +213,7 @@ class LaunchComponent extends Component {
                 vm.state.launchAccountsCoverage = {
                     accountsCount: data
                 };
+                vm.state.fetching = false;
                 vm.setState(vm.state);
             });
         }
@@ -355,7 +364,7 @@ class LaunchComponent extends Component {
                 <Aux>
                     {this.makeBucketsContainer(coverage, play, noBuckets, opts)}
                     <div className={'unscored-accounts-container'}>
-                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
+                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} disabled={this.state.fetching} /> 
                         <label for="unscored">
                             Include the {(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%) unscored account
                         </label>
@@ -562,6 +571,7 @@ class LaunchComponent extends Component {
     }
 
     clickUnscored = (e) => {
+        this.state.dirty.unscored = true;
         this.state.unscored = e.target.checked;
         this.setState(this.state);
     }
@@ -576,6 +586,7 @@ class LaunchComponent extends Component {
     }
 
     clickRequireAccountId = (e) => {
+        var vm = this;
         this.state.excludeItemsWithoutSalesforceId = e.target.checked;
         this.setState(this.state);
         this.getLaunchAccountsCoverage(this.state.play.name, {

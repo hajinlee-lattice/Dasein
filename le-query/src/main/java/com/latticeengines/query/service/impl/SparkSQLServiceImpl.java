@@ -241,7 +241,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
         // broadcast join
         conf.put("spark.sql.autoBroadcastJoinThreshold", String.valueOf(bhjThresholdGb * GB));
-        conf.put("spark.sql.broadcastTimeout", "600");
+        conf.put("spark.sql.broadcastTimeout", "3600");
 
         // others
         conf.put("spark.driver.maxResultSize", "4g");
