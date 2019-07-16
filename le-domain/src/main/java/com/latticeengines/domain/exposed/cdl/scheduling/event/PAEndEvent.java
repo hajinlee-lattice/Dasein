@@ -2,8 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scheduling.event;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.scheduling.SimulationStats;
-import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class PAEndEvent extends Event {
@@ -14,32 +13,49 @@ public class PAEndEvent extends Event {
     }
 
     @Override
-    public List<Event> changeState(SystemStatus status, SimulationStats simulationStats) {
-        TenantActivity tenantActivity = simulationStats.getRuningTenantActivityByTenantId(tenantId);
+    public List<Event> changeState(SimulationContext simulationContext) {
+        TenantActivity tenantActivity = simulationContext.getRuningTenantActivityByTenantId(tenantId);
         // TODO remove check (fail if not exist)
         if (tenantActivity != null) {
             // TODO move to central place for running counts
-            status.setRunningTotalCount(status.getRunningTotalCount() - 1);
-            status.changeSystemStateAfterPAFinished(tenantActivity);
-            boolean isSuccessed = simulationStats.isSucceed(tenantActivity);
+            simulationContext.systemStatus.changeSystemStateAfterPAFinished(tenantActivity);
+            boolean isSuccessed = simulationContext.isSucceed(tenantId);
             if (isSuccessed || tenantActivity.isRetry()) {
-                tenantActivity = simulationStats.cleanTenantActivity(tenantActivity);
+                tenantActivity = simulationContext.cleanTenantActivity(tenantActivity);
                 if (tenantActivity.isAutoSchedule()
-                        && tenantActivity.getInvokeTime() < simulationStats.timeClock.getCurrentTime()) {
-                    while (tenantActivity.getInvokeTime() - simulationStats.timeClock.getCurrentTime() < 0) {
+                        && tenantActivity.getInvokeTime() < simulationContext.timeClock.getCurrentTime()) {
+                    while (tenantActivity.getInvokeTime() - simulationContext.timeClock.getCurrentTime() < 0) {
                         long time = tenantActivity.getInvokeTime() + 24 * 3600 * 1000;
                         tenantActivity.setInvokeTime(time);
                     }
                 }
             } else {
                 tenantActivity.setRetry(true);
-                tenantActivity.setLastFinishTime(simulationStats.timeClock.getCurrentTime());
+                tenantActivity.setLastFinishTime(simulationContext.timeClock.getCurrentTime());
             }
-            tenantActivity = simulationStats.setTenantActivityAfterPAFinished(tenantActivity);
-            simulationStats.changeSimulationStateAfterPAFinished(tenantActivity);
+            if (simulationContext.tenantEventMap.containsKey(tenantActivity.getTenantId())) {
+                List<Event> events = simulationContext.tenantEventMap.get(tenantActivity.getTenantId());
+                for (int i = events.size() - 1; i >= 0; i--) {
+                    if (events.get(i) instanceof PAEndEvent) {
+                        break;
+                    }
+                    if (events.get(i) instanceof ImportActionEvent) {
+                        tenantActivity.setLastActionTime(events.get(i).getTime());
+                        if (tenantActivity.getFirstActionTime() == null || tenantActivity.getFirstActionTime() == 0L
+                                || tenantActivity.getFirstActionTime() > events.get(i).getTime()) {
+                            tenantActivity.setFirstActionTime(events.get(i).getTime());
+                        }
+                    }
+                }
+            }
+            simulationContext.changeSimulationStateAfterPAFinished(tenantActivity);
         }
-        System.out.println("PA end for tenant: " + tenantId + ", time: " + getTime());
-        simulationStats.push(tenantId, this);
+        simulationContext.push(tenantId, this);
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "PA end for tenant: " + tenantId + ", time: " +  + getTime();
     }
 }

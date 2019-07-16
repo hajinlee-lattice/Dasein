@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.util.Simulation;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
@@ -38,13 +39,13 @@ public class SimulationUnitTestNG {
     public void testMain() {
         this.tenantList = initTenant();
         this.clock.setTimestamp(1531373313L * 1000);
-        Map<String, TenantActivity> tenantActivityMap = setTenantInitState(tenantList);
+        Map<String, SimulationTenant> simulationTenantMap = setTenantInitState(tenantList);
         this.priorityQueue.addAll(generateTenantEvents());
         this.priorityQueue.addAll(generateSchedulingEvent());
         this.priorityQueue.addAll(generateDataCloudRefreshEvent());
         SystemStatus systemStatus = newStatus(5, 10, 2);
-        Simulation simulation = new Simulation(systemStatus, tenantList, new HashSet<>(dataCloudRefreshTenant),
-                tenantActivityMap, priorityQueue, clock);
+        Simulation simulation = new Simulation(systemStatus, new HashSet<>(dataCloudRefreshTenant),
+                simulationTenantMap, priorityQueue, clock);
         simulation.run();
     }
 
@@ -115,11 +116,10 @@ public class SimulationUnitTestNG {
         return tenantList;
     }
 
-    private Map<String, TenantActivity> setTenantInitState(List<String> tenantList) {
-        Map<String, TenantActivity> canRunTenantActivityMap = new HashMap<>();
+    private Map<String, SimulationTenant> setTenantInitState(List<String> tenantList) {
+        Map<String, SimulationTenant> simulationTenantMap = new HashMap<>();
         dataCloudRefreshTenant = new ArrayList<>();
         int index = 0;
-        Random r = new Random();
         for (String tenant : tenantList) {
             TenantActivity tenantActivity = new TenantActivity();
             tenantActivity.setTenantId(tenant);
@@ -135,11 +135,11 @@ public class SimulationUnitTestNG {
             if (index % 3 == 1) {
                 tenantActivity.setLarge(true);
             }
-            canRunTenantActivityMap.put(tenant, tenantActivity);
+            simulationTenantMap.put(tenant, new SimulationTenant(tenantActivity));
             index++;
         }
         log.info("dataCloudRefreshTenant is : " + JsonUtils.serialize(dataCloudRefreshTenant));
-        return canRunTenantActivityMap;
+        return simulationTenantMap;
     }
 
 }

@@ -2,8 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scheduling.event;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.scheduling.SimulationStats;
-import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class DataCloudRefreshEvent extends Event {
@@ -13,16 +12,21 @@ public class DataCloudRefreshEvent extends Event {
     }
 
     @Override
-    public List<Event> changeState(SystemStatus status, SimulationStats simulationStats) {
-        for (String tenantId : simulationStats.dcRefreshTenants) {
-            TenantActivity activity = simulationStats.getcanRunTenantActivityByTenantId(tenantId);
-            if (activity == null) {
-                activity = simulationStats.getRuningTenantActivityByTenantId(tenantId);
+    public List<Event> changeState(SimulationContext simulationContext) {
+        for (String tenantId : simulationContext.dcRefreshTenants) {
+            TenantActivity activity = simulationContext.getcanRunTenantActivityByTenantId(tenantId);
+            if (activity != null) {
+                activity.setDataCloudRefresh(true);
+                simulationContext.setTenantActivityToCanRun(activity);
             }
-            activity.setDataCloudRefresh(true);
-            simulationStats.push(tenantId, this);
+            simulationContext.push(tenantId, this);
         }
 
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "DataCloudRefreshEvent current time is: " + getTime();
     }
 }

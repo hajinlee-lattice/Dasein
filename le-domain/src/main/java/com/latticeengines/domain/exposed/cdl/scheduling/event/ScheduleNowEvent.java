@@ -2,8 +2,8 @@ package com.latticeengines.domain.exposed.cdl.scheduling.event;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.scheduling.SimulationStats;
-import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
+import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class ScheduleNowEvent extends Event {
 
@@ -13,8 +13,19 @@ public class ScheduleNowEvent extends Event {
     }
 
     @Override
-    public List<Event> changeState(SystemStatus status, SimulationStats simulationStats) {
-        simulationStats.push(tenantId, this);
+    public List<Event> changeState(SimulationContext simulationContext) {
+        TenantActivity tenantActivity = simulationContext.getcanRunTenantActivityByTenantId(tenantId);
+        if (tenantActivity != null) {
+            tenantActivity.setScheduledNow(true);
+            tenantActivity.setScheduleTime(simulationContext.timeClock.getCurrentTime());
+            simulationContext.setTenantActivityToCanRun(tenantActivity);
+        }
+        simulationContext.push(tenantId, this);
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "ScheduleNowEvent current time is: " + getTime();
     }
 }

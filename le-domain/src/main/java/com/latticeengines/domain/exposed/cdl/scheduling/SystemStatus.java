@@ -106,11 +106,14 @@ public class SystemStatus {
      */
     public void changeSystemState(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount - 1;
+        this.runningTotalCount = this.runningTotalCount + 1;
         if (tenantActivity.isLarge()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount - 1;
+            this.runningLargeJobCount = this.runningLargeJobCount + 1;
         }
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount - 1;
+            this.runningScheduleNowCount = this.runningScheduleNowCount + 1;
         }
     }
 
@@ -120,11 +123,14 @@ public class SystemStatus {
      */
     public void changeSystemStateAfterPAFinished(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount + 1;
+        this.runningTotalCount = this.runningTotalCount - 1;
         if (tenantActivity.isLarge()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount + 1;
+            this.runningLargeJobCount = this.runningLargeJobCount - 1;
         }
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount + 1;
+            this.runningScheduleNowCount = this.runningScheduleNowCount - 1;
         }
     }
 
@@ -137,5 +143,20 @@ public class SystemStatus {
 
     public void setScheduleTenants(Set<String> scheduleTenants) {
         this.scheduleTenants = scheduleTenants;
+    }
+
+    @Override
+    public String toString() {
+        return "SystemStatus{" +
+                "canRunJobCount=" + canRunJobCount +
+                ", canRunLargeJobCount=" + canRunLargeJobCount +
+                ", canRunScheduleNowJobCount=" + canRunScheduleNowJobCount +
+                ", runningTotalCount=" + runningTotalCount +
+                ", runningScheduleNowCount=" + runningScheduleNowCount +
+                ", runningLargeJobCount=" + runningLargeJobCount +
+                ", largeJobTenantId=" + largeJobTenantId +
+                ", runningPATenantId=" + runningPATenantId +
+                ", scheduleTenants=" + scheduleTenants +
+                '}';
     }
 }

@@ -2,8 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scheduling.event;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.scheduling.SimulationStats;
-import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 
 public abstract class Event implements Comparable<Event> {
     private Long time;
@@ -17,7 +16,7 @@ public abstract class Event implements Comparable<Event> {
 
     // change current state & tenant activities and other things etc.
     // return newly generated events
-    public abstract List<Event> changeState(SystemStatus status, SimulationStats simulationStats);
+    public abstract List<Event> changeState(SimulationContext simulationContext);
 
     public Long getTime() {
         return time;

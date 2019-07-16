@@ -102,10 +102,6 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return priorityQueue.size();
     }
 
-    public Set<String> getScheduleTenants() {
-        return systemStatus.getScheduleTenants();
-    }
-
     /**
      * get all element from priorityQueue.
      */
