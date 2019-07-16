@@ -708,7 +708,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             try {
                 Schema.Type avroType = TableUtils.getTypeFromPhysicalDataType(attr.getPhysicalDataType());
                 if (StringUtils.isEmpty(attr.getFundamentalType())) {
-                    diagnostic.addWarnings(String.format("Attribute %s has empty fundamental type.", attr.getName()));
+                    diagnostic.addWarnings(String.format("Attribute %s has data type %s but has empty fundamental " +
+                            "type.", attr.getName(), attr.getPhysicalDataType()));
                 }
                 FundamentalType fdType = FundamentalType.fromName(attr.getFundamentalType());
                 switch (avroType) {
