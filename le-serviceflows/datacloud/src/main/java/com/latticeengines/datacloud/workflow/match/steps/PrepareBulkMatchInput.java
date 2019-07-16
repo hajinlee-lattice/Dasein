@@ -106,6 +106,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             log.info("Insert new match command for root uid " + getConfiguration().getRootOperationUid());
             matchCommandService.start(input, null, getConfiguration().getRootOperationUid());
         }
+        putStringValueInContext(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
 
         avroGlobs = MatchUtils.toAvroGlobs(avroDir);
         Long count = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, avroGlobs);
@@ -114,7 +115,6 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         List<DataCloudJobConfiguration> configurations = readAndSplitInputAvro(blocks);
 
         executionContext.put(BulkMatchContextKey.YARN_JOB_CONFIGS, configurations);
-        putStringValueInContext(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
         matchCommandService.update(getConfiguration().getRootOperationUid()) //
                 .status(MatchStatus.MATCHING) //
                 .rowsRequested(count.intValue()) //
