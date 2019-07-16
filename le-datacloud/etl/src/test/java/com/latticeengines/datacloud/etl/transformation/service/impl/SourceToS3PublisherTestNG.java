@@ -203,7 +203,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void prepareData() {
         try {
             s3FilePrepare();
-            preparePurgeStrategySource();
+            preparePurgeStrategies();
 
             uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
             uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
@@ -222,7 +222,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void preparePurgeStrategySource() {
+    private void preparePurgeStrategies() {
         PurgeStrategy ps1 = new PurgeStrategy();
         ps1.setSource(baseSrc6.getSourceName());
         ps1.setSourceType(SourceType.AM_SOURCE);
@@ -340,8 +340,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void validateTag(List<Integer> days, String key) {
-        List<Tag> tags = s3Service.getObjectTags(s3Bucket, key);
+    private void validateTagSuccess(List<Integer> days, List<Tag> tags) {
         Assert.assertEquals(tags.size(), 2);
         Assert.assertEquals(tags.get(0).getKey(), "S3ToGlacierDays");
         Assert.assertEquals(tags.get(1).getKey(), "ExpireDays");
@@ -360,15 +359,16 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files, List<Integer> days, boolean isTagCheck) {
+    private void validateCopySuccess(List<String> files, List<Integer> days, boolean hasTagCheck) {
         files.forEach(file -> {
             try {
                 Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
             } catch (Exception e) {
                 throw new RuntimeException("Fail to validate publishing:" + file, e);
             }
-            if (isTagCheck) {
-                validateTag(days, file);
+            if (hasTagCheck) {
+                List<Tag> tags = s3Service.getObjectTags(s3Bucket, file);
+                validateTagSuccess(days, tags);
             }
         });
     }

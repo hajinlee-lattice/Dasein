@@ -192,7 +192,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         try {
             return HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false);
         } catch (IOException e) {
-            throw new RuntimeException("Fail to list files under HDFS path " + hdfsDir, e);
+            throw new RuntimeException("Fail to get file list of HDFS path: " + hdfsDir, e);
         }
     }
 
@@ -247,7 +247,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         } catch (Exception ex) {
             throw new RuntimeException("Fail to parse current version file", ex);
         }
-
     }
 
     private String sanitizePrefix(String prefix) {///
