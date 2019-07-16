@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.workflow.match.listeners;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,7 +9,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -25,7 +23,6 @@ import com.latticeengines.datacloud.workflow.match.steps.BulkMatchContextKey;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("updateFailedMatchListener")
@@ -80,13 +77,6 @@ public class UpdateFailedMatchListener extends LEJobListener {
     }
 
     private void killChildrenApplications(JobExecution jobExecution) {
-        List<?> list = (List<?>) JsonUtils.deserialize(jobExecution.getExecutionContext().getString(BulkMatchContextKey.APPLICATION_IDS), List.class);
-        List<ApplicationId> applicationIds = new ArrayList<>();
-        for (Object obj : list) {
-            if (obj instanceof ApplicationId) {
-                applicationIds.add((ApplicationId) obj);
-            }
-        }
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
@@ -95,7 +85,7 @@ public class UpdateFailedMatchListener extends LEJobListener {
         List<MatchBlock> matchBlocks = matchCommandService.getByRootOperationUid(rootUid).getMatchBlocks();
         for (MatchBlock block: matchBlocks) {
             if (!YarnUtils.TERMINAL_APP_STATE.contains(block.getApplicationState())) {
-                ApplicationId appId = ConverterUtils.toApplicationId(block.getApplicationId());
+                ApplicationId appId = ApplicationId.fromString(block.getApplicationId());
                 try {
                     ApplicationReport report = yarnClient.getApplicationReport(appId);
                     if (!YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState())) {
