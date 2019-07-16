@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.cache;
+package com.latticeengines.cache.exposed.redis;
 
 import java.util.List;
 

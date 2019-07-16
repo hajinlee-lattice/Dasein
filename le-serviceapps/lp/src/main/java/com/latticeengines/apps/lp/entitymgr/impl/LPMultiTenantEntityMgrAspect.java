@@ -47,12 +47,12 @@ public class LPMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
             }
         }
         if (tenant != null) {
-            modelSummaryCacheService.clearModelSummaryCache(tenant, modelId);
+            modelSummaryCacheService.clearCache(tenant, modelId);
         }
     }
 
     // redis delay clear model summary cache
-    @After("@annotation(com.latticeengines.apps.core.annotation.ClearModelSummary)")
+    @After("@annotation(com.latticeengines.apps.core.annotation.ClearCache)")
     public void afterCUDModelSummay(JoinPoint joinPoint) {
         clearModelSummaryCache(joinPoint);
     }

@@ -61,6 +61,12 @@
             <artifactId>jetty-servlets</artifactId>
             <version>${jetty.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-cache</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
 
     </dependencies>
 

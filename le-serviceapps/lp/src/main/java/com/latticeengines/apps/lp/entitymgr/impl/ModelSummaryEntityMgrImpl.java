@@ -19,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.apps.core.annotation.ClearModelSummary;
+import com.latticeengines.apps.core.annotation.ClearCache;
 import com.latticeengines.apps.lp.cache.ModelSummaryCacheWriter;
 import com.latticeengines.apps.lp.dao.ModelSummaryDao;
 import com.latticeengines.apps.lp.dao.ModelSummaryProvenancePropertyDao;
@@ -72,28 +72,28 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return dao;
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void delete(ModelSummary modelSummary) {
         super.delete(modelSummary);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void update(ModelSummary modelSummary) {
         super.update(modelSummary);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void createOrUpdate(ModelSummary modelSummary) {
         super.createOrUpdate(modelSummary);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
@@ -262,7 +262,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return MultiTenantContext.getTenant().getPid();
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByModelId(String modelId) {
@@ -293,7 +293,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         keyValueDao.delete(kv);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
@@ -319,7 +319,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         updateDisplayName(summary, attrMap);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
@@ -360,7 +360,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public void updateLastUpdateTime(ModelSummary summary) {
@@ -439,7 +439,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return summary;
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByModelIdForInternalOperations(String modelId) {
@@ -587,7 +587,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return dao.findModelSummariesByIds(ids);
     }
 
-    @ClearModelSummary
+    @ClearCache
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateLastUpdateTime(String modelGuid) {

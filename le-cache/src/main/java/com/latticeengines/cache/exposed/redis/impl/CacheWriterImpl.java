@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.cache.impl;
+package com.latticeengines.cache.exposed.redis.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.latticeengines.apps.core.cache.CacheWriter;
+import com.latticeengines.cache.exposed.redis.CacheWriter;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.pls.EntityListCache;
@@ -46,17 +46,17 @@ public abstract class CacheWriterImpl<T extends HasId<String>> implements CacheW
         RETRY_EXCEPTIONS.put(RedisSystemException.class, true);
     }
 
-    @Value("${proxy.retry.initialwaitmsec}")
+    @Value("${proxy.retry.initialwaitmsec:500}")
     private long initialWaitMsec;
-    @Value("${proxy.retry.multiplier}")
+    @Value("${proxy.retry.multiplier:2}")
     private double multiplier;
-    @Value("${proxy.retry.maxattempts}")
+    @Value("${proxy.retry.maxattempts:5}")
     private int maxAttempts;
-    @Value("${cdl.redis.cache.namespace}")
+    @Value("${cache.redis.namespace}")
     private String namespace;
-    @Value("${cdl.redis.ids.ttl}")
+    @Value("${cache.redis.ids.ttl}")
     protected long idsTTL;
-    @Value("${cdl.redis.entity.ttl}")
+    @Value("${cache.redis.entity.ttl}")
     protected long entityTTL;
 
     @Autowired

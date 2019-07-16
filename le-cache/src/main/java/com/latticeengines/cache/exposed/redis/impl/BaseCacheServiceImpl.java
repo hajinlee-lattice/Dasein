@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.service.impl;
+package com.latticeengines.cache.exposed.redis.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,9 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.apps.core.cache.CacheWriter;
-import com.latticeengines.apps.core.cache.RedisDistributedLock;
-import com.latticeengines.apps.core.service.CacheService;
+import com.latticeengines.cache.exposed.redis.CacheService;
+import com.latticeengines.cache.exposed.redis.CacheWriter;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -24,19 +23,16 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.EntityListCache;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.redis.lock.RedisDistributedLock;
 
 public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements CacheService<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseCacheServiceImpl.class);
 
-    @Value("${proxy.retry.initialwaitmsec:500}")
-    private long initialWaitMsec;
-    @Value("${proxy.retry.multiplier:2}")
-    private double multiplier;
-    @Value("${proxy.retry.maxattempts:5}")
-    private int maxAttempts;
-    @Value("${lp.cache.namespace:default}")
-    private String namespace;
+    @Value("${cache.lock.build.seconds}")
+    private long cacheBuild;
+    @Value("${cache.lock.clear.seconds}")
+    private long cacheClear;
 
     private static final int NUM_THREADS = 8;
 
@@ -119,9 +115,9 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
             }
             String key = getCacheWriter().getLockKeyForObject(tenant);
             String requestId = UUID.randomUUID().toString();
-            if (redisDistributedLock.lock(key, requestId, false)) {
+            if (redisDistributedLock.lock(key, requestId, cacheBuild, false)) {
                 try {
-                    log.info("Start to build model summary cache for tenant %s.", tenant.getPid());
+                    log.info("Start to build cache for tenant %s.", tenant.getPid());
                     MultiTenantContext.setTenant(tenant);
                     EntityListCache entityListCache = getCacheWriter().getEntitiesAndNonExistEntitityIdsByTenant(tenant);
                     List<T> entities = entityListCache.getExistEntities();
@@ -148,7 +144,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
     }
 
     @Override
-    public Future<?> clearModelSummaryCache(Tenant tenant, String entityId) {
+    public Future<?> clearCache(Tenant tenant, String entityId) {
         return service.submit(new ClearCache(tenant, entityId));
     }
 
@@ -166,7 +162,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
         public void run() {
             String key = getCacheWriter().getLockKeyForObject(tenant);
             String requestId = UUID.randomUUID().toString();
-            if (redisDistributedLock.lock(key, requestId, true)) {
+            if (redisDistributedLock.lock(key, requestId, cacheClear, true)) {
                 try {
                     deleteData();
                 } finally {

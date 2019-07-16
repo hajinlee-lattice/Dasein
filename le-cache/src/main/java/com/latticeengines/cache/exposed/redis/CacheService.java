@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.service;
+package com.latticeengines.cache.exposed.redis;
 
 import java.util.List;
 import java.util.concurrent.Future;
@@ -28,5 +28,5 @@ public interface CacheService<T extends HasId<String>> {
 
     Future<?> buildEntitiesCache(Tenant tenant);
 
-    Future<?> clearModelSummaryCache(Tenant tenant, String entityId);
+    Future<?> clearCache(Tenant tenant, String entityId);
 }

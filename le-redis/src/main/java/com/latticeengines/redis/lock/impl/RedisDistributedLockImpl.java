@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.cache.impl;
+package com.latticeengines.redis.lock.impl;
 
 import java.util.Collections;
 
@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.core.cache.RedisDistributedLock;
+import com.latticeengines.redis.lock.RedisDistributedLock;
 
 @Component("redisDistributedLock")
 public class RedisDistributedLockImpl implements RedisDistributedLock {
@@ -28,13 +28,11 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
     private RedisScript<Long> unlockScript;
 
     private RedisScript<String> getLockScript;
-
-    @Value("${cdl.redis.lock.milliseconds}")
-    private long sleepInterval;
-    @Value("${cdl.redis.lock.maxattempts}")
+    
+    @Value("${common.redis.lock.maxattempts}")
     private int maxAttempts;
-    @Value("${cdl.redis.lock.expire}")
-    private int expire;
+    @Value("${common.redis.lock.sleepinterval}")
+    private int sleepInterval;
 
     @PostConstruct
     public void setupLuaScript() {
@@ -50,25 +48,25 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
     private final Logger logger = LoggerFactory.getLogger(RedisDistributedLockImpl.class);
 
     @Override
-    public boolean lock(String key, String requestId, boolean retry) {
+    public boolean lock(String key, String requestId, long expire, boolean retry) {
         if (retry) {
             int maxAttempts = this.maxAttempts;
-            boolean result = setRedis(key, requestId, true);
+            boolean result = setRedis(key, requestId, expire, true);
             while ((!result) && maxAttempts-- > 0) {
                 try {
                     Thread.sleep(sleepInterval);
                 } catch (InterruptedException e) {
                     return false;
                 }
-                result = setRedis(key, requestId, true);
+                result = setRedis(key, requestId, expire, true);
             }
             return result;
         } else {
-            return setRedis(key, requestId, true);
+            return setRedis(key, requestId, expire, true);
         }
     }
 
-    private boolean setRedis(String key, String requestId, boolean lock) {
+    private boolean setRedis(String key, String requestId, long expire, boolean lock) {
         try {
             Object result;
             if (lock) {
@@ -102,7 +100,7 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
     @Override
     public boolean releaseLock(String key, String requestId) {
         try {
-            return setRedis(key, requestId, false);
+            return setRedis(key, requestId, -1l, false);
         } catch (Exception e) {
             logger.error("Exception happened while releasing redis lock: ", e);
         } finally {

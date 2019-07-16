@@ -256,7 +256,7 @@ public class ModelSummaryServiceImplTestNG extends LPFunctionalTestNGBase {
         modelSummaryCacheService.setIdsAndEntitiesByTenant(tenant1, allModelSummaries);
         List<ModelSummary> modelSummaries = modelSummaryService.getModelSummaries("all");
         assertEquals(modelSummaries.size(), 6);
-        Future<?> future = modelSummaryCacheService.clearModelSummaryCache(tenant1, allModelSummaries.get(0).getId());
+        Future<?> future = modelSummaryCacheService.clearCache(tenant1, allModelSummaries.get(0).getId());
         future.get();
         EntityListCache entityListCache = modelSummaryCacheService.getEntitiesAndNonExistEntitityIdsByTenant(tenant1);
         assertEquals(entityListCache.getNonExistIds().size(), 0);

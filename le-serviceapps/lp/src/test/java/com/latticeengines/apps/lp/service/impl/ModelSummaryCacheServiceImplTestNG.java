@@ -93,7 +93,7 @@ public class ModelSummaryCacheServiceImplTestNG extends LPFunctionalTestNGBase {
     }
 
     private void verifyClearModelSummaryCache(Tenant tenant, String id, List<String> ids, int size) throws Exception {
-        Future<?> future = modelSummaryCacheService.clearModelSummaryCache(tenant, id);
+        Future<?> future = modelSummaryCacheService.clearCache(tenant, id);
         future.get();
         EntityListCache entityListCache = modelSummaryCacheService.getEntitiesAndNonExistEntitityIdsByTenant(tenant);
         assertEquals(entityListCache.getExistEntities().size(), 0);

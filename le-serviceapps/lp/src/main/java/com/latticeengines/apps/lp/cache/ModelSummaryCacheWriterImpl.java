@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.core.cache.impl.CacheWriterImpl;
+import com.latticeengines.cache.exposed.redis.impl.CacheWriterImpl;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
