@@ -163,7 +163,7 @@ public enum LedpCode {
     LEDP_18039("Salesforce URL with name {0} not found."), //
     LEDP_18040("The URL field is empty of Salesforce URL with name {0}."), //
     LEDP_18041("Failed to extract information from modelSummary file."), //
-    LEDP_18042("Failed to extract information from data-diagnostics file."), //
+    LEDP_18042("Failed to extract information from data-diagnostics file."), //40
     LEDP_18043("Failed to extract information from rfModel file."), //
     LEDP_18044("Failed to extract information from top predictor file."), //
     LEDP_18045("Failed to extract information from metadata-diagnostics file."), //
@@ -819,7 +819,7 @@ public enum LedpCode {
     LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
     LEDP_40052("Could not find External System Authentication ID: {0}"),
     LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"),
-    LEDP_40054("We are currently experiencing heavy data loads. We will run your Data Processing and Analysis as a scheduled job for the day. You will get a notification when your data is refreshed."),
+    LEDP_40054("We are currently experiencing heavy data loads. Please try again later."),
     LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
