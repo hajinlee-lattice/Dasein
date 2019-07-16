@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.annotation.ClearCache;
-import com.latticeengines.apps.lp.cache.ModelSummaryCacheWriter;
 import com.latticeengines.apps.lp.dao.ModelSummaryDao;
 import com.latticeengines.apps.lp.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.apps.lp.dao.PredictorDao;
@@ -63,9 +62,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Inject
     private ModelSummaryProvenancePropertyDao modelSummaryProvenancePropertyDao;
-
-    @Inject
-    private ModelSummaryCacheWriter modelSummaryCacheWriter;
 
     @Override
     public BaseDao<ModelSummary> getDao() {
