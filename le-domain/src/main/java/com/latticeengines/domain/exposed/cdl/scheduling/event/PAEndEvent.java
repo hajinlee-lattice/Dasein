@@ -16,14 +16,18 @@ public class PAEndEvent extends Event {
     @Override
     public List<Event> changeState(SystemStatus status, SimulationStats simulationStats) {
         TenantActivity tenantActivity = simulationStats.getRuningTenantActivityByTenantId(tenantId);
+        // TODO remove check (fail if not exist)
         if (tenantActivity != null) {
+            // TODO move to central place for running counts
+            status.setRunningTotalCount(status.getRunningTotalCount() - 1);
             status.changeSystemStateAfterPAFinished(tenantActivity);
             boolean isSuccessed = simulationStats.isSucceed(tenantActivity);
-            if (isSuccessed || (!isSuccessed && tenantActivity.isRetry())) {
+            if (isSuccessed || tenantActivity.isRetry()) {
                 tenantActivity = simulationStats.cleanTenantActivity(tenantActivity);
-                if (tenantActivity.isAutoSchedule() && tenantActivity.getInvokeTime() < simulationStats.timeClock.getCurrentTime()) {
+                if (tenantActivity.isAutoSchedule()
+                        && tenantActivity.getInvokeTime() < simulationStats.timeClock.getCurrentTime()) {
                     while (tenantActivity.getInvokeTime() - simulationStats.timeClock.getCurrentTime() < 0) {
-                        long time = tenantActivity.getInvokeTime() + 24 * 3600;
+                        long time = tenantActivity.getInvokeTime() + 24 * 3600 * 1000;
                         tenantActivity.setInvokeTime(time);
                     }
                 }
@@ -34,6 +38,7 @@ public class PAEndEvent extends Event {
             tenantActivity = simulationStats.setTenantActivityAfterPAFinished(tenantActivity);
             simulationStats.changeSimulationStateAfterPAFinished(tenantActivity);
         }
+        System.out.println("PA end for tenant: " + tenantId + ", time: " + getTime());
         simulationStats.push(tenantId, this);
         return null;
     }

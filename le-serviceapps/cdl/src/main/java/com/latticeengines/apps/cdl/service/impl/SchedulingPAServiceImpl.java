@@ -184,14 +184,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
                 }
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
-                tenantActivity.setScheduleTime(tenantActivity.isScheduledNow() ?
-                        simpleDataFeed.getScheduleTime().getTime() : null);
+                tenantActivity.setScheduleTime(
+                        tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
                     Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, execution);
                     if (invokeTime != null) {
-                        if (simpleDataFeed.getNextInvokeTime() == null || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
+                        if (simpleDataFeed.getNextInvokeTime() == null
+                                || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                             dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                         }
                         tenantActivity.setAutoSchedule(true);
@@ -238,6 +239,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return map;
     }
 
+    @Override
     public List<SchedulingPAQueue> initQueue() {
 
         Map<String, Object> map = setSystemStatus();
@@ -248,7 +250,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     @Override
-    public List<SchedulingPAQueue> initQueue(TimeClock schedulingPATimeClock, SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
+    public List<SchedulingPAQueue> initQueue(TimeClock schedulingPATimeClock, SystemStatus systemStatus,
+            List<TenantActivity> tenantActivityList) {
+        // TODO move this logic to util or factory class
         List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
         SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
                 RetrySchedulingPAObject.class, schedulingPATimeClock, true);
@@ -256,22 +260,22 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
         SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(
                 systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<ScheduleNowSchedulingPAObject> nonCustomerScheduleNowSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<AutoScheduleSchedulingPAObject> nonCustomerAutoScheduleSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> nonDataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
+        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
+        SchedulingPAQueue<ScheduleNowSchedulingPAObject> nonCustomerScheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
+        SchedulingPAQueue<AutoScheduleSchedulingPAObject> nonCustomerAutoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
+        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> nonDataCloudRefreshSchedulingPAQueue = new SchedulingPAQueue<>(
+                systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
         for (TenantActivity tenantActivity : tenantActivityList) {
             RetrySchedulingPAObject retrySchedulingPAObject = new RetrySchedulingPAObject(tenantActivity);
-            ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject =
-                    new ScheduleNowSchedulingPAObject(tenantActivity);
-            AutoScheduleSchedulingPAObject autoScheduleSchedulingPAObject =
-                    new AutoScheduleSchedulingPAObject(tenantActivity);
-            DataCloudRefreshSchedulingPAObject dataCloudRefreshSchedulingPAObject =
-                    new DataCloudRefreshSchedulingPAObject(tenantActivity);
+            ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject = new ScheduleNowSchedulingPAObject(
+                    tenantActivity);
+            AutoScheduleSchedulingPAObject autoScheduleSchedulingPAObject = new AutoScheduleSchedulingPAObject(
+                    tenantActivity);
+            DataCloudRefreshSchedulingPAObject dataCloudRefreshSchedulingPAObject = new DataCloudRefreshSchedulingPAObject(
+                    tenantActivity);
             retrySchedulingPAQueue.add(retrySchedulingPAObject);
             if (tenantActivity.getTenantType() == TenantType.CUSTOMER) {
                 scheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
@@ -347,10 +351,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private boolean reachRetryLimit(CDLJobType cdlJobType, int retryCount) {
         switch (cdlJobType) {
-            case PROCESSANALYZE:
-                return retryCount >= processAnalyzeJobRetryCount;
-            default:
-                return false;
+        case PROCESSANALYZE:
+            return retryCount >= processAnalyzeJobRetryCount;
+        default:
+            return false;
         }
     }
 
@@ -417,8 +421,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         } else if (execution.getStatus() == DataFeedExecution.Status.Started) {
             return null;
         } else {
-            if ((execution.getStatus() == DataFeedExecution.Status.Failed) &&
-                    (execution.getRetryCount() < processAnalyzeJobRetryCount)) {
+            if ((execution.getStatus() == DataFeedExecution.Status.Failed)
+                    && (execution.getRetryCount() < processAnalyzeJobRetryCount)) {
                 calendar.setTime(execution.getUpdated());
                 calendar.add(Calendar.MINUTE, 15);
             } else {
@@ -476,15 +480,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
         return (status != null
                 && (status.getDataCloudBuildNumber() == null
-                || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
-                || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
+                        || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
+                        || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                 && StringUtils.isNotBlank(accountTableName));
     }
 
     private Boolean isDataCloudRefresh(Tenant tenant, String currentBuildNumber, DataCollectionStatus status) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-            boolean allowAutoDataCloudRefresh =  batonService.isEnabled(customerSpace,
+            boolean allowAutoDataCloudRefresh = batonService.isEnabled(customerSpace,
                     LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY);
             if (allowAutoDataCloudRefresh) {
                 return checkDataCloudChange(currentBuildNumber, customerSpace.toString(), status);

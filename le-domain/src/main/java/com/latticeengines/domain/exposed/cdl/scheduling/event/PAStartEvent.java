@@ -22,9 +22,11 @@ public class PAStartEvent extends Event {
     @Override
     public List<Event> changeState(SystemStatus status, SimulationStats simulationStats) {
         TenantActivity tenantActivity = simulationStats.getcanRunTenantActivityByTenantId(tenantId);
+        System.out.println("PA start for tenant: " + tenantId + ", time: " + getTime());
         log.info("pa start tenantActivity is: " + JsonUtils.serialize(tenantActivity));
         if (tenantActivity != null) {
-            status.changeSystemState(tenantActivity);
+            // TODO change to central place
+            status.setRunningTotalCount(status.getRunningTotalCount() + 1);
             simulationStats.changeSimulationStateWhenRunPA(tenantActivity);
             simulationStats.push(tenantId, this);
         }

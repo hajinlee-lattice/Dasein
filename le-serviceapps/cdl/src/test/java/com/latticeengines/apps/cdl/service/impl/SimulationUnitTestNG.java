@@ -9,14 +9,10 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.SchedulingPAService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.Simulation;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTimeClock;
@@ -29,12 +25,9 @@ import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.SchedulingEvent;
 import com.latticeengines.domain.exposed.security.TenantType;
 
-public class SimulationUnitTestNG extends CDLFunctionalTestNGBase {
+public class SimulationUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(SimulationUnitTestNG.class);
-
-    @Inject
-    private SchedulingPAService schedulingPAService;
 
     private PriorityQueue<Event> priorityQueue = new PriorityQueue<>();
     private SimulationTimeClock clock = new SimulationTimeClock();
@@ -44,14 +37,14 @@ public class SimulationUnitTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "unit")
     public void testMain() {
         this.tenantList = initTenant();
-        this.clock.setTimestamp(1531373313);
+        this.clock.setTimestamp(1531373313L * 1000);
         Map<String, TenantActivity> tenantActivityMap = setTenantInitState(tenantList);
         this.priorityQueue.addAll(generateTenantEvents());
         this.priorityQueue.addAll(generateSchedulingEvent());
         this.priorityQueue.addAll(generateDataCloudRefreshEvent());
         SystemStatus systemStatus = newStatus(5, 10, 2);
-        Simulation simulation = new Simulation(schedulingPAService, systemStatus, tenantList, tenantActivityMap,
-                priorityQueue, clock);
+        Simulation simulation = new Simulation(systemStatus, tenantList, new HashSet<>(dataCloudRefreshTenant),
+                tenantActivityMap, priorityQueue, clock);
         simulation.run();
     }
 
@@ -69,7 +62,7 @@ public class SimulationUnitTestNG extends CDLFunctionalTestNGBase {
         List<Event> eventList = new ArrayList<>();
         Random r = new Random();
         for (String tenantId : tenantList) {
-            int count = r.nextInt(5) + 1;
+            int count = r.nextInt(1000) + 1;
             for (int i = 0; i < count; i++) {
                 int type = r.nextInt(5);
                 if (type < 1) {
@@ -87,8 +80,8 @@ public class SimulationUnitTestNG extends CDLFunctionalTestNGBase {
     private List<Event> generateSchedulingEvent() {
         long time = clock.getCurrentTime();
         List<Event> events = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            time += i * 5 * 60; // 5 min
+        for (int i = 0; i < 600; i++) {
+            time += 5 * 60 * 1000; // 5 min
             events.add(new SchedulingEvent(time));
         }
         return events;
@@ -98,23 +91,25 @@ public class SimulationUnitTestNG extends CDLFunctionalTestNGBase {
         List<Event> events = new ArrayList<>();
         Random r = new Random();
         long time = clock.getCurrentTime();
-        for (String tenantId : dataCloudRefreshTenant) {
-            time += r.nextInt(1000) * 60;
-            events.add(new DataCloudRefreshEvent(tenantId, time));
+        // TODO change evaluation to end time
+        for (int i = 0; i < 10; i++) {
+            // 6 wks
+            events.add(new DataCloudRefreshEvent(time + i * 6 * 7 * 86400L * 1000));
         }
+
         return events;
     }
 
     private long getRandomTime() {
         Random r = new Random();
-        int randomInt = r.nextInt(100) * 60;
-        long time = clock.getCurrentTime() + randomInt;
+        int randomInt = r.nextInt(24 * 60 * 2) * 60; // 2 day
+        long time = clock.getCurrentTime() + (long) randomInt * 1000;
         return time;
     }
 
     private List<String> initTenant() {
         List<String> tenantList = new LinkedList<>();
-        for (int i = 1; i < 21; i ++) {
+        for (int i = 1; i < 21; i++) {
             tenantList.add("testTenant" + i);
         }
         return tenantList;

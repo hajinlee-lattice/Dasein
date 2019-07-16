@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,16 @@ public class SimulationStats {
     public Map<String, TenantActivity> canRunTenantActivityMap;
     public Map<String, TenantActivity> runningTenantActivityMap;
     public List<String> tenantList;
+    public Set<String> dcRefreshTenants;
     public Map<String, List<Event>> tenantEventMap = new HashMap<>();
 
     public TimeClock timeClock;
     public List<SchedulingPAQueue> schedulingPAQueues;
 
-    public SimulationStats(List<String> tenantList, Map<String, TenantActivity> canRunTenantActivityMap) {
+    public SimulationStats(List<String> tenantList, Set<String> dcRefreshTenants,
+            Map<String, TenantActivity> canRunTenantActivityMap) {
         this.tenantList = tenantList;
+        this.dcRefreshTenants = dcRefreshTenants;
         this.canRunTenantActivityMap = canRunTenantActivityMap;
         this.runningTenantActivityMap = new HashMap<>();
     }
@@ -85,15 +89,18 @@ public class SimulationStats {
     }
 
     public TenantActivity setTenantActivityAfterPAFinished(TenantActivity tenantActivity) {
+        // TODO probably remove this method
         if (tenantEventMap.containsKey(tenantActivity.getTenantId())) {
             List<Event> events = tenantEventMap.get(tenantActivity.getTenantId());
-            for ( int i = events.size() - 1; i >= 0; i--) {
+            for (int i = events.size() - 1; i >= 0; i--) {
                 if (events.get(i).getClass().equals(PAEndEvent.class)) {
                     break;
                 }
+                // TODO move to import action event
                 if (events.get(i).getClass().equals(ImportActionEvent.class)) {
                     tenantActivity.setLastActionTime(events.get(i).getTime());
-                    if (tenantActivity.getFirstActionTime() == 0L || tenantActivity.getFirstActionTime() > events.get(i).getTime()) {
+                    if (tenantActivity.getFirstActionTime() == null || tenantActivity.getFirstActionTime() == 0L
+                            || tenantActivity.getFirstActionTime() > events.get(i).getTime()) {
                         tenantActivity.setFirstActionTime(events.get(i).getTime());
                     }
                 }
@@ -111,8 +118,8 @@ public class SimulationStats {
     }
 
     /**
-     * according the pushed event, edit the tenantActivity states
-     * waiting for next scheduling
+     * according the pushed event, edit the tenantActivity states waiting for next
+     * scheduling
      */
     public void push(String tenantId, Event e) {
         List<Event> events;
@@ -123,12 +130,14 @@ public class SimulationStats {
         }
         events.add(e);
         if (canRunTenantActivityMap.containsKey(tenantId)) {
+            // TODO move to each event
             TenantActivity tenantActivity = canRunTenantActivityMap.get(tenantId);
             if (e.getClass().equals(ImportActionEvent.class)) {
                 if (tenantActivity.getFirstActionTime() == null || tenantActivity.getFirstActionTime() == 0L) {
                     tenantActivity.setFirstActionTime(e.getTime());
                 }
-                if (tenantActivity.getLastActionTime() == null || tenantActivity.getLastActionTime() - e.getTime() < 0) {
+                if (tenantActivity.getLastActionTime() == null
+                        || tenantActivity.getLastActionTime() - e.getTime() < 0) {
                     tenantActivity.setLastActionTime(e.getTime());
                 }
             } else if (e.getClass().equals(ScheduleNowEvent.class)) {
@@ -144,8 +153,8 @@ public class SimulationStats {
     }
 
     /**
-     * if this PA job is large job, the failure probability is 2/5
-     * if not, the failure probability is 1/10
+     * if this PA job is large job, the failure probability is 2/5 if not, the
+     * failure probability is 1/10
      */
     public boolean isSucceed(TenantActivity tenantActivity) {
         Random r = new Random();
