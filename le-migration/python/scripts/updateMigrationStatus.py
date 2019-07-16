@@ -29,8 +29,22 @@ def getStorage(args):
 
 
 def checkCanUpdate(tenant, args):
-    return (tenant and tenant.migrationTrack
-            and args.tenant and args.status and args.status in STATUS)
+    if not tenant:
+        print('Tenant not found.')
+        return False
+    elif len(tenant.migrationTrack) != 1:
+        print('Tenant has never been tracked for migration')
+        return False
+    elif not args.tenant:
+        print('Missing tenant')
+        return False
+    elif not args.status:
+        print('Missing status')
+        return False
+    elif args.status not in STATUS:
+        print('{} is not a valid status'.format(args.status))
+        return False
+    return True
 
 
 if __name__ == '__main__':
@@ -47,8 +61,6 @@ if __name__ == '__main__':
             tenant.migrationTrack[0].status = args.status
             storage.save()
             print('\nUpdated tenant {} status to {}\n'.format(tenant.tenantId, args.status))
-        else:
-            print('\nFailed to update status for tenant. Tenant not found or status invalid.\n')
     finally:
         if storage:
             storage.close()

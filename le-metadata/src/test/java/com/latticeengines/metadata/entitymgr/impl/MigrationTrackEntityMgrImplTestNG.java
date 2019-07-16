@@ -28,8 +28,8 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     private final MigrationTrack.Status STATUS = MigrationTrack.Status.SCHEDULED;
     private final DataCollection.Version VERSION = DataCollection.Version.Blue;
     private final String STATSNAME = "Test";
-    private final String ROLE = TableRoleInCollection.SortedContact.name();
-    private Map<String, Long> ACTIVETABLE;
+    private final TableRoleInCollection ROLE = TableRoleInCollection.AccountBatchSlim;
+    private Map<TableRoleInCollection, String[]> ACTIVETABLE;
 
     @BeforeClass(groups = "functional")
     private void getTestData() {
@@ -61,8 +61,9 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
     public void testActiveTable(Tenant tenant, MigrationTrack track) {
-        Assert.assertEquals(track.getCurActiveTable(), migrationTrackEntityMgr.findByKey(track).getCurActiveTable());
-        Assert.assertEquals(ACTIVETABLE.get(ROLE),
+        Assert.assertNotNull(migrationTrackEntityMgr.findByKey(track).getCurActiveTable());
+        Assert.assertNotNull(migrationTrackEntityMgr.findByKey(track).getCurActiveTable().get(ROLE));
+        Assert.assertArrayEquals(ACTIVETABLE.get(ROLE),
                 migrationTrackEntityMgr.findByKey(track).getCurActiveTable().get(ROLE));
     }
 
@@ -81,11 +82,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     public void testStatsCubesData(Tenant tenant, MigrationTrack track) {
         Assert.assertArrayEquals(track.getStatsCubesData(),
                 migrationTrackEntityMgr.findByKey(track).getStatsCubesData());
-    }
-
-    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
-    public void testStatsData(Tenant tenant, MigrationTrack track) {
-        Assert.assertArrayEquals(track.getStatsData(), migrationTrackEntityMgr.findByKey(track).getStatsData());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
@@ -120,7 +116,8 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
         if (ACTIVETABLE == null) {
             ACTIVETABLE = new HashMap<>();
-            ACTIVETABLE.put(ROLE, -2L);
+            String[] tableNames = { "This table", "That table" };
+            ACTIVETABLE.put(ROLE, tableNames);
         }
 
         if (migrationTrackEntityMgr.findByField("FK_TENANT_ID", tenant1.getPid()) == null) {
@@ -132,7 +129,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
             track1.setCurActiveTable(ACTIVETABLE);
             track1.setCollectionStatusDetail(null);
             track1.setStatsCubesData(new byte[1]);
-            track1.setStatsData(new byte[1]);
             Assert.assertNotNull(track1);
             migrationTrackEntityMgr.create(track1);
         } else {
@@ -148,7 +144,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
             track2.setCurActiveTable(ACTIVETABLE);
             track2.setCollectionStatusDetail((null));
             track2.setStatsCubesData(new byte[5]);
-            track2.setStatsData(new byte[5]);
             Assert.assertNotNull(track2);
             migrationTrackEntityMgr.create(track2);
         } else {

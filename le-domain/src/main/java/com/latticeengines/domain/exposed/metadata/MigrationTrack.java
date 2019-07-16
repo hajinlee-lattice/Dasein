@@ -62,8 +62,8 @@ public class MigrationTrack implements HasPid, HasTenant {
     @JsonProperty("curActiveTable")
     @Type(type = "json")
     @Column(name = "CUR_ACTIVE_TABLE_NAME", columnDefinition = "'JSON'")
-    // Role -> Table.PID
-    private Map<String, Long> curActiveTable; // List of all active tables' id under tenant
+    // Role -> Table.names
+    private Map<TableRoleInCollection, String[]> curActiveTable; // List of all active tables' names under tenant
 
     @Type(type = "json")
     @JsonProperty("importAction")
@@ -78,11 +78,6 @@ public class MigrationTrack implements HasPid, HasTenant {
     @Lob
     @JsonIgnore
     private byte[] statsCubesData;
-
-    @Column(name = "DATA")
-    @Lob
-    @JsonIgnore
-    private byte[] statsData;
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("statsName")
@@ -132,11 +127,11 @@ public class MigrationTrack implements HasPid, HasTenant {
         this.version = version;
     }
 
-    public Map<String, Long> getCurActiveTable() {
+    public Map<TableRoleInCollection, String[]> getCurActiveTable() {
         return curActiveTable;
     }
 
-    public void setCurActiveTable(Map<String, Long> curActiveTable) {
+    public void setCurActiveTable(Map<TableRoleInCollection, String[]> curActiveTable) {
         this.curActiveTable = curActiveTable;
     }
 
@@ -162,14 +157,6 @@ public class MigrationTrack implements HasPid, HasTenant {
 
     public void setStatsCubesData(byte[] statsCubesData) {
         this.statsCubesData = statsCubesData;
-    }
-
-    public byte[] getStatsData() {
-        return statsData;
-    }
-
-    public void setStatsData(byte[] statsData) {
-        this.statsData = statsData;
     }
 
     public String getStatsName() {
