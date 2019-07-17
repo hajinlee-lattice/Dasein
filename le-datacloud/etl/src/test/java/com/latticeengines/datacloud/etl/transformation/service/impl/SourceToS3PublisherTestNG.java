@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.EXPIRE_DAYS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.S3_TO_GLACIER_DAYS;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -61,7 +65,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     // Sources for multi-source step
     private IngestionSource baseSrc5 = new IngestionSource("TestSource5");
-    private GeneralSource baseSrc6 = new GeneralSource("AccountMaster");
+    private GeneralSource baseSrc6 = new GeneralSource(ACCOUNT_MASTER);
 
     // Place holder of target source whose name is used as pod
     private GeneralSource source = new GeneralSource(
@@ -309,19 +313,23 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
             // Verify data files
             List<String> dataFiles = getExpectedDataFiles(baseSource);
-            validateCopySuccess(dataFiles, days, true);
+            validateCopySuccess(dataFiles, days);
+            validateTags(dataFiles, days);
 
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
                         .append(sourceName + ".avsc").toString();
-                validateCopySuccess(Arrays.asList(schemaFile), days, true);
+                validateCopySuccess(Arrays.asList(schemaFile), days);
+                validateTags(Arrays.asList(schemaFile), days);
             }
 
             // Verify current version file
             String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
-            validateCopySuccess(Arrays.asList(versionFilePath), days, false);
+            validateCopySuccess(Arrays.asList(versionFilePath), days);
+            Assert.assertTrue(CollectionUtils.isEmpty(s3Service.getObjectTags(s3Bucket, versionFilePath)));
             verifyVersionFile(baseSource, versionFilePath);
+
            
         } catch (Exception e) {
             log.error("Fail to validate publising source {} at version {}", sourceName, version);
@@ -344,8 +352,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void validateTagSuccess(List<Integer> days, List<Tag> tags) {
         Assert.assertNotNull(tags);
         Assert.assertEquals(tags.size(), 2);
-        Assert.assertEquals(tags.get(0).getKey(), "S3ToGlacierDays");
-        Assert.assertEquals(tags.get(1).getKey(), "ExpireDays");
+        Assert.assertEquals(tags.get(0).getKey(), S3_TO_GLACIER_DAYS);
+        Assert.assertEquals(tags.get(1).getKey(), EXPIRE_DAYS);
         Assert.assertEquals(tags.get(0).getValue(), days.get(0).toString());
         Assert.assertEquals(tags.get(1).getValue(), days.get(1).toString());
     }
@@ -361,16 +369,23 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files, List<Integer> days, boolean hasTagCheck) {
+    private void validateCopySuccess(List<String> files, List<Integer> days) {
         files.forEach(file -> {
             try {
                 Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
             } catch (Exception e) {
                 throw new RuntimeException("Fail to validate publishing:" + file, e);
             }
-            if (hasTagCheck) {
+        });
+    }
+
+    private void validateTags(List<String> files, List<Integer> days) {
+        files.forEach(file -> {
+            try {
                 List<Tag> tags = s3Service.getObjectTags(s3Bucket, file);
                 validateTagSuccess(days, tags);
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate tags of file: " + file, e);
             }
         });
     }

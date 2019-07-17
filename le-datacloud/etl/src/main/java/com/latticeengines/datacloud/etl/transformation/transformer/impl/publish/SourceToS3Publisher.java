@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -96,16 +97,16 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String dataPath = getSourceHdfsDir(step, i);
                 String versionFilePath = getBaseSourceVersionFilePath(step, i);
 
-                PurgeStrategy ps = getPurgeStrategy(source);
+                List<Pair<String, String>> tags = getPurgeStrategyTags(source);
 
                 List<String> files = getDirFiles(dataPath);
                 copyAndValidate(sourceName, dataPath, files, true);
-                objectTagging(ps, dataPath, files);
+                objectTagging(tags, dataPath, files);
 
                 if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                     files = getDirFiles(schemaPath);
                     copyAndValidate(sourceName, schemaPath, files, true);
-                    objectTagging(ps, dataPath, files);
+                    objectTagging(tags, dataPath, files);
                 }
 
                 if (shouldCopyVersionFile(source, versionFilePath)) {
@@ -123,31 +124,31 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private void objectTagging(PurgeStrategy ps, String prefix, List<String> files) {
+    private void objectTagging(List<Pair<String, String>> tags, String prefix, List<String> files) {
+        tags.forEach(tag -> log.info("Adding tag {} with value {} on objects with prefix {}",
+                tag.getKey(), tag.getValue(), prefix));
+        tagS3Objects(files, tags);
+    }
+
+    private List<Pair<String, String>> getPurgeStrategyTags(Source source) {
+        PurgeStrategy ps = purgeStrategyEntityMgr.findStrategyBySourceAndType(source.getSourceName(),
+                PurgeStrategyUtils.getSourceType(source));
         Integer glacierDays = (ps == null) || (ps.getGlacierDays() == null) ? 180 : ps.getGlacierDays();
         Integer s3Days = (ps == null) || (ps.getS3Days() == null) ? 180 : ps.getS3Days();
-        List<Pair<String, String>> keyAndValues = Arrays.asList(Pair.of(S3_TO_GLACIER_DAYS, s3Days.toString()),
+        return Arrays.asList(Pair.of(S3_TO_GLACIER_DAYS, s3Days.toString()),
                 Pair.of(EXPIRE_DAYS, Integer.toString(s3Days + glacierDays)));
-        keyAndValues.forEach(keyAndValue -> log.info("Adding tag {} with value {} on objects with prefix {}",
-                keyAndValue.getKey(), keyAndValue.getValue(), prefix));
-        tagS3Objects(files, keyAndValues);
+
     }
 
-    private PurgeStrategy getPurgeStrategy(Source source) {
-        return purgeStrategyEntityMgr.findStrategyBySourceAndType(source.getSourceName(),
-                PurgeStrategyUtils.getSourceType(source));
-    }
-
-    private void tagS3Objects(List<String> files, List<Pair<String, String>> keyAndValues) {
+    private void tagS3Objects(List<String> files, List<Pair<String, String>> tags) {
         files.forEach(s3Path -> {
-            String s3Key = sanitizePrefix(s3Path);
-            for (Pair<String, String> keyAndValue : keyAndValues) {
+            for (Pair<String, String> tag : tags) {
                 try {
-                    s3Service.addTagToObject(s3Bucket, s3Key, keyAndValue.getKey(), keyAndValue.getValue());
+                    s3Service.addTagToObject(s3Bucket, s3Path, tag.getKey(), tag.getValue());
                 }
                 catch (Exception e) {
-                    log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, keyAndValue.getKey(),
-                            keyAndValue.getValue()));
+                    log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, tag.getKey(),
+                            tag.getValue()));
                     throw new RuntimeException(e);
                 }
             }
@@ -194,11 +195,10 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     private void validateCopySuccess(String hdfsDir, List<String> files) {
         try {
             for (String file : files) {
-                String filePath = file.substring(file.indexOf(hdfsDir));
-                if (!s3Service.objectExist(s3Bucket, filePath)) {
-                    throw new RuntimeException(filePath + " wasn't successfully copied to S3 bucket " + s3Bucket);
+                if (!s3Service.objectExist(s3Bucket, file)) {
+                    throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
                 }
-                validateFileSize(filePath);
+                validateFileSize(file);
             }
         } catch (Exception e) {
             throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
@@ -207,7 +207,10 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
 
     private List<String> getDirFiles(String hdfsDir) {
         try {
-            return HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false);
+            List<String> hdfsFiles = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir,
+                    (HdfsFileFilter) null, false);
+            return hdfsFiles.stream().map(hdfsFile -> hdfsFile.substring(hdfsFile.indexOf(hdfsDir)))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Fail to get file list of HDFS path: " + hdfsDir, e);
         }
@@ -264,16 +267,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         } catch (Exception ex) {
             throw new RuntimeException("Fail to parse current version file", ex);
         }
-    }
-
-    private String sanitizePrefix(String prefix) {
-        if (prefix.startsWith("hdfs://localhost:9000")) {
-            prefix = prefix.substring(22);
-        }
-        while (prefix.startsWith("/")) {
-            prefix = prefix.substring(1);
-        }
-        return prefix;
     }
 
     private String gets3nPath(String hdfsPath) {
