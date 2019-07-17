@@ -121,7 +121,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     // Source -> [S3ToGlacierDays,ExpireDays]
     @SuppressWarnings("serial")
-    private Map<Source, List<Integer>> expectedDays = new HashMap<Source, List<Integer>>() {
+    private Map<Source, List<Integer>> expectedPurgeDays = new HashMap<Source, List<Integer>>() {
         {
             put(baseSrc1, Arrays.asList(180, 360));
             put(baseSrc2, Arrays.asList(180, 360));
@@ -309,24 +309,24 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         try {
             log.info("Checking the objects of Source: {}", sourceName);
 
-            List<Integer> days = expectedDays.get(baseSource);
+            List<Integer> purgeDays = expectedPurgeDays.get(baseSource);
 
             // Verify data files
             List<String> dataFiles = getExpectedDataFiles(baseSource);
-            validateCopySuccess(dataFiles, days);
-            validateTags(dataFiles, days);
+            validateCopySuccess(dataFiles);
+            validateTags(dataFiles, purgeDays);
 
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
                         .append(sourceName + ".avsc").toString();
-                validateCopySuccess(Arrays.asList(schemaFile), days);
-                validateTags(Arrays.asList(schemaFile), days);
+                validateCopySuccess(Arrays.asList(schemaFile));
+                validateTags(Arrays.asList(schemaFile), purgeDays);
             }
 
             // Verify current version file
             String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
-            validateCopySuccess(Arrays.asList(versionFilePath), days);
+            validateCopySuccess(Arrays.asList(versionFilePath));
             Assert.assertTrue(CollectionUtils.isEmpty(s3Service.getObjectTags(s3Bucket, versionFilePath)));
             verifyVersionFile(baseSource, versionFilePath);
 
@@ -349,13 +349,13 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     }
 
-    private void validateTagSuccess(List<Integer> days, List<Tag> tags) {
+    private void validateTagSuccess(List<Integer> purgeDays, List<Tag> tags) {
         Assert.assertNotNull(tags);
         Assert.assertEquals(tags.size(), 2);
         Assert.assertEquals(tags.get(0).getKey(), S3_TO_GLACIER_DAYS);
         Assert.assertEquals(tags.get(1).getKey(), EXPIRE_DAYS);
-        Assert.assertEquals(tags.get(0).getValue(), days.get(0).toString());
-        Assert.assertEquals(tags.get(1).getValue(), days.get(1).toString());
+        Assert.assertEquals(tags.get(0).getValue(), purgeDays.get(0).toString());
+        Assert.assertEquals(tags.get(1).getValue(), purgeDays.get(1).toString());
     }
 
     private List<String> getExpectedDataFiles(Source baseSource) {
@@ -369,7 +369,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         return lists;
     }
 
-    private void validateCopySuccess(List<String> files, List<Integer> days) {
+    private void validateCopySuccess(List<String> files) {
         files.forEach(file -> {
             try {
                 Assert.assertTrue(s3Service.objectExist(s3Bucket, file));
@@ -379,11 +379,11 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         });
     }
 
-    private void validateTags(List<String> files, List<Integer> days) {
+    private void validateTags(List<String> files, List<Integer> purgeDays) {
         files.forEach(file -> {
             try {
                 List<Tag> tags = s3Service.getObjectTags(s3Bucket, file);
-                validateTagSuccess(days, tags);
+                validateTagSuccess(purgeDays, tags);
             } catch (Exception e) {
                 throw new RuntimeException("Fail to validate tags of file: " + file, e);
             }

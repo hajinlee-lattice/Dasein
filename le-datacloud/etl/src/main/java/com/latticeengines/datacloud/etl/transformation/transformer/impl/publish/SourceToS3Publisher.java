@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -156,12 +157,12 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private void copyAndValidate(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
-        String s3Prefix = gets3nPath(hdfsDir);
-        copyToS3(sourceName, hdfsDir, s3Prefix, isDir);
+        copyToS3(sourceName, hdfsDir, files, isDir);
         validateCopySuccess(hdfsDir, files);
     }
 
-    private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir) {
+    private void copyToS3(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
+        String s3nDir = gets3nPath(hdfsDir);
         try {
             cleanupS3Path(hdfsDir);
 
@@ -174,8 +175,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             log.info("Copying from {} to {}", hdfsDir, s3nDir);
 
             if (isDir) {
-                if (!HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false)
-                        .isEmpty()) {
+                if (!files.isEmpty()) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
                     throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);
@@ -193,22 +193,25 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private void validateCopySuccess(String hdfsDir, List<String> files) {
-        try {
-            for (String file : files) {
+        files.forEach(file -> {
+            try {
                 if (!s3Service.objectExist(s3Bucket, file)) {
                     throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
                 }
                 validateFileSize(file);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
-        }
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
+                }
+        });
     }
 
     private List<String> getDirFiles(String hdfsDir) {
         try {
             List<String> hdfsFiles = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir,
                     (HdfsFileFilter) null, false);
+            if (hdfsFiles == null) {
+                return Collections.emptyList();
+            }
             return hdfsFiles.stream().map(hdfsFile -> hdfsFile.substring(hdfsFile.indexOf(hdfsDir)))
                     .collect(Collectors.toList());
         } catch (IOException e) {
