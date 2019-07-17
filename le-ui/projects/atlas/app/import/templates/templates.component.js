@@ -181,7 +181,7 @@ export default class TemplatesComponent extends Component {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
 
-            copy['TemplateName'] = value;
+            copy['Object'] = value;
             httpService.put(
                 "/pls/cdl/s3/template/displayname",
                 copy,
@@ -190,7 +190,7 @@ export default class TemplatesComponent extends Component {
                         cell.toogleEdit();
                         if (response.getStatus() === SUCCESS) {
                             let newState = [...this.state.data];
-                            newState[cell.props.rowIndex]['TemplateName'] = value;
+                            newState[cell.props.rowIndex]['Object'] = value;
                             this.setState({ data: newState });
                         }
                     },
@@ -326,8 +326,8 @@ export default class TemplatesComponent extends Component {
                         if (!cell.state.saving && !cell.state.editing) {
                             if (cell.props.rowData.Exist) {
                                 return (
-                                    <div className={!cell.props.rowData.TemplateName ? 'no-name' : ''}>
-                                        {cell.props.rowData.TemplateName ? cell.props.rowData.TemplateName : 'Name is not defined'}
+                                    <div className={!cell.props.rowData.Object ? 'no-name' : ''}>
+                                        {cell.props.rowData.Object ? cell.props.rowData.Object : 'Name is not defined'}
                                         <ul className="unstyled">
                                             <EditControl
                                                 icon="fa fa-pencil-square-o"
@@ -340,8 +340,8 @@ export default class TemplatesComponent extends Component {
                                 );
                             } else {
                                 return (
-                                    <div className={!cell.props.rowData.TemplateName ? 'no-name' : ''}>
-                                        {cell.props.rowData.TemplateName ? cell.props.rowData.TemplateName : 'Name is not defined'}
+                                    <div className={!cell.props.rowData.Object ? 'no-name' : ''}>
+                                        {cell.props.rowData.Object ? cell.props.rowData.Object : 'Name is not defined'}
                                     </div>
                                 );
                             }
@@ -351,7 +351,7 @@ export default class TemplatesComponent extends Component {
                                 return (
                                     <EditorText
                                         initialValue={
-                                            cell.props.rowData.TemplateName
+                                            cell.props.rowData.Object
                                         }
                                         cell={cell}
                                         applyChanges={
