@@ -64,6 +64,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, //
                 LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, //
                 LatticeFeatureFlag.ENABLE_APS_IMPUTATION, //
                 LatticeFeatureFlag.ENABLE_FILE_IMPORT, //
@@ -95,6 +96,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, //
                 LatticeFeatureFlag.ENABLE_APS_IMPUTATION, //
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
