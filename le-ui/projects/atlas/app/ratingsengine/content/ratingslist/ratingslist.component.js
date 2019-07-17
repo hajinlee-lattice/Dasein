@@ -335,16 +335,11 @@ angular.module('lp.ratingsengine.ratingslist', [
     };
 
 
-    vm.callbackModalWindow = function(args) {
-        
+    vm.callbackDeleteModalWindow = function(args) {
         var modal = Modal.get('deleteModelPrompt');
-
         if (args.action === 'cancel') {
-         
             Modal.modalRemoveFromDOM(modal, args);
-
         } else if (args.action === 'ok') {
-
             var ratingId = vm.rating.id;
             if(modal){
                 modal.waiting(true);
@@ -371,7 +366,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             title: "Delete Model",
             message: "Are you sure you want to delete this model: " + rating.displayName + "?",
             confirmtext: "Delete Model"
-        }, vm.callbackModalWindow);
+        }, vm.callbackDeleteModalWindow);
     };
 
     // vm.showDeleteRatingModalClick = function($event, rating){
@@ -401,18 +396,50 @@ angular.module('lp.ratingsengine.ratingslist', [
         return !vm.enableDelete(ratingId) && JobsStore.inProgressModelJobs[ratingId] == null;
     }
 
+
+    vm.callbackCancelModalWindow = function(args) {
+        var modal = Modal.get('cancelModelPrompt');
+        if (args.action === 'cancel') {
+            Modal.modalRemoveFromDOM(modal, args);
+        } else if (args.action === 'ok') {
+            var ratingId = vm.ratingId;
+            if(modal){
+                modal.waiting(true);
+            }
+
+            var jobId = JobsStore.inProgressModelJobs[ratingId];
+            if (jobId) { //jobId can be null when status is pending
+                JobsService.cancelJob(jobId).then(function (result) {
+
+                    if (result.status != null && result.status === 200) {
+                        JobsStore.cancelledJobs[ratingId] = jobId;
+                        delete JobsStore.inProgressModelJobs[ratingId];
+                        $state.go('home.ratingsengine.list', {}, { reload: true } );
+                    } else {
+                        console.log(result);
+                    }
+                });
+            } else {
+                console.log('jobid', jobId);
+            }
+            Modal.modalRemoveFromDOM(modal, args);
+        }
+    }
+
     vm.cancelJobClickConfirm = function ($event, ratingId) {
+        $event.preventDefault();
         $event.stopPropagation();
 
-        var jobId = JobsStore.inProgressModelJobs[ratingId];
-        if (jobId) { //jobId can be null when status is pending
-            JobsService.cancelJob(jobId).then(function (result) {
-                JobsStore.cancelledJobs[ratingId] = jobId;
-                delete JobsStore.inProgressModelJobs[ratingId];
-            });
-        } else {
-            console.log('jobid', jobId);
-        }
+        vm.ratingId = ratingId;
+
+        Modal.warning({
+            name: 'cancelModelPrompt',
+            title: "Cancel Modeling Job",
+            message: "Are you sure you want to cancel this modeling job?",
+            confirmtext: "Cancel Job"
+        }, vm.callbackCancelModalWindow);
+
+        
     }
 
     vm.isCancellingJob = function(ratingId) {
