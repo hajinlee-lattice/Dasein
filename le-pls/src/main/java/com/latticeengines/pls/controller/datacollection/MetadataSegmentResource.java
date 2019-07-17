@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -88,9 +89,9 @@ public class MetadataSegmentResource {
             String email = principal.toString();
             if (StringUtils.isNotBlank(email)) {
                 metadataSegment.setCreatedBy(email);
-                metadataSegment.setUpdatedBy(email);
             }
         }
+        metadataSegment.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
     }
 
