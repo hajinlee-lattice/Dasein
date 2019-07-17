@@ -175,7 +175,7 @@
                     ng-init="
                         highest = vm.getHighestStat(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List);
                         highestLift = vm.getHighestLift(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List);
-                        totalBucketsCounts = vm.getTotalBucketCounts(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5)"
+                        totalBucketsCounts = vm.getTotalBucketCounts(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List)"
                     >
                     <div class="tooltip_" ng-if="vm.section == 'segment.analysis' && statcount == 0">
                         <div class="cover">
@@ -217,8 +217,11 @@
                         </li>
                         <li class="count">
                             <span ng-if="vm.section == 're.model_iteration'">
-                            {{vm.percentage(stat.Cnt, totalBucketsCounts, '%', 0)}}</span>
-                            <span ng-if="vm.section != 're.model_iteration'">{{stat.Cnt|number}}</span>
+                                {{vm.percentage(stat.Cnt, totalBucketsCounts, '%', 0)}}
+                            </span>
+                            <span ng-if="vm.section != 're.model_iteration'">
+                                {{stat.Cnt|number}}
+                            </span>
                         </li>
                     </ul>
                 </li>
