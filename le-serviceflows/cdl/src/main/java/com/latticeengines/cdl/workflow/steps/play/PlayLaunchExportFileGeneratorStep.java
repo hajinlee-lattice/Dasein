@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -79,7 +78,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            AvroUtils.convertAvroToCSV(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
+            AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
                     new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
                             config.getContactDisplayNames(),
                             config.getDestinationSysType() == CDLExternalSystemType.MAP));
@@ -101,7 +100,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
         @Override
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
-            AvroUtils.convertAvroToJSON(yarnConfiguration, new Path(recAvroHdfsFilePath), localFile,
+            AvroUtils.convertAvroToJSON(yarnConfiguration, recAvroHdfsFilePath, localFile,
                     new RecommendationAvroToJsonFunction(config.getAccountDisplayNames(),
                             config.getContactDisplayNames()));
         }
