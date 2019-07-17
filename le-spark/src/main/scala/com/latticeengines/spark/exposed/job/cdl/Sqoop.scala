@@ -22,134 +22,11 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 
-
-object Sqoop {
-
-  case class Recommendation(PID: Option[Long], //
-                            EXTERNAL_ID: String, //
-                            ACCOUNT_ID: String, //
-                            LE_ACCOUNT_EXTERNAL_ID: String, //
-                            PLAY_ID: String, //
-                            LAUNCH_ID: String, //
-                            DESCRIPTION: String, //
-                            LAUNCH_DATE: Long, //
-                            LAST_UPDATED_TIMESTAMP: Long, //
-                            MONETARY_VALUE: Double, //
-                            LIKELIHOOD: Double, //
-                            COMPANY_NAME: String, //
-                            SFDC_ACCOUNT_ID: String, //
-                            PRIORITY_ID: String, //
-                            PRIORITY_DISPLAY_NAME: String, //
-                            MONETARY_VALUE_ISO4217_ID: String, //
-                            LIFT: String, //
-                            RATING_MODEL_ID: String, //
-                            MODEL_SUMMARY_ID: String, //
-                            CONTACTS: String, //
-                            SYNC_DESTINATION: String, //
-                            DESTINATION_ORG_ID: String, //
-                            DESTINATION_SYS_TYPE: String, //
-                            TENANT_ID: Long, //
-                            DELETED: Boolean)
-
-  def createRec(account: Row): Recommendation = {
-    
-    val playId: String = "playId"
-    val playLaunchId: String = "playLaunchId"
-    val tenantId: Long = 1L
-    val accountId: String = "accountId"
-    val externalAccountId: String = accountId
-    val uuid: String = UUID.randomUUID().toString
-    val description: String = "description"
-
-    var synchronizationDestination: String = "synchronizationDestination"
-    var destinationOrgId: String = "destinationOrgId"
-    var destinationSysType: String = "destinationSysType"
-    var score: String = ""
-    var bucketName: String = "A"
-    var bucket: RatingBucketName = null
-    var likelihood: Double = 98.0
-    var expectedValue: String = null
-    var monetaryValue: Double = 100.0
-    var priorityId: String = "A"
-    var priorityDisplayName: String = "A"
-    var ratingModelId: String = null
-    var modelSummaryId: String = "modelSummaryId"
-    var launchTime: Long = 1562181990314L
-    val sfdcAccountId: String = "sfdcAccountId"
-    var companyName: String = "companyName"
-    
-    Recommendation(None, // PID
-      uuid, // EXTERNAL_ID
-      accountId, // ACCOUNT_ID
-      externalAccountId, // LE_ACCOUNT_EXTERNAL_ID
-      playId, // PLAY_ID
-      playLaunchId, // LAUNCH_ID
-      description, // DESCRIPTION
-      launchTime, // LAUNCH_DATE
-      launchTime, // LAST_UPDATED_TIMESTAMP
-      monetaryValue, // MONETARY_VALUE
-      likelihood, // LIKELIHOOD
-      companyName, // COMPANY_NAME
-      sfdcAccountId, // SFDC_ACCOUNT_ID
-      priorityId, // PRIORITY_ID
-      priorityDisplayName, // PRIORITY_DISPLAY_NAME
-      null, // MONETARY_VALUE_ISO4217_ID
-      null, // LIFT
-      ratingModelId, // RATING_MODEL_ID
-      modelSummaryId, // MODEL_SUMMARY_ID
-      "[]", // CONTACTS
-      synchronizationDestination, // SYNC_DESTINATION
-      destinationOrgId, // DESTINATION_ORG_ID
-      destinationSysType, //DESTINATION_SYS_TYPE
-      tenantId, // TENANT_ID
-      DELETED = false // DELETED
-    )
-  }
-
-}
-
 class Sqoop extends AbstractSparkJob[CreateRecommendationConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[CreateRecommendationConfig]): Unit = {
     // Manipulate Account Table with PlayLaunchContext
-    val createRecFunc = (account: Row) => Sqoop.createRec(account)
-    val accountTable: DataFrame = lattice.input.head
-    val accountAndPlayLaunch = accountTable.rdd.map(createRecFunc)
-
-    val derivedAccounts = spark.createDataFrame(accountAndPlayLaunch) //
-      .toDF("PID", //
-      "EXTERNAL_ID", //
-      "ACCOUNT_ID", //
-      "LE_ACCOUNT_EXTERNAL_ID", //
-      "PLAY_ID", //
-      "LAUNCH_ID", //
-      "DESCRIPTION", //
-      "LAUNCH_DATE", //
-      "LAST_UPDATED_TIMESTAMP", //
-      "MONETARY_VALUE", //
-      "LIKELIHOOD", //
-      "COMPANY_NAME", //
-      "SFDC_ACCOUNT_ID", //
-      "PRIORITY_ID", //
-      "PRIORITY_DISPLAY_NAME", //
-      "MONETARY_VALUE_ISO4217_ID", //
-      "LIFT", //
-      "RATING_MODEL_ID", //
-      "MODEL_SUMMARY_ID", //
-      "CONTACTS", //
-      "SYNC_DESTINATION", //
-      "DESTINATION_ORG_ID", //
-      "DESTINATION_SYS_TYPE", //
-      "TENANT_ID", //
-      "DELETED")
-    
-    // finish
-    val orderedRec = derivedAccounts.select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
-        "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
-        "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
-        "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
-//    lattice.output = orderedRec :: Nil    
-    
+   
     val values = List(1L, // 1
                  "uuid", // 2
                  "accountId", // 3
@@ -166,7 +43,7 @@ class Sqoop extends AbstractSparkJob[CreateRecommendationConfig] {
                  "A", // 14
                  "A", // 15
                  "money_value", // 16
-                 "2.0", // 17
+                 2.0, // 17
                  "rating", // 18
                  "model", // 19
                  "[]", // 20
@@ -201,7 +78,7 @@ class Sqoop extends AbstractSparkJob[CreateRecommendationConfig] {
       StructField("PRIORITY_ID", StringType, nullable = false),
       StructField("PRIORITY_DISPLAY_NAME", StringType, nullable = false),
       StructField("MONETARY_VALUE_ISO4217_ID", StringType, nullable = false),
-      StructField("LIFT", StringType, nullable = false),
+      StructField("LIFT", DoubleType, nullable = false),
       StructField("RATING_MODEL_ID", StringType, nullable = false),
       StructField("MODEL_SUMMARY_ID", StringType, nullable = false),
       StructField("CONTACTS", StringType, nullable = false),

@@ -33,7 +33,7 @@ object CreateRecommendationsJob {
                             PRIORITY_ID: String, //
                             PRIORITY_DISPLAY_NAME: String, //
                             MONETARY_VALUE_ISO4217_ID: String, //
-                            LIFT: String, //
+                            LIFT: Option[Double], //
                             RATING_MODEL_ID: String, //
                             MODEL_SUMMARY_ID: String, //
                             SYNC_DESTINATION: String, //

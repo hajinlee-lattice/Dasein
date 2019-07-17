@@ -155,7 +155,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         List<AttrConfig> attrConfigs = metadataPair.getRight();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId, enableEntityMatch);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
+                enableEntityMatch || enableEntityMatchGA);
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -708,7 +710,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             try {
                 Schema.Type avroType = TableUtils.getTypeFromPhysicalDataType(attr.getPhysicalDataType());
                 if (StringUtils.isEmpty(attr.getFundamentalType())) {
-                    diagnostic.addWarnings(String.format("Attribute %s has empty fundamental type.", attr.getName()));
+                    diagnostic.addWarnings(String.format("Attribute %s has data type %s but has empty fundamental " +
+                            "type.", attr.getName(), attr.getPhysicalDataType()));
                 }
                 FundamentalType fdType = FundamentalType.fromName(attr.getFundamentalType());
                 switch (avroType) {

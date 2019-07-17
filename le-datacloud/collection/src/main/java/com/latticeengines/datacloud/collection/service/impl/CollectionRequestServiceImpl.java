@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
@@ -452,4 +453,12 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         collectionRequestMgr.cleanupRequestBetween(start, end);
     }
 
+
+    @Override
+    public void cleanupRequestHandled(String vendor, Timestamp before) {
+        List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED);
+
+        collectionRequestMgr.cleanupRequests(statuses, vendor, before);
+
+    }
 }

@@ -16,6 +16,8 @@ public final class DataCloudConstants {
 
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";
+    public static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
+    public static final String DUNS_GUIDE_BOOK = "DunsGuideBook";
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
     public static final String PATCH_BOOK_ATTR_PREFIX = "PATCH_";
 

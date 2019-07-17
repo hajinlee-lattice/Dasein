@@ -180,11 +180,13 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         segmentEntityMgr.upsertStats(masterSeg.getName(), statisticsContainer);
     }
 
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED, readOnly = true, noRollbackFor = {RuntimeException.class})
     @Override
     public DataCollection findDefaultCollection() {
         List<DataCollection> collections = dataCollectionDao.findAll();
         if (CollectionUtils.size(collections) != 1) {
+            log.error("There are " + CollectionUtils.size(collections) + " data collections in current tenant. " +
+                    "Cannot determine which one is the default.");
             throw new RuntimeException("There are " + CollectionUtils.size(collections) + " data collections in current tenant. "
                     + "Cannot determine which one is the default.");
         } else {

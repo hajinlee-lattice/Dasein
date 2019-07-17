@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.spark.LivySession;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Component
@@ -23,12 +22,6 @@ public class LivySessionManager {
 
     @Inject
     private LivySessionService sessionService;
-
-    @Inject
-    private EMRCacheService emrCacheService;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     @Value("${dataflowapi.spark.driver.cores}")
     private int driverCores;
@@ -82,9 +75,10 @@ public class LivySessionManager {
     }
 
     private Map<String, String> getSparkConf(int scalingMultiplier) {
+        scalingMultiplier = Math.max(scalingMultiplier - 1, 1);
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingMultiplier;
-        int maxExe = Math.max((int) (maxExecutors * scalingMultiplier * 0.5), minExe);
+        int maxExe = maxExecutors * scalingMultiplier;
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));

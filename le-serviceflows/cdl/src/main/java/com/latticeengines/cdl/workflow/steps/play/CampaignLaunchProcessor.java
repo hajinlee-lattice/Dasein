@@ -126,7 +126,7 @@ public class CampaignLaunchProcessor {
         metadataProxy.updateTable(tenant.getId(), playLaunchContext.getPlayLaunch().getTableName(),
                 playLaunchContext.getRecommendationTable());
 
-        if (!export(playLaunchContext, extractPath)) {
+        if (!export(playLaunchContext, recAvroHdfsFilePath)) {
             throw new LedpException(LedpCode.LEDP_18168);
         }
     }
