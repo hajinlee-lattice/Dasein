@@ -620,8 +620,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         updateJobsWithActionId(jobs, null);
 
         List<Long> allActionPids = getActionPids(jobs);
-        final Map<Long, Action> actionIdMap = new HashMap<>();
-        final Map<Long, Action> actionJobPidMap = new HashMap<>();
+        Map<Long, Action> actionIdMap = new HashMap<>();
+        Map<Long, Action> actionJobPidMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(allActionPids)) {
             List<Action> actions = getActions(allActionPids, null);
             actions.forEach(action -> {
