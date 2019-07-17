@@ -40,7 +40,7 @@ public class TestSqoopTestNG extends TestJoinTestNGBase {
     private String accountData;
     private String contactData;
 
-    @Test(groups = "manual")
+    @Test(groups = "functional")
     public void runTest() {
         uploadInputAvro();
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
