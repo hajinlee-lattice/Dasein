@@ -832,6 +832,7 @@ public enum LedpCode {
     LEDP_40063("Cannot update All System Priority, missing system: {0}."),
     LEDP_40064("Cannot update All System Priority: {0}"),
     LEDP_40065("Cannot create a new Campaign without a Display Name"),
+    LEDP_40066("Cannot create Import System: {0}"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
