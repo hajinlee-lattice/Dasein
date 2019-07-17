@@ -89,7 +89,7 @@
                             </div>
 
                             <span ng-if="vm.editMode == 'Custom'">
-                                <select ng-model="vm.operation" ng-change="vm.changeNumericalCmpValue()"
+                                <select ng-model="vm.operation" ng-change="vm.changeCmpValue()"
                                     ng-options="k as v for (k, v) in vm.numerical_operations">
                                 </select>
                             </span>

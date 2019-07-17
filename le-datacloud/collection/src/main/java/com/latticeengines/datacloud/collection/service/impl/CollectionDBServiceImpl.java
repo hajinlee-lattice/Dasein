@@ -174,6 +174,11 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private int transferRawRequests(boolean deleteFilteredReqs) {
 
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
+        if (rawReqs.size() > 0) {
+
+            log.info("fetch " + rawReqs.size() + " reqs from raw req table");
+
+        }
 
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
 
