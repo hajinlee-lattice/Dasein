@@ -50,8 +50,13 @@ public class S3ImportResource {
     @RequestMapping(value = "/system", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create an Import System")
-    public void createS3ImoprtSystem(@PathVariable String customerSpace, @RequestBody S3ImportSystem system) {
-        s3ImportSystemService.createS3ImportSystem(customerSpace, system);
+    public ResponseDocument<Boolean> createS3ImoprtSystem(@PathVariable String customerSpace, @RequestBody S3ImportSystem system) {
+        try {
+            s3ImportSystemService.createS3ImportSystem(customerSpace, system);
+            return ResponseDocument.successResponse(Boolean.TRUE);
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
 
     @RequestMapping(value = "/system/update", method = RequestMethod.POST, headers = "Accept=application/json")

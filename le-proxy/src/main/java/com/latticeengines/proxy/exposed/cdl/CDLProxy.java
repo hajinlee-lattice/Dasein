@@ -387,9 +387,16 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void createS3ImportSystem(String customerSpace, S3ImportSystem system) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system", shortenCustomerSpace(customerSpace));
-        post("create s3 import system", url, system, Void.class);
+        ResponseDocument<String> responseDoc = post("create s3 import system", url, system, ResponseDocument.class);
+        if (responseDoc == null) {
+            throw new RuntimeException("Failed to create Import System!");
+        }
+        if (!responseDoc.isSuccess()) {
+            throw new LedpException(LedpCode.LEDP_18216, responseDoc.getErrors().toArray());
+        }
     }
 
     public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
