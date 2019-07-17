@@ -129,7 +129,7 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     @Override
     public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before) {
 
-        repository.removeByStatusInAndVendorAndRequestedTimeBefore(statuses, vendor, before);
+        repository.removeByStatusInAndVendorAndDeliveryTimeBefore(statuses, vendor, before);
 
     }
 }
