@@ -183,7 +183,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (MapUtils.isNotEmpty(actionMap)) {
             List<Action> actions = new ArrayList<>();
             for (Long actionPid : actionPids) {
-                actions.add(actionMap.get(actionPid));
+                Action action = actionMap.get(actionPid);
+                if (action != null) {
+                    actions.add(actionMap.get(actionPid));
+                }
             }
             return actions;
         } else {
@@ -345,7 +348,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public void setErrorCategoryByJobPid(String jobPid, String errorCategory) {
-        workflowProxy.setErrorCategoryByJobPid(jobPid, errorCategory,MultiTenantContext.getCustomerSpace().toString());
+        workflowProxy.setErrorCategoryByJobPid(jobPid, errorCategory, MultiTenantContext.getCustomerSpace().toString());
     }
 
     private String getRecordsFound(ObjectNode payload, String impactedEntity) {
@@ -617,19 +620,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         updateJobsWithActionId(jobs, null);
 
         List<Long> allActionPids = getActionPids(jobs);
-        Map<Long, Action> actionIdMap;
-        Map<Long, Action> actionJobPidMap;
+        Map<Long, Action> actionIdMap = new HashMap<>();
+        Map<Long, Action> actionJobPidMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(allActionPids)) {
             List<Action> actions = getActions(allActionPids, null);
-            actionIdMap =
-                    actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
-                            Action -> Action, (key1, key2) -> key2));
-            actionJobPidMap =
-                    actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
-                            Action -> Action, (key1, key2) -> key2));
-        } else {
-            actionIdMap = new HashMap<>();
-            actionJobPidMap = new HashMap<>();
+            actions.forEach(action -> {
+                if (action.getPid() != null) {
+                    actionIdMap.put(action.getPid(), action);
+                }
+                if (action.getTrackingPid() != null) {
+                    actionJobPidMap.put(action.getTrackingPid(), action);
+                }
+            });
         }
         Map<String, Job> jobMap = getJobMap(actionIdMap);
 
@@ -674,21 +676,21 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 // check by the same orphan types
                 if (latestOrphanTrxJob.isPresent()
                         && validateArtifactTypeAndOrphanType(
-                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.TRANSACTION)
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.TRANSACTION)
                         && latestOrphanTrxJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
 
                 if (latestOrphanContactJob.isPresent()
                         && validateArtifactTypeAndOrphanType(
-                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.CONTACT)
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.CONTACT)
                         && latestOrphanContactJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
 
                 if (latestUnmatchedAccountJob.isPresent()
                         && validateArtifactTypeAndOrphanType(
-                                job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.UNMATCHED_ACCOUNT)
+                        job.getInputs().get("ARTIFACT_TYPE"), OrphanRecordsType.UNMATCHED_ACCOUNT)
                         && latestUnmatchedAccountJob.get().getStartTimestamp().compareTo(job.getStartTimestamp()) > 0) {
                     job.getInputs().put("EXPORT_ID", ORPHAN_ARTIFACT_EXPIRED);
                 }
