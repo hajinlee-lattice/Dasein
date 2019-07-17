@@ -49,7 +49,6 @@ import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.query.factory.SparkQueryProvider;
 
 import reactor.core.publisher.Flux;
@@ -59,14 +58,10 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
 
     private final TransactionService transactionService;
 
-    private final SparkSQLService sparkSQLService;
-
     @Inject
-    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService, //
-                                  SparkSQLService sparkSQLService) {
+    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
         super(queryEvaluatorService);
         this.transactionService = transactionService;
-        this.sparkSQLService = sparkSQLService;
     }
 
     @Override
