@@ -226,12 +226,12 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                     RestrictionOptimizer.optimize(rules.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
             if (accRestInRule != null || ctcRestInRule != null) {
                 mergedQuery = query.getDeepCopy();
-                Restriction accRestInQuery = query.getAccountRestriction() == null ? //
-                        null : query.getAccountRestriction().getRestriction();
+                Restriction accRestInQuery = mergedQuery.getAccountRestriction() == null ? //
+                        null : mergedQuery.getAccountRestriction().getRestriction();
                 Restriction accRest = mergeRestrictions(accRestInQuery, accRestInRule);
                 mergedQuery.setAccountRestriction(new FrontEndRestriction(accRest));
-                Restriction ctcRestInQuery = query.getContactRestriction() == null ? //
-                        null : query.getContactRestriction().getRestriction();
+                Restriction ctcRestInQuery = mergedQuery.getContactRestriction() == null ? //
+                        null : mergedQuery.getContactRestriction().getRestriction();
                 Restriction ctcRest = mergeRestrictions(ctcRestInQuery, ctcRestInRule);
                 mergedQuery.setContactRestriction(new FrontEndRestriction(ctcRest));
             }
