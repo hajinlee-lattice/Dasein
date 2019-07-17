@@ -82,7 +82,7 @@ angular.module('lp.ratingsengine.dashboard', [
                     },
                     {
                         'field': 'num_leads',
-                        'label': 'Accounts',
+                        'label': 'Records',
                         'type': 'number',
                         'chart': true
                     }
