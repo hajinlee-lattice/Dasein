@@ -55,9 +55,9 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
         metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), aggrTable.getName());
     }
 
-    protected int getScalingMultiplier(long count) {
-        int multiplier = super.getScalingMultiplier(count) * 4;
-        log.info("Set multiplier=" + multiplier + " base on count=" + count);
+    protected int getScalingMultiplier(double sizeInGb) {
+        int multiplier = super.getScalingMultiplier(sizeInGb) * 4;
+        log.info("Adjust multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
         return multiplier;
     }
 

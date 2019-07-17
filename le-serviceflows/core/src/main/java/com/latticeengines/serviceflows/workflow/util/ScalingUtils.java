@@ -27,16 +27,18 @@ public final class ScalingUtils {
      * 72G -> 4
      */
     public static int getMultiplier(double sizeInGb) {
-        double div8 = Math.floor(sizeInGb / 8.);
-        if (div8 < 1) {
-            return 1;
-        } else {
-            int log3 = (int) Math.floor(Math.log10(div8) / Math.log10(3));
-            int lowerBound = Math.max(log3 + 2, 1);
-            int multiplier = Math.min(lowerBound, 4);
-            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
-            return multiplier;
+        int multiplier = 1;
+        if (sizeInGb >= 72) {
+            multiplier = 4;
+        } else if (sizeInGb >= 24) {
+            multiplier = 3;
+        } else if (sizeInGb >= 8) {
+            multiplier = 2;
         }
+        if (multiplier > 1) {
+            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
+        }
+        return multiplier;
     }
 
     public static double getTableSizeInGb(Configuration configuration, Table table) {
