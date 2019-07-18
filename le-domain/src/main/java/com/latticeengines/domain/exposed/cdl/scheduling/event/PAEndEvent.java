@@ -32,6 +32,7 @@ public class PAEndEvent extends Event {
             } else {
                 tenantActivity.setRetry(true);
                 tenantActivity.setLastFinishTime(simulationContext.timeClock.getCurrentTime());
+                simulationContext.setTenantSummary(tenantActivity, true);
             }
             if (simulationContext.tenantEventMap.containsKey(tenantActivity.getTenantId())) {
                 List<Event> events = simulationContext.tenantEventMap.get(tenantActivity.getTenantId());

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.DataCloudRefreshEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 
 public class Simulation {
@@ -24,20 +26,22 @@ public class Simulation {
     private PriorityQueue<Event> priorityQueue;
     private SimulationTimeClock clock;
     private SystemStatus systemStatus;
+    private long endTime;
 
     public Simulation(SystemStatus systemStatus, Set<String> dcRefreshTenants,
                       Map<String, SimulationTenant> simulationTenantMap, PriorityQueue<Event> priorityQueue,
-                      SimulationTimeClock timeClock) {
+                      SimulationTimeClock timeClock, String duringTime) {
         this.clock = timeClock;
         this.priorityQueue = priorityQueue;
         this.systemStatus = systemStatus;
         this.simulationContext = new SimulationContext(systemStatus, dcRefreshTenants, simulationTenantMap);
         this.simulationContext.setTimeClock(clock);
-
+        this.endTime = transferTime(duringTime);
+        this.priorityQueue.addAll(generateDataCloudRefreshEvent());
     }
 
     public void run() {
-        while (!priorityQueue.isEmpty()) {
+        while (!priorityQueue.isEmpty() && (clock.getCurrentTime() <= endTime)) {
             Event e = priorityQueue.poll();
             // fake current time
             clock.setTimestamp(e.getTime());
@@ -45,10 +49,34 @@ public class Simulation {
             if (!CollectionUtils.isEmpty(events)) {
                 priorityQueue.addAll(events);
             }
-            log.info("current event is : " + JsonUtils.serialize(e));
         }
         log.info(JsonUtils.serialize(this.systemStatus));
         simulationContext.printSummary();
+    }
+
+    private long transferTime(String duringTime) {
+        String timeNumber = duringTime.substring(0, duringTime.length() - 1);
+        String tag = duringTime.substring(duringTime.length() - 1);
+        long endTime = 0L;
+        switch (tag) {
+            case "d" : endTime = 86400L * 1000 * Long.valueOf(timeNumber) + clock.getCurrentTime(); break;
+            case "w" : endTime = 7 * 86400L * 1000 * Long.valueOf(timeNumber) + clock.getCurrentTime(); break;
+            case "m" : endTime = 30 * 7 * 86400L * 1000 * Long.valueOf(timeNumber) + clock.getCurrentTime(); break;
+            default: break;
+        }
+        return endTime;
+    }
+
+    private List<Event> generateDataCloudRefreshEvent() {
+        List<Event> events = new ArrayList<>();
+        long time = clock.getCurrentTime();
+        for (int i = 0; time <= endTime ; i++) {
+            // 6 wks
+            time += i * 6 * 7 * 86400L * 1000;
+            events.add(new DataCloudRefreshEvent(time));
+        }
+
+        return events;
     }
 
 }

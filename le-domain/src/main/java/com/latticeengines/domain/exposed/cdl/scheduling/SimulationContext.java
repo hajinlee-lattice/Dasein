@@ -10,7 +10,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 
 public class SimulationContext {
@@ -19,13 +18,17 @@ public class SimulationContext {
 
     private Map<String, TenantActivity> canRunTenantActivityMap;
     private Map<String, TenantActivity> runningTenantActivityMap;
-    public Set<String> dcRefreshTenants;
-    public SystemStatus systemStatus;
     private Map<String, SimulationTenant> simulationTenantMap;
+    private Map<String, SimulationTenantSummary> simulationTenantSummaryMap;
+    public final Set<String> dcRefreshTenants;
+    public SystemStatus systemStatus;
     public Map<String, List<Event>> tenantEventMap = new HashMap<>();
-    public Map<String, SimulationTenantSummary> simulationTenantSummaryMap = new HashMap<>();
 
     public TimeClock timeClock;
+
+    private int schedulingEventCount;
+    private int dataCloudRefreshCount;
+
 
     public SimulationContext(SystemStatus systemStatus, Set<String> dcRefreshTenants,
                              Map<String, SimulationTenant> simulationTenantMap) {
@@ -34,16 +37,23 @@ public class SimulationContext {
         this.simulationTenantMap = simulationTenantMap;
         setCanRunTenantActivityMap();
         this.runningTenantActivityMap = new HashMap<>();
+        this.schedulingEventCount = 0;
+        this.dataCloudRefreshCount = 0;
     }
 
     private void setCanRunTenantActivityMap() {
         Iterator iter = this.simulationTenantMap.entrySet().iterator();
         this.canRunTenantActivityMap = new HashMap<>();
+        this.simulationTenantSummaryMap = new HashMap<>();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
             String tenantId = entry.getKey().toString();
             SimulationTenant simulationTenant = (SimulationTenant) entry.getValue();
-            this.canRunTenantActivityMap.put(tenantId, simulationTenant.getTenantActivity());
+            TenantActivity tenantActivity = simulationTenant.getTenantActivity();
+            SimulationTenantSummary simulationTenantSummary = new SimulationTenantSummary(tenantId,
+                    tenantActivity.isLarge(), dcRefreshTenants.contains(tenantId));
+            this.canRunTenantActivityMap.put(tenantId, tenantActivity);
+            this.simulationTenantSummaryMap.put(tenantId, simulationTenantSummary);
         }
     }
 
@@ -110,15 +120,9 @@ public class SimulationContext {
     }
 
     public void printSummary() {
-        for (Map.Entry<String, SimulationTenantSummary> entry : this.simulationTenantSummaryMap.entrySet()) {
-            SimulationTenantSummary simulationTenantSummary = entry.getValue();
-            log.info(simulationTenantSummary.printSummary());
-        }
+        log.info(SchedulingPASummaryUtil.printTenantSummary(new ArrayList<>(simulationTenantSummaryMap.values()), tenantEventMap,
+                schedulingEventCount, dataCloudRefreshCount));
 
-    }
-
-    public void printMyself() {
-        log.info(JsonUtils.serialize(this));
     }
 
     /**
@@ -134,16 +138,6 @@ public class SimulationContext {
         }
         events.add(e);
         tenantEventMap.put(tenantId, events);
-
-        if (!simulationTenantSummaryMap.containsKey(tenantId)) {
-            SimulationTenantSummary simulationTenantSummary = new SimulationTenantSummary(tenantId);
-            simulationTenantSummary.push(e, timeClock.getCurrentTime());
-            simulationTenantSummaryMap.put(tenantId, simulationTenantSummary);
-        } else {
-            SimulationTenantSummary simulationTenantSummary = simulationTenantSummaryMap.get(tenantId);
-            simulationTenantSummary.push(e, timeClock.getCurrentTime());
-            simulationTenantSummaryMap.put(tenantId, simulationTenantSummary);
-        }
     }
 
     public void setTenantActivityToCanRun(TenantActivity tenantActivity) {
@@ -156,4 +150,33 @@ public class SimulationContext {
         return new ArrayList<>(runningTenantActivityMap.values());
     }
 
+    public void setTenantSummary(TenantActivity tenantActivity, boolean isPAEnd) {
+        if (simulationTenantSummaryMap.containsKey(tenantActivity.getTenantId())) {
+            if (tenantActivity.isRetry()) {
+                SimulationTenantSummary simulationTenantSummary =
+                        simulationTenantSummaryMap.get(tenantActivity.getTenantId());
+                if (isPAEnd) {//when pa failed, will set Retry flag at PAEndEvent
+                    simulationTenantSummary.setFailedPANum(simulationTenantSummary.getFailedPANum() + 1);
+                } else {//when pa running, Retry flag is true ,then this is retry PA
+                    simulationTenantSummary.setRetryPANum(simulationTenantSummary.getRetryPANum() + 1);
+                }
+            }
+        }
+    }
+
+    public int getSchedulingEventCount() {
+        return schedulingEventCount;
+    }
+
+    public void setSchedulingEventCount(int schedulingEventCount) {
+        this.schedulingEventCount = schedulingEventCount;
+    }
+
+    public int getDataCloudRefreshCount() {
+        return dataCloudRefreshCount;
+    }
+
+    public void setDataCloudRefreshCount(int dataCloudRefreshCount) {
+        this.dataCloudRefreshCount = dataCloudRefreshCount;
+    }
 }

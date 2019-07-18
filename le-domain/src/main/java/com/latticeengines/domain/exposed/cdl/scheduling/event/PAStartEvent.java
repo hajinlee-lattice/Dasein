@@ -23,6 +23,7 @@ public class PAStartEvent extends Event {
         TenantActivity tenantActivity = simulationContext.getcanRunTenantActivityByTenantId(tenantId);
         log.info("pa start tenantActivity is: " + JsonUtils.serialize(tenantActivity));
         if (tenantActivity != null) {
+            simulationContext.setTenantSummary(tenantActivity, false);
             simulationContext.systemStatus.changeSystemState(tenantActivity);
             log.info(simulationContext.systemStatus.toString());
             simulationContext.changeSimulationStateWhenRunPA(tenantActivity);

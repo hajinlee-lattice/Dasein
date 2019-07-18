@@ -50,6 +50,7 @@ public class SchedulingEvent extends Event {
                 events.add(paEndEvent);
             }
         }
+        simulationContext.setSchedulingEventCount(simulationContext.getSchedulingEventCount() + 1);
         // clear already scheduled tenant set
         simulationContext.systemStatus.setScheduleTenants(new HashSet<>());
         return events;

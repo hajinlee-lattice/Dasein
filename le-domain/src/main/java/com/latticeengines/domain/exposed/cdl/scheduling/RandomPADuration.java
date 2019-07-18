@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
-public interface RandomConfig {
+public interface RandomPADuration {
 
     int getRandom(TenantActivity tenantActivity);
 

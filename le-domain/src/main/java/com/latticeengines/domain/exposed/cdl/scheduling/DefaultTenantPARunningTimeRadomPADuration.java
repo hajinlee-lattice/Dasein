@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 
 import java.util.Random;
 
-public class DefaultTenantPARunningTimeRadomConfig implements RandomConfig {
+public class DefaultTenantPARunningTimeRadomPADuration implements RandomPADuration {
     @Override
     public int getRandom(TenantActivity tenantActivity) {
         Random r = new Random();

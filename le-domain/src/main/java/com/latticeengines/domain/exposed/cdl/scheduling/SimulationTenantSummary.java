@@ -1,48 +1,141 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAEndEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAStartEvent;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
 
 public class SimulationTenantSummary {
 
+    private static final Logger log = LoggerFactory.getLogger(SimulationTenantSummary.class);
+
     private String tenantId;
-    private Map<Long, Event> eventMap;
-    private long preTime;
+    private boolean isLarge;
+    private boolean isDataCloudRefresh;
+    private int paNum;
+    private int failedPANum;
+    private int retryPANum;
+    private float successRate;
+    private List<Long> paTime;
+    private List<Long> importActionWaitingTime;
+    private List<Long> scheduleNowWaitingTime;
 
-    public SimulationTenantSummary(String tenantId) {
+    public SimulationTenantSummary(String tenantId, boolean isLarge, boolean isDataCloudRefresh) {
         this.tenantId = tenantId;
-        this.preTime = 0L;
-        this.eventMap = new HashMap<>();
+        this.isLarge = isLarge;
+        this.isDataCloudRefresh = isDataCloudRefresh;
+        this.paNum = 0;
+        this.failedPANum = 0;
+        this.retryPANum = 0;
+        this.successRate = 0.0f;
+        this.paTime = new LinkedList<>();
+        this.importActionWaitingTime = new LinkedList<>();
+        this.scheduleNowWaitingTime = new LinkedList<>();
+
     }
 
-    public void push(Event event, long currentTime) {
-        if (this.eventMap.isEmpty()) {
-            eventMap.put(0L, event);
-        } else {
-            long duringTime = currentTime - this.preTime;
-            eventMap.put(duringTime, event);
+    public void calculate(List<Event> eventList) {
+        long paStartTime = 0L;
+        long paEndTime = 0L;
+        for (int i = (eventList.size() - 1); i >= 0; i--) {
+            Event event = eventList.get(i);
+            if (event instanceof PAStartEvent) {
+                paStartTime = event.getTime();
+                if (paEndTime != 0L) {
+                    this.paNum = this.paNum + 1;
+                    long duringPATime = paEndTime - paStartTime;
+                    paTime.add(duringPATime);
+                }
+            } else if (event instanceof PAEndEvent) {
+                paEndTime = event.getTime();
+            } else if (event instanceof ImportActionEvent) {
+                if (paStartTime != 0L) {
+                    long waitingTime = paStartTime - event.getTime();
+                    importActionWaitingTime.add(waitingTime);
+                }
+            } else if (event instanceof ScheduleNowEvent) {
+                if (paStartTime != 0L && paStartTime - paEndTime < 0) {
+                    long waitingTime = paStartTime - event.getTime();
+                    scheduleNowWaitingTime.add(waitingTime);
+                }
+            }
         }
-        this.preTime = currentTime;
     }
 
-    public String printSummary() {
-        StringBuilder str = new StringBuilder("tenant " + tenantId + " summary is: ");
-        int paStartNum = 0;
-        int paEndNum = 0;
-        for (Map.Entry<Long, Event> longEventEntry : this.eventMap.entrySet()) {
-            if (((Map.Entry) longEventEntry).getValue() instanceof PAStartEvent) {
-                paStartNum++;
+    public int getFailedPANum() {
+        return failedPANum;
+    }
+
+    public void setFailedPANum(int failedPANum) {
+        this.failedPANum = failedPANum;
+    }
+
+    public int getRetryPANum() {
+        return retryPANum;
+    }
+
+    public void setRetryPANum(int retryPANum) {
+        this.retryPANum = retryPANum;
+    }
+
+    public long getAvgPATime() {
+        long avgPATime = 0L;
+        if (paTime.size() > 0) {
+            for (long patime : paTime) {
+                avgPATime += patime;
             }
-            if (((Map.Entry) longEventEntry).getValue() instanceof PAEndEvent) {
-                paEndNum++;
-            }
-            str.append(((Map.Entry) longEventEntry).getValue().toString()).append(", during time is: ").append(((Map.Entry) longEventEntry).getKey().toString()).append(", ");
+            avgPATime = avgPATime / paTime.size();
         }
-        str.append("PA start num is: ").append(paStartNum).append(", PA end num is: ").append(paEndNum);
-        return str.toString();
+        return avgPATime;
+    }
+
+    public long getAvgImportActionWaitingTime() {
+        long avgTime = 0L;
+        if (importActionWaitingTime.size() > 0) {
+            for (long time : importActionWaitingTime) {
+                avgTime += time;
+            }
+            avgTime = avgTime / importActionWaitingTime.size();
+        }
+        return avgTime;
+    }
+
+    public long getAvgScheduleNowWaitingTime() {
+        long avgTime = 0L;
+        if (scheduleNowWaitingTime.size() > 0) {
+            for (long time : scheduleNowWaitingTime) {
+                avgTime += time;
+            }
+            avgTime = avgTime / scheduleNowWaitingTime.size();
+        }
+        return avgTime;
+    }
+
+    public float getSuccessRate() {
+        if (this.paNum != 0) {
+            this.successRate = 1 - (float) this.failedPANum / this.paNum;
+        }
+        return this.successRate;
+    }
+
+    public String getTenantId() {
+        return this.tenantId;
+    }
+
+    public String getTenantSummary(List<Event> eventList) {
+        calculate(eventList);
+        String result = String.format("Tenant: %s, isLarge: %s, isDataCloudRefresh: %s, paNum: %d, failedPANum: %d, " +
+                        "retryNum: %d, " +
+                "successRate: %f, avgPATime: %d, avgImportActionWaitingTime: %d, avgScheduleNowWaitingTime: %d.",
+                tenantId, isLarge, isDataCloudRefresh, paNum, failedPANum, retryPANum, getSuccessRate(),
+                getAvgPATime(), getAvgImportActionWaitingTime(), getAvgScheduleNowWaitingTime());
+        return result;
     }
 }

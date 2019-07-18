@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTenant;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
-import com.latticeengines.domain.exposed.cdl.scheduling.event.DataCloudRefreshEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
@@ -42,10 +41,9 @@ public class SimulationUnitTestNG {
         Map<String, SimulationTenant> simulationTenantMap = setTenantInitState(tenantList);
         this.priorityQueue.addAll(generateTenantEvents());
         this.priorityQueue.addAll(generateSchedulingEvent());
-        this.priorityQueue.addAll(generateDataCloudRefreshEvent());
         SystemStatus systemStatus = newStatus(5, 10, 2);
         Simulation simulation = new Simulation(systemStatus, new HashSet<>(dataCloudRefreshTenant),
-                simulationTenantMap, priorityQueue, clock);
+                simulationTenantMap, priorityQueue, clock, "2w");
         simulation.run();
     }
 
@@ -85,19 +83,6 @@ public class SimulationUnitTestNG {
             time += 5 * 60 * 1000; // 5 min
             events.add(new SchedulingEvent(time));
         }
-        return events;
-    }
-
-    private List<Event> generateDataCloudRefreshEvent() {
-        List<Event> events = new ArrayList<>();
-        Random r = new Random();
-        long time = clock.getCurrentTime();
-        // TODO change evaluation to end time
-        for (int i = 0; i < 10; i++) {
-            // 6 wks
-            events.add(new DataCloudRefreshEvent(time + i * 6 * 7 * 86400L * 1000));
-        }
-
         return events;
     }
 

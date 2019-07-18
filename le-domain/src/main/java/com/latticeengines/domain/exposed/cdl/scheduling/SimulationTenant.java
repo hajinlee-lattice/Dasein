@@ -3,16 +3,16 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 public class SimulationTenant {
 
     private  TenantActivity tenantActivity;
-    public RandomConfig randomConfig;
+    public RandomPADuration randomPADuration;
 
     public SimulationTenant(TenantActivity tenantActivity) {
        this.tenantActivity = tenantActivity;
-       this.randomConfig = new DefaultTenantPARunningTimeRadomConfig();
+       this.randomPADuration = new DefaultTenantPARunningTimeRadomPADuration();
     }
 
-    public SimulationTenant(TenantActivity tenantActivity, RandomConfig randomConfig) {
+    public SimulationTenant(TenantActivity tenantActivity, RandomPADuration randomPADuration) {
         this.tenantActivity = tenantActivity;
-        this.randomConfig = randomConfig;
+        this.randomPADuration = randomPADuration;
     }
 
     public TenantActivity getTenantActivity() {
@@ -20,10 +20,10 @@ public class SimulationTenant {
     }
 
     public int getRandom() {
-        return randomConfig.getRandom(tenantActivity);
+        return randomPADuration.getRandom(tenantActivity);
     }
 
     public boolean isSucceed() {
-        return randomConfig.isSucceed(tenantActivity);
+        return randomPADuration.isSucceed(tenantActivity);
     }
 }

@@ -21,7 +21,7 @@ public class DataCloudRefreshEvent extends Event {
             }
             simulationContext.push(tenantId, this);
         }
-
+        simulationContext.setDataCloudRefreshCount(simulationContext.getDataCloudRefreshCount() + 1);
         return null;
     }
 
