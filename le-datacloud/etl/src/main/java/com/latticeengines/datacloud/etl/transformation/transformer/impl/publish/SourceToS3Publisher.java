@@ -146,8 +146,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             for (Pair<String, String> tag : tags) {
                 try {
                     s3Service.addTagToObject(s3Bucket, s3Path, tag.getKey(), tag.getValue());
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, tag.getKey(),
                             tag.getValue()));
                     throw new RuntimeException(e);
