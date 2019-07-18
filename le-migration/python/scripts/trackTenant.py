@@ -31,6 +31,9 @@ def checkCanTrack(storage, tenant=None):
     if not tenant:
         print('Tenant not found.')
         return False
+    elif len(tenant.migrationTrack) > 0:
+        print('Tenant already being tracked.')
+        return False
     elif len(tenant.metadataDataCollection) != 1:
         print('Tenant must have one active data collection')
         return False
@@ -42,11 +45,6 @@ def checkCanTrack(storage, tenant=None):
         return False
     elif len(tenant.metadataDataCollectionStatus) != 1:
         print('Tenant must have one status record')
-        return False
-    exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
-    if len(exist):
-        print('Tenant already in tracking table:\n')
-        print(exist[0])
         return False
     return True
 

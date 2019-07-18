@@ -28,13 +28,16 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -43,6 +46,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitterTestNG.class);
 
     private static final String customerSpace = "tenant";
+    private static final String lockedCustomerSpace = "LockedTenant";
+    private static final String unlockedCustomerSpace = "UnlockedTenant";
     private static final Long METADATA_ACTION_PID = 1L;
     private static final Long RUNNING_ACTION_1_PID = 2L;
     private static final Long RUNNING_ACTION_2_PID = 3L;
@@ -71,6 +76,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Mock
     private WorkflowProxy workflowProxy;
 
+    @Mock
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
+
+    @Mock
+    private TenantEntityMgr tenantEntityMgr;
+
     @InjectMocks
     private ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter;
 
@@ -87,7 +98,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isEmpty(list));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
+    @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetNoCancelActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
@@ -100,7 +111,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
+    @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetCancelActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
@@ -123,7 +134,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
+    @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetFullActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateFullActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
@@ -138,7 +149,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetFullActionAndJobIds" })
+    @Test(groups = "functional", dependsOnMethods = {"testGetFullActionAndJobIds"})
     public void testGetProblematicActionWithoutTrackingId() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateActionWithTrackingPid());
         List<String> workflowIdStr = Stream.of(RUNNING_ACTION_1_TRACKING_PID, RUNNING_ACTION_2_TRACKING_PID,
@@ -157,7 +168,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
-            List<Action> actions, List<Long> inheritableActionIds) {
+                                                          List<Action> actions, List<Long> inheritableActionIds) {
         when(dataFeedProxy.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
@@ -174,30 +185,35 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @DataProvider(name = "provideInheritableActionTestObjects")
     private Object[][] provideInheritableActionTestObjects() {
-        return new Object[][] {
+        return new Object[][]{
                 // completed PA's actions will not be inherited
-                { newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED), Collections.emptyList(),
-                        Collections.emptyList() },
-                { newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED),
+                {newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED), Collections.emptyList(),
+                        Collections.emptyList()},
+                {newDataFeedExecution(), newWorkflowExecution(JobStatus.COMPLETED),
                         newTypedActions(ActionType.INTENT_CHANGE, ActionType.ACTIVITY_METRICS_CHANGE),
-                        Collections.emptyList() },
+                        Collections.emptyList()},
                 // failed PA
-                { newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED), Collections.emptyList(),
-                        Collections.emptyList() },
-                { newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED),
+                {newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED), Collections.emptyList(),
+                        Collections.emptyList()},
+                {newDataFeedExecution(), newWorkflowExecution(JobStatus.FAILED),
                         newTypedActions(ActionType.ACTIVITY_METRICS_CHANGE, ActionType.ATTRIBUTE_MANAGEMENT_ACTIVATION,
                                 ActionType.INTENT_CHANGE, // system action, not
-                                                          // inherited
+                                // inherited
                                 ActionType.ATTRIBUTE_MANAGEMENT_DEACTIVATION, ActionType.METADATA_CHANGE,
                                 ActionType.METADATA_SEGMENT_CHANGE, ActionType.DATA_CLOUD_CHANGE, // system
-                                                                                                  // action,
-                                                                                                  // not
-                                                                                                  // inherited
+                                // action,
+                                // not
+                                // inherited
                                 ActionType.RATING_ENGINE_CHANGE, ActionType.CDL_DATAFEED_IMPORT_WORKFLOW), // import
-                                                                                                           // action,
-                                                                                                           // not
-                                                                                                           // inherited
-                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L) }, };
+                        // action,
+                        // not
+                        // inherited
+                        Arrays.asList(0L, 1L, 3L, 4L, 5L, 7L)},};
+    }
+
+    @DataProvider(name = "testTenantLockDataProvider")
+    private Object[][] testTenantLockDataProvider() {
+        return new Object[][]{{generateLockedTenant()}, {generateUnlockedTenant()}};
     }
 
     private List<Action> newTypedActions(ActionType... types) {
@@ -289,7 +305,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         return actions;
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     private List<Action> generateEmptyActions() {
         return Collections.EMPTY_LIST;
     }
@@ -323,5 +339,16 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         return actions;
     }
 
+    private Tenant generateLockedTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId(lockedCustomerSpace);
+        return tenant;
+    }
+
+    private Tenant generateUnlockedTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setId(unlockedCustomerSpace);
+        return tenant;
+    }
 
 }

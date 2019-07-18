@@ -75,6 +75,12 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("SkipDynamoExport")
     private Boolean skipDynamoExport;
 
+    /**
+     * skip checking if tenant in migration table
+     */
+    @JsonProperty("SkipMigrationCheck")
+    public Boolean skipMigrationCheck = false;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }

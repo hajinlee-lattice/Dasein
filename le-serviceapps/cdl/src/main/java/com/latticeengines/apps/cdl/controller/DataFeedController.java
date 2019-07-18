@@ -40,7 +40,7 @@ public class DataFeedController {
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
-            OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
+                              OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
                               EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
                               DataFeedService dataFeedService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
@@ -82,9 +82,10 @@ public class DataFeedController {
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
                                             @ApiParam(value = "Memory in MB", required = false)
                                             @RequestParam(value = "memory", required = false) Integer memory,
-                                            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry) {
+                                            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry,
+                                            @RequestParam(value = "skipMigrationCheck", required = false, defaultValue = "false") Boolean skipMigrationTrack) {
         customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry);
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry, skipMigrationTrack);
         return ResponseDocument.successResponse(appId.toString());
     }
 
@@ -110,7 +111,7 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
-                                                   @RequestBody EntityExportRequest request) {
+                                                 @RequestBody EntityExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
             ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,

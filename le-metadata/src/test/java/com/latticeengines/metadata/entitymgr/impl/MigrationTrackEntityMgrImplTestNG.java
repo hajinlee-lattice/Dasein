@@ -16,6 +16,8 @@ import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.MigrationTrackImportAction;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 
@@ -27,7 +29,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     private static final MigrationTrack.Status STATUS = MigrationTrack.Status.SCHEDULED;
     private static final DataCollection.Version VERSION = DataCollection.Version.Blue;
     private static final String STATSNAME = "Test";
-    private static Tenant tenant1, tenant2;
+    private static Tenant tenant1, tenant2, untracked;
     private static Map<TableRoleInCollection, String[]> ACTIVETABLE = new HashMap<>();
     private static final MigrationTrackImportAction IMPORTACTION = new MigrationTrackImportAction();
     private static final DataCollectionStatusDetail DETAIL = new DataCollectionStatusDetail();
@@ -43,10 +45,12 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
         tenant1 = tenantEntityMgr.findByTenantId(customerSpace1);
         tenant2 = tenantEntityMgr.findByTenantId(customerSpace2);
+        untracked = new Tenant();
         Assert.assertNotNull(tenant1);
         Assert.assertNotNull(tenant2);
+        Assert.assertNotNull(untracked);
 
-        String[] tableNames = { "This table", "That table" };
+        String[] tableNames = {"This table", "That table"};
         ACTIVETABLE.put(ROLE, tableNames);
 
         track1.setStatus(STATUS);
@@ -66,6 +70,13 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         track2.setImportAction(IMPORTACTION);
         track2.setCollectionStatusDetail((DETAIL));
         track2.setStatsCubesData(CUBESDATA);
+
+        untracked.setId("untracked");
+        untracked.setName("untracked");
+        untracked.setRegisteredTime(-2L);
+        untracked.setStatus(TenantStatus.ACTIVE);
+        untracked.setTenantType(TenantType.QA);
+        untracked.setUiVersion("untracked");
     }
 
     @AfterClass(groups = "functional")
@@ -82,7 +93,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(track.getPid(), migrationTrackEntityMgr.findByKey(track).getPid());
     }
 
-    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
+    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
     public void testRead(Tenant tenant, MigrationTrack track) {
         MigrationTrack created = migrationTrackEntityMgr.findByKey(track);
 
@@ -99,16 +110,31 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(tenant.getPid(), created.getTenant().getPid());
     }
 
-    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = { "testCreate" })
+    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
     public void testFindByTenant(Tenant tenant, MigrationTrack track) {
         MigrationTrack created = migrationTrackEntityMgr.findByTenant(tenant);
 
         Assert.assertEquals(track.getPid(), created.getPid());
     }
 
+    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
+    public void testTenantInMigrationForTrackedTenants(Tenant tenant, MigrationTrack track) {
+        Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(tenant));
+        track.setStatus(MigrationTrack.Status.STARTED);
+        migrationTrackEntityMgr.update(track);
+        Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
+    }
+
+    @Test(groups = "functional")
+    public void testTenantInMigrationForUntrackedTenants() {
+        tenantEntityMgr.create(untracked);
+        Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(untracked));
+        tenantEntityMgr.delete(untracked);
+    }
+
     @DataProvider(name = "entityProvider")
-    public Object[][] enittyProvider() {
-        return new Object[][] { { tenant1, track1 }, { tenant2, track2 } };
+    public Object[][] entityProvider() {
+        return new Object[][]{{tenant1, track1}, {tenant2, track2}};
     }
 
 }
