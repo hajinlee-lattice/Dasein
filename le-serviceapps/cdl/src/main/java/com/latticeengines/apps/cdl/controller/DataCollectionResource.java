@@ -372,8 +372,7 @@ public class DataCollectionResource {
     @PostMapping(value = "/diagnostic/{dataCollectionId}")
     @ResponseBody
     @ApiOperation(value = "diagnose collection and service store table")
-    public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSpace,
-                                                                         @PathVariable Long dataCollectionTablePid) {
+    public ResponseDocument<ImportTemplateDiagnostic> servingAndBatchDiagnostic(@PathVariable String customerSpace, @PathVariable Long dataCollectionTablePid) {
         return ResponseDocument.successResponse(dataCollectionService.diagnostic(customerSpace, dataCollectionTablePid));
     }
 }
