@@ -3,11 +3,13 @@ package com.latticeengines.domain.exposed.query.frontend;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.query.Query;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,6 +17,9 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 public class EventFrontEndQuery extends FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.SEGMENT_QUERY)
     private FrontEndQuery segmentQuery;
+
+    @JsonIgnore
+    private Query segmentSubQuery;
 
     @JsonProperty(FrontEndQueryConstants.PERIOD_NAME)
     private String periodName;
@@ -96,5 +101,13 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     public void setTargetProductIds(List<String> targetProductIds) {
         this.targetProductIds = targetProductIds;
+    }
+
+    public Query getSegmentSubQuery() {
+        return segmentSubQuery;
+    }
+
+    public void setSegmentSubQuery(Query segmentSubQuery) {
+        this.segmentSubQuery = segmentSubQuery;
     }
 }

@@ -55,7 +55,8 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     @Inject
-    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
+    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, //
+                                 TransactionService transactionService) {
         super(queryEvaluatorService);
         this.transactionService = transactionService;
     }
