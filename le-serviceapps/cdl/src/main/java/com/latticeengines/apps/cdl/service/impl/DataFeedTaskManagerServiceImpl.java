@@ -712,6 +712,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 if (StringUtils.isEmpty(attr.getFundamentalType())) {
                     diagnostic.addWarnings(String.format("Attribute %s has data type %s but has empty fundamental " +
                             "type.", attr.getName(), attr.getPhysicalDataType()));
+                    continue;
                 }
                 FundamentalType fdType = FundamentalType.fromName(attr.getFundamentalType());
                 switch (avroType) {
