@@ -223,7 +223,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         int scalingFactor = Math.min(5, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
         if (scalingFactor > 1) {
             log.info("Adjust scaling factor to " + scalingFactor + " based on total size " + totalSizeInGb //
-                    + " and rating weights " + ratingWeights);
+                    + " gb and rating weights " + ratingWeights);
         }
         return scalingFactor;
     }
