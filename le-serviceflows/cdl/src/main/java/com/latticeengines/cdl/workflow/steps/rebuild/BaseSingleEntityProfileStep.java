@@ -117,10 +117,8 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             }
             double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
             int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-            if (multiplier > 1) {
-                log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
-                scalingMultiplier = multiplier;
-            }
+            log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+            scalingMultiplier = multiplier;
         }
     }
 

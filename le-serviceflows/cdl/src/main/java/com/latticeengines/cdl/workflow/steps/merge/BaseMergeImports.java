@@ -378,6 +378,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             sizeInGb += ScalingUtils.getTableSizeInGb(yarnConfiguration, table);
         }
         scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
+        log.info("Set scalingMultiplier=" + scalingMultiplier //
+                + " base on the sum of input table sizes=" + sizeInGb + " gb.");
     }
 
     private TransformationWorkflowConfiguration generateWorkflowConf() {
