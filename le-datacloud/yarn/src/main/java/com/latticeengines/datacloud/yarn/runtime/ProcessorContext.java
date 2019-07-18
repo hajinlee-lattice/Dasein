@@ -183,7 +183,8 @@ public class ProcessorContext {
     }
 
     public String getOutputAvro(int split) {
-        return "output/block_" + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d.avro", split);
+        return "output/block_" + AvroUtils.getAvroFriendlyString(blockOperationUid)
+                + String.format("-p-%05d.avro", split);
     }
 
     public String getHdfsOutputDir() {
@@ -337,7 +338,6 @@ public class ProcessorContext {
 
         podId = jobConfiguration.getHdfsPodId();
 
-
         returnUnmatched = true;
         excludePublicDomain = originalInput.getExcludePublicDomain();
         publicDomainAsNormalDomain = originalInput.isPublicDomainAsNormalDomain();
@@ -358,7 +358,7 @@ public class ProcessorContext {
         tenant = new Tenant(space.toString());
         datacloudOnly = Boolean.TRUE.equals(originalInput.getDataCloudOnly())
                 || (!zkConfigurationService.isCDLTenant(space)
-                        && !OperationalMode.ENTITY_MATCH.equals(originalInput.getOperationalMode()));
+                        && !OperationalMode.isEntityMatch(originalInput.getOperationalMode()));
 
         if (originalInput.getUnionSelection() != null || originalInput.getCustomSelection() != null) {
             columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(originalInput);
@@ -446,8 +446,7 @@ public class ProcessorContext {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
 
-        matchDebugEnabled = zkConfigurationService.isMatchDebugEnabled(space)
-                || originalInput.isMatchDebugEnabled();
+        matchDebugEnabled = zkConfigurationService.isMatchDebugEnabled(space) || originalInput.isMatchDebugEnabled();
         originalInput.setMatchDebugEnabled(matchDebugEnabled);
         log.info("Match Debug Enabled=" + matchDebugEnabled);
         if (matchDebugEnabled) {
@@ -546,7 +545,7 @@ public class ProcessorContext {
                 metadataFields = parseMetadataFields();
             }
             log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
-        } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        } else if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
             // TODO: Feeling match planning for bulk match is not
             // well-organized. Some of them happen in BulkMatchPlanner, some of
             // them happen here

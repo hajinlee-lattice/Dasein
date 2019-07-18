@@ -197,7 +197,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         long matchedByMatchKeyCount = 0L;
         long matchedByAccountIdCount = 0L;
 
-        boolean isEntityMatch = OperationalMode.ENTITY_MATCH.equals(matchContext.getInput().getOperationalMode());
+        boolean isEntityMatch = OperationalMode.isEntityMatch(matchContext.getInput().getOperationalMode());
         if (isEntityMatch) {
             matchContext.setDomains(new HashSet<>());
             matchContext.setNameLocations(new HashSet<>());
@@ -254,10 +254,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 } else if (ColumnSelection.Predefined.LeadToAcct
                         .equals(matchContext.getInput().getPredefinedSelection())
                         && InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
-                    // For Lead-to-Account match, if cannot find matched AccountId or customer's AccountId doesn't
-                    // match with AccountId from matcher, return anonymous AccountId to help ProfileContact step
-                    // which requires existence of AccountId. Anonymous AccountId is some predefined string which
-                    // should have very low chance to be conflict with real AccountId. And these contacts become orphan.
+                    // For Lead-to-Account match, if cannot find matched AccountId or customer's
+                    // AccountId doesn't match with AccountId from matcher, return anonymous
+                    // AccountId to help ProfileContact step which requires existence of AccountId.
+                    // Anonymous AccountId is some predefined string which should have very low
+                    // chance to be conflict with real AccountId. And these contacts become orphan.
                     value = results.get(field);
                     String customerAccountId = internalRecord.getParsedSystemIds() == null ? null
                             : internalRecord.getParsedSystemIds().get(InterfaceName.AccountId.name());
@@ -377,7 +378,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         log.debug("TotalMatched: " + totalMatched);
         if (isEntityMatch) {
             matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
-            matchContext.getOutput().getStatistics().setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
+            matchContext.getOutput().getStatistics()
+                    .setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
 

@@ -89,8 +89,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     private String defaultContactGraph;
 
     /**
-     * Default DataCloud version is latest approved version with major version
-     * as 2.0
+     * Default DataCloud version is latest approved version with major version as
+     * 2.0
      *
      * @param input
      */
@@ -164,6 +164,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     boolean isCdlLookup(MatchInput input) {
+        // TODO figure out whether entity match attr lookup counts as cdl lookup
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
         return !OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
                 && !Boolean.TRUE.equals(input.getDataCloudOnly()) && zkConfigurationService.isCDLTenant(customerSpace);
@@ -195,7 +196,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
-                        );
+                );
             }
             if (BusinessEntity.Contact.name().equals(input.getTargetEntity())) {
                 return Arrays.asList( //
@@ -203,7 +204,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                         new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
-                        );
+                );
             }
             throw new IllegalArgumentException("Unsupported entity " + input.getTargetEntity());
             // FetchOnly mode (Might be retired)
@@ -234,8 +235,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     // this is a dispatcher method
     MatchContext scanInputData(MatchInput input, MatchContext context) {
-        //Map<MatchKey, List<Integer>> keyPositionMap = MatchKeyUtils.getKeyPositionMap(input);
-        // TODO(jwinter): Put this back in after testing that MatchKeyUtils.getKeyPositionMap works during testing.
+        // Map<MatchKey, List<Integer>> keyPositionMap =
+        // MatchKeyUtils.getKeyPositionMap(input);
+        // TODO(jwinter): Put this back in after testing that
+        // MatchKeyUtils.getKeyPositionMap works during testing.
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
         List<InternalOutputRecord> records = new ArrayList<>();
@@ -244,8 +247,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<String> keyFields = getKeyFields(input.getKeyMap());
         String lookupIdKey = getLookupIdKey(input.getKeyMap());
         for (int i = 0; i < input.getData().size(); i++) {
-            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i),
-                    i, input.getFields(), keyPositionMap, domainSet, nameLocationSet,
+            InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
+                    input.getFields(), keyPositionMap, domainSet, nameLocationSet,
                     input.isPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setLookupIdKey(lookupIdKey);
@@ -309,7 +312,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-
     @MatchStep(threshold = 100L)
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
@@ -328,7 +330,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
-            if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+            if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
                 throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
             }
             output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
@@ -345,10 +347,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return statistics;
     }
 
-    private InternalOutputRecord scanInputRecordAndUpdateKeySets(
-            Set<String> keyFields, List<Object> inputRecord, int rowNum, List<String> fields,
-            Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet, Set<NameLocation> nameLocationSet,
-            boolean treatPublicDomainAsNormal) {
+    private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
+            int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
+            Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -371,9 +372,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return record;
     }
 
-    private InternalOutputRecord scanEntityInputRecordAndUpdateKeySets(
-            Set<String> keyFields, List<Object> inputRecord, int rowNum, MatchInput input,
-            Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
+    private InternalOutputRecord scanEntityInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
+            int rowNum, MatchInput input, Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);

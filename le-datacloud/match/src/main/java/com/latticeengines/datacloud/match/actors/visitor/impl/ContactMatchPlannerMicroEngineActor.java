@@ -82,7 +82,7 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     @Override
     protected void validateTraveler(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        if (!OperationalMode.ENTITY_MATCH.equals(matchTraveler.getMatchInput().getOperationalMode())) {
+        if (!OperationalMode.isEntityMatch(matchTraveler.getMatchInput().getOperationalMode())) {
             throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
         if (!BusinessEntity.Contact.name().equals(matchTraveler.getEntity())) {

@@ -220,7 +220,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     private boolean shouldRecord(String tenantId, @NotNull MatchTraveler traveler) {
         // only record entity match visits
-        return OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())
+        return OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())
                 && StringUtils.isNotBlank(tenantId);
     }
 
