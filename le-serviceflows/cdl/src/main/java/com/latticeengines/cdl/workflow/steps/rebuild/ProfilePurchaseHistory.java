@@ -457,11 +457,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
                 Pair<String, String> displayNames = ActivityMetricsUtils
                         .getDisplayNamesFromFullName(attribute.getName(), evaluationDate, periodStrategies);
-                if (ActivityMetricsUtils.isDeprecated(attribute.getName(), purchaseMetrics)) {
-                    attribute.setDisplayName(displayNames.getLeft() + " (Deprecated)");
-                } else {
-                    attribute.setDisplayName(displayNames.getLeft());
-                }
+                attribute.setDisplayName(displayNames.getLeft());
                 attribute.setSecondaryDisplayName(displayNames.getRight());
                 attribute.setSubcategory(productName);
                 if (ActivityMetricsUtils.isHasPurchasedAttr(attribute.getName())) {
