@@ -1,17 +1,23 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.publish;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.EXPIRE_DAYS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.S3_TO_GLACIER_DAYS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.SERVICE_TENANT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOURCE_TO_S3_PUBLISHER;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.slf4j.Logger;
@@ -28,9 +34,12 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.PurgeStrategyUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
+import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractTransformer;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -49,7 +58,10 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     private Configuration yarnConfiguration;
 
     @Inject
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Inject
+    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Inject
     private EMREnvService emrEnvService;
@@ -59,7 +71,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
-
 
     @Override
     public String getName() {
@@ -87,12 +98,21 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String dataPath = getSourceHdfsDir(step, i);
                 String versionFilePath = getBaseSourceVersionFilePath(step, i);
 
-                copyAndValidate(sourceName, dataPath, true);
+                List<Pair<String, String>> tags = getPurgeStrategyTags(source);
+
+                List<String> files = getDirFiles(dataPath);
+                copyAndValidate(sourceName, dataPath, files, true);
+                objectTagging(tags, dataPath, files);
+
                 if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
-                    copyAndValidate(sourceName, schemaPath, true);
+                    files = getDirFiles(schemaPath);
+                    copyAndValidate(sourceName, schemaPath, files, true);
+                    objectTagging(tags, dataPath, files);
                 }
+
                 if (shouldCopyVersionFile(source, versionFilePath)) {
-                    copyAndValidate(sourceName, versionFilePath, false);
+                    files = getDirFiles(versionFilePath);
+                    copyAndValidate(sourceName, versionFilePath, files, false);
                 }
             }
             step.setTarget(null);
@@ -105,13 +125,43 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private void copyAndValidate(String sourceName, String hdfsDir, boolean isDir) {
-        String s3Prefix = gets3nPath(hdfsDir);
-        copyToS3(sourceName, hdfsDir, s3Prefix, isDir);
-        validateCopySuccess(hdfsDir);
+    private void objectTagging(List<Pair<String, String>> tags, String prefix, List<String> files) {
+        tags.forEach(tag -> log.info("Adding tag {} with value {} on objects with prefix {}",
+                tag.getKey(), tag.getValue(), prefix));
+        tagS3Objects(files, tags);
     }
 
-    private void copyToS3(String sourceName, String hdfsDir, String s3nDir, boolean isDir) {
+    private List<Pair<String, String>> getPurgeStrategyTags(Source source) {
+        PurgeStrategy ps = purgeStrategyEntityMgr.findStrategyBySourceAndType(source.getSourceName(),
+                PurgeStrategyUtils.getSourceType(source));
+        Integer glacierDays = (ps == null) || (ps.getGlacierDays() == null) ? 180 : ps.getGlacierDays();
+        Integer s3Days = (ps == null) || (ps.getS3Days() == null) ? 180 : ps.getS3Days();
+        return Arrays.asList(Pair.of(S3_TO_GLACIER_DAYS, s3Days.toString()),
+                Pair.of(EXPIRE_DAYS, Integer.toString(s3Days + glacierDays)));
+
+    }
+
+    private void tagS3Objects(List<String> files, List<Pair<String, String>> tags) {
+        files.forEach(s3Path -> {
+            for (Pair<String, String> tag : tags) {
+                try {
+                    s3Service.addTagToObject(s3Bucket, s3Path, tag.getKey(), tag.getValue());
+                } catch (Exception e) {
+                    log.error(String.format("Failed to tag %s with tag key: %s value: %s", s3Path, tag.getKey(),
+                            tag.getValue()));
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+    private void copyAndValidate(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
+        copyToS3(sourceName, hdfsDir, files, isDir);
+        validateCopySuccess(hdfsDir, files);
+    }
+
+    private void copyToS3(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
+        String s3nDir = gets3nPath(hdfsDir);
         try {
             cleanupS3Path(hdfsDir);
 
@@ -124,8 +174,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             log.info("Copying from {} to {}", hdfsDir, s3nDir);
 
             if (isDir) {
-                if (!HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false)
-                        .isEmpty()) {
+                if (!files.isEmpty()) {
                     HdfsUtils.distcp(distcpConfiguration, hdfsDir, s3nDir, overwriteQueue);
                 } else {
                     throw new RuntimeException("No file exists in dir, or Dir not exist : " + hdfsDir);
@@ -142,20 +191,30 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private void validateCopySuccess(String hdfsDir) {
-        List<String> files = null;
-        try {
-            files = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir, (HdfsFileFilter) null, false);
-        } catch (IOException e) {
-            throw new RuntimeException("Fail to list files under HDFS path " + hdfsDir, e);
-        }
+    private void validateCopySuccess(String hdfsDir, List<String> files) {
+        files.forEach(file -> {
+            try {
+                if (!s3Service.objectExist(s3Bucket, file)) {
+                    throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
+                }
+                validateFileSize(file);
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
+                }
+        });
+    }
 
-        for (String file : files) {
-            String filePath = file.substring(file.indexOf(hdfsDir));
-            if (!s3Service.objectExist(s3Bucket, filePath)) {
-                throw new RuntimeException(filePath + " wasn't successfully copied to S3 bucket " + s3Bucket);
+    private List<String> getDirFiles(String hdfsDir) {
+        try {
+            List<String> hdfsFiles = HdfsUtils.onlyGetFilesForDirRecursive(yarnConfiguration, hdfsDir,
+                    (HdfsFileFilter) null, false);
+            if (hdfsFiles == null) {
+                return Collections.emptyList();
             }
-            validateFileSize(filePath);
+            return hdfsFiles.stream().map(hdfsFile -> hdfsFile.substring(hdfsFile.indexOf(hdfsDir)))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to get file list of HDFS path: " + hdfsDir, e);
         }
     }
 
@@ -210,7 +269,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         } catch (Exception ex) {
             throw new RuntimeException("Fail to parse current version file", ex);
         }
-
     }
 
     private String gets3nPath(String hdfsPath) {

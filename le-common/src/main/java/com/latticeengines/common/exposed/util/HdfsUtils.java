@@ -334,14 +334,9 @@ public class HdfsUtils {
         }
     }
 
-    public static long getTotalBytes(Configuration configuration, String globPath) throws IOException {
-        try (FileSystem fs = getFileSystem(configuration, globPath)) {
-            FileStatus[] statuses = fs.globStatus(new Path(globPath));
-            long totalBytes = 0L;
-            for (FileStatus status : statuses) {
-                totalBytes += status.getLen();
-            }
-            return totalBytes;
+    public static long getSpaceConsumedByDir(Configuration configuration, String hdfsDir) throws IOException {
+        try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
+            return fs.getUsed(new Path(hdfsDir));
         }
     }
 

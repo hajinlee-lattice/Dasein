@@ -24,6 +24,10 @@ public final class DataCloudConstants {
     public static final String LATTICE_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
 
+    // tag names of s3 objects
+    public static final String S3_TO_GLACIER_DAYS = "S3ToGlacierDays";
+    public static final String EXPIRE_DAYS = "ExpireDays";
+
     // entity match constants
     public static final String ENTITY_PREFIX_LOOKUP = "LOOKUP";
     public static final String ENTITY_PREFIX_SEED = "SEED";

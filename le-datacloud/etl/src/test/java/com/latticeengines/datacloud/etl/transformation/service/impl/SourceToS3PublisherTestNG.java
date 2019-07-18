@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.EXPIRE_DAYS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.S3_TO_GLACIER_DAYS;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -27,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.services.s3.model.Tag;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -34,8 +39,11 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.publish.SourceToS3Publisher;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
@@ -57,7 +65,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     // Sources for multi-source step
     private IngestionSource baseSrc5 = new IngestionSource("TestSource5");
-    private GeneralSource baseSrc6 = new GeneralSource("TestSource6");
+    private GeneralSource baseSrc6 = new GeneralSource(ACCOUNT_MASTER);
 
     // Place holder of target source whose name is used as pod
     private GeneralSource source = new GeneralSource(
@@ -71,6 +79,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private String earlySourceVersion = "2019-06-22_17-07-43_UTC";
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
@@ -108,6 +119,19 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         }
     };
 
+    // Source -> [S3ToGlacierDays,ExpireDays]
+    @SuppressWarnings("serial")
+    private Map<Source, List<Integer>> expectedPurgeDays = new HashMap<Source, List<Integer>>() {
+        {
+            put(baseSrc1, Arrays.asList(180, 360));
+            put(baseSrc2, Arrays.asList(180, 360));
+            put(baseSrc3, Arrays.asList(180, 360));
+            put(baseSrc4, Arrays.asList(70, 470));
+            put(baseSrc5, Arrays.asList(50, 550));
+            put(baseSrc6, Arrays.asList(30, 1200));
+        }
+    };
+
     @Test(groups = "pipeline1")
     public void testTransformation() throws IOException {
         prepareData();
@@ -120,7 +144,8 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     @AfterClass(groups = "pipeline1", enabled = true)
     private void destroy() {
-        cleanup();
+        cleanupPods();
+        cleanupPurgeStrategy();
     }
 
     /****************************************
@@ -182,6 +207,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void prepareData() {
         try {
             s3FilePrepare();
+            preparePurgeStrategies();
 
             uploadBaseSourceFile(baseSrc1, "AccountMaster206", basedSourceVersion);
             uploadBaseSourceFile(baseSrc2, "AccountMaster206", basedSourceVersion);
@@ -198,6 +224,28 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         } catch (Exception e) {
             throw new RuntimeException("Fail to prepare data.", e);
         }
+    }
+
+    private void preparePurgeStrategies() {
+        PurgeStrategy ps1 = new PurgeStrategy();
+        ps1.setSource(baseSrc6.getSourceName());
+        ps1.setSourceType(SourceType.AM_SOURCE);
+        ps1.setS3Days(30);
+        ps1.setGlacierDays(1170);
+        ps1.setNoBak(false);
+
+        PurgeStrategy ps2 = new PurgeStrategy();
+        ps2.setSource(baseSrc5.getSourceName());
+        ps2.setSourceType(SourceType.INGESTION_SOURCE);
+        ps2.setS3Days(50);
+        ps2.setGlacierDays(500);
+
+        PurgeStrategy ps3 = new PurgeStrategy();
+        ps3.setSource(baseSrc4.getSourceName());
+        ps3.setSourceType(SourceType.GENERAL_SOURCE);
+        ps3.setS3Days(70);
+        ps3.setGlacierDays(400);
+        purgeStrategyEntityMgr.insertAll(Arrays.asList(ps1, ps2, ps3));
     }
 
     private void createSchema(Source baseSource, String version) {
@@ -261,22 +309,27 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         try {
             log.info("Checking the objects of Source: {}", sourceName);
 
+            List<Integer> purgeDays = expectedPurgeDays.get(baseSource);
+
             // Verify data files
             List<String> dataFiles = getExpectedDataFiles(baseSource);
             validateCopySuccess(dataFiles);
+            validateTags(dataFiles, purgeDays);
 
             // Verify schema file
             if (expectedSrcWithSchema.contains(sourceName)) {
                 String schemaFile = hdfsPathBuilder.constructSchemaDir(sourceName, version)
                         .append(sourceName + ".avsc").toString();
                 validateCopySuccess(Arrays.asList(schemaFile));
-
+                validateTags(Arrays.asList(schemaFile), purgeDays);
             }
 
             // Verify current version file
             String versionFilePath = hdfsPathBuilder.constructVersionFile(baseSource).toString();
             validateCopySuccess(Arrays.asList(versionFilePath));
+            Assert.assertTrue(CollectionUtils.isEmpty(s3Service.getObjectTags(s3Bucket, versionFilePath)));
             verifyVersionFile(baseSource, versionFilePath);
+
            
         } catch (Exception e) {
             log.error("Fail to validate publising source {} at version {}", sourceName, version);
@@ -294,6 +347,15 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         } catch (Exception e) {
             throw new RuntimeException("Fail to validate version of file:" + versionFilePath, e);
         }
+    }
+
+    private void validateTagSuccess(List<Integer> purgeDays, List<Tag> tags) {
+        Assert.assertNotNull(tags);
+        Assert.assertEquals(tags.size(), 2);
+        Assert.assertEquals(tags.get(0).getKey(), S3_TO_GLACIER_DAYS);
+        Assert.assertEquals(tags.get(1).getKey(), EXPIRE_DAYS);
+        Assert.assertEquals(tags.get(0).getValue(), purgeDays.get(0).toString());
+        Assert.assertEquals(tags.get(1).getValue(), purgeDays.get(1).toString());
     }
 
     private List<String> getExpectedDataFiles(Source baseSource) {
@@ -317,11 +379,22 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         });
     }
 
+    private void validateTags(List<String> files, List<Integer> purgeDays) {
+        files.forEach(file -> {
+            try {
+                List<Tag> tags = s3Service.getObjectTags(s3Bucket, file);
+                validateTagSuccess(purgeDays, tags);
+            } catch (Exception e) {
+                throw new RuntimeException("Fail to validate tags of file: " + file, e);
+            }
+        });
+    }
+
     /*****************
      * Final cleanup
      *****************/
 
-    private void cleanup() {
+    private void cleanupPods() {
         String podDir = hdfsPathBuilder.podDir().toString();
         try {
             cleanupS3Path(podDir);
@@ -339,6 +412,12 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         } catch (Exception e) {
             throw new RuntimeException("Fail to clean up s3: " + path, e);
         }
+    }
+
+    private void cleanupPurgeStrategy() {
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc4.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc5.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(baseSrc6.getSourceName()));
     }
 
     @Override
