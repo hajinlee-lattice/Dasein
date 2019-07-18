@@ -114,6 +114,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                         matchRecord.setNewEntityIds(traveler.getNewEntityIds());
                     }
                     matchRecord.setEntityIds(traveler.getEntityIds());
+                    if (MapUtils.isNotEmpty(traveler.getEntityIds()) && matchRecord.getLatticeAccountId() == null) {
+                        String latticeAccountId = traveler.getEntityIds().get(BusinessEntity.LatticeAccount.name());
+                        matchRecord.setLatticeAccountId(latticeAccountId);
+                    }
                     matchRecord.setFieldsToClear(traveler.getFieldsToClear());
                     // Copy data from EntityMatchKeyRecord in MatchTraveler that was set by
                     // MatchPlannerMicroEngineActor
@@ -561,11 +565,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     // Extract the matched entity ID for a given entity.
     private String extractEntityId(MatchTraveler traveler, String entity) {
         if (MapUtils.isEmpty(traveler.getEntityIds())) {
-            log.error("Found null or empty EntityIds Map in MatchTraveler");
+            if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+                log.error("Found null or empty EntityIds Map in MatchTraveler");
+            }
             return null;
         }
         if (!traveler.getEntityIds().containsKey(entity)) {
-            log.error("EntityIds missing entry for Business Entity: " + entity);
+            if (OperationalMode.ENTITY_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+                log.error("EntityIds missing entry for Business Entity: " + entity);
+            }
             return null;
         }
         return traveler.getEntityIds().get(entity);

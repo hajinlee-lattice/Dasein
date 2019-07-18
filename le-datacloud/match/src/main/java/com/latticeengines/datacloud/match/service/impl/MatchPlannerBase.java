@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
@@ -37,6 +40,7 @@ import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -145,7 +149,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     public ColumnSelection parseColumnSelection(MatchInput input) {
-        if (isCdlLookup(input)) {
+        if (isAttrLookup(input)) {
             throw new UnsupportedOperationException("Should not call parseColumnSelection for cdl match.");
         } else {
             ColumnSelectionService columnSelectionService = beanDispatcher
@@ -163,8 +167,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    boolean isCdlLookup(MatchInput input) {
-        // TODO figure out whether entity match attr lookup counts as cdl lookup
+    boolean isAttrLookup(MatchInput input) {
         CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
         return !OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
                 && !Boolean.TRUE.equals(input.getDataCloudOnly()) && zkConfigurationService.isCDLTenant(customerSpace);
@@ -172,11 +175,26 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @VisibleForTesting
     List<ColumnMetadata> parseCDLMetadata(MatchInput input) {
-        if (isCdlLookup(input)) {
+        if (isAttrLookup(input)) {
             return cdlColumnSelectionService.parseMetadata(input);
         } else {
             throw new UnsupportedOperationException("Should not call parseCDLMetadata for non-cdl match.");
         }
+    }
+
+    protected Pair<ColumnSelection, List<ColumnMetadata>> setAttrLookupMetadata(@NotNull MatchContext context,
+            @NotNull MatchInput input, List<ColumnMetadata> metadatas) {
+        if (metadatas == null) {
+            metadatas = parseCDLMetadata(input);
+        }
+        ColumnSelection columnSelection = new ColumnSelection();
+        List<Column> columns = metadatas.stream() //
+                .map(cm -> new Column(cm.getAttrName())) //
+                .collect(Collectors.toList());
+        columnSelection.setColumns(columns);
+        context.setCustomAccountDataUnit(parseCustomAccount(input));
+        context.setCustomDataUnits(parseCustomDynamo(input));
+        return Pair.of(columnSelection, metadatas);
     }
 
     DynamoDataUnit parseCustomAccount(MatchInput input) {
@@ -280,12 +298,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(input.getTenant());
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> keyFields = getKeyFields(keyMap);
+        Pair<MatchKey, String> lookupPair = getEntityLookupIdKey(input.getOperationalMode(), keyMap);
+        String lookupIdKey = lookupPair.getRight();
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanEntityInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
-                    input, entityKeyPositionMaps);
+                    input, entityKeyPositionMaps, lookupPair.getLeft());
             record.setOrigTenant(input.getTenant());
             // NOTE tenant in match input should be already validated
             record.setParsedTenant(standardizedTenant);
+            record.setLookupIdKey(lookupIdKey);
             record.setColumnMatched(new ArrayList<>());
             records.add(record);
         }
@@ -304,6 +325,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return keyFields;
     }
 
+    /*-
+     * Get Entity match attr lookup id key/value. Return Pair<MatchKeyForLookupId,
+     * LookupIdKey>.
+     *
+     * NOTE: support LookupIdKey=AccountId only at the moment
+     */
+    private Pair<MatchKey, String> getEntityLookupIdKey(OperationalMode mode, Map<MatchKey, List<String>> keyMap) {
+        if (MapUtils.isEmpty(keyMap)) {
+            return Pair.of(null, null);
+        }
+        if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(mode) && keyMap.containsKey(MatchKey.EntityId)) {
+            // look for EntityId match key
+            return Pair.of(MatchKey.EntityId, InterfaceName.AccountId.name());
+        } else {
+            return Pair.of(null, null);
+        }
+    }
+
+    /*
+     * legacy function to retrieve lookup id key for CDL lookup
+     */
     private String getLookupIdKey(Map<MatchKey, List<String>> keyMap) {
         if (MapUtils.isNotEmpty(keyMap) && keyMap.containsKey(MatchKey.LookupId)) {
             return keyMap.get(MatchKey.LookupId).get(0);
@@ -330,7 +372,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
-            if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
+            if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
                 throw new UnsupportedOperationException("Column metadatas should already be set for Entity Match");
             }
             output = appendMetadata(output, columnSelection, input.getDataCloudVersion(), input.getMetadatas());
@@ -373,7 +415,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private InternalOutputRecord scanEntityInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
-            int rowNum, MatchInput input, Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps) {
+            int rowNum, MatchInput input, Map<String, Map<MatchKey, List<Integer>>> entityKeyPositionMaps,
+            MatchKey lookupIdKey) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -387,7 +430,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
         parseRecordForLatticeAccountId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
-        parseRecordForEntityId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
+        parseRecordForEntityId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record,
+                MatchKey.EntityId.equals(lookupIdKey));
+        if (MatchKey.LookupId.equals(lookupIdKey)) {
+            // only set if EntityId match key is not provided by user
+            parseRecordForLookupId(inputRecord, entityKeyPositionMaps.get(input.getTargetEntity()), record);
+        }
         profilingInputRecord(keyFields, inputRecord, input.getFields(), record);
 
         return record;
@@ -606,7 +654,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForEntityId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            InternalOutputRecord record) {
+            InternalOutputRecord record, boolean setLookupIdValue) {
         if (keyPositionMap.containsKey(MatchKey.EntityId)) {
             List<Integer> idPosList = keyPositionMap.get(MatchKey.EntityId);
             try {
@@ -619,6 +667,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     }
                 }
                 record.setEntityId(cleanId);
+                if (setLookupIdValue) {
+                    record.setLookupIdValue(cleanId);
+                }
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessages("Error when cleanup lattice account id field: " + e.getMessage());
