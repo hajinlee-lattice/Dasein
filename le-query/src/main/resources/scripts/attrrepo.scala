@@ -1,4 +1,3 @@
-import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.apache.spark.storage.StorageLevel
 
 // read config
