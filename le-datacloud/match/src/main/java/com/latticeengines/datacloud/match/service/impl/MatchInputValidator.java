@@ -100,7 +100,8 @@ public class MatchInputValidator {
 
         // Perform a different set of validation operations for Entity Match
         // case.
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
+            // TODO add validation for entity match attr lookup
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
@@ -136,7 +137,8 @@ public class MatchInputValidator {
             input.setEntityKeyMaps(new HashMap<>());
         }
 
-        // TODO: Add other code to process other EntityKeyMaps besides the Account EntityKeyMap.
+        // TODO: Add other code to process other EntityKeyMaps besides the Account
+        // EntityKeyMap.
         for (Map.Entry<String, EntityKeyMap> entry : input.getEntityKeyMaps().entrySet()) {
             EntityKeyMap entityKeyMap = entry.getValue();
             if (entityKeyMap == null) {
@@ -162,14 +164,14 @@ public class MatchInputValidator {
     }
 
     /**
-     * TODO: For now, only validate Non-FetchOnly mode to avoid attribute
-     * conflict in match result (EntityId).
+     * TODO: For now, only validate Non-FetchOnly mode to avoid attribute conflict
+     * in match result (EntityId).
      *
-     * FetchOnly mode validation will be more complicate because it could fetch
-     * any attribute from Seed table. Whether we should fail any attribute name
-     * conflict or overwrite existing attribute or do some attribute rename
-     * (hard to read renamed attributes as renaming logic is not exposed to
-     * outside of matcher), needs more thoughts
+     * FetchOnly mode validation will be more complicate because it could fetch any
+     * attribute from Seed table. Whether we should fail any attribute name conflict
+     * or overwrite existing attribute or do some attribute rename (hard to read
+     * renamed attributes as renaming logic is not exposed to outside of matcher),
+     * needs more thoughts
      *
      * @param input
      */
@@ -202,7 +204,8 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Entity Match cannot have union column selection set.");
         }
 
-        // For Entity Match Allocated ID mode, predefined column selection must be "ID".  Otherwise, the predefined
+        // For Entity Match Allocated ID mode, predefined column selection must be "ID".
+        // Otherwise, the predefined
         // column selection must be a valid value.
         if (input.isAllocateId()) {
             if (!Predefined.ID.equals(input.getPredefinedSelection())) {
@@ -250,9 +253,10 @@ public class MatchInputValidator {
     private static Map<MatchKey, List<String>> resolveKeyMap(Map<MatchKey, List<String>> keyMap,
             List<String> inputFields, boolean isSkipKeyResolution, boolean allowEmptyKeyMap) {
         Map<MatchKey, List<String>> newKeyMap = keyMap;
-        // TODO: Automatic key resolution is not allowed for the Entity Match case.  This code would have to be
-        //     changed to work because it is not set up to handle multiple key maps, one for each entity, and
-        //     would currently populate each entity's key map with all input fields.
+        // TODO: Automatic key resolution is not allowed for the Entity Match case. This
+        // code would have to be changed to work because it is not set up to handle
+        // multiple key maps, one for each entity, and would currently populate each
+        // entity's key map with all input fields.
         if (!isSkipKeyResolution) {
             newKeyMap = MatchKeyUtils.resolveKeyMap(inputFields);
             if (MapUtils.isNotEmpty(keyMap)) {
@@ -271,15 +275,16 @@ public class MatchInputValidator {
             }
         }
 
-        // Validate the MatchKeys by checking:
-        //   a) That all keys are non-null.
-        //   b) That all values are either:
-        //      i) null
-        //      ii) empty lists
-        //      iii) lists composed of non-null and non-empty strings.
-        //   c) That all value list elements are contained in the input fields.
-        // Note: Using a key with a null or empty list value is allowed as a way to indicate that this key should
-        //       be ignored in match as also a way to auto-resolution from populating that key.
+        /*-
+         * Validate the MatchKeys by checking:
+         * a) That all keys are non-null.
+         * b) That all values are either:
+         *   i) null
+         *   ii) empty lists
+         *   iii) lists composed of non-null and non-empty strings.
+         * Note: Using a key with a null or empty list value is allowed as a way to indicate that this key should
+         * be ignored in match as also a way to auto-resolution from populating that key.
+         */
         for (Map.Entry<MatchKey, List<String>> entry : newKeyMap.entrySet()) {
             if (entry.getKey() == null) {
                 throw new IllegalArgumentException("MatchKey key must be non-null.");
@@ -291,9 +296,8 @@ public class MatchInputValidator {
                     } else if (!inputFields.contains(elem)) {
                         throw new IllegalArgumentException(
                                 "Cannot find MatchKey value element " + elem + " in claimed field list."
-                                        + "\n\nInput Fields contains: " + String.join(" ", inputFields)
-                                        + "\nMatchKey: " + entry.getKey() + " values: "
-                                        + String.join(" ", entry.getValue()));
+                                        + "\n\nInput Fields contains: " + String.join(" ", inputFields) + "\nMatchKey: "
+                                        + entry.getKey() + " values: " + String.join(" ", entry.getValue()));
                     }
                 }
             }
@@ -303,9 +307,10 @@ public class MatchInputValidator {
     }
 
     private static void validateNonEntityMatchColumnSelection(MatchInput input) {
-        // TODO(dzheng): This first return clause seems to assume that if Predefined Column Selection is set to "ID",
-        //     there is no Union Column Selection or Custom Column Selection added, since they do not get validated.
-        //     Is this always true?
+        // TODO(dzheng): This first return clause seems to assume that if Predefined
+        // Column Selection is set to "ID", there is no Union Column Selection or Custom
+        // Column Selection added, since they do not get validated.
+        // Is this always true?
         if (Predefined.ID.equals(input.getPredefinedSelection())) {
             return;
         }
@@ -342,7 +347,6 @@ public class MatchInputValidator {
         }
     }
 
-
     /**
      * For 2.0 AccountMaster based LDC matcher:
      *
@@ -363,8 +367,8 @@ public class MatchInputValidator {
     /**
      * For 1.0 RTS matcher whose target is sql table DerivedColumnsCache:
      *
-     * For exact sql lookup in DerivedColumnsCache (no fuzzy match), we require
-     * one of following MatchKey (combination) provided:
+     * For exact sql lookup in DerivedColumnsCache (no fuzzy match), we require one
+     * of following MatchKey (combination) provided:
      *
      * LatticeAccountId (Fetch-Only), Domain, [Name, Country, State]
      *
@@ -459,7 +463,8 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Too many input data, maximum rows = " + maxRealTimeInput + ".");
         }
 
-        // Check that each sub-list in input data is the same length as the number of fields.
+        // Check that each sub-list in input data is the same length as the number of
+        // fields.
         for (List<Object> sublist : input.getData()) {
             if (sublist.size() > input.getFields().size()) {
                 throw new IllegalArgumentException(

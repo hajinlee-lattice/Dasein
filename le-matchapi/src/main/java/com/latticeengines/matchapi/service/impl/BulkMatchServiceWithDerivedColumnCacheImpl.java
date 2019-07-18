@@ -72,7 +72,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     @Override
     public MatchCommand match(MatchInput input, String hdfsPodId) {
-        DecisionGraph decisionGraph = OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
+        DecisionGraph decisionGraph = OperationalMode.isEntityMatch(input.getOperationalMode())
                 ? matchDecisionGraphService.findDecisionGraph(input.getDecisionGraph())
                 : null;
         MatchInputValidator.validateBulkInput(input, yarnConfiguration, decisionGraph);
@@ -115,7 +115,8 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
         return matchCommandService.start(input, appId, rootOperationUid);
     }
 
-    protected BulkMatchWorkflowConfiguration generateWorkflowConf(MatchInput input, String hdfsPodId, String rootOperationUid) {
+    protected BulkMatchWorkflowConfiguration generateWorkflowConf(MatchInput input, String hdfsPodId,
+            String rootOperationUid) {
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         return submitter //
                 .matchInput(input) //

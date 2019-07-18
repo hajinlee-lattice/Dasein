@@ -71,13 +71,12 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     protected void validateTraveler(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         // First make sure this actor should be run on this traveler.
-        if (!OperationalMode.ENTITY_MATCH.equals(matchTraveler.getMatchInput().getOperationalMode())) {
+        if (!OperationalMode.isEntityMatch(matchTraveler.getMatchInput().getOperationalMode())) {
             throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
         if (!BusinessEntity.Account.name().equals(matchTraveler.getEntity())) {
-            throw new UnsupportedOperationException(
-                    this.getClass().getSimpleName() + " only handles Account entity, but found "
-                            + matchTraveler.getEntity());
+            throw new UnsupportedOperationException(this.getClass().getSimpleName()
+                    + " only handles Account entity, but found " + matchTraveler.getEntity());
         }
         if (CollectionUtils.isEmpty(matchTraveler.getInputDataRecord())) {
             throw new IllegalArgumentException("MatchTraveler must have input record data to generate MatchKeyTuple.");
@@ -114,8 +113,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
                 .getOrDefault(BusinessEntity.Account.name(), new HashMap<>());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
-        matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null,
-                entityMatchKeyRecord);
+        matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null, entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDuns(inputRecord, keyPositionMap, entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap,
                 matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
@@ -127,7 +125,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);
 
-        // Send domain data to DomainCollectionService since this was not done outside the Actor system.
+        // Send domain data to DomainCollectionService since this was not done outside
+        // the Actor system.
         String domain = matchKeyTuple.getDomain();
         if (StringUtils.isNotBlank(domain)) {
             domainCollectService.enqueue(domain);
