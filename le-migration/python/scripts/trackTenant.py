@@ -31,11 +31,17 @@ def checkCanTrack(storage, tenant=None):
     if not tenant:
         print('Tenant not found.')
         return False
-    elif not len(tenant.metadataDataCollection):
-        print("Tenant doesn't have an active data collection.")
-        return False
     elif len(tenant.metadataDataCollection) != 1:
-        print("Tenant has invalid number of active data collections")
+        print('Tenant must have one active data collection')
+        return False
+    elif len(tenant.metadataDataCollection[0].metadataDataCollectionTable) <= 0:
+        print('No records found for the active data collection of this tenant')
+        return False
+    elif len(tenant.metadataStatistics) != 1:
+        print('Tenant must have one statistics record')
+        return False
+    elif len(tenant.metadataDataCollectionStatus) != 1:
+        print('Tenant must have one status record')
         return False
     exist = storage.getByColumn('MigrationTrack', 'fkTenantId', tenant.tenantPid)
     if len(exist):
@@ -73,15 +79,19 @@ def createTenantTrack(tenant):
     track.status = 'SCHEDULED'
     track.version = tenant.metadataDataCollection[0].version
     track.curActiveTable = {}
-    for roleTable in tenant.metadataDataCollectionTable:
-        track.curActiveTable[roleTable.role] = roleTable.fkTableId
+    for record in tenant.metadataDataCollection[0].metadataDataCollectionTable:
+        if not track.curActiveTable.get(record.role):
+            track.curActiveTable[record.role] = [record.metadataTable.name]
+        else:
+            track.curActiveTable[record.role].append(record.metadataTable.name)
     # TODO - double check with Jinyang for import action (maybe list of ACTION.PID).
-    # TODO - May need to write model for ACTION table
+    # TODO - If needs to be list of action objects, write model for ACTION object (table)
     track.importAction = {'actions': []}
-    track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
-    track.statsCubesData = tenant.metadataStatistics[0].cubesData
-    track.statsData = tenant.metadataStatistics[0].data
-    track.statsName = tenant.metadataStatistics[0].name
+    if tenant.metadataDataCollectionStatus:
+        track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
+    if tenant.metadataStatistics:
+        track.statsCubesData = tenant.metadataStatistics[0].cubesData
+        track.statsName = tenant.metadataStatistics[0].name
     track.save()
     return track
 
