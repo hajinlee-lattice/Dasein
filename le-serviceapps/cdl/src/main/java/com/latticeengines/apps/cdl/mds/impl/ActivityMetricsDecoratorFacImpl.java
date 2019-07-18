@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -144,7 +143,7 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
         if (productTable == null) {
             log.warn("Fail to find active table with role {} for tenant {}", TableRoleInCollection.ConsolidatedProduct,
                     customerSpace);
-            return null;
+            return Collections.emptyMap();
         }
         List<Product> productList = new ArrayList<>(ProductUtils.loadProducts(yarnConfiguration,
                 productTable.getExtracts().get(0).getPath(), Arrays.asList(ProductType.Analytic.name()), null));
@@ -164,9 +163,6 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     private static ColumnMetadata checkDeprecate(ColumnMetadata cm, Map<String, List<Product>> productMap,
             List<ActivityMetrics> metrics) {
         if (!ActivityMetricsUtils.isActivityMetricsAttr(cm.getAttrName())) {
-            return cm;
-        }
-        if (MapUtils.isEmpty(productMap)) {
             return cm;
         }
         String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
