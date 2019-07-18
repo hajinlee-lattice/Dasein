@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
@@ -22,6 +23,9 @@ public final class ScalingUtils {
     private static final double GB = 1024. * 1024 * 1024;
 
     /**
+     * This is mainly estimated by Atlas account table
+     * For other use case, can pre-process sizeInGb to change the threshold
+     *
      * 8G -> 2
      * 24G -> 3
      * 72G -> 4
@@ -35,9 +39,6 @@ public final class ScalingUtils {
         } else if (sizeInGb >= 8) {
             multiplier = 2;
         }
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
-        }
         return multiplier;
     }
 
@@ -47,7 +48,7 @@ public final class ScalingUtils {
             for (Extract extract: table.getExtracts()) {
                 String path = extract.getPath();
                 double extractSize = getHdfsPathSizeInGb(configuration, path);
-                totalSize += (extractSize / GB);
+                totalSize += extractSize;
             }
         }
         return totalSize;
@@ -55,20 +56,22 @@ public final class ScalingUtils {
 
     public static double getHdfsPathSizeInGb(Configuration configuration, String path) {
         if (StringUtils.isNotBlank(path)) {
-            if (!path.endsWith(".parquet") && !path.endsWith(".avro")) {
-                // default is avro
-                path = PathUtils.toAvroGlob(path);
-            }
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            final String globPath = path;
-            long extractSize = 0;
+            String dirPath = PathUtils.toDirWithoutTrailingSlash(path);
+            long dirSize = 0;
             try {
-                extractSize = retry.execute(ctx -> HdfsUtils.getTotalBytes(configuration, globPath));
+                dirSize = retry.execute(ctx -> {
+                    FileStatus fileStatus = HdfsUtils.getFileStatus(configuration, dirPath);
+                    return fileStatus.getLen();
+                });
             } catch (IOException e) {
-                log.warn("Failed to get extract size for " + path);
+                log.warn("Failed to get extract size for " + dirPath);
             }
-            return extractSize / GB;
+            double size = dirSize / GB;
+            log.info("Files in " + dirSize + " are " + size + " gb.");
+            return size;
         } else {
+            log.warn("Path is empty, return 0.0 gb as file size.");
             return 0.0;
         }
     }

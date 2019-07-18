@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -26,9 +24,7 @@ import com.querydsl.sql.SQLQuery;
 
 public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
 
-    private static Logger log = LoggerFactory.getLogger(EventQueryTranslatorTest.class);
-
-    protected EventQueryTranslator getEventQueryTranslator() {
+    private EventQueryTranslator getEventQueryTranslator() {
         return new EnhancedEventQueryTranslator();
     }
 
@@ -37,13 +33,13 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
             "DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa", // Product 1
             "eNm3Nmt72BXLZRniXJWSFO4j2jnOUpY", // Product 2
             "H8u0TkdKoeqD2b8bEFNwcWagzKmPJk", // Product 3
-            "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks", // Product 4 
+            "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks", // Product 4
             "uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8", // Product 5
             "k4Pb7AhrIccPjW5jXiWzpwWX2mTvY7I", // Product 6
             "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il", // Product 7
             "yhJKT0T3Pu64VprFieVLFbstNw17yz1h", // Product 8
             "zqpVPoOPufEuPkcxqjDFMykEHN7ocY", // Product 9
-            "uiUrfXNLCGpDIkTAB5he5iLbhGwLik0I", // Product 10 
+            "uiUrfXNLCGpDIkTAB5he5iLbhGwLik0I", // Product 10
             "hpf28LuxIoQzJ4gy4u20Vwazew0t", // Product 11
             "5Bg2lBhLITlRpSMIMv8qtVMRS9ortPL", // Product 12
             "hLxxPy0B6A4ehW7FaaGRh9LAjNzsYicB", // Product 13
@@ -57,7 +53,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
             "Bl2ObAv3Smmm0xLD1bXMYnQ0zs4Hsnh8" // Product 21
     );
 
-    public List<String> getProductIds() {
+    private List<String> getProductIds() {
         return productIds;
     }
 
@@ -68,7 +64,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         };
     }
 
-    protected int getDefaultPeriodId() {
+    private int getDefaultPeriodId() {
         return 10;
     }
 
@@ -161,7 +157,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         return frontEndQuery;
     }
 
-    public TransactionRestriction getAtLeastOnceAmountBetweenPeriods(String prodIdList) {
+    private TransactionRestriction getAtLeastOnceAmountBetweenPeriods(String prodIdList) {
         TransactionRestriction txRestriction = new TransactionRestriction();
         txRestriction.setProductId(prodIdList);
         TimeFilter timeFilter = new TimeFilter(ComparisonType.BETWEEN, //

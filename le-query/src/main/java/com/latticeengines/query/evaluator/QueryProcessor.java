@@ -79,7 +79,8 @@ public class QueryProcessor {
             sqlQuery = sqlQuery.distinct();
         }
 
-        sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
+        sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups(), //
+                Boolean.TRUE.equals(query.getDistinct())));
         if (query.getPageFilter() != null && !query.containEntityForExists()) {
             sqlQuery = addPaging(sqlQuery, query.getPageFilter());
         }
@@ -229,11 +230,11 @@ public class QueryProcessor {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
+    private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups, boolean distinct) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
-            Expression<?> expression = resolver.resolveForSelect(lookup, true);
+            Expression<?> expression = resolver.resolveForSelect(lookup, !distinct);
             expressions.add(expression);
         }
         if (expressions.size() == 0) {
