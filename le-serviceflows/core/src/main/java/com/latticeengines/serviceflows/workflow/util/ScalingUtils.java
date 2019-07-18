@@ -67,9 +67,7 @@ public final class ScalingUtils {
             } catch (IOException e) {
                 log.warn("Failed to get extract size for " + dirPath);
             }
-            double size = dirSize / GB;
-            log.info("Files in " + dirSize + " are " + size + " gb.");
-            return size;
+            return dirSize / GB;
         } else {
             log.warn("Path is empty, return 0.0 gb as file size.");
             return 0.0;
