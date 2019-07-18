@@ -11,8 +11,17 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
+import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -28,9 +37,15 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
     private DataCollectionArtifact artifact1;
     private DataCollectionArtifact artifact2;
 
+    private DataCollectionTable dataCollectionTable;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironmentWithDataCollection();
+        Table table = getTable();
+        tableEntityMgr.create(table);
+        dataCollectionTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(),
+                TableRoleInCollection.ConsolidatedAccount, DataCollection.Version.Blue);
     }
 
     @AfterClass(groups = "functional")
@@ -78,7 +93,7 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testUpdateArtifact() {
         artifact1.setStatus(DataCollectionArtifact.Status.GENERATING);
         DataCollectionArtifact artifact = dataCollectionService.updateArtifact(mainCustomerSpace, artifact1);
-        Assert.assertEquals(artifact.getName() , artifact1.getName());
+        Assert.assertEquals(artifact.getName(), artifact1.getName());
         Assert.assertEquals(artifact.getStatus(), artifact1.getStatus());
         Assert.assertEquals(artifact.getUrl(), artifact1.getUrl());
 
@@ -112,5 +127,39 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(artifact);
         artifact = dataCollectionService.deleteArtifact(mainCustomerSpace, artifact.getName(), artifact.getVersion(), true);
         Assert.assertNotNull(artifact);
+    }
+
+    @Test(groups = "functional")
+    public void testDiagnostic() {
+        ImportTemplateDiagnostic diagnostic = dataCollectionService.diagnostic(mainCustomerSpace, dataCollectionTable.getPid());
+        Assert.assertNotNull(diagnostic);
+        Assert.assertEquals(diagnostic.getWarnings().size(), 2);
+        Assert.assertTrue(diagnostic.getWarnings().get(0).contains("user_Att2")
+                || diagnostic.getWarnings().get(1).contains("user_Att2"));
+        Assert.assertTrue(diagnostic.getWarnings().get(0).contains("NumberOfEmployees")
+                || diagnostic.getWarnings().get(1).contains("NumberOfEmployees"));
+    }
+
+    private Table getTable() {
+        Table table = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true);
+        table.setTableType(TableType.DATATABLE);
+        Attribute userAttr1 = new Attribute();
+        userAttr1.setPhysicalDataType("String");
+        userAttr1.setFundamentalType(FundamentalType.ALPHA);
+        userAttr1.setName("user_Att1");
+        userAttr1.setDisplayName("Attr1");
+        table.addAttribute(userAttr1);
+        Attribute userAttr2 = new Attribute();
+        userAttr2.setPhysicalDataType("Int");
+        userAttr2.setFundamentalType(FundamentalType.ALPHA);
+        userAttr2.setName("user_Att2");
+        userAttr2.setDisplayName("Attr2");
+        table.addAttribute(userAttr2);
+        for (Attribute attr : table.getAttributes()) {
+            if (attr.getName().equalsIgnoreCase("NumberOfEmployees")) {
+                attr.setFundamentalType(FundamentalType.ALPHA);
+            }
+        }
+        return table;
     }
 }
