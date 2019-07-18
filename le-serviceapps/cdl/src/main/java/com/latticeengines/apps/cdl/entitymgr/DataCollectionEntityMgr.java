@@ -37,4 +37,9 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
     List<DataCollectionTable> findTablesFromCollection(String collectionName, String tableName);
 
     Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
+
+    DataCollectionTable findDataCollectionTableByPid(Long dataCollectionId);
+
+    DataCollectionTable createDataCollectionTable(String collectionName, Table table, TableRoleInCollection role,
+                                                  DataCollection.Version version);
 }

@@ -247,4 +247,31 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             return list;
         }
     }
+
+    @Transactional(transactionManager = "transactionManagerReader", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public DataCollectionTable findDataCollectionTableByPid(Long dataCollectionTablePid) {
+        DataCollectionTable dataCollectionTable = dataCollectionTableReaderRepository.findByPid(dataCollectionTablePid);
+        if (dataCollectionTable != null && dataCollectionTable.getTable() != null) {
+            TableEntityMgr.inflateTable(dataCollectionTable.getTable());
+        }
+        return dataCollectionTable;
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public DataCollectionTable createDataCollectionTable(String collectionName, Table table, TableRoleInCollection role,
+                                          DataCollection.Version version) {
+        DataCollection collection = getDataCollection(collectionName);
+        removeTableFromCollection(collectionName, table.getName(), version);
+        DataCollectionTable dataCollectionTable = new DataCollectionTable();
+        dataCollectionTable.setTenant(MultiTenantContext.getTenant());
+        dataCollectionTable.setDataCollection(collection);
+        dataCollectionTable.setTable(table);
+        dataCollectionTable.setRole(role);
+        dataCollectionTable.setVersion(version);
+        dataCollectionTableDao.create(dataCollectionTable);
+        return dataCollectionTable;
+    }
+
 }
