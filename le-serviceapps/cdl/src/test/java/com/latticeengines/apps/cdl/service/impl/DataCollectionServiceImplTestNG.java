@@ -44,7 +44,8 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironmentWithDataCollection();
         Table table = getTable();
         tableEntityMgr.create(table);
-        dataCollectionTable = dataCollectionEntityMgr.createDataCollectionTable(collectionName, table, TableRoleInCollection.ConsolidatedAccount, DataCollection.Version.Blue);
+        dataCollectionTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(),
+                TableRoleInCollection.ConsolidatedAccount, DataCollection.Version.Blue);
     }
 
     @AfterClass(groups = "functional")

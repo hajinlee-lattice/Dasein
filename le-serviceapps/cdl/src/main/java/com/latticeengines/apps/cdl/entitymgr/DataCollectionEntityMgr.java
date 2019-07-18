@@ -27,7 +27,7 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     List<String> getAllTableName();
 
-    void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
+    DataCollectionTable upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
                                  DataCollection.Version version);
 
     void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version);
@@ -40,6 +40,4 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     DataCollectionTable findDataCollectionTableByPid(Long dataCollectionId);
 
-    DataCollectionTable createDataCollectionTable(String collectionName, Table table, TableRoleInCollection role,
-                                                  DataCollection.Version version);
 }

@@ -138,7 +138,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
+    public DataCollectionTable upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
@@ -151,7 +151,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             dataCollectionTable.setRole(role);
             dataCollectionTable.setVersion(version);
             dataCollectionTableDao.create(dataCollectionTable);
+            return dataCollectionTable;
         }
+        return null;
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -255,22 +257,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         if (dataCollectionTable != null && dataCollectionTable.getTable() != null) {
             TableEntityMgr.inflateTable(dataCollectionTable.getTable());
         }
-        return dataCollectionTable;
-    }
-
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    @Override
-    public DataCollectionTable createDataCollectionTable(String collectionName, Table table, TableRoleInCollection role,
-                                          DataCollection.Version version) {
-        DataCollection collection = getDataCollection(collectionName);
-        removeTableFromCollection(collectionName, table.getName(), version);
-        DataCollectionTable dataCollectionTable = new DataCollectionTable();
-        dataCollectionTable.setTenant(MultiTenantContext.getTenant());
-        dataCollectionTable.setDataCollection(collection);
-        dataCollectionTable.setTable(table);
-        dataCollectionTable.setRole(role);
-        dataCollectionTable.setVersion(version);
-        dataCollectionTableDao.create(dataCollectionTable);
         return dataCollectionTable;
     }
 
