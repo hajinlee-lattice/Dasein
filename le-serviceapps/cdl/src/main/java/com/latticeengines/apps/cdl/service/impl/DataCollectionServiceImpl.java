@@ -32,8 +32,10 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusHistoryEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -43,12 +45,14 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace.TableSpace;
+import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusHistory;
+import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -83,6 +87,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private BatonService batonService;
 
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
@@ -776,6 +783,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             }
         }
         return others;
+    }
+
+    @Override
+    public ImportTemplateDiagnostic diagnostic(String customerSpaceStr, Long dataCollectionTablePid) {
+        DataCollectionTable dataCollectionTable = dataCollectionEntityMgr.findDataCollectionTableByPid(dataCollectionTablePid);
+        if (dataCollectionTable == null) {
+            throw new RuntimeException("Cannot find datacollection table for id: " + dataCollectionTablePid);
+        }
+        Table table = dataCollectionTable.getTable();
+        if (table == null) {
+            throw new RuntimeException(String.format("The table for datacollection table %s is empty!",
+                    dataCollectionTablePid));
+        }
+        return DiagnoseTable.diagnostic(customerSpaceStr, table, null, batonService);
     }
 
 }

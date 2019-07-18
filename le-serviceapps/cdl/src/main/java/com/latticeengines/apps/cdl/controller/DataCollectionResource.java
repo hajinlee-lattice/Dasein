@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
+import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -366,5 +367,12 @@ public class DataCollectionResource {
     @ApiOperation(value = "Download a data collection artifact")
     public byte[] downloadArtifact(@PathVariable String customerSpace, @PathVariable String exportId) {
         return dataCollectionService.downloadDataCollectionArtifact(customerSpace, exportId);
+    }
+
+    @PostMapping(value = "/diagnostic/{dataCollectionId}")
+    @ResponseBody
+    @ApiOperation(value = "diagnose collection and service store table")
+    public ResponseDocument<ImportTemplateDiagnostic> servingAndBatchDiagnostic(@PathVariable String customerSpace, @PathVariable Long dataCollectionTablePid) {
+        return ResponseDocument.successResponse(dataCollectionService.diagnostic(customerSpace, dataCollectionTablePid));
     }
 }
