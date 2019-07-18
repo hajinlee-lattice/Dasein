@@ -153,21 +153,21 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(destinationAccountId, String.class), //
                 Pair.of(InterfaceName.CompanyName.name(), String.class), //
                 Pair.of(InterfaceName.LDC_Name.name(), String.class), //
-                Pair.of(ratingId + PlaymakerConstants.RatingScoreColumnSuffix, String.class), //
+                Pair.of(ratingId + PlaymakerConstants.RatingScoreColumnSuffix, Integer.class), //
                 Pair.of(ratingId, String.class), //
                 Pair.of(ratingId + PlaymakerConstants.RatingEVColumnSuffix, String.class) //
         );
         Object[][] accounts = new Object[][] { //
-                { "0L", "destinationAccountId", "Lattice", "Lattice Engines", "98", "A", "1000" }, //
-                { "1L", "destinationAccountId", "DnB", "DnB", "97", "B", "2000" }, //
-                { "2L", "destinationAccountId", "Google", "Google", "98", "C", "3000" }, //
-                { "3L", "destinationAccountId", "Facebook", "FB", "93", "E", "1000000" }, //
+                { "0L", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000" }, //
+                { "1L", "destinationAccountId", "DnB", "DnB", 97, "B", "2000" }, //
+                { "2L", "destinationAccountId", "Google", "Google", 98, "C", "3000" }, //
+                { "3L", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000" }, //
                 { "4L", "destinationAccountId", "Apple", "Apple", null, null, null }, //
                 { "5L", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null }, //
-                { "6L", "destinationAccountId", "Adobe", "Adobe", "98", null, "1000" }, //
-                { "7L", "destinationAccountId", "Eloqua", "Eloqua", "40", "F", "100" }, //
-                { "8L", "destinationAccountId", "Dell", "Dell", "8", "F", "10" }, //
-                { "9L", "destinationAccountId", "HP", "HP", "38", "E", "500" }, //
+                { "6L", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000" }, //
+                { "7L", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100" }, //
+                { "8L", "destinationAccountId", "Dell", "Dell", 8, "F", "10" }, //
+                { "9L", "destinationAccountId", "HP", "HP", 38, "E", "500" }, //
         };
         accountData = uploadHdfsDataUnit(accounts, accountFields);
 
