@@ -111,6 +111,11 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
                 scalingMultiplier, storageLevel, getClass().getSimpleName());
     }
 
+    protected void prepareForCrossSellQueries(String period, String trxnTable, boolean persistOnDisk) {
+        String storageLevel = persistOnDisk ? "DISK_ONLY" : null;
+        sparkSQLService.prepareForCrossSellQueries(livySession, period, trxnTable, storageLevel);
+    }
+
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
     SparkJobResult executeSparkJob(Class<J> jobClz, C jobConfig) {
         if (livySession != null) {

@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.factory.SparkQueryProvider;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -94,14 +95,6 @@ public class EventQueryTranslator extends TranslatorCommon {
     protected String getPeriodTransactionTableName(AttributeRepository repository) {
         return repository.getTableName(AggregatedPeriodTransaction);
     }
-
-//    private BooleanExpression limitPeriodByCount(QueryFactory queryFactory, AttributeRepository repository,
-//                                                 String period, int periodCount, String sqlUser) {
-//        BooleanExpression matchedPeriod = periodName.eq(period);
-//        return (periodCount <= 0)
-//            ? matchedPeriod
-//            : periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount, sqlUser));
-//    }
 
     private SubQuery translateTempTrxn(QueryFactory queryFactory, AttributeRepository repository, String period, //
                                       String sqlUser) {
@@ -715,8 +708,11 @@ public class EventQueryTranslator extends TranslatorCommon {
         overwritePeriodsInRestriction(rootRestriction, period);
         rootRestriction = mergeSegmentQuery(rootRestriction, frontEndQuery.getSegmentSubQuery());
 
-        builder.with(translateTempTrxn(queryFactory, repository, period, sqlUser));
-        builder.with(translateAllKeys(queryFactory, repository, sqlUser));
+        if (!SparkQueryProvider.SPARK_BATCH_USER.equals(sqlUser)) {
+            // Spark SQL prepares these two temp views before-hand.
+            builder.with(translateTempTrxn(queryFactory, repository, period, sqlUser));
+            builder.with(translateAllKeys(queryFactory, repository, sqlUser));
+        }
 
         if (calculateEventRevenue(isEvent, frontEndQuery)) {
             if (frontEndQuery.getTargetProductIds() == null || frontEndQuery.getTargetProductIds().isEmpty()) {
