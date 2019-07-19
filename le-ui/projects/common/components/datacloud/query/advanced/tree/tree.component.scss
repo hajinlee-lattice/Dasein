@@ -308,7 +308,7 @@ div.advanced-query-builder {
                             
                 span.query-section-item-category,
                 span.query-section-item-displayname {
-                    float: left;
+                    // float: left;
                 }
 
                 .query-section-item-category {
@@ -318,11 +318,10 @@ div.advanced-query-builder {
                     strong {
                         max-width: 15em;
                         display: inline-block;
-                        white-space: nowrap;
                         overflow: hidden;
-                        text-overflow: ellipsis;
                         vertical-align: middle;
-                        padding-right: 1em;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
                     }
                 }
 

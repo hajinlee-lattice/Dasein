@@ -13,6 +13,14 @@ div.advanced-query-builder {
         font-weight: bold;
     }
 
+    .query-section-item-value strong {
+        max-width: 15em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: table-cell;
+    }
+
     ul.query-tree-root > li > query-tree-directive > ul > li > query-tree-directive > ul > li > query-tree-directive > ul > li div.query-section-item-end span.add-operator {
         display: none;
     }
