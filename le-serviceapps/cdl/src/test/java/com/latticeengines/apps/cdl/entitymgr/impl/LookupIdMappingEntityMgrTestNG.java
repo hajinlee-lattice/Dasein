@@ -6,8 +6,10 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
@@ -37,6 +40,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     private LookupIdMap lookupIdMap;
     private String configId;
     private String configIdWithAuth;
+    private String configIdWithFieldMapping;
     private String dropbox;
     private String orgId = "ABC_s";
     private String orgName = "n1234_1";
@@ -256,6 +260,62 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNull(updatedExtAuth.getTrayAuthenticationId());
         assertNull(updatedExtAuth.getSolutionInstanceId());
         assertNull(updatedExtAuth.getTrayWorkflowEnabled());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateWithNull" })
+    public void testCreateWithFieldMapping() {
+        LookupIdMap lookupIdMapWithFieldMapping = new LookupIdMap();
+        lookupIdMapWithFieldMapping.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMapWithFieldMapping.setExternalSystemName(CDLExternalSystemName.Marketo);
+        lookupIdMapWithFieldMapping.setOrgId("Marketo_FieldMappingTest");
+        lookupIdMapWithFieldMapping.setOrgName("Marketo_FieldMappingTest");
+
+        List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<ExportFieldMetadataMapping>();
+        exportFieldMappings.add(new ExportFieldMetadataMapping("COMPANY_NAME", "company", false));
+        exportFieldMappings.add(new ExportFieldMetadataMapping("Email", "email", false));
+        exportFieldMappings.add(new ExportFieldMetadataMapping("Phone", "phone", false));
+
+        LookupIdMap lookupIdMapWithFieldMappingCreated = lookupIdMappingEntityMgr
+                .createExternalSystem(lookupIdMapWithFieldMapping);
+        assertNotNull(lookupIdMapWithFieldMappingCreated);
+        assertNotNull(lookupIdMapWithFieldMappingCreated.getId());
+        configIdWithFieldMapping = lookupIdMapWithFieldMappingCreated.getId();
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithFieldMapping" })
+    public void testUpdateWithFieldMapping() {
+        LookupIdMap lookupIdMapWithFieldMapping = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithFieldMapping);
+        assertNotNull(lookupIdMapWithFieldMapping);
+        List<ExportFieldMetadataMapping> existingFieldMapping = lookupIdMapWithFieldMapping
+                .getExportFieldMetadataMappings();
+        assertNotNull(existingFieldMapping);
+
+        List<ExportFieldMetadataMapping> updatedFieldMapping = new ArrayList<ExportFieldMetadataMapping>();
+        updatedFieldMapping.add(new ExportFieldMetadataMapping("City", "city", false));
+        updatedFieldMapping.add(new ExportFieldMetadataMapping("Address", "address", false));
+        updatedFieldMapping.add(new ExportFieldMetadataMapping("ZipCode", "zipcode", false));
+        lookupIdMapWithFieldMapping.setExportFieldMappings(updatedFieldMapping);
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+
+        lookupIdMappingEntityMgr.updateLookupIdMap(lookupIdMapWithFieldMapping.getId(), lookupIdMapWithFieldMapping);
+
+        LookupIdMap lookupIdWithFieldMappingFromDB = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithFieldMapping);
+        assertNotNull(lookupIdWithFieldMappingFromDB.getId());
+        List<ExportFieldMetadataMapping> retrievedFieldMapping = lookupIdWithFieldMappingFromDB
+                .getExportFieldMetadataMappings();
+        assertNotNull(retrievedFieldMapping);
+        assertEquals(retrievedFieldMapping.size(), 3);
+
+        List<String> sourceFields = retrievedFieldMapping.stream().map(ExportFieldMetadataMapping::getSourceField)
+                .collect(Collectors.toList());
+        assertTrue(sourceFields.contains("City"));
+        assertTrue(sourceFields.contains("Address"));
+        assertTrue(sourceFields.contains("ZipCode"));
     }
 
 }
