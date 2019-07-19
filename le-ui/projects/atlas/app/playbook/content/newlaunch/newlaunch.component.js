@@ -105,9 +105,17 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             PlaybookWizardStore.setMarketoProgramName(vm.programName);
         }
 
+        vm.isValidAudienceName = function() {
+            if (vm.createNewList) {
+                return !vm.staticLists.some(function(list) {
+                    return list.name == vm.audienceName;
+                });
+            }
+        }
+
         vm.isInvalidAudienceSelection = function() {
             if (vm.externalIntegrationEnabled && vm.destinationOrg.externalAuthentication && vm.destinationOrg.externalAuthentication.trayAuthenticationId) {
-                return vm.createNewList ? (!vm.programName || !vm.audienceName) : (vm.listSelection == {});
+                return vm.createNewList ? (!vm.programName || !vm.audienceName || !vm.isValidAudienceName()) : (vm.listSelection == {});
             }
             return false;
         }
