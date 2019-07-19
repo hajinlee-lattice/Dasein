@@ -34,6 +34,16 @@ public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMeta
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
+            List<ExportFieldMetadataDefaults> defaultFields) {
+        defaultFields.stream().forEach(df -> {
+            exportFieldMetadataDefaultsDao.update(df);
+        });
+        return defaultFields;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteByPid(Long pid) {
         exportFieldMetadataDefaultsDao.deleteByPid(pid, true);
     }

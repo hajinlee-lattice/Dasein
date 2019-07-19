@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
@@ -53,16 +55,29 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
         if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
             mappedFieldNames.forEach(fieldName -> {
-                ColumnMetadata cm = attributesMap.containsKey(fieldName) ? attributesMap.get(fieldName)
-                        : constructCampaignDerivedColumnMetadata(defaultFieldsMetadataMap.get(fieldName));
+                ColumnMetadata cm = null;
+                if (attributesMap.containsKey(fieldName)) {
+                    cm = attributesMap.get(fieldName);
+                    if (defaultFieldsMetadataMap.containsKey(fieldName)) {
+                        cm.setDisplayName(defaultFieldsMetadataMap.get(fieldName).getDisplayName());
+                    }
+                } else if (defaultFieldsMetadataMap.containsKey(fieldName)) {
+                    cm = constructCampaignDerivedColumnMetadata(defaultFieldsMetadataMap.get(fieldName));
+                } else {
+                    throw new LedpException(LedpCode.LEDP_40069, new String[] { fieldName, "Marketo" });
+                }
                 exportColumnMetadataList.add(cm);
             });
         } else {
             defaultFieldsMetadataMap.values().forEach(defaultField -> {
-                ColumnMetadata cm = defaultField.getStandardField()
-                        && attributesMap.containsKey(defaultField.getAttrName())
-                        ? attributesMap.get(defaultField.getAttrName())
-                        : constructCampaignDerivedColumnMetadata(defaultField);
+                ColumnMetadata cm;
+                String attrName = defaultField.getAttrName();
+                if (attributesMap.containsKey(attrName)) {
+                    cm = attributesMap.get(attrName);
+                    cm.setDisplayName(defaultField.getDisplayName());
+                } else {
+                    cm = constructCampaignDerivedColumnMetadata(defaultField);
+                }
 
                 exportColumnMetadataList.add(cm);
             });
