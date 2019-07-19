@@ -107,6 +107,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     public MetadataSegment createSegment(MetadataSegment segment) {
         preprocessBeforeCreateOrUpdate(segment);
+        populateNullsBeforeCreate(segment);
 
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
@@ -116,7 +117,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             return segment;
         }
     }
-
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -146,6 +146,15 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             return existingSegment;
         } else {
             throw new RuntimeException("Segment does not already exists");
+        }
+    }
+
+    private void populateNullsBeforeCreate(MetadataSegment segment) {
+        if (segment.getAccounts() == null) {
+            segment.setAccounts(0L);
+        }
+        if (segment.getContacts() == null) {
+            segment.setContacts(0L);
         }
     }
 
@@ -250,6 +259,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         existing.setProducts(incoming.getProducts());
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());
+        existing.setUpdatedBy(incoming.getUpdatedBy());
         if (!Boolean.TRUE.equals(existing.getMasterSegment())) {
             existing.setAccountRestriction(incoming.getAccountRestriction());
             existing.setContactRestriction(incoming.getContactRestriction());
