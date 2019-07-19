@@ -37,7 +37,7 @@
                             <li class="name" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'display_name'">
                                 Segment
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort"></i>
-                                <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'display_name')" class="fa fa-sort-{{up ? 'desc' : 'asc'}}"></i>
                             </li>
                             <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'accounts'">
                                 Accounts

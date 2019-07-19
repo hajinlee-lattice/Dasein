@@ -20,6 +20,7 @@ public class QueryBuilder {
     private String freeFormTextSearch;
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
     private Boolean distinct = Boolean.FALSE;
+    private Boolean isCount;
 
     QueryBuilder() {
     }
@@ -117,6 +118,11 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder count(boolean count) {
+        this.isCount = count;
+        return this;
+    }
+
     @SuppressWarnings("rawtypes")
     public List getSubQueryList() {
         return Collections.unmodifiableList(subQueryList);
@@ -139,6 +145,7 @@ public class QueryBuilder {
         query.setCommonTableQueryList(subQueryList);
         query.setGroupBy(groupBy);
         query.setDistinct(distinct);
+        query.setCount(isCount);
         return query;
     }
 
