@@ -16,6 +16,12 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
+            span {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 15em;
+                overflow: hidden;
+            }
         }
         .chip {
             width: auto;
