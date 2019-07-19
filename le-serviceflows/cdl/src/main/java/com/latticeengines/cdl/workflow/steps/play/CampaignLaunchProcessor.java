@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -125,7 +126,7 @@ public class CampaignLaunchProcessor {
         metadataProxy.updateTable(tenant.getId(), playLaunchContext.getPlayLaunch().getTableName(),
                 playLaunchContext.getRecommendationTable());
 
-        if (!export(playLaunchContext, extractPath)) {
+        if (!export(playLaunchContext, recAvroHdfsFilePath)) {
             throw new LedpException(LedpCode.LEDP_18168);
         }
     }
@@ -150,6 +151,7 @@ public class CampaignLaunchProcessor {
                 .setCustomer(tenant) //
                 .build();
 
+        log.info("exporter is " + JsonUtils.serialize(exporter));
         String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
         log.info("Submitted sqoop jobs: " + appId);
 
@@ -274,19 +276,6 @@ public class CampaignLaunchProcessor {
                 .schema(schema);
 
         return playLaunchContextBuilder.build();
-    }
-
-    public void updateLaunchProgress(PlayLaunchContext playLaunchContext, long processedSegmentAccountsCount,
-            long segmentAccountsCount) {
-        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-
-        playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
-        playLaunch.setAccountsLaunched(playLaunchContext.getCounter().getAccountLaunched().get());
-        playLaunch.setContactsLaunched(playLaunchContext.getCounter().getContactLaunched().get());
-        playLaunch.setAccountsErrored(playLaunchContext.getCounter().getAccountErrored().get());
-
-        updateLaunchProgress(playLaunchContext);
-        log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
     }
 
     public void updateLaunchProgress(PlayLaunchContext playLaunchContext) {

@@ -48,6 +48,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     private static final Logger log = LoggerFactory.getLogger(CDLAttrConfigResourceDeploymentTestNG.class);
     private static final String RATING_ENGINE_NOTE_1 = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "lattice@lattice-engines.com";
     private final boolean shouldCreateActionWithRatingEngine1 = true;
     private final boolean shouldCreateActionWithRatingEngine2 = false;
     @Inject
@@ -212,8 +213,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), null);
         Thread.sleep(500L);
 
-        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
-                BusinessEntity.Account, false);
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Account, false);
         assertEquals(request.getAttrConfigs().size(), 0);
 
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
@@ -235,6 +235,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(UPDATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE_1);
         if (shouldCreateActionWithRatingEngine1) {

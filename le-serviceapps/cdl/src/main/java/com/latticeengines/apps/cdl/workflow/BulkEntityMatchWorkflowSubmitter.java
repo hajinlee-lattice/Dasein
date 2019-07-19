@@ -180,7 +180,7 @@ public class BulkEntityMatchWorkflowSubmitter extends WorkflowSubmitter {
             return;
         }
 
-        Preconditions.checkArgument(input.getOperationalMode() == OperationalMode.ENTITY_MATCH);
+        Preconditions.checkArgument(OperationalMode.isEntityMatch(input.getOperationalMode()));
         Preconditions.checkArgument(input.isSkipKeyResolution());
         Preconditions.checkArgument(input.getTargetEntity() == null || input.getTargetEntity().equals(entity),
                 "Entity in MatchInput should be the same as the one in BulkEntityMatchRequest");

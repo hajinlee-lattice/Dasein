@@ -49,6 +49,8 @@ public class TranslatorCommon {
     static final String AMOUNT_VAL = "amountval";
     static final String QUANTITY_VAL = "quantityval";
     static final String KEYS = "tempkeys";
+    static final String TEMP_TRXN = "temptrxn";
+    static final String SEGMENT = "segment";
     static final String TRXN_PERIOD = "trxnbyperiod";
     static final String NUMBERS = "numbers";
     static final String REVENUE = "revenue";

@@ -45,6 +45,12 @@
             <artifactId>le-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
     </dependencies>
 
 </project>

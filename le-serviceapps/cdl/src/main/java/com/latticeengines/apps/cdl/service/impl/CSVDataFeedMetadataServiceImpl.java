@@ -72,14 +72,12 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         List<Attribute> attributes = schemaTable.getAttributes();
         Map<String, Attribute> requiredAttr = new HashMap<>();
         for (Attribute attribute : attributes) {
-            if (attribute.getRequired() == true && attribute.getDefaultValueStr() == null) {
+            if (Boolean.TRUE.equals(attribute.getRequired()) && attribute.getDefaultValueStr() == null) {
                 requiredAttr.put(attribute.getName(), attribute);
             }
         }
         for (Attribute attribute : original.getAttributes()) {
-            if (requiredAttr.containsKey(attribute.getName())) {
-                requiredAttr.remove(attribute.getName());
-            }
+            requiredAttr.remove(attribute.getName());
         }
         if (requiredAttr.size() > 0) {
             throw new RuntimeException(String.format("Missing the following required field: %s",
@@ -182,7 +180,6 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     @Override
     public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
             String customerSpace) {
-        return;
     }
 
     @Override

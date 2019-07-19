@@ -82,15 +82,14 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     }
 
     private void setAllocateModeFlag(MatchInput input) {
-        boolean allocateMode = OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())
+        boolean allocateMode = OperationalMode.isEntityMatch(input.getOperationalMode())
                 && (input.isAllocateId() || input.isFetchOnly());
         if (allocateMode) {
             if (input.isAllocateId()) {
                 logger.info("Entity match is in Allocate mode which generates EntityId during match");
             } else if (input.isFetchOnly()) {
-                logger.info(
-                        "Entity match is in FetchOnly mode "
-                                + "which looks up seed by EntityId in staging table or serving table (if no found in staging table)");
+                logger.info("Entity match is in FetchOnly mode "
+                        + "which looks up seed by EntityId in staging table or serving table (if no found in staging table)");
             }
             entityMatchConfigurationService.setIsAllocateMode(allocateMode);
         }

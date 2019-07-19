@@ -47,7 +47,6 @@ import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.MergeRuleRatings;
 import com.latticeengines.spark.exposed.service.LivySessionService;
-import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
 
@@ -56,9 +55,6 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
 
     @Inject
     private SparkSQLService sparkSQLService;
-
-    @Inject
-    private SparkJobService sparkJobService;
 
     @Inject
     private LivySessionService livySessionService;

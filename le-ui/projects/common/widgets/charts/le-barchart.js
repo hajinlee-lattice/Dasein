@@ -89,7 +89,7 @@ export default class LeBarchart extends Component {
         };
 
         chart.items.forEach(function(item, index) {
-            var percent = Math.floor((item.value / chart.total) * 100);
+            var percent = Math.floor((item.value / chart.total) * 100) || 0;
 
             chart.items[index].percent = percent
 

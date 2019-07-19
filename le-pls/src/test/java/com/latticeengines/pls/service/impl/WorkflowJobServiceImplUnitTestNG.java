@@ -89,12 +89,12 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
-    private Long[] jobIds = {123L, 456L};
+    private Long[] jobIds = { 123L, 456L };
     private Long TS_2019_01_21 = 1548028800000L;
     private Long TS_2019_01_20 = 1547942400000L;
     private Long TS_2019_01_19 = 1547856000000L;
     private Long TS_2019_01_18 = 1547769600000L;
-    private Long[] actionPids = {101L, 102L, 103L};
+    private Long[] actionPids = { 101L, 102L, 103L };
 
     private static final String INITIATOR = "test@lattice-engines.com";
 
@@ -148,7 +148,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "unit", dependsOnMethods = {"testExpandActions"})
+    @Test(groups = "unit", dependsOnMethods = { "testExpandActions" })
     public void testGenerateUnstartedProcessAnalyzeJob() {
         // Auto Schedule is off
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
@@ -186,7 +186,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertTrue(job.getStartTimestamp().after(now));
     }
 
-    @Test(groups = "unit", dependsOnMethods = {"testGenerateUnstartedProcessAnalyzeJob"})
+    @Test(groups = "unit", dependsOnMethods = { "testGenerateUnstartedProcessAnalyzeJob" })
     public void updateStartTimeStampAndForJob() {
         DateTime nextInvokeDate = new DateTime().plusDays(1).withTimeAtStartOfDay();
 
@@ -205,14 +205,11 @@ public class WorkflowJobServiceImplUnitTestNG {
         workflowJobService.updateStartTimeStampAndForJob(job);
         log.info("job.startDate = " + job.getStartTimestamp());
         Assert.assertTrue(now.isBefore(job.getStartTimestamp().getTime()));
-        Assert.assertEquals(
-                new DateTime(job.getStartTimestamp().getTime()).getHourOfDay(),
+        Assert.assertEquals(new DateTime(job.getStartTimestamp().getTime()).getHourOfDay(),
                 new DateTime(previous25hour).getHourOfDay());
-        Assert.assertEquals(
-                new DateTime(job.getStartTimestamp().getTime()).getMinuteOfHour(),
+        Assert.assertEquals(new DateTime(job.getStartTimestamp().getTime()).getMinuteOfHour(),
                 new DateTime(previous25hour).getMinuteOfHour());
-        Assert.assertEquals(
-                new DateTime(job.getStartTimestamp().getTime()).getSecondOfMinute(),
+        Assert.assertEquals(new DateTime(job.getStartTimestamp().getTime()).getSecondOfMinute(),
                 new DateTime(previous25hour).getSecondOfMinute());
 
         when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(new DateTime().plusHours(1).toDate().getTime());
@@ -259,9 +256,8 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
-        Map<String, Job> jobMap =
-                jobs.stream().filter(job -> job.getPid() != null).collect(Collectors.toMap(job -> job.getPid().toString(),
-                        Job -> Job, (key1, key2) -> key2));
+        Map<String, Job> jobMap = jobs.stream().filter(job -> job.getPid() != null)
+                .collect(Collectors.toMap(job -> job.getPid().toString(), Job -> Job, (key1, key2) -> key2));
         actions.remove(5);
         expandedJobs = workflowJobService.expandActions(actions, jobMap);
         verifyActionAndJobsForExpandActions(actions, 5, expandedJobs);
@@ -322,12 +318,10 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Action> actions = generateActionWithJobIdAndActionPids(jobIds[0], actionPids);
         Map<Long, Action> actionIdMap;
         Map<Long, Action> actionJobPidMap;
-        actionIdMap =
-                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
-                        Action -> Action, (key1, key2) -> key2));
-        actionJobPidMap =
-                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
-                        Action -> Action, (key1, key2) -> key2));
+        actionIdMap = actions.stream().filter(action -> action.getPid() != null)
+                .collect(Collectors.toMap(Action::getPid, Action -> Action, (key1, key2) -> key2));
+        actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null)
+                .collect(Collectors.toMap(Action::getTrackingPid, Action -> Action, (key1, key2) -> key2));
         workflowJobService.updateJobWithSubJobsIfIsPnA(job1, jobMap, actionIdMap, actionJobPidMap);
         Assert.assertNotNull(job1.getSubJobs());
         job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
@@ -335,12 +329,10 @@ public class WorkflowJobServiceImplUnitTestNG {
         jobMap = new HashMap<>();
         jobMap.put(job1.getPid().toString(), job1);
         actions = generateActionWithJobIdAndActionPids(jobIds[0], actionPids);
-        actionIdMap =
-                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
-                        Action -> Action, (key1, key2) -> key2));
-        actionJobPidMap =
-                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
-                        Action -> Action, (key1, key2) -> key2));
+        actionIdMap = actions.stream().filter(action -> action.getPid() != null)
+                .collect(Collectors.toMap(Action::getPid, Action -> Action, (key1, key2) -> key2));
+        actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null)
+                .collect(Collectors.toMap(Action::getTrackingPid, Action -> Action, (key1, key2) -> key2));
         workflowJobService.updateJobWithSubJobsIfIsPnA(job1, jobMap, actionIdMap, actionJobPidMap);
         Assert.assertNull(job1.getSubJobs());
     }
@@ -361,9 +353,8 @@ public class WorkflowJobServiceImplUnitTestNG {
         Assert.assertNotNull(jobList.get(0).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
         Assert.assertNotNull(jobList.get(1).getInputs().get(WorkflowContextConstants.Inputs.ACTION_ID));
 
-        Map<Long, Action> actionJobPidMap =
-                actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
-                        Action -> Action, (key1, key2) -> key2));
+        Map<Long, Action> actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null)
+                .collect(Collectors.toMap(Action::getTrackingPid, Action -> Action, (key1, key2) -> key2));
         workflowJobService.updateJobsWithActionId(jobList, actionJobPidMap);
         jobList = new ArrayList<>();
         jobList.add(job1);
@@ -392,13 +383,14 @@ public class WorkflowJobServiceImplUnitTestNG {
         workflowJobService.updateExpiredOrphanJobs(jobList);
         jobList.forEach(job -> {
             if (job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)) {
-                Assert.assertNotEquals(job.getInputs().get("EXPORT_ID"), WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED);
+                Assert.assertNotEquals(job.getInputs().get("EXPORT_ID"),
+                        WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED);
             }
         });
     }
 
-    private List<Job> getJobList(String jobType){
-        Long[] actionPids = {1L, 2L, 3L, 4L, 5L};
+    private List<Job> getJobList(String jobType) {
+        Long[] actionPids = { 1L, 2L, 3L, 4L, 5L };
         Job job1 = createProcessAnalyzeJob(jobIds[0], actionPids);
         job1.setJobType(jobType);
         List<Job> jobs = new ArrayList<>();
@@ -433,8 +425,8 @@ public class WorkflowJobServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void testGetJobMap() {
         List<Action> actions = generateActions();
-        Map<Long, Action> actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null).collect(Collectors.toMap(Action::getTrackingPid,
-                Action -> Action, (key1, key2) -> key2));
+        Map<Long, Action> actionJobPidMap = actions.stream().filter(action -> action.getTrackingPid() != null)
+                .collect(Collectors.toMap(Action::getTrackingPid, Action -> Action, (key1, key2) -> key2));
         Map<String, Job> jobMap = workflowJobService.getJobMap(actionJobPidMap);
         Assert.assertEquals(jobMap.size(), 2);
     }
@@ -443,9 +435,8 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testGetActions() {
         List<Long> actionIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
         List<Action> actions = generateActions();
-        Map<Long, Action> actionIdMap =
-                actions.stream().filter(action -> action.getPid() != null).collect(Collectors.toMap(Action::getPid,
-                        Action -> Action, (key1, key2) -> key2));
+        Map<Long, Action> actionIdMap = actions.stream().filter(action -> action.getPid() != null)
+                .collect(Collectors.toMap(Action::getPid, Action -> Action, (key1, key2) -> key2));
         List<Action> actions2 = workflowJobService.getActions(actionIds, actionIdMap);
         Assert.assertEquals(actions2.size(), 5);
     }
@@ -463,13 +454,14 @@ public class WorkflowJobServiceImplUnitTestNG {
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
         Assert.assertEquals(jobList.stream()
-                .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
-                        && job.getInputs().get("ARTIFACT_TYPE").equals(OrphanRecordsType.CONTACT.getOrphanType())
+                .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE) && job.getInputs()
+                        .get("ARTIFACT_TYPE").equals(OrphanRecordsType.CONTACT.getOrphanType())
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
         Assert.assertEquals(jobList.stream()
                 .filter(job -> job.getJobType().equals(WorkflowJobServiceImpl.ORPHAN_JOB_TYPE)
-                        && job.getInputs().get("ARTIFACT_TYPE").equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType())
+                        && job.getInputs().get("ARTIFACT_TYPE")
+                                .equals(OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType())
                         && job.getInputs().get("EXPORT_ID").equals(WorkflowJobServiceImpl.ORPHAN_ARTIFACT_EXPIRED))
                 .count(), 1);
     }
@@ -524,7 +516,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         jobs.add(createJob(jobIds[1]));
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(jobs);
         when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(jobs);
-        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), new String[]{anyString()})).thenReturn(jobs);
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), new String[] { anyString() })).thenReturn(jobs);
     }
 
     private void mockSourceFileEntityManager() {
@@ -697,6 +689,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setId(ratingEngineId);
         ratingEngine.setDisplayName("newName");
+        ratingEngine.setDescription("description");
         when(ratingEngineProxy.getRatingEngine(anyString(), anyString())).thenReturn(ratingEngine);
         workflowJobService.updateJobWithRatingEngine(job);
         Assert.assertEquals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME), "newName");

@@ -56,8 +56,8 @@ public abstract class RatingEngineTemplate {
                 .map(AIModel::getModelSummaryId) //
                 .collect(Collectors.toList());
 
-        Map<String, List<BucketMetadata>> modelSummaryToBucketListMap =
-                bucketedScoreProxy.getAllPublishedBucketMetadataByModelSummaryIdList(tenantId, modelSummaryIds);
+        Map<String, List<BucketMetadata>> modelSummaryToBucketListMap = bucketedScoreProxy
+                .getAllPublishedBucketMetadataByModelSummaryIdList(tenantId, modelSummaryIds);
 
         List<Callable<RatingEngineSummary>> callables = ratingList.stream().map(re -> //
         (Callable<RatingEngineSummary>) () -> //
@@ -90,6 +90,7 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary
                 .setSegmentName(ratingEngine.getSegment() != null ? ratingEngine.getSegment().getName() : null);
         ratingEngineSummary.setCreatedBy(ratingEngine.getCreatedBy());
+        ratingEngineSummary.setUpdatedBy(ratingEngine.getUpdatedBy());
         ratingEngineSummary.setCreated(ratingEngine.getCreated());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
         ratingEngineSummary.setCoverage(ratingEngine.getCountsAsMap());
@@ -135,8 +136,8 @@ public abstract class RatingEngineTemplate {
                     if (MapUtils.isNotEmpty(modelSummaryToBucketListMap)) {
                         bucketMetadataList = modelSummaryToBucketListMap.get(modelSummaryId);
                     } else {
-                        bucketMetadataList =
-                                bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenantId, modelSummaryId);
+                        bucketMetadataList = bucketedScoreProxy.getPublishedBucketMetadataByModelGuid(tenantId,
+                                modelSummaryId);
                     }
                     if (CollectionUtils.isEmpty(bucketMetadataList)) {
                         bucketMetadataList = setAndRetrievePublishedBucketsIfMissing(tenantId, ratingEngine);
@@ -165,8 +166,8 @@ public abstract class RatingEngineTemplate {
         validateAIRatingEngine(ratingEngine);
         if (isPublishedMetadataMissing(tenantId, ratingEngine)) {
             String modelSummaryId = ((AIModel) ratingEngine.getPublishedIteration()).getModelSummaryId();
-            List<BucketMetadata> latestBuckets =
-                    bucketedScoreProxy.getLatestABCDBucketsByModelGuid(tenantId, modelSummaryId);
+            List<BucketMetadata> latestBuckets = bucketedScoreProxy.getLatestABCDBucketsByModelGuid(tenantId,
+                    modelSummaryId);
             UpdateBucketMetadataRequest request = new UpdateBucketMetadataRequest();
             request.setBucketMetadataList(latestBuckets);
             request.setModelGuid(modelSummaryId);
@@ -179,7 +180,7 @@ public abstract class RatingEngineTemplate {
     protected void validateAIRatingEngine(RatingEngine ratingEngine) {
         if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
             throw new LedpException(LedpCode.LEDP_31107,
-                    new String[] {RatingEngineType.RULE_BASED.getRatingEngineTypeName()});
+                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
         }
     }
 

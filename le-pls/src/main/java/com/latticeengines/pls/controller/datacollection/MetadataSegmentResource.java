@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -76,8 +77,7 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, UIAction> getDependenciesModelAndView(@PathVariable String segmentName) {
         UIAction uiAction = metadataSegmentService.getDependenciesModelAndView(segmentName);
-        return uiAction == null ? null
-                : ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        return uiAction == null ? null : ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PostMapping("")
@@ -91,6 +91,7 @@ public class MetadataSegmentResource {
                 metadataSegment.setCreatedBy(email);
             }
         }
+        metadataSegment.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
     }
 

@@ -30,6 +30,8 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Rule;
 import com.amazonaws.services.s3.model.BucketPolicy;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
@@ -213,20 +215,38 @@ public class S3ServiceImpl implements S3Service {
         return s3Client.listObjectsV2(request).getObjectSummaries();
     }
 
+    private List<String> getCommonPrefixes(String bucket, String prefix) {
+        prefix = sanitizePathToKey(prefix);
+        prefix += "/";
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(prefix) //
+                .withDelimiter("/")
+                .withMaxKeys(Integer.MAX_VALUE);
+        ListObjectsV2Result result;
+        List<String> commonPrefixes = new ArrayList<>();
+        do {
+            result = s3Client.listObjectsV2(request);
+            commonPrefixes.addAll(result.getCommonPrefixes());
+            String token = result.getNextContinuationToken();
+            request.setContinuationToken(token);
+        } while (result.isTruncated());
+        return commonPrefixes;
+    }
+
     @Override
     public List<String> listSubFolders(String bucket, String parentDir) {
-        List<S3ObjectSummary> summaries = listObjects(bucket, parentDir);
-        return summaries.stream() //
+        List<String> prefixes = getCommonPrefixes(bucket, parentDir);
+        return prefixes.stream()
                 .map(obj -> {
-                    String absolutePath = obj.getKey();
-                    String relativePath = absolutePath.replace(parentDir + "/", "");
+                    String relativePath = obj.replace(parentDir + "/", "");
                     if (StringUtils.isNotBlank(relativePath) && relativePath.contains("/")) {
                         return relativePath.substring(0, relativePath.indexOf("/"));
                     } else {
                         return "";
                     }
-                }) //
-                .filter(StringUtils::isNotBlank) //
+                })
+                .filter(StringUtils::isNotBlank)
                 .distinct().collect(Collectors.toList());
     }
 
@@ -459,6 +479,15 @@ public class S3ServiceImpl implements S3Service {
         GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucket, key);
         GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
         return getTagsResult.getTagSet();
+    }
+
+    @Override
+    public List<Rule> getBucketLifecycleConfigurationRules(String bucket) {
+        BucketLifecycleConfiguration configuration = s3Client.getBucketLifecycleConfiguration(bucket);
+        if (configuration != null) {
+            return configuration.getRules();
+        }
+        return null;
     }
 
     private AmazonS3 s3Client() {

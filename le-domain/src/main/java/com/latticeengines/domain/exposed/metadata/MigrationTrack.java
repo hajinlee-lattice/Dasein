@@ -40,7 +40,7 @@ public class MigrationTrack implements HasPid, HasTenant {
     private Long pid;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
+    @JoinColumn(name = "FK_COLLECTION_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DataCollection dataCollection;
 
@@ -62,23 +62,22 @@ public class MigrationTrack implements HasPid, HasTenant {
     @JsonProperty("curActiveTable")
     @Type(type = "json")
     @Column(name = "CUR_ACTIVE_TABLE_NAME", columnDefinition = "'JSON'")
-    // Role -> Table.PID
-    private Map<TableRoleInCollection, Long> curActiveTable; // List of all active tables' names under tenant
+    // Role -> Table.names
+    private Map<TableRoleInCollection, String[]> curActiveTable; // List of all active tables' names under tenant
 
     @Type(type = "json")
     @JsonProperty("importAction")
     @Column(name = "IMPORT_ACTION", columnDefinition = "'JSON'")
     private MigrationTrackImportAction importAction; // mimic import actions
 
+    @Type(type = "json")
+    @Column(name = "DETAIL", columnDefinition = "'JSON'")
+    private DataCollectionStatusDetail collectionStatusDetail;
+
     @Column(name = "CUBES_DATA")
     @Lob
     @JsonIgnore
     private byte[] statsCubesData;
-
-    @Column(name = "DATA")
-    @Lob
-    @JsonIgnore
-    private byte[] statsData;
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("statsName")
@@ -128,11 +127,11 @@ public class MigrationTrack implements HasPid, HasTenant {
         this.version = version;
     }
 
-    public Map<TableRoleInCollection, Long> getCurActiveTable() {
+    public Map<TableRoleInCollection, String[]> getCurActiveTable() {
         return curActiveTable;
     }
 
-    public void setCurActiveTable(Map<TableRoleInCollection, Long> curActiveTable) {
+    public void setCurActiveTable(Map<TableRoleInCollection, String[]> curActiveTable) {
         this.curActiveTable = curActiveTable;
     }
 
@@ -144,20 +143,20 @@ public class MigrationTrack implements HasPid, HasTenant {
         this.importAction = importAction;
     }
 
+    public DataCollectionStatusDetail getCollectionStatusDetail() {
+        return collectionStatusDetail;
+    }
+
+    public void setCollectionStatusDetail(DataCollectionStatusDetail collectionStatusDetail) {
+        this.collectionStatusDetail = collectionStatusDetail;
+    }
+
     public byte[] getStatsCubesData() {
         return statsCubesData;
     }
 
     public void setStatsCubesData(byte[] statsCubesData) {
         this.statsCubesData = statsCubesData;
-    }
-
-    public byte[] getStatsData() {
-        return statsData;
-    }
-
-    public void setStatsData(byte[] statsData) {
-        this.statsData = statsData;
     }
 
     public String getStatsName() {
@@ -170,20 +169,5 @@ public class MigrationTrack implements HasPid, HasTenant {
 
     public enum Status {
         SCHEDULED, STARTED, FAILED, COMPLETED;
-
-        public Status complement() {
-            switch (this) {
-                case SCHEDULED:
-                    return SCHEDULED;
-                case STARTED:
-                    return STARTED;
-                case FAILED:
-                    return FAILED;
-                case COMPLETED:
-                default:
-                    return COMPLETED;
-            }
-        }
-
     }
 }

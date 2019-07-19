@@ -32,6 +32,7 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
@@ -477,6 +479,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup) {
+        return datafeedEntityMgr.getDataFeedsBySchedulingGroup(status, version, schedulingGroup);
+    }
+
+    @Override
     public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
         DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (dataFeed == null) {
@@ -563,5 +570,17 @@ public class DataFeedServiceImpl implements DataFeedService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public AttributeLimit getAttributeQuotaLimit(String customerSpace) {
+        int accountLimit = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(customerSpace,
+                DataLicense.ACCOUNT.getDataLicense());
+        int contactLimit = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(customerSpace,
+                DataLicense.CONTACT.getDataLicense());
+        AttributeLimit limit = new AttributeLimit();
+        limit.setAccountAttributeQuotaLimit(accountLimit);
+        limit.setContactAttributeQuotaLimit(contactLimit);
+        return limit;
     }
 }

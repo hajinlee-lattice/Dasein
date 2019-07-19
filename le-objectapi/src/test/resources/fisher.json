@@ -1,0 +1,149 @@
+{
+  "account_restriction": {
+    "restriction": null
+  },
+  "restrict_without_sfdcid": false,
+  "restrict_with_sfdcid": false,
+  "lookups": [],
+  "distinct": false,
+  "segment_query": {
+    "account_restriction": {
+      "restriction": {
+        "logicalRestriction": {
+          "operator": "AND",
+          "restrictions": [{
+            "logicalRestriction": {
+              "operator": "OR",
+              "restrictions": [{
+                "bucketRestriction": {
+                  "bkt": {
+                    "Id": 1,
+                    "Txn": {
+                      "PrdId": "3CEE264F699022855C884E4455AE33CD",
+                      "Time": {
+                        "Cmp": "BETWEEN",
+                        "Vals": [
+                          0,
+                          12
+                        ],
+                        "Period": "Month"
+                      },
+                      "Negate": false,
+                      "Amt": {
+                        "Agg": "SUM",
+                        "Cmp": "LESS_THAN",
+                        "Vals": [
+                          5
+                        ],
+                        "includeNotPurchased": false
+                      }
+                    }
+                  },
+                  "ignored": false,
+                  "attr": "PurchaseHistory.AM_3CEE264F699022855C884E4455AE33CD__EVER__HP"
+                }
+              }, {
+                "bucketRestriction": {
+                  "bkt": {
+                    "Id": 2,
+                    "Txn": {
+                      "PrdId": "6368494B622E0CB60F9C80FEB1D0F95F",
+                      "Time": {
+                        "Cmp": "BETWEEN",
+                        "Vals": [
+                          0,
+                          12
+                        ],
+                        "Period": "Month"
+                      },
+                      "Negate": true
+                    }
+                  },
+                  "ignored": false,
+                  "attr": "PurchaseHistory.AM_6368494B622E0CB60F9C80FEB1D0F95F__EVER__HP"
+                }
+              }
+              ]
+            }
+          }, {
+            "bucketRestriction": {
+              "bkt": {
+                "Id": 3,
+                "Txn": {
+                  "PrdId": "104061194E2216B01B3C6D4817DBCEA7",
+                  "Time": {
+                    "Cmp": "BETWEEN",
+                    "Vals": [
+                      12,
+                      36
+                    ],
+                    "Period": "Month"
+                  },
+                  "Negate": false,
+                  "Amt": {
+                    "Agg": "SUM",
+                    "Cmp": "GREATER_THAN",
+                    "Vals": [
+                      500
+                    ],
+                    "includeNotPurchased": false
+                  }
+                }
+              },
+              "ignored": false,
+              "attr": "PurchaseHistory.AM_104061194E2216B01B3C6D4817DBCEA7__EVER__HP"
+            }
+          }, {
+            "logicalRestriction": {
+              "operator": "OR",
+              "restrictions": [{
+                "bucketRestriction": {
+                  "bkt": {
+                    "Id": 4,
+                    "Cmp": "EQUAL",
+                    "Vals": [
+                      "US"
+                    ]
+                  },
+                  "ignored": false,
+                  "attr": "Account.Country"
+                }
+              }, {
+                "bucketRestriction": {
+                  "bkt": {
+                    "Id": 5,
+                    "Cmp": "EQUAL",
+                    "Vals": [
+                      "CA"
+                    ]
+                  },
+                  "ignored": false,
+                  "attr": "Account.Country"
+                }
+              }
+              ]
+            }
+          }
+          ]
+        }
+      }
+    },
+    "contact_restriction": {
+      "restriction": null
+    },
+    "restrict_without_sfdcid": false,
+    "restrict_with_sfdcid": false,
+    "lookups": [],
+    "main_entity": "Account",
+    "distinct": false
+  },
+  "period_name": "Month",
+  "period_count": -1,
+  "target_product_ids": [
+    "uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8",
+    "DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa"
+  ],
+  "calculate_product_revenue": false,
+  "evaluation_period_id": 211,
+  "lagging_period_count": 1
+}

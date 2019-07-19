@@ -19,7 +19,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -113,7 +112,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Tenant tenant;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayLaunchChannel playLaunchChannel;

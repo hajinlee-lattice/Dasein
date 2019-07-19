@@ -18,12 +18,14 @@ import LeButton from "common/widgets/buttons/le-button";
 import { deepCopy } from 'common/app/utilities/ObjectUtilities.js';
 import { debounce } from 'lodash';
 import {
-  LEFT,
-  CENTER,
-  SPACEAROUND,
-  SPACEBETWEEN,
-  SPACEEVEN
+    LEFT,
+    CENTER,
+    SPACEAROUND,
+    SPACEBETWEEN,
+    SPACEEVEN
 } from "common/widgets/container/le-alignments";
+import "../../../../../common/assets/sass/mixins.scss";
+import "../../../../../common/assets/sass/_tooltips.scss";
 import './launch.component.scss';
 
 /**
@@ -99,7 +101,10 @@ class LaunchComponent extends Component {
             staticList: null,
             showNewAudienceName: true,
             audienceParams: audienceParamsDefault(),
-            connection: connection
+            connection: connection,
+            lookupIdMapping: null,
+            fetching: false,
+            dirty: {}
         };
     }
 
@@ -115,6 +120,12 @@ class LaunchComponent extends Component {
             } else {
                 this.setState({ratings: playstore.ratings});
             }
+        }
+
+        if(!playstore.lookupIdMapping) {
+            actions.fetchLookupIdMapping();
+        } else {
+            this.setState({lookupIdMapping: playstore.lookupIdMapping});
         }
 
         if(this.state.externalSystemName && isAudience(this.state.externalSystemName)) {
@@ -165,6 +176,9 @@ class LaunchComponent extends Component {
         let playstore = store.getState()['playbook'],
             vm = this;
 
+        this.state.fetching = true;
+        this.setState(this.state);
+
         // creates this.state.launchAccountsCoverage, needed to load launch
         if(playstore.play.ratingEngine) {
             playstore.playbookWizardStore.launchAccountsCoverage(play.name, { 
@@ -175,7 +189,9 @@ class LaunchComponent extends Component {
                 var coverage = vm.getCoverage(response).coverage,
                     hasBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? true : false);
 
-                vm.state.unscored = !hasBuckets;
+                if(!vm.state.dirty.unscored) {
+                    vm.state.unscored = !hasBuckets; // if there are buckets this should be checked by default
+                }
                 vm.state.launchAccountsCoverage = response;
 
                 var coverageObj = vm.getCoverage(response),
@@ -183,11 +199,13 @@ class LaunchComponent extends Component {
                     coverageBuckets = (coverage && coverage.bucketCoverageCounts && coverage.bucketCoverageCounts.length ? coverage.bucketCoverageCounts : []);
 
                 if(coverageBuckets) { // this pre-selects all the buckets
+                    vm.state.selectedBuckets = [];
                     coverageBuckets.forEach(function(bucket) {
                         vm.state.selectedBuckets.push(bucket.bucket);
                     });
                 }
 
+                vm.state.fetching = false;
                 vm.setState(vm.state);
             });
         } else {
@@ -195,6 +213,7 @@ class LaunchComponent extends Component {
                 vm.state.launchAccountsCoverage = {
                     accountsCount: data
                 };
+                vm.state.fetching = false;
                 vm.setState(vm.state);
             });
         }
@@ -345,7 +364,7 @@ class LaunchComponent extends Component {
                 <Aux>
                     {this.makeBucketsContainer(coverage, play, noBuckets, opts)}
                     <div className={'unscored-accounts-container'}>
-                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} /> 
+                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} disabled={this.state.fetching} /> 
                         <label for="unscored">
                             Include the {(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%) unscored account
                         </label>
@@ -368,12 +387,13 @@ class LaunchComponent extends Component {
                 </Aux>
             );
         } else if(externalSystemName === 'Marketo') {
+                    // <li>
+                    //     <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
+                    //     <label for="requireEmail">Must have email</label>
+                    // </li>
+
             return (
                 <Aux>
-                    <li>
-                        <input id="requireEmail" checked={true}  disabled={true} type="checkbox" /> 
-                        <label for="requireEmail">Must have email</label>
-                    </li>
                     <li>
                         <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
                         <label for="requireContactIfo">Must have contact info</label>
@@ -551,6 +571,7 @@ class LaunchComponent extends Component {
     }
 
     clickUnscored = (e) => {
+        this.state.dirty.unscored = true;
         this.state.unscored = e.target.checked;
         this.setState(this.state);
     }
@@ -565,12 +586,13 @@ class LaunchComponent extends Component {
     }
 
     clickRequireAccountId = (e) => {
+        var vm = this;
         this.state.excludeItemsWithoutSalesforceId = e.target.checked;
         this.setState(this.state);
         this.getLaunchAccountsCoverage(this.state.play.name, {
             sendEngineId: true,
             getExcludeItems: e.target.checked,
-            getDestinationAccountId: this.state.connection.accountId
+            getDestinationAccountId: this.state.connection.lookupIdMap.accountId
         });
     }
 
@@ -637,6 +659,42 @@ class LaunchComponent extends Component {
         }
     }
 
+    makeDropFolder(externalSystemName, lookupIdMapping) {
+        var system = null;
+        if(externalSystemName && lookupIdMapping && lookupIdMapping.FILE_SYSTEM) {
+            system = lookupIdMapping.FILE_SYSTEM.find(function(item) {
+                return (item.externalSystemName === externalSystemName);
+            });
+            if(system && externalSystemName === 'AWS_S3') {
+                return(
+                    <div className={'launch-section drop-folder'}>
+                        <h2>
+                            S3 Drop Folder 
+                            <i className={'more-info show-tooltip left bottom'}> i
+                                <div className={'tooltip_'}>
+                                    <div className={'cover'}>
+                                        <p>Data Rentention</p>
+                                        <p>Audience data generated on S3 will be automatically removed after 30 days.</p>
+                                        <p>Identifying Audience Data</p>
+                                        <p>Audience data (accounts and contacts with-in accounts) will be available as CSV formatted file</p>
+                                    </div>
+                                </div>
+                            </i>
+                        </h2>
+                        <p className={'folder'}>
+                            <strong>{system.exportFolder}</strong>
+                        </p>
+                        <p className={'subtext'}>
+                            After launching the campaign, audience data is generated and will be available in the S3 drop location. 
+                            You will need the access token to S3 to access this data. 
+                            You can obtain token from the connection page.
+                        </p>
+                    </div>
+                );
+            }
+        }
+    }
+
     render() {
         var loaded = (this.state.launchAccountsCoverage);
         if(isAudience(this.state.externalSystemName)) {
@@ -659,7 +717,9 @@ class LaunchComponent extends Component {
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
-                canLaunch = recommendationCounts.launched;
+                canLaunch = recommendationCounts.launched,
+                lookupIdMapping = this.state.lookupIdMapping,
+                externalSystemName = this.state.externalSystemName;
 
             if(coverage && coverage.bucketCoverageCounts){
                 coverage.bucketCoverageCounts.forEach(function(bucket){
@@ -690,6 +750,7 @@ class LaunchComponent extends Component {
                                 </li>
                             </ul>
                         </div>
+                        {this.makeDropFolder(externalSystemName, lookupIdMapping)}
                         <div className={'launch-section model-ratings'}>
                             {this.makeBucketList(play, coverage, {
                                 unscoredAccountCountPercent: unscoredAccountCountPercent

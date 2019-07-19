@@ -198,6 +198,7 @@ public class RatingEngineResource {
             @RequestParam(value = "create-action", required = false, defaultValue = "true") Boolean createAction) {
         Tenant tenant = MultiTenantContext.getTenant();
         String user = MultiTenantContext.getEmailAddress();
+        ratingEngine.setUpdatedBy(user);
         RatingEngine res;
         try {
             cleanupBucketsInRules(ratingEngine);

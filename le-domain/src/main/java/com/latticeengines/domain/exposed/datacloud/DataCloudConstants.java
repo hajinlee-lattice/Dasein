@@ -16,11 +16,17 @@ public final class DataCloudConstants {
 
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";
+    public static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
+    public static final String DUNS_GUIDE_BOOK = "DunsGuideBook";
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
     public static final String PATCH_BOOK_ATTR_PREFIX = "PATCH_";
 
     public static final String LATTICE_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
+
+    // tag names of s3 objects
+    public static final String S3_TO_GLACIER_DAYS = "S3ToGlacierDays";
+    public static final String EXPIRE_DAYS = "ExpireDays";
 
     // entity match constants
     public static final String ENTITY_PREFIX_LOOKUP = "LOOKUP";

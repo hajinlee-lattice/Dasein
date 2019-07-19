@@ -99,6 +99,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private String displayName;
 
+    private String description;
+
     private String note;
 
     private RatingEngineType type;
@@ -114,6 +116,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private Date updated;
 
     private String createdBy;
+
+    private String updatedBy;
 
     private List<RatingEngineNote> ratingEngineNotes;
 
@@ -207,6 +211,16 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @JsonProperty("description")
+    @Column(name = "DESCRIPTION", length = 1000)
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -312,6 +326,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @JsonProperty("createdBy")
     public void setCreatedBy(String user) {
         this.createdBy = user;
+    }
+
+    @JsonProperty("updatedBy")
+    @Column(name = "UPDATED_BY", nullable = true)
+    public String getUpdatedBy() {
+        return this.updatedBy;
+    }
+
+    @JsonProperty("updatedBy")
+    public void setUpdatedBy(String user) {
+        this.updatedBy = user;
     }
 
     @JsonProperty("lastRefreshedDate")

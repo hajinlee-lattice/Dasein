@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -149,6 +150,47 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Assert.assertEquals(lookupAccount(tenant, "acct_1", null, null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, "mkto_1", null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE", null, "USA", null, null), entityId);
+    }
+
+    /*
+     * make sure that when many to many match key already map to other entity (and
+     * existing data is in serving env), the existing mapping is NOT overridden.
+     */
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testDomainConflictFromServing() {
+        Tenant tenant = newTestTenant();
+        String domain = "google.com";
+
+        List<Object> data1 = Arrays.asList("acct_1", null, null, null, domain, "USA", null, null);
+        MatchOutput output = matchAccount(data1, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        String entityId1 = verifyAndGetEntityId(output);
+
+        publishToServing(tenant, BusinessEntity.Account);
+        testEntityMatchService.bumpVersion(tenant.getId(), EntityMatchEnvironment.STAGING);
+
+        // domain should map to account 1
+        Assert.assertEquals(lookupAccount(tenant, null, null, null, null, domain, "USA", null, null), entityId1,
+                String.format("Domain=%s should match to created account", domain));
+
+        // account ID have diff value in existing account, create new one.
+        // domain already used by existing account, and should NOT be mapped to account2
+        List<Object> data2 = Arrays.asList("acct_2", null, null, null, "google.com", "USA", null, null);
+        output = matchAccount(data2, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        String entityId2 = verifyAndGetEntityId(output);
+        // should get two accounts since account id are different
+        Assert.assertNotEquals(entityId1, entityId2);
+
+        publishToServing(tenant, BusinessEntity.Account);
+        // bump version and clear cache since the service for lookup/allocate are shared
+        testEntityMatchService.bumpVersion(tenant.getId(), EntityMatchEnvironment.STAGING);
+
+        // domain should still map to account 1 (should NOT be overridden by rows import
+        // after publish)
+        Assert.assertEquals(lookupAccount(tenant, null, null, null, null, domain, "USA", null, null), entityId1,
+                String.format("Domain=%s should match to existing account", domain));
+        // test account id lookup
+        Assert.assertEquals(lookupAccount(tenant, "acct_1", null, null, null, null, null, null, null), entityId1);
+        Assert.assertEquals(lookupAccount(tenant, "acct_2", null, null, null, null, null, null, null), entityId2);
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)

@@ -408,13 +408,13 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
 
         Map<EntityMatchResult, Long> matchResultMap = new HashMap<>();
-        if (OperationalMode.ENTITY_MATCH.equals(processorContext.getGroupMatchInput().getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(processorContext.getGroupMatchInput().getOperationalMode())) {
             MatchStatistics matchStats = processorContext.getBlockOutput().getStatistics();
             matchResultMap.put(EntityMatchResult.ORPHANED_NO_MATCH,
                     matchStats.getOrphanedNoMatchCount() == null ? 0L : matchStats.getOrphanedNoMatchCount());
             matchResultMap.put(EntityMatchResult.ORPHANED_UNMATCHED_ACCOUNTID,
-                    matchStats.getOrphanedUnmatchedAccountIdCount() == null ?
-                            0L : matchStats.getOrphanedUnmatchedAccountIdCount());
+                    matchStats.getOrphanedUnmatchedAccountIdCount() == null ? 0L
+                            : matchStats.getOrphanedUnmatchedAccountIdCount());
             matchResultMap.put(EntityMatchResult.MATCHED_BY_MATCHKEY,
                     matchStats.getMatchedByMatchKeyCount() == null ? 0L : matchStats.getMatchedByMatchKeyCount());
             matchResultMap.put(EntityMatchResult.MATCHED_BY_ACCOUNTID,

@@ -81,4 +81,6 @@ public interface ModelSummaryService {
     Set<String> getModelSummaryIds();
 
     Map<String, ModelSummary> getEventToModelSummary(String tenantId, Map<String, String> modelApplicationIdToEventColumn);
+
+    List<ModelSummary> findModelSummariesByIds(Set<String> ids);
 }

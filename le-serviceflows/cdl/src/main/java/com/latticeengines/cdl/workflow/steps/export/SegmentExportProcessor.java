@@ -140,8 +140,7 @@ public abstract class SegmentExportProcessor {
         List<Attribute> configuredPurHistoryAttributes = configuredBusEntityAttrMap.get(BusinessEntity.PurchaseHistory);
         List<Attribute> configuredCuratedAccAttributes = configuredBusEntityAttrMap.get(BusinessEntity.CuratedAccount);
 
-        if (exportType == AtlasExportType.ACCOUNT
-                || exportType == AtlasExportType.ACCOUNT_AND_CONTACT) {
+        if (exportType == AtlasExportType.ACCOUNT || exportType == AtlasExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
 
             Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
@@ -176,8 +175,7 @@ public abstract class SegmentExportProcessor {
             });
         }
 
-        if (exportType == AtlasExportType.CONTACT
-                || exportType == AtlasExportType.ACCOUNT_AND_CONTACT
+        if (exportType == AtlasExportType.CONTACT || exportType == AtlasExportType.ACCOUNT_AND_CONTACT
                 || exportType == AtlasExportType.ORPHAN_CONTACT) {
             configuredContactAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Contact));
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
@@ -293,9 +291,6 @@ public abstract class SegmentExportProcessor {
                     metadataSegmentExport.getContactFrontEndRestriction().getRestriction(),
                     modifiableAccountIdCollectionForContacts);
             contactFrontEndQuery.setContactRestriction(contactRestrictionWithAccountIdList);
-            setSortField(BusinessEntity.Contact,
-                    Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
-                    contactFrontEndQuery);
         } else if (metadataSegmentExport.getType() == AtlasExportType.ORPHAN_CONTACT) {
             Restriction restriction = Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name())
                     .isNull().build();
@@ -303,16 +298,13 @@ public abstract class SegmentExportProcessor {
                     Restriction.builder().or(restriction).build());
             contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
             contactFrontEndQuery.setContactRestriction(frontEndRestriction);
-            setSortField(BusinessEntity.Contact,
-                    Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
-                    contactFrontEndQuery);
         } else {
             contactFrontEndQuery.setAccountRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
             contactFrontEndQuery.setContactRestriction(metadataSegmentExport.getContactFrontEndRestriction());
-            setSortField(BusinessEntity.Contact,
-                    Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactName.name()), false,
-                    contactFrontEndQuery);
         }
+        setSortField(BusinessEntity.Contact,
+                Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name()), false,
+                contactFrontEndQuery);
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, configuredBusEntityAttrMap);

@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling S3ExportFieldMetadataService");
-        Map<String, ColumnMetadata> attributesMap = getServingMetadataForEntity(customerSpace, BusinessEntity.Account)
+        Map<String, ColumnMetadata> attributesMap = getServingMetadata(customerSpace,
+                Arrays.asList(BusinessEntity.Account))
                 .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
                 .block();
 
@@ -40,12 +42,14 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         Map<String, ColumnMetadata> defaultExportFieldsMap = new HashMap<String, ColumnMetadata>();
 
         defaultFieldsMetadata.forEach(field -> {
-            ColumnMetadata cm = field.getStandardField() && attributesMap.containsKey(field.getAttrName())
-                    ? attributesMap.get(field.getAttrName())
-                    : constructNonStandardColumnMetadata(field);
+            if (!defaultExportFieldsMap.containsKey(field.getAttrName())) {
+                ColumnMetadata cm = field.getStandardField() && attributesMap.containsKey(field.getAttrName())
+                        ? attributesMap.get(field.getAttrName())
+                        : constructCampaignDerivedColumnMetadata(field);
 
-            result.add(cm);
-            defaultExportFieldsMap.put(field.getAttrName(), cm);
+                result.add(cm);
+                defaultExportFieldsMap.put(field.getAttrName(), cm);
+            }
         });
 
         S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();

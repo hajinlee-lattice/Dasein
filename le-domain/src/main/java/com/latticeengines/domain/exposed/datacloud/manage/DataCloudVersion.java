@@ -38,6 +38,7 @@ public class DataCloudVersion implements HasPid, Serializable {
     private static final long serialVersionUID = -6472245305360293747L;
     public static Comparator<DataCloudVersion> versionComparator = new Comparator<DataCloudVersion>() {
 
+        @Override
         public int compare(DataCloudVersion dc1, DataCloudVersion dc2) {
             if (!dc1.majorVersion.equals(dc2.majorVersion)) {
                 return dc1.majorVersion.compareTo(dc2.majorVersion);
@@ -71,6 +72,9 @@ public class DataCloudVersion implements HasPid, Serializable {
     @JsonIgnore
     @Column(name = "AccountLookupHdfsVersion", length = 100)
     private String accountLookupHdfsVersion;
+    @JsonIgnore
+    @Column(name = "DunsGuideBookHdfsVersion", length = 100)
+    private String dunsGuideBookHdfsVersion;
     @JsonIgnore
     @Column(name = "EnrichmentStatsVersion", length = 100)
     private String enrichmentStatsVersion;
@@ -168,6 +172,14 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setAccountLookupHdfsVersion(String accountLookupHdfsVersion) {
         this.accountLookupHdfsVersion = accountLookupHdfsVersion;
+    }
+
+    public String getDunsGuideBookHdfsVersion() {
+        return dunsGuideBookHdfsVersion;
+    }
+
+    public void setDunsGuideBookHdfsVersion(String dunsGuideBookHdfsVersion) {
+        this.dunsGuideBookHdfsVersion = dunsGuideBookHdfsVersion;
     }
 
     public String getMajorVersion() {

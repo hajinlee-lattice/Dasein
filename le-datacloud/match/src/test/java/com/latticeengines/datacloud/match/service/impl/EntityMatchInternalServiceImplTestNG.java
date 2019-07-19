@@ -340,7 +340,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate1 = newSeed(seedId, "sfdc_1", "google.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result1 = entityMatchInternalService
-                .associate(tenant, seedToUpdate1, false);
+                .associate(tenant, seedToUpdate1, false, null);
         Assert.assertNotNull(result1);
         // check state before update has no lookup entries
         Assert.assertTrue(equalsDisregardPriority(result1.getLeft(), newSeed(seedId, null)));
@@ -349,7 +349,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate2 = newSeed(seedId, "sfdc_2", "facebook.com", "netflix.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result2 = entityMatchInternalService
-                .associate(tenant, seedToUpdate2, false);
+                .associate(tenant, seedToUpdate2, false, null);
         Assert.assertNotNull(result2);
         // check state before update
         Assert.assertTrue(equalsDisregardPriority(result2.getLeft(), seedToUpdate1));
@@ -363,7 +363,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // update domain again and make sure it does not get reported in failure
         result2 = entityMatchInternalService.associate(tenant,
-                newSeed(seedId, null, "facebook.com", "netflix.com"), false);
+                newSeed(seedId, null, "facebook.com", "netflix.com"), false, null);
         Assert.assertNotNull(result2);
         verifyNoAssociationFailure(result2);
     }
@@ -401,7 +401,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         entityLookupEntryService.set(env, tenant, currLookupMappings, true);
 
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
-                entityMatchInternalService.associate(tenant, seedToAssociate, false);
+                entityMatchInternalService.associate(tenant, seedToAssociate, false, null);
         Assert.assertNotNull(result);
         // currently, we only return updated old attribute, so no equals current seed
         Assert.assertNotNull(result.getLeft());

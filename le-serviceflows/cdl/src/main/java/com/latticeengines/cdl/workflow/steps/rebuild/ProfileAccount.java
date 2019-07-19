@@ -89,16 +89,13 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         if (StringUtils.isBlank(fullAccountTableName)) {
             throw new IllegalStateException("Cannot find the fully enriched account table");
         }
-        Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
+        Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
         if (fullAccountTable == null) {
             throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
         }
         double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, fullAccountTable);
-        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
-            scalingMultiplier = multiplier;
-        }
+        scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
+        log.info("Set scalingMultiplier=" + scalingMultiplier + " base on master table size=" + sizeInGb + " gb.");
 
         setEvaluationDateStrAndTimestamp();
 

@@ -3,10 +3,13 @@ package com.latticeengines.domain.exposed.pls.cdl.channel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SalesforceChannelConfig implements ChannelConfig {
+
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.Salesforce;
 
     @JsonProperty("accountLimit")
     private Long accountLimit;
@@ -28,6 +31,11 @@ public class SalesforceChannelConfig implements ChannelConfig {
 
     public void setSupressAccountsWithoutLookupId(boolean supressAccountsWithoutLookupId) {
         this.supressAccountsWithoutLookupId = supressAccountsWithoutLookupId;
+    }
+
+    @Override
+    public CDLExternalSystemName getSystemName() {
+        return systemName;
     }
 
     @Override

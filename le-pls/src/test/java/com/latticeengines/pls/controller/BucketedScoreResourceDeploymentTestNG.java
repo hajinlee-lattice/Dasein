@@ -52,6 +52,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
+    @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -109,6 +110,7 @@ public class BucketedScoreResourceDeploymentTestNG extends PlsDeploymentTestNGBa
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         return ratingEngine;
     }
