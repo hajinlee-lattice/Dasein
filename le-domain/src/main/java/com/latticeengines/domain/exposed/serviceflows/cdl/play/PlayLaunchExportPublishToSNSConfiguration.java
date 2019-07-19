@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class PlayLaunchExportPublishToSNSConfiguration extends BaseStepConfiguration {
@@ -15,6 +17,10 @@ public class PlayLaunchExportPublishToSNSConfiguration extends BaseStepConfigura
     private String externalAudienceName;
 
     private String externalFolderName;
+
+    private AudienceType audienceType;
+
+    private ChannelConfig channelConfig;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -56,4 +62,19 @@ public class PlayLaunchExportPublishToSNSConfiguration extends BaseStepConfigura
         this.externalFolderName = externalFolderName;
     }
 
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
+
+    public void setAudienceType(AudienceType audienceType) {
+        this.audienceType = audienceType;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        return channelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = channelConfig;
+    }
 }

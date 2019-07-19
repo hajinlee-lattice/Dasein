@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,8 @@ public class ExternalIntegrationMessageBody {
     private String solutionInstanceId;
 
     private String folderName;
+
+    private String audienceType;
 
     public String getTrayTenantId() {
         return trayTenantId;
@@ -76,4 +80,11 @@ public class ExternalIntegrationMessageBody {
         return folderName;
     }
 
+    public void setAudienceType(String audienceType) {
+        this.audienceType = audienceType;
+    }
+
+    public String getAudienceType() {
+        return audienceType;
+    }
 }

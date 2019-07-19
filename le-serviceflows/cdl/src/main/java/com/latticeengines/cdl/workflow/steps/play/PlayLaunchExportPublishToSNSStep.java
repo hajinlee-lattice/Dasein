@@ -7,9 +7,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -39,6 +42,8 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
 
     @Inject
     private SNSService snsService;
+    @Autowired
+    private ChannelConfigProcessor channelConfigProcessor;
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -88,6 +93,7 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
+        channelConfigProcessor.updateSnsMessageWithChannelConfig(config.getChannelConfig(), messageBody);
 
         Map<String, Object> jsonMessage = new HashMap<>();
         jsonMessage.put("default", JsonUtils.serialize(messageBody));
