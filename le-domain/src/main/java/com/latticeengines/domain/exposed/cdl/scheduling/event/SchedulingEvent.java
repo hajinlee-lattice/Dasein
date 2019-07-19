@@ -32,17 +32,21 @@ public class SchedulingEvent extends Event {
         Set<String> tenantSet = new HashSet<>();
         tenantSet.addAll(tenantMap.get(RETRY_KEY));
         tenantSet.addAll(tenantMap.get(OTHER_KEY));
+        System.out.println("SchedulingEvent: " + getTime() + ", tenants=" + tenantSet + ", size=" + tenantSet.size());
         List<Event> events = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tenantSet)) {
             for (String tenantId : tenantSet) {
-                PAStartEvent paStartEvent = new PAStartEvent(tenantId,
-                        simulationStats.timeClock.getCurrentTime());
-                PAEndEvent paEndEvent = new PAEndEvent(tenantId,
-                        simulationStats.timeClock.getCurrentTime());
-                paStartEvent.changeState(status, simulationStats);
+                PAStartEvent paStartEvent = new PAStartEvent(tenantId, simulationStats.timeClock.getCurrentTime());
+                // TODO random end time, and make it configurable (30min now)
+                long endTime = simulationStats.timeClock.getCurrentTime() + 1800L * 1000;
+                PAEndEvent paEndEvent = new PAEndEvent(tenantId, endTime);
+                // FIXME remove comment (mark change)
+                events.add(paStartEvent);
                 events.add(paEndEvent);
             }
         }
+        // clear already scheduled tenant set
+        status.setScheduleTenants(new HashSet<>());
         return events;
     }
 }
