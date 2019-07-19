@@ -3,10 +3,13 @@ package com.latticeengines.domain.exposed.pls.cdl.channel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MarketoChannelConfig implements ChannelConfig {
+
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.Marketo;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -75,6 +78,11 @@ public class MarketoChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public CDLExternalSystemName getSystemName() {
+        return systemName;
+    }
+
+    @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         MarketoChannelConfig marketoChannelConfig = this;
         MarketoChannelConfig newMarketoChannelConfig = (MarketoChannelConfig) config;
@@ -88,5 +96,4 @@ public class MarketoChannelConfig implements ChannelConfig {
         return this;
 
     }
-
 }

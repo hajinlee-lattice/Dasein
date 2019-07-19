@@ -179,15 +179,20 @@ angular.module('common.datacloud')
             }
             return deferred.promise;
         };
-
         this.setCategories = function (item) {
             this.categories = item;
         };
 
+        this.setRatingIterationFilter = function (type) {
+            this.ratingIterationFilter = type;
+        }
+        this.getRatingIterationFilter = function () {
+            return this.ratingIterationFilter;
+        }
+
         this.setPresentCategories = function (categories) {
             this.presentCategories = categories;
         }
-
         this.getPresentCategories = function () {
             return this.presentCategories;
         }

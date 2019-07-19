@@ -103,7 +103,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
             inputBuffer.setSchema(schema);
         }
         matchInput.setInputBuffer(inputBuffer);
-        if (!OperationalMode.ENTITY_MATCH.equals(matchInput.getOperationalMode())) {
+        if (!OperationalMode.isEntityMatch(matchInput.getOperationalMode())) {
             matchInput.setDataCloudOnly(true);
         }
         return matchInput;

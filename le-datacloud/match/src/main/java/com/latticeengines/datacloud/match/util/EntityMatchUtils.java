@@ -132,11 +132,13 @@ public class EntityMatchUtils {
     }
 
     /**
-     * Check if input entry has conflict with target seed (same serialized key, different value). Only evaluate entries
-     * with X to one mapping.
+     * Check if input entry has conflict with target seed (same serialized key,
+     * different value). Only evaluate entries with X to one mapping.
      *
-     * @param seed target seed
-     * @param entry entry to be evaluated
+     * @param seed
+     *            target seed
+     * @param entry
+     *            entry to be evaluated
      * @return true if the input entry has conflict with target seed
      */
     public static boolean hasConflictInSeed(@NotNull EntityRawSeed seed, @NotNull EntityLookupEntry entry) {
@@ -169,9 +171,11 @@ public class EntityMatchUtils {
     }
 
     /**
-     * Based on the input environment, determine whether we should set TTL for seed/lookup entries or not.
+     * Based on the input environment, determine whether we should set TTL for
+     * seed/lookup entries or not.
      *
-     * @param env input environment
+     * @param env
+     *            input environment
      * @return true if we should set TTL
      */
     public static boolean shouldSetTTL(EntityMatchEnvironment env) {
@@ -220,7 +224,7 @@ public class EntityMatchUtils {
             return false;
         }
 
-        return OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode()) && input.isAllocateId();
+        return OperationalMode.isEntityMatch(input.getOperationalMode()) && input.isAllocateId();
     }
 
     /**

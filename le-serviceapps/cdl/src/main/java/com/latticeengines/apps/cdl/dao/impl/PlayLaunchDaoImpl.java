@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 @SuppressWarnings("deprecation")
@@ -58,6 +59,28 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             return null;
         }
         return (PlayLaunch) list.get(0);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    @Override
+    public PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId) {
+        if (StringUtils.isBlank(launchId)) {
+            return null;
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+        String queryStr = String.format(
+                " Select playLaunchChannel FROM %s " //
+                        + " WHERE launch_id = :launchId ", //
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("launchId", launchId);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (PlayLaunchChannel) list.get(0);
     }
 
     @SuppressWarnings({ "rawtypes" })

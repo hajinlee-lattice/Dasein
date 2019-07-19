@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +42,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     public static ExportFieldMetadataService getExportFieldMetadataService(CDLExternalSystemName systemName) {
         if (!registry.containsKey(systemName)) {
-            throw new LedpException(LedpCode.LEDP_00002);
+            throw new LedpException(LedpCode.LEDP_40068, new String[] { systemName.toString() });
         }
 
         return registry.get(systemName);
@@ -66,7 +67,22 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         return cms;
     }
 
-    protected ColumnMetadata constructNonStandardColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
+    public Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities) {
+        Flux<ColumnMetadata> cms = Flux.empty();
+        if (entities != null && !entities.isEmpty()) {
+            List<ColumnMetadata> cmList = new ArrayList<ColumnMetadata>();
+            entities.forEach(entity -> {
+                cmList.addAll(servingStoreProxy.getDecoratedMetadata(customerSpace, entity, Collections.singletonList(Predefined.Enrichment))
+                .collectList().block());
+            });
+            if (CollectionUtils.isNotEmpty(cmList)) {
+                cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
+            }
+        }
+        return cms;
+    }
+
+    protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
         ColumnMetadata cm = new ColumnMetadata(defaultExportField.getAttrName(), defaultExportField.getJavaClass());
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);

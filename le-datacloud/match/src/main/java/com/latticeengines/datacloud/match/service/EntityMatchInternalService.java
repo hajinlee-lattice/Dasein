@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -92,6 +93,9 @@ public interface EntityMatchInternalService {
      * @param clearAllFailedLookupEntries
      *            true if we clear all lookup entries that failed to set lookup
      *            mapping, false if we only clear one to one entries that failed
+     * @param entriesMapToOtherSeed
+     *            set of entries that are already map to other seeds, can be
+     *            {@literal null}
      * @return a triple where the left object is the state before association the
      *         middle list contains all lookup entries that cannot be associated to
      *         the current seed. the right list contains all lookup entries that
@@ -100,7 +104,8 @@ public interface EntityMatchInternalService {
      *             if allocating new accounts are not supported
      */
     Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries);
+            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
+            Set<EntityLookupEntry> entriesMapToOtherSeed);
 
     /**
      * Cleanup entity seed that is supposed to be orphan (not mapped by any of its

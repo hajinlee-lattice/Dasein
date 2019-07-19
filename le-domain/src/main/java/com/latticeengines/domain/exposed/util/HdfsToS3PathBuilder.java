@@ -15,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -39,13 +40,13 @@ public class HdfsToS3PathBuilder {
     private String hdfsAtlasDataDir = hdfsAtlasDir + "/Data";
     private String hdfsAtlasMetadataDir = hdfsAtlasDir + "/Metadata";
 
-    private String s3AnalyticsDir = "://%s/%s/analytics";
+    private String s3AnalyticsDir = PROTOCOL_SEPARATOR + "/%s/%s/analytics";
     private String s3EventTableModelDir = s3AnalyticsDir + "/models";
     private String s3EventTableDataDir = s3AnalyticsDir + "/data";
 
-    private String s3BucketDir = "://%s";
-    private String s3AtlasDir = "://%s/%s/atlas";
-    private String s3AtlasIntegrationDir = "://%s/dropfolder/%s/atlas";
+    private String s3BucketDir = PROTOCOL_SEPARATOR + "/%s";
+    private String s3AtlasDir = PROTOCOL_SEPARATOR + "/%s/%s/atlas";
+    private String s3AtlasIntegrationDir = PROTOCOL_SEPARATOR + "/%s/dropfolder/%s/atlas";
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
     private String s3AtlasExportFileDir = s3AtlasDataDir + "/Files/Export";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
@@ -407,13 +408,10 @@ public class HdfsToS3PathBuilder {
         }
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
+    public String getProtocol() { return protocol; }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+    @VisibleForTesting
+    void setProtocol(String protocol) { this.protocol = protocol; }
 
     public String getPathSeparator() {
         return PATH_SEPARATOR;

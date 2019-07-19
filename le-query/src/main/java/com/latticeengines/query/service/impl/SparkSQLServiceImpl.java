@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
@@ -55,12 +54,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Inject
     private SparkJobService sparkJobService;
-
-    @Inject
-    private EMRCacheService emrCacheService;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -82,9 +75,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
-
-    @Value("${dataflowapi.spark.sql.broadcast.join.threashold.gb}")
-    private long bhjThresholdGb;
 
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
@@ -223,12 +213,12 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     private Map<String, String> getSparkConf(int scalingFactor) {
-        scalingFactor = Math.max(scalingFactor, 1);
+        scalingFactor = Math.max(scalingFactor - 1, 1);
         Map<String, String> conf = new HashMap<>();
 
         // instances
         int minExe = minExecutors * scalingFactor;
-        int maxExe = Math.max((int) (maxExecutors * scalingFactor * 0.5), minExe);
+        int maxExe = maxExecutors * scalingFactor;
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
@@ -238,10 +228,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         int partitions = Math.max(maxExe * executorCores * 2, 200);
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
-
-        // broadcast join
-        conf.put("spark.sql.autoBroadcastJoinThreshold", String.valueOf(bhjThresholdGb * GB));
-        conf.put("spark.sql.broadcastTimeout", "600");
 
         // others
         conf.put("spark.driver.maxResultSize", "4g");

@@ -153,6 +153,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private int consolidationExecWeekDay;*/
 
     private long prevCollectMillis = 0;
+    private long prevCleanupMillis = 0;
     private int prevCollectTasks;
     private long prevIngestionMillis = 0;
 
@@ -173,6 +174,11 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private int transferRawRequests(boolean deleteFilteredReqs) {
 
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
+        if (rawReqs.size() > 0) {
+
+            log.info("fetch " + rawReqs.size() + " reqs from raw req table");
+
+        }
 
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
 
@@ -585,6 +591,21 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
+    public void cleanup() {
+
+        rawCollectionRequestService.cleanup();
+
+        long ts = System.currentTimeMillis();
+        for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
+
+            long period = vendorConfigService.getCollectingFreq(vendor); //in seconds
+
+            long tsBefore = ts - period * 1000;
+
+            collectionRequestService.cleanupRequestHandled(vendor, new Timestamp(tsBefore));
+        }
+    }
+
     public boolean collect() {
         if (prevCollectMillis == 0) {
 
@@ -596,6 +617,16 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         boolean finished = true;
         int activeTasks = 0;
         try {
+
+            if (prevCleanupMillis == 0 || currentMillis - prevCleanupMillis > 86400 * 1000) {
+
+                prevCleanupMillis = currentMillis;
+
+                log.info("begin cleaning up unused raw reqs and collection reqs...");
+                cleanup();
+                log.info("cleaning up done.");
+
+            }
 
             activeTasks = getActiveTaskCount();
             if (prevCollectMillis == 0 ||

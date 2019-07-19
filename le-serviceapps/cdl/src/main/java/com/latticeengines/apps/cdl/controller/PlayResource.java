@@ -283,9 +283,6 @@ public class PlayResource {
             @PathVariable("channelId") String channelId) {
         return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
     }
-    // -------------
-    // Channels
-    // -------------
 
     // -------------
     // Play Launches
@@ -298,6 +295,15 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @RequestParam(value = "launch-state", required = false) List<LaunchState> launchStates) {
         return playLaunchService.findByPlayId(getPlayId(playName), launchStates);
+    }
+
+    @GetMapping(value = "/{playName}/launches/{launchId}/channel")
+    @ResponseBody
+    @ApiOperation(value = "Get play launch channel from play launch")
+    public PlayLaunchChannel getPlayLaunchChannelFromPlayLaunch(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId) {
+        return playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
     }
 
     @PostMapping(value = "/{playName}/launches", headers = "Accept=application/json")
@@ -399,7 +405,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
-        return playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
     }
 

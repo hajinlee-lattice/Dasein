@@ -51,7 +51,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(lookupIdsMapping.containsKey(CDLExternalSystemType.FILE_SYSTEM.name()));
         Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).size(), 1);
         Assert.assertEquals(lookupIdsMapping.get(CDLExternalSystemType.FILE_SYSTEM.name()).get(0).getExportFolder(),
-                String.format("s3n://%s/dropfolder/%s/export/campaigns", s3CustomerBucket, dropBox));
+                String.format("%s/dropfolder/%s/export/campaigns", s3CustomerBucket, dropBox));
         // "");
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";

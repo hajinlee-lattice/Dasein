@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.entitymgr;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -60,4 +61,6 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     void updateLastUpdateTime(String modelGuid);
 
     boolean hasBucketMetadata(String modelId);
+
+    List<ModelSummary> findModelSummariesByIds(Set<String> ids);
 }

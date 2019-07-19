@@ -81,6 +81,16 @@ public class ExportFieldMetadataMapping implements HasPid, HasTenant, HasAuditin
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    public ExportFieldMetadataMapping() {
+
+    }
+
+    public ExportFieldMetadataMapping(String sourceField, String destinationField, Boolean overwriteValue) {
+        this.sourceField = sourceField;
+        this.destinationField = destinationField;
+        this.overwriteValue = overwriteValue;
+    }
+
     @Override
     public Long getPid() {
         return pid;

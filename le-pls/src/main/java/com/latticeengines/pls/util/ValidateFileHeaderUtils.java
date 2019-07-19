@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.avro.SchemaParseException;
 import org.apache.commons.collections4.MapUtils;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -46,6 +48,9 @@ public class ValidateFileHeaderUtils {
     public static final int MAX_HEADER_LENGTH = 63;
     public static final String AVRO_FIELD_NAME_PREFIX = "avro_";
     public static final String CSV_INJECTION_CHARACHTERS = "@+-=";
+
+    @Inject
+    private CommonTenantConfigServiceImpl appTenantConfigService;
 
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
@@ -216,6 +221,13 @@ public class ValidateFileHeaderUtils {
         if (headerFields.size() == 1) {
             throw new LedpException(LedpCode.LEDP_18120);
         }
+    }
+
+    public static void checkForHeaderNum(Set<String> headerFields, int limit) {
+        if (headerFields.size() > limit) {
+            throw new LedpException(LedpCode.LEDP_18226, new String[] {String.valueOf(limit), String.valueOf(headerFields.size())});
+        }
+
     }
 
     public static String convertFieldNameToAvroFriendlyFormat(String fieldName) {

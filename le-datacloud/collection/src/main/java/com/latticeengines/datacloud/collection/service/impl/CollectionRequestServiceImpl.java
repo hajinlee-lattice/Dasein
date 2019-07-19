@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
@@ -266,9 +267,11 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             return rawReqFilter;
 
         }
+        log.info("self filtering of raw reqs done");
 
         //continue to filter raw req against current req
         filterNonTransferredAgainstCurrent(toAdd, rawReqFilter);
+        log.info("filtering raw reqs against collection reqs done");
 
         //insert collection req
         for (int i = 0; i < toAdd.size(); ++i) {
@@ -295,6 +298,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             collectionRequestMgr.create(colReq);
 
         }
+        log.info("inserting collection reqs done");
 
         return rawReqFilter;
     }
@@ -339,6 +343,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         //processing
         int resetCount = 0, failCount = 0;
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
         for (CollectionRequest req: resultList) {
 
             int reqRetries = req.getRetryAttempts();
@@ -355,6 +360,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             } else {
 
                 req.setStatus(CollectionRequest.STATUS_FAILED);
+                req.setDeliveryTime(ts);
 
                 ++failCount;
 
@@ -452,4 +458,12 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         collectionRequestMgr.cleanupRequestBetween(start, end);
     }
 
+
+    @Override
+    public void cleanupRequestHandled(String vendor, Timestamp before) {
+        List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED);
+
+        collectionRequestMgr.cleanupRequests(statuses, vendor, before);
+
+    }
 }

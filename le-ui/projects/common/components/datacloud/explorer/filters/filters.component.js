@@ -332,15 +332,17 @@ export default function () {
                     filter.IsRatingsEngineAttribute = (vm.metadata.toggle.show.selected_ratingsengine_attributes ? true : '');
                 }
 
-                if (DataCloudStore.ratingIterationFilter == 'used') {
+                let iterationFilter = DataCloudStore.getRatingIterationFilter();
+
+                if (iterationFilter == 'used') {
                     filter.ImportanceOrdering = '!!';
                 }
 
-                if (DataCloudStore.ratingIterationFilter == 'warnings') {
+                if (iterationFilter == 'warnings') {
                     filter.HasWarnings = '!!';
                 }
 
-                if (DataCloudStore.ratingIterationFilter == 'disabled') {                    
+                if (iterationFilter == 'disabled') {                    
                     filter.ApprovedUsage = 'None';
                 }
 

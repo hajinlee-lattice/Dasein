@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 public enum CleanupOperationType {
     ALL("All", false), //
     ALLDATA("AllData", false), //
+    ALLDATAANDATTRCONFIG("AllDataAndAttrConfig", false), //
     BYDATERANGE("ByDateRange", false), //
     BYUPLOAD_ID("ByUpload_Id", true), //
     BYUPLOAD_ACPD("ByUpload_ACPD", true), //

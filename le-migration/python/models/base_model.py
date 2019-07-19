@@ -33,4 +33,8 @@ class BaseModel:
         """
             returns json representation of self
         """
-        return {k: v for k, v in self.__dict__.items()}
+        ignore = ['_sa_instance_state', 'statsCubesData', 'statsData']
+        return {k: v for k, v in self.__dict__.items() if k not in ignore}
+
+    def __str__(self):
+        return '\n\n'.join(['{}:\n{}'.format(k, v) for k, v in self.to_json().items()])

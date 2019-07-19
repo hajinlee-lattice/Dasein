@@ -172,6 +172,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
         String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         exportToDynamo(batchStoreTableName, InterfaceName.AccountId.name(), null);

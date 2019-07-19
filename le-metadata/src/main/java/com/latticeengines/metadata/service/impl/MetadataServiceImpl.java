@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.RollbackException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -142,7 +143,8 @@ public class MetadataServiceImpl implements MetadataService {
         tableTypeHolder.setTableType(table.getTableType());
         try {
             log.info("Metadata UpdateTable: {}", table.getName());
-            DatabaseUtils.retry("updateTable", input -> {
+            DatabaseUtils.retry("updateTable", 10, RollbackException.class, "RollbackException  detected performing", null,
+                    input -> {
                 Table found = tableEntityMgr.findByName(table.getName(), false);
                 if (found != null) {
                     log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));

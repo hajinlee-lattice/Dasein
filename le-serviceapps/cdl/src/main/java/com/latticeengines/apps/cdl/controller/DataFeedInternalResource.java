@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
@@ -91,5 +92,13 @@ public class DataFeedInternalResource {
             @RequestParam(value = "customerSpace")String customerSpace) {
         CustomerSpace customerSpace1 = CustomerSpace.parse(customerSpace);
         return dataFeedService.getDataQuotaLimitMap(customerSpace1);
+    }
+
+    @RequestMapping(value = "/attributeQuotaLimit", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @NoCustomerSpace
+    @ApiOperation(value = "get attribute limit")
+    public AttributeLimit getAttributeQuotaLimit( @RequestParam(value = "customerSpace")String customerSpace) {
+        return dataFeedService.getAttributeQuotaLimit(customerSpace);
     }
 }

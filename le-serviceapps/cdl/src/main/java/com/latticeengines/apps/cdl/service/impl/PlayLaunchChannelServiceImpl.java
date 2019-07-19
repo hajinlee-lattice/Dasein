@@ -79,6 +79,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    ChannelConfigProcessor channelConfigProcessor;
+
     @Override
     public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
             Boolean launchNow) {
@@ -220,7 +223,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels, boolean enableS3) {
-        if (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3) {
+        if (mapping.getExternalSystemName() == null
+                || (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3)) {
             return;
         }
         String configId = mapping.getId();
@@ -296,11 +300,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch
-                + (channel.isLaunchUnscored()
-                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
-                                .getUnscoredAccountCount()
-                        : 0L);
+        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
+                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

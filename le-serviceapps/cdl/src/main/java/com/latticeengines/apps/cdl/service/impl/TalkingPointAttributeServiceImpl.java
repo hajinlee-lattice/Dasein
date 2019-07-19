@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,9 +81,10 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
                 DataPage dataPage = entityProxy.getProducts(customerSpace);
                 Map<String, String> productNameMap = new HashMap<>();
                 if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
-                    dataPage.getData().forEach(map -> productNameMap.put( //
-                            map.get(InterfaceName.ProductId.name()).toString(), //
-                            map.get(InterfaceName.ProductName.name()).toString() //
+                    dataPage.getData()
+                            .forEach(map -> productNameMap.put( //
+                                    map.get(InterfaceName.ProductId.name()).toString(), //
+                                    map.get(InterfaceName.ProductName.name()).toString() //
                     ));
                 }
                 phAttrs = phAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).peek(cm -> {
@@ -106,10 +108,11 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
 
             // The Prefix is added since Dante UI looks for it to identify
             // Account attributes
+            Comparator<TalkingPointAttribute> comparator = Comparator.comparing(TalkingPointAttribute::getName);
             return JsonUtils.convertList(allAttrs, ColumnMetadata.class).stream()
                     .map(attr -> new TalkingPointAttribute(attr.getDisplayName(),
                             accountAttributePrefix + attr.getAttrName(), attr.getCategoryAsString()))
-                    .collect(Collectors.toList());
+                    .sorted(comparator).collect(Collectors.toList());
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
@@ -157,15 +160,15 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
         for (String notion : uniqueNotions) {
             if (TalkingPointAttributeNotion.isValidDanteNotion(notion)) {
                 switch (TalkingPointAttributeNotion.getDanteNotion(notion)) {
-                    case Account:
-                        toReturn.addNotion(notion, getAccountAttributes());
-                        break;
-                    case Recommendation:
-                        toReturn.addNotion(notion, getRecommendationAttributes());
-                        break;
-                    case Variable:
-                        toReturn.addNotion(notion, getVariableAttributes());
-                        break;
+                case Account:
+                    toReturn.addNotion(notion, getAccountAttributes());
+                    break;
+                case Recommendation:
+                    toReturn.addNotion(notion, getRecommendationAttributes());
+                    break;
+                case Variable:
+                    toReturn.addNotion(notion, getVariableAttributes());
+                    break;
                 }
             } else {
                 toReturn.addInvalidNotion(notion);

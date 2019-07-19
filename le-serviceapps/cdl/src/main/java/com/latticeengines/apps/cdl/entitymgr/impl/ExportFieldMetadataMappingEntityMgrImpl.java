@@ -79,6 +79,7 @@ public class ExportFieldMetadataMappingEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap,
             List<ExportFieldMetadataMapping> exportFieldMappings) {
+        log.info(JsonUtils.serialize(exportFieldMappings));
         return exportFieldMappingDao.updateExportFieldMetadataMappings(lookupIdMap, exportFieldMappings);
     }
 

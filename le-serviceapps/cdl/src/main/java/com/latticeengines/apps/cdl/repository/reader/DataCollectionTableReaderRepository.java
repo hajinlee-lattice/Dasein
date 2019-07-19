@@ -11,4 +11,6 @@ public interface DataCollectionTableReaderRepository extends BaseJpaRepository<D
 
     @Query("select table.name from DataCollectionTable")
     List<String> findAllTableName();
+
+    DataCollectionTable findByPid(Long dataCollectionTablePid);
 }
