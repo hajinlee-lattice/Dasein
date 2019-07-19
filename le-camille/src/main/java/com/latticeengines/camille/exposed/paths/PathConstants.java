@@ -41,4 +41,6 @@ public final class PathConstants {
     public static final String WORKSPACES = "Workspaces";
 
     public static final String ERROR_CATEGORY_FILE = "error-category.json";
+
+    public static final String SCHEDULING_GROUP_FILE = "schedulingGroup.json";
 }
