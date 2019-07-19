@@ -22,7 +22,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.chipsOperations = ['EQUAL', 'IN_COLLECTION', 'NOT_EQUAL', 'NOT_IN_COLLECTION'];
 
                 vm.init = function () {
-                    // console.log('[tree-edit] initz start', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
+                    console.log('[tree-edit] init', vm.tree, vm.item, vm);
                     vm.initVariables();
                     vm.resetCmp();
                     // console.log('[tree-edit] init end', vm.tree.bucketRestriction.bkt.Vals, vm.tree.bucketRestriction.bkt, vm);
@@ -120,7 +120,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.isNumerical = function () {
                     let funType = vm.item.FundamentalType;
-                    let bktType = vm.item.cube.Bkts.Type;
+                    let bktType = vm.item.cube.Bkts ? vm.item.cube.Bkts.Type : '';
                     return funType == 'enum' || funType == 'numeric' || bktType == 'Numerical';
                 }
 
@@ -128,7 +128,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     vm.clear = true;
                     let _operation = vm.tree.bucketRestriction.bkt.Cmp;
                     let numerical = vm.isNumerical();
-                    console.log('[tree-edit] changeCmpValue', vm.operation, vm.item.FundamentalType, vm.item.cube.Bkts.Type, numerical, vm.item);
+                    console.log('[tree-edit] changeCmpValue', numerical, vm.operation, vm.vals);
 
                     switch (vm.operation) {
                         case 'EQUAL':
