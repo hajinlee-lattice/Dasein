@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.Query;
@@ -77,6 +78,9 @@ public class SparkSQLQueryTester {
             // comment out this statement to reuse the livy session in next run
             Runtime.getRuntime().addShutdownHook(new Thread(() -> sessionService.stopSession(session)));
         }
+
+        String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+        sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
     }
 
     private void setupLivyEnvironment() {

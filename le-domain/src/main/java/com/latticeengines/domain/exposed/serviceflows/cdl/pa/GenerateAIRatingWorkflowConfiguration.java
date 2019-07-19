@@ -240,6 +240,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             cdlEventTable.setEventColumn(eventColumn);
         }
 
+        public Builder apsRollupPeriod(String period) {
+            generateRatingStepConfiguration.setApsRollupPeriod(period);
+            return this;
+        }
+
         public GenerateAIRatingWorkflowConfiguration build() {
             if (StringUtils.isBlank(cdlEventTable.getEventColumn())) {
                 // set event column to InterfaceName.Target if caller has not

@@ -136,7 +136,8 @@ class SparkScriptClient {
             } while(!LivyStatement.State.TERMINAL_STATES.contains(statement.state));
             if (LivyStatement.State.available.equals(statement.state)) {
                 if ("error".equals(statement.output.status)) {
-                    throw new RuntimeException("Statement " + id + " failed with " + statement.output.ename + " : " + statement.output.evalue);
+                    throw new RuntimeException("Statement " + id + " failed with " + statement.output.ename //
+                            + " : " + statement.output.evalue);
                 } else {
                     JsonNode json = statement.output.data;
                     String output = json.get("text/plain").asText();

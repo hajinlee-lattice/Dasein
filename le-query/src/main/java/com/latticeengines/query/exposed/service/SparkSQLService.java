@@ -12,6 +12,8 @@ public interface SparkSQLService {
     LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
                                       int scalingFactor, String storageLevel, String secondaryJobName);
 
+    void prepareForCrossSellQueries(LivySession livySession, String period, String trxnTable, String storageLevel);
+
     long getCount(CustomerSpace customerSpace, LivySession livySession, String sql);
 
     HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql, //

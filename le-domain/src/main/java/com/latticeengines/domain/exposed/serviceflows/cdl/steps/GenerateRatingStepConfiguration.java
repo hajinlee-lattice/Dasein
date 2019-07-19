@@ -9,11 +9,22 @@ public class GenerateRatingStepConfiguration extends MicroserviceStepConfigurati
     @JsonProperty("dataCollectionVersion")
     private DataCollection.Version dataCollectionVersion;
 
+    @JsonProperty("apsRollupPeriod")
+    private String apsRollupPeriod;
+
     public DataCollection.Version getDataCollectionVersion() {
         return dataCollectionVersion;
     }
 
     public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
         this.dataCollectionVersion = dataCollectionVersion;
+    }
+
+    public String getApsRollupPeriod() {
+        return apsRollupPeriod;
+    }
+
+    public void setApsRollupPeriod(String apsRollupPeriod) {
+        this.apsRollupPeriod = apsRollupPeriod;
     }
 }
