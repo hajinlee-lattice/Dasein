@@ -29,7 +29,6 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     @Resource(name = "realTimeEntityMatchPlanner")
     private MatchPlanner realTimeEntityMatchPlanner;
 
-
     @Resource(name = "realTimeMatchExecutor")
     private MatchExecutor matchExecutor;
 
@@ -59,11 +58,11 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     }
 
     protected MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas,
-                                               boolean skipExecutionPlanning) {
+            boolean skipExecutionPlanning) {
         if (StringUtils.isEmpty(input.getRootOperationUid())) {
             input.setRootOperationUid(UUID.randomUUID().toString());
         }
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
             return realTimeEntityMatchPlanner.plan(input, metadatas, skipExecutionPlanning);
         } else {
             return realTimeMatchPlanner.plan(input, metadatas, skipExecutionPlanning);

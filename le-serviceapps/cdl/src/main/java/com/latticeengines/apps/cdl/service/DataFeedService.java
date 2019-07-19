@@ -65,6 +65,8 @@ public interface DataFeedService {
 
     List<DataFeed> getDataFeeds(TenantStatus status, String version);
 
+    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup);
+
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);

@@ -136,10 +136,12 @@ public class AttributeFixer {
         if (statisticalType != null) {
             attribute.setStatisticalType(statisticalType);
         }
-        if (Boolean.TRUE.equals(required)) {
-            attribute.setRequired(true);
-        } else {
-            attribute.setRequired(false);
+        if (required != null) {
+            if (Boolean.TRUE.equals(required)) {
+                attribute.setRequired(true);
+            } else {
+                attribute.setRequired(false);
+            }
         }
     }
 }

@@ -626,11 +626,13 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 .let(BusinessEntity.Transaction, "ProductId").eq(PROD_ID1) //
                 .build();
         Query query = Query.builder()
-                .select(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name())).distinct(true)
+                .select(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name())) //
+                .distinct(true)
+                .count(true)
                 .from(BusinessEntity.Transaction).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 52);
+        testGetCountAndAssert(sqlUser, query, 115);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

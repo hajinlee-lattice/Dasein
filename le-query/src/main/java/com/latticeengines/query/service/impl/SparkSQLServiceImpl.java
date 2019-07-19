@@ -76,9 +76,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
 
-    @Value("${dataflowapi.spark.sql.broadcast.join.threashold.gb}")
-    private long bhjThresholdGb;
-
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
                                              int scalingFactor, String storageLevel, String secondaryJobName) {
@@ -231,10 +228,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         int partitions = Math.max(maxExe * executorCores * 2, 200);
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
-
-        // broadcast join
-        conf.put("spark.sql.autoBroadcastJoinThreshold", String.valueOf(bhjThresholdGb * GB));
-        conf.put("spark.sql.broadcastTimeout", "3600");
 
         // others
         conf.put("spark.driver.maxResultSize", "4g");

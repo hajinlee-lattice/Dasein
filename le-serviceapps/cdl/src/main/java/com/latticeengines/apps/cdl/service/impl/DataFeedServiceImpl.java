@@ -479,6 +479,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
+    public List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup) {
+        return datafeedEntityMgr.getDataFeedsBySchedulingGroup(status, version, schedulingGroup);
+    }
+
+    @Override
     public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
         DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (dataFeed == null) {

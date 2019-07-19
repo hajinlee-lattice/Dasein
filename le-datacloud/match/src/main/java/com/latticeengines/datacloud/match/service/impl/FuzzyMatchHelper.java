@@ -192,7 +192,7 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public void fetchMatchResult(MatchContext context) {
         if (!context.isSeekingIdOnly()) {
-            if (OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
+            if (OperationalMode.isEntityMatch(context.getInput().getOperationalMode())) {
                 fetchEntityMatchResult(context);
             } else {
                 fetchLDCMatchResult(context);
@@ -226,8 +226,7 @@ public class FuzzyMatchHelper implements DbHelper {
                         .findFirst() //
                         .orElse(null);
                 if (lookupEntry != null) {
-                    record.getQueryResult().put(InterfaceName.AccountId.name(),
-                            lookupEntry.getSerializedValues());
+                    record.getQueryResult().put(InterfaceName.AccountId.name(), lookupEntry.getSerializedValues());
                 }
             }
             if (MapUtils.isNotEmpty(seed.getAttributes())) {
@@ -290,8 +289,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        if (!context.isSeekingIdOnly()
-                && !OperationalMode.ENTITY_MATCH.equals(context.getInput().getOperationalMode())) {
+        if (!context.isSeekingIdOnly() && !OperationalMode.isEntityMatch(context.getInput().getOperationalMode())) {
             // FOR LDC match: Use record.latticeAccount to update
             // record.queryResult
             // For entity match: record.queryResult is already prepared in

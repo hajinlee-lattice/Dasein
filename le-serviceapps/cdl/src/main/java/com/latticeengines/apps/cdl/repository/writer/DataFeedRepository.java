@@ -18,4 +18,10 @@ public interface DataFeedRepository extends BaseJpaRepository<DataFeed, Long> {
 
     @Query("select df from DataFeed df where df.tenant.status = :status and df.tenant.uiVersion = :version")
     List<DataFeed> getDataFeedsByTenantStatus(@Param("status") TenantStatus status, @Param("version") String version);
+
+    @Query("select df from DataFeed df where df.tenant.status = :status and df.tenant.uiVersion = :version and df" +
+            ".schedulingGroup = :schedulingGroup")
+    List<DataFeed> getDataFeedsByTenantStatusAndSchedulingType(@Param("status") TenantStatus status,
+                                                               @Param("version") String version, @Param(
+                                                                       "schedulingGroup") String schedulingGroup);
 }

@@ -79,6 +79,7 @@ export default class SystemComponent extends Component {
                         solutionInstanceConfig.orgType = this.state.system.externalSystemName;
                         solutionInstanceConfig.accessToken = this.state.accessToken;
                         solutionInstanceConfig.registerLookupIdMap = false;
+                        solutionInstanceConfig.system = this.state.system;
                         configWindow.location = this.getPopupUrl(solutionInstanceId, authorizationCode);
                         httpService.unsubscribeObservable(observer);
                     }

@@ -30,7 +30,7 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
             List<ExportFieldMetadataMapping> exportFieldMetadataMappings) {
 
         if (lookupIdMap == null) {
-            throw new LedpException(LedpCode.LEDP_00002);
+            throw new LedpException(LedpCode.LEDP_40067);
         }
 
         List<ExportFieldMetadataMapping> retrievedFieldMapping = super.findAllByField("FK_LOOKUP_ID_MAP",
@@ -44,7 +44,7 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
         exportFieldMetadataMappings.stream().forEach(fm -> {
             ExportFieldMetadataMapping newMapping = new ExportFieldMetadataMapping();
             newMapping.setTenant(lookupIdMap.getTenant());
-            newMapping.setLookupIdMap(fm.getLookupIdMap());
+            newMapping.setLookupIdMap(lookupIdMap);
             newMapping.setSourceField(fm.getSourceField());
             newMapping.setDestinationField(fm.getDestinationField());
             newMapping.setOverwriteValue(fm.getOverwriteValue());

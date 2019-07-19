@@ -18,6 +18,7 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLQuery;
 
@@ -65,14 +66,13 @@ public class DateRangeTranslator extends TranslatorCommon {
         return subQuery;
     }
 
-    static BooleanExpression makeValidPurchase(TransactionRestriction txnRestriction) {
+    private static BooleanExpression makeValidPurchase(TransactionRestriction txnRestriction) {
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         AggregationFilter spendFilter = txnRestriction.getSpentFilter();
         if (unitFilter == null && spendFilter == null) {
-            StringPath amtAgg = Expressions.stringPath(InterfaceName.TotalAmount.name());
-            StringPath qtyAgg = Expressions.stringPath(InterfaceName.TotalQuantity.name());
-            BooleanExpression validPurchasePredicate = amtAgg.gt("0").or(qtyAgg.gt("0"));
-            return validPurchasePredicate;
+            NumberPath amtAgg = Expressions.numberPath(Double.class, InterfaceName.TotalAmount.name());
+            NumberPath qtyAgg = Expressions.numberPath(Double.class, InterfaceName.TotalQuantity.name());
+            return amtAgg.gt(Expressions.asNumber(0)).or(qtyAgg.gt(Expressions.asNumber(0)));
         }
         return null;
     }

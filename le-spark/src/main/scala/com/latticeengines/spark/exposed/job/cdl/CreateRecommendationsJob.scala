@@ -162,7 +162,12 @@ object CreateRecommendationsJob {
 
   def checkAndGet(account: Row, field: String, defaultValue: String): String = {
     try {
-      account.getString(account.fieldIndex(field))
+      val obj = account.get(account.fieldIndex(field))
+      if  (obj == null) {
+        return defaultValue
+      } else {
+        return obj.toString()
+      }
     } catch {
       case _: IllegalArgumentException => defaultValue
     }

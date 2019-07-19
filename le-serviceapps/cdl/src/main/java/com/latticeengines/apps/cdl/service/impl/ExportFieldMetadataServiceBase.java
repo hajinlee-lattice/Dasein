@@ -42,7 +42,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     public static ExportFieldMetadataService getExportFieldMetadataService(CDLExternalSystemName systemName) {
         if (!registry.containsKey(systemName)) {
-            throw new LedpException(LedpCode.LEDP_00002);
+            throw new LedpException(LedpCode.LEDP_40068, new String[] { systemName.toString() });
         }
 
         return registry.get(systemName);

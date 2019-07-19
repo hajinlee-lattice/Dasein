@@ -588,6 +588,8 @@ public class CDLServiceImpl implements CDLService {
                 display.setExist(Boolean.FALSE);
                 display.setObject(object.getDisplayName());
                 display.setTemplateName(object.getDisplayName());
+                display.setEntity(object.getEntity());
+                display.setFeedType(object.getDefaultFeedTypeName());
                 display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                 templates.add(display);
             }

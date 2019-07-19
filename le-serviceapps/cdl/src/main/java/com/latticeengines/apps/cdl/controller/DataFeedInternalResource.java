@@ -67,6 +67,23 @@ public class DataFeedInternalResource {
         }
     }
 
+    @RequestMapping(value = "/datafeedlistBySchedulingGroup", method = RequestMethod.GET, headers = "Accept" +
+            "=application/json")
+    @ResponseBody
+    @NoCustomerSpace
+    @ApiOperation(value = "get all data feeds by schedulingGroup.")
+    public List<DataFeed> getAllDataFeedsBySchedulingGroup(
+            @RequestParam(value = "status", required = false, defaultValue = "")String tenantStatus,
+            @RequestParam(value = "version", required = false, defaultValue = "")String version,
+            @RequestParam(value = "schedulingGroup", required = false, defaultValue = "")String schedulingGroup) {
+        if (StringUtils.isEmpty(tenantStatus) && StringUtils.isEmpty(version) && StringUtils.isEmpty(schedulingGroup)) {
+            return dataFeedService.getAllDataFeeds();
+        } else {
+            return dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.valueOf(tenantStatus), version,
+                    schedulingGroup);
+        }
+    }
+
     @RequestMapping(value = "/dataQuotaLimitMap", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @NoCustomerSpace
