@@ -628,6 +628,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Query query = Query.builder()
                 .select(new AttributeLookup(BusinessEntity.Transaction, InterfaceName.AccountId.name())) //
                 .distinct(true)
+                .count(true)
                 .from(BusinessEntity.Transaction).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);

@@ -76,6 +76,11 @@ public class Query implements GraphNode {
     @JsonProperty("distinct")
     private Boolean distinct = Boolean.FALSE;
 
+    // is a count query
+    // count query should not set alias for select
+    @JsonProperty("is_count")
+    private Boolean isCount;
+
     @JsonProperty("free_form_text_search_attributes")
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
 
@@ -187,6 +192,14 @@ public class Query implements GraphNode {
 
     public void setDistinct(Boolean distinct) {
         this.distinct = distinct;
+    }
+
+    public Boolean getCount() {
+        return isCount;
+    }
+
+    public void setCount(Boolean count) {
+        isCount = count;
     }
 
     public void analyze() {

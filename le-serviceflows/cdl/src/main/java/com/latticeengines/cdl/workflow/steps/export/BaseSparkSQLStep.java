@@ -88,7 +88,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         String customer = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         Map<String, String> pathMap = new HashMap<>();
         attrRepo.getTableNames().forEach(tblName -> {
-            Table table = metadataProxy.getTable(customer, tblName);
+            Table table = metadataProxy.getTableSummary(customer, tblName);
             if (table == null) {
                 throw new RuntimeException("Table " + tblName + " for customer " + customer + " does not exits.");
             }
