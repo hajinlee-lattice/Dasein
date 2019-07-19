@@ -12,18 +12,16 @@ public class PAEndEvent extends Event {
     public PAEndEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;
-        this.isFailed = false;
     }
 
     @Override
     public List<Event> changeState(SimulationContext simulationContext) {
         TenantActivity tenantActivity = simulationContext.getRuningTenantActivityByTenantId(tenantId);
-        // TODO remove check (fail if not exist)
         if (tenantActivity != null) {
-            // TODO move to central place for running counts
             simulationContext.systemStatus.changeSystemStateAfterPAFinished(tenantActivity);
             boolean isSuccessed = simulationContext.isSucceed(tenantId);
-            isFailed = isSuccessed;
+            isFailed = !isSuccessed;
+            simulationContext.setFailedCount(tenantId, isFailed);
             if (isSuccessed || tenantActivity.isRetry()) {
                 tenantActivity = simulationContext.cleanTenantActivity(tenantActivity);
                 if (tenantActivity.isAutoSchedule()
@@ -36,7 +34,6 @@ public class PAEndEvent extends Event {
             } else {
                 tenantActivity.setRetry(true);
                 tenantActivity.setLastFinishTime(simulationContext.timeClock.getCurrentTime());
-                simulationContext.setTenantSummary(tenantActivity, true);
             }
             if (simulationContext.tenantEventMap.containsKey(tenantActivity.getTenantId())) {
                 List<Event> events = simulationContext.tenantEventMap.get(tenantActivity.getTenantId());
@@ -54,6 +51,9 @@ public class PAEndEvent extends Event {
                 }
             }
             simulationContext.changeSimulationStateAfterPAFinished(tenantActivity);
+        } else {
+            isFailed = false;
+            simulationContext.setFailedCount(tenantId, isFailed);
         }
         simulationContext.push(tenantId, this);
         return null;

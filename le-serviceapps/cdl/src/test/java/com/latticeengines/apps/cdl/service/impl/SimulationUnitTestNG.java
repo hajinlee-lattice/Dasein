@@ -41,7 +41,7 @@ public class SimulationUnitTestNG {
         this.priorityQueue.addAll(generateTenantEvents());
         SystemStatus systemStatus = newStatus(5, 10, 2);
         Simulation simulation = new Simulation(systemStatus, new HashSet<>(dataCloudRefreshTenant),
-                simulationTenantMap, priorityQueue, clock, "2w");
+                simulationTenantMap, priorityQueue, clock, "2m");
         simulation.run();
     }
 

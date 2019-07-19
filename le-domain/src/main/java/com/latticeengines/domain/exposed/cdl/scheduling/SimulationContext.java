@@ -147,16 +147,23 @@ public class SimulationContext {
         return new ArrayList<>(runningTenantActivityMap.values());
     }
 
-    public void setTenantSummary(TenantActivity tenantActivity, boolean isPAEnd) {
-        if (simulationTenantSummaryMap.containsKey(tenantActivity.getTenantId())) {
-            if (tenantActivity.isRetry()) {
+    public void setFailedCount(String tenantId, boolean isFailed) {
+        if (simulationTenantSummaryMap.containsKey(tenantId)) {
+            if (isFailed) {
                 SimulationTenantSummary simulationTenantSummary =
-                        simulationTenantSummaryMap.get(tenantActivity.getTenantId());
-                if (isPAEnd) {//when pa failed, will set Retry flag at PAEndEvent
-                    simulationTenantSummary.setFailedPANum(simulationTenantSummary.getFailedPANum() + 1);
-                } else {//when pa running, Retry flag is true ,then this is retry PA
-                    simulationTenantSummary.setRetryPANum(simulationTenantSummary.getRetryPANum() + 1);
-                }
+                        simulationTenantSummaryMap.get(tenantId);
+                simulationTenantSummary.setFailedPANum(simulationTenantSummary.getFailedPANum() + 1);
+            }
+        }
+    }
+
+    public void setRetryCount(String tenantId, boolean isRetry) {
+        if (simulationTenantSummaryMap.containsKey(tenantId)) {
+            if (isRetry) {
+                SimulationTenantSummary simulationTenantSummary =
+                        simulationTenantSummaryMap.get(tenantId);
+                //when pa running, Retry flag is true ,then this is retry PA
+                simulationTenantSummary.setRetryPANum(simulationTenantSummary.getRetryPANum() + 1);
             }
         }
     }

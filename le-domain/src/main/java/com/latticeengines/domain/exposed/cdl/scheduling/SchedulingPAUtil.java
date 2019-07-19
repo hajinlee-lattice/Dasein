@@ -3,14 +3,9 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(SchedulingPAUtil.class);
 
     public static List<SchedulingPAQueue> initQueue(SimulationContext simulationContext) {
         return initQueue(simulationContext.timeClock, simulationContext.systemStatus,

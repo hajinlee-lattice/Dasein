@@ -17,7 +17,6 @@ public class PAStartEvent extends Event {
     public PAStartEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;
-        this.isRetry = false;
     }
 
     @Override
@@ -25,8 +24,7 @@ public class PAStartEvent extends Event {
         TenantActivity tenantActivity = simulationContext.getcanRunTenantActivityByTenantId(tenantId);
         if (tenantActivity != null) {
             this.isRetry = tenantActivity.isRetry();
-            simulationContext.setTenantSummary(tenantActivity, false);
-            simulationContext.systemStatus.changeSystemState(tenantActivity);
+            simulationContext.setRetryCount(tenantId, isRetry);
             log.info(simulationContext.systemStatus.toString());
             simulationContext.changeSimulationStateWhenRunPA(tenantActivity);
             simulationContext.push(tenantId, this);
