@@ -36,11 +36,11 @@ public class SchedulingEvent extends Event {
         Set<String> tenantSet = new HashSet<>();
         tenantSet.addAll(tenantMap.get(RETRY_KEY));
         tenantSet.addAll(tenantMap.get(OTHER_KEY));
-        log.info("SchedulingEvent: " + getTime() + ", tenants=" + tenantSet + ", size=" + tenantSet.size());
-        log.info("running tenant is: " + simulationContext.getRuningTenantActivitys());
-        log.info("systemStatus is: " + simulationContext.systemStatus.toString());
         List<Event> events = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tenantSet)) {
+            log.info("SchedulingEvent: " + getTime() + ", tenants=" + tenantSet + ", size=" + tenantSet.size());
+            log.info("running tenant is: " + simulationContext.getRuningTenantActivitys());
+            log.info("systemStatus is: " + simulationContext.systemStatus.toString());
             for (String tenantId : tenantSet) {
                 PAStartEvent paStartEvent = new PAStartEvent(tenantId, simulationContext.timeClock.getCurrentTime());
                 long endTime =

@@ -196,7 +196,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (cdlJobType == CDLJobType.PROCESSANALYZE) {
             checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
             try {
-                if (!systemCheck()) {
+                if (!systemCheck() && !isActivityBasedPA) {
                     orchestrateJob();
                 }
             } catch (Exception e) {

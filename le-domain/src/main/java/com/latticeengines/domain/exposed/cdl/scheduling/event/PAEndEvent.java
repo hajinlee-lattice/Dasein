@@ -7,9 +7,12 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class PAEndEvent extends Event {
 
+    private boolean isFailed;
+
     public PAEndEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;
+        this.isFailed = false;
     }
 
     @Override
@@ -20,6 +23,7 @@ public class PAEndEvent extends Event {
             // TODO move to central place for running counts
             simulationContext.systemStatus.changeSystemStateAfterPAFinished(tenantActivity);
             boolean isSuccessed = simulationContext.isSucceed(tenantId);
+            isFailed = isSuccessed;
             if (isSuccessed || tenantActivity.isRetry()) {
                 tenantActivity = simulationContext.cleanTenantActivity(tenantActivity);
                 if (tenantActivity.isAutoSchedule()
@@ -57,6 +61,6 @@ public class PAEndEvent extends Event {
 
     @Override
     public String toString() {
-        return "PA end for tenant: " + tenantId + ", time: " +  + getTime();
+        return "PA end for tenant: " + tenantId + ", time: " + getTime() + ", isFailed: " + isFailed;
     }
 }

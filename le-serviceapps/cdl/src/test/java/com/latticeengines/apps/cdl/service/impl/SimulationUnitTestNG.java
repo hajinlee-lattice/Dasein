@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
-import com.latticeengines.domain.exposed.cdl.scheduling.event.SchedulingEvent;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SimulationUnitTestNG {
@@ -40,7 +39,6 @@ public class SimulationUnitTestNG {
         this.clock.setTimestamp(1531373313L * 1000);
         Map<String, SimulationTenant> simulationTenantMap = setTenantInitState(tenantList);
         this.priorityQueue.addAll(generateTenantEvents());
-        this.priorityQueue.addAll(generateSchedulingEvent());
         SystemStatus systemStatus = newStatus(5, 10, 2);
         Simulation simulation = new Simulation(systemStatus, new HashSet<>(dataCloudRefreshTenant),
                 simulationTenantMap, priorityQueue, clock, "2w");
@@ -74,16 +72,6 @@ public class SimulationUnitTestNG {
             }
         }
         return eventList;
-    }
-
-    private List<Event> generateSchedulingEvent() {
-        long time = clock.getCurrentTime();
-        List<Event> events = new ArrayList<>();
-        for (int i = 0; i < 600; i++) {
-            time += 5 * 60 * 1000; // 5 min
-            events.add(new SchedulingEvent(time));
-        }
-        return events;
     }
 
     private long getRandomTime() {
@@ -120,6 +108,8 @@ public class SimulationUnitTestNG {
             if (index % 3 == 1) {
                 tenantActivity.setLarge(true);
             }
+            tenantActivity.setAutoSchedule(true);
+            tenantActivity.setInvokeTime(clock.getCurrentTime());
             simulationTenantMap.put(tenant, new SimulationTenant(tenantActivity));
             index++;
         }

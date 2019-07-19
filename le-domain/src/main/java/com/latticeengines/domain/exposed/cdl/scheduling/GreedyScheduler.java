@@ -37,7 +37,6 @@ public class GreedyScheduler implements Scheduler {
         canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
         canRunJobTenantMap.put(OTHER_KEY, canRunJobTenantSet);
         log.debug(JsonUtils.serialize(canRunJobTenantMap));
-        log.info("can run PA job tenant list is : " + JsonUtils.serialize(canRunJobTenantMap));
         return canRunJobTenantMap;
     }
 }

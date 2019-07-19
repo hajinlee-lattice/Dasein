@@ -3,9 +3,6 @@ package com.latticeengines.domain.exposed.cdl.scheduling;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAEndEvent;
@@ -13,8 +10,6 @@ import com.latticeengines.domain.exposed.cdl.scheduling.event.PAStartEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
 
 public class SimulationTenantSummary {
-
-    private static final Logger log = LoggerFactory.getLogger(SimulationTenantSummary.class);
 
     private String tenantId;
     private boolean isLarge;
@@ -31,10 +26,6 @@ public class SimulationTenantSummary {
         this.tenantId = tenantId;
         this.isLarge = isLarge;
         this.isDataCloudRefresh = isDataCloudRefresh;
-        this.paNum = 0;
-        this.failedPANum = 0;
-        this.retryPANum = 0;
-        this.successRate = 0.0f;
         this.paTime = new LinkedList<>();
         this.importActionWaitingTime = new LinkedList<>();
         this.scheduleNowWaitingTime = new LinkedList<>();
@@ -44,7 +35,7 @@ public class SimulationTenantSummary {
     public void calculate(List<Event> eventList) {
         long paStartTime = 0L;
         long paEndTime = 0L;
-        for (int i = (eventList.size() - 1); i >= 0; i--) {
+        for (int i = eventList.size() - 1; i >= 0; i--) {
             Event event = eventList.get(i);
             if (event instanceof PAStartEvent) {
                 paStartTime = event.getTime();

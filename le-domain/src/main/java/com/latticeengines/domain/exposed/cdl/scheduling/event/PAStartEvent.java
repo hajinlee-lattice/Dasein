@@ -5,24 +5,26 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 
 public class PAStartEvent extends Event {
+
+    private boolean isRetry;
 
     private static final Logger log = LoggerFactory.getLogger(PAStartEvent.class);
 
     public PAStartEvent(String tenantId, Long time) {
         super(time);
         this.tenantId = tenantId;
+        this.isRetry = false;
     }
 
     @Override
     public List<Event> changeState(SimulationContext simulationContext) {
         TenantActivity tenantActivity = simulationContext.getcanRunTenantActivityByTenantId(tenantId);
-        log.info("pa start tenantActivity is: " + JsonUtils.serialize(tenantActivity));
         if (tenantActivity != null) {
+            this.isRetry = tenantActivity.isRetry();
             simulationContext.setTenantSummary(tenantActivity, false);
             simulationContext.systemStatus.changeSystemState(tenantActivity);
             log.info(simulationContext.systemStatus.toString());
@@ -34,6 +36,6 @@ public class PAStartEvent extends Event {
 
     @Override
     public String toString() {
-        return "PA start for tenant: " + tenantId + ", time: " + getTime();
+        return "PA start for tenant: " + tenantId + ", time: " + getTime() + ", isRetry: " + isRetry;
     }
 }

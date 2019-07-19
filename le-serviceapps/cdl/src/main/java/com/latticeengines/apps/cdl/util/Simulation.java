@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SimulationTimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.DataCloudRefreshEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.SchedulingEvent;
 
 public class Simulation {
 
@@ -37,6 +38,7 @@ public class Simulation {
         this.simulationContext = new SimulationContext(systemStatus, dcRefreshTenants, simulationTenantMap);
         this.simulationContext.setTimeClock(clock);
         this.endTime = transferTime(duringTime);
+        this.priorityQueue.addAll(generateSchedulingEvent());
         this.priorityQueue.addAll(generateDataCloudRefreshEvent());
     }
 
@@ -44,6 +46,7 @@ public class Simulation {
         while (!priorityQueue.isEmpty() && (clock.getCurrentTime() <= endTime)) {
             Event e = priorityQueue.poll();
             // fake current time
+            log.debug(e.toString());
             clock.setTimestamp(e.getTime());
             List<Event> events = e.changeState(simulationContext);
             if (!CollectionUtils.isEmpty(events)) {
@@ -76,6 +79,16 @@ public class Simulation {
             events.add(new DataCloudRefreshEvent(time));
         }
 
+        return events;
+    }
+
+    private List<Event> generateSchedulingEvent() {
+        long time = clock.getCurrentTime();
+        List<Event> events = new ArrayList<>();
+        for (int i = 0; time <= endTime; i++) {
+            time += 5 * 60 * 1000; // 5 min
+            events.add(new SchedulingEvent(time));
+        }
         return events;
     }
 

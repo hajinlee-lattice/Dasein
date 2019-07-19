@@ -37,8 +37,6 @@ public class SimulationContext {
         this.simulationTenantMap = simulationTenantMap;
         setCanRunTenantActivityMap();
         this.runningTenantActivityMap = new HashMap<>();
-        this.schedulingEventCount = 0;
-        this.dataCloudRefreshCount = 0;
     }
 
     private void setCanRunTenantActivityMap() {
@@ -120,8 +118,7 @@ public class SimulationContext {
     }
 
     public void printSummary() {
-        log.info(SchedulingPASummaryUtil.printTenantSummary(new ArrayList<>(simulationTenantSummaryMap.values()), tenantEventMap,
-                schedulingEventCount, dataCloudRefreshCount));
+        log.info(SchedulingPASummaryUtil.printTenantSummary(this));
 
     }
 
@@ -178,5 +175,9 @@ public class SimulationContext {
 
     public void setDataCloudRefreshCount(int dataCloudRefreshCount) {
         this.dataCloudRefreshCount = dataCloudRefreshCount;
+    }
+
+    public Map<String, SimulationTenantSummary> getSimulationTenantSummaryMap() {
+        return this.simulationTenantSummaryMap;
     }
 }

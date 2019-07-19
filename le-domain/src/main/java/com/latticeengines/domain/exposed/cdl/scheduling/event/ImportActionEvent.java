@@ -31,6 +31,6 @@ public class ImportActionEvent extends Event {
 
     @Override
     public String toString() {
-        return "ImportActionEvent current time is: " + getTime();
+        return "ImportActionEvent tenantId: " + tenantId + ", current time is: " + getTime();
     }
 }

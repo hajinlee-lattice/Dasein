@@ -26,6 +26,6 @@ public class ScheduleNowEvent extends Event {
 
     @Override
     public String toString() {
-        return "ScheduleNowEvent current time is: " + getTime();
+        return "ScheduleNowEvent tenantId is: " + tenantId + ", current time is: " + getTime();
     }
 }

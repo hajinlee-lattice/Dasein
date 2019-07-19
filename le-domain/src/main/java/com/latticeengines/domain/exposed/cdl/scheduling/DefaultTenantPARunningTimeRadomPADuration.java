@@ -18,7 +18,7 @@ public class DefaultTenantPARunningTimeRadomPADuration implements RandomPADurati
         Random r = new Random();
         int num = r.nextInt(100);
         if (tenantActivity.isLarge()) {
-            return false;
+            return num >= 40;
         } else {
             return num >= 10;
         }
