@@ -833,6 +833,9 @@ public enum LedpCode {
     LEDP_40064("Cannot update All System Priority: {0}"),
     LEDP_40065("Cannot create a new Campaign without a Display Name"),
     LEDP_40066("Cannot create Import System: {0}"),
+    LEDP_40067("Cannot update Export Field Metadata Mapping as LookupMap is empty"),
+    LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
+    LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

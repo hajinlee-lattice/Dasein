@@ -33,6 +33,12 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     }
 
     @Override
+    public List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
+            List<ExportFieldMetadataDefaults> defaultExportFields) {
+        return exportFieldMetadataDefaultsEntityMgr.updateDefaultFields(systemName, defaultExportFields);
+    }
+
+    @Override
     public void delete(List<ExportFieldMetadataDefaults> defaultExportFields) {
         defaultExportFields.forEach(field -> exportFieldMetadataDefaultsEntityMgr.deleteByPid(field.getPid()));
     }
