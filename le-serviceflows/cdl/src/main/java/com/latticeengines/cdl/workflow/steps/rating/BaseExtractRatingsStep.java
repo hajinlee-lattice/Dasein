@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -136,6 +137,14 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                 if (CollectionUtils.isNotEmpty(round)) {
                     boolean persistOnDisk = getTotalRatingWeights() > 8;
                     startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
+                    String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+                    if (StringUtils.isNotBlank(trxnTable)) {
+                        String period = configuration.getApsRollupPeriod();
+                        if (StringUtils.isBlank(period)) {
+                            period = "Month";
+                        }
+                        prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
+                    }
                     round.forEach(this::extractOneContainer);
                 }
                 return true;

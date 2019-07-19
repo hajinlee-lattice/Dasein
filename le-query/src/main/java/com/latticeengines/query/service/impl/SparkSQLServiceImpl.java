@@ -105,6 +105,22 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     @Override
+    public void prepareForCrossSellQueries(LivySession livySession, //
+                                           String periodName, String trxnTable, String storageLevel) {
+        InputStreamSparkScript sparkScript = getTrxnScript();
+        ScriptJobConfig jobConfig = new ScriptJobConfig();
+        jobConfig.setNumTargets(0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("TRXN_TABLE", trxnTable);
+        params.put("PERIOD_NAME", periodName);
+        if (StringUtils.isNotBlank(storageLevel)) {
+            params.put("STORAGE_LEVEL", storageLevel);
+        }
+        jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+        sparkJobService.runScript(livySession, sparkScript, jobConfig);
+    }
+
+    @Override
     public long getCount(CustomerSpace customerSpace, LivySession livySession, String sql) {
         InputStreamSparkScript sparkScript = getQueryScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
@@ -188,6 +204,15 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     private InputStreamSparkScript getQueryScript() {
         InputStream is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("scripts/query.scala");
+        InputStreamSparkScript sparkScript = new InputStreamSparkScript();
+        sparkScript.setStream(is);
+        sparkScript.setInterpreter(SparkInterpreter.Scala);
+        return sparkScript;
+    }
+
+    private InputStreamSparkScript getTrxnScript() {
+        InputStream is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("scripts/trxn.scala");
         InputStreamSparkScript sparkScript = new InputStreamSparkScript();
         sparkScript.setStream(is);
         sparkScript.setInterpreter(SparkInterpreter.Scala);

@@ -102,7 +102,12 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
             return this;
         }
-        
+
+        public Builder apsRollupPeriod(String period) {
+            generateAIRating.apsRollupPeriod(period);
+            return this;
+        }
+
         public GenerateRatingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("generateRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
