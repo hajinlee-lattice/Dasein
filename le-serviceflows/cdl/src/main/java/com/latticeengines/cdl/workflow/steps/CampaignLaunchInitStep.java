@@ -153,6 +153,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
             } else {
                 PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+                playLaunch.setAccountsLaunched(launchedAccountNum);
+                playLaunch.setContactsLaunched(launchedContactNum);
                 campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext,
                         System.currentTimeMillis(), targetPath);
                 long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);

@@ -278,19 +278,6 @@ public class CampaignLaunchProcessor {
         return playLaunchContextBuilder.build();
     }
 
-    public void updateLaunchProgress(PlayLaunchContext playLaunchContext, long processedSegmentAccountsCount,
-            long segmentAccountsCount) {
-        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-
-        playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
-        playLaunch.setAccountsLaunched(playLaunchContext.getCounter().getAccountLaunched().get());
-        playLaunch.setContactsLaunched(playLaunchContext.getCounter().getContactLaunched().get());
-        playLaunch.setAccountsErrored(playLaunchContext.getCounter().getAccountErrored().get());
-
-        updateLaunchProgress(playLaunchContext);
-        log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
-    }
-
     public void updateLaunchProgress(PlayLaunchContext playLaunchContext) {
         try {
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
