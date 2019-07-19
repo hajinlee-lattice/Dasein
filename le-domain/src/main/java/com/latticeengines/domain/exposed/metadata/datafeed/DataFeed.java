@@ -160,6 +160,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("schedule_request")
     private String scheduleRequest;
 
+    @Column(name = "SCHEDULING_GROUP")
+    @JsonProperty("scheduling_group")
+    private String schedulingGroup;
+
     @Transient
     @JsonIgnore
     private Map<String, Map<String, Map<String, DataFeedTask>>> taskMap = new HashMap<>();
@@ -389,6 +393,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setScheduleRequest(String scheduleRequest) {
         this.scheduleRequest = scheduleRequest;
+    }
+
+    public String getSchedulingGroup() {
+        return schedulingGroup;
+    }
+
+    public void setSchedulingGroup(String schedulingGroup) {
+        this.schedulingGroup = schedulingGroup;
     }
 
     public enum Status {

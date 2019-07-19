@@ -228,4 +228,8 @@ public final class PathBuilder {
     public static Path buildErrorCategoryPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.ERROR_CATEGORY_FILE);
     }
+
+    public static Path buildSchedulingGroupPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_GROUP_FILE);
+    }
 }
