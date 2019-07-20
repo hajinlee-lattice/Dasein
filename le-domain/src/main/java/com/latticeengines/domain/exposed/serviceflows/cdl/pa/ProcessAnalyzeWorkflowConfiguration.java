@@ -219,6 +219,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
             processRatingWorkflowBuilder.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            processStepConfiguration.setTargetScoreDerivation(targetScoreDerivationEnabled);
             return this;
         }
 

@@ -21,6 +21,9 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
     @JsonProperty("scoreField")
     private String scoreField;
 
+    @JsonProperty("target_score_derivation")
+    private boolean targetScoreDerivation;
+    
     public PivotScoreAndEventConfiguration() {
         setBeanName("pivotScoreAndEvent");
     }
@@ -59,5 +62,13 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
 
     public void setScoreField(String scoreField) {
         this.scoreField = scoreField;
+    }
+
+    public boolean isTargetScoreDerivation() {
+        return targetScoreDerivation;
+    }
+
+    public void setTargetScoreDerivation(boolean targetScoreDerivation) {
+        this.targetScoreDerivation = targetScoreDerivation;
     }
 }

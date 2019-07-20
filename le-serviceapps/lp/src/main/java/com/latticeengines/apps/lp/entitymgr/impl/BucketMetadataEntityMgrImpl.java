@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +92,19 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
             return Collections.emptyList();
         } else {
             return readerRepository.findByCreationTimestampAndModelSummary_Id(bm.getCreationTimestamp(), modelId);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<BucketMetadata> getModelBucketMetadatasFromReader(String modelId) {
+        Pageable pageable = PageRequest.of(0, 1);
+        List<BucketMetadata> bm = readerRepository
+                .findFirstByModelSummary_IdForModel(modelId, pageable);
+        if (CollectionUtils.isEmpty(bm)) {
+            return Collections.emptyList();
+        } else {
+            return readerRepository.findByCreationTimestampAndModelSummary_Id(bm.get(0).getCreationTimestamp(), modelId);
         }
     }
 

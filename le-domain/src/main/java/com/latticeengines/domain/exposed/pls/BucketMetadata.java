@@ -76,10 +76,14 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonProperty("published_version")
     @Column(name = "PUBLISHED_VERSION")
     private Integer publishedVersion;
-
+    
     @JsonProperty("creation_timestamp")
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private long creationTimestamp;
+
+    @JsonProperty("orig_creation_timestamp")
+    @Column(name = "ORIG_CREATION_TIMESTAMP", nullable = true)
+    private Long origCreationTimestamp;
 
     @JsonProperty("last_modified_by_user")
     @Column(name = "LAST_MODIFIED_BY_USER")
@@ -96,7 +100,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonProperty("model_summary_id")
     @Transient
     private String modelSummaryId;
-
+    
     public BucketMetadata() {
     }
 
@@ -180,6 +184,14 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
 
     public void setPublishedVersion(Integer publishedVersion) {
         this.publishedVersion = publishedVersion;
+    }
+
+    public Long getOrigCreationTimestamp() {
+        return origCreationTimestamp;
+    }
+
+    public void setOrigCreationTimestamp(Long origCreationTimestamp) {
+        this.origCreationTimestamp = origCreationTimestamp;
     }
 
     public String getModelSummaryId() {

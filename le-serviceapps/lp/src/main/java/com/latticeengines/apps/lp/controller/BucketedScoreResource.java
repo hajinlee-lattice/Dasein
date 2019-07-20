@@ -67,6 +67,14 @@ public class BucketedScoreResource {
         return bucketedScoreService.getABCDBucketsByModelGuid(modelGuid);
     }
 
+    @GetMapping(value = "/modelabcdbuckets/model/{modelGuid}")
+    @ResponseBody
+    @ApiOperation(value = "Get Model ABCD Buckets info by model GUID")
+    public List<BucketMetadata> getModelABCDBucketsByModelGuid(@PathVariable String customerSpace,
+            @PathVariable String modelGuid) {
+        return bucketedScoreService.getModelABCDBucketsByModelGuid(modelGuid);
+    }
+    
     @GetMapping(value = "/publishedbuckets/model")
     @ResponseBody
     @ApiOperation(value = "Get all up-to-date ABCD Buckets info from list of by model GUID")
