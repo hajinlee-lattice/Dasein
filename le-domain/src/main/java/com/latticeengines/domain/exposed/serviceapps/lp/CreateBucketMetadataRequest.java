@@ -28,6 +28,9 @@ public class CreateBucketMetadataRequest {
     @JsonProperty("IsPublished")
     private boolean isPublished;
 
+    @JsonProperty("IsCreateForModel")
+    private boolean isCreateForModel;
+    
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
     }
@@ -67,4 +70,13 @@ public class CreateBucketMetadataRequest {
     public void setPublished(boolean published) {
         isPublished = published;
     }
+
+    public boolean isCreateForModel() {
+        return isCreateForModel;
+    }
+
+    public void setCreateForModel(boolean isCreateForModel) {
+        this.isCreateForModel = isCreateForModel;
+    }
+    
 }

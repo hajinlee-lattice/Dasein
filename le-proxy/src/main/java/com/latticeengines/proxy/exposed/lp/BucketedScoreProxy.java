@@ -33,4 +33,6 @@ public interface BucketedScoreProxy {
 
     Map<String, List<BucketMetadata>> getAllPublishedBucketMetadataByModelSummaryIdList(String tenantId,
             List<String> modelSummaryIds);
+
+    List<BucketMetadata> getModelABCDBucketsByModelGuid(String shortTenantId, String modelId);
 }

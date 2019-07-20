@@ -68,6 +68,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
+    public List<BucketMetadata> getModelABCDBucketsByModelGuid(String modelId) {
+        return bucketMetadataEntityMgr.getModelBucketMetadatasFromReader(modelId);
+    }
+    
+    @Override
     public List<BucketMetadata> getPublishedBucketMetadataByModelGuid(String modelSummaryId) {
         Integer maxPublishedVersion = bucketMetadataEntityMgr.getMaxPublishedVersionByModelId(modelSummaryId);
         if (maxPublishedVersion == null) {
@@ -121,6 +126,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         bucketMetadataList.forEach(bucketMetadata -> {
             bucketMetadata.setCreationTimestamp(creationTimestamp);
+            if (request.isCreateForModel()) {
+                bucketMetadata.setOrigCreationTimestamp(creationTimestamp);
+            }
             bucketMetadata.setLastModifiedByUser(request.getLastModifiedBy());
             bucketMetadata.setPublishedVersion(publishedVersion);
         });

@@ -228,6 +228,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder targetScoreDerivationEnabled(boolean targetScoreDerivation) {
             recalculatePercentile.setTargetScoreDerivation(targetScoreDerivation);
             calculateExpectedRevenuePercentile.setTargetScoreDerivation(targetScoreDerivation);
+            pivotScoreAndEvent.setTargetScoreDerivation(targetScoreDerivation);
             return this;
         }
 

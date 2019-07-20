@@ -150,4 +150,12 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
         }
     }
 
+    @Override
+    public List<BucketMetadata> getModelABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/modelabcdbuckets/model/{modelGuid}",
+                shortenCustomerSpace(customerSpace), modelGuid);
+        List<?> list = get("get model bucket metadata history for model", url, List.class);
+        return JsonUtils.convertList(list, BucketMetadata.class);
+    }
+
 }

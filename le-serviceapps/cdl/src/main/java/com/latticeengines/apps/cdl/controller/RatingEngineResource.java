@@ -565,7 +565,7 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             @RequestBody(required = false) List<BucketMetadata> bucketMetadatas, //
             @RequestParam(value = "useremail", required = true) String userEmail) {
-        ratingEngineService.setScoringIteration(ratingEngineId, ratingModelId, bucketMetadatas,
+        ratingEngineService.setScoringIteration(customerSpace, ratingEngineId, ratingModelId, bucketMetadatas,
                 userEmail);
     }
     // -------------
