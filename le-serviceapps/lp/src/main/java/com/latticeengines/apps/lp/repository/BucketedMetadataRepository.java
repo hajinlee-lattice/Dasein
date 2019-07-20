@@ -2,6 +2,9 @@ package com.latticeengines.apps.lp.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -14,6 +17,9 @@ public interface BucketedMetadataRepository extends BaseJpaRepository<BucketMeta
 
     List<BucketMetadata> findByCreationTimestampAndRatingEngine_Id(long creationTimestamp, String engineId);
 
+    @Query("select m from BucketMetadata m where m.modelSummary.id = ?1 and m.creationTimestamp = m.origCreationTimestamp order by m.creationTimestamp Desc")
+    List<BucketMetadata> findFirstByModelSummary_IdForModel(String modelGuid, Pageable pageable);
+    
     List<BucketMetadata> findByCreationTimestampAndModelSummary_Id(long creationTimestamp, String modelGuid);
 
     BucketMetadata findFirstByModelSummary_IdOrderByCreationTimestampDesc(String modelGuid);

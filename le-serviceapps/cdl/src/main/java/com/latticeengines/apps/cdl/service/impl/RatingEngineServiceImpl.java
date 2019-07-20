@@ -44,11 +44,13 @@ import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
@@ -162,6 +164,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
+
+    @Inject
+    private BatonService batonService;
 
     @PostConstruct
     public void postConstruct() {
@@ -517,7 +522,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public void setScoringIteration(String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas,
+    public void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId, List<BucketMetadata> bucketMetadatas,
             String userEmail) {
 
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, true);
@@ -541,6 +546,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 request.setModelGuid(aiModel.getModelSummaryId());
                 request.setRatingEngineId(ratingEngineId);
                 request.setLastModifiedBy(userEmail);
+                boolean targetScoreDerivation = batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION);
+                if (targetScoreDerivation) {
+                    request.setCreateForModel(true);
+                }
                 bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
             }
         }

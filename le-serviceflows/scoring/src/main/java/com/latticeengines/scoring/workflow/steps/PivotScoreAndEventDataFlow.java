@@ -22,8 +22,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -59,7 +61,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-
+    
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
@@ -201,6 +203,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         request.setBucketMetadataList(bucketMetadata);
         log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId + ": "
                 + JsonUtils.pprint(bucketMetadata));
+        if (getConfiguration().isTargetScoreDerivation()) {
+            request.setCreateForModel(true);
+        }
         bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
     }
 

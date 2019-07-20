@@ -105,7 +105,7 @@ public interface RatingEngineService {
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
-    void setScoringIteration(String ratingEngineId, String ratingModelId,
+    void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
             List<BucketMetadata> bucketMetadatas, String userEmail);
 
     boolean validateForModeling(String customerSpace, RatingEngine ratingEngine,

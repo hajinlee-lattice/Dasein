@@ -6,18 +6,23 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -59,6 +64,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+    
+    @Autowired
+    private BatonService batonService;
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
@@ -116,9 +124,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
         return bucketedScoreProxy.getABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
-
+    
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
+        List<BucketMetadata> metadata = bucketedScoreProxy.getModelABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
+        if (CollectionUtils.isNotEmpty(metadata)) return metadata;
         return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
 
@@ -128,6 +138,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setBucketMetadataList(bucketMetadatas);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
         request.setModelGuid(modelId);
+        setTargetDerivation(request);
         bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
     }
 
@@ -135,7 +146,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     public List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId) {
         return bucketedScoreProxy.getLatestABCDBucketsByModelGuid(MultiTenantContext.getShortTenantId(), modelId);
     }
-
+    
     @Override
     public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas) {
         log.info(String.format("Creating BucketMetadata for RatingEngine %s, Model %s", ratingEngineId, modelId));
@@ -144,9 +155,18 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setModelGuid(modelId);
         request.setRatingEngineId(ratingEngineId);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
+        setTargetDerivation(request);
         bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getShortTenantId(), request);
         // Activate Rating Engine by default
         activateRatingEngine(ratingEngineId);
+    }
+
+    private void setTargetDerivation(CreateBucketMetadataRequest request) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        boolean targetScoreDerivation = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION);
+        if (targetScoreDerivation) {
+            request.setCreateForModel(true);
+        }
     }
 
     @Override
@@ -189,4 +209,5 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         ratingEngine.setId(ratingEngineId);
         ratingEngineProxy.createOrUpdateRatingEngine(MultiTenantContext.getCustomerSpace().toString(), ratingEngine);
     }
+
 }
