@@ -195,7 +195,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     private void processMetadataWithTargetScoreDerivationEnabled(String modelGuid, List<BucketMetadata> bucketMetadata,
             String engineId) {
-        if (bucketMetadata.get(0).getCreationTimestamp() == bucketMetadata.get(0).getOrigCreationTimestamp()) {
+        if (bucketMetadata.get(0).getOrigCreationTimestamp() != null && bucketMetadata.get(0).getCreationTimestamp() == bucketMetadata.get(0).getOrigCreationTimestamp()) {
             createMetadataForPublish(modelGuid, bucketMetadata, engineId);
         } else {
             log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : "
@@ -214,7 +214,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         request.setModelGuid(modelGuid);
         request.setBucketMetadataList(bucketMetadata);
         request.setPublished(isPublish);
-        bucketMetadata.forEach(b -> b.setOrigCreationTimestamp(b.getCreationTimestamp()));
+        if (!isPublish) {
+            bucketMetadata.forEach(b -> b.setOrigCreationTimestamp(b.getCreationTimestamp()));
+        }
         bucketedScoreProxy.updateABCDBuckets(customerSpace.toString(), request);
     }
 
