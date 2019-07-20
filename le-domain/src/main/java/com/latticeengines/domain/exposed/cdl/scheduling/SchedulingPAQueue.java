@@ -20,15 +20,19 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     private final boolean isRetryQueue;
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock) {
-        this(systemStatus, clz, timeClock, false);
+    private final String queueName;
+
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, String queueName) {
+        this(systemStatus, clz, timeClock, false, queueName);
     }
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, boolean isRetryQueue) {
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, boolean isRetryQueue,
+                             String queueName) {
         this.systemStatus = systemStatus;
         this.clz = clz;
         this.timeClock = timeClock;
         this.isRetryQueue = isRetryQueue;
+        this.queueName = queueName;
         priorityQueue = new PriorityQueue<>();
     }
 
@@ -37,7 +41,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     }
 
     public String getQueueName() {
-        return clz.getName();
+        return this.queueName;
     }
 
     public boolean isRetryQueue() {
@@ -100,10 +104,6 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      */
     public int size() {
         return priorityQueue.size();
-    }
-
-    public Set<String> getScheduleTenants() {
-        return systemStatus.getScheduleTenants();
     }
 
     /**

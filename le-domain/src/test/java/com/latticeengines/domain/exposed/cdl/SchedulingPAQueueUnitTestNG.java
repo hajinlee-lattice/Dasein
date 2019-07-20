@@ -50,7 +50,8 @@ public class SchedulingPAQueueUnitTestNG {
     private Object[][] provideFillAllCanRunJobsTestCases() {
         return new Object[][] { //
                 { //
-                        new SchedulingPAQueue<>(newStatus(5, 6, 1), ScheduleNowSchedulingPAObject.class, schedulingPATestTimeClock), //
+                        new SchedulingPAQueue<>(newStatus(5, 6, 1), ScheduleNowSchedulingPAObject.class,
+                                schedulingPATestTimeClock, "testScheduleNowQueue"), //
                         Arrays.asList( //
                                 newScheduleNowObj("t1", true, false, 1L, TenantType.QA),
                                 // not schedule now, will be skipped during push
@@ -62,7 +63,8 @@ public class SchedulingPAQueueUnitTestNG {
                         4, Sets.newHashSet("t1", "t3", "t4") //
                 }, //
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class, schedulingPATestTimeClock), //
+                        new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class,
+                                schedulingPATestTimeClock, "RetryQueue"), //
                         Arrays.asList(
                                 newRetryObj("t1", true, false, schedulingPATestTimeClock.getCurrentTime() - timestamp,
                         TenantType.QA),
@@ -80,7 +82,8 @@ public class SchedulingPAQueueUnitTestNG {
                         ), 4, Sets.newHashSet("t1", "t4", "t5") //
                 },
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 7, 2), AutoScheduleSchedulingPAObject.class, schedulingPATestTimeClock),
+                        new SchedulingPAQueue<>(newStatus(5, 7, 2), AutoScheduleSchedulingPAObject.class,
+                                schedulingPATestTimeClock, "AutoScheduleQueue"),
                         Arrays.asList(
                                 newAutoScheduleObj("t1", true, false, 1L, 1L, 1L, TenantType.QA),
                                 // not auto schedule, will be skipped during push
@@ -99,7 +102,8 @@ public class SchedulingPAQueueUnitTestNG {
                         ), 4, Sets.newHashSet("t1", "t5", "t6")
                 },
                 {
-                        new SchedulingPAQueue<>(newStatus(5, 7, 2), DataCloudRefreshSchedulingPAObject.class, schedulingPATestTimeClock),
+                        new SchedulingPAQueue<>(newStatus(5, 7, 2), DataCloudRefreshSchedulingPAObject.class,
+                                schedulingPATestTimeClock, "dataCloudRefreshQueue"),
                         Arrays.asList(
                                 newDataCloudRefreshObj("t1", true, false, TenantType.QA),
                                 // not dataCloud refresh, will be skipped during push
@@ -112,7 +116,8 @@ public class SchedulingPAQueueUnitTestNG {
                         ), 5, Sets.newHashSet("t1", "t3", "t5", "t6")
                 },
                 { //
-                        new SchedulingPAQueue<>(newStatus(2, 6, 1), ScheduleNowSchedulingPAObject.class, schedulingPATestTimeClock), //
+                        new SchedulingPAQueue<>(newStatus(2, 6, 1), ScheduleNowSchedulingPAObject.class,
+                                schedulingPATestTimeClock, "ScheduleNowQueue"), //
                         Arrays.asList( //
                                 newScheduleNowObj("t1", true, false, 1L, TenantType.QA),
                                 // not schedule now, will be skipped during push

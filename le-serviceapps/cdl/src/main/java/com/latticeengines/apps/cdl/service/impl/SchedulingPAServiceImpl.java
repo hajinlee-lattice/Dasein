@@ -42,13 +42,10 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
-import com.latticeengines.domain.exposed.cdl.scheduling.AutoScheduleSchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.DataCloudRefreshSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
-import com.latticeengines.domain.exposed.cdl.scheduling.RetrySchedulingPAObject;
-import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -60,7 +57,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
-import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
@@ -195,14 +191,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
                 }
                 tenantActivity.setScheduledNow(simpleDataFeed.isScheduleNow());
-                tenantActivity.setScheduleTime(tenantActivity.isScheduledNow() ?
-                        simpleDataFeed.getScheduleTime().getTime() : null);
+                tenantActivity.setScheduleTime(
+                        tenantActivity.isScheduledNow() ? simpleDataFeed.getScheduleTime().getTime() : null);
 
                 // auto scheduling
                 if (actionStats.containsKey(tenant.getPid())) {
                     Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()), tenant, execution);
                     if (invokeTime != null) {
-                        if (simpleDataFeed.getNextInvokeTime() == null || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
+                        if (simpleDataFeed.getNextInvokeTime() == null
+                                || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                             dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                         }
                         tenantActivity.setAutoSchedule(true);
@@ -249,6 +246,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return map;
     }
 
+    @Override
     public List<SchedulingPAQueue> initQueue() {
         Map<String, Object> map = setSystemStatus();
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
@@ -258,49 +256,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     public List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
         SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
-        List<SchedulingPAQueue> schedulingPAQueues = new LinkedList<>();
-        SchedulingPAQueue<RetrySchedulingPAObject> retrySchedulingPAQueue = new SchedulingPAQueue<>(systemStatus,
-                RetrySchedulingPAObject.class, schedulingPATimeClock, true);
-        SchedulingPAQueue<ScheduleNowSchedulingPAObject> scheduleNowSchedulingPAQueue = new SchedulingPAQueue<>(
-                systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<AutoScheduleSchedulingPAObject> autoScheduleSchedulingPAQueue = new SchedulingPAQueue<>(
-                systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> dataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<ScheduleNowSchedulingPAObject> nonCustomerScheduleNowSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, ScheduleNowSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<AutoScheduleSchedulingPAObject> nonCustomerAutoScheduleSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, AutoScheduleSchedulingPAObject.class, schedulingPATimeClock);
-        SchedulingPAQueue<DataCloudRefreshSchedulingPAObject> nonDataCloudRefreshSchedulingPAQueue =
-                new SchedulingPAQueue<>(systemStatus, DataCloudRefreshSchedulingPAObject.class, schedulingPATimeClock);
-        for (TenantActivity tenantActivity : tenantActivityList) {
-            RetrySchedulingPAObject retrySchedulingPAObject = new RetrySchedulingPAObject(tenantActivity);
-            ScheduleNowSchedulingPAObject scheduleNowSchedulingPAObject =
-                    new ScheduleNowSchedulingPAObject(tenantActivity);
-            AutoScheduleSchedulingPAObject autoScheduleSchedulingPAObject =
-                    new AutoScheduleSchedulingPAObject(tenantActivity);
-            DataCloudRefreshSchedulingPAObject dataCloudRefreshSchedulingPAObject =
-                    new DataCloudRefreshSchedulingPAObject(tenantActivity);
-            retrySchedulingPAQueue.add(retrySchedulingPAObject);
-            if (tenantActivity.getTenantType() == TenantType.CUSTOMER) {
-                scheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
-                autoScheduleSchedulingPAQueue.add(autoScheduleSchedulingPAObject);
-                dataCloudRefreshSchedulingPAQueue.add(dataCloudRefreshSchedulingPAObject);
-            } else {
-                nonCustomerScheduleNowSchedulingPAQueue.add(scheduleNowSchedulingPAObject);
-                nonCustomerAutoScheduleSchedulingPAQueue.add(autoScheduleSchedulingPAObject);
-                nonDataCloudRefreshSchedulingPAQueue.add(dataCloudRefreshSchedulingPAObject);
-            }
-        }
-        schedulingPAQueues.add(retrySchedulingPAQueue);
-        schedulingPAQueues.add(scheduleNowSchedulingPAQueue);
-        schedulingPAQueues.add(autoScheduleSchedulingPAQueue);
-        schedulingPAQueues.add(dataCloudRefreshSchedulingPAQueue);
-        schedulingPAQueues.add(nonCustomerScheduleNowSchedulingPAQueue);
-        schedulingPAQueues.add(nonCustomerAutoScheduleSchedulingPAQueue);
-        schedulingPAQueues.add(nonDataCloudRefreshSchedulingPAQueue);
-        log.info(JsonUtils.serialize(scheduleNowSchedulingPAQueue));
-        return schedulingPAQueues;
+        return SchedulingPAUtil.initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
     }
 
     @Override
@@ -356,10 +312,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private boolean reachRetryLimit(CDLJobType cdlJobType, int retryCount) {
         switch (cdlJobType) {
-            case PROCESSANALYZE:
-                return retryCount >= processAnalyzeJobRetryCount;
-            default:
-                return false;
+        case PROCESSANALYZE:
+            return retryCount >= processAnalyzeJobRetryCount;
+        default:
+            return false;
         }
     }
 
@@ -426,8 +382,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         } else if (execution.getStatus() == DataFeedExecution.Status.Started) {
             return null;
         } else {
-            if ((execution.getStatus() == DataFeedExecution.Status.Failed) &&
-                    (execution.getRetryCount() < processAnalyzeJobRetryCount)) {
+            if ((execution.getStatus() == DataFeedExecution.Status.Failed)
+                    && (execution.getRetryCount() < processAnalyzeJobRetryCount)) {
                 calendar.setTime(execution.getUpdated());
                 calendar.add(Calendar.MINUTE, 15);
             } else {
@@ -485,15 +441,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
         return (status != null
                 && (status.getDataCloudBuildNumber() == null
-                || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
-                || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
+                        || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
+                        || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                 && StringUtils.isNotBlank(accountTableName));
     }
 
     private Boolean isDataCloudRefresh(Tenant tenant, String currentBuildNumber, DataCollectionStatus status) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
-            boolean allowAutoDataCloudRefresh =  batonService.isEnabled(customerSpace,
+            boolean allowAutoDataCloudRefresh = batonService.isEnabled(customerSpace,
                     LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY);
             if (allowAutoDataCloudRefresh) {
                 return checkDataCloudChange(currentBuildNumber, customerSpace.toString(), status);
