@@ -63,6 +63,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     private static final String UPDATED_SEGMENT_DESCRIPTION = "UPDATED_SEGMENT_DESCRIPTION";
     private static final MetadataSegment METADATA_SEGMENT = new MetadataSegment();
 
+    private static final Long ZERO = 0L;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         segmentName = NamingUtils.uuid("SEGMENT_NAME");
@@ -112,11 +114,10 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
-
-        assertNull(retrieved.getAccounts());
-        assertNull(retrieved.getContacts());
         assertNull(retrieved.getProducts());
 
+        assertEquals(retrieved.getAccounts(), ZERO);
+        assertEquals(retrieved.getContacts(), ZERO);
         assertEquals(retrieved.getName(), METADATA_SEGMENT.getName());
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT.getDisplayName());
         assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
