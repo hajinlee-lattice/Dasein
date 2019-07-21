@@ -1,0 +1,96 @@
+{
+  "account_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": [
+          {
+            "logicalRestriction": {
+              "operator": "OR",
+              "restrictions": [
+                {
+                  "bucketRestriction": {
+                    "bkt": {
+                      "Cnt": 204,
+                      "Txn": {
+                        "PrdId": "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il",
+                        "Time": {
+                          "Cmp": "PRIOR_ONLY",
+                          "Vals": [
+                            4
+                          ],
+                          "Period": "Year"
+                        },
+                        "Negate": false,
+                        "Amt": {
+                          "Cmp": "GREATER_THAN",
+                          "Vals": [
+                            100
+                          ],
+                          "includeNotPurchased": false
+                        }
+                      }
+                    },
+                    "ignored": false,
+                    "attr": "PurchaseHistory.AM_LHdgKhusYLJqk9JgC5SdJrwNv8tg9il__EVER__HP"
+                  }
+                },
+                {
+                  "bucketRestriction": {
+                    "bkt": {
+                      "Cnt": 19632,
+                      "Txn": {
+                        "PrdId": "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il",
+                        "Time": {
+                          "Cmp": "WITHIN",
+                          "Vals": [
+                            4
+                          ],
+                          "Period": "Year"
+                        },
+                        "Negate": true
+                      }
+                    },
+                    "ignored": false,
+                    "attr": "PurchaseHistory.AM_LHdgKhusYLJqk9JgC5SdJrwNv8tg9il__EVER__HP"
+                  }
+                },
+                {
+                  "bucketRestriction": {
+                    "bkt": {
+                      "Cnt": 19951,
+                      "Txn": {
+                        "PrdId": "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il",
+                        "Time": {
+                          "Cmp": "IN_CURRENT_PERIOD",
+                          "Vals": [],
+                          "Period": "Year"
+                        },
+                        "Negate": true
+                      }
+                    },
+                    "ignored": false,
+                    "attr": "PurchaseHistory.AM_LHdgKhusYLJqk9JgC5SdJrwNv8tg9il__EVER__HP"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "contact_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": []
+      }
+    }
+  },
+  "restrict_without_sfdcid": false,
+  "restrict_with_sfdcid": false,
+  "lookups": [],
+  "main_entity": "Account",
+  "distinct": false
+}

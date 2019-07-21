@@ -99,6 +99,9 @@ public class Query implements GraphNode {
     @JsonIgnore
     private List<JoinSpecification> commonTableJoins;
 
+    @JsonIgnore
+    private Map<BusinessEntity, String> joinHints;
+
     Query() {
     }
 
@@ -322,6 +325,14 @@ public class Query implements GraphNode {
 
     public List<JoinSpecification> getCommonTableJoins() {
         return commonTableJoins;
+    }
+
+    public Map<BusinessEntity, String> getJoinHints() {
+        return joinHints;
+    }
+
+    public void setJoinHints(Map<BusinessEntity, String> joinHints) {
+        this.joinHints = joinHints;
     }
 
     @Override
