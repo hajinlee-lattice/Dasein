@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
@@ -38,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
@@ -49,8 +48,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
-
-    private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
     @Inject
     private PlayService playService;
@@ -78,9 +75,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    ChannelConfigProcessor channelConfigProcessor;
 
     @Override
     public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
@@ -189,6 +183,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
             SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
+        } else if(playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
+            LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
+            playLaunch.setAudienceId(channelConfig.getAudienceId());
+            playLaunch.setAudienceName(channelConfig.getAudienceName());
+            channelConfig.setAudienceType(channelConfig.getAudienceType());
         }
 
         Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();

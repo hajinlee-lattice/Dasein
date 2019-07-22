@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -19,6 +20,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.sns.SNSService;
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -39,6 +41,8 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
 
     @Inject
     private SNSService snsService;
+    @Autowired
+    private ChannelConfigProcessor channelConfigProcessor;
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -88,6 +92,7 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
+        channelConfigProcessor.updateSnsMessageWithChannelConfig(config.getChannelConfig(), messageBody);
 
         Map<String, Object> jsonMessage = new HashMap<>();
         jsonMessage.put("default", JsonUtils.serialize(messageBody));

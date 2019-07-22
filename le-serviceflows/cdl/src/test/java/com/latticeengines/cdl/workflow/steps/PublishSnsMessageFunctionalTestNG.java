@@ -25,6 +25,9 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -68,7 +71,6 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         lookupIdMap.setExternalAuthentication(extSysAuth);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
-
         publishConfig.setLookupIdMap(lookupIdMap);
         publishConfig.setExternalAudienceId(audienceId);
         publishConfig.setExternalAudienceName("externalAudienceName");
@@ -93,4 +95,39 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         log.info(JsonUtils.serialize(publishResult));
         Assert.assertNotNull(publishResult);
     }
+
+    @Test(groups = "manual")
+    public void testLinkedInSnsTopic() {
+        PlayLaunchExportPublishToSNSConfiguration publishConfig = new PlayLaunchExportPublishToSNSConfiguration();
+        LinkedInChannelConfig liConfig = new LinkedInChannelConfig();
+        liConfig.setAudienceType(AudienceType.ACCOUNTS);
+        PlayLaunchChannel plC = new PlayLaunchChannel();
+        plC.setChannelConfig(liConfig);
+
+        publishConfig.setChannelConfig(null);
+
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
+        extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+        lookupIdMap.setExternalAuthentication(extSysAuth);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
+        publishConfig.setLookupIdMap(lookupIdMap);
+        publishConfig.setExternalAudienceId(audienceId);
+        publishConfig.setExternalAudienceName("externalAudienceName");
+        publishConfig.setExternalFolderName("folderName");
+        publishToSNSStep.setConfiguration(publishConfig);
+        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
+                UUID.randomUUID().toString());
+
+        String workflowRequestId = publishToSNSStep
+                .getObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
+
+        DropBoxSummary dropbox = new DropBoxSummary();
+        dropbox.setDropBox(UUID.randomUUID().toString());
+        when(dropboxProxy.getDropBox(anyString())).thenReturn(dropbox);
+
+        PublishResult publishResult = publishToSNSStep.publishToSnsTopic(customerSpace, workflowRequestId);
+        Assert.assertNotNull(publishResult);
+    }
+
 }

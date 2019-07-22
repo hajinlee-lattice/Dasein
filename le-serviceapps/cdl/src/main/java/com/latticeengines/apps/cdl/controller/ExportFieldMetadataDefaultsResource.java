@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,5 +45,14 @@ public class ExportFieldMetadataDefaultsResource {
     public List<ExportFieldMetadataDefaults> getDefaultFields(
             @RequestParam(value = "systemName", required = true) CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsService.getAttributes(systemName);
+    }
+
+    @DeleteMapping(value = "")
+    @ResponseBody
+    @ApiOperation(value = "Delete default fields")
+    @NoCustomerSpace
+    public void deleteDefaultFields(
+            @RequestParam(value = "systemName", required = true) CDLExternalSystemName systemName) {
+        exportFieldMetadataDefaultsService.deleteBySystemName(systemName);
     }
 }

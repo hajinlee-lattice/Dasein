@@ -161,14 +161,9 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     }
 
     private void cleanupExportDefaults() {
-        List<ExportFieldMetadataDefaults> defaultFields = exportFieldMetadataDefaultsService
-                .getAttributes(CDLExternalSystemName.AWS_S3);
+        exportFieldMetadataDefaultsService.deleteBySystemName(CDLExternalSystemName.AWS_S3);
 
-        defaultFields.addAll(exportFieldMetadataDefaultsService
-                .getAttributes(CDLExternalSystemName.Marketo));
-
-        log.info(JsonUtils.serialize(defaultFields));
-        exportFieldMetadataDefaultsService.delete(defaultFields);
+        exportFieldMetadataDefaultsService.deleteBySystemName(CDLExternalSystemName.Marketo);
     }
 
     @Test(groups = "deployment-app")

@@ -1,5 +1,3 @@
-// import  { underscore } from 'common/vendor.index';
-import {isEquivalent} from 'common/app/utilities/ObjectUtilities.js'
 /**
  * Account:[
  *  {name: 'the_name', fieldType: 'TEXT', requiredIfNoField: boolean/null, requiredType:'Required'/'NotRequired'}

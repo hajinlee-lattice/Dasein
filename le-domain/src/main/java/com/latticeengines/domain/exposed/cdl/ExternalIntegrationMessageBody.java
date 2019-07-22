@@ -20,6 +20,8 @@ public class ExternalIntegrationMessageBody {
 
     private String folderName;
 
+    private String audienceType;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -76,4 +78,11 @@ public class ExternalIntegrationMessageBody {
         return folderName;
     }
 
+    public void setAudienceType(String audienceType) {
+        this.audienceType = audienceType;
+    }
+
+    public String getAudienceType() {
+        return audienceType;
+    }
 }
