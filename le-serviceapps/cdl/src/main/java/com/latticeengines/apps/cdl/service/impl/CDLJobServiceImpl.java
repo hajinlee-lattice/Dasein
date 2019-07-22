@@ -194,7 +194,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Override
     public boolean submitJob(CDLJobType cdlJobType, String jobArguments) {
         if (cdlJobType == CDLJobType.PROCESSANALYZE) {
-            checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
+            if (!isActivityBasedPA) {
+                checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
+            }
             try {
                 if (!systemCheck() && !isActivityBasedPA) {
                     orchestrateJob();
@@ -359,7 +361,11 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private void schedulePAJob() {
+    @Override
+    public void schedulePAJob() {
+        if (systemCheck()) {
+            return;
+        }
         Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
         log.info("Scheduled PAs for tenants = {}. dryRun={}", canRunJobTenantMap, !isActivityBasedPA);
         Set<String> canRunRetryJobSet = canRunJobTenantMap.get(RETRY_KEY);

@@ -10,4 +10,6 @@ public interface CDLJobService {
     boolean submitJob(CDLJobType cdlJobType, String jobArguments);
 
     Date getNextInvokeTime(CustomerSpace customerSpace);
+
+    void schedulePAJob();
 }
