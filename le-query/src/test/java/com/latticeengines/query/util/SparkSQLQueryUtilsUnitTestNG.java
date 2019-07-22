@@ -15,7 +15,7 @@ public class SparkSQLQueryUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testDetachCTE() {
-        for (String queryFile: Arrays.asList("query1", "query2", "query3")) {
+        for (String queryFile : Arrays.asList("query1", "query2", "query3")) {
             String sql = readSqlFromResource(queryFile);
             List<List<String>> queries = SparkSQLQueryUtils.detachSubQueries(sql);
             AtomicReference<String> segmentSqlRef = new AtomicReference<>();
@@ -23,7 +23,9 @@ public class SparkSQLQueryUtilsUnitTestNG {
                 String name = l.get(0);
                 Assert.assertFalse(name.contains(" "), name);
                 String statement = l.get(1);
-                Assert.assertTrue(statement.startsWith("select") || statement.startsWith("("), statement);
+                Assert.assertTrue(statement.startsWith("select") || (statement.startsWith("(select")
+                        && statement.endsWith(")") && (statement.contains("intersect") || statement.contains("union"))),
+                        statement);
                 if (l.get(0).equals("segment")) {
                     segmentSqlRef.set(statement);
                 }

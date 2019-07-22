@@ -50,7 +50,7 @@ public class TranslatorCommon {
     static final String QUANTITY_VAL = "quantityval";
     static final String KEYS = "tempkeys";
     static final String TEMP_TRXN = "temptrxn";
-    static final String SEGMENT = "segment";
+    public static final String SEGMENT = "segment";
     static final String TRXN_PERIOD = "trxnperiod";
     static final String NUMBERS = "numbers";
     static final String REVENUE = "revenue";

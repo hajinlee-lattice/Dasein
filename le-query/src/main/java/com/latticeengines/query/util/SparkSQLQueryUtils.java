@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.latticeengines.query.exposed.translator.TranslatorCommon;
 import org.apache.commons.lang3.StringUtils;
 import org.kitesdk.shaded.com.google.common.collect.Lists;
 
@@ -25,11 +26,17 @@ public class SparkSQLQueryUtils {
             Matcher matcher = Pattern.compile("with .* as ").matcher(sql);
             if (matcher.find()) {
                 String phrase = matcher.group();
-                phrase = phrase.substring(0, phrase.indexOf(" as ")) + " as ";
                 String name = phrase.split(" ")[1];
+                String projection = phrase.substring(("with " + name + " ").length());
+                if (projection.startsWith("(")) {
+                    projection = extractInParenthesis(projection);
+                    phrase = "with " + name + " (" + projection + ") as ";
+                } else {
+                    phrase = phrase.substring(0, phrase.indexOf(" as ")) + " as ";
+                }
                 sql = sql.substring(phrase.length());
                 String statement = extractInParenthesis(sql);
-                if (name.endsWith("segment")) {
+                if (name.equals(TranslatorCommon.SEGMENT)) {
                     queries.addAll(extractSubQueries(statement, name));
                 } else {
                     queries.add(Arrays.asList(name, statement));
