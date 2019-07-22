@@ -78,6 +78,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
     private Map<String, Integer> attrIdMap;
     private List<AttrDimension> dimensions;
     private List<String> dedupFields = new ArrayList<>();
+    private Set<Integer> overlapBktAttrIds = new HashSet<>();
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -106,6 +107,8 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
             dedupFields = config.getDedupFields();
         }
         parseProfile(source, profile);
+
+        System.out.println("Overlap Attr Ids: " + overlapBktAttrIds);
 
         Node count;
         if (dedupFields != null && !dedupFields.isEmpty()) {
@@ -254,7 +257,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
         Aggregator<?> aggregator = new BucketConsolidateAggregator( //
-                groupby, BKT_ID, BKT_COUNT, ATTR_COUNT, ATTR_BKTS);
+                groupby, ATTR_ID, BKT_ID, BKT_COUNT, ATTR_COUNT, ATTR_BKTS, overlapBktAttrIds);
         return node.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
     }
 
@@ -393,6 +396,11 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
                     attrIdMap.put(fieldName, attrIdx++);
                 }
             }
+        }
+
+        List<String> overlapBktAttrs = BucketEncodeUtils.overlapBktAttrs(records);
+        for (String attrName: overlapBktAttrs) {
+            overlapBktAttrIds.add(attrIdMap.get(attrName));
         }
     }
 
