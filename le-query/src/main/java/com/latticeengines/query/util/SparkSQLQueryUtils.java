@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.latticeengines.query.exposed.translator.TranslatorCommon;
 import org.apache.commons.lang3.StringUtils;
 import org.kitesdk.shaded.com.google.common.collect.Lists;
 
+import com.latticeengines.query.exposed.translator.TranslatorCommon;
 import com.latticeengines.query.exposed.translator.TranslatorUtils;
 
 public class SparkSQLQueryUtils {
