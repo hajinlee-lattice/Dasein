@@ -104,7 +104,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         PlayLaunchChannel plC = new PlayLaunchChannel();
         plC.setChannelConfig(liConfig);
 
-        publishConfig.setChannelConfig(plC.getChannelConfig());
+        publishConfig.setChannelConfig(null);
 
         LookupIdMap lookupIdMap = new LookupIdMap();
         ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
