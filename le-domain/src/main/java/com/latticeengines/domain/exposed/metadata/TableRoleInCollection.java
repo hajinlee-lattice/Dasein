@@ -38,8 +38,6 @@ public enum TableRoleInCollection {
 
     AccountFeatures, //
     AccountExport, //
-    AccountDiffSlim, //
-    AccountBatchSlim, //
 
     AccountMaster;
 

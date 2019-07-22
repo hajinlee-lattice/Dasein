@@ -111,7 +111,8 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
     }
 
-    private Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, String sqlUser,
+    @Override
+    public Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, String sqlUser,
             boolean isCountQuery) {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);

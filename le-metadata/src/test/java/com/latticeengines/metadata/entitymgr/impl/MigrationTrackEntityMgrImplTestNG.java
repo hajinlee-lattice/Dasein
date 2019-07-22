@@ -31,7 +31,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     private static Map<TableRoleInCollection, String[]> ACTIVETABLE = new HashMap<>();
     private static final MigrationTrackImportAction IMPORTACTION = new MigrationTrackImportAction();
     private static final DataCollectionStatusDetail DETAIL = new DataCollectionStatusDetail();
-    private static final TableRoleInCollection ROLE = TableRoleInCollection.AccountBatchSlim;
+    private static final TableRoleInCollection ROLE = TableRoleInCollection.BucketedAccount;
     private static byte[] CUBESDATA = new byte[5];
 
     private static MigrationTrack track1 = new MigrationTrack();

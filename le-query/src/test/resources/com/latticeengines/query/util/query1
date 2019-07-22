@@ -1,0 +1,62 @@
+with temptrxn as (select AccountId, PeriodId, ProductId, TotalAmount, TotalQuantity
+from query_test_transaction
+where PeriodName = 'Month'), tempkeys (AccountId, PeriodId) as (select crossprod.AccountId, PeriodId
+from (select AccountId, PeriodId
+from (select distinct AccountId
+from temptrxn) as allaccounts, (select distinct PeriodId
+from temptrxn) as allperiods) as crossprod
+inner join (select AccountId, min(PeriodId) as minpid
+from temptrxn
+group by AccountId) as periodrange
+on periodrange.AccountId = crossprod.AccountId
+where crossprod.PeriodId >= periodrange.minpid - 2), segment as (select Account.AccountId
+from Query_Test_BucketedAccount_3 as Account
+where Account.AccountId in (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and TransactionDate <= '2013-12-31'
+group by AccountId
+having sum(TotalAmount) > 1000) and Account.AccountId in (select lhsLwuyqqfw.AccountId
+from Query_Test_AggregatedTransaction_3 as lhsLwuyqqfw
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2014-01-01' and TransactionDate <= '2018-12-31')
+group by AccountId
+having sum(TotalAmount) > 1000) as rhsGYzaTBim
+on lhsLwuyqqfw.AccountId = rhsGYzaTBim.AccountId
+where rhsGYzaTBim.AccountId is null) or Account.AccountId in (select lhs0P6R2hG6.AccountId
+from Query_Test_AggregatedTransaction_3 as lhs0P6R2hG6
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2014-01-01' and TransactionDate <= '2017-12-31') and (TotalAmount > 0 or TotalQuantity > 0)) as rhssoIbJgYy
+on lhs0P6R2hG6.AccountId = rhssoIbJgYy.AccountId
+where rhssoIbJgYy.AccountId is null) or Account.AccountId in (select lhspcA1wbiV.AccountId
+from Query_Test_AggregatedTransaction_3 as lhspcA1wbiV
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2018-01-01' and TransactionDate <= '2018-12-31') and (TotalAmount > 0 or TotalQuantity > 0)) as rhsYi3rvWZ4
+on lhspcA1wbiV.AccountId = rhsYi3rvWZ4.AccountId
+where rhsYi3rvWZ4.AccountId is null)), TransactionQJDs1inV as (select AccountId, PeriodId
+from (select tempkeys.AccountId, tempkeys.PeriodId, trxn.amountval, max(case when trxn.amountval > 0 then 1 when trxn.quantityval > 0 then 1 else 0 end) over (partition by tempkeys.AccountId order by tempkeys.PeriodId asc rows between unbounded preceding and 5 preceding) as amountagg
+from tempkeys
+left join (select AccountId, PeriodId, TotalAmount as amountval, TotalQuantity as quantityval
+from temptrxn
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il') as trxn
+on tempkeys.AccountId = trxn.AccountId and tempkeys.PeriodId = trxn.PeriodId) as aps
+where amountagg = '1' and PeriodId = 211
+group by AccountId, PeriodId), TransactionCrDuhcpV as (select AccountId, PeriodId
+from (select tempkeys.AccountId, tempkeys.PeriodId, trxn.amountval, max(case when trxn.amountval > 0 then 1 when trxn.quantityval > 0 then 1 else 0 end) over (partition by tempkeys.AccountId order by tempkeys.PeriodId asc rows between 5 preceding and 0 preceding) as amountagg
+from tempkeys
+left join (select AccountId, PeriodId, TotalAmount as amountval, TotalQuantity as quantityval
+from temptrxn
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il') as trxn
+on tempkeys.AccountId = trxn.AccountId and tempkeys.PeriodId = trxn.PeriodId) as aps
+where amountagg = '0' and PeriodId = 211
+group by AccountId, PeriodId), LogicalhgQ1N15v as ((select *
+from TransactionQJDs1inV)
+intersect
+(select *
+from TransactionCrDuhcpV))
+select LogicalhgQ1N15v.AccountId, LogicalhgQ1N15v.PeriodId
+from LogicalhgQ1N15v
+where PeriodId > 0 and LogicalhgQ1N15v.AccountId in (select AccountId
+from segment)
