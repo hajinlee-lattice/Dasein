@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
-
 import java.util.List;
 import java.util.Map;
 
