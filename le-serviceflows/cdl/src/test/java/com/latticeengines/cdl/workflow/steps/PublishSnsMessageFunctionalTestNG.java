@@ -8,9 +8,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
-import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
@@ -28,6 +25,9 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;

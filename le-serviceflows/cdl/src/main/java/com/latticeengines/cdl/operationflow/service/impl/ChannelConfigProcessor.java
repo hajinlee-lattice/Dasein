@@ -1,10 +1,11 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
-import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
-import com.latticeengines.domain.exposed.pls.cdl.channel.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 
 /**
  * This class process the configuration based on the Channel Type
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ChannelConfigProcessor {
-
-    private static final Logger log = LoggerFactory.getLogger(ChannelConfigProcessor.class);
 
     public void updateSnsMessageWithChannelConfig(ChannelConfig channelConfig, ExternalIntegrationMessageBody messageBody) {
         if(channelConfig instanceof LinkedInChannelConfig){

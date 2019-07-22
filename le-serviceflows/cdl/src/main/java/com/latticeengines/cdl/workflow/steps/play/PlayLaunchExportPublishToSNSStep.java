@@ -7,8 +7,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
-import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +20,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.sns.SNSService;
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;

@@ -6,18 +6,19 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.latticeengines.apps.cdl.service.*;
-import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
+import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.RatingCoverageService;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
@@ -46,8 +48,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
-
-    private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
     @Inject
     private PlayService playService;
