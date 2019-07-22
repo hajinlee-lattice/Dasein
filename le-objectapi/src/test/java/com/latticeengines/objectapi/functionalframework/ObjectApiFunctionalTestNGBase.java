@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.functionalframework.QueryTestUtils;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -127,10 +128,20 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         }
     }
 
-    protected EventFrontEndQuery loadFrontEndQueryFromResource(String resourceName) {
+    protected EventFrontEndQuery loadEventFrontEndQueryFromResource(String resourceName) {
         try {
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
             return JsonUtils.deserialize(inputStream, EventFrontEndQuery.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load json resource" + resourceName, e);
+        }
+
+    }
+
+    protected FrontEndQuery loadFrontEndQueryFromResource(String resourceName) {
+        try {
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
+            return JsonUtils.deserialize(inputStream, FrontEndQuery.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load json resource" + resourceName, e);
         }

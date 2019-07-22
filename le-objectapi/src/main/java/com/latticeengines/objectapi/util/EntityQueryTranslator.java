@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +43,7 @@ public class EntityQueryTranslator extends QueryTranslator {
                 .distinct(frontEndQuery.getDistinct());
 
         if (CollectionUtils.isNotEmpty(frontEndQuery.getLookups())) {
-            frontEndQuery.getLookups().forEach(lookup -> {
-                AttributeLookup attributeLookup = (AttributeLookup) lookup;
-                queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
-            });
+            frontEndQuery.getLookups().forEach(queryBuilder::select);
         } else if (decorator != null && !decorator.isDataQuery()) {
             queryBuilder.select(decorator.getIdLookup());
         }
@@ -66,7 +64,11 @@ public class EntityQueryTranslator extends QueryTranslator {
 
         configurePagination(frontEndQuery);
 
-        return queryBuilder.build();
+        Query query = queryBuilder.build();
+        if (MapUtils.isNotEmpty(frontEndQuery.getJoinHints())) {
+            query.setJoinHints(frontEndQuery.getJoinHints());
+        }
+        return query;
     }
 
 }

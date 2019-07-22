@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,6 +24,7 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
@@ -52,17 +52,14 @@ public class ModelingQueryTranslator extends QueryTranslator {
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
-        if (restriction == null) {
-            restriction = Restriction.builder().or(new ArrayList<>()).build();
-        }
-
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
         switch (eventType) {
         case Scoring:
             if (frontEndQuery.getSegmentQuery() != null) {
-                Restriction segmentRestriction = translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(),
-                        timeTranslator, sqlUser);
+                Restriction segmentRestriction = RestrictionOptimizer.optimize( //
+                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(), timeTranslator,
+                                sqlUser));
                 QueryBuilder segmentQryBldr = Query.builder();
                 Query segmentQry = segmentQryBldr.from(BusinessEntity.Account) //
                         .select(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())) //

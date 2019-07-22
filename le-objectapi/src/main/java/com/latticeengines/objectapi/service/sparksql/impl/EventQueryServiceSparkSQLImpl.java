@@ -23,7 +23,7 @@ public class EventQueryServiceSparkSQLImpl extends EventQueryServiceImpl {
 
     /**
      * @param livySession
-     * 
+     *
      * This is added for Testing Purpose. In real world, this session will be created at runtime
      */
     public void setLivySession(LivySession livySession) {
