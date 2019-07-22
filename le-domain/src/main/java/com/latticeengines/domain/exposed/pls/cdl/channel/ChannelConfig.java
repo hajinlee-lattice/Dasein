@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
         @Type(value = MarketoChannelConfig.class, name = "marketo"), //
         @Type(value = EloquaChannelConfig.class, name = "eloqua"), //
         @Type(value = S3ChannelConfig.class, name = "aws_s3"), //
+        @Type(value = LinkedInChannelConfig.class, name = "linkedin") //
 })
 public interface ChannelConfig {
 
