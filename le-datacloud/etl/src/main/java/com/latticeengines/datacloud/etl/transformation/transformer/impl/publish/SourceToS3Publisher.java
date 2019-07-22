@@ -116,7 +116,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                     files = getDirFiles(versionFilePath);
                     copyAndValidate(sourceName, versionFilePath, files, false);
                 }
-
             }
             step.setTarget(null);
             step.setCount(0L);
