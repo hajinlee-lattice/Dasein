@@ -86,7 +86,6 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         return true;
     }
 
-
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
@@ -102,12 +101,15 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
 
                 List<String> files = getDirFiles(dataPath);
                 copyAndValidate(sourceName, dataPath, files, true);
+                cleanupS3Path(dataPath + "_$folder$");
                 objectTagging(tags, dataPath, files);
 
                 if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                     files = getDirFiles(schemaPath);
                     copyAndValidate(sourceName, schemaPath, files, true);
+                    cleanupS3Path(schemaPath + "_$folder$");
                     objectTagging(tags, dataPath, files);
+
                 }
 
                 if (shouldCopyVersionFile(source, versionFilePath)) {
@@ -126,8 +128,8 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private void objectTagging(List<Pair<String, String>> tags, String prefix, List<String> files) {
-        tags.forEach(tag -> log.info("Adding tag {} with value {} on objects with prefix {}",
-                tag.getKey(), tag.getValue(), prefix));
+        tags.forEach(tag -> log.info("Adding tag {} with value {} on objects with prefix {}", tag.getKey(),
+                tag.getValue(), prefix));
         tagS3Objects(files, tags);
     }
 
@@ -200,7 +202,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 validateFileSize(file);
             } catch (Exception e) {
                 throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
-                }
+            }
         });
     }
 
@@ -283,4 +285,3 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 }
-
