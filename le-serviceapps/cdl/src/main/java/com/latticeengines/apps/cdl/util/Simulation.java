@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.DataCloudRefreshEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.SchedulingEvent;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.VerifyEvent;
 
 public class Simulation {
 
@@ -40,6 +41,7 @@ public class Simulation {
         this.endTime = transferTime(duringTime);
         this.priorityQueue.addAll(generateSchedulingEvent());
         this.priorityQueue.addAll(generateDataCloudRefreshEvent());
+        this.priorityQueue.addAll(generateVerifyEvent());
     }
 
     public void run() {
@@ -88,6 +90,16 @@ public class Simulation {
         for (int i = 0; time <= endTime; i++) {
             time += 5 * 60 * 1000; // 5 min
             events.add(new SchedulingEvent(time));
+        }
+        return events;
+    }
+
+    private List<Event> generateVerifyEvent() {
+        long time = clock.getCurrentTime();
+        List<Event> events = new ArrayList<>();
+        for (int i = 0; time <= endTime; i++) {
+            time += 30 * 60 * 1000;
+            events.add(new VerifyEvent(time));
         }
         return events;
     }

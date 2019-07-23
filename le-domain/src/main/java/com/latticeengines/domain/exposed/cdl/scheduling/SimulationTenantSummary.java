@@ -8,12 +8,14 @@ import com.latticeengines.domain.exposed.cdl.scheduling.event.ImportActionEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAEndEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.PAStartEvent;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.ScheduleNowEvent;
+import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SimulationTenantSummary {
 
     private String tenantId;
     private boolean isLarge;
     private boolean isDataCloudRefresh;
+    private TenantType tenantType;
     private int paNum;
     private int failedPANum;
     private int retryPANum;
@@ -21,15 +23,21 @@ public class SimulationTenantSummary {
     private List<Long> paTime;
     private List<Long> importActionWaitingTime;
     private List<Long> scheduleNowWaitingTime;
+    private Long maxPATime;
+    private Long minPATime;
+    private Long maxImportActionWaitingTime;
+    private Long minImportActionWaitingTime;
+    private Long maxScheduleNowWaitingTime;
+    private Long minScheduleNowWaitingTime;
 
-    public SimulationTenantSummary(String tenantId, boolean isLarge, boolean isDataCloudRefresh) {
+    public SimulationTenantSummary(String tenantId, boolean isLarge, boolean isDataCloudRefresh, TenantType tenantType) {
         this.tenantId = tenantId;
         this.isLarge = isLarge;
         this.isDataCloudRefresh = isDataCloudRefresh;
+        this.tenantType = tenantType;
         this.paTime = new LinkedList<>();
         this.importActionWaitingTime = new LinkedList<>();
         this.scheduleNowWaitingTime = new LinkedList<>();
-
     }
 
     public void calculate(List<Event> eventList) {
@@ -79,7 +87,13 @@ public class SimulationTenantSummary {
     public long getAvgPATime() {
         long avgPATime = 0L;
         if (paTime.size() > 0) {
+            maxPATime = minPATime = paTime.get(0);
             for (long patime : paTime) {
+                if (patime < minPATime) {
+                    minPATime = patime;
+                } else if (patime > maxPATime) {
+                    maxPATime = patime;
+                }
                 avgPATime += patime;
             }
             avgPATime = avgPATime / paTime.size();
@@ -90,7 +104,13 @@ public class SimulationTenantSummary {
     public long getAvgImportActionWaitingTime() {
         long avgTime = 0L;
         if (importActionWaitingTime.size() > 0) {
+            maxImportActionWaitingTime = minImportActionWaitingTime = importActionWaitingTime.get(0);
             for (long time : importActionWaitingTime) {
+                if (time < minImportActionWaitingTime) {
+                    minImportActionWaitingTime = time;
+                } else if (time > maxImportActionWaitingTime){
+                    maxImportActionWaitingTime = time;
+                }
                 avgTime += time;
             }
             avgTime = avgTime / importActionWaitingTime.size();
@@ -101,7 +121,13 @@ public class SimulationTenantSummary {
     public long getAvgScheduleNowWaitingTime() {
         long avgTime = 0L;
         if (scheduleNowWaitingTime.size() > 0) {
+            minScheduleNowWaitingTime = maxScheduleNowWaitingTime = scheduleNowWaitingTime.get(0);
             for (long time : scheduleNowWaitingTime) {
+                if ( time < minScheduleNowWaitingTime) {
+                    minScheduleNowWaitingTime = time;
+                } else if (time > maxScheduleNowWaitingTime) {
+                    maxScheduleNowWaitingTime = time;
+                }
                 avgTime += time;
             }
             avgTime = avgTime / scheduleNowWaitingTime.size();
@@ -124,9 +150,53 @@ public class SimulationTenantSummary {
         calculate(eventList);
         String result = String.format("Tenant: %s, isLarge: %s, isDataCloudRefresh: %s, paNum: %d, failedPANum: %d, " +
                         "retryNum: %d, " +
-                "successRate: %f, avgPATime: %d, avgImportActionWaitingTime: %d, avgScheduleNowWaitingTime: %d.",
+                "successRate: %f, avgPATime: %d, MaxPATime: %d, MinPATime: %d, avgImportActionWaitingTime: %d, " +
+                        "MaxImportActionWaitingTime: %d, MinImportActionWaitingTime: %d, " +
+                        "avgScheduleNowWaitingTime: %d, MaxScheduleNowWaitingTime: %d, MinScheduleNowWaitingTime: %d.",
                 tenantId, isLarge, isDataCloudRefresh, paNum, failedPANum, retryPANum, getSuccessRate(),
-                getAvgPATime(), getAvgImportActionWaitingTime(), getAvgScheduleNowWaitingTime());
+                getAvgPATime(), maxPATime, minPATime, getAvgImportActionWaitingTime(),
+                maxImportActionWaitingTime, minImportActionWaitingTime, getAvgScheduleNowWaitingTime(),
+                maxScheduleNowWaitingTime, minScheduleNowWaitingTime);
         return result;
+    }
+
+    public TenantType getTenantType() {
+        return tenantType;
+    }
+
+    public List<Long> getPaTime() {
+        return this.paTime;
+    }
+
+    public List<Long> getImportActionWaitingTime() {
+        return this.importActionWaitingTime;
+    }
+
+    public List<Long> getScheduleNowWaitingTime() {
+        return this.scheduleNowWaitingTime;
+    }
+
+    public Long getMaxPATime() {
+        return this.maxPATime;
+    }
+
+    public Long getMinPATime() {
+        return this.minPATime;
+    }
+
+    public Long getMaxImportActionWaitingTime() {
+        return this.maxImportActionWaitingTime;
+    }
+
+    public Long getMinImportActionWaitingTime() {
+        return this.minImportActionWaitingTime;
+    }
+
+    public Long getMaxScheduleNowWaitingTime() {
+        return this.maxScheduleNowWaitingTime;
+    }
+
+    public Long getMinScheduleNowWaitingTime() {
+        return this.minScheduleNowWaitingTime;
     }
 }

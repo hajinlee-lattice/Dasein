@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
+import com.latticeengines.domain.exposed.cdl.scheduling.event.VerifyEvent;
 
 public class SimulationContext {
 
@@ -22,6 +23,7 @@ public class SimulationContext {
     private Map<String, SimulationTenantSummary> simulationTenantSummaryMap;
     public final Set<String> dcRefreshTenants;
     public SystemStatus systemStatus;
+    public List<VerifyEvent> verifyEventList;
     public Map<String, List<Event>> tenantEventMap = new HashMap<>();
 
     public TimeClock timeClock;
@@ -37,6 +39,7 @@ public class SimulationContext {
         this.simulationTenantMap = simulationTenantMap;
         setCanRunTenantActivityMap();
         this.runningTenantActivityMap = new HashMap<>();
+        this.verifyEventList = new ArrayList<>();
     }
 
     private void setCanRunTenantActivityMap() {
@@ -49,7 +52,7 @@ public class SimulationContext {
             SimulationTenant simulationTenant = (SimulationTenant) entry.getValue();
             TenantActivity tenantActivity = simulationTenant.getTenantActivity();
             SimulationTenantSummary simulationTenantSummary = new SimulationTenantSummary(tenantId,
-                    tenantActivity.isLarge(), dcRefreshTenants.contains(tenantId));
+                    tenantActivity.isLarge(), dcRefreshTenants.contains(tenantId), tenantActivity.getTenantType());
             this.canRunTenantActivityMap.put(tenantId, tenantActivity);
             this.simulationTenantSummaryMap.put(tenantId, simulationTenantSummary);
         }

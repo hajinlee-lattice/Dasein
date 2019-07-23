@@ -68,6 +68,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
+    private static final String SCHEDULING_PA_FALG_SUFFIX = "_PAFlag";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
 
     private static ObjectMapper om = new ObjectMapper();
@@ -477,5 +478,29 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static String filterDetail(String stackName, Map<String, String> nodes) {
         String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
         return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
+    }
+
+    private String getSchedulingPAFlag() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String content = c.get(PathBuilder.buildSchedulingPAFlagPath(CamilleEnvironment.getPodId())).getData();
+            log.info("stack is " + leStack);
+            Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
+                    String.class);
+            return filterDetailForSchedulingPAFlag(leStack, jsonMap);
+        }catch (Exception e) {
+            log.error("Get json node from zk failed.");
+            return null;
+        }
+    }
+
+    private static String filterDetailForSchedulingPAFlag(String stackName, Map<String, String> nodes) {
+        String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
+        return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
+    }
+
+    @Override
+    public boolean isActivityBasedPA() {
+        return "On".equals(getSchedulingPAFlag());
     }
 }
