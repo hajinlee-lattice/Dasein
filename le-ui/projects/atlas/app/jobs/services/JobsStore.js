@@ -78,7 +78,8 @@ angular
                 case "cdlDataFeedImportWorkflow":
                 case "cdlOperationWorkflow":
                 case "metadataChange":
-                case "playLaunchWorkflow": {
+                case "playLaunchWorkflow":
+                case "entityExportWorkflow":{
                     return false;
                 }
                 default: {
@@ -96,7 +97,10 @@ angular
         }
 
         function isExportJob(job) {
-            return job.jobType === "segmentExportWorkflow";
+            return (
+				job.jobType === "segmentExportWorkflow" ||
+				job.jobType === "entityExportWorkflow"
+			);
         }
 
         function isOrphanJob(job) {
@@ -120,7 +124,6 @@ angular
             var deferred = $q.defer();
 
             JobsService.getOrphanCounts().then(function(res) {
-                console.log("getOrphanCounts STORE", res);
                 JobsStore.data.orphanCounts = res.data;
                 deferred.resolve(res);
             });
@@ -191,7 +194,7 @@ angular
             return deferred.promise;
         };
 
-        this.getJobs = function(use_cache, modelId, statusFilter) {
+        this.getJobs = function (use_cache, modelId, statusFilter) {
             JobsStore.loadingJobs = true;
             var deferred = $q.defer(),
                 isModelState = modelId ? true : false,
@@ -283,7 +286,7 @@ angular
             return deferred.promise;
         };
 
-        this.addJob = function(job, modelId) {
+        this.addJob = function (job, modelId) {
             if (modelId) {
                 JobsStore.data.models[modelId].push(job);
             } else {
@@ -292,6 +295,7 @@ angular
                         JobsStore.addImportJob(job);
                         break;
                     case "segmentExportWorkflow":
+                    case "entityExportWorkflow":
                         JobsStore.addExportJob(job);
                         break;
                     case "orphanRecordsExportWorkflow":
@@ -463,7 +467,8 @@ angular
             }
         };
 
-        this.synchJobs = function(nullIdsMap, retApi) {
+        this.synchJobs = function (nullIdsMap, retApi) {
+            // console.log('Sync', retApi);
             this.jobTypes.forEach(function(type) {
                 var jobsMap = JobsStore.getMap(type);
                 var jobsList = JobsStore.getList(type);
@@ -484,7 +489,7 @@ angular
             });
         };
 
-        this.setJobsByType = function(map, list, type) {
+        this.setJobsByType = function (map, list, type) {
             if (type == "import") {
                 JobsStore.importJobsMap = map;
                 JobsStore.data.importJobs = list;
