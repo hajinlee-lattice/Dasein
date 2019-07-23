@@ -93,7 +93,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
-        return new Object[][] { { DNB_INGESTION, "{\"ClassName\":\"SftpConfiguration\"", IngestionType.SFTP }, //
+        return new Object[][] { { DNB_INGESTION, "{\"ClassName\":\"SftpConfiguration\"}", IngestionType.SFTP }, //
         };
     }
 

@@ -96,7 +96,7 @@ public class IngestionServiceTestNG extends PropDataEngineFunctionalTestNGBase {
         ingestion = testIngestionService
                 .createIngestions(
                         Collections.singletonList(Triple.of(PREFIX + "_Ingestion",
-                                "{\"ClassName\":\"SftpConfiguration\"", IngestionType.SFTP)))
+                                "{\"ClassName\":\"SftpConfiguration\"}", IngestionType.SFTP)))
                 .get(0);
         Assert.assertNotNull(ingestion.getPid());
     }
