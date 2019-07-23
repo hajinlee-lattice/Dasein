@@ -491,7 +491,6 @@ angular
         };
 
         this.setJobsByType = function (map, list, type) {
-            console.log('Type ', type);
             if (type == "import") {
                 JobsStore.importJobsMap = map;
                 JobsStore.data.importJobs = list;
