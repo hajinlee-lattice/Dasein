@@ -1,23 +1,20 @@
-import states from 'atlas/import/templates/multiple/states';
-import s3filestates from 'atlas/import/s3files/s3files.states';
-import mappingsstate from 'atlas/import/templates/viewMappings/viewMappings.states';
-import connectrosstates from 'atlas/connectors/connectors.states';
-import overviewstates from 'atlas/playbook/content/overview/overview.states';
-import statessingle from 'atlas/import/templates/states';
-// projects/atlas/app/import/templates/states.js
 const modulesStates = [];
-
 function mergeStates(imported) {
-    imported.forEach(state => {
-        modulesStates.push(state);
-    });
+	if (imported) {
+		imported.forEach(state => {
+			modulesStates.push(state);
+		});
+	}
 }
 
-mergeStates(states);
-mergeStates(connectrosstates);
-mergeStates(overviewstates);
-mergeStates(s3filestates);
-mergeStates(mappingsstate);
-mergeStates(statessingle);
+function importAll(r) {
+	r.keys().forEach(key => {
+		let state = r(key).default;
+		if (state) {
+			mergeStates(state);
+		}
+	});
+}
 
+importAll(require.context("../", true, /\.states.js$/));
 export default modulesStates;
