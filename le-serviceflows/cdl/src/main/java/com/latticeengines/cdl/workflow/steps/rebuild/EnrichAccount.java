@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
+import com.latticeengines.serviceflows.workflow.zkconfig.ServiceflowsZKConfigService;
 
 @Component(EnrichAccount.BEAN_NAME)
 @Lazy
@@ -59,6 +60,9 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Inject
+    private ServiceflowsZKConfigService serviceflowsZKConfigService;
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
@@ -167,8 +171,11 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
         List<Column> cols = new ArrayList<>();
+        boolean useInternalAttrs = useInternalAttrs();
         for (ColumnMetadata cm : dcCols) {
-            cols.add(new Column(cm.getAttrName()));
+            if (useInternalAttrs || isNotInternalAttr(cm)) {
+                cols.add(new Column(cm.getAttrName()));
+            }
         }
         ColumnSelection cs = new ColumnSelection();
         cs.setColumns(cols);
@@ -191,6 +198,14 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
+    }
+
+    private boolean useInternalAttrs() {
+        return serviceflowsZKConfigService.isEnabledForInternalEnrichment(customerSpace);
+    }
+
+    private boolean isNotInternalAttr(ColumnMetadata columnMetadata) {
+        return !Boolean.TRUE.equals(columnMetadata.getCanInternalEnrich());
     }
 
 }
