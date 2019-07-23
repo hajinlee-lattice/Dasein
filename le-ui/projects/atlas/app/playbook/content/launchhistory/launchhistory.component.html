@@ -40,7 +40,7 @@
         	<li class="cell-border">
         		<dl>
         			<dt>Suppressed</dt>
-        			<dd class="red-text">{{vm.summaryData.accountsSuppressed | number}}</dd>
+        			<dd class="black-text">{{vm.summaryData.accountsSuppressed | number}}</dd>
         		</dl>
         	</li>
             <li class="cell-border">
@@ -77,7 +77,7 @@
         	<li>
         		<dl>
         			<dt>Suppressed</dt>
-        			<dd class="blue-text">{{vm.summaryData.accountsSuppressed || 0 | number}}</dd>
+        			<dd class="black-text">{{vm.summaryData.accountsSuppressed || 0 | number}}</dd>
         		</dl>
         	</li>
             <li>
@@ -107,7 +107,7 @@
             <li>
                 <dl>
                     <dt>Suppressed</dt>
-                    <dd class="blue-text">{{ (vm.summaryData.contactsSuppressed || 0) | number}}</dd>
+                    <dd class="black-text">{{ (vm.summaryData.contactsSuppressed || 0) | number}}</dd>
                 </dl>
             </li>
             <li>
@@ -191,8 +191,8 @@
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'launchState',
-                                'fa fa-sort-desc': vm.sortBy === 'launchState' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'launchState' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'launchState' && vm.sortDesc, 
+                                'fa fa-sort-desc': vm.sortBy === 'launchState' && !vm.sortDesc}"></i>
                    </th>
     			</tr>
     		</thead>
@@ -210,7 +210,7 @@
                         <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.selectedContacts || 0 | number}}</span>
                     </td>
 
-    				<td class="red-text">
+    				<td class="black-text">
                         <span ng-if="vm.isAccountBasedLaunch(launch)"> {{launch.stats.accountsSuppressed | number}} </span>
                         <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactsSuppressed || 0 | number}}</span>                    
                     </td>

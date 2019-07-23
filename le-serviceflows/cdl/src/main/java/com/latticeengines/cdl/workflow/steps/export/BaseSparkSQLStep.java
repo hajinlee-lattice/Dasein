@@ -47,7 +47,6 @@ import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.MergeRuleRatings;
 import com.latticeengines.spark.exposed.service.LivySessionService;
-import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
 
@@ -56,9 +55,6 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
 
     @Inject
     private SparkSQLService sparkSQLService;
-
-    @Inject
-    private SparkJobService sparkJobService;
 
     @Inject
     private LivySessionService livySessionService;
@@ -92,7 +88,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         String customer = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         Map<String, String> pathMap = new HashMap<>();
         attrRepo.getTableNames().forEach(tblName -> {
-            Table table = metadataProxy.getTable(customer, tblName);
+            Table table = metadataProxy.getTableSummary(customer, tblName);
             if (table == null) {
                 throw new RuntimeException("Table " + tblName + " for customer " + customer + " does not exits.");
             }
@@ -113,6 +109,11 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         String storageLevel = persistOnDisk ? "DISK_ONLY" : null;
         livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
                 scalingMultiplier, storageLevel, getClass().getSimpleName());
+    }
+
+    protected void prepareForCrossSellQueries(String period, String trxnTable, boolean persistOnDisk) {
+        String storageLevel = persistOnDisk ? "DISK_ONLY" : null;
+        sparkSQLService.prepareForCrossSellQueries(livySession, period, trxnTable, storageLevel);
     }
 
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //

@@ -3,21 +3,20 @@ import NgState from "../../ng-state";
 
 import ReactRouter from 'atlas/react/router';
 
-import ReactMainContainer from "atlas/react/react-main-container";
 import httpService from "common/app/http/http-service";
+import Observer from "common/app/http/observer";
 import { SUCCESS } from "common/app/http/response";
 
 import { store, injectAsyncReducer } from 'store';
 import { s3actions, s3reducer } from 'atlas/import/s3files/s3files.redux';
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import messageService from "common/app/utilities/messaging-service";
+import Message, {
+    NOTIFICATION
+} from "common/app/utilities/message";
 
-import TemplatesRowActions, {
-    CREATE_TEMPLATE,
-    VIEW_TEMPLATE,
-    EDIT_TEMPLATE,
-    IMPORT_DATA
-} from "./templates-row-actions";
-import "./templates.scss";
-import Observer from "common/app/http/observer";
+import ReactMainContainer from "atlas/react/react-main-container";
+import TemplatesRowActions from "./templates-row-actions";
 import EditControl from "common/widgets/table/controlls/edit-controls";
 import CopyComponent from "common/widgets/table/controlls/copy-controll";
 import EditorText from "common/widgets/table/editors/editor-text";
@@ -26,16 +25,11 @@ import LeButton from "common/widgets/buttons/le-button";
 import {
     LeToolBar
 } from "common/widgets/toolbar/le-toolbar";
-import "./templates.scss";
-
-import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
-import messageService from "common/app/utilities/messaging-service";
-import Message, {
-    NOTIFICATION
-} from "common/app/utilities/message";
-
 import LeTable from "common/widgets/table/table";
+
+import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
+
+import "./templates.scss";
 
 export default class TemplatesComponent extends Component {
     constructor(props) {
@@ -181,7 +175,7 @@ export default class TemplatesComponent extends Component {
             cell.setSavingState();
             let copy = Object.assign({}, this.state.data[cell.props.rowIndex]);
 
-            copy['TemplateName'] = value;
+            copy['Object'] = value;
             httpService.put(
                 "/pls/cdl/s3/template/displayname",
                 copy,
@@ -190,7 +184,7 @@ export default class TemplatesComponent extends Component {
                         cell.toogleEdit();
                         if (response.getStatus() === SUCCESS) {
                             let newState = [...this.state.data];
-                            newState[cell.props.rowIndex]['TemplateName'] = value;
+                            newState[cell.props.rowIndex]['Object'] = value;
                             this.setState({ data: newState });
                         }
                     },
@@ -326,8 +320,8 @@ export default class TemplatesComponent extends Component {
                         if (!cell.state.saving && !cell.state.editing) {
                             if (cell.props.rowData.Exist) {
                                 return (
-                                    <div className={!cell.props.rowData.TemplateName ? 'no-name' : ''}>
-                                        {cell.props.rowData.TemplateName ? cell.props.rowData.TemplateName : 'Name is not defined'}
+                                    <div className={!cell.props.rowData.Object ? 'no-name' : ''}>
+                                        {cell.props.rowData.Object ? cell.props.rowData.Object : 'Name is not defined'}
                                         <ul className="unstyled">
                                             <EditControl
                                                 icon="fa fa-pencil-square-o"
@@ -340,8 +334,8 @@ export default class TemplatesComponent extends Component {
                                 );
                             } else {
                                 return (
-                                    <div className={!cell.props.rowData.TemplateName ? 'no-name' : ''}>
-                                        {cell.props.rowData.TemplateName ? cell.props.rowData.TemplateName : 'Name is not defined'}
+                                    <div className={!cell.props.rowData.Object ? 'no-name' : ''}>
+                                        {cell.props.rowData.Object ? cell.props.rowData.Object : 'Name is not defined'}
                                     </div>
                                 );
                             }
@@ -351,7 +345,7 @@ export default class TemplatesComponent extends Component {
                                 return (
                                     <EditorText
                                         initialValue={
-                                            cell.props.rowData.TemplateName
+                                            cell.props.rowData.Object
                                         }
                                         cell={cell}
                                         applyChanges={
@@ -473,9 +467,8 @@ export default class TemplatesComponent extends Component {
                             <ul>
                                 <CopyComponent
                                     title="Copy Link"
-                                    data={
-                                        `${'S3 Root Folder: '}${rootFolder}`
-                                    }
+                                    label={`${'S3 Root Folder: '}`}
+                                    data={`${rootFolder}`}
                                     callback={() => {
                                         messageService.sendMessage(
                                             new Message(

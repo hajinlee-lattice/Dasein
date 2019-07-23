@@ -456,7 +456,7 @@ angular
                             ratingId = $stateParams.rating_id,
                             modelId = $stateParams.modelId;
 
-                        DataCloudStore.ratingIterationFilter = 'all';
+                        DataCloudStore.setRatingIterationFilter('all');
 
                         DataCloudStore.getAllEnrichmentsConcurrently("/pls/ratingengines/" + ratingId + "/ratingmodels/" + modelId + "/metadata", true).then((result) => {
                             deferred.resolve(result);

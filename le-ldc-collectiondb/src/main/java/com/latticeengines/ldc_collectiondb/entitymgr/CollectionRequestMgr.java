@@ -22,4 +22,5 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
 
     void cleanupRequestBetween(Timestamp start, Timestamp end);
 
+    void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before);
 }

@@ -15,4 +15,6 @@ public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawColl
     void saveDomains(Iterable<String> domains, String reqId);
 
     void cleanupRequestsBetween(Timestamp start, Timestamp end);
+
+    void cleanupTransferred();
 }

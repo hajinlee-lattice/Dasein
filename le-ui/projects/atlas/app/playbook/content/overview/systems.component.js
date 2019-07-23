@@ -111,7 +111,7 @@ class SystemsComponent extends Component {
         if(this.state.checkLaunch) {
             return false;
         }
-        var interval = .1 * (1000 * 60),
+        var interval = 30 * 1000, // 30 seconds
             vm = this,
             checkLaunch = setInterval(function() {
                 let playstore = store.getState()['playbook'];
@@ -120,9 +120,9 @@ class SystemsComponent extends Component {
 
                 let connections = playstore.connections,
                     launchingConnection = connections.find(function(connection) {
-                        return (connection  && connection.lastLaunch && connection.lastLaunch.launchState === 'Launching');
+                        var launchState = (connection  && connection.lastLaunch && connection.lastLaunch.launchState ? connection.lastLaunch.launchState : '');
+                        return (launchState === 'Launching' || launchState === 'Queued');
                     });
-
                 if(!launchingConnection) {
                     clearInterval(checkLaunch);
                     vm.setState({checkLaunch: null});
@@ -133,45 +133,53 @@ class SystemsComponent extends Component {
     }
 
     getLaunchStateText(connection, play) {
-        var launch = connection.lastLaunch,
-            launchState = (launch ? launch.launchState : 'Unlaunched'),
-            launched = (launchState === 'Launched' ? true : false),
-            launching = (launchState === 'Launching' ? true : false),
-            text = [];
+        var text = [];
+        if(connection && connection.lastLaunch) {
+            var launch = connection.lastLaunch,
+                launchState = (launch ? launch.launchState : 'Unlaunched'),
+                launched = (launchState === 'Launched' ? true : false),
+                launching = (launchState === 'Launching' ? true : false),
+                queued = (launchState === 'Queued' ? true : false);
 
-            if(launching) {
-                this.checkLaunching();
+                if(launching || queued) {
+                    this.checkLaunching();
+                }
+
+            if(launched && launch && launch.created && launch.accountsLaunched && launch.contactsLaunched) {
+                text.push(
+                    <div class="launch-text launched">
+                        <ul>
+                            <li>
+                                Last Launched: {new Date(launch.created).toLocaleDateString("en-US")}
+                            </li>
+                            <li>
+                                Accounts Sent: {launch.accountsLaunched.toLocaleString()}
+                            </li>
+                            <li>
+                                Contacts Sent: {launch.contactsLaunched.toLocaleString()}
+                            </li>
+                        </ul>
+                    </div>
+                );
+            } else if(queued) {
+                text.push(
+                    <div class="launch-text launched queued">
+                        Queued...
+                    </div>
+                );
+            } else if(launching) {
+                text.push(
+                    <div class="launch-text unlaunched launching">
+                        Launching...
+                    </div>
+                );
+            } else {
+                text.push(
+                    <div class="launch-text unlaunched no-previous-launch">
+                        No previous launch
+                    </div>
+                );
             }
-
-
-        if(launched) {
-            text.push(
-                <div class="launch-text launched">
-                    <ul>
-                        <li>
-                            Last Launched: {new Date(connection.created).toLocaleDateString("en-US")}
-                        </li>
-                        <li>
-                            Accounts Sent: {connection.accountsLaunched.toLocaleString()}
-                        </li>
-                        <li>
-                            Contacts Sent: {connection.contactsLaunched.toLocaleString()}
-                        </li>
-                    </ul>
-                </div>
-            );
-        } else if(launching) {
-            text.push(
-                <div class="launch-text unlaunched">
-                    Launching...
-                </div>
-            );
-        } else {
-            text.push(
-                <div class="launch-text unlaunched">
-                    No previous launch
-                </div>
-            );
         }
         return text;
     }
@@ -238,7 +246,7 @@ class SystemsComponent extends Component {
         //var connections = this.getConnectionsList(connections),
         var connectionTemplates = [];
         connections.forEach(function(connection) {
-            connectionTemplates.push(this.connectionTemplate(connection, play))
+            connectionTemplates.push(this.connectionTemplate(connection, play));
         }, this);
         return connectionTemplates;
     }

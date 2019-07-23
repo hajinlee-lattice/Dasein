@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -32,7 +34,10 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.factory.SparkQueryProvider;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.SubQueryExpression;
@@ -49,42 +54,32 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.Union;
 import com.querydsl.sql.WindowFunction;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
 public class EventQueryTranslator extends TranslatorCommon {
     private static final int ONE_LAG_BEHIND_OFFSET = 1;
 
     public EventQueryTranslator() {
     }
 
-    public QueryBuilder translateForScoring(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            Restriction restriction,
-                                            EventFrontEndQuery frontEndQuery,
-                                            QueryBuilder queryBuilder,
-                                            String sqlUser) {
-        return translateRestriction(queryFactory, repository, restriction, true, false, frontEndQuery, queryBuilder, sqlUser);
+    public QueryBuilder translateForScoring(QueryFactory queryFactory, AttributeRepository repository,
+            Restriction restriction, EventFrontEndQuery frontEndQuery, QueryBuilder queryBuilder, String sqlUser) {
+        return translateRestriction(queryFactory, repository, restriction, true, false, frontEndQuery, queryBuilder,
+                sqlUser);
     }
 
-    public QueryBuilder translateForTraining(QueryFactory queryFactory,
-                                             AttributeRepository repository,
-                                             Restriction restriction,
-                                             EventFrontEndQuery frontEndQuery,
-                                             QueryBuilder queryBuilder,
-                                             String sqlUser) {
-        return translateRestriction(queryFactory, repository, restriction, false, false, frontEndQuery, queryBuilder, sqlUser);
+    public QueryBuilder translateForTraining(QueryFactory queryFactory, AttributeRepository repository,
+            Restriction restriction, EventFrontEndQuery frontEndQuery, QueryBuilder queryBuilder, String sqlUser) {
+        return translateRestriction(queryFactory, repository, restriction, false, false, frontEndQuery, queryBuilder,
+                sqlUser);
     }
 
-    public QueryBuilder translateForEvent(QueryFactory queryFactory,
-                                          AttributeRepository repository,
-                                          Restriction restriction,
-                                          EventFrontEndQuery frontEndQuery,
-                                          QueryBuilder queryBuilder,
-                                          String sqlUser) {
-        return translateRestriction(queryFactory, repository, restriction, false, true, frontEndQuery, queryBuilder, sqlUser);
+    public QueryBuilder translateForEvent(QueryFactory queryFactory, AttributeRepository repository,
+            Restriction restriction, EventFrontEndQuery frontEndQuery, QueryBuilder queryBuilder, String sqlUser) {
+        return translateRestriction(queryFactory, repository, restriction, false, true, frontEndQuery, queryBuilder,
+                sqlUser);
     }
 
-
-    private SQLQueryFactory getSQLQueryFactory(QueryFactory queryFactory, AttributeRepository repository, String sqlUser) {
+    private SQLQueryFactory getSQLQueryFactory(QueryFactory queryFactory, AttributeRepository repository,
+            String sqlUser) {
         return queryFactory.getSQLQueryFactory(repository, sqlUser);
     }
 
@@ -92,36 +87,40 @@ public class EventQueryTranslator extends TranslatorCommon {
         return repository.getTableName(AggregatedPeriodTransaction);
     }
 
-    private BooleanExpression limitPeriodByNameAndCount(QueryFactory queryFactory, AttributeRepository repository,
-                                                        String period, int periodCount, String sqlUser) {
-        BooleanExpression matchedPeriod = periodName.eq(period);
-        return (periodCount <= 0)
-            ? matchedPeriod
-            : matchedPeriod.and(periodId.gt(translateValidPeriodId(queryFactory, repository, period, periodCount, sqlUser)));
-    }
-
-    private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository, String period,
-                                      int periodCount, String sqlUser) {
+    private SubQuery translateTempTrxn(QueryFactory queryFactory, AttributeRepository repository, String period, //
+            String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-
         String txTableName = getPeriodTransactionTableName(repository);
         StringPath tablePath = Expressions.stringPath(txTableName);
+
+        SQLQuery<Tuple> txnTableSubQuery = factory.query() //
+                .select(accountId, periodId, productId, amountVal, quantityVal) //
+                .where(periodName.eq(period));
+        txnTableSubQuery = txnTableSubQuery.from(tablePath);
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(txnTableSubQuery);
+        subQuery.setAlias(TEMP_TRXN);
+        return subQuery;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SubQuery translateAllKeys(QueryFactory queryFactory, AttributeRepository repository, String sqlUser) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         NumberPath minPid = Expressions.numberPath(BigDecimal.class, periodRange, MIN_PID);
         SQLQuery periodRangeSubQuery = factory.query() //
-            .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
-            .from(tablePath) //
-            .where(periodName.eq(period)) //
-            .groupBy(accountId);
+                .select(accountId, SQLExpressions.min(periodId).as(MIN_PID)) //
+                .from(tablePath) //
+                .groupBy(accountId);
 
         SQLQuery crossProdQuery = factory.query().select(accountId, periodId).from(
-            factory.selectDistinct(accountId).from(tablePath).where(periodName.eq(period)).as(ALL_ACCOUNTS),
-            factory.selectDistinct(periodId).from(tablePath)
-                .where(periodName.eq(period))
-                .as(ALL_PERIODS));
+                factory.selectDistinct(accountId).from(tablePath).as(ALL_ACCOUNTS),
+                factory.selectDistinct(periodId).from(tablePath).as(ALL_PERIODS));
 
         SQLQuery crossProdSubQuery = factory.query().from(crossProdQuery, crossProd)
-            .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
-            .where(crossPeriodId.goe(minPid.subtract(NUM_ADDITIONAL_PERIOD)));
+                .innerJoin(periodRangeSubQuery, periodRange).on(periodAccountId.eq(crossAccountId))
+                .where(crossPeriodId.goe(minPid.subtract(NUM_ADDITIONAL_PERIOD)));
         SQLQuery minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
 
         SubQuery subQuery = new SubQuery();
@@ -130,29 +129,31 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
-    private SubQuery translateProductRevenue(QueryFactory queryFactory,
-                                             AttributeRepository repository,
-                                             List<String> targetProductIds,
-                                             String period, String sqlUser) {
-        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+    private SubQuery translateSegment(Query segmentQuery) {
+        SubQuery subQuery = new SubQuery();
+        subQuery.setQuery(segmentQuery);
+        subQuery.setAlias(SEGMENT);
+        return subQuery;
+    }
 
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
-        BooleanExpression periodFilter = limitPeriodByNameAndCount(queryFactory, repository, period, -1, sqlUser);
+    @SuppressWarnings("unchecked")
+    private SubQuery translateProductRevenue(QueryFactory queryFactory, //
+            AttributeRepository repository, //
+            List<String> targetProductIds, //
+            String sqlUser) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         BooleanExpression productFilter = productId.in(targetProductIds);
         NumberExpression trxnAmount = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
 
-        SQLQuery productQuery = factory.query()
-            .select(accountId, periodId, amountVal.as(AMOUNT_VAL))
-            .from(tablePath) //
-            .where(periodFilter.and(productFilter));
+        SQLQuery productQuery = factory.query().select(accountId, periodId, amountVal.as(AMOUNT_VAL)).from(tablePath) //
+                .where(productFilter);
 
         SQLQuery revenueSubQuery = factory.query()
-            .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO).as(REVENUE))
-            .from(keysPath)
-            .leftJoin(productQuery, trxnPath)
-            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)))
-            .groupBy(keysAccountId, keysPeriodId);
+                .select(keysAccountId, keysPeriodId, trxnAmount.sum().coalesce(BigDecimal.ZERO).as(REVENUE))
+                .from(keysPath).leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)))
+                .groupBy(keysAccountId, keysPeriodId);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(revenueSubQuery);
@@ -160,18 +161,18 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
-    private SubQuery translateShiftedRevenue(QueryFactory queryFactory,
-                                             AttributeRepository repository,
-                                             int laggingPeriodCount, String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private SubQuery translateShiftedRevenue(QueryFactory queryFactory, AttributeRepository repository,
+            int laggingPeriodCount, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
         NumberExpression revenueNumber = Expressions.numberPath(BigDecimal.class, revenueRevenue.getMetadata());
         WindowFunction windowAgg = SQLExpressions.sum(revenueNumber.coalesce(BigDecimal.ZERO)).over()
-            .partitionBy(revenueAccountId).orderBy(revenuePeriodId)
-            .rows().between().following(ONE_LAG_BEHIND_OFFSET).following(laggingPeriodCount);
+                .partitionBy(revenueAccountId).orderBy(revenuePeriodId).rows().between()
+                .following(ONE_LAG_BEHIND_OFFSET).following(laggingPeriodCount);
 
         SQLQuery revenueSubQuery = factory.query() //
-            .select(revenueAccountId, revenuePeriodId, windowAgg.as(REVENUE)) //
-            .from(revenuePath);
+                .select(revenueAccountId, revenuePeriodId, windowAgg.as(REVENUE)) //
+                .from(revenuePath);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(revenueSubQuery);
@@ -179,171 +180,111 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
-    private SubQueryExpression translateValidPeriodId(QueryFactory queryFactory,
-                                                      AttributeRepository repository,
-                                                      String period,
-                                                      int periodCount,
-                                                      String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private Expression translateEvaluationPeriodId(QueryFactory queryFactory, AttributeRepository repository,
+            int evaluationPeriodId, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
-        NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
-
-        return factory.query().from(tablePath) //
-            .where(periodName.eq(period)) //
-            .select(periodId.max().subtract(periodCount).as(MAX_PID));
-
-    }
-
-    private Expression translateEvaluationPeriodId(QueryFactory queryFactory,
-                                                   AttributeRepository repository,
-                                                   String periodNameStr,
-                                                   int evaluationPeriodId,
-                                                   String sqlUser) {
-        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
 
         if (evaluationPeriodId < 0) {
-            return factory.query().from(tablePath) //
-                .where(periodName.eq(periodNameStr)) //
-                .select(periodId.max().as(MAX_PID));
+            return factory.query().from(tablePath).select(periodId.max().as(MAX_PID));
         } else {
-            return Expressions.constant(String.valueOf(evaluationPeriodId));
+            return Expressions.asNumber(evaluationPeriodId);
         }
     }
 
-    private Expression translateMaxTrainingPeriodId(QueryFactory queryFactory,
-                                                    AttributeRepository repository,
-                                                    String periodNameStr,
-                                                    int evaluationPeriodId,
-                                                    int laggingPeriodCount,
-                                                    String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private Expression translateMaxTrainingPeriodId(QueryFactory queryFactory, AttributeRepository repository,
+            int evaluationPeriodId, int laggingPeriodCount, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
 
         if (evaluationPeriodId < 0) {
-            return factory.query().from(tablePath) //
-                .where(periodName.eq(periodNameStr)) //
-                .select(periodId.max().subtract(laggingPeriodCount));
+            return factory.query().from(tablePath).select(periodId.max().subtract(laggingPeriodCount));
         } else {
-            return Expressions.constant(String.valueOf(evaluationPeriodId - laggingPeriodCount));
+            return Expressions.asNumber(evaluationPeriodId - laggingPeriodCount);
         }
     }
 
-    private Expression translateMinPeriodId(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            String periodNameStr,
-                                            int evaluationPeriodId,
-                                            int laggingPeriodCount,
-                                            int periodCount,
-                                            String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private Expression translateMinPeriodId(QueryFactory queryFactory, AttributeRepository repository,
+            int evaluationPeriodId, int laggingPeriodCount, int periodCount, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
 
         if (periodCount <= 0) {
             return Expressions.constant(0);
         } else {
             if (evaluationPeriodId < 0) {
-                return factory.query().from(tablePath) //
-                    .where(periodName.eq(periodNameStr)) //
-                    .select(periodId.max().subtract(laggingPeriodCount).subtract(periodCount));
+                return factory.query().from(tablePath)
+                        .select(periodId.max().subtract(laggingPeriodCount).subtract(periodCount));
             } else {
                 return Expressions.constant(String.valueOf(evaluationPeriodId - laggingPeriodCount - periodCount));
             }
         }
     }
 
-    private Expression translateMinPeriodId(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            String periodNameStr,
-                                            int offset,
-                                            String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private Expression translateMinPeriodId(QueryFactory queryFactory, AttributeRepository repository, int offset,
+            String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
         NumberPath periodId = Expressions.numberPath(Integer.class, tablePath, PERIOD_ID);
 
-        return factory.query().from(tablePath) //
-            .where(periodName.eq(periodNameStr)) //
-            .select(periodId.min().add(offset));
+        return factory.query().from(tablePath).select(periodId.min().add(offset));
     }
 
     private BooleanExpression translateProductId(String productIdStr) {
         return productId.in(productIdStr.split(","));
     }
 
-    private BooleanExpression translatePeriodRestriction(QueryFactory queryFactory,
-                                                         AttributeRepository repository,
-                                                         boolean isScoring,
-                                                         String periodName,
-                                                         int evaluationPeriodId,
-                                                         int laggingPeriodCount,
-                                                         String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private BooleanExpression translatePeriodRestriction(QueryFactory queryFactory, AttributeRepository repository,
+            boolean isScoring, int evaluationPeriodId, int laggingPeriodCount, String sqlUser) {
         return isScoring //
-            ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, periodName, evaluationPeriodId, sqlUser)) //
-            : periodId.loe(translateMaxTrainingPeriodId(queryFactory, repository, periodName, evaluationPeriodId,
-                                                        laggingPeriodCount, sqlUser));
+                ? periodId.eq(translateEvaluationPeriodId(queryFactory, repository, evaluationPeriodId, sqlUser)) //
+                : periodId.loe(translateMaxTrainingPeriodId(queryFactory, repository, evaluationPeriodId,
+                        laggingPeriodCount, sqlUser));
     }
 
-    private SQLQuery joinAccountWithPeriods(QueryFactory queryFactory,
-                                            AttributeRepository repository,
-                                            String accountViewAlias,
-                                            String periodName,
-                                            int evaluationPeriodId,
-                                            int laggingPeriodCount,
-                                            boolean isScoring,
-                                            String sqlUser) {
+    private SQLQuery joinAccountWithPeriods(QueryFactory queryFactory, AttributeRepository repository,
+            String accountViewAlias, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
 
         EntityPath<String> accountViewPath = new PathBuilder<>(String.class, accountViewAlias);
         StringPath qualifiedAccountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
         BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring,
-                                                                         periodName, evaluationPeriodId,
-                                                                         laggingPeriodCount, sqlUser);
-        return factory.query().select(keysAccountId, keysPeriodId)
-            .from(keysPath)
-            .join(accountViewPath)
-            .on(keysAccountId.eq(qualifiedAccountId))
-            .where(periodIdPredicate);
+                evaluationPeriodId, laggingPeriodCount, sqlUser);
+        return factory.query().select(keysAccountId, keysPeriodId).from(keysPath).join(accountViewPath)
+                .on(keysAccountId.eq(qualifiedAccountId)).where(periodIdPredicate);
     }
 
-    private SQLQuery joinEventTupleWithRevenue(QueryFactory queryFactory,
-                                               AttributeRepository repository,
-                                               String eventTupleViewAlias,
-                                               String sqlUser) {
+    private SQLQuery joinEventTupleWithRevenue(QueryFactory queryFactory, AttributeRepository repository,
+            String eventTupleViewAlias, String sqlUser) {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
 
         EntityPath<String> eventViewPath = new PathBuilder<>(String.class, eventTupleViewAlias);
         StringPath tupleAccountId = Expressions.stringPath(eventViewPath, ACCOUNT_ID);
         StringPath tuplePeriodId = Expressions.stringPath(eventViewPath, PERIOD_ID);
-        return factory.query().select(shiftedAccountId, shiftedPeriodId, shiftedRevenue)
-            .from(shiftedRevenuePath)
-            .join(eventViewPath)
-            .on(tupleAccountId.eq(shiftedAccountId).and(tuplePeriodId.eq(shiftedPeriodId)));
+        return factory.query().select(shiftedAccountId, shiftedPeriodId, shiftedRevenue).from(shiftedRevenuePath)
+                .join(eventViewPath).on(tupleAccountId.eq(shiftedAccountId).and(tuplePeriodId.eq(shiftedPeriodId)));
     }
 
-    private SubQuery translateSingleProductAPS(QueryFactory queryFactory,
-                                               AttributeRepository repository,
-                                               TransactionRestriction txRestriction,
-                                               int evaluationPeriodId,
-                                               int laggingPeriodCount,
-                                               boolean isScoring,
-                                               String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private SubQuery translateSingleProductAPS(QueryFactory queryFactory, AttributeRepository repository,
+            TransactionRestriction txRestriction, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            String sqlUser) {
 
         TimeFilter timeFilter = txRestriction.getTimeFilter();
         AggregationFilter spentFilter = txRestriction.getSpentFilter();
         AggregationFilter unitFilter = txRestriction.getUnitFilter();
 
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
-
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
 
         List<Expression> productSelectList = new ArrayList(Arrays.asList(accountId, periodId));
         List<Expression> apsSelectList = new ArrayList(Arrays.asList(keysAccountId, keysPeriodId));
@@ -353,7 +294,7 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         if (spentFilter != null) {
             Expression spentWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnAmountVal,
-                                                                     timeFilter, spentFilter, true).as(amountAggr);
+                    timeFilter, spentFilter, true).as(amountAggr);
             apsSelectList.add(spentWindowAgg);
         } else {
             apsSelectList.add(SQLExpressions.selectZero().as(amountAggr));
@@ -361,39 +302,32 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         if (unitFilter != null) {
             Expression unitWindowAgg = translateAggregateTimeWindow(keysAccountId, keysPeriodId, trxnQuantityVal,
-                                                                    timeFilter, unitFilter, true).as(quantityAggr);
+                    timeFilter, unitFilter, true).as(quantityAggr);
             apsSelectList.add(unitWindowAgg);
         } else {
             apsSelectList.add(SQLExpressions.selectZero().as(quantityAggr));
         }
 
-        String period = txRestriction.getTimeFilter().getPeriod();
-        SQLQuery productQuery = factory.query()
-            .select(productSelectList.toArray(new Expression[0]))
-            .from(tablePath) //
-            .where(periodName.eq(period)) //
-            .where(translateProductId(txRestriction.getProductId()));
+        SQLQuery productQuery = factory.query().select(productSelectList.toArray(new Expression[0])).from(tablePath)
+                .where(translateProductId(txRestriction.getProductId()));
 
-        SQLQuery apsQuery = factory.query()
-            .select(apsSelectList.toArray(new Expression[0]))
-            .from(keysPath)
-            .leftJoin(productQuery, trxnPath)
-            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+        SQLQuery apsQuery = factory.query().select(apsSelectList.toArray(new Expression[0])).from(keysPath)
+                .leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
-                                                                         evaluationPeriodId, laggingPeriodCount, sqlUser);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring,
+                evaluationPeriodId, laggingPeriodCount, sqlUser);
 
         if (txRestriction.isSkipOffset()) {
             int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
 
-            periodIdPredicate = periodIdPredicate.and(periodId.gt(translateMinPeriodId(queryFactory, repository, period,
-                                                                             offset, sqlUser)));
+            periodIdPredicate = periodIdPredicate
+                    .and(periodId.gt(translateMinPeriodId(queryFactory, repository, offset, sqlUser)));
         }
 
         SQLQuery subQueryExpression = factory.query().select(accountId, periodId, amountAggr, quantityAggr) //
-            .from(apsQuery, apsPath) //
-            .where(periodIdPredicate);
+                .from(apsQuery, apsPath) //
+                .where(periodIdPredicate);
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
@@ -401,26 +335,17 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjections(ACCOUNT_ID, PERIOD_ID, AMOUNT_AGG, QUANTITY_AGG);
     }
 
-    private SQLQuery translateMultiProductRestriction(QueryFactory queryFactory,
-                                                      AttributeRepository repository,
-                                                      TransactionRestriction txOld,
-                                                      int evaluationPeriodId,
-                                                      int laggingPeriodCount,
-                                                      boolean isScoring,
-                                                      QueryBuilder builder,
-                                                      String sqlUser) {
+    private SQLQuery translateMultiProductRestriction(QueryFactory queryFactory, AttributeRepository repository,
+            TransactionRestriction txOld, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            QueryBuilder builder, String sqlUser) {
 
         String[] products = txOld.getProductId().split(",");
 
         SubQuery[] apsSubQueryList = Stream.of(products).map(product -> {
-            TransactionRestriction txNew = new TransactionRestriction(product,
-                                                                      txOld.getTimeFilter(),
-                                                                      txOld.isNegate(),
-                                                                      txOld.getSpentFilter(),
-                                                                      txOld.getUnitFilter()
-            );
+            TransactionRestriction txNew = new TransactionRestriction(product, txOld.getTimeFilter(), txOld.isNegate(),
+                    txOld.getSpentFilter(), txOld.getUnitFilter());
             return translateSingleProductAPS(queryFactory, repository, txNew, evaluationPeriodId, laggingPeriodCount,
-                                             isScoring, sqlUser);
+                    isScoring, sqlUser);
         }).toArray(SubQuery[]::new);
 
         builder.with(apsSubQueryList);
@@ -429,7 +354,8 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         builder.with(apsUnionAll);
 
-        SubQuery apsUnionAllNoNull = translateAPSUnionAllReplaceNull(queryFactory, repository, apsUnionAll.getAlias(), sqlUser);
+        SubQuery apsUnionAllNoNull = translateAPSUnionAllReplaceNull(queryFactory, repository, apsUnionAll.getAlias(),
+                sqlUser);
 
         builder.with(apsUnionAllNoNull);
 
@@ -442,10 +368,12 @@ public class EventQueryTranslator extends TranslatorCommon {
         AggregationFilter spentFilter = txOld.getSpentFilter();
         AggregationFilter unitFilter = txOld.getUnitFilter();
 
-        BooleanExpression aggrAmountPredicate =
-            (spentFilter != null) ? translateAggregatePredicate(amountAggr, spentFilter, true) : Expressions.TRUE;
-        BooleanExpression aggrQuantityPredicate =
-            (unitFilter != null) ? translateAggregatePredicate(quantityAggr, unitFilter, true) : Expressions.TRUE;
+        BooleanExpression aggrAmountPredicate = (spentFilter != null)
+                ? translateAggregatePredicate(amountAggr, spentFilter, true)
+                : Expressions.TRUE;
+        BooleanExpression aggrQuantityPredicate = (unitFilter != null)
+                ? translateAggregatePredicate(quantityAggr, unitFilter, true)
+                : Expressions.TRUE;
 
         BooleanExpression aggrValPredicate = aggrAmountPredicate.and(aggrQuantityPredicate);
 
@@ -453,71 +381,56 @@ public class EventQueryTranslator extends TranslatorCommon {
             aggrValPredicate = aggrValPredicate.not();
         }
 
-        return factory.query()
-            .select(accountId, periodId)
-            .from(apsUnionAllPath) //
-            .groupBy(accountId, periodId)
-            .having(aggrValPredicate);
+        return factory.query().select(accountId, periodId).from(apsUnionAllPath) //
+                .groupBy(accountId, periodId).having(aggrValPredicate);
     }
 
-    private SQLQuery translateTransaction(QueryFactory queryFactory,
-                                          AttributeRepository repository,
-                                          TransactionRestriction txRestriction,
-                                          int evaluationPeriodId,
-                                          int laggingPeriodCount,
-                                          boolean isScoring,
-                                          QueryBuilder builder,
-                                          String sqlUser) {
+    private SQLQuery translateTransaction(QueryFactory queryFactory, AttributeRepository repository,
+            TransactionRestriction txRestriction, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            QueryBuilder builder, String sqlUser) {
 
         if (txRestriction.getSpentFilter() == null && txRestriction.getUnitFilter() == null) {
             return translateHasEngaged(queryFactory, repository, txRestriction, evaluationPeriodId, laggingPeriodCount,
-                                       isScoring, sqlUser);
+                    isScoring, sqlUser);
         }
 
         return translateMultiProductRestriction(queryFactory, repository, txRestriction, evaluationPeriodId,
-                                                laggingPeriodCount,
-                                                isScoring, builder, sqlUser);
+                laggingPeriodCount, isScoring, builder, sqlUser);
     }
 
-    private SQLQuery translateHasEngaged(QueryFactory queryFactory,
-                                         AttributeRepository repository,
-                                         TransactionRestriction txRestriction,
-                                         int evaluationPeriodId,
-                                         int laggingPeriodCount,
-                                         boolean isScoring,
-                                         String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private SQLQuery translateHasEngaged(QueryFactory queryFactory, AttributeRepository repository,
+            TransactionRestriction txRestriction, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            String sqlUser) {
 
         TimeFilter timeFilter = txRestriction.getTimeFilter();
         String productIdStr = txRestriction.getProductId();
         boolean returnPositive = !txRestriction.isNegate();
 
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
-        String txTableName = getPeriodTransactionTableName(repository);
-        StringPath tablePath = Expressions.stringPath(txTableName);
-        String period = txRestriction.getTimeFilter().getPeriod();
+        StringPath tablePath = Expressions.stringPath(TEMP_TRXN);
 
         NumberExpression trxnAmountValNumber = Expressions.numberPath(BigDecimal.class, trxnAmountVal.getMetadata());
-        NumberExpression trxnQuantityValNumber = Expressions.numberPath(BigDecimal.class, trxnQuantityVal.getMetadata());
+        NumberExpression trxnQuantityValNumber = Expressions.numberPath(BigDecimal.class,
+                trxnQuantityVal.getMetadata());
         CaseBuilder caseBuilder = new CaseBuilder();
         NumberExpression trxnValExists = caseBuilder.when(trxnAmountValNumber.gt(0)).then(1)
-            .when(trxnQuantityValNumber.gt(0)).then(1)
-            .otherwise(0);
+                .when(trxnQuantityValNumber.gt(0)).then(1).otherwise(0);
 
-        Expression windowAgg = translateTimeWindow(timeFilter, SQLExpressions.max(trxnValExists).over()
-            .partitionBy(keysAccountId).orderBy(keysPeriodId)).as(amountAggr);
+        Expression windowAgg = translateTimeWindow(timeFilter,
+                SQLExpressions.max(trxnValExists).over().partitionBy(keysAccountId).orderBy(keysPeriodId))
+                        .as(amountAggr);
 
-        SQLQuery productQuery = factory.query()  //
-            .select(accountId, periodId, amountVal.as(AMOUNT_VAL), quantityVal.as(QUANTITY_VAL)).from(tablePath) //
-            .where(periodName.eq(period)) //
-            .where(translateProductId(productIdStr));
+        SQLQuery productQuery = factory.query() //
+                .select(accountId, periodId, amountVal.as(AMOUNT_VAL), quantityVal.as(QUANTITY_VAL)).from(tablePath) //
+                .where(translateProductId(productIdStr));
 
-        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnAmountVal, windowAgg)
-            .from(keysPath).leftJoin(productQuery, trxnPath)
-            .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
+        SQLQuery apsQuery = factory.query().select(keysAccountId, keysPeriodId, trxnAmountVal, windowAgg).from(keysPath)
+                .leftJoin(productQuery, trxnPath)
+                .on(keysAccountId.eq(trxnAccountId).and(keysPeriodId.eq(trxnPeriodId)));
 
-        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring, period,
-                                                                         evaluationPeriodId, laggingPeriodCount,
-                                                                         sqlUser);
+        BooleanExpression periodIdPredicate = translatePeriodRestriction(queryFactory, repository, isScoring,
+                evaluationPeriodId, laggingPeriodCount, sqlUser);
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
@@ -526,20 +439,17 @@ public class EventQueryTranslator extends TranslatorCommon {
         if (txRestriction.isSkipOffset()) {
             int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
 
-            resultFilter = resultFilter.and(periodId.gt(translateMinPeriodId(queryFactory, repository, period, //
-                                                                             offset, sqlUser)));
+            resultFilter = resultFilter
+                    .and(periodId.gt(translateMinPeriodId(queryFactory, repository, offset, sqlUser)));
         }
 
-        return factory.query().select(accountId, periodId).from(apsQuery, apsPath)
-            .where(resultFilter)
-            .groupBy(accountId, periodId);
+        return factory.query().select(accountId, periodId).from(apsQuery, apsPath).where(resultFilter)
+                .groupBy(accountId, periodId);
 
     }
 
-
-    private SubQuery translateSelectAll(QueryFactory queryFactory,
-                                        AttributeRepository repository,
-                                        String tableName, String sqlUser) {
+    private SubQuery translateSelectAll(QueryFactory queryFactory, AttributeRepository repository, String tableName,
+            String sqlUser) {
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
         EntityPath<String> tablePath = new PathBuilder<>(String.class, tableName);
         SQLQuery selectAll = factory.query().select(SQLExpressions.all).from(tablePath);
@@ -549,33 +459,36 @@ public class EventQueryTranslator extends TranslatorCommon {
         return query;
     }
 
-    private SubQuery translateSelectAll(QueryFactory queryFactory,
-                                        AttributeRepository repository,
-                                        String tableName,
-                                        String periodNameStr,
-                                        int evaluationPeriodId,
-                                        int laggingPeriodCount,
-                                        int periodCount, String sqlUser) {
+    @SuppressWarnings("unchecked")
+    private SubQuery translateSelectAll(QueryFactory queryFactory, AttributeRepository repository, String tableName,
+            int evaluationPeriodId, int laggingPeriodCount, int periodCount, String sqlUser, boolean hasSegmentQuery) {
         SQLQueryFactory factory = queryFactory.getSQLQueryFactory(repository, sqlUser);
         EntityPath<String> tablePath = new PathBuilder<>(String.class, tableName);
-        BooleanExpression periodRestriction = periodId.gt(translateMinPeriodId(queryFactory,
-                                                                               repository,
-                                                                               periodNameStr,
-                                                                               evaluationPeriodId,
-                                                                               laggingPeriodCount,
-                                                                               periodCount,
-                                                                               sqlUser));
-        SQLQuery selectAll = factory.query().select(SQLExpressions.all).from(tablePath).where(periodRestriction);
+        BooleanExpression periodRestriction = periodId.gt(translateMinPeriodId(queryFactory, repository,
+                evaluationPeriodId, laggingPeriodCount, periodCount, sqlUser));
+        SQLQuery selectAll;
+        if (hasSegmentQuery) {
+            EntityPath<String> segmentPath = new PathBuilder<>(String.class, SEGMENT);
+            StringPath tableId = Expressions.stringPath(tablePath, InterfaceName.AccountId.name());
+            StringPath segmentId = Expressions.stringPath(segmentPath, InterfaceName.AccountId.name());
+            selectAll = factory.query() //
+                    .select(SQLExpressions.all).from(tablePath) //
+                    .join(segmentPath).on(tableId.eq(segmentId)) //
+                    .where(periodRestriction);
+        } else {
+            selectAll = factory.query() //
+                    .select(SQLExpressions.all).from(tablePath) //
+                    .where(periodRestriction);
+
+        }
         SubQuery query = new SubQuery();
         query.setSubQueryExpression(selectAll);
         query.setAlias(tableName);
         return query;
     }
 
-    private SubQuery translateEventRevenue(QueryFactory queryFactory,
-                                           AttributeRepository repository,
-                                           String eventTupleViewAlias,
-                                           String sqlUser) {
+    private SubQuery translateEventRevenue(QueryFactory queryFactory, AttributeRepository repository,
+            String eventTupleViewAlias, String sqlUser) {
         SQLQuery selectAll = joinEventTupleWithRevenue(queryFactory, repository, eventTupleViewAlias, sqlUser);
         SubQuery query = new SubQuery();
         query.setSubQueryExpression(selectAll);
@@ -583,36 +496,55 @@ public class EventQueryTranslator extends TranslatorCommon {
         return query.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID).withProjection(REVENUE);
     }
 
-    private SubQuery translateTransactionRestriction(QueryFactory queryFactory,
-                                                     AttributeRepository repository,
-                                                     TransactionRestriction txRestriction,
-                                                     int evaluationPeriodId,
-                                                     int laggingPeriodCount,
-                                                     boolean isScoring,
-                                                     QueryBuilder builder,
-                                                     String sqlUser) {
+    private SubQuery translateTransactionRestriction(QueryFactory queryFactory, AttributeRepository repository,
+            TransactionRestriction txRestriction, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            QueryBuilder builder, String sqlUser) {
         if (StringUtils.isEmpty(txRestriction.getProductId())) {
             throw new RuntimeException("Invalid transaction restriction, no product specified");
         }
         SQLQuery subQueryExpression = translateTransaction(queryFactory, repository, txRestriction, evaluationPeriodId,
-                                                           laggingPeriodCount,
-                                                           isScoring, builder, sqlUser);
+                laggingPeriodCount, isScoring, builder, sqlUser);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Transaction.name()));
         return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
     }
 
-    private SubQuery translateAccountViewWithJoinedPeriods(QueryFactory queryFactory,
-                                                           AttributeRepository repository,
-                                                           String accountViewAlias,
-                                                           String period,
-                                                           int evaluationPeriodId,
-                                                           int laggingPeriodCount,
-                                                           boolean isScoring,
-                                                           String sqlUser) {
-        SQLQuery subQueryExpression = joinAccountWithPeriods(queryFactory, repository, accountViewAlias, period,
-                                                             evaluationPeriodId, laggingPeriodCount, isScoring, sqlUser);
+    private SubQuery translateAccountViewWithJoinedPeriods(QueryFactory queryFactory, AttributeRepository repository,
+            String accountViewAlias, int evaluationPeriodId, int laggingPeriodCount, boolean isScoring,
+            String sqlUser) {
+        SQLQuery subQueryExpression = joinAccountWithPeriods(queryFactory, repository, accountViewAlias,
+                evaluationPeriodId, laggingPeriodCount, isScoring, sqlUser);
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(subQueryExpression);
+        subQuery.setAlias(generateAlias(BusinessEntity.Account.name()));
+        return subQuery.withProjection(ACCOUNT_ID).withProjection(PERIOD_ID);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SubQuery translateTransactionPeriodId(QueryFactory queryFactory, //
+            AttributeRepository repository, String sqlUser) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+        NumberPath periodId = Expressions.numberPath(Integer.class, PERIOD_ID);
+        Expression subQueryExpression = factory.query().select(periodId.max()).from(Expressions.stringPath(TEMP_TRXN));
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(subQueryExpression);
+        subQuery.setAlias(MAX_PID);
+        return subQuery.withProjection(PERIOD_ID);
+    }
+
+    private SubQuery translateDistinctAccounts(QueryFactory queryFactory, //
+            AttributeRepository repository, String sqlUser, int evaluationPeriodId) {
+        SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
+        EntityPath<String> accountViewPath = new PathBuilder<>(String.class, KEYS);
+        StringPath accountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
+        NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
+        if (evaluationPeriodId < 0) {
+            EntityPath<String> periodViewPath = new PathBuilder<>(String.class, MAX_PID);
+            periodIdExpression = Expressions.numberPath(Long.class, periodViewPath, PERIOD_ID);
+        }
+        SQLQuery subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression).from(keysPath,
+                Expressions.stringPath(MAX_PID));
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Account.name()));
@@ -629,72 +561,60 @@ public class EventQueryTranslator extends TranslatorCommon {
         return subQuery.withProjection(ACCOUNT_ID);
     }
 
-
     private TransactionRestriction translateToPrior(TransactionRestriction priorOnly) {
 
-        TimeFilter timeFilter = new TimeFilter(
-            priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
-            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+        TimeFilter timeFilter = new TimeFilter(priorOnly.getTimeFilter().getLhs(), ComparisonType.PRIOR, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
         return new TransactionRestriction(priorOnly.getProductId(), //
-                                          timeFilter, //
-                                          false, //
-                                          priorOnly.getSpentFilter(), //
-                                          priorOnly.getUnitFilter());
+                timeFilter, //
+                false, //
+                priorOnly.getSpentFilter(), //
+                priorOnly.getUnitFilter());
     }
 
     private TransactionRestriction translateToNotEngagedWithin(TransactionRestriction priorOnly) {
 
-        TimeFilter timeFilter = new TimeFilter(
-            priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
-            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+        TimeFilter timeFilter = new TimeFilter(priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
-                                          timeFilter, //
-                                          true, //
-                                          null, //
-                                          null);
+                timeFilter, //
+                true, //
+                null, //
+                null);
     }
 
     private TransactionRestriction translateToEngagedWithin(TransactionRestriction priorOnly, boolean skipOffset) {
 
-        TimeFilter timeFilter = new TimeFilter(
-            priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
-            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+        TimeFilter timeFilter = new TimeFilter(priorOnly.getTimeFilter().getLhs(), ComparisonType.WITHIN, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
-                                          timeFilter, //
-                                          false, //
-                                          null, //
-                                          null,
-                                          skipOffset);
+                timeFilter, //
+                false, //
+                null, //
+                null, skipOffset);
     }
 
     private TransactionRestriction translateToNotEngagedEver(TransactionRestriction priorOnly, boolean skipOffset) {
 
-        TimeFilter timeFilter = new TimeFilter(
-            priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
-            priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
+        TimeFilter timeFilter = new TimeFilter(priorOnly.getTimeFilter().getLhs(), ComparisonType.EVER, //
+                priorOnly.getTimeFilter().getPeriod(), priorOnly.getTimeFilter().getValues());
 
         return new TransactionRestriction(priorOnly.getProductId(), //
-                                          timeFilter, //
-                                          true, //
-                                          null, //
-                                          null,
-                                          skipOffset);
+                timeFilter, //
+                true, //
+                null, //
+                null, skipOffset);
     }
 
     private boolean calculateEventRevenue(boolean isEvent, EventFrontEndQuery frontEndQuery) {
         return isEvent && frontEndQuery.getCalculateProductRevenue();
     }
 
-    private QueryBuilder translateRestriction(QueryFactory queryFactory,
-                                              AttributeRepository repository,
-                                              Restriction restriction,
-                                              boolean isScoring,
-                                              boolean isEvent,
-                                              EventFrontEndQuery frontEndQuery,
-                                              QueryBuilder builder,
-                                              String sqlUser) {
+    private QueryBuilder translateRestriction(QueryFactory queryFactory, AttributeRepository repository,
+            Restriction restriction, boolean isScoring, boolean isEvent, EventFrontEndQuery frontEndQuery,
+            QueryBuilder builder, String sqlUser) {
 
         final String period = frontEndQuery.getPeriodName();
         final int periodCount = frontEndQuery.getPeriodCount();
@@ -706,20 +626,30 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
 
         if (StringUtils.isBlank(period)) {
-            throw new IllegalArgumentException("Must specify a period name in front end query: " + JsonUtils.serialize(frontEndQuery));
+            throw new IllegalArgumentException(
+                    "Must specify a period name in front end query: " + JsonUtils.serialize(frontEndQuery));
         }
 
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
-        overwritePeriodsInRestriction(restriction, period);
-        builder.with(translateAllKeys(queryFactory, repository, period, periodCount, sqlUser));
+        overwritePeriodsInRestriction(rootRestriction, period);
+        rootRestriction = RestrictionOptimizer.optimize(rootRestriction);
+
+        if (!SparkQueryProvider.SPARK_BATCH_USER.equals(sqlUser)) {
+            // Spark SQL prepares these two temp views before-hand.
+            builder.with(translateTempTrxn(queryFactory, repository, period, sqlUser));
+            builder.with(translateAllKeys(queryFactory, repository, sqlUser));
+        }
+        if (frontEndQuery.getSegmentSubQuery() != null) {
+            builder.with(translateSegment(frontEndQuery.getSegmentSubQuery()));
+        }
 
         if (calculateEventRevenue(isEvent, frontEndQuery)) {
             if (frontEndQuery.getTargetProductIds() == null || frontEndQuery.getTargetProductIds().isEmpty()) {
                 throw new RuntimeException("Fail to calculate product revenue. No target product specified");
             }
-            builder.with(translateProductRevenue(queryFactory, repository, frontEndQuery.getTargetProductIds(),
-                                                 period, sqlUser));
+            builder.with(
+                    translateProductRevenue(queryFactory, repository, frontEndQuery.getTargetProductIds(), sqlUser));
             builder.with(translateShiftedRevenue(queryFactory, repository, laggingPeriodCount, sqlUser));
         }
 
@@ -773,8 +703,8 @@ public class EventQueryTranslator extends TranslatorCommon {
             bfs.run(rootRestriction, (object, ctx) -> {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    if (txRestriction.isNegate() &&
-                        ComparisonType.WITHIN == txRestriction.getTimeFilter().getRelation()) {
+                    if (txRestriction.isNegate()
+                            && ComparisonType.WITHIN == txRestriction.getTimeFilter().getRelation()) {
                         Restriction newRestriction = translateNotWithinToSkipOffset(txRestriction);
                         LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                         parent.getRestrictions().remove(txRestriction);
@@ -810,7 +740,8 @@ public class EventQueryTranslator extends TranslatorCommon {
             }
         }
 
-        // translate restrictions to individual subqueries
+        // translate restrictions to individual sub-queries
+        AtomicReference<String> finalAliasRef = new AtomicReference<>("");
         if (rootRestriction instanceof LogicalRestriction) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();
             bfs.run(rootRestriction, (object, ctx) -> {
@@ -820,9 +751,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                 } else if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
                     SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction,
-                                                                        evaluationPeriodId,
-                                                                        laggingPeriodCount,
-                                                                        isScoring, builder, sqlUser);
+                            evaluationPeriodId, laggingPeriodCount, isScoring, builder, sqlUser);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);
@@ -832,10 +761,7 @@ public class EventQueryTranslator extends TranslatorCommon {
                     SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
                     builder.with(accountViewSubquery);
                     SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
-                                                                              accountViewSubquery.getAlias(),
-                                                                              period, evaluationPeriodId,
-                                                                              laggingPeriodCount,
-                                                                              isScoring, sqlUser);
+                            accountViewSubquery.getAlias(), evaluationPeriodId, laggingPeriodCount, isScoring, sqlUser);
                     builder.with(subQuery);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     List<String> childSubQueryList = subQueryTableMap.get(parent);
@@ -845,52 +771,40 @@ public class EventQueryTranslator extends TranslatorCommon {
         } else if (rootRestriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
             SubQuery subQuery = translateTransactionRestriction(queryFactory, repository, txRestriction,
-                                                                evaluationPeriodId,
-                                                                laggingPeriodCount,
-                                                                isScoring,
-                                                                builder, sqlUser);
+                    evaluationPeriodId, laggingPeriodCount, isScoring, builder, sqlUser);
             builder.with(subQuery);
-            SubQuery selectAll = translateSelectAll(queryFactory, repository, subQuery.getAlias(),
-                                                    period, evaluationPeriodId, laggingPeriodCount, periodCount,
-                                                    sqlUser);
-            SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
-            SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
-            builder.from(selectAll);
-            builder.select(accountId, periodId);
+            finalAliasRef.set(subQuery.getAlias());
         } else if (rootRestriction instanceof ConcreteRestriction) {
             ConcreteRestriction concreteRestriction = (ConcreteRestriction) rootRestriction;
             SubQuery accountViewSubquery = translateAccountView(concreteRestriction);
             builder.with(accountViewSubquery);
             SubQuery subQuery = translateAccountViewWithJoinedPeriods(queryFactory, repository,
-                                                                      accountViewSubquery.getAlias(),
-                                                                      period, evaluationPeriodId,
-                                                                      laggingPeriodCount,
-                                                                      isScoring, sqlUser);
+                    accountViewSubquery.getAlias(), evaluationPeriodId, laggingPeriodCount, isScoring, sqlUser);
             builder.with(subQuery);
             String selectAllAlias;
             if (calculateEventRevenue(isEvent, frontEndQuery)) {
-                SubQuery revenueSubQuery = translateEventRevenue(queryFactory, repository, subQuery.getAlias(), sqlUser);
+                SubQuery revenueSubQuery = translateEventRevenue(queryFactory, repository, subQuery.getAlias(),
+                        sqlUser);
                 builder.with(revenueSubQuery);
                 selectAllAlias = revenueSubQuery.getAlias();
             } else {
                 selectAllAlias = subQuery.getAlias();
             }
-            SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias,
-                                                    period, evaluationPeriodId, laggingPeriodCount, periodCount,
-                                                    sqlUser);
-            SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
-            SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
-            builder.from(selectAll);
-            builder.select(accountId, periodId);
-            if (calculateEventRevenue(isEvent, frontEndQuery)) {
-                SubQueryAttrLookup revenue = new SubQueryAttrLookup(selectAll, REVENUE);
-                builder.select(revenue);
+            finalAliasRef.set(selectAllAlias);
+        } else if (rootRestriction == null) {
+            if (evaluationPeriodId < 0) {
+                SubQuery trxnPeriod = translateTransactionPeriodId(queryFactory, repository, sqlUser);
+                builder.with(trxnPeriod);
             }
+            SubQuery distinctAccounts = //
+                    translateDistinctAccounts(queryFactory, repository, sqlUser, evaluationPeriodId);
+            builder.with(distinctAccounts);
+            finalAliasRef.set(distinctAccounts.getAlias());
         } else {
             throw new UnsupportedOperationException("Cannot translate restriction " + restriction);
         }
 
-        // merge subqueries into final query
+        // merge sub queries into final query
         if (!subQueryTableMap.isEmpty()) {
             Map<LogicalRestriction, UnionCollector> unionMap = new HashMap<>();
 
@@ -898,9 +812,10 @@ public class EventQueryTranslator extends TranslatorCommon {
                 List<String> childLookups = subQueryTableMap.get(logicalRestriction);
                 // process leaf nodes
                 if (childLookups != null && childLookups.size() != 0) {
-                    SQLQuery[] childQueries = childLookups.stream().map(x -> {
-                        return (SQLQuery) translateSelectAll(queryFactory, repository, x, sqlUser).getSubQueryExpression();
-                    }).toArray(SQLQuery[]::new);
+                    SQLQuery[] childQueries = childLookups.stream() //
+                            .map(x -> (SQLQuery) translateSelectAll(queryFactory, repository, x, sqlUser) //
+                                    .getSubQueryExpression()) //
+                            .toArray(SQLQuery[]::new);
 
                     Union<?> union = mergeQueryResult(logicalRestriction.getOperator(), childQueries);
                     UnionCollector collector = unionMap.getOrDefault(logicalRestriction, new UnionCollector());
@@ -928,7 +843,8 @@ public class EventQueryTranslator extends TranslatorCommon {
                     }
 
                     // generate CTE for intermediary tables
-                    // todo: experiment with skipping intermediate tables to see if it improves performance
+                    // todo: experiment with skipping intermediate tables to see if it improves
+                    // performance
                     String mergedTableAlias = generateAlias("Logical");
                     SubQuery mergedQuery = new SubQuery();
                     mergedQuery.setSubQueryExpression(merged);
@@ -938,35 +854,42 @@ public class EventQueryTranslator extends TranslatorCommon {
 
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     if (parent != null) {
-                        SQLQuery childQuery = (SQLQuery)
-                            translateSelectAll(queryFactory, repository, mergedTableAlias, sqlUser).getSubQueryExpression();
+                        SQLQuery childQuery = (SQLQuery) translateSelectAll(queryFactory, repository, mergedTableAlias,
+                                sqlUser).getSubQueryExpression();
 
                         UnionCollector parentCollector = unionMap.getOrDefault(parent, new UnionCollector());
                         unionMap.put(parent, parentCollector.withUnion(childQuery));
                     } else {
                         String selectAllAlias;
                         if (calculateEventRevenue(isEvent, frontEndQuery)) {
-                            SubQuery revenueSubQuery = translateEventRevenue(queryFactory, repository, mergedTableAlias, sqlUser);
+                            SubQuery revenueSubQuery = translateEventRevenue(queryFactory, repository, mergedTableAlias,
+                                    sqlUser);
                             builder.with(revenueSubQuery);
                             selectAllAlias = revenueSubQuery.getAlias();
                         } else {
                             selectAllAlias = mergedTableAlias;
                         }
-                        SubQuery selectAll = translateSelectAll(queryFactory, repository, selectAllAlias,
-                                                                period, evaluationPeriodId, laggingPeriodCount, periodCount,
-                                                                sqlUser);
-                        SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
-                        SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
-                        builder.from(selectAll);
-                        builder.select(accountId, periodId);
-                        if (calculateEventRevenue(isEvent, frontEndQuery)) {
-                            SubQueryAttrLookup revenue = new SubQueryAttrLookup(selectAll, REVENUE);
-                            builder.select(revenue);
-                        }
+                        finalAliasRef.set(selectAllAlias);
                     }
                 }
             }, true);
         }
+
+        // final "select ... from ..." statement
+        if (StringUtils.isBlank(finalAliasRef.get())) {
+            throw new IllegalStateException("Cannot resolve final alias from restriction " + restriction);
+        }
+        SubQuery selectAll = translateSelectAll(queryFactory, repository, finalAliasRef.get(), evaluationPeriodId,
+                laggingPeriodCount, periodCount, sqlUser, frontEndQuery.getSegmentQuery() != null);
+        SubQueryAttrLookup accountId = new SubQueryAttrLookup(selectAll, ACCOUNT_ID);
+        SubQueryAttrLookup periodId = new SubQueryAttrLookup(selectAll, PERIOD_ID);
+        builder.from(selectAll);
+        builder.select(accountId, periodId);
+        if (calculateEventRevenue(isEvent, frontEndQuery)) {
+            SubQueryAttrLookup revenue = new SubQueryAttrLookup(selectAll, REVENUE);
+            builder.select(revenue);
+        }
+
         return builder;
     }
 
@@ -1008,12 +931,8 @@ public class EventQueryTranslator extends TranslatorCommon {
     }
 
     private Restriction translateNotWithinToSkipOffset(TransactionRestriction txRestriction) {
-        return new TransactionRestriction(txRestriction.getProductId(),
-                                                                txRestriction.getTimeFilter(),
-                                                                txRestriction.isNegate(),
-                                                                txRestriction.getSpentFilter(),
-                                                                txRestriction.getUnitFilter(),
-                                                                true);
+        return new TransactionRestriction(txRestriction.getProductId(), txRestriction.getTimeFilter(),
+                txRestriction.isNegate(), txRestriction.getSpentFilter(), txRestriction.getUnitFilter(), true);
     }
 
     private static class UnionCollector {
@@ -1038,13 +957,14 @@ public class EventQueryTranslator extends TranslatorCommon {
         }
 
         SubQueryExpression[] asArray() {
-            return unionList.toArray(new SubQueryExpression[unionList.size()]);
+            return unionList.toArray(new SubQueryExpression[0]);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Union<?> mergeQueryResult(LogicalOperator ops, SubQueryExpression[] childQueries) {
         return (LogicalOperator.AND == ops) //
-            ? SQLExpressions.intersect(childQueries)
-            : SQLExpressions.union(childQueries);
+                ? SQLExpressions.intersect(childQueries)
+                : SQLExpressions.union(childQueries);
     }
 }

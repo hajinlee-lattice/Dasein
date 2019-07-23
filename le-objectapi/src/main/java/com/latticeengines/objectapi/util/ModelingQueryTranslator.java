@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
@@ -41,10 +44,6 @@ public class ModelingQueryTranslator extends QueryTranslator {
             throw new IllegalArgumentException("No restriction specified for event query");
         }
 
-        if (EventType.Scoring.equals(eventType) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
-            log.warn("Did not specify segment query for target query: " + JsonUtils.serialize(frontEndQuery));
-        }
-
         log.info("Translating modeling query with period name " + frontEndQuery.getPeriodName());
 
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
@@ -53,16 +52,22 @@ public class ModelingQueryTranslator extends QueryTranslator {
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
 
-        if (frontEndQuery.getSegmentQuery() != null) {
-            Restriction segmentRestriction = translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(),
-                    timeTranslator, sqlUser);
-            restriction = joinRestrictions(segmentRestriction, restriction);
-        }
-
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
         switch (eventType) {
         case Scoring:
+            if (frontEndQuery.getSegmentQuery() != null) {
+                Restriction segmentRestriction = RestrictionOptimizer.optimize( //
+                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(), timeTranslator,
+                                sqlUser));
+                QueryBuilder segmentQryBldr = Query.builder();
+                Query segmentQry = segmentQryBldr.from(BusinessEntity.Account) //
+                        .select(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())) //
+                        .where(segmentRestriction).build();
+                frontEndQuery.setSegmentSubQuery(segmentQry);
+            } else {
+                log.warn("Did not specify segment query for target query: " + JsonUtils.serialize(frontEndQuery));
+            }
             queryBuilder = eventQueryTranslator.translateForScoring(queryFactory, repository, restriction,
                     frontEndQuery, queryBuilder, sqlUser);
             break;

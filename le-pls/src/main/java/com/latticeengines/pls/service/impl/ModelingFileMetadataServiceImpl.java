@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -44,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
@@ -61,6 +65,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -90,6 +95,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Inject
+    private CommonTenantConfigServiceImpl appTenantConfigService;
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
@@ -123,6 +131,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
         FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
@@ -155,6 +164,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     templateTable, SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true,
                             withoutId, enableEntityMatch));
         }
+        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument);
         return resultDocument;
     }
 
@@ -320,7 +330,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         bestEffortMapping.getFieldType());
                         validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
                                 message));
-                    } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType()) && !resolver.checkUserDateType(fieldMapping)) {
+                    } else if (UserDefinedType.DATE.equals(fieldMapping.getFieldType())) {
                         String userFormat = StringUtils.isBlank(fieldMapping.getTimeFormatString()) ?
                                 fieldMapping.getDateFormatString() :
                                 fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
@@ -330,11 +340,32 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 bestEffortMapping.getDateFormatString() :
                                 bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                         + bestEffortMapping.getTimeFormatString();
-                        String message = String
-                                .format("%s is set as %s but appears to be %s in your file.", userField,
-                                        userFormat, correctFormat);
-                        validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                message));
+
+                        // deal with case format can't parse the value
+                        String errorValue = resolver.checkUserDateType(fieldMapping);
+                        if (errorValue != null){
+                            // deal with special case that format in field mapping provided by system and field mapping
+                            // after user changed are inconsistent
+                            String message;
+                            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                                message = String
+                                        .format("%s is set as %s from the system-provided %s in your file.", userField,
+                                                userFormat, correctFormat);
+                            } else {
+                                message = String
+                                        .format("%s is set as %s which can't parse the %s from uploaded file.", userField,
+                                                userFormat, errorValue);
+                            }
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                    message));
+                        } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                            // this is case that user change the date/time format which can be parsed
+                            String message =  String
+                                    .format("%s is set as %s which can parse the value from uploaded file.", userField,
+                                            userFormat);
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                    message));
+                        }
                     }
                 }
             }
@@ -489,21 +520,28 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         if (dataFeedTask == null) {
-            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                    enableEntityMatch || enableEntityMatchGA);
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
+            EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
         } else {
             table = dataFeedTask.getImportTemplate();
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
+            if (table.getAttribute(InterfaceName.AccountId) == null) {
+                EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
+            }
         }
-        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId, enableEntityMatch);
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                enableEntityMatch || enableEntityMatchGA);
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
     }
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName,
             boolean checkHeaderFormat) {
-        return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, false);
+        return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, null);
     }
 
     private void decodeFieldMapping(FieldMappingDocument fieldMappingDocument) {
@@ -588,6 +626,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         importSystem.setContactSystemId(contactSystemId);
                                         importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
                                         cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                                        fieldMapping.setMappedToLatticeField(false);
                                         fieldMapping.setMappedField(contactSystemId);
                                     }
                                     else {
@@ -800,7 +839,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String fileDisplayName, boolean checkHeaderFormat, boolean withCDLHeader) {
+            String fileDisplayName, boolean checkHeaderFormat, String entity) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
@@ -820,6 +859,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
+        if (BusinessEntity.Account.name().equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
+        }
+
         Collection<String> reservedWords = new ArrayList<>(
                 Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));
         Collection<String> reservedBeginings = new ArrayList<>(

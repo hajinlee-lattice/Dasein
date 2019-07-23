@@ -1,9 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
@@ -35,44 +39,57 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling MarketoExportFieldMetadataService");
-        Map<String, ColumnMetadata> attributesMap = getServingMetadataForEntity(customerSpace, BusinessEntity.Account)
-                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
+        Map<String, ColumnMetadata> attributesMap = getServingMetadata(customerSpace,
+                Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact))
+                        .collect(HashMap<String, ColumnMetadata>::new,
+                                (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
                 .block();
 
-        getServingMetadataForEntity(customerSpace, BusinessEntity.Contact)
-                .collect(Object::new, (__, cm) -> attributesMap.put(cm.getAttrName(), cm)).block();
+        Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getStandardExportFields(
+                channel.getLookupIdMap().getExternalSystemName()).stream()
+                        .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
+        
+        List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId());
 
-        List<ExportFieldMetadataDefaults> defaultFieldsMetadata = getStandardExportFields(
-                channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<ColumnMetadata>();
 
-        List<ColumnMetadata> result = new ArrayList<ColumnMetadata>();
-        Map<String, ColumnMetadata> defaultExportFieldsMap = new HashMap<String, ColumnMetadata>();
+        if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
+            mappedFieldNames.forEach(fieldName -> {
+                ColumnMetadata cm = null;
+                if (attributesMap.containsKey(fieldName)) {
+                    cm = attributesMap.get(fieldName);
+                    if (defaultFieldsMetadataMap.containsKey(fieldName)) {
+                        cm.setDisplayName(defaultFieldsMetadataMap.get(fieldName).getDisplayName());
+                    }
+                } else if (defaultFieldsMetadataMap.containsKey(fieldName)) {
+                    cm = constructCampaignDerivedColumnMetadata(defaultFieldsMetadataMap.get(fieldName));
+                } else {
+                    throw new LedpException(LedpCode.LEDP_40069, new String[] { fieldName, "Marketo" });
+                }
+                exportColumnMetadataList.add(cm);
+            });
+        } else {
+            defaultFieldsMetadataMap.values().forEach(defaultField -> {
+                ColumnMetadata cm;
+                String attrName = defaultField.getAttrName();
+                if (attributesMap.containsKey(attrName)) {
+                    cm = attributesMap.get(attrName);
+                    cm.setDisplayName(defaultField.getDisplayName());
+                } else {
+                    cm = constructCampaignDerivedColumnMetadata(defaultField);
+                }
 
-        defaultFieldsMetadata.forEach(field -> {
-            ColumnMetadata cm = field.getStandardField() && attributesMap.containsKey(field.getAttrName())
-                    ? attributesMap.get(field.getAttrName())
-                    : constructNonStandardColumnMetadata(field);
+                exportColumnMetadataList.add(cm);
+            });
 
-            result.add(cm);
-            defaultExportFieldsMap.put(field.getAttrName(), cm);
-        });
+        }
 
-        List<String> customizedAttributes = getCustomizedFields(channel.getLookupIdMap().getOrgId());
-
-        List<ColumnMetadata> customAttributes = customizedAttributes.stream()
-                .filter(attr -> !defaultExportFieldsMap.containsKey(attr)).filter(attributesMap::containsKey)
-                .map(attr -> attributesMap.get(attr)).collect(Collectors.toList());
-
-        result.addAll(customAttributes);
-
-        return result;
+        return exportColumnMetadataList;
 
     }
 
-    private List<String> getCustomizedFields(String orgId) {
+    private List<String> getMappedFieldNames(String orgId) {
         List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId);
-
         return mapping.stream().map(ExportFieldMetadataMapping::getSourceField).collect(Collectors.toList());
     }
-
 }

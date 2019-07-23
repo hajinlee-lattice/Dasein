@@ -195,6 +195,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         AIModel toCreate = new AIModel();
         toCreate.setPredictionType(derivedFromRatingModel.getPredictionType());
         toCreate.setCreatedBy(aiModel.getCreatedBy());
+        toCreate.setUpdatedBy(aiModel.getUpdatedBy());
         toCreate.setRatingEngine(ratingEngine);
         toCreate.setTrainingSegment(aiModel.getTrainingSegment());
         toCreate.setAdvancedModelingConfig(aiModel.getAdvancedModelingConfig());
@@ -206,9 +207,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             String sourceFileName = modelingConfig.getSourceFileName();
             SourceFile originalSourceFile = sourceFileProxy.findByName(customerSpace,
                     modelingConfig.getSourceFileName());
-            // Remove this below line and replace it with some code that creates a metadata table but does not copy the
+            // Remove this below line and replace it with some code that creates
+            // a metadata table but does not copy the
             // underlying data
-            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName(), true);
+            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName(), false);
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());
@@ -517,8 +519,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
         attrStat.setNonNullCount(predictorsElementsExist
-                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
-                : 0);
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum() : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)

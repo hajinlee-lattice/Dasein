@@ -107,10 +107,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
         int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-        if (multiplier > 1) {
-            log.info("Set multiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
-            scalingMultiplier = multiplier;
-        }
+        log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+        scalingMultiplier = multiplier;
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
 

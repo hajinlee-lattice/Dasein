@@ -20,7 +20,14 @@
         </h2>
 
         <span class="count">
-            <strong>{{ count|number }}</strong>
+            <strong class="show-tooltip top right">
+                {{ count|number }}
+                <div class="tooltip_">
+                    <div class="cover">
+                        There are {{ count|number }} attributes in this category
+                    </div>
+                </div>
+            </strong>
         </span>
 
         <div class="attributes-container" ng-if="!vm.category">

@@ -27,7 +27,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
     @Override
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
             setEntityDecisionGraph(input);
         }
         setDataCloudVersion(input);
@@ -41,7 +41,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
 
         MatchOutput output;
         ColumnSelection columnSelection;
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
             // Handle Entity Match metadata and column selection setup.
             context.setCdlLookup(false);
             if (metadatas == null) {
@@ -67,18 +67,19 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
             } else {
                 context.setCdlLookup(false);
                 columnSelection = parseColumnSelection(input);
-                // TODO(lming, ysong): Should this be here?  It is missing in real time case.
+                // TODO(lming, ysong): Should this be here? It is missing in real time case.
                 metadatas = null;
             }
         }
         context.setColumnSelection(columnSelection);
-        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
-        //     metadatas is always set to null but not in real time.
+        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time
+        // and Bulk. In bulk,
+        // metadatas is always set to null but not in real time.
         output = initializeMatchOutput(input, columnSelection, metadatas);
 
         logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumns().size()));
         context.setOutput(output);
-        if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
             context = scanEntityInputData(input, context);
         } else {
             context = scanInputData(input, context);

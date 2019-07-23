@@ -105,7 +105,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
+                    // ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
                         ImportWizardStore.setValidation('jobstatus', true);
                     }, true);
@@ -166,6 +166,7 @@ angular.module('lp.import')
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts.customfields', 
                 nextLabel: 'Next, Validate Template', 
                 nextFn: function(nextState) {
+                    // ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     ImportWizardStore.nextSaveMapping(nextState);
                 }
             },{ 
@@ -174,7 +175,7 @@ angular.module('lp.import')
                 nextLabel: 'Next, Save Template', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping();
-                    ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
+                    // ImportUtils.remapTypes(ImportWizardStore.fieldDocumentSaved[$state.current.name], ImportWizardStore.userFieldsType, ImportWizardStore.getEntityType());
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true);
                     }, true);
@@ -620,6 +621,7 @@ angular.module('lp.import')
                     alreadyAdded.dateFormatString = element.dateFormatString ? element.dateFormatString : null;
                     alreadyAdded.timeFormatString = element.timeFormatString ? element.timeFormatString : null;
                     alreadyAdded.timezone = element.timezone ? element.timezone : null;
+                    alreadyAdded.type = element.type ? element.type : alreadyAdded.type;
                     newObject.push(alreadyAdded);
                 }else if(alreadyAdded != undefined && alreadyAdded.mappedField == element.mappedField){
                     alreadyAdded.dateFormatString = alreadyAdded.dateFormatString == undefined ? (element.dateFormatString ? element.dateFormatString : null) : alreadyAdded.dateFormatString ;
@@ -627,15 +629,47 @@ angular.module('lp.import')
                     // element.timeFormatString ? element.timeFormatString : null;
                     alreadyAdded.timezone = alreadyAdded.timezone == undefined ? (element.timezone ? element.timezone : null) : alreadyAdded.timezone ;
                     //element.timezone ? element.timezone : null;
+                    alreadyAdded.type = element.type ? element.type : alreadyAdded.type;
                     newObject.push(alreadyAdded);
                 }
             });
+            // console.log(newObject);
             this.setSaveObjects(newObject, name);
             return;
         }else{
             this.setSaveObjects(object, name);
         }
          
+    }
+
+    this.updateSavedObjectCustomFields = (object) => {
+        let name = $state.current.name;
+        let saved = this.saveObjects[name];
+        let newArrayObjects = [];
+        if(saved){
+            let alreadyAdded = ImportWizardStore.isAlreadySave(saved, 'userField', object.userField);//underscore.findWhere(saved, {userField: element.userField});
+                if(alreadyAdded == undefined){
+                    saved.push(object);
+                }else {
+                    // alreadyAdded.mappedField = element.mappedField;
+                    switch(object.type){
+                        case 'DATE':
+                            break;
+                        default:
+                            object.dateFormatString = undefined;
+                            object.timeFormatString = undefined;
+                            object.timezone = undefined;
+                            break;
+                    }
+                    alreadyAdded.dateFormatString = object.dateFormatString ? object.dateFormatString : null;
+                    alreadyAdded.timeFormatString = object.timeFormatString ? object.timeFormatString : null;
+                    alreadyAdded.timezone = object.timezone ? object.timezone : null;
+                    alreadyAdded.type = object.type ? object.type : alreadyAdded.type;
+                }
+        }else{
+            newArrayObjects.push(object)
+            this.setSaveObjects(newArrayObjects, name);
+        }
     }
     
     this.isAlreadySave = (savedObj, key, userFieldName) => {
@@ -773,18 +807,21 @@ angular.module('lp.import')
 
     this.remapType = function(userField, type) {
         var userIndexes = findIndexes(this.fieldDocument.fieldMappings, 'userField', userField);
-
+        console.log('REMAPPING ', userField, type)
         userIndexes.forEach(function(index) {
-            if(typeof type == 'object' && type.type == 'DATE'){
+            if((typeof type == 'object' && type.type == 'DATE') || typeof type != 'object' && type.type == 'DATE'){
+                ImportUtils.remapTypes(ImportWizardStore.fieldDocument.fieldMappings, type );
                 ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
                 ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString = type.dateFormatString;
-                ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString = type.timeFormatString;
+                ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString = (type.timeFormatString && type.timeFormatString != '' ? type.timeFormatString : undefined);
                 ImportWizardStore.fieldDocument.fieldMappings[index].timezone = type.timezone;
+                ImportWizardStore.userFieldsType[userField] = type;
             }else{
                 ImportWizardStore.fieldDocument.fieldMappings[index].fieldType = type.type;
                 delete ImportWizardStore.fieldDocument.fieldMappings[index].dateFormatString;
                 delete ImportWizardStore.fieldDocument.fieldMappings[index].timeFormatString;
                 delete ImportWizardStore.fieldDocument.fieldMappings[index].timezone;
+
             }
         });
     }

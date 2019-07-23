@@ -10,6 +10,8 @@ public class ExternalIntegrationMessageBody {
 
     private Map<String, List<ExportFileConfig>> sourceFiles;
 
+    private Map<String, List<ExportFileConfig>> deleteFiles;
+
     private String externalAudienceId;
 
     private String externalAudienceName;
@@ -19,6 +21,8 @@ public class ExternalIntegrationMessageBody {
     private String solutionInstanceId;
 
     private String folderName;
+
+    private String audienceType;
 
     public String getTrayTenantId() {
         return trayTenantId;
@@ -34,6 +38,14 @@ public class ExternalIntegrationMessageBody {
 
     public void setSourceFiles(Map<String, List<ExportFileConfig>> sourceFiles) {
         this.sourceFiles = sourceFiles;
+    }
+
+    public Map<String, List<ExportFileConfig>> getDeleteFiles() {
+        return deleteFiles;
+    }
+
+    public void setDeleteFiles(Map<String, List<ExportFileConfig>> deleteFiles) {
+        this.deleteFiles = deleteFiles;
     }
 
     public String getExternalAudienceId() {
@@ -76,4 +88,11 @@ public class ExternalIntegrationMessageBody {
         return folderName;
     }
 
+    public void setAudienceType(String audienceType) {
+        this.audienceType = audienceType;
+    }
+
+    public String getAudienceType() {
+        return audienceType;
+    }
 }

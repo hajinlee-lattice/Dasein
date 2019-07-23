@@ -11,6 +11,11 @@ public interface ExportFieldMetadataDefaultsEntityMgr {
 
     List<ExportFieldMetadataDefaults> getDefaultExportFieldMetadata(CDLExternalSystemName systemName);
 
-    void deleteByPid(Long pid);
+    List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
+            List<ExportFieldMetadataDefaults> defaultFields);
+
+    void removeBySystemName(CDLExternalSystemName systemName);
+
+    void removeByAttrNames(CDLExternalSystemName systemName, List<String> attrNames);
 
 }

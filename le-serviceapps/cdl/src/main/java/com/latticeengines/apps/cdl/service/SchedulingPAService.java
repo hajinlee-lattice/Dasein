@@ -17,4 +17,6 @@ public interface SchedulingPAService {
     Map<String, List<String>> showQueue();
 
     String getPositionFromQueue(String tenantName);
+
+    boolean isActivityBasedPA();
 }

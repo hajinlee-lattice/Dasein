@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -64,6 +65,8 @@ public interface DataFeedService {
 
     List<DataFeed> getDataFeeds(TenantStatus status, String version);
 
+    List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup);
+
     Long lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
@@ -75,4 +78,6 @@ public interface DataFeedService {
     DataLimit getDataQuotaLimitMap(CustomerSpace customerSpace);
 
     Boolean increasedRetryCount(String customerSpace);
+
+    AttributeLimit getAttributeQuotaLimit(String customerSpace);
 }

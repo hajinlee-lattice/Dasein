@@ -375,15 +375,12 @@ public class TestPlayCreationHelper {
 
     private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(
-                playLaunchConfig.getBucketsToLaunch() != null ? playLaunchConfig.getBucketsToLaunch()
-                        : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
-        playLaunch.setDestinationOrgId(
-                playLaunchConfig.getDestinationSystemId() != null ? playLaunchConfig.getDestinationSystemId()
-                        : destinationOrgId);
-        playLaunch.setDestinationSysType(
-                playLaunchConfig.getDestinationSystemType() != null ? playLaunchConfig.getDestinationSystemType()
-                        : destinationOrgType);
+        playLaunch.setBucketsToLaunch(playLaunchConfig.getBucketsToLaunch() != null
+                ? playLaunchConfig.getBucketsToLaunch() : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
+        playLaunch.setDestinationOrgId(playLaunchConfig.getDestinationSystemId() != null
+                ? playLaunchConfig.getDestinationSystemId() : destinationOrgId);
+        playLaunch.setDestinationSysType(playLaunchConfig.getDestinationSystemType() != null
+                ? playLaunchConfig.getDestinationSystemType() : destinationOrgType);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
@@ -704,6 +701,7 @@ public class TestPlayCreationHelper {
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        ratingEngine1.setUpdatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
 
@@ -743,6 +741,7 @@ public class TestPlayCreationHelper {
         crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(retrievedSegment);
         crossSellRatingEngine.setCreatedBy(CREATED_BY);
+        crossSellRatingEngine.setUpdatedBy(CREATED_BY);
         crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
 
         RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(),

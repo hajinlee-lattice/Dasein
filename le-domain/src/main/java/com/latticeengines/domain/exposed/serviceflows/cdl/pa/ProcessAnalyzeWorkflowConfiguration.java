@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration.Builder;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -209,6 +208,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setRollingPeriod(apsRollingPeriod);
             apsGenerationStepConfiguration.setRollingPeriod(apsRollingPeriod);
             processStepConfiguration.setApsRollingPeriod(apsRollingPeriod);
+            processRatingWorkflowBuilder.apsRollupPeriod(apsRollingPeriod);
             return this;
         }
 
@@ -219,6 +219,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
             processRatingWorkflowBuilder.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
+            processStepConfiguration.setTargetScoreDerivation(targetScoreDerivationEnabled);
             return this;
         }
 

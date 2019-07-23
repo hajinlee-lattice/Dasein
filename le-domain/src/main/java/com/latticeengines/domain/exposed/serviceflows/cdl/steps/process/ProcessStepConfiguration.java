@@ -59,6 +59,8 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("skip_publish_to_s3")
     private boolean skipPublishToS3;
 
+    private boolean targetScoreDerivationEnabled;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -142,6 +144,18 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
         this.entityMatchEnabled = entityMatchEnabled;
     }
 
+    public boolean isTargetScoreDerivationEnabled() {
+        return targetScoreDerivationEnabled;
+    }
+
+    public void setTargetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
+        this.targetScoreDerivationEnabled = targetScoreDerivationEnabled;
+    }
+
+    public void setTargetScoreDerivation(boolean targetScoreDerivationEnabled) {
+        this.targetScoreDerivationEnabled = targetScoreDerivationEnabled;
+    }
+    
     public boolean isFullRematch() {
         return fullRematch;
     }

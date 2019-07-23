@@ -234,6 +234,9 @@ public class RatingEngineEntityMgrImpl //
         if (ratingEngine.getDisplayName() != null) {
             retrievedRatingEngine.setDisplayName(ratingEngine.getDisplayName());
         }
+        if (ratingEngine.getDescription() != null) {
+            retrievedRatingEngine.setDescription(ratingEngine.getDescription());
+        }
         if (ratingEngine.getStatus() != null) {
             validateForStatusUpdate(retrievedRatingEngine, ratingEngine);
             // set Activation Action Context
@@ -257,7 +260,7 @@ public class RatingEngineEntityMgrImpl //
             RatingEngineNote ratingEngineNote = new RatingEngineNote();
             ratingEngineNote.setNotesContents(ratingEngine.getNote());
             ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
-            ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
+            ratingEngineNote.setLastModifiedByUser(ratingEngine.getUpdatedBy());
 
             Long nowTimestamp = (new Date()).getTime();
             ratingEngineNote.setCreationTimestamp(nowTimestamp);
@@ -311,8 +314,7 @@ public class RatingEngineEntityMgrImpl //
         ratingEngineDao.update(retrievedRatingEngine);
     }
 
-    void updateCustomEventModelingType(RatingEngine retrievedRatingEngine,
-            CustomEventModelingType modelingType) {
+    void updateCustomEventModelingType(RatingEngine retrievedRatingEngine, CustomEventModelingType modelingType) {
         AIModel model = (AIModel) retrievedRatingEngine.getLatestIteration();
         CustomEventModelingConfig advancedModelingConfig = (CustomEventModelingConfig) model
                 .getAdvancedModelingConfig();
@@ -361,7 +363,7 @@ public class RatingEngineEntityMgrImpl //
             RatingEngineNote ratingEngineNote = new RatingEngineNote();
             ratingEngineNote.setNotesContents(ratingEngine.getNote());
             ratingEngineNote.setCreatedByUser(ratingEngine.getCreatedBy());
-            ratingEngineNote.setLastModifiedByUser(ratingEngine.getCreatedBy());
+            ratingEngineNote.setLastModifiedByUser(ratingEngine.getUpdatedBy());
 
             Long nowTimestamp = (new Date()).getTime();
             ratingEngineNote.setCreationTimestamp(nowTimestamp);
@@ -388,8 +390,7 @@ public class RatingEngineEntityMgrImpl //
                 advancedModelingConfig = new CustomEventModelingConfig();
                 CustomEventModelingType modelingType = segment == null ? CustomEventModelingType.LPI
                         : CustomEventModelingType.CDL;
-                ((CustomEventModelingConfig) advancedModelingConfig)
-                        .setCustomEventModelingType(modelingType);
+                ((CustomEventModelingConfig) advancedModelingConfig).setCustomEventModelingType(modelingType);
             }
             if (advancedRatingConfig == null) {
                 advancedRatingConfig = new CustomEventRatingConfig();
@@ -430,6 +431,7 @@ public class RatingEngineEntityMgrImpl //
         ruleBasedModel.setId(RuleBasedModel.generateIdStr());
         ruleBasedModel.setRatingEngine(ratingEngine);
         ruleBasedModel.setCreatedBy(ratingEngine.getCreatedBy());
+        ruleBasedModel.setUpdatedBy(ratingEngine.getUpdatedBy());
 
         ruleBasedModel.setRatingRule(RatingRule.constructDefaultRule());
         List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
@@ -491,6 +493,7 @@ public class RatingEngineEntityMgrImpl //
         AIModel aiModel = new AIModel();
         aiModel.setId(AIModel.generateIdStr());
         aiModel.setCreatedBy(ratingEngine.getCreatedBy());
+        aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
         aiModel.setRatingEngine(ratingEngine);
         aiModel.setAdvancedModelingConfig(advancedModelingConfig);
         aiModelDao.create(aiModel);

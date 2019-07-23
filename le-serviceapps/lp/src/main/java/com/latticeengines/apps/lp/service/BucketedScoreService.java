@@ -16,6 +16,8 @@ public interface BucketedScoreService {
 
     List<BucketMetadata> getABCDBucketsByModelGuid(String modelGuid);
 
+    List<BucketMetadata> getModelABCDBucketsByModelGuid(String modelGuid);
+
     List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId);
 
     void createABCDBuckets(CreateBucketMetadataRequest request);

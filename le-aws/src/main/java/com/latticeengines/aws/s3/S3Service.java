@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
@@ -49,6 +51,8 @@ public interface S3Service {
 
     void changeKeyRecursive(String bucket, String srcFolder, String tgtFolder, String keyId);
 
+    List<BucketLifecycleConfiguration.Rule> getBucketLifecycleConfigurationRules(String bucket);
+
     String getBucketPolicy(String bucket);
 
     void setBucketPolicy(String bucket, String policyDoc);
@@ -58,6 +62,8 @@ public interface S3Service {
     void addTagToObject(String bucket, String key, String tagKey, String tagValue);
 
     List<Tag> getObjectTags(String bucket, String key);
+
+    ObjectMetadata getObjectMetadata(String bucket, String key);
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
 

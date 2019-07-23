@@ -10,4 +10,8 @@ public interface ExportFieldMetadataDefaultsDao extends BaseDao<ExportFieldMetad
 
     List<ExportFieldMetadataDefaults> getDefaultExportFields(CDLExternalSystemName systemName);
 
+    void deleteBySystemName(CDLExternalSystemName systemName);
+
+    void deleteByAttrNames(CDLExternalSystemName systemName, List<String> attrNames);
+
 }

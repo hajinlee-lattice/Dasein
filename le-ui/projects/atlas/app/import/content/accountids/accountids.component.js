@@ -132,7 +132,7 @@ angular.module('lp.import.wizard.accountids', [])
                 // console.log(' <===> ',map, vm.fieldMapping.contact);
                 if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
                     map.mapToLatticeId = vm.match;
-                    map.IdType = map.mapToLatticeId == true ?'Account' : null;
+                    map.IdType = 'Account';
                 }
                 mapped.push(map);
                 if(userField) {
@@ -143,45 +143,6 @@ angular.module('lp.import.wizard.accountids', [])
         return mapped;
     }
 
-    // vm.changeLatticeField = function(mapping, form) {
-    //     var mapped = [];
-    //     vm.unavailableFields = [];
-    //     for(var i in mapping) {
-    //         if(mapping[i] || mapping[i] === "") { // yes yes, don't worry about it
-    //             var key = i,
-    //                 userField = mapping[key],
-    //                 map = {
-    //                     userField: userField, //(userField === 'unmapToNull' ? null : userField), 
-    //                     mappedField: vm.mappedFieldMap[key],
-    //                     // removing the following 3 lines makes it update instead of append
-    //                     originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
-    //                     originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
-    //                     append: false
-    //                 };
-    //             // leaving this here because maybe a hack for PLS-13927, I never tested this though
-    //             // if you see this after july 2019, please remove
-    //             // console.log(map);
-    //             // if(vm.entityMatchEnabled) {
-    //             //     map = Object.assign({
-    //             //         idType: 'Account',
-    //             //         systemName: 'DefaultSystem',
-    //             //         mapToLatticeId: true 
-    //             //     }, map);
-    //             // }
-    //             // console.log(map);
-    //             if(vm.isMultipleTemplates() && map.mappedField == "CustomerAccountId"){
-    //                 map.mapToLatticeId = vm.match;
-    //                 map.IdType = map.mapToLatticeId == true ?'Account' : null;
-    //             }
-    //             mapped.push(map);
-    //             if(userField) {
-    //                 vm.unavailableFields.push(userField);
-    //             }
-    //         }
-    //     }
-    //     ImportWizardStore.setSaveObjects(mapped, $state.current.name);
-    //     vm.checkValid(form);
-    // };
 
     vm.changeLatticeField = function(mapping, form) {
         let mapped = vm.getMapped(mapping);
@@ -189,7 +150,7 @@ angular.module('lp.import.wizard.accountids', [])
             vm.changeMatchIds(mapped);
             vm.updateMatch(mapped);
         }
-        // console.log('Saving', mapped);
+        console.log('Saving', mapped);
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form); 
     };

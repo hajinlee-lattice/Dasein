@@ -19,7 +19,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -135,21 +134,6 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, 13);
-    }
-
-    @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
-    public void testTimeFilter(String sqlUser, String queryContext) {
-        // This query actually returns all accounts so it doesn't change over time
-        Restriction restriction = Restriction.builder() //
-            .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
-                .prior(PeriodStrategy.Template.Quarter.name(), 1) //
-                .build();
-        Query query = Query.builder() //
-                .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
-                .where(restriction).build();
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-        logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 108045);
     }
 
     @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")

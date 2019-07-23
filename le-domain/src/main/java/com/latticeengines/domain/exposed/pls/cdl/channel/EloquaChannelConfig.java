@@ -3,10 +3,13 @@ package com.latticeengines.domain.exposed.pls.cdl.channel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EloquaChannelConfig implements ChannelConfig {
+
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.Eloqua;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -39,6 +42,11 @@ public class EloquaChannelConfig implements ChannelConfig {
 
     public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
         this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    }
+
+    @Override
+    public CDLExternalSystemName getSystemName() {
+        return systemName;
     }
 
     @Override

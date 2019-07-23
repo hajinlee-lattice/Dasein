@@ -6,7 +6,9 @@ export const solutionInstanceConfig = {
     orgType: null,
     id: null,
     accessToken: null,
-    registerLookupIdMap: null
+    registerLookupIdMap: null,
+    fieldMapping: null,
+    system: null
 };
 
 const FIELD_MAPPING = 'external_field_mapping';
@@ -28,6 +30,7 @@ export const openConfigWindow = () => {
 
     // Listen to popup messages
     let configFinished = false;
+    let lookupIdMapRegistered = false;
     const onmessage = e => {
         if (e.data.type === 'tray.configPopup.error') {
             // Handle popup error message
@@ -37,9 +40,10 @@ export const openConfigWindow = () => {
             configWindow.close();
         }
         if (e.data.type === 'tray.configPopup.finish') {
-            console.log("Register new LookupIdMap: " + solutionInstanceConfig.registerLookupIdMap);
+            
             // Handle popup finish message
             if (solutionInstanceConfig.registerLookupIdMap == true) {
+                console.log("Register new system");
                 if (solutionInstanceConfig.id) {
                     // get Tray auth values
                     // create lookup id map
@@ -48,6 +52,9 @@ export const openConfigWindow = () => {
                 } else {
                     alert('Error: Solution instance id is not defined');
                 }
+            } else {
+                console.log("Update system");
+                updateSystem();
             }
             configFinished = true;
             configWindow.close();
@@ -119,13 +126,15 @@ export const openConfigWindow = () => {
             response => {
                 if (response.data) {
                     var authValues = response.data.solutionInstance.authValues;
-                    var externalMarketoAuthentication = authValues.filter(function(authValue) {
-                        return authValue.externalId == "external_marketo_authentication";
-                    })
-                    var trayAuthenticationId = externalMarketoAuthentication[0].authId;
+                    var authenticationExternalId = "external_" + solutionInstanceConfig.orgType.toLowerCase() + "_authentication";
+                    console.log(authenticationExternalId);
+                    var externalAuthentication = authValues.filter(function(authValue) {
+                        return authValue.externalId == authenticationExternalId;
+                    });
+                    var trayAuthenticationId = externalAuthentication[0].authId;
                     var authenticationName = response.data.authentications.filter(function(auth) {
                         return auth.node.id == trayAuthenticationId;
-                    })
+                    });
                     registerLookupIdMap(trayAuthenticationId, authenticationName[0].node.name);
                     updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name);
                     httpService.unsubscribeObservable(observer);
@@ -141,30 +150,57 @@ export const openConfigWindow = () => {
     function registerLookupIdMap(trayAuthenticationId, trayAuthenticationName) {
         let observer = new Observer(
             response => {
-                if (response.data && response.data.name) {
+                console.log('response', response.data);
+                if (response.data && response.data.configId) {
                     httpService.unsubscribeObservable(observer);
+                    lookupIdMapRegistered = true;
+                    console.log("Set lookupIdMapRegistered as true");
                 } else {
                     console.log("response", response);
                 }
             },
             error => {
-                console.error('Error registering lookupIdMap ', error);
+                console.error('Error registering lookupIdMap ', error ? error : '');
             }
         );
 
         var lookupIdMap = {
             orgId: guidGenerator(),
-            orgName: trayAuthenticationName ? trayAuthenticationName : "Marketo_" +  (new Date()).getTime(),
+            orgName: trayAuthenticationName ? trayAuthenticationName : solutionInstanceConfig.orgType + '_' + (new Date()).getTime(),
             externalSystemType: "MAP",
-            externalSystemName: "Marketo",
+            externalSystemName: solutionInstanceConfig.orgType,
             externalAuthentication: {
                 solutionInstanceId: solutionInstanceConfig.id,
                 trayWorkflowEnabled: true,
                 trayAuthenticationId: trayAuthenticationId
-            }
+            },
+            exportFieldMappings: constructExportFieldMappings()
         };
 
-        httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
+        console.log(JSON.stringify(lookupIdMap));
+
+        if (lookupIdMapRegistered == false) {
+            httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
+        } else {
+            console.error('Prevent duplicate lookupIdMaps ', lookupIdMap);
+        }
+    }
+
+    function constructExportFieldMappings() {
+        if (solutionInstanceConfig.orgType != MARKETO || !solutionInstanceConfig.fieldMapping) {
+            return [];
+        }
+        return solutionInstanceConfig.fieldMapping.map(mapping => {
+            return {
+                sourceField: parseLatticeField(mapping.field_left),
+                destinationField: mapping.field_right,
+                overwriteValue: false
+            };
+        })
+    }
+
+    function parseLatticeField(field) {
+        return field.replace('CONTACT:', '');
     }
 
     function updateSolutionInstance(solutionInstanceId, solutionInstanceName) {
@@ -181,8 +217,28 @@ export const openConfigWindow = () => {
         httpService.put('/tray/solutionInstances/' + solutionInstanceId, {solutionInstanceName: solutionInstanceName}, observer, {useraccesstoken: solutionInstanceConfig.accessToken});
     }
 
+    function updateSystem() {
+        let observer = new Observer(
+            response => {
+                if (response.data && response.data.name) {
+                    httpService.unsubscribeObservable(observer);
+                } else {
+                    console.log("response", response);
+                }
+            },
+            error => {
+                console.error('Error registering lookupIdMap ', error);
+            }
+        );
+
+        var lookupIdMap = solutionInstanceConfig.system;
+        lookupIdMap.exportFieldMappings = constructExportFieldMappings();
+        console.log("Update LookupIdMap:" + lookupIdMap);
+
+        httpService.put('/pls/lookup-id-mapping/config/' + lookupIdMap.configId, lookupIdMap, observer);
+    }
+
     function verifyFieldMapping(fieldMappingValues, errors, externalId) {
-        console.log(solutionInstanceConfig.orgType);
         console.log(fieldMappingValues);
         switch(solutionInstanceConfig.orgType) {
           case MARKETO:
@@ -196,16 +252,26 @@ export const openConfigWindow = () => {
                     errors[externalId] = `The Marketo field ${mapping.field_right} has been mapped multiple times.`;
                     return;
                 }
+                if (isEmptyObject(mapping.field_left)) {
+                    errors[externalId] = `Lattice field cannot be blank.`;
+                    return;  
+                }
                 marketoFields.add(mapping.field_right);
             });
             if (!marketoFields.has(EMAIL)) {
                 errors[externalId] = `The email field in Marketo is required.`;
                 break;
             }
+            solutionInstanceConfig.fieldMapping = fieldMappingValues;
             break;
         }
 
     }
+
+    function isEmptyObject(obj) {
+        return obj === Object(obj) && Object.entries(obj).length === 0;
+    }
+
 
     checkWindow();
 

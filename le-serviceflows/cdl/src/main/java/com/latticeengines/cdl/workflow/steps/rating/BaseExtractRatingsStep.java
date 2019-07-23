@@ -19,11 +19,14 @@ import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -134,6 +137,14 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                 if (CollectionUtils.isNotEmpty(round)) {
                     boolean persistOnDisk = getTotalRatingWeights() > 8;
                     startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
+                    String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+                    if (StringUtils.isNotBlank(trxnTable)) {
+                        String period = configuration.getApsRollupPeriod();
+                        if (StringUtils.isBlank(period)) {
+                            period = "Month";
+                        }
+                        prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
+                    }
                     round.forEach(this::extractOneContainer);
                 }
                 return true;
@@ -195,7 +206,11 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             try {
                 return retry.execute(ctx -> {
-                    String avroPath = result.getPath() + "/part-" + UUID.randomUUID().toString() + ".avro";
+                    String resultDir = PathUtils.toParquetOrAvroDir(result.getPath());
+                    if (HdfsUtils.fileExists(yarnConfiguration, resultDir)) {
+                        HdfsUtils.rmdir(yarnConfiguration, resultDir);
+                    }
+                    String avroPath = resultDir + "/part-" + UUID.randomUUID().toString() + ".avro";
                     log.info("(Attempt=" + ctx.getRetryCount() + ") write dummy record for " + engineId //
                             + " at " + avroPath);
                     GenericRecord record = getDummyRecord();
@@ -214,8 +229,11 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     protected int scaleBySize(double totalSizeInGb) {
         int ratingWeights = getTotalRatingWeights();
         int scalingByWeights = (int) Math.floor(ratingWeights / 40.) + 1;
-        int scalingFactor = Math.min(4, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
-        log.info("Adjust scaling factor to " + scalingFactor + " based on rating weights " + ratingWeights);
+        int scalingFactor = Math.min(5, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
+        if (scalingFactor > 1) {
+            log.info("Adjust scaling factor to " + scalingFactor + " based on total size " + totalSizeInGb //
+                    + " gb and rating weights " + ratingWeights);
+        }
         return scalingFactor;
     }
 

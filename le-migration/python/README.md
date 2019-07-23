@@ -8,7 +8,27 @@ mysqlclient 1.3.14<br/>
 
 Please install them in your python environment.
 
-## DB Storage Engine Usage<br/>
+## Scripts
+
+Please add the following lines to `~/.bash_profile` and source it:
+```
+alias trackTenant="python $WSHOME/le-migration/python/scripts/trackTenant.py"
+alias updateMigrationStatus="python $WSHOME/le-migration/python/scripts/updateMigrationStatus.py"
+```
+
+To add a tenant to the migration table:<br/>
+(The default database name is PLS_MultiTenant)
+```
+trackTenant -u <db username> -p <db password> -x <db host> [-d <db name>] -t TENANT_PID
+```
+
+To update the migration status of a tenant to the migration table:<br/>
+(The migration status is case insensitive)
+```
+updateMigrationStatus -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID -s <SCHEDULED/STARTED/FAILED/COMPLETED>
+```
+
+## DB Storage Engine Usage (Optional)<br/>
 You can provide the following environment variables:<br/>
 MYSQL_USER --> MySQL server user<br/>
 MYSQL_PWD  --> MySQL password<br/>

@@ -272,7 +272,13 @@
          Loading {{vm.page}}...
     </div>
     <div ng-if="vm.section !== 'wizard.targets' && vm.showNoResultsText(vm.tmpAccounts, vm.tmpContacts)">
-        <p>No {{vm.page != 'Playbook' && vm.page != 'Campaign Overview' ? vm.page : 'Targets'}} Found<p>
+        <p ng-if="!vm.loadingTargetData">
+            No {{vm.page != 'Playbook' && vm.page != 'Campaign Overview' ? vm.page : 'Targets'}} Found
+        <p>
+        <p ng-if="vm.loadingTargetData">
+            Loading {{vm.page != 'Playbook' && vm.page != 'Campaign Overview' ? vm.page : 'Targets'}}
+            <span class="fa fa-spinner fa-spin fa-fw"></span>
+        </p>
     </div>
 
     <ul class="filters pull-right" ng-if="vm.section !== 'wizard.targets' && (vm.showAccountPagination || vm.bypassBuckets)">

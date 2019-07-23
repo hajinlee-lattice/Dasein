@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 
 public interface PlayLaunchService {
@@ -12,6 +13,8 @@ public interface PlayLaunchService {
     void create(PlayLaunch playLaunch);
 
     PlayLaunch findByLaunchId(String launchId);
+
+    PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 
     void deleteByLaunchId(String launchId, boolean hardDelete);
 

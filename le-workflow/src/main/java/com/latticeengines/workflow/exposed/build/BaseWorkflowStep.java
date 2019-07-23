@@ -191,6 +191,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CHOREOGRAPHER_CONTEXT_KEY = "CHOREOGRAPHER_CONTEXT_KEY";
 
     public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
+    public static final String ATTRIBUTE_QUOTA_LIMIT = "ATTRIBUTE_QUOTA_LIMIT";
 
     @Autowired
     protected Configuration yarnConfiguration;

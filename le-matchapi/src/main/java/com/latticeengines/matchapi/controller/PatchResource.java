@@ -1,6 +1,5 @@
 package com.latticeengines.matchapi.controller;
 
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,8 +49,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/patches")
 public class PatchResource {
 
-    private static final Set<PatchStatus> STATUSES_ALLOWED_IN_RESPONSE = Sets.newHashSet(
-            PatchStatus.Failed, PatchStatus.Noop, PatchStatus.NewInactive);
+    private static final Set<PatchStatus> STATUSES_ALLOWED_IN_RESPONSE = Sets.newHashSet(PatchStatus.Failed,
+            PatchStatus.Noop, PatchStatus.NewInactive);
 
     @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
@@ -74,43 +74,50 @@ public class PatchResource {
         return patchService.patch(requests);
     }
 
-    @RequestMapping(
-            value = "/validate/{patchBookType}", method = RequestMethod.POST)
+    @RequestMapping(value = "/validate/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and sort by field", response = PatchValidationResponse.class)
-    private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
-        checkRequired(request);
-        checkAndSetDataCloudVersion(request);
-
-        PatchBook.Type type = getPatchBookType(patchBookType);
-        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
-                request.getLimit(), request.getSortByField());
-        return validate(books, type, request);
-    }
-    
-    @RequestMapping(
-            value = "/validatePagination/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
-    private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType, @RequestBody PatchRequest request) {
-        checkRequired(request);
-        checkAndSetDataCloudVersion(request);
-
-        PatchBook.Type type = getPatchBookType(patchBookType);
-        List<PatchBook> books = loadWithPagin(request.getMode(), type, request.getPid());
-        return validate(books, type, request);
-    }
-
-    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
-    private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
+    private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType,
             @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
 
         PatchBook.Type type = getPatchBookType(patchBookType);
-        Map<String, Long> pids = loadMinMaxPid(type, PatchBook.COLUMN_PID);
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(), request.getLimit(),
+                request.getSortByField());
+        return validate(books, type, request);
+    }
+
+    @RequestMapping(value = "/validatePagination/{patchBookType}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
+    private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType,
+            @RequestBody PatchRequest request) {
+        checkRequired(request);
+        checkAndSetDataCloudVersion(request);
+        checkPidRange(request);
+
+        PatchBook.Type type = getPatchBookType(patchBookType);
+        List<PatchBook> books = loadWithPagin(request.getMode(), type, request.getStartPid(), request.getEndPid());
+        return validate(books, type, request);
+    }
+
+    @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
+    private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
+            @RequestParam(value = "dataCloudVersion", required = false) String dataCloudVersion,
+            @RequestParam(value = "mode", required = false) PatchMode mode) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(dataCloudVersion), "DataCloudVersion should not be blank");
+        Preconditions.checkNotNull(mode, "PatchMode should not be null");
+
+        // fake patch request
+        PatchRequest request = new PatchRequest();
+        request.setDataCloudVersion(dataCloudVersion);
+        request.setMode(mode);
+
+        PatchBook.Type type = getPatchBookType(patchBookType);
+        Map<String, Long> pids = loadMinMaxPid(type);
         return configMinMaxPidResponse(pids, type, request);
     }
 
@@ -124,8 +131,8 @@ public class PatchResource {
         LookupPatchResponse response = prepareResponse(request);
 
         PatchBook.Type type = PatchBook.Type.Lookup;
-        List<PatchBook> books = load(request.getMode(), type, request.getOffset(),
-                request.getLimit(), request.getSortByField());
+        List<PatchBook> books = load(request.getMode(), type, request.getOffset(), request.getLimit(),
+                request.getSortByField());
 
         // validate
         PatchValidationResponse validationResponse = validate(books, type, request);
@@ -136,20 +143,16 @@ public class PatchResource {
         }
 
         // patch entries
-        List<PatchLog> logs = patchService.lookupPatch(
-                books, request.getDataCloudVersion(), request.getMode(), request.isDryRun());
+        List<PatchLog> logs = patchService.lookupPatch(books, request.getDataCloudVersion(), request.getMode(),
+                request.isDryRun());
         // only return important logs as returning all of them will be too much
         // full logs will be available in log file
-        response.setNotPatchedLogs(logs
-                .stream()
-                .filter(log -> STATUSES_ALLOWED_IN_RESPONSE.contains(log.getStatus()))
+        response.setNotPatchedLogs(logs.stream().filter(log -> STATUSES_ALLOWED_IN_RESPONSE.contains(log.getStatus()))
                 .collect(Collectors.toList()));
 
         // upload logs
-        response.setLogFile(
-                patchService.uploadPatchLog(
-                        response.getMode(), response.getPatchBookType(), response.isDryRun(),
-                        response.getDataCloudVersion(), response.getStartAt(), logs));
+        response.setLogFile(patchService.uploadPatchLog(response.getMode(), response.getPatchBookType(),
+                response.isDryRun(), response.getDataCloudVersion(), response.getStartAt(), logs));
 
         // calculate stats
         response.setStats(calculateStats(logs));
@@ -165,15 +168,15 @@ public class PatchResource {
     private PatchResponse.PatchStats calculateStats(@NotNull List<PatchLog> patchLogs) {
         PatchResponse.PatchStats stats = new PatchResponse.PatchStats();
         stats.setTotal(patchLogs.size());
-        stats.setStatusMap(patchLogs
-                .stream()
+        stats.setStatusMap(patchLogs.stream()
                 // count the frequency
                 .collect(Collectors.toMap(PatchLog::getStatus, l -> 1, Integer::sum)));
         return stats;
     }
 
     /*
-     * trim debug fields (not returning to prevent API response from being too large)
+     * trim debug fields (not returning to prevent API response from being too
+     * large)
      */
     private void cleanupPatchLog(@NotNull PatchLog patchLog) {
         patchLog.setInputMatchKey(null);
@@ -200,9 +203,8 @@ public class PatchResource {
     /*
      * configure response with input request
      */
-    private PatchValidationResponse configMinMaxPidResponse(
-            @NotNull Map<String, Long> pids, @NotNull PatchBook.Type type,
-            @NotNull PatchRequest request) {
+    private PatchValidationResponse configMinMaxPidResponse(@NotNull Map<String, Long> pids,
+            @NotNull PatchBook.Type type, @NotNull PatchRequest request) {
         String dataCloudVersion = request.getDataCloudVersion();
         PatchValidationResponse response = new PatchValidationResponse();
         response.setSuccess(true);
@@ -226,12 +228,11 @@ public class PatchResource {
     }
 
     /*
-     * 1. filter out entries that is end of life
-     * 2. validate remaining entries
-     * 3. configure response with input request and validation result
+     * 1. filter out entries that is end of life 2. validate remaining entries 3.
+     * configure response with input request and validation result
      */
-    private PatchValidationResponse validate(
-            @NotNull List<PatchBook> books, @NotNull PatchBook.Type type, @NotNull PatchRequest request) {
+    private PatchValidationResponse validate(@NotNull List<PatchBook> books, @NotNull PatchBook.Type type,
+            @NotNull PatchRequest request) {
         String dataCloudVersion = request.getDataCloudVersion();
         Pair<Integer, List<PatchBookValidationError>> validationResult = patchBookValidator
                 .validate(type, dataCloudVersion, books);
@@ -250,35 +251,28 @@ public class PatchResource {
         return response;
     }
 
-    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset,
-            int limit, String sortByField) {
+    private List<PatchBook> load(@NotNull PatchMode mode, PatchBook.Type type, int offset, int limit,
+            String sortByField) {
         // adding pagination parameters
         if (mode == PatchMode.Normal) {
             return patchBookEntityMgr.findByTypeWithPagination(offset, limit, sortByField, type);
         } else {
             // hot fix mode
-            return patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, limit, sortByField,
-                    type, true);
+            return patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, limit, sortByField, type, true);
         }
     }
 
-    private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type,
-            Object pid) {
-        // finding min and max Pid in patchBook table
-        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(type);
-        Long minPid = minMaxPid.get(MIN_PID);
-        Long maxPid = minMaxPid.get(MAX_PID);
+    private List<PatchBook> loadWithPagin(@NotNull PatchMode mode, PatchBook.Type type, long startPid, long endPid) {
         // adding pagination parameters
         if (mode == PatchMode.Normal) {
-            return patchBookEntityMgr.findByTypeWithPaginNoSort(minPid, maxPid, type);
+            return patchBookEntityMgr.findByTypeWithPaginNoSort(startPid, endPid, type);
         } else {
             // hot fix mode
-            return patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(minPid, maxPid, type,
-                    true);
+            return patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(startPid, endPid, type, true);
         }
     }
 
-    private Map<String, Long> loadMinMaxPid(PatchBook.Type type, String pidColumn) {
+    private Map<String, Long> loadMinMaxPid(PatchBook.Type type) {
         return patchBookEntityMgr.findMinMaxPid(type);
     }
 
@@ -286,9 +280,7 @@ public class PatchResource {
      * case insensitive match
      */
     private PatchBook.Type getPatchBookType(String patchBookType) {
-        return Arrays.stream(PatchBook.Type.values())
-                .filter(e -> e.name().equalsIgnoreCase(patchBookType))
-                .findAny()
+        return Arrays.stream(PatchBook.Type.values()).filter(e -> e.name().equalsIgnoreCase(patchBookType)).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid patch book type"));
     }
 
@@ -319,5 +311,12 @@ public class PatchResource {
             // TODO throw different error
             throw new IllegalArgumentException("Patch request missing required field");
         }
+    }
+
+    private void checkPidRange(@NotNull PatchRequest request) {
+        Preconditions.checkNotNull(request.getStartPid(), "Start PID should not be null");
+        Preconditions.checkNotNull(request.getEndPid(), "End PID should not be null");
+        Preconditions.checkArgument(request.getStartPid() <= request.getEndPid(),
+                "Start PID should be less than or equal to end PID");
     }
 }

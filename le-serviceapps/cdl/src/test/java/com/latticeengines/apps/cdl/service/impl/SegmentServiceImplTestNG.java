@@ -228,6 +228,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(segment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
 

@@ -29,6 +29,7 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
     private static final String SEGMENT_NAME = "MultiTenantRESegment";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "lattice@lattice-engines.com";
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -46,12 +47,14 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant1.getId()));
         dataCollection = dataCollectionEntityMgr.createDefaultCollection();
         segment1 = createMetadataSegment(SEGMENT_NAME);
-        //segment1 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
+        // segment1 = createMetadataSegment(SEGMENT_NAME,
+        // CustomerSpace.parse(tenant1.getId()).toString());
 
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(tenant2.getId()));
         dataCollection = dataCollectionEntityMgr.createDefaultCollection();
         segment2 = createMetadataSegment(SEGMENT_NAME);
-        // segment2 = createMetadataSegment(SEGMENT_NAME, CustomerSpace.parse(tenant1.getId()).toString());
+        // segment2 = createMetadataSegment(SEGMENT_NAME,
+        // CustomerSpace.parse(tenant1.getId()).toString());
     }
 
     @Test(groups = "functional")
@@ -59,6 +62,7 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(segment1);
         ratingEngine1.setCreatedBy(CREATED_BY);
+        ratingEngine1.setUpdatedBy(UPDATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
         ratingEngine1.setNote(RATING_ENGINE_NOTE);
         ratingEngine1.setId(UUID.randomUUID().toString());
@@ -68,6 +72,7 @@ public class MultiTenantRatingEngineEntityMgrImplTestNG extends CDLFunctionalTes
         RatingEngine ratingEngine2 = new RatingEngine();
         ratingEngine2.setSegment(segment2);
         ratingEngine2.setCreatedBy(CREATED_BY);
+        ratingEngine1.setUpdatedBy(UPDATED_BY);
         ratingEngine2.setType(RatingEngineType.RULE_BASED);
         ratingEngine2.setNote(RATING_ENGINE_NOTE);
         ratingEngine2.setId(UUID.randomUUID().toString());

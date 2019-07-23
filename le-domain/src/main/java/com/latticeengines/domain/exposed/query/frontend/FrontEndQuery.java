@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,6 +69,9 @@ public class FrontEndQuery {
 
     @JsonProperty(FrontEndQueryConstants.DISTINCT)
     private boolean distinct = false;
+
+    @JsonIgnore
+    private Map<BusinessEntity, String> joinHints;
 
     public static FrontEndQuery fromSegment(MetadataSegment segment) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
@@ -198,6 +203,14 @@ public class FrontEndQuery {
                 .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
         lookups.addAll(moreLookups);
+    }
+
+    public Map<BusinessEntity, String> getJoinHints() {
+        return joinHints;
+    }
+
+    public void setJoinHints(Map<BusinessEntity, String> joinHints) {
+        this.joinHints = joinHints;
     }
 
     @Override

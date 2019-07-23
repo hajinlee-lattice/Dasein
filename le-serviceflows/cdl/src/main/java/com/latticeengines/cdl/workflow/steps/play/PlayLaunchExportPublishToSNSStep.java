@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -19,6 +20,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.sns.SNSService;
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -39,6 +41,8 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
 
     @Inject
     private SNSService snsService;
+    @Autowired
+    private ChannelConfigProcessor channelConfigProcessor;
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -66,21 +70,17 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
     public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
         PlayLaunchExportPublishToSNSConfiguration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
-        s3ExportFilePaths = getListObjectFromContext(
-                PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, String.class);
+        sourceFiles = getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, s3ExportFilePaths);
 
-        s3ExportFilePaths.forEach(exportPath -> {
-            List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
-                    new ArrayList<>());
-            fileConfigs
-                    .add(new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")), exportS3Bucket));
-            sourceFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
-        });
+        // TODO: Add the same call method to get the deleteFiles
 
         DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
         messageBody.setWorkflowRequestId(workflowRequestId);
         messageBody.setSourceFiles(sourceFiles);
+
+        // TODO: Add messageBody.setDeleteFiles(deleteFiles);
+
         messageBody.setTrayTenantId(dropboxSummary.getDropBox());
         if (lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null) {
             messageBody.setSolutionInstanceId(lookupIdMap.getExternalAuthentication().getSolutionInstanceId());
@@ -88,6 +88,7 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
+        channelConfigProcessor.updateSnsMessageWithChannelConfig(config.getChannelConfig(), messageBody);
 
         Map<String, Object> jsonMessage = new HashMap<>();
         jsonMessage.put("default", JsonUtils.serialize(messageBody));
@@ -103,6 +104,27 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
             log.info(e.toString());
             return null;
         }
+    }
+
+    /**
+     * @param key
+     *            {@link PlayLaunchWorkflowConfiguration}
+     * @param s3ExportFilePaths
+     *            {@link List}
+     * @return {@link Map} with the files from S3
+     */
+    private Map<String, List<ExportFileConfig>> getFiles(String key, List<String> s3ExportFilePaths) {
+        Map<String, List<ExportFileConfig>> retFiles = new HashMap<>();
+        s3ExportFilePaths = super.getListObjectFromContext(key, String.class);
+        s3ExportFilePaths.forEach(exportPath -> {
+            List<ExportFileConfig> fileConfigs = retFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
+                    new ArrayList<>());
+            fileConfigs
+                    .add(new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")), exportS3Bucket));
+            retFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
+        });
+
+        return retFiles;
     }
 
     @VisibleForTesting

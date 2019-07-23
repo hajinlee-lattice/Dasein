@@ -506,12 +506,25 @@ section.container.custom-fields {
 Create Model: Validate Import View
 ================================================================== */
 .import-summary {
+    position: relative;
+    .jobs-report-breadcrumbs {
+        font-size: 16px;
+        position: absolute;
+        left: 0;
+        top: -20px;
+    }
+    h1 {
+        text-align: center;
+        font-size: 30px;
+        margin: 30px auto;
+    }
     .summary-list-container {
-        width: calc(100%/3);
-        min-width: 400px;
+        width: 100%;
+        // min-width: 400px;
         margin: 0 auto;
         .summary-list {
-            font-size: .9em;
+            background: none;
+            font-size: 10px;
             dt {
                 color: #333;
                 text-transform: initial;
@@ -527,8 +540,12 @@ Create Model: Validate Import View
             flex-direction: column;
             margin: 0 30px;
             width: calc(100%/3);
+            &:nth-child(even) {
+                border-left: 1px solid #eee;
+                border-right: 1px solid #eee;
+            }
             h2, h3 {
-                @include flex-item(1 1 auto);
+                @include flex-item(0 1 auto);
                 text-align: center;
                 font-size: 3em;
                 margin: 0;

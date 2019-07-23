@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
 public class FirehoseServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final int BATCH_SIZE = 1_000;
+    private static final int BATCH_SIZE = 1_100;
 
     @Inject
     private FirehoseService firehoseService;

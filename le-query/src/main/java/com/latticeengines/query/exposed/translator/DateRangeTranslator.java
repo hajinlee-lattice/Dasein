@@ -18,7 +18,9 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 
 public class DateRangeTranslator extends TranslatorCommon {
@@ -27,19 +29,16 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     public static Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
-        SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser);
+        SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser, //
+                Boolean.TRUE.equals(txnRestriction.isNegate()));
         RestrictionBuilder builder = Restriction.builder() //
-                .let(BusinessEntity.Account, InterfaceName.AccountId.name());
-        if (Boolean.TRUE.equals(txnRestriction.isNegate())) {
-            builder = builder.notInSubquery(subQuery);
-        } else {
-            builder = builder.inSubquery(subQuery);
-        }
+                .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                .inSubquery(subQuery);
         return builder.build();
     }
 
     private static SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
-            AttributeRepository repository, String sqlUser) {
+            AttributeRepository repository, String sqlUser, boolean negate) {
         StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
         BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
         BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
@@ -51,28 +50,49 @@ public class DateRangeTranslator extends TranslatorCommon {
         if (validPurchasePredicate != null) {
             predicate = predicate.and(validPurchasePredicate);
         }
-        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
-                .select(accountId) //
-                .from(table) //
-                .where(predicate);
         BooleanExpression aggPredicate = getAggPredicate(txnRestriction);
-        if (aggPredicate != null) {
-            query = query.groupBy(accountId).having(aggPredicate);
+
+        SQLQuery<?> query;
+        SubQuery subQuery = new SubQuery();
+        if (!negate) {
+            query = queryFactory.getQuery(repository, sqlUser) //
+                    .select(accountId) //
+                    .from(table) //
+                    .where(predicate);
+            if (aggPredicate != null) {
+                query = query.groupBy(accountId).having(aggPredicate);
+            }
+        } else {
+            StringPath lhsPath = Expressions.stringPath(TranslatorUtils.generateAlias("lhs"));
+            StringPath lhsId = Expressions.stringPath(lhsPath, InterfaceName.AccountId.name());
+            StringPath rhsPath = Expressions.stringPath(TranslatorUtils.generateAlias("rhs"));
+            StringPath rhsId = Expressions.stringPath(rhsPath, InterfaceName.AccountId.name());
+            SQLQuery<?> rhsQry = SQLExpressions //
+                    .select(accountId) //
+                    .from(table) //
+                    .where(predicate);
+            if (aggPredicate != null) {
+                rhsQry = rhsQry.groupBy(accountId).having(aggPredicate);
+            }
+            query = SQLExpressions //
+                    .select(lhsId) //
+                    .from(table.as(lhsPath)) //
+                    .leftJoin(rhsQry, rhsPath) //
+                    .on(lhsId.eq(rhsId)) //
+                    .where(rhsId.isNull());
         }
 
-        SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(query);
         return subQuery;
     }
 
-    static BooleanExpression makeValidPurchase(TransactionRestriction txnRestriction) {
+    private static BooleanExpression makeValidPurchase(TransactionRestriction txnRestriction) {
         AggregationFilter unitFilter = txnRestriction.getUnitFilter();
         AggregationFilter spendFilter = txnRestriction.getSpentFilter();
         if (unitFilter == null && spendFilter == null) {
-            StringPath amtAgg = Expressions.stringPath(InterfaceName.TotalAmount.name());
-            StringPath qtyAgg = Expressions.stringPath(InterfaceName.TotalQuantity.name());
-            BooleanExpression validPurchasePredicate = amtAgg.gt("0").or(qtyAgg.gt("0"));
-            return validPurchasePredicate;
+            NumberPath amtAgg = Expressions.numberPath(Double.class, InterfaceName.TotalAmount.name());
+            NumberPath qtyAgg = Expressions.numberPath(Double.class, InterfaceName.TotalQuantity.name());
+            return amtAgg.gt(Expressions.asNumber(0)).or(qtyAgg.gt(Expressions.asNumber(0)));
         }
         return null;
     }
@@ -130,13 +150,7 @@ public class DateRangeTranslator extends TranslatorCommon {
         BooleanExpression aggrQuantityPredicate = (unitFilter != null)
                 ? translateAggregatePredicate(qtyAgg, unitFilter, true) : null;
 
-        BooleanExpression aggrValPredicate = mergePredicates(aggrAmountPredicate, aggrQuantityPredicate);
-
-        if (aggrValPredicate != null && txnRestriction.isNegate()) {
-            aggrValPredicate = aggrValPredicate.not();
-        }
-
-        return aggrValPredicate;
+        return mergePredicates(aggrAmountPredicate, aggrQuantityPredicate);
     }
 
 }

@@ -18,8 +18,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -113,7 +114,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private Tenant tenant;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_LAUNCH_CHANNEL_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private PlayLaunchChannel playLaunchChannel;
@@ -223,6 +224,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
+
+    @JsonProperty("channelConfig")
+    @Column(name = "CHANNEL_CONFIG")
+    @Lob
+    private String channelConfig;
 
     public PlayLaunch() {
     }
@@ -554,6 +560,18 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setExportFile(String exportFile) {
         this.exportFile = exportFile;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        ChannelConfig newChannelConfig = null;
+        if (channelConfig != null) {
+            newChannelConfig = JsonUtils.deserialize(channelConfig, ChannelConfig.class);
+        }
+        return newChannelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = JsonUtils.serialize(channelConfig);
     }
 
 }

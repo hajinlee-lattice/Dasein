@@ -1,11 +1,14 @@
 package com.latticeengines.query.service.impl;
 
+import static com.latticeengines.query.util.SparkSQLQueryUtils.FINAL;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -35,8 +38,8 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.query.exposed.service.SparkSQLService;
+import com.latticeengines.query.util.SparkSQLQueryUtils;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
@@ -55,12 +58,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Inject
     private SparkJobService sparkJobService;
-
-    @Inject
-    private EMRCacheService emrCacheService;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -82,9 +79,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
 
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
-
-    @Value("${dataflowapi.spark.sql.broadcast.join.threashold.gb}")
-    private long bhjThresholdGb;
 
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
@@ -115,12 +109,28 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     @Override
+    public void prepareForCrossSellQueries(LivySession livySession, //
+                                           String periodName, String trxnTable, String storageLevel) {
+        InputStreamSparkScript sparkScript = getTrxnScript();
+        ScriptJobConfig jobConfig = new ScriptJobConfig();
+        jobConfig.setNumTargets(0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("TRXN_TABLE", trxnTable);
+        params.put("PERIOD_NAME", periodName);
+        if (StringUtils.isNotBlank(storageLevel)) {
+            params.put("STORAGE_LEVEL", storageLevel);
+        }
+        jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+        sparkJobService.runScript(livySession, sparkScript, jobConfig);
+    }
+
+    @Override
     public long getCount(CustomerSpace customerSpace, LivySession livySession, String sql) {
         InputStreamSparkScript sparkScript = getQueryScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
-        params.put("SQL", compressSql(sql));
+        setSQLParam(sql, params);
         params.put("SAVE", false);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
@@ -134,7 +144,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(1);
         Map<String, Object> params = new HashMap<>();
-        params.put("SQL", compressSql(sql));
+        setSQLParam(sql, params);
         params.put("DECODE_MAPPING", decodeMapping);
         params.put("SAVE", true);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
@@ -142,6 +152,18 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         jobConfig.setWorkspace(workspace);
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         return result.getTargets().get(0);
+    }
+
+    private void setSQLParam(String sql, Map<String, Object> params) {
+        if (sql.startsWith("with")) {
+            List<List<String>> sqls = SparkSQLQueryUtils.detachSubQueries(sql);
+            params.put("SQLS", compressSql(JsonUtils.serialize(sqls)));
+        } else if (sql.contains("AccountId in") || sql.contains("AccountId not in")) {
+            List<List<String>> sqls = SparkSQLQueryUtils.extractSubQueries(sql, FINAL);
+            params.put("SQLS", compressSql(JsonUtils.serialize(sqls)));
+        } else {
+            params.put("SQL", compressSql(sql));
+        }
     }
 
     private void bootstrapAttrRepo(LivySession livySession, Map<String, String> hdfsPathMap, String storageLevel) {
@@ -204,6 +226,15 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return sparkScript;
     }
 
+    private InputStreamSparkScript getTrxnScript() {
+        InputStream is = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream("scripts/trxn.scala");
+        InputStreamSparkScript sparkScript = new InputStreamSparkScript();
+        sparkScript.setStream(is);
+        sparkScript.setInterpreter(SparkInterpreter.Scala);
+        return sparkScript;
+    }
+
     private Map<String, Object> getLivyConf(int scalingFactor) {
         Map<String, Object> conf = new HashMap<>();
         conf.put("driverCores", driverCores);
@@ -223,12 +254,12 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     private Map<String, String> getSparkConf(int scalingFactor) {
-        scalingFactor = Math.max(scalingFactor, 1);
+        scalingFactor = Math.max(scalingFactor - 1, 1);
         Map<String, String> conf = new HashMap<>();
 
         // instances
         int minExe = minExecutors * scalingFactor;
-        int maxExe = Math.max((int) (maxExecutors * scalingFactor * 0.5), minExe);
+        int maxExe = maxExecutors * scalingFactor;
         conf.put("spark.executor.instances", "1");
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
@@ -238,10 +269,6 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         int partitions = Math.max(maxExe * executorCores * 2, 200);
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
-
-        // broadcast join
-        conf.put("spark.sql.autoBroadcastJoinThreshold", String.valueOf(bhjThresholdGb * GB));
-        conf.put("spark.sql.broadcastTimeout", "600");
 
         // others
         conf.put("spark.driver.maxResultSize", "4g");

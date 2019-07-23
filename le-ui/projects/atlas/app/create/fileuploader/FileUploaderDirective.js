@@ -398,13 +398,15 @@ angular
 
                     if (!vm.readOnly) {
                         if ($state.includes('home.import.entry')) {
-                            var fileName = "file_" + (new Date).getTime() + ".csv";
+                            var fileName = "file_" + (new Date).getTime() + ".csv",
+                                entityType = ImportWizardStore.getEntityType().toLowerCase();
+
                             ImportWizardStore.setCsvFileName(fileName);
                             options = {
                                 file: file,
                                 url: vm.params.url || '/pls/models/uploadfile',
                                 params: {
-                                    entity: 'account',
+                                    entity: entityType,
                                     fileName: fileName,
                                     modelId: vm.params.modelId || false,
                                     metadataFile: vm.params.metadataFile || null,
@@ -429,9 +431,6 @@ angular
                             };
                         }
                         vm.cancelDeferred = cancelDeferred = $q.defer();
-
-                        console.log(options);
-
 
                         ImportService.Upload(options).then(vm.uploadResponse);
                     } else {

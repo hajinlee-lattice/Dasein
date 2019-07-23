@@ -228,6 +228,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder targetScoreDerivationEnabled(boolean targetScoreDerivation) {
             recalculatePercentile.setTargetScoreDerivation(targetScoreDerivation);
             calculateExpectedRevenuePercentile.setTargetScoreDerivation(targetScoreDerivation);
+            pivotScoreAndEvent.setTargetScoreDerivation(targetScoreDerivation);
             return this;
         }
 
@@ -238,6 +239,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public void eventColumn(String eventColumn) {
             cdlEventTable.setEventColumn(eventColumn);
+        }
+
+        public Builder apsRollupPeriod(String period) {
+            generateRatingStepConfiguration.setApsRollupPeriod(period);
+            return this;
         }
 
         public GenerateAIRatingWorkflowConfiguration build() {

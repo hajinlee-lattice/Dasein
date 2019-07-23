@@ -260,7 +260,7 @@ angular
                     switch (column.type) {
                         case 'number':
                             {
-                                return getTruncatedValue(stat[column.field]);
+                                return getTruncatedValue(stat[column.field]).toLocaleString();
                             }
                         case 'string':
                             {

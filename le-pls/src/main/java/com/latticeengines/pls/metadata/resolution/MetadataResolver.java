@@ -436,11 +436,9 @@ public class MetadataResolver {
                         List<String> columnFields = getColumnFieldsByHeader(knownColumn.getUserField());
                         MutableTriple<String, String, String> result = distinguishDateAndTime(columnFields);
                         if (result != null) {
-                            knownColumn.setDateFormatString(
-                                    TimeStampConvertUtils.mapJavaToUserDateFormat(result.getLeft()));
-                            knownColumn.setTimeFormatString(
-                                    TimeStampConvertUtils.mapJavaToUserTimeFormat(result.getMiddle()));
-                            knownColumn.setTimezone(TimeStampConvertUtils.mapJavaToUserTimeZone(result.getRight()));
+                            knownColumn.setDateFormatString(result.getLeft());
+                            knownColumn.setTimeFormatString(result.getMiddle());
+                            knownColumn.setTimezone(result.getRight());
                             knownColumn.setMappedToDateBefore(false);
                         }
                     }
@@ -671,15 +669,17 @@ public class MetadataResolver {
     /*
      * check the given format can be used to parse column value, if number of
      * column value can be parsed is more than 10% of size of columnFields
+     * return null if the check can pass, return one error value if the check can't pass
      */
     @VisibleForTesting
-    public boolean checkUserDateType(FieldMapping fieldMapping) {
+    public String checkUserDateType(FieldMapping fieldMapping) {
         String columnHeaderName = fieldMapping.getUserField();
+        String errorValue = null;
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
         String dateFormat = fieldMapping.getDateFormatString();
         String timeFormat = fieldMapping.getTimeFormatString();
         if (StringUtils.isEmpty(dateFormat)) {
-            return false;
+            return null;
         }
         int conformingDateCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
@@ -691,12 +691,13 @@ public class MetadataResolver {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 TemporalAccessor dateTime = null;
-                columnField = columnField.trim().replaceFirst("(\\s{2,})", TimeStampConvertUtils.SYSTEM_DELIMITER);
-                columnField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(columnField);
+                String trimmedField = columnField.trim().replaceFirst("(\\s{2,})",
+                        TimeStampConvertUtils.SYSTEM_DELIMITER);
+                trimmedField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
                 try {
-                    dateTime = dtf.parse(columnField);
+                    dateTime = dtf.parse(trimmedField);
                 } catch (DateTimeParseException e) {
-                    log.debug("Found columnField unparsable as date/time: " + columnField);
+                    log.debug("Found columnField unparsable as date/time: " + trimmedField);
                 }
                 if (dateTime != null) {
                     conformingDateCount++;
@@ -704,12 +705,16 @@ public class MetadataResolver {
                         break;
                     }
                 }
+                // pick up first one error value to show in ui page
+                if (errorValue == null && dateTime == null) {
+                    errorValue = columnField;
+                }
             }
         }
         if (conformingDateCount < dateThreshold) {
-            return false;
+            return errorValue;
         }
-        return true;
+        return null;
     }
 
     /*

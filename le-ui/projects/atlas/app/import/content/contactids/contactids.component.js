@@ -125,7 +125,7 @@ angular.module('lp.import.wizard.contactids', [])
                 // console.log(' <===> ',map, vm.fieldMapping.contact);
                 if(vm.isMultipleTemplates() && map.mappedField == "CustomerContactId"){
                     map.mapToLatticeId = vm.match;
-                    map.IdType = map.mapToLatticeId == true ?'Contact' : null;
+                    map.IdType = 'Contact';
                 }
                 mapped.push(map);
                 if(userField) {

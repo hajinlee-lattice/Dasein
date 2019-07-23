@@ -35,6 +35,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String RATING_ENGINE_NAME = "Rating Engine for AI Model";
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String UPDATED_BY = "lattice@lattice-engines.com";
 
     private static final String PRODUCT_ID1 = "PID1";
     private static final String PRODUCT_ID2 = "PID2";
@@ -67,6 +68,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         crossSellratingEngine.setNote(RATING_ENGINE_NOTE);
         crossSellratingEngine.setSegment(testSegment);
         crossSellratingEngine.setCreatedBy(CREATED_BY);
+        crossSellratingEngine.setUpdatedBy(UPDATED_BY);
         crossSellratingEngine.setType(RatingEngineType.CROSS_SELL);
 
         crossSellratingEngine.setId(UUID.randomUUID().toString());
@@ -209,6 +211,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         customEventRatingEngine.setNote(RATING_ENGINE_NOTE);
         customEventRatingEngine.setSegment(testSegment);
         customEventRatingEngine.setCreatedBy(CREATED_BY);
+        customEventRatingEngine.setUpdatedBy(UPDATED_BY);
         customEventRatingEngine.setType(RatingEngineType.CUSTOM_EVENT);
 
         customEventRatingEngine.setId(UUID.randomUUID().toString());

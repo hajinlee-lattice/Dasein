@@ -2,14 +2,17 @@ package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -79,7 +82,10 @@ public class QueryProcessor {
             sqlQuery = sqlQuery.distinct();
         }
 
-        sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
+        boolean useAlias = !( //
+                Boolean.TRUE.equals(query.getDistinct()) && Boolean.TRUE.equals(query.getCount()) //
+        );
+        sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups(), useAlias));
         if (query.getPageFilter() != null && !query.containEntityForExists()) {
             sqlQuery = addPaging(sqlQuery, query.getPageFilter());
         }
@@ -180,13 +186,20 @@ public class QueryProcessor {
         private BusinessEntity mainEntity;
         private Set<BusinessEntity> joinedEntities;
         private AttributeRepository repository;
+        private Map<BusinessEntity, String> joinHints = new HashMap<>();
+
+        private static final String JOIN = "join";
+        private static final String LEFT = "left";
 
         JoinedEntityVisitor(SQLQuery<?> sqlQuery, BusinessEntity mainEntity, Set<BusinessEntity> joinedEntities,
-                AttributeRepository repository) {
+                            AttributeRepository repository, Map<BusinessEntity, String> joinHints) {
             this.sqlQuery = sqlQuery;
             this.mainEntity = mainEntity;
             this.joinedEntities = joinedEntities;
             this.repository = repository;
+            if (MapUtils.isNotEmpty(joinHints)) {
+                this.joinHints.putAll(joinHints);
+            }
         }
 
         @Override
@@ -198,12 +211,20 @@ public class QueryProcessor {
                 BusinessEntity.Cardinality cardinality = relationship.getCardinality();
                 // JOIN T1
                 EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, entity);
-                switch (cardinality) {
-                case ONE_TO_MANY:
-                case ONE_TO_ONE:
+                String joinMethod = joinHints.getOrDefault(entity, "");
+                if (StringUtils.isBlank(joinMethod)) {
+                    switch (cardinality) {
+                        case ONE_TO_MANY:
+                        case ONE_TO_ONE:
+                            joinMethod = LEFT;
+                            break;
+                        default:
+                            joinMethod = JOIN;
+                    }
+                }
+                if (LEFT.equals(joinMethod)) {
                     sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(entity.name()));
-                    break;
-                default:
+                } else {
                     sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(entity.name()));
                 }
                 for (Predicate predicate : QueryUtils.getJoinPredicates(relationship)) {
@@ -223,17 +244,18 @@ public class QueryProcessor {
         if (!joinedEntities.isEmpty()) {
             BreadthFirstSearch bfs = new BreadthFirstSearch();
             bfs.run(query.getMainEntity(),
-                    new JoinedEntityVisitor(sqlQuery, query.getMainEntity(), joinedEntities, repository));
+                    new JoinedEntityVisitor(sqlQuery, query.getMainEntity(), joinedEntities, repository, //
+                            query.getJoinHints()));
         }
         return sqlQuery;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups) {
+    private Expression<?> getSelect(LookupResolverFactory factory, List<Lookup> lookups, boolean useAlias) {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
-            Expression<?> expression = resolver.resolveForSelect(lookup, true);
+            Expression<?> expression = resolver.resolveForSelect(lookup, useAlias);
             expressions.add(expression);
         }
         if (expressions.size() == 0) {

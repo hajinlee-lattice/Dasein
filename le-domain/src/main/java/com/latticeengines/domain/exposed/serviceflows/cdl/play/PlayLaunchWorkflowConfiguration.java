@@ -9,12 +9,13 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 
-public class    PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
+
 
     public static class Builder {
         private PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration();
@@ -42,6 +43,7 @@ public class    PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigura
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
             exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
             exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
+            exportPublishToSNSConf.setChannelConfig(playLaunch.getChannelConfig());
             return this;
         }
 

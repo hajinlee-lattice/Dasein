@@ -7,7 +7,6 @@ import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 
-val sqlB64: String = lattice.params.get("SQL").asText()
 val saveResult = lattice.params.get("SAVE").asBoolean()
 val decodeMapping: Map[String, Map[String, String]] =
   if (lattice.params.has("DECODE_MAPPING")) {
@@ -16,15 +15,55 @@ val decodeMapping: Map[String, Map[String, String]] =
     null
   }
 
-val sql = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
-  Charset.forName("UTF-8"))
+def parseSqls(): List[List[String]] = {
+  val sqlB64: String = lattice.params.get("SQLS").asText()
+  val sqls = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
+    Charset.forName("UTF-8"))
+  mapper.readValue[List[List[String]]](sqls)
+}
 
-println("----- BEGIN SCRIPT OUTPUT -----")
-println("SQL Statement:")
-println(sql)
+def parseSql(): String = {
+  val sqlB64: String = lattice.params.get("SQL").asText()
+  IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
+    Charset.forName("UTF-8"))
+}
+
+if (lattice.params.hasNonNull("SQLS")) {
+  val pairs: List[List[String]] = parseSqls()
+  pairs map {pair => {
+    val name = pair.head
+    val statement = pair(1)
+    println("----- BEGIN SCRIPT OUTPUT -----")
+    println(s"\nSQL Statement for $name:")
+    println(statement)
+    println("----- END SCRIPT OUTPUT -----")
+    name
+  }}
+} else {
+  val sql = parseSql()
+  println("----- BEGIN SCRIPT OUTPUT -----")
+  println("SQL Statement:")
+  println(sql)
+  println("----- END SCRIPT OUTPUT -----")
+}
 // -----CELL BREAKER----
 
-val sqlDF = spark.sql(sql)
+val sqlDF: DataFrame =
+  if (lattice.params.hasNonNull("SQLS")) {
+    val pairs: List[List[String]] = parseSqls()
+    val finalStatment = pairs.foldLeft("")((_, pair) => {
+      val name = pair.head
+      val statement = pair(1)
+      if (name != "final") {
+        spark.sql(statement).createOrReplaceTempView(name)
+      }
+      statement
+    })
+    spark.sql(finalStatment)
+  } else {
+    val sql = parseSql()
+    spark.sql(sql)
+  }
 
 def decode(df: DataFrame, decodeMapping: Map[String, Map[String, String]]): DataFrame = {
   if (decodeMapping == null) {

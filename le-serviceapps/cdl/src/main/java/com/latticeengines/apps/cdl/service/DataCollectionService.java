@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
+import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -85,4 +86,6 @@ public interface DataCollectionService {
     void saveStatusHistory(String customerSpace, DataCollectionStatus status);
 
     List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace);
+
+    ImportTemplateDiagnostic diagnostic(String customerSpaceStr, Long dataCollectionTablePid);
 }

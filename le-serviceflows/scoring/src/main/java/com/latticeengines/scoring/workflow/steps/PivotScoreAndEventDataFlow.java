@@ -59,7 +59,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-
+    
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
@@ -201,6 +201,9 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         request.setBucketMetadataList(bucketMetadata);
         log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId + ": "
                 + JsonUtils.pprint(bucketMetadata));
+        if (getConfiguration().isTargetScoreDerivation()) {
+            request.setCreateForModel(true);
+        }
         bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
     }
 

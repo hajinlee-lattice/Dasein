@@ -95,10 +95,6 @@ export default class ViewMappings extends Component {
                 }
             )
         );
-
-
-        console.log(this.state.allMappings);
-        console.log(this.state.downloadData);
     }
 
     handleChange = () => {
@@ -142,9 +138,19 @@ export default class ViewMappings extends Component {
                 {
                     colSpan: 6,
                     template: cell => {
-                        return (
-                            <span>{cell.props.rowData.name_from_file} <i className="fa fa-long-arrow-right pull-right" aria-hidden="true"></i></span>
-                        );
+                        if (cell.props.rowData.unmapped) {
+                            return (
+                                <span className="unmapped">
+                                    Unmapped <i className="fa fa-long-arrow-right pull-right" aria-hidden="true"></i>
+                                </span>
+                            );
+                        } else {
+                            return (
+                                <span>
+                                    {cell.props.rowData.name_from_file} <i className="fa fa-long-arrow-right pull-right" aria-hidden="true"></i>
+                                </span>
+                            );
+                        }
                     }
                 },
                 {
@@ -256,7 +262,11 @@ export default class ViewMappings extends Component {
                                         name: ""
                                       }}
                                       callback={() => {
-                                        NgState.getAngularState().go('home.importtemplates', {});
+                                        if(FeatureFlagsUtilities.isFeatureFlagEnabled(ENABLE_MULTI_TEMPLATE_IMPORT)){
+                                            NgState.getAngularState().go('home.multipletemplates', {});
+                                        }else {
+                                            NgState.getAngularState().go('home.importtemplates', {});
+                                        }
                                       }}
                                     />
                                     View {this.state.object} Mappings

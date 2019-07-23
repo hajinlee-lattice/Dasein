@@ -80,7 +80,7 @@ public class FilterAccountExport extends RunSparkJob<ProcessAccountStepConfigura
         if (StringUtils.isBlank(fullAccountTableName)) {
             throw new IllegalStateException("Cannot find the fully enriched account table");
         }
-        Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
+        Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
         if (fullAccountTable == null) {
             throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
         }

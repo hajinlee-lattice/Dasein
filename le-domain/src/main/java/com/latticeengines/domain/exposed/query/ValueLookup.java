@@ -19,8 +19,16 @@ public class ValueLookup extends Lookup {
     @JsonProperty("value")
     private Object value;
 
+    @JsonProperty("alias")
+    private String alias;
+
     public ValueLookup(Object value) {
         this.value = value;
+    }
+
+    public ValueLookup(Object value, String alias) {
+        this.value = value;
+        this.alias = alias;
     }
 
     public ValueLookup() {
@@ -32,6 +40,14 @@ public class ValueLookup extends Lookup {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     @Override

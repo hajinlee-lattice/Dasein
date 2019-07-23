@@ -44,7 +44,9 @@ public enum CacheName {
     }
 
     public static CacheName[] getCdlLocalCacheGroup() {
-        return new CacheName[] { TimeTranslatorCache };
+        return new CacheName[] {
+                AttrRepoCache, //
+                TimeTranslatorCache };
     }
 
     public String getName() {
@@ -75,5 +77,6 @@ public enum CacheName {
         public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
         public static final String EMRClusterCacheName = "EMRClusterCache";
         public static final String CSVImportMapperCacheName = "CSVImportMapperCache";
+        public static final String ModelSummaryCacheName = "ModelSummaryCache";
     }
 }

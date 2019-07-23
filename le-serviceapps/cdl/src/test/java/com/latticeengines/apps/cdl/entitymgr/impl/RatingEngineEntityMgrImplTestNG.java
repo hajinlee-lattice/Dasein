@@ -100,6 +100,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine = new RatingEngine();
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         ratingEngine.setId(UUID.randomUUID().toString());
@@ -107,6 +108,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(testSegment);
         crossSellRatingEngine.setCreatedBy(CREATED_BY);
+        crossSellRatingEngine.setUpdatedBy(CREATED_BY);
         crossSellRatingEngine.setType(RatingEngineType.CROSS_SELL);
         crossSellRatingEngine.setNote(RATING_ENGINE_NOTE);
         crossSellRatingEngine.setId(UUID.randomUUID().toString());
@@ -114,6 +116,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         customEventRatingEngine = new RatingEngine();
         customEventRatingEngine.setSegment(testSegment);
         customEventRatingEngine.setCreatedBy(CREATED_BY);
+        customEventRatingEngine.setUpdatedBy(CREATED_BY);
         customEventRatingEngine.setType(RatingEngineType.CUSTOM_EVENT);
         customEventRatingEngine.setNote(RATING_ENGINE_NOTE);
         customEventRatingEngine.setId(UUID.randomUUID().toString());

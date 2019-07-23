@@ -30,9 +30,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -116,12 +116,12 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 putStringValueInContext(SCORING_MODEL_ID, StringUtils.join(modelGuids, "|"));
             }
             Set<String> existingEngineIds = new HashSet<>();
-            List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.Rating);
-            if (CollectionUtils.isNotEmpty(cms)) {
-                cms.forEach(cm -> {
-                    if (cm.getAttrName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
-                        String engineId = RatingEngine.toEngineId(cm.getAttrName());
+            DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            Table table = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Rating.getServingStore(), active);
+            if (table != null) {
+                table.getAttributes().forEach(attr -> {
+                    if (attr.getName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
+                        String engineId = RatingEngine.toEngineId(attr.getName());
                         existingEngineIds.add(engineId);
                     }
                 });

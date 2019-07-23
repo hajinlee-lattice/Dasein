@@ -7,8 +7,15 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 
 public class SchedulingPAQueue<T extends SchedulingPAObject> {
+
+    private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueue.class);
 
     private final SystemStatus systemStatus;
 
@@ -20,15 +27,19 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
 
     private final boolean isRetryQueue;
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock) {
-        this(systemStatus, clz, timeClock, false);
+    private final String queueName;
+
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, String queueName) {
+        this(systemStatus, clz, timeClock, false, queueName);
     }
 
-    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, boolean isRetryQueue) {
+    public SchedulingPAQueue(SystemStatus systemStatus, Class<T> clz, TimeClock timeClock, boolean isRetryQueue,
+                             String queueName) {
         this.systemStatus = systemStatus;
         this.clz = clz;
         this.timeClock = timeClock;
         this.isRetryQueue = isRetryQueue;
+        this.queueName = queueName;
         priorityQueue = new PriorityQueue<>();
     }
 
@@ -37,7 +48,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
     }
 
     public String getQueueName() {
-        return clz.getName();
+        return this.queueName;
     }
 
     public boolean isRetryQueue() {
@@ -91,6 +102,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
             }
         }while (size() > 0);
         systemStatus.getScheduleTenants().addAll(canRunJobSetInQueue);
+        log.debug("queue: " + this.getQueueName() + ", canRunJobs: " + JsonUtils.serialize(canRunJobSetInQueue));
         return canRunJobSetInQueue;
     }
 
@@ -100,10 +112,6 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      */
     public int size() {
         return priorityQueue.size();
-    }
-
-    public Set<String> getScheduleTenants() {
-        return systemStatus.getScheduleTenants();
     }
 
     /**

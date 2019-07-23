@@ -57,9 +57,9 @@ public class ContactMatchPlannerMicroEngineActorTestNG extends SingleActorTestNG
     private Object[][] prepareContactPlannerData() {
         return new Object[][] { //
                 { "CCID", new Contact("Name", "email@gmail.com", "16501234567"), "USA", //
-                        "CCID", new Contact("NAME", "email@gmail.com", "16501234567") }, //
+                        "ccid", new Contact("NAME", "email@gmail.com", "16501234567") }, //
                 { " CCID ", new Contact(" Name ", "gmail.com", "1 (650)123-4567"), null, //
-                        "CCID", new Contact("NAME", null, "16501234567") }, //
+                        "ccid", new Contact("NAME", null, "16501234567") }, //
                 { null, new Contact(null, null, "134-861-9249"), "China", //
                         null, new Contact(null, null, "861348619249") }, //
 

@@ -68,6 +68,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         ratingEngine.setId(UUID.randomUUID().toString());
@@ -168,12 +169,12 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
                 return;
             }
 
-//            for (DataSource cpds : dsList) {
-//                 log.info("Connection Pool Initial Config: {}", (cpds
-//                 instanceof ComboPooledDataSource) ?
-//                 ((ComboPooledDataSource)cpds).toString(true) :
-//                 cpds.toString());
-//            }
+            // for (DataSource cpds : dsList) {
+            // log.info("Connection Pool Initial Config: {}", (cpds
+            // instanceof ComboPooledDataSource) ?
+            // ((ComboPooledDataSource)cpds).toString(true) :
+            // cpds.toString());
+            // }
 
             try {
                 while (!interrupted) {

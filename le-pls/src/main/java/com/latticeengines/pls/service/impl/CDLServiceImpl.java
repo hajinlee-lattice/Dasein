@@ -88,9 +88,6 @@ public class CDLServiceImpl implements CDLService {
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    @Value("${cdl.activity.based.pa}")
-    boolean isActivityBasedPA;
-
     private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name", "Data Type");
 
     private static final String CUSTOM = "Custom";
@@ -100,6 +97,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         checkPALimit(customerSpace, request);
+        boolean isActivityBasedPA = cdlProxy.isActivityBasedPA();
         if (isActivityBasedPA) {
             return cdlProxy.scheduleProcessAnalyze(customerSpace, false, request);
         } else {
@@ -588,6 +586,8 @@ public class CDLServiceImpl implements CDLService {
                 display.setExist(Boolean.FALSE);
                 display.setObject(object.getDisplayName());
                 display.setTemplateName(object.getDisplayName());
+                display.setEntity(object.getEntity());
+                display.setFeedType(object.getDefaultFeedTypeName());
                 display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                 templates.add(display);
             }

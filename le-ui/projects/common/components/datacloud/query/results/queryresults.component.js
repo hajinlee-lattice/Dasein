@@ -276,9 +276,11 @@ angular.module('common.datacloud.query.results', [
 
                 // Get Account Data
                 if(engineId) {
+                    vm.loadingTargetData = true;
                     PlaybookWizardService.getTargetData(engineId, dataQuery).then(function(results) { 
                         PlaybookWizardStore.setTargetData(results.data);
                         vm.accounts = PlaybookWizardStore.getTargetData();
+                        vm.loadingTargetData = false;
                     });
                 } else {
                     var accountQuery = {

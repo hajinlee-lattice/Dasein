@@ -20,6 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -109,14 +111,14 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     // 1. form FrontEndQuery for Account and Contact
                     // 2. get DataFrame for Account and Contact
                     HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
-                    log.info("accountDataUnit: " + accountDataUnit.toString());
+                    log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
                     HdfsDataUnit contactDataUnit = null;
                     String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
                     if (StringUtils.isBlank(contactTableName)) {
                         log.info("No contact table available in Redshift.");
                     } else {
                         contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
-                        log.info("contactDataUnit: " + contactDataUnit.toString());
+                        log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
                     }
                     // 3. generate avro out of DataFrame with predefined format
                     // for Recommendations
@@ -139,7 +141,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info(createRecJobResult.getOutput());
             String targetPath = createRecJobResult.getTargets().get(0).getPath();
             log.info("Target HDFS path: " + targetPath);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH, targetPath);
+            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(targetPath));
 
             /*
              * 4. export to mysql database using sqoop
@@ -150,6 +153,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
             } else {
                 PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+                playLaunch.setAccountsLaunched(launchedAccountNum);
+                playLaunch.setContactsLaunched(launchedContactNum);
                 campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext,
                         System.currentTimeMillis(), targetPath);
                 long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);

@@ -8,7 +8,7 @@ angular.module('lp.import.wizard.customfields', [])
 ) {
     var vm = this;
     var alreadySaved = ImportWizardStore.getSavedDocumentFields($state.current.name),
-        extraFieldMappingInfo = FieldDocument.extraFieldMappingInfo;
+        extraFieldMappingInfo = FieldDocument.extraFieldMappingInfo;    
 
     if(alreadySaved){
         FieldDocument.fieldMappings = alreadySaved;
@@ -18,7 +18,7 @@ angular.module('lp.import.wizard.customfields', [])
     }
     angular.extend(vm, {
         AvailableFields: [],
-        ignoredFields: FieldDocument.ignoredFields || [],
+        ignoredFields: ImportWizardStore.fieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
         mergedFields: mergedFieldDocument.main || mergedFieldDocument,
         fieldMappingIgnore: {},
@@ -69,20 +69,29 @@ angular.module('lp.import.wizard.customfields', [])
     };
 
     function setDefaultIgnore(){
-        vm.AvailableFields.forEach(function(element){
-            
-            var ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, vm.fieldMappings);
-            if(ignore == false){
-                ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, ImportWizardStore.fieldDocument.fieldMappings);
-            }
+        vm.AvailableFields.forEach(function(element){            
             var name = element.userField;
-            if(ignore === true && $scope.fieldMapping[name]){
-                // console.log(name);
+            
+            function setIgnored() {
                 $scope.fieldMapping[name].ignore = true;
-                element.defaultIgnored = true;
+                element.defaultIgnored = false;
                 vm.defaultsIgnored.push(element);
                 vm.changeIgnore($scope.fieldMapping);
             }
+
+            if (vm.ignoredFields.includes(name)) {
+                setIgnored();
+            } else {
+                var ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, vm.fieldMappings);
+                if(ignore == false){
+                    ignore = ImportUtils.isFieldInSchema(ImportWizardStore.getEntityType(), element.userField, ImportWizardStore.fieldDocument.fieldMappings);
+                }
+                if (ignore === true && $scope.fieldMapping[name]){
+                    setIgnored();
+                }    
+            }
+
+
         });
         setTimeout(function(){
             $scope.$apply();
@@ -124,16 +133,17 @@ angular.module('lp.import.wizard.customfields', [])
         vm.changeSingleType(field);
     }
     vm.changeSingleType = function(fieldMapping){
-        let userField = fieldMapping.userField;
-        ImportWizardStore.remapType(userField, {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone}, ImportWizardStore.getEntityType());
-        ImportWizardStore.userFieldsType[userField] = {type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
+        let usField = fieldMapping.userField;
+        let obj = { userField: usField, type: fieldMapping.fieldType, dateFormatString: fieldMapping.dateFormatString, timeFormatString: fieldMapping.timeFormatString, timezone: fieldMapping.timezone};
+        ImportWizardStore.updateSavedObjectCustomFields(obj, $state.current.name);
         vm.validate();
     }
     
     vm.updateFormats = (formats) => {
         let field = formats.field;
-        ImportWizardStore.userFieldsType[field.userField] = {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
-        ImportWizardStore.remapType(field.userField, {type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone}, ImportWizardStore.getEntityType());
+        let usField = field.userField;
+        let obj = { userField: usField, type: field.fieldType, dateFormatString: formats.dateformat, timeFormatString: formats.timeformat, timezone: formats.timezone};
+        ImportWizardStore.updateSavedObjectCustomFields(obj, $state.current.name);
         vm.validate();
     }
 

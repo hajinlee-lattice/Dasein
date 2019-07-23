@@ -42,6 +42,7 @@ public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine = new RatingEngine();
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setId(UUID.randomUUID().toString());
         ratingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngine);

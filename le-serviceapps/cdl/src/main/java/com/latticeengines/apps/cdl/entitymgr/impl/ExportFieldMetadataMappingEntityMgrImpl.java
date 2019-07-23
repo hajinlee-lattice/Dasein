@@ -18,6 +18,7 @@ import com.latticeengines.apps.cdl.repository.ExportFieldMetadataMappingReposito
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 @Component("exportFieldMetadataMappingEntityMgr")
 public class ExportFieldMetadataMappingEntityMgrImpl
@@ -76,8 +77,10 @@ public class ExportFieldMetadataMappingEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<ExportFieldMetadataMapping> update(List<ExportFieldMetadataMapping> exportFieldMappings) {
-        return exportFieldMappingDao.updateExportFieldMetadataMappings(exportFieldMappings);
+    public List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap,
+            List<ExportFieldMetadataMapping> exportFieldMappings) {
+        log.info(JsonUtils.serialize(exportFieldMappings));
+        return exportFieldMappingDao.updateExportFieldMetadataMappings(lookupIdMap, exportFieldMappings);
     }
 
 }

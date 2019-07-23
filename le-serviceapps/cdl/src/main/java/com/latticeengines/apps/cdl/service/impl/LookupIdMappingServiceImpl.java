@@ -51,6 +51,8 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Value("${aws.customer.export.s3.bucket}")
     private String s3CustomerExportBucket;
 
+    private final HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+
     @Override
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending) {
@@ -187,15 +189,25 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             if (dropbox != null && StringUtils.isNotBlank(dropbox.getDropBox()))
                 switch (lookupIdMap.getExternalSystemType()) {
                     case MAP:
-                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder()
-                                .getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox()));
+                        lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
+                                pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
                         break;
                     case FILE_SYSTEM:
-                        lookupIdMap.setExportFolder(new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket,
-                                dropbox.getDropBox()));
+                        lookupIdMap.setExportFolder(
+                                new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox())
+                                        .replace(getProtocolPrefix(), ""));
                         break;
                 }
         }
         return lookupIdMap;
+    }
+
+    private String getUIFriendlyExportFolder(String exportFolderPath) {
+        return exportFolderPath.replace(getProtocolPrefix(), "");
+    }
+
+    private String getProtocolPrefix() {
+
+        return pathBuilder.getProtocol() + pathBuilder.getProtocolSeparator() + pathBuilder.getPathSeparator();
     }
 }

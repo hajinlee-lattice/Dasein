@@ -64,7 +64,9 @@ public class FirehoseServiceImpl implements FirehoseService {
                     batches++;
                 }
                 for (int i = 0; i < batches; i++) {
-                    List<String> subStreams = streams.subList(i * batchSize, (i + 1) * batchSize);
+                    // Handle case where final mini-batch is not the full size.
+                    int endOfRange = Math.min((i + 1) * batchSize, streams.size());
+                    List<String> subStreams = streams.subList(i * batchSize, endOfRange);
                     sendMiniBatch(deliveryStreamName, subStreams);
                 }
             } else {
@@ -73,7 +75,7 @@ public class FirehoseServiceImpl implements FirehoseService {
 
         } catch (Throwable t) {
             log.warn("Cannot sendBatch message to AWS Firehose delivery stream name=" + deliveryStreamName + " error="
-                    + t.getClass().getName() + ": " + t.getMessage());
+                    + t.getClass().getName() + ": " + t.getMessage(), t);
         }
     }
 

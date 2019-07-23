@@ -1,0 +1,27 @@
+select Account.AccountId
+from Query_Test_BucketedAccount_3 as Account
+where Account.AccountId in (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and TransactionDate <= '2013-12-31'
+group by AccountId
+having sum(TotalAmount) > 100) and Account.AccountId in (select lhsLwuyqqfw.AccountId
+from Query_Test_AggregatedTransaction_3 as lhsLwuyqqfw
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2014-01-01' and TransactionDate <= '2018-12-31')
+group by AccountId
+having sum(TotalAmount) > 100) as rhsGYzaTBim
+on lhsLwuyqqfw.AccountId = rhsGYzaTBim.AccountId
+where rhsGYzaTBim.AccountId is null) or Account.AccountId in (select lhs0P6R2hG6.AccountId
+from Query_Test_AggregatedTransaction_3 as lhs0P6R2hG6
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2014-01-01' and TransactionDate <= '2017-12-31') and (TotalAmount > 0 or TotalQuantity > 0)) as rhssoIbJgYy
+on lhs0P6R2hG6.AccountId = rhssoIbJgYy.AccountId
+where rhssoIbJgYy.AccountId is null) or Account.AccountId in (select lhspcA1wbiV.AccountId
+from Query_Test_AggregatedTransaction_3 as lhspcA1wbiV
+left join (select AccountId
+from Query_Test_AggregatedTransaction_3
+where ProductId = 'LHdgKhusYLJqk9JgC5SdJrwNv8tg9il' and (TransactionDate >= '2018-01-01' and TransactionDate <= '2018-12-31') and (TotalAmount > 0 or TotalQuantity > 0)) as rhsYi3rvWZ4
+on lhspcA1wbiV.AccountId = rhsYi3rvWZ4.AccountId
+where rhsYi3rvWZ4.AccountId is null)

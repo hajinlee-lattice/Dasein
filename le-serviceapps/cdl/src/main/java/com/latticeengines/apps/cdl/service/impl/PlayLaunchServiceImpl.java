@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
@@ -77,6 +78,14 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             throw new LedpException(LedpCode.LEDP_18146);
         }
         return playLaunchEntityMgr.findByLaunchId(launchId);
+    }
+
+    @Override
+    public PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId) {
+        if (StringUtils.isBlank(launchId)) {
+            throw new LedpException(LedpCode.LEDP_18146);
+        }
+        return playLaunchEntityMgr.findPlayLaunchChannelByLaunchId(launchId);
     }
 
     @Override

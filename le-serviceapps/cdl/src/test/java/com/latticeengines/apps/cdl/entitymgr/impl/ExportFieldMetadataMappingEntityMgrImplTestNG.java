@@ -6,6 +6,8 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -33,23 +36,37 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
     @Inject
     ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
 
+    @Inject
+    ExportFieldMetadataMappingDao exportFieldMetadataMappingDao;
+
     private LookupIdMap lookupIdMap;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-    }
 
-    @Test(groups = "functional")
-    public void testCreate() {
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
-        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + System.currentTimeMillis());
+        lookupIdMap.setOrgId(lookupIdMap.getExternalSystemName() + "_" + this.getClass().getSimpleName() + "_" + System.currentTimeMillis());
         lookupIdMap.setOrgName(lookupIdMap.getExternalSystemName() + "_Test");
         lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         assertNotNull(lookupIdMap);
         assertNotNull(lookupIdMap.getId());
+    }
+
+    @Test(groups = "functional")
+    public void testEmptyMappings() {
+        List<ExportFieldMetadataMapping> fieldMappings = exportFieldMetadataMappingEntityMgr
+                .findByOrgId(lookupIdMap.getOrgId());
+        assertNotNull(fieldMappings);
+
+        assertEquals(fieldMappings.size(), 0);
+
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testEmptyMappings")
+    public void testCreate() {
 
         List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<ExportFieldMetadataMapping>();
 
@@ -58,6 +75,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_1.setDestinationField("CompanyId");
         fieldMapping_1.setOverwriteValue(false);
         fieldMapping_1.setLookupIdMap(lookupIdMap);
+        fieldMapping_1.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_1);
 
         ExportFieldMetadataMapping fieldMapping_2 = new ExportFieldMetadataMapping();
@@ -65,6 +83,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_2.setDestinationField("CompanyName");
         fieldMapping_2.setOverwriteValue(false);
         fieldMapping_2.setLookupIdMap(lookupIdMap);
+        fieldMapping_2.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_2);
 
         ExportFieldMetadataMapping fieldMapping_3 = new ExportFieldMetadataMapping();
@@ -72,11 +91,26 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_3.setDestinationField("Email");
         fieldMapping_3.setOverwriteValue(false);
         fieldMapping_3.setLookupIdMap(lookupIdMap);
+        fieldMapping_3.setTenant(mainTestTenant);
         exportFieldMappings.add(fieldMapping_3);
 
         exportFieldMappings = exportFieldMetadataMappingEntityMgr.createAll(exportFieldMappings);
 
         assertNotNull(exportFieldMappings);
+        assertEquals(exportFieldMappings.size(), 3);
+        
+        Set<String> sourceFieldNames = exportFieldMappings.stream().map(ExportFieldMetadataMapping::getSourceField)
+                .collect(Collectors.toSet());
+        
+        sourceFieldNames.contains(InterfaceName.AccountId.toString());
+        sourceFieldNames.contains(InterfaceName.CompanyName.toString());
+        sourceFieldNames.contains(InterfaceName.Email.toString());
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
 
     }
 
@@ -113,7 +147,13 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_2.setOverwriteValue(false);
         exportFieldMappings.add(fieldMapping_2);
 
-        exportFieldMetadataMappingEntityMgr.update(exportFieldMappings);
+        exportFieldMetadataMappingEntityMgr.update(lookupIdMap, exportFieldMappings);
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
 
         List<ExportFieldMetadataMapping> updatedExportFieldMappings = exportFieldMetadataMappingEntityMgr
                 .findByOrgId(lookupIdMap.getOrgId());
@@ -127,7 +167,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
             assertNotNull(fm.getSourceField());
             assertNotNull(fm.getDestinationField());
         });
-
     }
+
 
 }

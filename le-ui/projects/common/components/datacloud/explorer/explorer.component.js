@@ -102,7 +102,6 @@ export default function (
     }
 
     vm.init = function () {
-
         // leo();
         if (['segment.analysis'].indexOf(vm.section) != -1) { // only run on 'my data' page
             getDatacollectionPrecheck();
@@ -1529,7 +1528,9 @@ export default function (
     
 
     vm.categoryCount = function (category) {
-            var filtered = vm.enrichmentsObj[category];
+            var filtered = vm.enrichmentsObj[category],
+                iterationFilter = DataCloudStore.getRatingIterationFilter();
+
             if (!filtered) {
                 return 0;
             }
@@ -1562,11 +1563,11 @@ export default function (
                         (vm.metadata.toggle.show
                             .selected_ratingsengine_attributes &&
                             !item.IsRatingsEngineAttribute) ||
-                        (DataCloudStore.ratingIterationFilter == 'used' &&
+                        (iterationFilter == 'used' &&
                             !('ImportanceOrdering' in item)) ||
-                        (DataCloudStore.ratingIterationFilter == 'warnings' &&
+                        (iterationFilter == 'warnings' &&
                             !item.HasWarnings) ||
-                        (DataCloudStore.ratingIterationFilter == 'disabled' &&
+                        (iterationFilter == 'disabled' &&
                             item.ApprovedUsage[0] != 'None')
                     ) {
                         continue;

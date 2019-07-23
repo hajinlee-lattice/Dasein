@@ -127,11 +127,9 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
             double accSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, accountTable);
             double ctcSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, contactTable);
             int multiplier = ScalingUtils.getMultiplier(Math.max(accSize, ctcSize));
-            if (multiplier > 1) {
-                log.info("Set multiplier=" + multiplier + " base on account table size=" //
-                        + accSize + " gb and contact table size=" + ctcSize + " gb.");
-                scalingMultiplier = multiplier;
-            }
+            log.info("Set scalingMultiplier=" + multiplier + " base on account table size=" //
+                    + accSize + " gb and contact table size=" + ctcSize + " gb.");
+            scalingMultiplier = multiplier;
         }
     }
 
