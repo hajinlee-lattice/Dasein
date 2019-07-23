@@ -59,20 +59,24 @@ public class PatchBookDaoImpl
                 getEntityClass().getSimpleName(),
                 type.name());
         Query<?> minMaxPidQuery = session.createQuery(minMaxPidQueryStr);
-        Map<String, Long> minMaxPid = null;
-        if (minMaxPidQuery.list().size() > 0) {
-            minMaxPid = (Map<String, Long>) minMaxPidQuery.list().get(0);
-        }
+        Boolean emptyList = false;
         Map<String, Long> result = new HashMap<>();
-        if (minMaxPid == null
-                || (minMaxPid.get(MIN_PID) == null && minMaxPid.get(MAX_PID) == null)) {
+        if (minMaxPidQuery.list().size() > 0) {
+            Map<String, Long> minMaxPid = (Map<String, Long>) minMaxPidQuery.list().get(0);
+            if (minMaxPid == null
+                    || (minMaxPid.get(MIN_PID) == null && minMaxPid.get(MAX_PID) == null)) {
+                emptyList = true;
+            } else {
+                result.put(MIN_PID, minMaxPid.get(MIN_PID));
+                result.put(MAX_PID, minMaxPid.get(MAX_PID));
+            }
+        } else {
+            emptyList = true;
+        }
+        if (emptyList) {
             result.put(MIN_PID, Long.valueOf(0));
             result.put(MAX_PID, Long.valueOf(0));
-        } else {
-            result.put(MIN_PID, minMaxPid.get(MIN_PID));
-            result.put(MAX_PID, minMaxPid.get(MAX_PID));
         }
         return result;
     }
-
 }
