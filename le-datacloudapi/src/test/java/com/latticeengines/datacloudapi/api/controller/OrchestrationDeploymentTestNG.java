@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -52,6 +53,18 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private static final String DNBRAW_TRANSFORMATION = "DnBCacheSeedRawPipeline";
     private static final String DNB_VERSION = "2017-01-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2017_01_052.OUT.gz";
+
+    @Value("${datacloud.test.sftp.host}")
+    private String sftpHost;
+
+    @Value("${datacloud.test.sftp.port}")
+    private int sftpPort;
+
+    @Value("${datacloud.test.sftp.username}")
+    private String sftpUserName;
+
+    @Value("${datacloud.test.sftp.password}")
+    private String sftpPassword;
 
     @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;
@@ -93,9 +106,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
-        return new Object[][] { { DNB_INGESTION,
-                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/IngestionResourceDeploymentTestNG/DnB\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
-                IngestionType.SFTP }, //
+        return new Object[][] { { DNB_INGESTION, "{\"ClassName\":\"SftpConfiguration\"", IngestionType.SFTP }, //
         };
     }
 
