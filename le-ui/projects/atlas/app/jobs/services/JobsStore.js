@@ -71,6 +71,7 @@ angular
 
         function isModelJob(job) {
             // Based on implementation of addJob()
+            // console.log('TEST ',job.jobType);
             switch (job.jobType) {
                 case "processAnalyzeWorkflow":
                 case "segmentExportWorkflow":
@@ -78,7 +79,8 @@ angular
                 case "cdlDataFeedImportWorkflow":
                 case "cdlOperationWorkflow":
                 case "metadataChange":
-                case "playLaunchWorkflow": {
+                case "playLaunchWorkflow":
+                case "entityExportWorkflow":{
                     return false;
                 }
                 default: {
@@ -96,7 +98,9 @@ angular
         }
 
         function isExportJob(job) {
-            return job.jobType === "segmentExportWorkflow";
+            return (
+				job.jobType === "segmentExportWorkflow"
+			);
         }
 
         function isOrphanJob(job) {
@@ -191,7 +195,7 @@ angular
             return deferred.promise;
         };
 
-        this.getJobs = function(use_cache, modelId, statusFilter) {
+        this.getJobs = function (use_cache, modelId, statusFilter) {
             JobsStore.loadingJobs = true;
             var deferred = $q.defer(),
                 isModelState = modelId ? true : false,
@@ -283,32 +287,33 @@ angular
             return deferred.promise;
         };
 
-        this.addJob = function(job, modelId) {
+        this.addJob = function (job, modelId) {
             if (modelId) {
                 JobsStore.data.models[modelId].push(job);
             } else {
                 switch (job.jobType) {
-                    case "processAnalyzeWorkflow":
-                        JobsStore.addImportJob(job);
-                        break;
-                    case "segmentExportWorkflow":
-                        JobsStore.addExportJob(job);
-                        break;
-                    case "orphanRecordsExportWorkflow":
-                        JobsStore.addOrphanJob(job);
-                        break;
-                    case "cdlDataFeedImportWorkflow":
-                    case "cdlOperationWorkflow":
-                    case "metadataChange": {
-                        JobsStore.manageSubjobsRunning(job);
-                        break;
-                    }
-                    case "playLaunchWorkflow":
-                        break;
-                    default:
-                        JobsStore.addModelJob(job);
-                        break;
-                }
+					case "processAnalyzeWorkflow":
+						JobsStore.addImportJob(job);
+						break;
+					case "segmentExportWorkflow":
+						JobsStore.addExportJob(job);
+						break;
+					case "orphanRecordsExportWorkflow":
+						JobsStore.addOrphanJob(job);
+						break;
+					case "cdlDataFeedImportWorkflow":
+					case "cdlOperationWorkflow":
+					case "metadataChange": {
+						JobsStore.manageSubjobsRunning(job);
+						break;
+					}
+					case "playLaunchWorkflow":
+					case "entityExportWorkflow":
+						break;
+					default:
+						JobsStore.addModelJob(job);
+						break;
+				}
             }
         };
 
@@ -463,7 +468,8 @@ angular
             }
         };
 
-        this.synchJobs = function(nullIdsMap, retApi) {
+        this.synchJobs = function (nullIdsMap, retApi) {
+            // console.log('Sync', retApi);
             this.jobTypes.forEach(function(type) {
                 var jobsMap = JobsStore.getMap(type);
                 var jobsList = JobsStore.getList(type);
@@ -484,7 +490,8 @@ angular
             });
         };
 
-        this.setJobsByType = function(map, list, type) {
+        this.setJobsByType = function (map, list, type) {
+            console.log('Type ', type);
             if (type == "import") {
                 JobsStore.importJobsMap = map;
                 JobsStore.data.importJobs = list;

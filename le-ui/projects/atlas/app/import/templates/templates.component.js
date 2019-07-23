@@ -3,21 +3,20 @@ import NgState from "../../ng-state";
 
 import ReactRouter from 'atlas/react/router';
 
-import ReactMainContainer from "atlas/react/react-main-container";
 import httpService from "common/app/http/http-service";
+import Observer from "common/app/http/observer";
 import { SUCCESS } from "common/app/http/response";
 
 import { store, injectAsyncReducer } from 'store';
 import { s3actions, s3reducer } from 'atlas/import/s3files/s3files.redux';
+import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
+import messageService from "common/app/utilities/messaging-service";
+import Message, {
+    NOTIFICATION
+} from "common/app/utilities/message";
 
-import TemplatesRowActions, {
-    CREATE_TEMPLATE,
-    VIEW_TEMPLATE,
-    EDIT_TEMPLATE,
-    IMPORT_DATA
-} from "./templates-row-actions";
-import "./templates.scss";
-import Observer from "common/app/http/observer";
+import ReactMainContainer from "atlas/react/react-main-container";
+import TemplatesRowActions from "./templates-row-actions";
 import EditControl from "common/widgets/table/controlls/edit-controls";
 import CopyComponent from "common/widgets/table/controlls/copy-controll";
 import EditorText from "common/widgets/table/editors/editor-text";
@@ -26,16 +25,11 @@ import LeButton from "common/widgets/buttons/le-button";
 import {
     LeToolBar
 } from "common/widgets/toolbar/le-toolbar";
-import "./templates.scss";
-
-import { actions as modalActions } from 'common/widgets/modal/le-modal.redux';
-import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
-import messageService from "common/app/utilities/messaging-service";
-import Message, {
-    NOTIFICATION
-} from "common/app/utilities/message";
-
 import LeTable from "common/widgets/table/table";
+
+import { SMALL_SIZE } from "common/widgets/modal/le-modal.utils";
+
+import "./templates.scss";
 
 export default class TemplatesComponent extends Component {
     constructor(props) {
