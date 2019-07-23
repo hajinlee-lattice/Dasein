@@ -47,7 +47,7 @@ public class SchedulingPAQueueResource {
         return schedulingPAService.getPositionFromQueue(tenantName);
     }
 
-    @RequestMapping(value = "/TriggerSchedulingPA", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/triggerSchedulingPA", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Trigger Scheduling PA")
     @NoMetricsLog
