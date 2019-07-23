@@ -68,7 +68,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
-    private static final String SCHEDULING_PA_FALG_SUFFIX = "_PAFlag";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
 
     private static ObjectMapper om = new ObjectMapper();
@@ -114,11 +113,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
 
-    @Value("${common.le.stack}")
-    private String leStack;
-
     @Override
-    public Map<String, Object> setSystemStatus() {
+    public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
 
         int runningTotalCount = 0;
         int runningScheduleNowCount = 0;
@@ -128,7 +124,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> runningPATenantId = new HashSet<>();
 
         List<TenantActivity> tenantActivityList = new LinkedList<>();
-        String schedulingGroup = getSchedulingGroup();
+        String schedulingGroup = getSchedulingGroup(schedulerName);
         List<DataFeed> allDataFeeds = dataFeedService.getDataFeedsBySchedulingGroup(TenantStatus.ACTIVE, "4.0", schedulingGroup);
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
         String currentBuildNumber = columnMetadataProxy.latestBuildNumber();
@@ -248,28 +244,28 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     @Override
-    public List<SchedulingPAQueue> initQueue() {
-        Map<String, Object> map = setSystemStatus();
+    public List<SchedulingPAQueue> initQueue(@NotNull String schedulerName) {
+        Map<String, Object> map = setSystemStatus(schedulerName);
         SystemStatus systemStatus = (SystemStatus) map.get(SYSTEM_STATUS);
         List<TenantActivity> tenantActivityList = (List<TenantActivity>) map.get(TENANT_ACTIVITY_LIST);
         return initQueue(systemStatus, tenantActivityList);
     }
 
-    public List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
+    private List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
         SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
         return SchedulingPAUtil.initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
     }
 
     @Override
-    public Map<String, Set<String>> getCanRunJobTenantList() {
-        List<SchedulingPAQueue> schedulingPAQueues = initQueue();
+    public Map<String, Set<String>> getCanRunJobTenantList(@NotNull String schedulerName) {
+        List<SchedulingPAQueue> schedulingPAQueues = initQueue(schedulerName);
         GreedyScheduler greedyScheduler = new GreedyScheduler();
         return greedyScheduler.schedule(schedulingPAQueues);
     }
 
     @Override
-    public Map<String, List<String>> showQueue() {
-        List<SchedulingPAQueue> schedulingPAQueues = initQueue();
+    public Map<String, List<String>> showQueue(@NotNull String schedulerName) {
+        List<SchedulingPAQueue> schedulingPAQueues = initQueue(schedulerName);
         Map<String, List<String>> tenantMap = new HashMap<>();
         for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             tenantMap.put(schedulingPAQueue.getQueueName(), schedulingPAQueue.getAll());
@@ -279,9 +275,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     @Override
-    public String getPositionFromQueue(String tenantName) {
-
-        List<SchedulingPAQueue> schedulingPAQueues = initQueue();
+    public String getPositionFromQueue(@NotNull String schedulerName, String tenantName) {
+        List<SchedulingPAQueue> schedulingPAQueues = initQueue(schedulerName);
         for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             int index = schedulingPAQueue.getPosition(tenantName);
             if (index != -1) {
@@ -461,17 +456,17 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return false;
     }
 
-    private String getSchedulingGroup() {
+    private String getSchedulingGroup(String schedulerName) {
         try {
             Camille c = CamilleEnvironment.getCamille();
             String content = c.get(PathBuilder.buildSchedulingGroupPath(CamilleEnvironment.getPodId())).getData();
-            log.info("stack is " + leStack);
+            log.debug("Retrieving scheduling group for scheduler {}", schedulerName);
             Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
                     String.class);
-            return filterDetail(leStack, jsonMap);
+            return filterDetail(schedulerName, jsonMap);
         }catch (Exception e) {
-            log.error("Get json node from zk failed.");
-            return null;
+            log.error("Failed to retrieve scheduling group for scheduler {}, error = {}", schedulerName, e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -480,27 +475,23 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
     }
 
-    private String getSchedulingPAFlag() {
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            String content = c.get(PathBuilder.buildSchedulingPAFlagPath(CamilleEnvironment.getPodId())).getData();
-            log.info("stack is " + leStack);
-            Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
-                    String.class);
-            return filterDetailForSchedulingPAFlag(leStack, jsonMap);
-        }catch (Exception e) {
-            log.error("Get json node from zk failed.");
-            return null;
-        }
-    }
-
-    private static String filterDetailForSchedulingPAFlag(String stackName, Map<String, String> nodes) {
-        String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
-        return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
+    private static String filterDetailForSchedulingPAFlag(String schedulerName, Map<String, String> nodes) {
+        String filterName = schedulerName + SCHEDULING_GROUP_SUFFIX;
+        return nodes.getOrDefault(filterName, "");
     }
 
     @Override
-    public boolean isActivityBasedPA() {
-        return "On".equals(getSchedulingPAFlag());
+    public boolean isSchedulerEnabled(@NotNull String schedulerName) {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String content = c.get(PathBuilder.buildSchedulingPAFlagPath(CamilleEnvironment.getPodId())).getData();
+            Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
+                    String.class);
+            log.debug("Checking whether scheduler [{}] is enabled. SchedulingFlags={}", schedulerName, jsonMap);
+            return "On".equalsIgnoreCase(filterDetailForSchedulingPAFlag(schedulerName, jsonMap));
+        } catch (Exception e) {
+            log.error("Failed to check whether scheduler [{}] is enabled", schedulerName);
+            return false;
+        }
     }
 }
