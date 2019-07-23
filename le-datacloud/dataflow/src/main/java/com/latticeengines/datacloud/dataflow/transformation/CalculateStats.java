@@ -108,7 +108,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         }
         parseProfile(source, profile);
 
-        System.out.println("Overlap Attr Ids: " + overlapBktAttrIds);
+        log.info("Overlap Attr Ids: " + overlapBktAttrIds);
 
         Node count;
         if (dedupFields != null && !dedupFields.isEmpty()) {
