@@ -189,6 +189,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setAudienceName(channelConfig.getAudienceName());
             channelConfig.setAudienceType(channelConfig.getAudienceType());
         }
+        playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
 
         Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
         Long totalAvailableContacts = play.getTargetSegment().getContacts();
