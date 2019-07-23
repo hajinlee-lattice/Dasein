@@ -27,11 +27,11 @@ def checkEnvironment():
         quit(-1)
 
 
-def checkCanTrack(storage, tenant=None):
+def checkCanTrack(tenant=None):
     if not tenant:
         print('Tenant not found.')
         return False
-    elif len(tenant.migrationTrack) > 0:
+    elif len(tenant.migrationTrack):
         print('Tenant already being tracked.')
         return False
     elif len(tenant.metadataDataCollection) != 1:
@@ -40,11 +40,12 @@ def checkCanTrack(storage, tenant=None):
     elif len(tenant.metadataDataCollection[0].metadataDataCollectionTable) <= 0:
         print('No records found for the active data collection of this tenant')
         return False
-    elif len(tenant.metadataStatistics) != 1:
-        print('Tenant must have one statistics record')
+    elif len([stats for stats in tenant.metadataStatistics if
+              tenant.metadataDataCollection[0].version == stats.version]) != 1:
+        print('Tenant must have one statistics record for its active data collection')
         return False
-    elif len(tenant.metadataDataCollectionStatus) != 1:
-        print('Tenant must have one status record')
+    elif len(tenant.metadataDataCollection[0].metadataDataCollectionStatus) != 1:
+        print('Tenant must have one status record for its active data collection')
         return False
     return True
 
@@ -86,10 +87,11 @@ def createTenantTrack(tenant):
     # TODO - If needs to be list of action objects, write model for ACTION object (table)
     track.importAction = {'actions': []}
     if tenant.metadataDataCollectionStatus:
-        track.collectionStatusDetail = tenant.metadataDataCollectionStatus[0].detail
+        track.collectionStatusDetail = tenant.metadataDataCollection[0].metadataDataCollectionStatus[0].detail
     if tenant.metadataStatistics:
-        track.statsCubesData = tenant.metadataStatistics[0].cubesData
-        track.statsName = tenant.metadataStatistics[0].name
+        stats = [stats for stats in tenant.metadataStatistics if tenant.metadataDataCollection[0].version == stats.version][0]
+        track.statsCubesData = stats.cubesData
+        track.statsName = stats.name
     track.save()
     return track
 
@@ -100,7 +102,7 @@ if __name__ == '__main__':
     storage = getStorage(args)
     models.storage = storage
     tenant = storage.getByPid('Tenant', args.tenant)
-    if checkCanTrack(storage, tenant):
+    if checkCanTrack(tenant):
         migrationTrack = createTenantTrack(tenant)
         print('Tenant added to tracking table:\n')
         print(migrationTrack)
