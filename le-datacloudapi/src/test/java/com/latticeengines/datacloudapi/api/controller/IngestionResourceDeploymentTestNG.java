@@ -16,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -53,6 +54,19 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
+    private static final String BOMBORA_INGESTION = "BomboraTest";
+
+    @Value("${datacloud.test.sftp.host}")
+    private String sftpHost;
+
+    @Value("${datacloud.test.sftp.port}")
+    private int sftpPort;
+
+    @Value("${datacloud.test.sftp.username}")
+    private String sftpUserName;
+
+    @Value("${datacloud.test.sftp.password}")
+    private String sftpPassword;
 
     @Inject
     private IngestionEntityMgr ingestionEntityMgr;
@@ -79,7 +93,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     // split into groups, to avoid too many jobs to congest yarn RM
     // IngestionName, Config, IngestionType
-    private static Object[][] getIngestions1() {
+    private Object[][] getIngestions1() {
         return new Object[][] {
                 { ORB_INGESTION,
                         "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss zzz yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=ff7e84da-206c-4fb4-9c4f-b18fc4716e71\",\"FileName\":\"orb-db2-export-sample.zip\"}",
@@ -87,10 +101,12 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         };
     }
 
-    private static Object[][] getIngestions2() {
+    private Object[][] getIngestions2() {
         return new Object[][] {
                 { DNB_INGESTION,
-                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                        String.format(
+                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"%s\",\"SftpPort\":%d,\"SftpUsername\":\"%s\",\"SftpPassword\":\"%s\",\"SftpDir\":\"/ingest_test/IngestionResourceDeploymentTestNG/DnB\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                                sftpHost, sftpPort, sftpUserName, sftpPassword),
                         IngestionType.SFTP },
         };
     }

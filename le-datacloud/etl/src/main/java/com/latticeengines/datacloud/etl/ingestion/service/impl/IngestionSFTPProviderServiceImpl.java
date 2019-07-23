@@ -8,21 +8,22 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.datacloud.etl.utils.SftpUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -37,19 +38,19 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceImpl {
     private static Logger log = LoggerFactory.getLogger(IngestionSFTPProviderServiceImpl.class);
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private IngestionProgressService ingestionProgressService;
 
-    @Autowired
+    @Inject
     private IngestionVersionService ingestionVersionService;
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
-    @Autowired
+    @Inject
     protected JobService jobService;
 
     private static final String TMP_PREFIX = "TMP_";
@@ -88,10 +89,10 @@ public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceIm
 
     @Override
     public List<String> getMissingFiles(Ingestion ingestion) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         List<String> targetFiles = getTargetFiles(ingestion);
         List<String> existingFiles = getExistingFiles(ingestion);
-        Set<String> existingFilesSet = new HashSet<String>(existingFiles);
+        Set<String> existingFilesSet = new HashSet<>(existingFiles);
         for (String targetFile : targetFiles) {
             if (!existingFilesSet.contains(targetFile)) {
                 result.add(targetFile);
@@ -105,9 +106,7 @@ public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceIm
         SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
         String fileNamePattern = config.getFileNamePrefix() + "(.*)" + config.getFileNamePostfix()
                 + config.getFileExtension();
-        List<String> fileNames = SftpUtils.getFileNames(config, fileNamePattern);
-        return ingestionVersionService.getFileNamesOfMostRecentVersions(fileNames, config.getCheckVersion(),
-                config.getCheckStrategy(), config.getFileTimestamp());
+        return SftpUtils.getFileNames(config, fileNamePattern);
     }
 
     private List<String> getExistingFiles(Ingestion ingestion) {
