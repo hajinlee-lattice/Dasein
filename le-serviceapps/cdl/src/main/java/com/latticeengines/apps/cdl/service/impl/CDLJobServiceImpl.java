@@ -155,14 +155,12 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private CDLProxy cdlProxy;
 
-    @VisibleForTesting
-    @Value("${cdl.activity.based.pa}")
-    boolean isActivityBasedPA;
-
     @Value("${cdl.app.public.url:https://localhost:9081}")
     private String appPublicUrl;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    public boolean isActivityBasedPA;
 
     @PostConstruct
     public void init() {
@@ -173,6 +171,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         };
         EXPORT_APPID_MAP = new LinkedHashMap<>();
+        isActivityBasedPA = schedulingPAService.isActivityBasedPA();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");

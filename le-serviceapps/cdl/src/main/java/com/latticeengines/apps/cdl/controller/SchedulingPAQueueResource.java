@@ -56,4 +56,13 @@ public class SchedulingPAQueueResource {
         cdlJobService.schedulePAJob();
     }
 
+    @RequestMapping(value = "/isActivityBasedPA", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "get ActivityBasedPA Flag")
+    @NoMetricsLog
+    @NoCustomerSpace
+    public Boolean isActivityBasedPA() {
+        return schedulingPAService.isActivityBasedPA();
+    }
+
 }
