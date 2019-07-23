@@ -72,7 +72,7 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
             }
             Assert.assertTrue(attrCnt >= 0);
             if (ATTR_DATE_1.equals(attrName)) {
-                Assert.assertEquals(attrCnt, 17);
+                Assert.assertEquals(attrCnt, 5);
             } else {
                 Assert.assertTrue(attrCnt <= 5);
             }

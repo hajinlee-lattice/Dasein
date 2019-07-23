@@ -35,7 +35,6 @@ public class EMRScalingRunnable implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
-    private static final int MAX_TASK_CORE_RATIO = 3;
     private static final int MAX_SCALE_IN_SIZE = 8;
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
@@ -73,6 +72,7 @@ public class EMRScalingRunnable implements Runnable {
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
     private final int minTaskNodes;
+    private final int maxTaskCoreRatio;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
 
@@ -81,10 +81,11 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceFleet taskFleet;
     private InstanceFleet coreFleet;
 
-    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, EMRService emrService, //
-                       EMREnvService emrEnvService) {
+    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, int maxTaskCoreRatio, //
+                       EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
         this.minTaskNodes = minTaskNodes;
+        this.maxTaskCoreRatio = maxTaskCoreRatio;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
         this.clusterId = clusterId;
@@ -356,7 +357,7 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private int getMaxTaskNodes() {
-        return getCoreCount() * MAX_TASK_CORE_RATIO;
+        return getCoreCount() * maxTaskCoreRatio;
     }
 
     private int getCoreCount() {

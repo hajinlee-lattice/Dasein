@@ -250,6 +250,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (ratingEngine != null) {
             counts = updateRatingCount(ratingEngine);
             log.info("Updated counts for rating engine " + engineId + " to " + JsonUtils.serialize(counts));
+        } else {
+            log.warn("Cannot find engine with id " + engineId);
         }
         return counts;
     }

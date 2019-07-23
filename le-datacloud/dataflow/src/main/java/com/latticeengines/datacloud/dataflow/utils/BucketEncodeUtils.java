@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.metadata.Extract;
 
 public class BucketEncodeUtils {
@@ -158,6 +159,21 @@ public class BucketEncodeUtils {
             return attr;
         }
         throw new IllegalArgumentException("This record cannot be parsed to a bucked attr: " + record);
+    }
+
+    // find attrs need to use max bkt as total count, instead of summing bkt counts
+    public static List<String> overlapBktAttrs(List<GenericRecord> records) {
+        List<String> attrs = new ArrayList<>();
+        for (GenericRecord record: records) {
+            if (record.get(PROFILE_ATTR_BKTALGO) != null) {
+                BucketAlgorithm algorithm = JsonUtils.deserialize(record.get(PROFILE_ATTR_BKTALGO).toString(), //
+                        BucketAlgorithm.class);
+                if (algorithm instanceof DateBucket) {
+                    attrs.add(record.get(PROFILE_ATTR_ATTRNAME).toString());
+                }
+            }
+        }
+        return attrs;
     }
 
 }

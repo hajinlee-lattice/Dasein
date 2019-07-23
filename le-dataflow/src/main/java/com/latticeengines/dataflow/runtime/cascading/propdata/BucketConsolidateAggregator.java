@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,18 +19,22 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
         implements Aggregator<BucketConsolidateAggregator.Context> {
 
     private static final long serialVersionUID = -4558848041315363629L;
+    private final String attrIdField;
     private final String bktIdField;
     private final String bktCntField;
     private final List<String> grpByFields;
     private Integer bktIdArgPos;
     private Integer bktCntArgPos;
+    private Set<Integer> overlapBktAttrIds;
     // grpFields + bktsField + cntField
-    public BucketConsolidateAggregator(List<String> grpByFields, String bktIdField,
-            String bktCntField, String cntField, String bktsField) {
+    public BucketConsolidateAggregator(List<String> grpByFields, String attrIdField, String bktIdField,
+            String bktCntField, String cntField, String bktsField, Set<Integer> overlapBktAttrIds) {
         super(generateFieldDeclaration(grpByFields, cntField, bktsField));
         this.grpByFields = grpByFields;
         this.bktIdField = bktIdField;
         this.bktCntField = bktCntField;
+        this.attrIdField = attrIdField;
+        this.overlapBktAttrIds = overlapBktAttrIds;
     }
 
     private static Fields generateFieldDeclaration(List<String> grpByFields, String cntField,
@@ -68,6 +73,9 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
         Context context = new Context();
         for (String grpField : grpByFields) {
             context.result.add(group.getObject(grpField));
+            if (attrIdField.equals(grpField)) {
+                context.attrId = (int) group.getObject(grpField);
+            }
         }
         return context;
     }
@@ -87,10 +95,16 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
     @Override
     protected Tuple finalizeContext(Context context) {
         String serialized = serializeBktCnts(context.bktCounts);
-        context.bktCounts.clear();
         Tuple result = context.result;
-        result.add(context.count);
+        if (StringUtils.isNotBlank(attrIdField) && context.attrId >= 0 //
+                && overlapBktAttrIds.contains(context.attrId)) {
+            long maxBkt = context.bktCounts.values().stream().max(Long::compareTo).orElse(0L);
+            result.add(maxBkt);
+        } else {
+            result.add(context.count);
+        }
         result.add(serialized);
+        context.bktCounts.clear();
         return result;
     }
 
@@ -104,6 +118,7 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
 
     public static class Context extends BaseAggregator.Context {
         Map<Integer, Long> bktCounts = new HashMap<>();
+        int attrId = -1;
         long count = 0L;
         Tuple result = new Tuple();
     }

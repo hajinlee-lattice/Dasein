@@ -44,7 +44,9 @@ public enum CacheName {
     }
 
     public static CacheName[] getCdlLocalCacheGroup() {
-        return new CacheName[] { TimeTranslatorCache };
+        return new CacheName[] {
+                AttrRepoCache, //
+                TimeTranslatorCache };
     }
 
     public String getName() {
