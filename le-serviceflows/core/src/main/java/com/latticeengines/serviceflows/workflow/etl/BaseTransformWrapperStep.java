@@ -222,6 +222,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024));
+        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
@@ -236,6 +237,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * extraHeavyMultiplier));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * extraHeavyMultiplier));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * extraHeavyMultiplier));
+        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
