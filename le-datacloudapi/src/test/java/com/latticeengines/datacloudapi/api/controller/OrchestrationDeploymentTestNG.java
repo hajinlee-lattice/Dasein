@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -53,18 +52,6 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private static final String DNBRAW_TRANSFORMATION = "DnBCacheSeedRawPipeline";
     private static final String DNB_VERSION = "2017-01-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2017_01_052.OUT.gz";
-
-    @Value("${datacloud.test.sftp.host}")
-    private String sftpHost;
-
-    @Value("${datacloud.test.sftp.port}")
-    private int sftpPort;
-
-    @Value("${datacloud.test.sftp.username}")
-    private String sftpUserName;
-
-    @Value("${datacloud.test.sftp.password}")
-    private String sftpPassword;
 
     @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;
