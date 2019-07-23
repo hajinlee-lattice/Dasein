@@ -174,24 +174,14 @@ public class ActivityMetricsUtils {
     }
 
     /**
-     * Check whether it is activity metrics attr
-     *
-     * @param fullName
-     * @return
-     */
-    public static boolean isActivityMetricsAttr(String fullName) {
-        return StringUtils.isNotBlank(fullName) && fullName.startsWith(HEADER);
-    }
-
-    /**
      * Check whether it is HasPurchase attr
      *
      * @param fullName
      * @return
      */
     public static boolean isHasPurchasedAttr(String fullName) {
-        return StringUtils.isNotBlank(fullName) && fullName.startsWith(HEADER)
-                && fullName.endsWith(SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
+        return StringUtils.isNotBlank(fullName) && fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
     }
 
     /**
@@ -201,8 +191,8 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static boolean isSpendChangeAttr(String fullName) {
-        return fullName.startsWith(HEADER)
-                && fullName.endsWith(SEPARATOR + ActivityMetricsUtils.getSpendChangeAbbr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAbbr());
     }
 
     /**
@@ -212,7 +202,8 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static boolean isTotalSpendAttr(String fullName) {
-        return fullName.startsWith(HEADER) && fullName.endsWith(SEPARATOR + ActivityMetricsUtils.getTotalSpendAbbr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getTotalSpendAbbr());
     }
 
     /**
@@ -222,7 +213,8 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static boolean isAvgSpendAttr(String fullName) {
-        return fullName.startsWith(HEADER) && fullName.endsWith(SEPARATOR + ActivityMetricsUtils.getAvgSpendAbbr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getAvgSpendAbbr());
     }
 
     /**
