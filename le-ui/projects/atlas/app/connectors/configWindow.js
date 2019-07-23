@@ -30,6 +30,7 @@ export const openConfigWindow = () => {
 
     // Listen to popup messages
     let configFinished = false;
+    let lookupIdMapRegistered = false;
     const onmessage = e => {
         if (e.data.type === 'tray.configPopup.error') {
             // Handle popup error message
@@ -149,14 +150,17 @@ export const openConfigWindow = () => {
     function registerLookupIdMap(trayAuthenticationId, trayAuthenticationName) {
         let observer = new Observer(
             response => {
-                if (response.data && response.data.name) {
+                console.log('response', response.data);
+                if (response.data && response.data.configId) {
                     httpService.unsubscribeObservable(observer);
+                    lookupIdMapRegistered = true;
+                    console.log("Set lookupIdMapRegistered as true");
                 } else {
                     console.log("response", response);
                 }
             },
             error => {
-                console.error('Error registering lookupIdMap ', error);
+                console.error('Error registering lookupIdMap ', error ? error : '');
             }
         );
 
@@ -175,7 +179,11 @@ export const openConfigWindow = () => {
 
         console.log(JSON.stringify(lookupIdMap));
 
-        httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
+        if (lookupIdMapRegistered == false) {
+            httpService.post('/pls/lookup-id-mapping/register', lookupIdMap, observer);
+        } else {
+            console.error('Prevent duplicate lookupIdMaps ', lookupIdMap);
+        }
     }
 
     function constructExportFieldMappings() {
