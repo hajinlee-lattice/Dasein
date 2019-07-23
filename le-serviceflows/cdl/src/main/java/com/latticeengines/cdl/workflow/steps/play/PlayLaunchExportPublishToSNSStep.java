@@ -114,17 +114,17 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
      * @return {@link Map} with the files from S3
      */
     private Map<String, List<ExportFileConfig>> getFiles(String key, List<String> s3ExportFilePaths) {
-        Map<String, List<ExportFileConfig>> sourceFiles = new HashMap<>();
+        Map<String, List<ExportFileConfig>> retFiles = new HashMap<>();
         s3ExportFilePaths = super.getListObjectFromContext(key, String.class);
         s3ExportFilePaths.forEach(exportPath -> {
-            List<ExportFileConfig> fileConfigs = sourceFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
+            List<ExportFileConfig> fileConfigs = retFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
                     new ArrayList<>());
             fileConfigs
                     .add(new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")), exportS3Bucket));
-            sourceFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
+            retFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
         });
 
-        return sourceFiles;
+        return retFiles;
     }
 
     @VisibleForTesting
