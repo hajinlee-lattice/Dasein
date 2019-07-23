@@ -77,7 +77,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     @Override
     public Pair<Integer, List<PatchBookValidationError>> validate(
             @NotNull PatchBook.Type type, @NotNull String dataCloudVersion, @NotNull List<PatchBook> books) {
-        // Preconditions.checkNotNull(books);
+        Preconditions.checkNotNull(books);
         Preconditions.checkNotNull(type);
         if (books.isEmpty()) {
             return Pair.of(0, Collections.emptyList());

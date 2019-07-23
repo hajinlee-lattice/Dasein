@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
@@ -59,23 +60,14 @@ public class PatchBookDaoImpl
                 getEntityClass().getSimpleName(),
                 type.name());
         Query<?> minMaxPidQuery = session.createQuery(minMaxPidQueryStr);
-        Boolean emptyList = false;
         Map<String, Long> result = new HashMap<>();
-        if (minMaxPidQuery.list().size() > 0) {
+        if (CollectionUtils.isNotEmpty(minMaxPidQuery.list())) {
             Map<String, Long> minMaxPid = (Map<String, Long>) minMaxPidQuery.list().get(0);
-            if (minMaxPid == null
-                    || (minMaxPid.get(MIN_PID) == null && minMaxPid.get(MAX_PID) == null)) {
-                emptyList = true;
-            } else {
                 result.put(MIN_PID, minMaxPid.get(MIN_PID));
                 result.put(MAX_PID, minMaxPid.get(MAX_PID));
-            }
         } else {
-            emptyList = true;
-        }
-        if (emptyList) {
-            result.put(MIN_PID, Long.valueOf(0));
-            result.put(MAX_PID, Long.valueOf(0));
+            result.put(MIN_PID, 0L);
+            result.put(MAX_PID, 0L);
         }
         return result;
     }
