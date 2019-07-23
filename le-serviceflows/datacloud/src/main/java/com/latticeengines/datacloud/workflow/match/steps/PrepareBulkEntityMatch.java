@@ -59,28 +59,35 @@ public class PrepareBulkEntityMatch extends BaseWorkflowStep<PrepareBulkEntityMa
             return;
         }
 
-        config.getSrcTestFilePath().forEach(path -> copy(path, config));
+        // make sure dest dir is there
+        String destDir = config.getDestTestDirectory();
+        try {
+            // cleanup dest directory
+            if (HdfsUtils.fileExists(yarnConfiguration, destDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, destDir);
+            }
+            HdfsUtils.mkdir(yarnConfiguration, destDir);
+        } catch (IOException e) {
+            log.error("Failed to ensure destination dir {} is there, error = {}", destDir, e);
+            throw new RuntimeException(e);
+        }
+
+        config.getSrcTestFilePath().forEach(path -> copy(destDir, path, config));
     }
 
     /*
      * copy test input file from S3 to HDFS
      */
-    private void copy(@NotNull String srcPath, @NotNull PrepareBulkEntityMatchConfiguration config) {
+    private void copy(@NotNull String destDir, @NotNull String srcPath,
+            @NotNull PrepareBulkEntityMatchConfiguration config) {
         // TODO use distcp or other s3 connector if the file is too large
         try {
-            // cleanup dest directory
-            String destDir = config.getDestTestDirectory();
-            if (HdfsUtils.fileExists(yarnConfiguration, destDir)) {
-                HdfsUtils.rmdir(yarnConfiguration, destDir);
-            }
-            HdfsUtils.mkdir(yarnConfiguration, destDir);
-
             InputStream is = s3Service.readObjectAsStream(config.getSrcBucket(), srcPath);
             // get the file name from source test file and use it as the file name in dest dir
             String destFilePath = FilenameUtils.concat(destDir, FilenameUtils.getName(srcPath));
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, destFilePath);
-            log.info("Test file is copied from S3 (bucket={}, file={}) to dest directory ({})", config.getSrcBucket(),
-                    config.getSrcTestFilePath(), config.getDestTestDirectory());
+            log.info("Test file is copied from S3 (bucket={}, file={}) to dest ({})", config.getSrcBucket(), srcPath,
+                    destFilePath);
         } catch (IOException e) {
             log.error("Failed to copy test file from S3 (bucket={}, file={}) to dest directory ({}), error = {}",
                     config.getSrcBucket(), config.getSrcTestFilePath(), config.getDestTestDirectory(), e);
