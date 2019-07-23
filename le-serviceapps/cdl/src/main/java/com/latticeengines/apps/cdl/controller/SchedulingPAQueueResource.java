@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
@@ -25,6 +26,8 @@ public class SchedulingPAQueueResource {
 
     @Inject
     private SchedulingPAService schedulingPAService;
+    @Inject
+    private CDLJobService cdlJobService;
 
     @RequestMapping(value = "/getQueueInfo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -42,6 +45,15 @@ public class SchedulingPAQueueResource {
     @NoCustomerSpace
     public String getPosition(@RequestParam String tenantName) {
         return schedulingPAService.getPositionFromQueue(tenantName);
+    }
+
+    @RequestMapping(value = "/triggerSchedulingPA", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Trigger Scheduling PA")
+    @NoMetricsLog
+    @NoCustomerSpace
+    public void triggerSchedulingPA() {
+        cdlJobService.schedulePAJob();
     }
 
 }
