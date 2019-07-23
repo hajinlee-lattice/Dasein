@@ -210,7 +210,8 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         if (minAllocationInMb < 1536) {
             return 1024;
         }
-        return minAllocationInMb - 512 * (IntMath.log2(minAllocationInMb, RoundingMode.CEILING) - 10);
+        int count = minAllocationInMb > 16384 ? 8 : 10;
+        return minAllocationInMb - 512 * (IntMath.log2(minAllocationInMb, RoundingMode.CEILING) - count);
     }
 
     @Override
