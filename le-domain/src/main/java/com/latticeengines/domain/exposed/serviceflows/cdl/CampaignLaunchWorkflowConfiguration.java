@@ -55,6 +55,7 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
             exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
             exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
+            exportPublishToSNSConf.setChannelConfig(playLaunch.getChannelConfig());
             return this;
         }
 
