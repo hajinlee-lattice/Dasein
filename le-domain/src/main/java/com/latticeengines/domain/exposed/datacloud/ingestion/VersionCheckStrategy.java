@@ -1,5 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.ingestion;
 
-public enum FileCheckStrategy {
+public enum VersionCheckStrategy {
     DAY, WEEK, MONTH, ALL
 }

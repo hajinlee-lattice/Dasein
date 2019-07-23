@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,8 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 
 @Component("ingestionProgressService")
 public class IngestionProgressServiceImpl implements IngestionProgressService {
+
+    private static final Logger log = LoggerFactory.getLogger(IngestionProgressServiceImpl.class);
 
 
     @Autowired
@@ -79,14 +83,14 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         return progress;
     }
 
-    private void inflateProgress(IngestionProgress progress, Ingestion ingestion, String fileName, String version) {
+    private void inflateProgress(IngestionProgress progress, Ingestion ingestion, String file, String version) {
         com.latticeengines.domain.exposed.camille.Path ingestionDir = hdfsPathBuilder
                 .constructIngestionDir(ingestion.getIngestionName());
         switch (ingestion.getIngestionType()) {
         case SFTP:
             SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
-            Path fileSource = new Path(sftpConfig.getSftpDir(), fileName);
-            progress.setSource(fileSource.toString());
+            String fileName = new Path(file).getName();
+            progress.setSource(new Path(sftpConfig.getSftpDir(), file).toString());
             // Arbitrary set version will not be respected
             progress.setVersion(ingestionVersionService.extractVersion(sftpConfig.getFileTimestamp(), fileName));
             progress.setDestination(ingestionDir.append(progress.getVersion()).append(fileName).toString());
@@ -108,7 +112,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             } else {
                 progress.setVersion(version);
             }
-            progress.setDestination(ingestionDir.append(progress.getVersion()).append(fileName).toString());
+            progress.setDestination(ingestionDir.append(progress.getVersion()).append(file).toString());
             break;
         case SQL_TO_SOURCE:
             SqlToSourceConfiguration sqlToSourceConfig = (SqlToSourceConfiguration) ingestion
@@ -126,7 +130,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             S3Configuration s3Configuration = (S3Configuration) ingestion.getProviderConfiguration();
             String bucket = s3Configuration.getBucket();
             S3Destination destination = new S3Destination();
-            destination.setSourceName(fileName);
+            destination.setSourceName(file);
             destination.setSourceVersion(version);
             if (StringUtils.isNotBlank(bucket) && !defaultBucket.equalsIgnoreCase(bucket)) {
                 destination.setS3Bucket(bucket);
@@ -139,7 +143,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
                 throw new IllegalArgumentException("Serialized destination config is longer than 1000 chars: " + destStr);
             }
             progress.setDestination(destStr);
-            progress.setSource(fileName);
+            progress.setSource(file);
             progress.setVersion(version);
             break;
         case BW_RAW:
@@ -147,7 +151,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             dest.setPath("/bwtest/test/test/test");
             String destSer = JsonUtils.serialize(dest);
             progress.setDestination(destSer);
-            progress.setSource(fileName);
+            progress.setSource(file);
             progress.setVersion(version);
             break;
         case PATCH_BOOK:

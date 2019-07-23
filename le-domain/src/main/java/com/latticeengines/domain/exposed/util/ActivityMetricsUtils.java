@@ -191,8 +191,8 @@ public class ActivityMetricsUtils {
      * @return
      */
     public static boolean isSpendChangeAttr(String fullName) {
-        return fullName.startsWith(ActivityMetricsUtils.HEADER) && fullName.endsWith(
-                ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAbbr());
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAbbr());
     }
 
     /**

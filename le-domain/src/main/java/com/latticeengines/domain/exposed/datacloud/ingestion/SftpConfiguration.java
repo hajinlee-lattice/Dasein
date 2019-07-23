@@ -1,118 +1,145 @@
 package com.latticeengines.domain.exposed.datacloud.ingestion;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SftpConfiguration extends ProviderConfiguration {
 
-    protected String sftpHost;
-    protected Integer sftpPort;
-    protected String sftpUserName;
-    protected String sftpPasswordEncrypted;
-    protected String sftpDir;
-    protected FileCheckStrategy checkStrategy;
-    protected String fileExtension;
-    protected String fileNamePrefix;
-    protected String fileNamePostfix;
-    protected String fileTimestamp;
-
     @JsonProperty("SftpHost")
+    private String sftpHost;
+
+    @JsonProperty("SftpPort")
+    private Integer sftpPort;
+
+    @JsonProperty("SftpUsername")
+    private String sftpUserName;
+
+    @JsonProperty("SftpPassword")
+    private String sftpPasswordEncrypted;
+
+    @JsonProperty("SftpDir")
+    private String sftpDir;
+
+    @JsonProperty("CheckStrategy")
+    private VersionCheckStrategy checkStrategy;
+
+    @JsonProperty("FileExtension")
+    private String fileExtension;
+
+    @JsonProperty("FileNamePrefix")
+    private String fileNamePrefix;
+
+    @JsonProperty("FileNamePostfix")
+    private String fileNamePostfix;
+
+    @JsonProperty("FileTimestamp")
+    private String fileTimestamp;
+
+    // whether different versions of files are separate sub-folders under
+    // sftpDir
+    @JsonProperty("HasSubFolder")
+    private boolean hasSubFolder;
+
+    // timestamp pattern in sub-folder name
+    @JsonProperty("SubFolderTSPattern")
+    private String subFolderTSPattern;
+
     public String getSftpHost() {
         return sftpHost;
     }
 
-    @JsonProperty("SftpHost")
     public void setSftpHost(String sftpHost) {
         this.sftpHost = sftpHost;
     }
 
-    @JsonProperty("SftpPort")
     public Integer getSftpPort() {
         return sftpPort;
     }
 
-    @JsonProperty("SftpPort")
     public void setSftpPort(Integer sftpPort) {
         this.sftpPort = sftpPort;
     }
 
-    @JsonProperty("SftpUsername")
     public String getSftpUserName() {
         return sftpUserName;
     }
 
-    @JsonProperty("SftpUsername")
     public void setSftpUserName(String sftpUserName) {
         this.sftpUserName = sftpUserName;
     }
 
-    @JsonProperty("SftpPassword")
     public String getSftpPasswordEncrypted() {
         return sftpPasswordEncrypted;
     }
 
-    @JsonProperty("SftpPassword")
     public void setSftpPasswordEncrypted(String sftpPasswordEncrypted) {
         this.sftpPasswordEncrypted = sftpPasswordEncrypted;
     }
 
-    @JsonProperty("SftpDir")
     public String getSftpDir() {
-        return sftpDir;
+        return sftpDir == null ? "" : sftpDir;
     }
 
-    @JsonProperty("SftpDir")
     public void setSftpDir(String sftpDir) {
         this.sftpDir = sftpDir;
     }
 
-    @JsonProperty("CheckStrategy")
-    public FileCheckStrategy getCheckStrategy() {
+    public VersionCheckStrategy getCheckStrategy() {
         return checkStrategy;
     }
 
-    @JsonProperty("CheckStrategy")
-    public void setCheckStrategy(FileCheckStrategy checkStrategy) {
+    public void setCheckStrategy(VersionCheckStrategy checkStrategy) {
         this.checkStrategy = checkStrategy;
     }
 
-    @JsonProperty("FileExtension")
     public String getFileExtension() {
         return fileExtension;
     }
 
-    @JsonProperty("FileExtension")
     public void setFileExtension(String fileExtension) {
         this.fileExtension = fileExtension;
     }
 
-    @JsonProperty("FileNamePrefix")
     public String getFileNamePrefix() {
         return fileNamePrefix;
     }
 
-    @JsonProperty("FileNamePrefix")
     public void setFileNamePrefix(String fileNamePrefix) {
         this.fileNamePrefix = fileNamePrefix;
     }
 
-    @JsonProperty("FileNamePostfix")
     public String getFileNamePostfix() {
         return fileNamePostfix;
     }
 
-    @JsonProperty("FileNamePostfix")
     public void setFileNamePostfix(String fileNamePostfix) {
         this.fileNamePostfix = fileNamePostfix;
     }
 
-    @JsonProperty("FileTimestamp")
     public String getFileTimestamp() {
         return fileTimestamp;
     }
 
-    @JsonProperty("FileTimestamp")
     public void setFileTimestamp(String fileTimestamp) {
         this.fileTimestamp = fileTimestamp;
     }
 
+    public boolean hasSubFolder() {
+        return hasSubFolder;
+    }
+
+    public void setHasSubFolder(boolean hasSubFolder) {
+        this.hasSubFolder = hasSubFolder;
+    }
+
+    public String getSubFolderTSPattern() {
+        return subFolderTSPattern;
+    }
+
+    public void setSubFolderTSPattern(String subFolderTSPattern) {
+        this.subFolderTSPattern = subFolderTSPattern;
+    }
 }
