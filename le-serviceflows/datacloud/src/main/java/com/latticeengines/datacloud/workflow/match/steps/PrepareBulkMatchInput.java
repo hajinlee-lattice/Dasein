@@ -371,6 +371,11 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 throw new RuntimeException(e);
             }
             log.info("Uploaded " + localFile + " to " + targetFile);
+            try {
+                FileUtils.deleteQuietly(new File(localFile));
+            } catch (Exception e) {
+                log.warn("Failed to clean up local file " + localFile);
+            }
             return 0;
         });
     }
