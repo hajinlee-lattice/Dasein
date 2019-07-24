@@ -148,6 +148,8 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
                     round.forEach(this::extractOneContainer);
                 }
                 return true;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to extract ratings from all containers: ", e);
             } finally {
                 stopSparkSQLSession();
             }

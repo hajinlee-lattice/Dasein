@@ -1,7 +1,5 @@
 package com.latticeengines.objectapi.service;
 
-import java.util.Map;
-
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -22,7 +20,4 @@ public interface EventQueryService {
     DataPage getEventTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
 
     String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, Version version);
-
-    Map<String, String> getSplitedSparkSQLQueries(EventFrontEndQuery frontEndQuery, EventType eventType, //
-                                                   DataCollection.Version version);
 }
