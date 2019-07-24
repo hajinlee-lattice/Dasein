@@ -6,7 +6,7 @@ var CONST = {
     USER_ID: 'USER_ID',
     USER_DOCUMENT: 'USER_DOCUMENT',
     AUTH_CODE: 'AUTHORIZATION_CODE',
-    MARKETO_ENABLED: 'MARKETO_ENABLED'
+    EXTERNAL_INTEGRATION_ENABLED: 'EXTERNAL_INTEGRATION_ENABLED'
 };
 const initialState = {
     templates: []
@@ -44,11 +44,11 @@ export const actions = {
          authorizationCode: authorizationCode
         });
     },
-    setMarketoEnabled: (isMarketoEnabled) => {
-        console.log(isMarketoEnabled);
+    setExternalIntegrationEnabled: (isExternalIntegrationEnabled) => {
+        console.log(isExternalIntegrationEnabled);
         return store.dispatch({
-            type: CONST.MARKETO_ENABLED,
-            isMarketoEnabled: isMarketoEnabled
+            type: CONST.EXTERNAL_INTEGRATION_ENABLED,
+            isExternalIntegrationEnabled: isExternalIntegrationEnabled
         });
     }
 };
@@ -61,8 +61,8 @@ export const reducer = (state = {}, action) => {
             return Object.assign({}, state, { userName: action.userName, userId: action.userId, accessToken: action.accessToken });
         case CONST.USER_ID:
             return Object.assign({}, state, { userId: action.userId });
-        case CONST.MARKETO_ENABLED:
-            return Object.assign({}, state, { isMarketoEnabled: action.isMarketoEnabled });
+        case CONST.EXTERNAL_INTEGRATION_ENABLED:
+            return Object.assign({}, state, { isExternalIntegrationEnabled: action.isExternalIntegrationEnabled });
         default:
             return state;
     }

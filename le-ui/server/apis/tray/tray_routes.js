@@ -254,27 +254,14 @@ class TrayRouter {
                     return;
                 }
                 let solutionInfo = GraphQLParser.getSolutionInfo(body.data);
+                if (!solutionInfo) {
+                    res.send(UIActionsFactory.getUIActionsObject('Could not find solution with tag ' + req.query.tag, 'Notice', 'Error'));
+                    return;
+                }
                 req.solutionId = solutionInfo.id;
-                console.log("SOLUTIONID: " + req.solutionId);
-
+                console.log("Solution to instantiate: " + req.solutionId);
                 next();
             });
-        }.bind(this), function(req, res, next) {
-            /*
-                Get S3 Authorization
-            */
-            // let options = this.getApiOptions(req);
-            // options.json = Queries.getAuthentications();
-            // this.request(options, function(error, response, body){
-            //     if (error || !body.data) {
-            //         res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));
-            //         return;
-            //     }
-            //     let awsAuthenticationId = GraphQLParser.getAwsAuthenticationId(body.data);
-            //     req.awsAuthenticationId = awsAuthenticationId;
-            //     next();
-            // });
-            next();
         }.bind(this), function(req, res, next) {
             /*
                 Get solution instance id
@@ -282,7 +269,6 @@ class TrayRouter {
             let instanceName = req.query.instanceName;
             let solutionId = req.solutionId;
             let options = this.getApiOptions(req, true);
-            // options.json = Queries.getCreateSolutionInstanceMutation(solutionId, instanceName, {externalId: "external_aws_s3_authentication", authId: req.awsAuthenticationId});
             options.json = Queries.getCreateSolutionInstanceMutation(solutionId, instanceName);
             this.request(options, function(error, response, body){
                 if (error || !body.data) {
