@@ -1,12 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
-import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -164,21 +159,6 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     @Override
     public String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, DataCollection.Version version) {
         return getQueryStr(frontEndQuery, eventType, version, getBatchUser());
-    }
-
-    @Override
-    public Map<String, String> getSplitedSparkSQLQueries(EventFrontEndQuery frontEndQuery, EventType eventType, //
-                                                          DataCollection.Version version) {
-        String fullSql = getQueryStr(frontEndQuery, eventType, version, SPARK_BATCH_USER);
-        Pattern pattern = Pattern.compile("with (<?name>\\w+).*as\\((<?sql>select.*from.*)\\)");
-        Matcher matcher = pattern.matcher(fullSql);
-        while (matcher.find()) {
-            String viewName = matcher.group("name");
-            String viewSql = matcher.group("sql");
-            System.out.println("name=" + viewName);
-            System.out.println("sql=" + viewSql);
-        }
-        return new HashMap<>();
     }
 
 }

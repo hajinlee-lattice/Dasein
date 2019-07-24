@@ -2,7 +2,9 @@ package com.latticeengines.objectapi.service.impl;
 
 import static com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor.SPARK_TEST_GROUP;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,16 +170,20 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Test(groups = "functional")
     public void testSparkSQLQuery() {
-        EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource("prior.json");
-        frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
-        String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, //
-                DataCollection.Version.Blue);
-        System.out.println(sql);
-
-//        frontEndQuery = loadEventFrontEndQueryFromResource("fisher2.json");
-//        frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
-//        sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, DataCollection.Version.Blue);
-//        System.out.println(sql);
+        List<String> queryFiles = Arrays.asList(
+                "fisher.json",
+                "prior.json",
+                "prior2.json"
+        );
+        for (String fileName: queryFiles) {
+            EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource(fileName);
+            frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
+            String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, //
+                    DataCollection.Version.Blue);
+            System.out.println("========== " + fileName + " ==========");
+            System.out.println(sql);
+            System.out.println("========== " + fileName + " ==========");
+        }
     }
 
     private long countTxnBktForScoring(String sqlUser, Bucket.Transaction txn) {

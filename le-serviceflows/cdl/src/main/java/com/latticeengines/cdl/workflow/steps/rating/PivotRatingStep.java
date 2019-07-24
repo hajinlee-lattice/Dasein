@@ -81,7 +81,8 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String resultTableName = NamingUtils.timestamp("PivotedRating");
+        String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
+        String resultTableName = tenantId + "_" + NamingUtils.timestamp("PivotedRating");
         String pk = InterfaceName.AccountId.name();
         Table resultTable = toTable(resultTableName, pk, result.getTargets().get(0));
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);

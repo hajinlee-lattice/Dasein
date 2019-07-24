@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,21 +35,21 @@ public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private EntityQueryService entityQueryService;
 
-    @BeforeClass(groups = { "functional", "manual" })
+    @BeforeClass(groups = { "manual" })
     public void setup() {
         super.setupTestData(4);
     }
 
     @Test(groups = "manual")
     public void testMaxViaFrontEndQuery() {
-        Set<AttributeLookup> set = new HashSet<>();
         AttributeLookup accout_2 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate1);
         AttributeLookup accout_3 = new AttributeLookup(BusinessEntity.Account, AccountAttr.TestDate2);
         AttributeLookup contact_1 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate1);
         AttributeLookup contact_2 = new AttributeLookup(BusinessEntity.Contact, ContactAttr.TestDate2);
-        set.addAll(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
+        Set<AttributeLookup> set = new HashSet<>(Arrays.asList(accout_2, accout_3, contact_1, contact_2));
         Map<AttributeLookup, Object> results = ReflectionTestUtils.invokeMethod(entityQueryService, //
                 "getMaxDatesViaFrontEndQuery", set, attrRepo);
+        Assert.assertNotNull(results);
         results.forEach((k, v) -> System.out.println(k + ": " + v));
     }
 
