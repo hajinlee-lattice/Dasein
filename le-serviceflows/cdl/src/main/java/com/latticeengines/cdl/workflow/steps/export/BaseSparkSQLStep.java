@@ -37,7 +37,9 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.service.RatingQueryService;
+import com.latticeengines.objectapi.service.sparksql.impl.EntityQueryServiceSparkSQLImpl;
 import com.latticeengines.objectapi.service.sparksql.impl.EventQueryServiceSparkSQLImpl;
+import com.latticeengines.objectapi.service.sparksql.impl.RatingQueryServiceSparkSQLImpl;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.service.SparkSQLService;
@@ -60,10 +62,10 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     @Inject
     private LivySessionService livySessionService;
 
-    @Inject
+    @Resource(name = "entityQueryServiceSparkSQL")
     private EntityQueryService entityQueryService;
 
-    @Inject
+    @Resource(name = "ratingQueryServiceSparkSQL")
     private RatingQueryService ratingQueryService;
 
     @Resource(name = "eventQueryServiceSparkSQL")
@@ -111,6 +113,8 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         livySession = sparkSQLService.initializeLivySession(QueryServiceUtils.getAttrRepo(), hdfsPathMap, //
                 scalingMultiplier, storageLevel, getClass().getSimpleName());
         ((EventQueryServiceSparkSQLImpl) eventQueryService).setLivySession(livySession);
+        ((EntityQueryServiceSparkSQLImpl) entityQueryService).setLivySession(livySession);
+        ((RatingQueryServiceSparkSQLImpl) ratingQueryService).setLivySession(livySession);
     }
 
     protected void prepareForCrossSellQueries(String period, String trxnTable, boolean persistOnDisk) {
@@ -210,6 +214,8 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
             livySessionService.stopSession(livySession);
         }
         ((EventQueryServiceSparkSQLImpl) eventQueryService).setLivySession(null);
+        ((EntityQueryServiceSparkSQLImpl) entityQueryService).setLivySession(null);
+        ((RatingQueryServiceSparkSQLImpl) ratingQueryService).setLivySession(null);
     }
 
     private void setCustomerSpace() {
