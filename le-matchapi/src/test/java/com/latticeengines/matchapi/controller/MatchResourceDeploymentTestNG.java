@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -18,7 +20,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
@@ -81,31 +82,31 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         domains.add("apache.com");
     }
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
-    @Autowired
+    @Inject
     private TestMatchInputService testMatchInputService;
 
-    @Autowired
+    @Inject
     private PublicDomainService publicDomainService;
 
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
-    @Autowired
+    @Inject
     private YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
     @BeforeClass(groups = "deployment")
@@ -302,7 +303,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", dataProvider = "recentApprovedVersions", enabled = true)
-    public void testBulkMatchWithSchema(String version) throws Exception {
+    public void testBulkMatchWithSchema(String version) {
         log.info("DataCloud Version : " + version);
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
