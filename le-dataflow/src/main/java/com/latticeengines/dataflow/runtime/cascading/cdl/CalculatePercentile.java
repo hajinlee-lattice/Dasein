@@ -159,14 +159,15 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
             if (scoreDerivation != null) {
                 String path = targetScoreDerivationPaths.get(modelId);
                 if (path != null) {
+                    log.info("Starting to write target score derivation to " + path + " for modelId=" + modelId);
                     HdfsUtils.writeToFile(new Configuration(), path, scoreDerivation);
-                    log.info("Write target score derivation to " + path + " for modelId=" + modelId);
+                    log.info("Finished writing target score derivation to " + path + " for modelId=" + modelId);
                 } else {
                     log.warn("Can not find the target score derivation path for modelId=" + modelId);
                 }
             }
         } catch (Exception ex) {
-            log.warn("Can not write target score derivation for modelId=" + modelId + " error=" + ex.getMessage());
+            log.warn("Can not write target score derivation for modelId=" + modelId + " error=" + ex.getMessage(), ex);
         }
     }
 
