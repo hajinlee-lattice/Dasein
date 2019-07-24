@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class SimulationTenantSummary {
     private Long minImportActionWaitingTime;
     private Long maxScheduleNowWaitingTime;
     private Long minScheduleNowWaitingTime;
+    private List<Long> firstImportActionWaitingTime;
+    private List<Long> firstScheduleNowWaitingTime;
 
     public SimulationTenantSummary(String tenantId, boolean isLarge, boolean isDataCloudRefresh, TenantType tenantType) {
         this.tenantId = tenantId;
@@ -38,14 +41,24 @@ public class SimulationTenantSummary {
         this.paTime = new LinkedList<>();
         this.importActionWaitingTime = new LinkedList<>();
         this.scheduleNowWaitingTime = new LinkedList<>();
+        this.firstScheduleNowWaitingTime = new ArrayList<>();
+        this.firstImportActionWaitingTime = new ArrayList<>();
     }
 
     public void calculate(List<Event> eventList) {
         long paStartTime = 0L;
         long paEndTime = 0L;
+        long firstImportActionTime = -1L;
+        long firstScheduleNowTime = -1L;
         for (int i = eventList.size() - 1; i >= 0; i--) {
             Event event = eventList.get(i);
             if (event instanceof PAStartEvent) {
+                if (paStartTime != 0L && firstImportActionTime != -1L) {
+                    // get the first ImportActionTime between this PA start to next PA start
+                    long waitingTime = paStartTime - firstImportActionTime;
+                    this.firstImportActionWaitingTime.add(waitingTime);
+                    firstImportActionTime = -1L;
+                }
                 paStartTime = event.getTime();
                 if (paEndTime != 0L) {
                     this.paNum = this.paNum + 1;
@@ -53,13 +66,30 @@ public class SimulationTenantSummary {
                     paTime.add(duringPATime);
                 }
             } else if (event instanceof PAEndEvent) {
+                if (paStartTime != 0L && firstScheduleNowTime != -1L) {
+                    //get the first ScheduleNowTime between this PA end to next PA end
+                    long waitingTime = paStartTime - firstScheduleNowTime;
+                    this.firstScheduleNowWaitingTime.add(waitingTime);
+                    firstScheduleNowTime = -1L;
+                }
                 paEndTime = event.getTime();
+
             } else if (event instanceof ImportActionEvent) {
+                if (firstImportActionTime == -1L) {//find the first importActionTime at one PA
+                    firstImportActionTime = event.getTime();
+                } else if (firstImportActionTime > event.getTime()){
+                    firstImportActionTime = event.getTime();
+                }
                 if (paStartTime != 0L) {
                     long waitingTime = paStartTime - event.getTime();
                     importActionWaitingTime.add(waitingTime);
                 }
             } else if (event instanceof ScheduleNowEvent) {
+                if (firstScheduleNowTime == -1L) {//find the first scheduleNowTime at one PA
+                    firstScheduleNowTime = event.getTime();
+                } else if (firstScheduleNowTime > event.getTime()) {
+                    firstScheduleNowTime = event.getTime();
+                }
                 if (paStartTime != 0L && paStartTime - paEndTime < 0) {
                     long waitingTime = paStartTime - event.getTime();
                     scheduleNowWaitingTime.add(waitingTime);
@@ -148,12 +178,14 @@ public class SimulationTenantSummary {
 
     public String getTenantSummary(List<Event> eventList) {
         calculate(eventList);
-        String result = String.format("Tenant: %s, isLarge: %s, isDataCloudRefresh: %s, paNum: %d, failedPANum: %d, " +
+        String result = String.format("Tenant: %s, tenantType: %s, isLarge: %s, isDataCloudRefresh: %s, paNum: %d, " +
+                        "failedPANum: %d, " +
                         "retryNum: %d, " +
                 "successRate: %f, avgPATime: %d, MaxPATime: %d, MinPATime: %d, avgImportActionWaitingTime: %d, " +
                         "MaxImportActionWaitingTime: %d, MinImportActionWaitingTime: %d, " +
                         "avgScheduleNowWaitingTime: %d, MaxScheduleNowWaitingTime: %d, MinScheduleNowWaitingTime: %d.",
-                tenantId, isLarge, isDataCloudRefresh, paNum, failedPANum, retryPANum, getSuccessRate(),
+                tenantId, tenantType.name(), isLarge, isDataCloudRefresh, paNum, failedPANum, retryPANum,
+                getSuccessRate(),
                 getAvgPATime(), maxPATime, minPATime, getAvgImportActionWaitingTime(),
                 maxImportActionWaitingTime, minImportActionWaitingTime, getAvgScheduleNowWaitingTime(),
                 maxScheduleNowWaitingTime, minScheduleNowWaitingTime);
@@ -168,14 +200,6 @@ public class SimulationTenantSummary {
         return this.paTime;
     }
 
-    public List<Long> getImportActionWaitingTime() {
-        return this.importActionWaitingTime;
-    }
-
-    public List<Long> getScheduleNowWaitingTime() {
-        return this.scheduleNowWaitingTime;
-    }
-
     public Long getMaxPATime() {
         return this.maxPATime;
     }
@@ -184,19 +208,15 @@ public class SimulationTenantSummary {
         return this.minPATime;
     }
 
-    public Long getMaxImportActionWaitingTime() {
-        return this.maxImportActionWaitingTime;
+    public List<Long> getFirstImportActionWaitingTime() {
+        return this.firstImportActionWaitingTime;
     }
 
-    public Long getMinImportActionWaitingTime() {
-        return this.minImportActionWaitingTime;
+    public List<Long> getFirstScheduleNowWaitingTime() {
+        return this.firstScheduleNowWaitingTime;
     }
 
-    public Long getMaxScheduleNowWaitingTime() {
-        return this.maxScheduleNowWaitingTime;
-    }
-
-    public Long getMinScheduleNowWaitingTime() {
-        return this.minScheduleNowWaitingTime;
+    public boolean isLarge() {
+        return this.isLarge;
     }
 }

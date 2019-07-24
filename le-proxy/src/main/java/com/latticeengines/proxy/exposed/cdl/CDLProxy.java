@@ -463,8 +463,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    public Boolean isActivityBasedPA() {
-        String url = constructUrl("/schedulingPAQueue/isActivityBasedPA");
+    public Boolean isActivityBasedPA(String schedulerName) {
+        String url = constructUrl("/schedulingPAQueue/isActivityBasedPA?schedulerName={schedulerName}", schedulerName);
         return get("get isActivityBasedPA Flag", url, Boolean.class);
     }
 }
