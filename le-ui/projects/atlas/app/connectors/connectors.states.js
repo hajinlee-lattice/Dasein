@@ -11,8 +11,8 @@ const connectorsList = {
   name: "connectorslist",
   url: "/connectorslist",
   onEnter: ($transition$, $state$) => {
-    const isMarketoEnabled = $transition$.router.ngservices.ConnectorsService.isMarketoEnabled();
-    if (isMarketoEnabled) {
+    const isExternalIntegrationEnabled = $transition$.router.ngservices.ConnectorsService.isExternalIntegrationEnabled();
+    if (isExternalIntegrationEnabled) {
       actions.fetchUserDocument();
     }
 

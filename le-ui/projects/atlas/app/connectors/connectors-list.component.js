@@ -34,7 +34,7 @@ export class ConnectorList extends Component {
             solutionInstanceId: null,
             openModal: false
         };
-        this.connectors = ConnectorService.getList(this.props.ConnectorsService.isMarketoEnabled());
+        this.connectors = ConnectorService.getList(this.props.ConnectorsService.isExternalIntegrationEnabled());
 
     }
     componentDidMount() {
