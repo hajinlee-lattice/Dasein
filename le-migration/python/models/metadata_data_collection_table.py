@@ -1,10 +1,10 @@
-from models.base_model import BaseModel, Base
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.mysql import VARCHAR, BIGINT
 
+from models.base_model import BaseModel, Base
+
 
 class MetadataDataCollectionTable(BaseModel, Base):
-
     __tablename__ = 'METADATA_DATA_COLLECTION_TABLE'
     pid = Column('PID', BIGINT(20), primary_key=True, nullable=False, autoincrement=True)
     role = Column('ROLE', VARCHAR(255), nullable=False)

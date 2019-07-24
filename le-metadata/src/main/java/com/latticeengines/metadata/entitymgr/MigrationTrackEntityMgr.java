@@ -6,4 +6,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface MigrationTrackEntityMgr extends BaseEntityMgrRepository<MigrationTrack, Long> {
     MigrationTrack findByTenant(Tenant tenant);
+
+    boolean tenantInMigration(Tenant tenant);
 }

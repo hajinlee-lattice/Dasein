@@ -39,28 +39,28 @@ CREATE PROCEDURE `UpdatePLSTables`()
    	ALTER TABLE `PLAY_LAUNCH` ADD COLUMN `CHANNEL_CONFIG` longtext;
 
     ALTER TABLE `PLAY_LAUNCH_CHANNEL` DROP FOREIGN KEY `FK_PLAYLAUNCHCHANNEL_FKPLAYLAUNCHID_PLAYLAUNCH`;
-    
-    create table `EXPORT_FIELD_METADATA_DEFAULTS` 
-    	(`PID` bigint not null auto_increment, 
-    	`ATTR_NAME` varchar(255) not null, 
-    	`DISPLAY_NAME` varchar(255) not null, 
-    	`ENTITY` varchar(255) not null, 
-    	`EXPORT_ENABLED` bit not null, 
-    	`EXT_SYS_NAME` varchar(255) not null, 
-    	`HISTORY_ENABLED` bit not null, 
-    	`JAVA_CLASS` varchar(255) not null, 
-    	`STANDARD_FIELD` bit not null, 
+
+    create table `EXPORT_FIELD_METADATA_DEFAULTS`
+    	(`PID` bigint not null auto_increment,
+    	`ATTR_NAME` varchar(255) not null,
+    	`DISPLAY_NAME` varchar(255) not null,
+    	`ENTITY` varchar(255) not null,
+    	`EXPORT_ENABLED` bit not null,
+    	`EXT_SYS_NAME` varchar(255) not null,
+    	`HISTORY_ENABLED` bit not null,
+    	`JAVA_CLASS` varchar(255) not null,
+    	`STANDARD_FIELD` bit not null,
     	primary key (`PID`)) engine=InnoDB;
 
-	create table `EXPORT_FIELD_METADATA_MAPPING` 
-		(`PID` bigint not null auto_increment, 
-		`CREATED` datetime not null, 
-		`DESTINATION_FIELD` varchar(255) not null, 
-		`OVERWRITE_VALUE` bit not null, 
-		`SOURCE_FIELD` varchar(255) not null, 
-		`UPDATED` datetime not null, 
-		`FK_LOOKUP_ID_MAP` bigint not null, 
-		`FK_TENANT_ID` bigint not null, 
+	create table `EXPORT_FIELD_METADATA_MAPPING`
+		(`PID` bigint not null auto_increment,
+		`CREATED` datetime not null,
+		`DESTINATION_FIELD` varchar(255) not null,
+		`OVERWRITE_VALUE` bit not null,
+		`SOURCE_FIELD` varchar(255) not null,
+		`UPDATED` datetime not null,
+		`FK_LOOKUP_ID_MAP` bigint not null,
+		`FK_TENANT_ID` bigint not null,
 		primary key (`PID`)) engine=InnoDB;
 
 	alter table `EXPORT_FIELD_METADATA_MAPPING` add constraint `FK_EXPORTFIELDMETADATAMAPPING_FKLOOKUPIDMAP_LOOKUPIDMAP` foreign key (`FK_LOOKUP_ID_MAP`) references `LOOKUP_ID_MAP` (`PID`) on delete cascade;
@@ -74,6 +74,24 @@ CREATE PROCEDURE `UpdatePLSTables`()
 	ALTER TABLE `PLS_MultiTenant`.`RATING_ENGINE` ADD COLUMN `DESCRIPTION` VARCHAR(255);
 	
 	ALTER TABLE `PLS_MultiTenant`.`BUCKET_METADATA` ADD COLUMN `ORIG_CREATION_TIMESTAMP` BIGINT(20) NULL DEFAULT NULL AFTER `CREATION_TIMESTAMP`;
+
+    CREATE TABLE IF NOT EXISTS `MIGRATION_TRACK` (
+          `PID` bigint(20) NOT NULL AUTO_INCREMENT,
+          `STATUS` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `VERSION` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `CUR_ACTIVE_TABLE_NAME` json DEFAULT NULL COMMENT 'DataCollectionTable.ROLE -> list of Table.NAME',
+          `IMPORT_ACTION` json DEFAULT NULL,
+          `DETAIL` json DEFAULT NULL COMMENT 'from DATA_COLLECTION_STATUS.Detail',
+          `CUBES_DATA` longblob COMMENT 'from STATISTICS.CUBES_DATA',
+          `NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'from STATISTICS.NAME',
+          `FK_TENANT_ID` bigint(20) NOT NULL,
+          `FK_COLLECTION_ID` bigint(20) DEFAULT NULL,
+          PRIMARY KEY (`PID`),
+          KEY `FK_TENANT_ID` (`FK_TENANT_ID`),
+          KEY `FK_COLLECTION_ID` (`FK_COLLECTION_ID`),
+          CONSTRAINT `MIGRATION_TRACK_ibfk_1` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE,
+          CONSTRAINT `MIGRATION_TRACK_ibfk_2` FOREIGN KEY (`FK_COLLECTION_ID`) REFERENCES `METADATA_DATA_COLLECTION` (`PID`)
+        ) engine=InnoDB;
 
   END;
 //

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
@@ -61,6 +63,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -73,11 +76,17 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
+    @Autowired
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
     @Value("${cdl.transform.workflow.mem.mb}")
-    protected int workflowMemMb;
+    private int workflowMemMb;
 
     @Value("${eai.export.dynamo.signature}")
     private String signature;
@@ -110,7 +119,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
                                            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
+                                           BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -126,6 +135,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("WorkflowJob created for customer=%s with pid=%s", customerSpace, pidWrapper.getPid()));
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
+        } else if (!request.skipMigrationCheck && migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace))) {
+            log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
         }
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
@@ -146,7 +158,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         try {
             List<Map<String, Object>> props = jdbcTemplate.queryForList("show variables like '%wait_timeout%'");
             log.info("Timeout Configuration from DB Session: " + props);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.warn("Failed to check timeout configuration from DB session.", e);
         }
 
@@ -230,7 +242,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_OPERATION_WORKFLOW);
         // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobPidStrs = actions.stream()
-                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null && action.getActionStatus() != ActionStatus.CANCELED)
+                .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null
+                        && action.getActionStatus() != ActionStatus.CANCELED)
                 .map(action -> action.getTrackingPid().toString()).collect(Collectors.toList());
         log.info(String.format("importAndDeleteJobPidStrs are %s", importAndDeleteJobPidStrs));
         List<Job> importAndDeleteJobs = workflowProxy.getWorkflowExecutionsByJobPids(importAndDeleteJobPidStrs,
@@ -258,18 +271,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         List<Long> canceledActionPids = actions.stream()
-                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW && action.getOwnerId() == null && action.getActionStatus() == ActionStatus.CANCELED)
+                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW
+                        && action.getOwnerId() == null && action.getActionStatus() == ActionStatus.CANCELED)
                 .map(Action::getPid).collect(Collectors.toList());
         return canceledActionPids;
     }
 
     /*
-     * Retrieve all the inheritable action IDs if the last PA failed. Return an
-     * empty list otherwise.
+     * Retrieve all the inheritable action IDs if the last PA failed. Return an empty list otherwise.
      */
     @VisibleForTesting
     List<Action> getActionsFromLastFailedPA(@NotNull String customerSpace, boolean inheritAllCompleteImportActions,
-            List<Long> importActionPidsToInherit) {
+                                            List<Long> importActionPidsToInherit) {
         DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(customerSpace,
                 DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
@@ -352,8 +365,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     /*
-     * Make sure input action PIDs all belong to import actions owned by last failed
-     * PA
+     * Make sure input action PIDs all belong to import actions owned by last failed PA
      */
     @VisibleForTesting
     void checkImportActionIds(long workflowPid, List<Long> importActionPIds) {
@@ -391,7 +403,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids, Set<Long> importActionIds) {
+    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids,
+                                     Set<Long> importActionIds) {
         boolean isComplete = true; // by default every action is valid
         if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
             // special check if is selected type
@@ -483,7 +496,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .build();
     }
 
-    public ApplicationId retryLatestFailed(String customerSpace, Integer memory, Boolean autoRetry) {
+    public ApplicationId retryLatestFailed(String customerSpace, Integer memory, Boolean autoRetry, Boolean skipMigrationCheck) {
+        if (!skipMigrationCheck && migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace))) {
+            log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
+        }
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
@@ -529,5 +546,4 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException(msg);
         }
     }
-
 }
