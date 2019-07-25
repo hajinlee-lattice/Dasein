@@ -56,7 +56,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @NamedEntityGraph(name = "PlayLaunchChannel.play", attributeNodes = { @NamedAttributeNode("play") })
-public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
+public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, HasAuditingFields, SoftDeletable {
 
     private static final String PLAY_LAUNCH_CHANNEL_NAME_PREFIX = "channel";
     private static final String PLAY_LAUNCH_CHANNEL_NAME_FORMAT = "%s__%s";
@@ -149,6 +149,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "ALWAYS_ON")
     private Boolean isAlwaysOn = Boolean.FALSE;
 
+    @JsonProperty("deleted")
+    @Column(name = "DELETED", nullable = false)
+    private Boolean deleted = Boolean.FALSE;
+
     public PlayLaunchChannel() {
     }
 
@@ -236,6 +240,16 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Play getPlay() {

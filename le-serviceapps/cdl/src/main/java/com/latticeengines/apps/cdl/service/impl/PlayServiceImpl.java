@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -72,6 +74,9 @@ public class PlayServiceImpl implements PlayService {
 
     @Inject
     private PlayLaunchService playLaunchService;
+
+    @Inject
+    private PlayLaunchChannelService playLaunchChannelService;
 
     @Inject
     private RatingEngineService ratingEngineService;
@@ -427,6 +432,10 @@ public class PlayServiceImpl implements PlayService {
             List<PlayLaunch> launches = playLaunchService.findByPlayId(playPid, null);
             if (CollectionUtils.isNotEmpty(launches)) {
                 launches.forEach(l -> playLaunchService.deleteByLaunchId(l.getId(), false));
+            }
+            List<PlayLaunchChannel> channels = playLaunchChannelService.getPlayLaunchChannels(name, false);
+            if (CollectionUtils.isNotEmpty(channels)) {
+                channels.forEach(c -> playLaunchChannelService.deleteByChannelId(c.getId(), false));
             }
         }
 

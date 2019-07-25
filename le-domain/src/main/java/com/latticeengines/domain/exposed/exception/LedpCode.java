@@ -352,6 +352,8 @@ public enum LedpCode {
     LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."),
     LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"),
     LEDP_18227("Can't get entity data from cache when cache is in build."),
+    LEDP_18228("Play Launch Channel not found for {0}"), 
+    
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

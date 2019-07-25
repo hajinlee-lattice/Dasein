@@ -11,6 +11,8 @@ public interface PlayLaunchChannelEntityMgr extends BaseEntityMgrRepository<Play
 
     List<PlayLaunchChannel> findByPlayName(String playName);
 
+    void deleteByChannelId(String id, boolean hardDelete);
+
     PlayLaunchChannel findByPlayNameAndLookupIdMapId(String playName, String lookupId);
 
     PlayLaunchChannel findById(String channelId);
