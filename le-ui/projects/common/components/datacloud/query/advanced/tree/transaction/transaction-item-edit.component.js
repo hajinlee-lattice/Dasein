@@ -297,7 +297,7 @@ angular
                 //************************ Txn *********************/
 
                 function getConfigField(position) {
-                    var values = JSON.parse(vm.getPeriodNumericalConfString());
+                    var values = vm.getPeriodNumericalConfString();
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }

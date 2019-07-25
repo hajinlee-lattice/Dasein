@@ -35,9 +35,15 @@ angular
             controller: function ($scope, $element) {
 
                 function getConfigField(position) {
+
                     var values = $scope.config;
-                    var config = values[Object.keys(values)[position]];
-                    return config;
+                    if (values) {
+                        var config = values[Object.keys(values)[position]];
+                        return config;
+                    } else {
+                        return { from: {}, to: {}};
+                    }
+
                 }
 
                 function validateMainConfig() {
@@ -51,7 +57,6 @@ angular
                 }
 
                 $scope.init = function () {
-                    console.log('numeric init', $scope.config, $scope.values);
                     validateMainConfig();
                     var conf = $scope.config;
                     if ($scope.initialvalidation === undefined) {
@@ -71,7 +76,6 @@ angular
                     }
 
                     $scope.values = $scope.config;
-                    console.log('numeric init', $scope.config, $scope.values, $scope);
                 }
 
                 $scope.getSteps = function (position) {
@@ -195,7 +199,7 @@ angular
                  */
                 $scope.changeValue = function (position) {
                     var conf = getConfigField(position);
-                    if ($scope.isValValid(position) || ($scope.invalidcallback && !!$scope.invalidcallback == true)) {
+                    if ( $scope.values && ($scope.isValValid(position) || ($scope.invalidcallback && !!$scope.invalidcallback == true))) {
                         // console.log('Change value');
                         switch (position) {
                             case 0: {
