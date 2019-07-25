@@ -634,4 +634,10 @@ public class RatingEngineResource {
     // RatingEngine Others
     // -------------------
 
+    @GetMapping(value = "/dependentattrs")
+    @ResponseBody
+    @ApiOperation(value = "")
+    public List<AttributeLookup> getDependentAttrs(@PathVariable String customerSpace) {
+        return ratingEngineService.getDependentAttrs();
+    }
 }

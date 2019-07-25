@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -32,14 +36,21 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 @Component("productFileValidationService")
 @Lazy(value = false)
@@ -54,6 +65,12 @@ public class ProductFileValidationService
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private SegmentProxy segmentProxy;
 
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
@@ -82,7 +99,7 @@ public class ProductFileValidationService
         // append error message to error file
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
-            errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter);
+            errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter, productFileValidationServiceConfiguration.getCustomerSpace());
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
@@ -144,23 +161,33 @@ public class ProductFileValidationService
     }
 
     private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            CSVPrinter csvFilePrinter) throws IOException {
+            CSVPrinter csvFilePrinter, CustomerSpace space) throws IOException {
         long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         Map<String, Product> inputProductMap = new HashMap<>();
+        boolean foundProductBundle = false;
         for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
             Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
                 continue;
             }
-            if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null
-                    && inputProduct.getProductName() == null) {
-                errorLine++;
-                csvFilePrinter.printRecord(entry.getKey(), "",
-                        String.format(
-                                "Product name, category, bundle can't be all empty for product with productId =%s",
-                                inputProduct.getProductId()));
+
+            if (inputProduct.getProductBundle() != null) {
+                foundProductBundle = true;
+                try {
+                    Product analyticProduct = mergeAnalyticProduct(null, inputProduct.getProductBundle(),
+                            inputProduct.getProductBundle(), inputProduct.getProductDescription(), currentProductMap,
+                            inputProductMap);
+                    String bundleId = analyticProduct.getProductId();
+                    inputProduct.setProductBundleId(bundleId);
+                    mergeBundleProduct(inputProduct, inputProductMap);
+                } catch(RuntimeException e) {
+                    errorLine++;
+                    csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
+                }
             }
+
+
             if (inputProduct.getProductCategory() != null) {
                 String category = inputProduct.getProductCategory();
                 String family = inputProduct.getProductFamily();
@@ -194,6 +221,114 @@ public class ProductFileValidationService
                     csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
                 }
             }
+
+            if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null) {
+                if (inputProduct.getProductName() == null) {
+                    String errMsg = "Product name is missing for product with id=" + inputProduct.getProductId();
+                    errorLine++;
+                    csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
+                }
+
+                // ProductId will be used in avro schema in curated metrics.
+                // Need to check validation
+                if (!AvroUtils.isValidColumn(inputProduct.getProductId())) {
+                    String errMsg = String.format("Product has invalid id=%s", inputProduct.getProductId());
+                    errorLine++;
+                    csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
+                }
+
+                foundProductBundle = true;
+                mergeAnalyticProduct(inputProduct.getProductId(), inputProduct.getProductName(),
+                        inputProduct.getProductName(), inputProduct.getProductDescription(), currentProductMap,
+                        inputProductMap);
+            }
+        }
+        if (foundProductBundle) {
+
+            Map<String, List<Product>> inputBundleToProductList =
+                    inputProducts.values().stream().filter(product -> ProductType.Bundle.name().equals(product.getProductType())&&
+                            StringUtils.isNotBlank(product.getProductBundle())).collect(Collectors.groupingBy(Product::getProductBundle));
+            Map<String, List<Product>> currentBundleToProductList =
+                    currentProducts.stream().filter(product -> ProductType.Bundle.name().equals(product.getProductType())&&
+                            StringUtils.isNotBlank(product.getProductBundle())).collect(Collectors.groupingBy(Product::getProductBundle));
+
+            // input intersect the current to get attrs to be removed
+            Set<String> bundleToBeRemoved =
+                    currentBundleToProductList.keySet().stream().filter(bundle -> !inputBundleToProductList.containsKey(bundle)).collect(Collectors.toSet());
+
+            List<MetadataSegment> segments = segmentProxy.getMetadataSegments(space.toString());
+            List<AttributeLookup> dependentAttrs = segmentProxy.findDependingAttributes(space.toString(), segments);
+            dependentAttrs.addAll(ratingEngineProxy.getDependentAttrs(space.toString()));
+            Set<String>  attrInSegmentOrModel = dependentAttrs.stream().map(attr -> attr.getAttribute()).collect(Collectors.toSet());
+            List<RatingEngineSummary> ratingEngines = ratingEngineProxy.getRatingEngineSummaries(space.toString());
+            // judge whether exists active CS model
+            boolean existActiveCS =
+                    ratingEngines.stream().anyMatch(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()) && RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()));
+
+            log.info("exist active cross shell model " + existActiveCS);
+            log.info("bundle that will be removed " + JsonUtils.serialize(bundleToBeRemoved));
+            if (existActiveCS) {
+                for (String bundle : bundleToBeRemoved) {
+                    String errMsg = String.format("Error: %s can't be removed as exists active CE model",
+                            bundle);
+                    csvFilePrinter.printRecord("", "", errMsg);
+                    errorLine++;
+                }
+            } else {
+                String allAttrString = StringUtils.join(attrInSegmentOrModel);
+                log.info("current string in segment or model is " + allAttrString);
+                for (String bundle : bundleToBeRemoved) {
+                    List<Product> productList = currentBundleToProductList.get(bundle);
+
+                    for (Product product : productList) {
+                        String bundleId = product.getProductBundleId();
+                        // case that attr in old while not in new, also there are segment or model, error
+                        if (allAttrString.contains(bundleId)) {
+                            String errMsg = String.format("Error: %s which is referenced by segment or models can't be " +
+                                            "removed.",
+                                    bundle);
+                            csvFilePrinter.printRecord("", "", errMsg);
+                            errorLine++;
+                        } else {
+                            // case that attr in old while not in new, exist no segment or model, warning
+                            String errMsg = String.format("Info: %s will be removed",
+                                    bundle);
+                            csvFilePrinter.printRecord("", "", errMsg);
+                            errorLine++;
+                        }
+                    }
+                }
+            }
+            // the relationship between Bundle and sku id is one to manny,  For each Bundle in old AND in new, compare
+            // the list of skus in the bundle to check warnings
+            for (Map.Entry<String, List<Product>> entry : inputBundleToProductList.entrySet()) {
+                String bundle = entry.getKey();
+                if (currentBundleToProductList.containsKey(bundle)) {
+                    List<Product> inputList = inputBundleToProductList.get(bundle);
+                    List<Product> currentList = currentBundleToProductList.get(bundle);
+                    String errMsg = String.format("Warning: %s changed, Remodel may be needed for accurate scores",
+                            bundle);
+                    if (inputList.size() != currentList.size()) {
+                        csvFilePrinter.printRecord("", "", errMsg);
+                        continue;
+                    }
+                    Collections.sort(inputList, Comparator.comparing(Product::getProductId));
+                    Collections.sort(currentList, Comparator.comparing(Product::getProductId));
+                    boolean change = false;
+                    for (int i=0; i< inputList.size(); i++) {
+                        Product pro1 = inputList.get(i);
+                        Product pro2 = currentList.get(i);
+                        if (!pro1.getProductId().equals(pro2.getProductId())) {
+                            change = true;
+                            break;
+                        }
+                    }
+                    if (change) {
+                        csvFilePrinter.printRecord("", "", errMsg);
+                    }
+                }
+            }
+
         }
         return errorLine;
     }
@@ -363,4 +498,59 @@ public class ProductFileValidationService
         inputProductMap.put(compositeId, newProduct);
     }
 
+    private Product mergeAnalyticProduct(String id, String name, String bundleName, String description,
+                                         Map<String, Product> currentProductMap, Map<String, Product> inputProductMap) {
+        String compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name(), id, name, bundleName, null, null,
+                null);
+        String productId = id;
+
+        if (id == null) {
+            productId = createProductId(compositeId, currentProductMap);
+        }
+
+        compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name(), productId, name, bundleName, null, null,
+                null);
+        Product product = inputProductMap.get(compositeId);
+        if (product != null) {
+            log.info(String.format("Found product [productId=%s, compositeId=%s] in inputProductMap.",
+                    product.getProductId(), compositeId));
+
+            if (!product.getProductType().equals(ProductType.Analytic.name())) {
+                String errMsg = String.format("Found inconsistent product type with bundle %s", bundleName);
+                throw new RuntimeException(String.format("Failed to merge analytic product. Id=%s, name=%s", id, name));
+            }
+
+        } else {
+            log.info(String.format("CompositeId=%s is not in inputProductMap. Create analytic product "
+                    + "[productId=%s, compositeId=%s].", compositeId, productId, compositeId));
+            Product newProduct = new Product();
+            newProduct.setProductId(productId);
+            newProduct.setProductName(name);
+            newProduct.setProductBundle(bundleName);
+            newProduct.setProductType(ProductType.Analytic.name());
+            inputProductMap.put(compositeId, newProduct);
+            product = newProduct;
+        }
+
+        return product;
+    }
+
+    private void mergeBundleProduct(Product inputProduct, Map<String, Product> inputProductMap) {
+        String id = inputProduct.getProductId();
+        String name = inputProduct.getProductName();
+        String description = inputProduct.getProductDescription();
+        String bundle = inputProduct.getProductBundle();
+        String compositeId = ProductUtils.getCompositeId(ProductType.Bundle.name(), id, name, bundle, null, null, null);
+
+        log.info(String.format("Create bundle product [productId=%s, bundle=%s, description=%s], bundleId=%s.", id,
+                bundle, description, inputProduct.getProductBundleId()));
+        Product newProduct = new Product();
+        newProduct.setProductId(id);
+        newProduct.setProductName(name);
+        newProduct.setProductDescription(description);
+        newProduct.setProductBundle(bundle);
+        newProduct.setProductBundleId(inputProduct.getProductBundleId());
+        newProduct.setProductType(ProductType.Bundle.name());
+        inputProductMap.put(compositeId, newProduct);
+    }
 }

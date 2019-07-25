@@ -113,4 +113,6 @@ public interface RatingEngineService {
 
     List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(String customerSpace,
             String ratingEngineId);
+
+    List<AttributeLookup> getDependentAttrs();
 }

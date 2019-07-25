@@ -368,6 +368,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final String SEGMENT_NAME_CURATED_ATTR = NamingUtils.timestamp("E2ESegmentCuratedAttr");
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
+    static final String SEGMENT_NAME_PRODUCT_BUNDLE = NamingUtils.timestamp("SEGMENT_NAME_PRODUCT_BUNDLE");
 
     /* Expected rating result */
 
@@ -744,6 +745,36 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
+    ApplicationId importData2(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
+                    boolean outsizeFlag) {
+        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
+        log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
+        String outputFileName = s3FileName;
+        if (feedType == null) {
+            feedType = getFeedTypeByEntity(entity.name());
+        }
+        if (s3FileName.endsWith(".gz"))
+            outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
+        SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
+                csvResource, outsizeFlag);
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name(),
+                SourceType.FILE.getName(), feedType);
+        modifyFieldMappings(entity, fieldMappingDocument);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+
+        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
+                SourceType.FILE.getName(), feedType);
+        log.info("Modified field mapping document is saved, start importing ...");
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
+                INITIATOR);
+        return applicationId;
     }
 
     void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
@@ -1235,6 +1266,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(segment);
     }
 
+    void createTestSegmentProductBundle() {
+        testMetadataSegmentProxy.createOrUpdate(constructSegmentForProductBundle());
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_PRODUCT_BUNDLE);
+        Assert.assertNotNull(segment);
+    }
+
     private MetadataSegment constructTestSegment1() {
         Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
         BucketRestriction websiteRestriction = new BucketRestriction(
@@ -1335,6 +1372,32 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         segment.setDescription("A test segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setAccountRestriction(accountRestriction);
+        return segment;
+    }
+
+    private MetadataSegment constructSegmentForProductBundle() {
+        //bundle1 CMT4: Autosampler Vials and Closures
+        //bundle2 CMT3: Other Plasticware
+        Bucket.Transaction txn1 = new Bucket.Transaction("4VXsZpo1WU5dpAYAdWTiKD9yZA1sd", TimeFilter.ever(), null, null,
+                false);
+        Bucket purchaseBkt1 = Bucket.txnBkt(txn1);
+        BucketRestriction purchaseRestriction1 = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"), purchaseBkt1);
+        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null, null,
+                false);
+        Bucket purchaseBkt2 = Bucket.txnBkt(txn2);
+        BucketRestriction purchaseRestriction2 = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"), purchaseBkt2);
+        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1,
+                purchaseRestriction2).build();
+
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_PRODUCT_BUNDLE);
+        segment.setDisplayName("End2End Segment For Product Bundle");
+        segment.setDescription("A test segment for CDL end2end product bundle.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+
         return segment;
     }
 

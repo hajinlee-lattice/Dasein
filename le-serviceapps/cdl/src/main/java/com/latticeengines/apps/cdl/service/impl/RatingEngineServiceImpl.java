@@ -1033,6 +1033,36 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<AttributeLookup> getDependentAttrs() {
+        Set<AttributeLookup> attrs = new HashSet<>();
+        RatingModelService<RatingModel> ratingModelService;
+        List<RatingEngine> ratingEngines = getAllRatingEngines();
+        if (ratingEngines != null) {
+            ratingEngines = ratingEngines.stream().filter(rating -> rating.getSegment() != null)
+                    .collect(Collectors.toList());
+            for (RatingEngine ratingEngine : ratingEngines) {
+                if (!Boolean.TRUE.equals(ratingEngine.getDeleted())) {
+                    ratingModelService = getRatingModelService(ratingEngine.getType());
+                    List<RatingModel> ratingModels = ratingModelService
+                            .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                    if (ratingModels != null) {
+                        for (RatingModel ratingModel : ratingModels) {
+                            ratingModelService.findRatingModelAttributeLookups(ratingModel);
+                            Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
+                            if (attributeLookups != null) {
+                                attrs.addAll(attributeLookups);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(attrs);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         RatingModelService<AIModel> aiModelService = getRatingModelService(ratingEngine.getType());
