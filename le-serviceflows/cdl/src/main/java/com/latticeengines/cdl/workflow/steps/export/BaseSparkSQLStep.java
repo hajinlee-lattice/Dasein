@@ -1,30 +1,24 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -32,11 +26,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.MergeRuleRatingsConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.EventQueryService;
-import com.latticeengines.objectapi.service.RatingQueryService;
+import com.latticeengines.objectapi.service.RatingQuerySparkSQLService;
 import com.latticeengines.objectapi.service.sparksql.impl.EntityQueryServiceSparkSQLImpl;
 import com.latticeengines.objectapi.service.sparksql.impl.EventQueryServiceSparkSQLImpl;
 import com.latticeengines.objectapi.service.sparksql.impl.RatingQueryServiceSparkSQLImpl;
@@ -48,7 +41,6 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
-import com.latticeengines.spark.exposed.job.cdl.MergeRuleRatings;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends BaseSparkStep<S> {
@@ -66,7 +58,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
     private EntityQueryService entityQueryService;
 
     @Resource(name = "ratingQueryServiceSparkSQL")
-    private RatingQueryService ratingQueryService;
+    private RatingQuerySparkSQLService ratingQueryService;
 
     @Resource(name = "eventQueryServiceSparkSQL")
     private EventQueryService eventQueryService;
@@ -166,47 +158,13 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         });
     }
 
-    protected HdfsDataUnit getRuleBasedRatings(FrontEndQuery frontEndQuery, String defaultBkt) {
+    protected HdfsDataUnit getRuleBasedRatings(FrontEndQuery frontEndQuery) {
         setCustomerSpace();
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
         frontEndQuery.setPageFilter(null);
+        frontEndQuery.setSort(null);
         DataCollection.Version version = parseDataCollectionVersion(configuration);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-
-        Map<String, String> sqlMap = ratingQueryService.getSparkSQLRuleBasedQueries(frontEndQuery, version);
-        List<DataUnit> bktResults = new ArrayList<>();
-        List<String> bktNames = new ArrayList<>();
-        String defaultSql = sqlMap.get("default");
-        HdfsDataUnit defaultResult = retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0) {
-                log.info("(Attempt=" + ctx.getRetryCount() + ") get default ratings via SparkSQL.");
-            }
-            return sparkSQLService.getData(customerSpace, livySession, defaultSql, null);
-        });
-        bktResults.add(defaultResult);
-        for (RatingBucketName bucketName : RatingBucketName.values()) {
-            String bktSql = sqlMap.get(bucketName.getName());
-            if (StringUtils.isNotBlank(bktSql)) {
-                HdfsDataUnit bktResult = retry.execute(ctx -> {
-                    if (ctx.getRetryCount() > 0) {
-                        log.info("(Attempt=" + ctx.getRetryCount() + ") get " + //
-                        bucketName.getName() + " ratings via SparkSQL.");
-                    }
-                    return sparkSQLService.getData(customerSpace, livySession, bktSql, null);
-                });
-                bktResults.add(bktResult);
-                bktNames.add(bucketName.getName());
-            }
-        }
-
-        MergeRuleRatingsConfig jobConfig = new MergeRuleRatingsConfig();
-        jobConfig.setInput(bktResults);
-        jobConfig.setDefaultBucketName(defaultBkt);
-        jobConfig.setBucketNames(bktNames);
-        String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
-        jobConfig.setWorkspace(workspace);
-        SparkJobResult result = runSparkJob(livySession, MergeRuleRatings.class, jobConfig);
-        return result.getTargets().get(0);
+        return ratingQueryService.getRatingData(frontEndQuery, version);
     }
 
     protected void stopSparkSQLSession() {

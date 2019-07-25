@@ -1,5 +1,6 @@
 package com.latticeengines.query.exposed.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -18,5 +19,10 @@ public interface SparkSQLService {
 
     HdfsDataUnit getData(CustomerSpace customerSpace, LivySession livySession, String sql, //
                          Map<String, Map<Long, String>> decodeMapping);
+
+    String createView(CustomerSpace customerSpace, LivySession livySession, String sql, String viewName);
+
+    HdfsDataUnit mergeRules(CustomerSpace customerSpace, LivySession livySession, //
+                            List<String> viewList, String defaultBucketName);
 
 }

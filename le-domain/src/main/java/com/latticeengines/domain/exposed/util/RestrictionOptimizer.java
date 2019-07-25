@@ -65,7 +65,7 @@ public class RestrictionOptimizer {
     }
 
     private static Restriction optimizeLogicalRestriction(LogicalRestriction logicalRestriction) {
-        if (logicalRestriction.getRestrictions() == null || logicalRestriction.getRestrictions().isEmpty()) {
+        if (CollectionUtils.isEmpty(logicalRestriction.getRestrictions())) {
             return null;
         }
 

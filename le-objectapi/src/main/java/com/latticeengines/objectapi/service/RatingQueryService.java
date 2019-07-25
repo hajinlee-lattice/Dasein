@@ -16,7 +16,4 @@ public interface RatingQueryService {
 
     String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser);
 
-    Map<String, String> getSparkSQLRuleBasedQueries(FrontEndQuery frontEndQuery, //
-                                                    DataCollection.Version version);
-
 }

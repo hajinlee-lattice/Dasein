@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
@@ -64,8 +63,7 @@ public class ExtractRuleBasedRatings extends BaseExtractRatingsStep<GenerateRati
             String segmentName = engineSummary.getSegmentName();
             MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace.toString(), segmentName);
             FrontEndQuery frontEndQuery = ruleBasedQuery(segment, container.getModel());
-            String defaultBkt = ((RuleBasedModel) container.getModel()).getRatingRule().getDefaultBucketName();
-            return getRuleBasedRatings(frontEndQuery, defaultBkt);
+            return getRuleBasedRatings(frontEndQuery);
         } else {
             return null;
         }

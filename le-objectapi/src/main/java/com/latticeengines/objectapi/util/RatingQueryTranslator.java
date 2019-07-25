@@ -69,13 +69,17 @@ public class RatingQueryTranslator extends QueryTranslator {
         AtomicBoolean hasRatingLookup = new AtomicBoolean(false);
         if (CollectionUtils.isNotEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.getLookups().forEach(lookup -> {
-                AttributeLookup attributeLookup = (AttributeLookup) lookup;
-                if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
-                    hasRatingLookup.set(true);
-                    queryBuilder.select(parseRatingLookup(frontEndQuery.getMainEntity(), attributeLookup,
-                            frontEndQuery.getRatingModels(), timeTranslator, sqlUser));
+                if (lookup instanceof AttributeLookup) {
+                    AttributeLookup attributeLookup = (AttributeLookup) lookup;
+                    if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
+                        hasRatingLookup.set(true);
+                        queryBuilder.select(parseRatingLookup(frontEndQuery.getMainEntity(), attributeLookup,
+                                frontEndQuery.getRatingModels(), timeTranslator, sqlUser));
+                    } else {
+                        queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
+                    }
                 } else {
-                    queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
+                    queryBuilder.select(lookup);
                 }
             });
         }
