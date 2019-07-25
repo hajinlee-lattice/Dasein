@@ -5,7 +5,7 @@
     <select ng-model="$ctrl.periodModel" ng-change="$ctrl.changePeriod()">
         <option ng-repeat="(key, value) in $ctrl.periodList" value="{{value.name}}">{{value.displayName}}</option>
     </select>
-    <numerical-range-directive ng-if="$ctrl.periodChanging==false" config="{{$ctrl.getPeriodNumericalConfString()}}" showmessage="true"
+    <numerical-range-directive ng-if="$ctrl.periodChanging==false" config="$ctrl.getPeriodNumericalConfString()" showmessage="true"
         showfrom="$ctrl.showFromPeriod" showto="$ctrl.showToPeriod" vm="$ctrl.vm" form="$ctrl.form" type="{{$ctrl.type}}" bucketrestriction="$ctrl.bucketrestriction"
         changed="$ctrl.callbackChangedValue(type, position, value)">
     </numerical-range-directive>
