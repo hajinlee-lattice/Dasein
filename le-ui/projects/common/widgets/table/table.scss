@@ -158,6 +158,7 @@ $font-size: 12px;
     .le-table-cell {
         text-overflow: ellipsis;
         overflow: hidden;
+        line-height: 2;
         // height: $row-height;
         margin: 0;
         display: flex;
