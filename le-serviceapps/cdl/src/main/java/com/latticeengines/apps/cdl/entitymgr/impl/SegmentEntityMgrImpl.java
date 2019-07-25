@@ -107,7 +107,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     public MetadataSegment createSegment(MetadataSegment segment) {
         preprocessBeforeCreateOrUpdate(segment);
-        // populateNullsBeforeCreate(segment);
+        populateNullsBeforeCreate(segment);
 
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
