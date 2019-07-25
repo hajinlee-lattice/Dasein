@@ -548,9 +548,6 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
             }
-            if (dataFeed.isScheduleNow()) {
-                dataFeedService.updateDataFeedScheduleTime(tenantId, false, null);
-            }
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
 
         } catch (Exception e) {

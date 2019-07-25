@@ -38,10 +38,11 @@ public class SimulationUnitTestNG {
         this.tenantList = initTenant();
         this.clock.setTimestamp(1531373313L * 1000);
         Map<String, SimulationTenant> simulationTenantMap = setTenantInitState(tenantList);
-        this.priorityQueue.addAll(generateTenantEvents());
+        String duringTime = "2m";
+        this.priorityQueue.addAll(generateTenantEvents(duringTime));
         SystemStatus systemStatus = newStatus(5, 10, 2);
         Simulation simulation = new Simulation(systemStatus, new HashSet<>(dataCloudRefreshTenant),
-                simulationTenantMap, priorityQueue, clock, "2m");
+                simulationTenantMap, priorityQueue, clock, duringTime);
         simulation.run();
     }
 
@@ -55,18 +56,18 @@ public class SimulationUnitTestNG {
         return status;
     }
 
-    private List<Event> generateTenantEvents() {
+    private List<Event> generateTenantEvents(String duringTime) {
         List<Event> eventList = new ArrayList<>();
         Random r = new Random();
         for (String tenantId : tenantList) {
-            int count = r.nextInt(1000) + 1;
+            int count = r.nextInt(transferCount(duringTime) * 20) + 1; // 1 week create avg 10 event per tenant
             for (int i = 0; i < count; i++) {
                 int type = r.nextInt(5);
                 if (type < 1) {
-                    ScheduleNowEvent scheduleNowEvent = new ScheduleNowEvent(tenantId, getRandomTime());
+                    ScheduleNowEvent scheduleNowEvent = new ScheduleNowEvent(tenantId, getRandomTime(duringTime));
                     eventList.add(scheduleNowEvent);
                 } else {
-                    ImportActionEvent importActionEvent = new ImportActionEvent(tenantId, getRandomTime());
+                    ImportActionEvent importActionEvent = new ImportActionEvent(tenantId, getRandomTime(duringTime));
                     eventList.add(importActionEvent);
                 }
             }
@@ -74,11 +75,10 @@ public class SimulationUnitTestNG {
         return eventList;
     }
 
-    private long getRandomTime() {
+    private long getRandomTime(String duringTime) {
         Random r = new Random();
-        int randomInt = r.nextInt(24 * 60 * 2) * 60; // 2 day
-        long time = clock.getCurrentTime() + (long) randomInt * 1000;
-        return time;
+        int randomInt = r.nextInt(transferTime(duringTime)); // 2 day
+        return clock.getCurrentTime() + (long) randomInt * 1000;
     }
 
     private List<String> initTenant() {
@@ -115,6 +115,32 @@ public class SimulationUnitTestNG {
         }
         log.info("dataCloudRefreshTenant is : " + JsonUtils.serialize(dataCloudRefreshTenant));
         return simulationTenantMap;
+    }
+
+    private int transferTime(String duringTime) {//get the duringTimeMillSecond
+        String timeNumber = duringTime.substring(0, duringTime.length() - 1);
+        String tag = duringTime.substring(duringTime.length() - 1);
+        long time = 0L;
+        switch (tag) {
+            case "d" : time = 86400L * 1000 * Long.valueOf(timeNumber); break;
+            case "w" : time = 7 * 86400L * 1000 * Long.valueOf(timeNumber); break;
+            case "m" : time = 30 * 7 * 86400L * 1000 * Long.valueOf(timeNumber); break;
+            default: break;
+        }
+        return (int) (time / 1000);
+    }
+
+    private int transferCount(String duringTime) {
+        String timeNumber = duringTime.substring(0, duringTime.length() - 1);
+        String tag = duringTime.substring(duringTime.length() - 1);
+        int count = 0;
+        switch (tag) {
+            case "d" : count = Integer.valueOf(timeNumber) / 7; break;
+            case "w" : count = Integer.valueOf(timeNumber); break;
+            case "m" : count = 4 * Integer.valueOf(timeNumber); break;//set 1m = 4w, so we can get the week count
+            default: break;
+        }
+        return count;
     }
 
 }
