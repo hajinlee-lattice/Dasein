@@ -18,6 +18,16 @@ val tempSqls: List[(String, String)] = List(
 
 spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
+tempSqls map {t => {
+  val viewName = t._1
+  val viewSql = t._2
+  println("----- BEGIN SCRIPT OUTPUT -----")
+  println(s"\nSQL Statement for $viewName:")
+  println(viewSql)
+  println("----- END SCRIPT OUTPUT -----")
+  0
+}}
+
 tempSqls map {t =>
   val viewName = t._1
   val viewSql = t._2

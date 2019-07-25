@@ -1,10 +1,10 @@
-from models.base_model import BaseModel, Base
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.mysql import VARCHAR, BIGINT, DATETIME, JSON
 
+from models.base_model import BaseModel, Base
+
 
 class MetadataDataCollectionStatus(BaseModel, Base):
-
     __tablename__ = 'METADATA_DATA_COLLECTION_STATUS'
     pid = Column('PID', BIGINT(20), nullable=False, primary_key=True, autoincrement=True)
     creationTime = Column('CREATION_TIME', DATETIME, nullable=False)

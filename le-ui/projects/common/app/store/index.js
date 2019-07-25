@@ -1,4 +1,4 @@
-import { createStore, combineReducers, applyMiddleware } from "redux";
+import { createStore, combineReducers, compose, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import ngRedux from "ng-redux";
 
@@ -8,11 +8,17 @@ const createReducer = asyncReducers => {
     });
 };
 
+const middleware = [
+    thunk
+];
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 export default function configureStore(initialState = {}) {
     let store = createStore(
         createReducer(),
         initialState,
-        applyMiddleware(thunk)
+        composeEnhancers(applyMiddleware(...middleware))
     );
     store.asyncReducers = {};
     return store;

@@ -96,8 +96,7 @@ public class IngestionServiceTestNG extends PropDataEngineFunctionalTestNGBase {
         ingestion = testIngestionService
                 .createIngestions(
                         Collections.singletonList(Triple.of(PREFIX + "_Ingestion",
-                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.141.1.239\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
-                                IngestionType.SFTP)))
+                                "{\"ClassName\":\"SftpConfiguration\"}", IngestionType.SFTP)))
                 .get(0);
         Assert.assertNotNull(ingestion.getPid());
     }

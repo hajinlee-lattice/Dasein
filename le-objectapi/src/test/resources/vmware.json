@@ -1,0 +1,57 @@
+{
+  "account_restriction": {
+    "restriction": null
+  },
+  "restrict_without_sfdcid": false,
+  "restrict_with_sfdcid": false,
+  "lookups": [],
+  "distinct": false,
+  "segment_query": {
+    "account_restriction": {
+      "restriction": {
+        "logicalRestriction": {
+          "operator": "OR",
+          "restrictions": [
+            {
+              "bucketRestriction": {
+                "bkt": {
+                  "Lbl": "Ever",
+                  "Cnt": 7978,
+                  "Id": 5,
+                  "Fltr": {
+                    "Cmp": "LATEST_DAY",
+                    "Vals": [],
+                    "Period": "Week"
+                  }
+                },
+                "ignored": false,
+                "attr": "Account.TransactionDate"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "contact_restriction": {
+      "restriction": {
+        "logicalRestriction": {
+          "operator": "AND",
+          "restrictions": []
+        }
+      }
+    },
+    "restrict_without_sfdcid": false,
+    "restrict_with_sfdcid": false,
+    "lookups": [],
+    "main_entity": "Account",
+    "distinct": false
+  },
+  "period_name": "Month",
+  "period_count": -1,
+  "target_product_ids": [
+    "uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8"
+  ],
+  "calculate_product_revenue": false,
+  "evaluation_period_id": 211,
+  "lagging_period_count": 1
+}

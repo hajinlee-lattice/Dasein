@@ -36,13 +36,13 @@ import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
-import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.scheduling.Scheduler;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -66,7 +67,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -76,18 +76,15 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final Logger log = LoggerFactory.getLogger(CDLJobServiceImpl.class);
 
-    private static final String LE_STACK = "LE_STACK";
-    private static final String QUARTZ_STACK = "quartz";
     private static final String USERID = "Auto Scheduled";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
-    private static final String RETRY_KEY = "RETRY_KEY";
-    private static final String OTHER_KEY = "OTHER_KEY";
+    private static final String TEST_SCHEDULER = "qa_testing";
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
-    static LinkedHashMap<String, String> EXPORT_APPID_MAP;
+    private static LinkedHashMap<String, String> EXPORT_APPID_MAP;
 
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -111,16 +108,10 @@ public class CDLJobServiceImpl implements CDLJobService {
     private AtlasSchedulingService atlasSchedulingService;
 
     @Inject
-    private ActionService actionService;
-
-    @Inject
     private SchedulingPAService schedulingPAService;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private ColumnMetadataProxy columnMetadataProxy;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
@@ -150,14 +141,13 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${common.quartz.stack.flag:false}")
     private boolean isQuartzStack;
 
+    @Value("${common.le.stack}")
+    private String leStack;
+
     @Inject
     private WorkflowProxy workflowProxy;
 
     private CDLProxy cdlProxy;
-
-    @VisibleForTesting
-    @Value("${cdl.activity.based.pa}")
-    boolean isActivityBasedPA;
 
     @Value("${cdl.app.public.url:https://localhost:9081}")
     private String appPublicUrl;
@@ -193,6 +183,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Override
     public boolean submitJob(CDLJobType cdlJobType, String jobArguments) {
+        boolean isActivityBasedPA = schedulingPAService.isSchedulerEnabled(leStack);
         if (cdlJobType == CDLJobType.PROCESSANALYZE) {
             if (!isActivityBasedPA) {
                 checkAndUpdateJobStatus(CDLJobType.PROCESSANALYZE);
@@ -214,7 +205,14 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         } else if (cdlJobType == CDLJobType.SCHEDULINGPA) {
             try {
-                schedulePAJob();
+                // always run the stack scheduler, use the flag to determine whether it is in
+                // dryRun mode
+                schedulePAJob(leStack, !isActivityBasedPA);
+
+                // test scheduler for QA, only evaluate system status if the flag is set
+                if (schedulingPAService.isSchedulerEnabled(TEST_SCHEDULER)) {
+                    schedulePAJob(TEST_SCHEDULER, false);
+                }
             } catch (Exception e) {
                 log.error("schedule CDLJobType.SCHEDULINGPA failed" + e.getMessage());
                 throw e;
@@ -276,7 +274,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         int runningPAJobsCount = 0;
         int autoScheduledPAJobsCount = 0;
         long currentTimeMillis = System.currentTimeMillis();
-        Date currentTime = new Date(currentTimeMillis);
 
         List<SimpleDataFeed> allDataFeeds = dataFeedService.getSimpleDataFeeds(TenantStatus.ACTIVE, "4.0");
         log.info(String.format("DataFeed for active tenant count: %d.", allDataFeeds.size()));
@@ -362,31 +359,30 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     @Override
-    public void schedulePAJob() {
+    public void schedulePAJob(@NotNull String schedulerName, boolean dryRun) {
         if (systemCheck()) {
             return;
         }
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
-        log.info("Scheduled PAs for tenants = {}. dryRun={}", canRunJobTenantMap, !isActivityBasedPA);
-        Set<String> canRunRetryJobSet = canRunJobTenantMap.get(RETRY_KEY);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(schedulerName);
+        log.info("Scheduled PAs for tenants = {}. schedulerName={} dryRun={}", canRunJobTenantMap, schedulerName,
+                dryRun);
+        Set<String> canRunRetryJobSet = canRunJobTenantMap.get(Scheduler.RETRY_KEY);
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
-                    if (isActivityBasedPA) {
+                    if (!dryRun) {
                         cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
                     }
                 } catch (Exception e) {
                     log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
-                    if (isActivityBasedPA) {
-                        updateRetryCount(needRunJobTenantId);
-                    }
+                    updateRetryCount(needRunJobTenantId);
                 }
             }
         }
-        Set<String> canRunJobSet = canRunJobTenantMap.get(OTHER_KEY);
+        Set<String> canRunJobSet = canRunJobTenantMap.get(Scheduler.OTHER_KEY);
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String needRunJobTenantId : canRunJobSet) {
-                if (isActivityBasedPA) {
+                if (!dryRun) {
                     submitProcessAnalyzeJob(needRunJobTenantId);
                 }
             }

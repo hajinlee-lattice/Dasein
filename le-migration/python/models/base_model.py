@@ -1,11 +1,14 @@
-import models
 from sqlalchemy.ext.declarative import declarative_base
 
+import models
 
 Base = declarative_base()
 
 
 class BaseModel:
+    """
+    Define basic functionality of a model
+    """
 
     def __init__(self, **kwargs):
         if kwargs:

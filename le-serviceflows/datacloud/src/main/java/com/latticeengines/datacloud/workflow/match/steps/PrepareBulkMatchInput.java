@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.workflow.match.steps;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,24 +9,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -47,16 +52,16 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     private static Logger log = LoggerFactory.getLogger(PrepareBulkMatchInput.class);
     private Schema schema;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private LivySessionService sessionService;
 
-    @Autowired
+    @Inject
     private SparkJobService sparkJobService;
 
     @Value("${datacloud.match.fetch.concurrent.blocks.max}")
@@ -229,20 +234,20 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer[] divideIntoNumBlocks(Long count, Integer numBlocks) {
-        Long blockSize = count / numBlocks;
+        long blockSize = count / numBlocks;
         Integer[] blocks = new Integer[numBlocks];
         Long sum = 0L;
         for (int i = 0; i < numBlocks - 1; i++) {
-            blocks[i] = blockSize.intValue();
-            sum += blockSize.intValue();
+            blocks[i] = (int) blockSize;
+            sum += (int) blockSize;
         }
-        blocks[numBlocks - 1] = new Long(count - sum).intValue();
+        blocks[numBlocks - 1] = Long.valueOf(count - sum).intValue();
         log.info("Divide input into blocks [" + StringUtils.join(blocks, ", ") + "]");
         return blocks;
     }
 
     private List<DataCloudJobConfiguration> readAndSplitInputAvro(Integer[] blocks) {
-        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroGlobs);
+        Iterator<GenericRecord> iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlobs);
         List<DataCloudJobConfiguration> configurations = new ArrayList<>();
 
         int blockIdx = 0;
@@ -285,8 +290,23 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         try {
             MatchInput matchInput = jobConfiguration.getMatchInput();
             if (matchInput.getInputBuffer() != null) {
-                HdfsUtils.writeToFile(yarnConfiguration, matchInputFile, JsonUtils.serialize(matchInput));
-                log.info("Write MatchInput on to hdfs, path=" + matchInputFile);
+                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+                retry.execute(ctx ->  {
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("(Attempt=" + ctx.getRetryCount() + ") writing MatchInput on to hdfs, " + //
+                                "path=" + matchInputFile);
+                    }
+                    try {
+                        if (HdfsUtils.fileExists(yarnConfiguration, matchInputFile)) {
+                            HdfsUtils.rmdir(yarnConfiguration, matchInputFile);
+                        }
+                        HdfsUtils.writeToFile(yarnConfiguration, matchInputFile, JsonUtils.serialize(matchInput));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    log.info("Wrote MatchInput on to hdfs, path=" + matchInputFile);
+                    return 0;
+                });
             }
             jobConfiguration.setMatchInputPath(matchInputFile);
             matchInput.setInputBuffer(null);
@@ -303,6 +323,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private void writeBlock(Iterator<GenericRecord> iterator, Integer blockSize, String targetFile) {
+        String localFile = targetFile.substring(targetFile.lastIndexOf("/") + 1);
+        FileUtils.deleteQuietly(new File(localFile));
         int bufferSize = 2000;
         List<GenericRecord> data = new ArrayList<>();
         int count = 0;
@@ -310,27 +332,52 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             data.add(iterator.next());
             count++;
             if (data.size() >= bufferSize) {
-                writeBuffer(targetFile, data);
+                writeBuffer(localFile, data);
                 data.clear();
             }
         }
         if (data.size() > 0) {
-            writeBuffer(targetFile, data);
+            writeBuffer(localFile, data);
         }
-        log.info("Write a block of " + count + " rows to " + targetFile);
+        log.info("Write a block of " + count + " rows to " + localFile);
+        uploadBlockInput(localFile, targetFile);
     }
 
-    private void writeBuffer(String targetFile, List<GenericRecord> data) {
+    private void writeBuffer(String localFile, List<GenericRecord> data) {
         try {
-            if (!HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
-                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, data);
+            if (new File(localFile).exists()) {
+                AvroUtils.appendToLocalFile(data, localFile, true);
             } else {
-                AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, data);
+                AvroUtils.writeToLocalFile(schema, data, localFile, true);
             }
-            log.info("Write a buffer of " + data.size() + " rows to " + targetFile);
+            log.info("Write a buffer of " + data.size() + " rows to " + localFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void uploadBlockInput(String localFile, String targetFile) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + ctx.getRetryCount() + ") uploading " + localFile + " to " + targetFile);
+            }
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, targetFile);
+                }
+                HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile, targetFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            log.info("Uploaded " + localFile + " to " + targetFile);
+            try {
+                FileUtils.deleteQuietly(new File(localFile));
+            } catch (Exception e) {
+                log.warn("Failed to clean up local file " + localFile);
+            }
+            return 0;
+        });
     }
 
     private DataCloudJobConfiguration generateJobConfiguration() {

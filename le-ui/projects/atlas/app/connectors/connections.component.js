@@ -16,7 +16,7 @@ import Connector from './connector.component';
 import { actions, reducer } from './connections.redux';
 
 
-import ConnectorService, { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
+import ConnectorService, { MARKETO, SALESFORCE, ELOQUA, LINKEDIN, FACEBOOK } from './connectors.service';
 
 import SystemsListComponent from './systems-list.component';
 import ReactMainContainer from "../react/react-main-container";
@@ -37,13 +37,11 @@ export default class ConnectionsComponent extends Component {
             solutionInstanceId: null,
             openModal: false
         };
-        this.connectors = ConnectorService.getList(this.ConnectorsService.isMarketoEnabled());
-        // console.log('UUUUUUU ',ReactRouter.getRouter().ngservices.ConnectorsService.isMarketoEnabled());
+        this.connectors = ConnectorService.getList(this.ConnectorsService.isExternalIntegrationEnabled());
     }
 
     handleChange = () => {
         const data = store.getState()['connections'];
-        console.log(data);
         let userName = data.userName;
         let userId = data.userId;
         let accessToken = data.accessToken;
@@ -68,7 +66,6 @@ export default class ConnectionsComponent extends Component {
         injectAsyncReducer(store, 'connections', reducer);
         this.unsubscribe = store.subscribe(this.handleChange);
 
-        // this.getTrayUserName();
         this.router = ReactRouter.getRouter();
         if (name != MARKETO) {
             ConnectorService.setUserValidated(true);
@@ -81,20 +78,23 @@ export default class ConnectionsComponent extends Component {
         console.log(name);
         this.setState({ connectorSelected: name });
         ConnectorService.setConnectorName(name);
-        if (name != MARKETO) {
+        let isExternallyAuthenticatedSystem = ConnectorService.isExternallyAuthenticatedSystem(name);
+        if (!isExternallyAuthenticatedSystem) {
             ConnectorService.setUserValidated(true);
-        } else if (name == MARKETO && this.state.userInfo == null) {
+        } else if (isExternallyAuthenticatedSystem && this.state.userInfo == null) {
             ConnectorService.setUserValidated(true);
         }
 
     }
     generateAuthTokenClickHandler() {
-        if (ConnectorService.getConnectorName() != '' && ConnectorService.getConnectorName() != MARKETO) {
+        let connectorName = ConnectorService.getConnectorName();
+        let isExternallyAuthenticatedSystem = ConnectorService.isExternallyAuthenticatedSystem(connectorName);
+        if (ConnectorService.getConnectorName() != '' && !isExternallyAuthenticatedSystem) {
             ConnectorService.sendMSG(() => {
                 this.ConnectorsService.generateAuthToken();
             });
-        } else if (ConnectorService.getConnectorName() == MARKETO) {
-            this.getSolutionConfiguration(this.state.userInfo.id, MARKETO, this.state.userName + '_' + MARKETO + '_' + (new Date()).getTime());
+        } else if (isExternallyAuthenticatedSystem) {
+            this.getSolutionConfiguration(this.state.userInfo.id, connectorName, this.state.userName + '_' + connectorName + '_' + (new Date()).getTime());
         }
 
     }
@@ -107,7 +107,7 @@ export default class ConnectionsComponent extends Component {
                 if (response.data && response.data.name) {
                     this.setState({ userValidated: true, userInfo: response.data, accessToken: response.data.accessToken });
                     solutionInstanceConfig.accessToken = this.state.accessToken;
-                    console.log(!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo)));
+                    console.log(!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (ConnectorService.isExternallyAuthenticatedSystem(this.state.connectorSelected) && (!this.state.accessToken || !this.state.userInfo)));
                     httpService.unsubscribeObservable(observer);
                 } else {
                     this.setState({ userValidated: false, userInfo: {} });
@@ -122,27 +122,6 @@ export default class ConnectionsComponent extends Component {
         httpService.get(('/tray/user?userName=' + userName), observer);
     }
 
-    // getTrayUserName() {
-    //     let observer = new Observer(
-    //         response => {
-    //             // httpService.printObservables();
-    //             if (response.data && response.data.DropBox) {
-    //                 let userName = response.data.DropBox;
-    //                 this.setState({ userName: userName });
-    //                 httpService.unsubscribeObservable(observer);
-    //             } else {
-    //                 this.setState({ userName: null });
-    //             }
-    //         },
-    //         error => {
-    //             console.error('ERROR ', error);
-    //             this.setState({ userName: null });
-    //         }
-    //     );
-
-    //     httpService.get('/pls/dropbox/summary', observer);
-    // }
-
     getSolutionConfiguration(userId, tag, instanceName) {
         const configWindow = openConfigWindow();
         solutionInstanceConfig.orgType = tag;
@@ -155,10 +134,10 @@ export default class ConnectionsComponent extends Component {
                     solutionInstanceConfig.registerLookupIdMap = true;
                     solutionInstanceConfig.accessToken = this.state.accessToken;
                     configWindow.location = this.getPopupUrl(data.solutionInstanceId, data.authorizationCode);
-                    // this.setState({openModal: true});
                     httpService.unsubscribeObservable(observer);
                 } else {
                     console.log("ERROR");
+                    console.log(response);
                 }
             },
             error => {
@@ -168,26 +147,6 @@ export default class ConnectionsComponent extends Component {
         let userAccessToken = this.state.accessToken;
         httpService.get('/tray/solutionconfiguration?tag=' + tag + '&userId=' + userId + '&instanceName=' + instanceName, observer, {UserAccessToken: userAccessToken});
     }
-
-    // getUserAccessToken(userId) {
-    //     let observer = new Observer(
-    //         response => {
-    //             if (response.data) {
-    //                 this.setState({accessToken: response.data.token});
-    //                 solutionInstanceConfig.accessToken = this.state.accessToken;
-    //                 console.log(!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo)));
-    //                 httpService.unsubscribeObservable(observer);
-    //             } else {
-    //                 this.setState({accessToken: null});
-    //             }
-    //         },
-    //         error => {
-    //             this.setState({accessToken: null});
-    //         }
-    //     );
-
-    //     httpService.post('/tray/authorize?userId=' + userId, {}, observer);
-    // }
 
     getIFrame() {
         let partnerId = 'LatticeEngines';
@@ -248,7 +207,7 @@ export default class ConnectionsComponent extends Component {
                     <div className="right">
                         <LeButton
                             name="credentials"
-                            disabled={!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (this.state.connectorSelected == 'Marketo' && (!this.state.accessToken || !this.state.userInfo))}
+                            disabled={!(ConnectorService.isUserValidated()) && this.state.connectorSelected == '' || (ConnectorService.isExternallyAuthenticatedSystem(this.state.connectorSelected) && (!this.state.accessToken || !this.state.userInfo))}
                             config={{
                                 label: "Create",
                                 classNames: "gray-button aptrinsic-connections-create-system"

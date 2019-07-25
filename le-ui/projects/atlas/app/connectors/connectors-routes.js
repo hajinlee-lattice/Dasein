@@ -33,9 +33,9 @@ angular
                 }
             });
         }
-        this.isMarketoEnabled = function () {
+        this.isExternalIntegrationEnabled = function () {
             let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_EXTERNAL_INTEGRATION);
-            actions.setMarketoEnabled(connectorsEnabled);
+            actions.setExternalIntegrationEnabled(connectorsEnabled);
             return connectorsEnabled;
         }
     })

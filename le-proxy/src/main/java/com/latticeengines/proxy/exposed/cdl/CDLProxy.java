@@ -462,4 +462,9 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
                     "Failed to start entityExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
+
+    public Boolean isActivityBasedPA(String schedulerName) {
+        String url = constructUrl("/schedulingPAQueue/isActivityBasedPA?schedulerName={schedulerName}", schedulerName);
+        return get("get isActivityBasedPA Flag", url, Boolean.class);
+    }
 }

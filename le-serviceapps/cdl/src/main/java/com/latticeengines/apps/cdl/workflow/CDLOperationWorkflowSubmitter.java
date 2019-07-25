@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
@@ -49,6 +51,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowCo
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -71,14 +74,23 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Autowired
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration, WorkflowPidWrapper pidWrapper) {
+                                MaintenanceOperationConfiguration maintenanceOperationConfiguration, WorkflowPidWrapper pidWrapper) {
         if (customerSpace == null) {
             throw new IllegalArgumentException("The CustomerSpace cannot be null!");
+        } else if (migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace.toString()))) {
+            log.error("Tenant {} is in migration and should not kickoff CDL operation workflow.", customerSpace.toString());
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.getTenantId()));
         }
         log.info(String.format("CDLOperation WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
@@ -131,7 +143,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private Action registerAction(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration, Long workflowPid) {
+                                  MaintenanceOperationConfiguration maintenanceOperationConfiguration, Long workflowPid) {
         log.info(String.format("Registering an operation action for tenant=%s", customerSpace.toString()));
         Action action = new Action();
         action.setType(ActionType.CDL_OPERATION_WORKFLOW);
@@ -167,8 +179,8 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid,
-            DataFeed.Status status, String executionId) {
+                                                                    MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid,
+                                                                    DataFeed.Status status, String executionId) {
         boolean isCleanupByUpload = false;
         BusinessEntity businessEntity = null;
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
@@ -201,7 +213,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .tableName(tableName) //
                 .businessEntity(businessEntity)
                 .workflowContainerMem(workflowMemMb) //
-                .inputProperties(ImmutableMap.<String, String> builder() //
+                .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName)//

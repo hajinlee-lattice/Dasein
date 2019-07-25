@@ -37,6 +37,7 @@ public class SchedulingPAServiceImplUnitTestNG {
     private static final String OTHER_KEY = "OTHER_KEY";
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
+    private static final String TEST_SCHEDULER_NAME = "Default";
 
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
@@ -50,8 +51,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 10);
@@ -62,13 +63,13 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 7);
         //Retry invalid, last finish time < 15min, can not poll from queue
-        Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        Assert.assertFalse(canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
     }
 
     @Test(groups = "unit")
@@ -76,8 +77,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 5);
@@ -88,8 +89,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 2);
@@ -102,8 +103,8 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 5);
@@ -116,13 +117,13 @@ public class SchedulingPAServiceImplUnitTestNG {
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
-        doReturn(map).when(schedulingPAService).setSystemStatus();
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList();
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
         log.info(JsonUtils.serialize(canRunJobTenantMap));
         Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 2);
         Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 3);
         //Retry invalid, last finish time < 15min, can not poll from queue
-        Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        Assert.assertFalse(canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
         //QA tenant has limit, can not poll from queue.
         Assert.assertFalse(canRunJobTenantMap.get(OTHER_KEY).contains("tenant2"));
     }

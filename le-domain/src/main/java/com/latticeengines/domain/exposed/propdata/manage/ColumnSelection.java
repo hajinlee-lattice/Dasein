@@ -153,7 +153,8 @@ public class ColumnSelection {
                 ColumnSelection.Predefined.TalkingPoint.getName(),
                 ColumnSelection.Predefined.CompanyProfile.getName() };
 
-        // For DataCloud match & CDL match (before M25)
+        // For DataCloud match & CDL match (before M25) & attribute lookup in entity
+        // match
         public static final EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID,
                 Enrichment, Segment, TalkingPoint, CompanyProfile, Seed);
 

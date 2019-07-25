@@ -1,18 +1,17 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -34,7 +33,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @MatchStep
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         validate(input);
-        if (isCdlLookup(input)) {
+        if (isAttrLookup(input)) {
             if (StringUtils.isBlank(input.getDataCloudVersion())) {
                 input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
             }
@@ -52,24 +51,18 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         MatchOutput output;
 
         ColumnSelection columnSelection;
-        if (isCdlLookup(input)) {
+        if (isAttrLookup(input)) {
             context.setCdlLookup(true);
-            if (metadatas == null) {
-                metadatas = parseCDLMetadata(input);
-            }
-            columnSelection = new ColumnSelection();
-            List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
-                    .collect(Collectors.toList());
-            columnSelection.setColumns(columns);
-            context.setCustomAccountDataUnit(parseCustomAccount(input));
-            context.setCustomDataUnits(parseCustomDynamo(input));
+            Pair<ColumnSelection, List<ColumnMetadata>> pair = setAttrLookupMetadata(context, input, metadatas);
+            metadatas = pair.getRight();
+            columnSelection = pair.getLeft();
         } else {
             context.setCdlLookup(false);
             columnSelection = parseColumnSelection(input);
         }
         context.setColumnSelection(columnSelection);
-        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time and Bulk.  In bulk,
-        //     metadatas is always set to null but not in real time.
+        // TODO(lming, ysong): isCdlLookup false case not handled the same in Real Time
+        // and Bulk. In bulk, metadatas is always set to null but not in real time.
         output = initializeMatchOutput(input, columnSelection, metadatas);
 
         context.setInput(input);

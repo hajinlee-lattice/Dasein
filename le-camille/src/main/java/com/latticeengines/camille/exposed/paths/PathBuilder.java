@@ -232,4 +232,8 @@ public final class PathBuilder {
     public static Path buildSchedulingGroupPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_GROUP_FILE);
     }
+
+    public static Path buildSchedulingPAFlagPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_PA_FLAG_FILE);
+    }
 }

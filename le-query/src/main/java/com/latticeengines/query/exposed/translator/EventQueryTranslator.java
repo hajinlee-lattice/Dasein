@@ -538,13 +538,18 @@ public class EventQueryTranslator extends TranslatorCommon {
         SQLQueryFactory factory = getSQLQueryFactory(queryFactory, repository, sqlUser);
         EntityPath<String> accountViewPath = new PathBuilder<>(String.class, KEYS);
         StringPath accountId = Expressions.stringPath(accountViewPath, ACCOUNT_ID);
-        NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
+
+        SQLQuery subQueryExpression;
         if (evaluationPeriodId < 0) {
             EntityPath<String> periodViewPath = new PathBuilder<>(String.class, MAX_PID);
-            periodIdExpression = Expressions.numberPath(Long.class, periodViewPath, PERIOD_ID);
+            NumberExpression periodIdExpression = Expressions.numberPath(Long.class, periodViewPath, PERIOD_ID);
+            subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
+                    .from(keysPath, Expressions.stringPath(MAX_PID));
+        } else {
+            NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
+            subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
+                    .from(keysPath);
         }
-        SQLQuery subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression).from(keysPath,
-                Expressions.stringPath(MAX_PID));
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
         subQuery.setAlias(generateAlias(BusinessEntity.Account.name()));

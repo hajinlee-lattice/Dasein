@@ -234,9 +234,8 @@ public class PatchResource {
     private PatchValidationResponse validate(@NotNull List<PatchBook> books, @NotNull PatchBook.Type type,
             @NotNull PatchRequest request) {
         String dataCloudVersion = request.getDataCloudVersion();
-
-        Pair<Integer, List<PatchBookValidationError>> validationResult = patchBookValidator.validate(type,
-                dataCloudVersion, books);
+        Pair<Integer, List<PatchBookValidationError>> validationResult = patchBookValidator
+                .validate(type, dataCloudVersion, books);
         Integer total = validationResult.getKey();
         List<PatchBookValidationError> errors = validationResult.getValue();
         Preconditions.checkNotNull(total);

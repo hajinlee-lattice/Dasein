@@ -5,7 +5,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEnt
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
-import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
@@ -74,7 +72,7 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
     public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion) {
         com.latticeengines.domain.exposed.camille.Path ingestionDir = hdfsPathBuilder
                 .constructIngestionDir(ingestionName);
-        List<String> versions = new ArrayList<String>();
+        List<String> versions = new ArrayList<>();
         try {
             if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
                 List<String> fullPaths = HdfsUtils.getFilesForDir(yarnConfiguration,
@@ -92,7 +90,7 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to scan hdfs directory %s", ingestionDir.toString()), e);
         }
-        List<String> mostRecentVersions = new ArrayList<String>();
+        List<String> mostRecentVersions = new ArrayList<>();
         if (versions.size() <= checkVersion) {
             mostRecentVersions.addAll(versions);
         } else {
@@ -142,53 +140,6 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
             fileVersion = df.format(timestamp);
         }
         return fileNamePrefix + fileVersion + fileNamePostfix + fileExtension;
-    }
-
-    @Override
-    public List<String> getFileNamesOfMostRecentVersions(List<String> fileNames, int checkVersion,
-            FileCheckStrategy checkStrategy, String fileTimestamp) {
-        if (checkStrategy == FileCheckStrategy.ALL) {
-            return fileNames;
-        }
-        String timestampPattern = fileTimestamp.replace("d", "\\d").replace("y", "\\d").replace("M",
-                "\\d");
-        Pattern pattern = Pattern.compile(timestampPattern);
-        List<String> result = new ArrayList<String>();
-        for (String fileName : fileNames) {
-            Matcher matcher = pattern.matcher(fileName);
-            if (matcher.find()) {
-                String timestampStr = matcher.group();
-                DateFormat df = new SimpleDateFormat(fileTimestamp);
-                try {
-                    Date timestamp = df.parse(timestampStr);
-                    Calendar cal = Calendar.getInstance();
-                    switch (checkStrategy) {
-                    case DAY:
-                        cal.add(Calendar.DATE, -checkVersion);
-                        break;
-                    case WEEK:
-                        cal.add(Calendar.DATE,
-                                -checkVersion * 7 - (cal.get(Calendar.DAY_OF_WEEK) - cal.getFirstDayOfWeek()));
-                        break;
-                    case MONTH:
-                        cal.add(Calendar.MONTH, -checkVersion);
-                        cal.set(Calendar.DATE, 1);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException(
-                                String.format("Unknown file check strategy: %s", checkStrategy.toString()));
-                    }
-                    df = new SimpleDateFormat("yyyyMMdd");
-                    Date cutOffTimestamp = df.parse(df.format(cal.getTime()));
-                    if (timestamp.compareTo(cutOffTimestamp) >= 0) {
-                        result.add(fileName);
-                    }
-                } catch (ParseException e) {
-                    throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
-                }
-            }
-        }
-        return result;
     }
 
     @Override

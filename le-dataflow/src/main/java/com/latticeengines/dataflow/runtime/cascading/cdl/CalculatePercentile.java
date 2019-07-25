@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +140,7 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
             return;
         }
         try {
-            String targetScoreDerivation = HdfsUtils.getHdfsFileContents(new Configuration(), path);
+            String targetScoreDerivation = HdfsUtils.getHdfsFileContents(getYarnConfig(), path);
             if (targetScoreDerivation == null) {
                 log.warn("There's no target score derivation path for modelId=" + modelId);
                 return;
@@ -159,14 +161,15 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
             if (scoreDerivation != null) {
                 String path = targetScoreDerivationPaths.get(modelId);
                 if (path != null) {
-                    HdfsUtils.writeToFile(new Configuration(), path, scoreDerivation);
-                    log.info("Write target score derivation to " + path + " for modelId=" + modelId);
+                    log.info("Starting to write target score derivation to " + path + " for modelId=" + modelId);
+                    HdfsUtils.writeToFile(getYarnConfig(), path, scoreDerivation);
+                    log.info("Finished writing target score derivation to " + path + " for modelId=" + modelId);
                 } else {
                     log.warn("Can not find the target score derivation path for modelId=" + modelId);
                 }
             }
         } catch (Exception ex) {
-            log.warn("Can not write target score derivation for modelId=" + modelId + " error=" + ex.getMessage());
+            log.warn("Can not write target score derivation for modelId=" + modelId + " error=" + ex.getMessage(), ex);
         }
     }
 
@@ -192,5 +195,26 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
         }
         ScoreDerivation derivation = new ScoreDerivation("TargetScoreDerivation", 0, percentiles, null);
         return JsonUtils.serialize(derivation);
+    }
+
+    private Configuration getYarnConfig() {
+        Configuration conf = new Configuration();
+        String hadoopConfDir = "/etc/hadoop/conf";
+        if (!new File(hadoopConfDir + "/core-site.xml").exists()) {
+            hadoopConfDir = System.getenv("HADOOP_CONF_DIR");
+            if (StringUtils.isBlank(hadoopConfDir)) {
+                String hadoopHome = System.getenv("HADOOP_HOME");
+                if (StringUtils.isNotBlank(hadoopHome)) {
+                    hadoopConfDir = hadoopHome + "/etc/hadoop";
+                }
+            }
+        }
+        log.info("Hadoop config Dir=" + hadoopConfDir);
+        if (StringUtils.isNotBlank(hadoopConfDir)) {
+            log.info("Adding Hadoop config Dir=" + hadoopConfDir);
+            conf.addResource(new Path(hadoopConfDir + "/core-site.xml"));
+            conf.addResource(new Path(hadoopConfDir + "/hdfs-site.xml"));
+        }
+        return conf;
     }
 }

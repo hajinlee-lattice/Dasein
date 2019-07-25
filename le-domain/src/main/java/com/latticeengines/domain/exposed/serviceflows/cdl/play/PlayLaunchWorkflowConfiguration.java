@@ -43,7 +43,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
             exportPublishToSNSConf.setExternalAudienceId(playLaunch.getAudienceId());
             exportPublishToSNSConf.setExternalAudienceName(playLaunch.getAudienceName());
-//            exportPublishToSNSConf.setChannelConfig(playLaunch.getChannelConfig());
+            exportPublishToSNSConf.setChannelConfig(playLaunch.getChannelConfig());
             return this;
         }
 

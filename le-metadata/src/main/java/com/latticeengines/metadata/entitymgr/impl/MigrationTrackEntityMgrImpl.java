@@ -39,4 +39,11 @@ public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Mig
     public MigrationTrack findByTenant(Tenant tenant) {
         return migrationTrackRepository.findByTenant(tenant);
     }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED, readOnly = true)
+    @Override
+    public boolean tenantInMigration(Tenant tenant) {
+        MigrationTrack track = findByTenant(tenant);
+        return track != null && track.getStatus() == MigrationTrack.Status.STARTED;
+    }
 }

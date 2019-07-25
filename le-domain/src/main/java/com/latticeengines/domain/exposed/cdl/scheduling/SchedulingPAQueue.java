@@ -7,8 +7,15 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 
 public class SchedulingPAQueue<T extends SchedulingPAObject> {
+
+    private static final Logger log = LoggerFactory.getLogger(SchedulingPAQueue.class);
 
     private final SystemStatus systemStatus;
 
@@ -95,6 +102,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
             }
         }while (size() > 0);
         systemStatus.getScheduleTenants().addAll(canRunJobSetInQueue);
+        log.debug("queue: " + this.getQueueName() + ", canRunJobs: " + JsonUtils.serialize(canRunJobSetInQueue));
         return canRunJobSetInQueue;
     }
 

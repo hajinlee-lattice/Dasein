@@ -2,6 +2,8 @@ export const MARKETO = 'Marketo';
 export const SALESFORCE = 'Salesforce';
 export const ELOQUA = 'Eloqua';
 export const AWS_S3 = 'AWS_S3';
+export const LINKEDIN = "LinkedIn";
+export const FACEBOOK = "Facebook";
 
 import messageService from 'common/app/utilities/messaging-service';
 import Message, {
@@ -38,6 +40,16 @@ class ConnectorService {
                     defaultConnector: true,
                     name: 'AWS_S3',
                     config: { img: '/atlas/assets/images/amazon-s3.png', text: '' }
+                },
+                LinkedIn: {
+                    defaultConnector: false,
+                    name: 'LinkedIn',
+                    config: { img: '/atlas/assets/images/linkedin.png', text: 'Generate leads and build brand awareness by running social ads on the world’s largest professional network' }
+                },
+                Facebook: {
+                    defaultConnector: false,
+                    name: 'Facebook',
+                    config: { img: '/atlas/assets/images/facebook.png', text: 'Display social ads to reach your future consumers by marketing to 2 billion people on Facebook' }
                 }
             };
             this._connectorsList = [
@@ -95,13 +107,13 @@ class ConnectorService {
         this._connectorsList = list;
     }
 
-    getList(markettoEnabled) {
+    getList(externalIntegrationEnabled) {
         if (this._connectorsList.length == 0) {
             Object.keys(this._connectors).forEach(element => {
                 let el = this._connectors[element];
-                if (element !== MARKETO && el && el.defaultConnector == false) {
+                if (!this.isExternallyAuthenticatedSystem(element) && el && el.defaultConnector == false) {
                     this._connectorsList.push(this._connectors[element]);
-                } else if (markettoEnabled && el && el.defaultConnector == false) {
+                } else if (externalIntegrationEnabled && el && el.defaultConnector == false) {
                     this._connectorsList.push(this._connectors[element]);
                 }
             });
@@ -130,6 +142,18 @@ class ConnectorService {
             }
         });
         messageService.sendMessage(msg);
+    }
+    isExternallyAuthenticatedSystem(systemName) {
+        switch (systemName) {
+            case MARKETO:
+            case LINKEDIN:
+            case FACEBOOK:
+                return true;
+            case SALESFORCE:
+            case ELOQUA:
+            case AWS_S3:
+                return false
+        }
     }
 }
 

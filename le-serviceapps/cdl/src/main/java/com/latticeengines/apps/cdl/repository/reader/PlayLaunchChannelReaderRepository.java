@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepository {
 
     @Query("SELECT c FROM PlayLaunchChannel c "
-            + "WHERE c.isAlwaysOn = :isAlwaysOn AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate "
+            + "WHERE c.isAlwaysOn = :isAlwaysOn AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate AND c.play.deleted = false "
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("isAlwaysOn") Boolean isAlwaysOn,
             @Param("startDate") Date startDate, @Param("endDate") Date endDate);
