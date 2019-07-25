@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.mds.AccountAttrsDecoratorFac;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
@@ -29,8 +28,7 @@ public class AccountAttrsDecoratorFacImpl implements AccountAttrsDecoratorFac {
         String tenantId = namespace.getCoord1();
         if (StringUtils.isNotBlank(tenantId)) {
             boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(tenantId));
-            boolean entityMatchEnabled = batonService.isEnabled(CustomerSpace.parse(tenantId),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
             return new AccountAttrsDecorator(internalEnrichEnabled, entityMatchEnabled);
         } else {
             return new DummyDecorator();

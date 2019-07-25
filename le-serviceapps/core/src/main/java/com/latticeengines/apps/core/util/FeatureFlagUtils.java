@@ -1,5 +1,7 @@
 package com.latticeengines.apps.core.util;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +34,14 @@ public class FeatureFlagUtils {
     }
 
     public static boolean isEntityMatchEnabled(FeatureFlagValueMap flags) {
+        String[] entityMatchFeatureFlags = { LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName() };
         try {
-            return flags.containsKey(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName())
-                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName()));
+            return Arrays.stream(entityMatchFeatureFlags).anyMatch(
+                    featureFlag -> flags.containsKey(featureFlag) && Boolean.TRUE.equals(flags.get(featureFlag)));
         } catch (Exception e) {
-            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName() + " feature flag!", e);
+            log.error("Error when checking entity match feature flags: " + String.join(",", entityMatchFeatureFlags),
+                    e);
             return false;
         }
     }

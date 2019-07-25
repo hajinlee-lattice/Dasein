@@ -573,6 +573,7 @@ public class BatonServiceImpl implements BatonService {
         return loadDirectory(spaceConfig, spaceConfigPath);
     }
 
+    @Override
     public boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product) {
         String contractId = customerSpace.getContractId();
         String tenantId = customerSpace.getTenantId();
@@ -592,15 +593,24 @@ public class BatonServiceImpl implements BatonService {
         }
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
     }
 
+    @Override
+    public boolean isEntityMatchEnabled(CustomerSpace customerSpace) {
+        return isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA)
+                || isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+    }
+
+    @Override
     public void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value) {
         FeatureFlagClient.setEnabled(customerSpace, flag.getName(), value);
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace) {
         FeatureFlagValueMap valueMapInCamille = FeatureFlagClient.getFlags(customerSpace);
