@@ -123,6 +123,7 @@ public class ProductUtils {
             List<String> productTypes) {
         Set<String> productIds = new HashSet<>();
         filePath = getPath(filePath);
+        log.info("Load products from " + filePath + "/*.avro");
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
