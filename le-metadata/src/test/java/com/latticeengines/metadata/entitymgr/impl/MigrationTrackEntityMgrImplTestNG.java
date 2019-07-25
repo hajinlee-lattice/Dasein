@@ -26,7 +26,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     @Autowired
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    private static final MigrationTrack.Status STATUS = MigrationTrack.Status.SCHEDULED;
+    private static final MigrationTrack.Status STATUS = MigrationTrack.Status.STARTED;
     private static final DataCollection.Version VERSION = DataCollection.Version.Blue;
     private static final String STATSNAME = "Test";
     private static Tenant tenant1, tenant2, untracked;
@@ -119,17 +119,26 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
     public void testTenantInMigrationForTrackedTenants(Tenant tenant, MigrationTrack track) {
+        Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
+        track.setStatus(MigrationTrack.Status.COMPLETED);
+        migrationTrackEntityMgr.update(track);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(tenant));
         track.setStatus(MigrationTrack.Status.STARTED);
         migrationTrackEntityMgr.update(track);
-        Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
     }
 
     @Test(groups = "functional")
-    public void testTenantInMigrationForUntrackedTenants() {
+    public void testUntrackedTenants() {
         tenantEntityMgr.create(untracked);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(untracked));
+        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(untracked, "This table"));
         tenantEntityMgr.delete(untracked);
+    }
+
+    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
+    public void testCanDeleteOrRenameTableTrackedTenant(Tenant tenant, MigrationTrack track) {
+        Assert.assertFalse(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
+        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "can delete this table"));
     }
 
     @DataProvider(name = "entityProvider")

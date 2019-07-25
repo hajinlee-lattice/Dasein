@@ -1,5 +1,9 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,5 +49,15 @@ public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Mig
     public boolean tenantInMigration(Tenant tenant) {
         MigrationTrack track = findByTenant(tenant);
         return track != null && track.getStatus() == MigrationTrack.Status.STARTED;
+    }
+
+    @Override
+    public boolean canDeleteOrRenameTable(Tenant tenant, String tableName) {
+        MigrationTrack track = findByTenant(tenant);
+        if (track != null && track.getStatus() == MigrationTrack.Status.STARTED) {
+            List<String> tableNames = track.getCurActiveTable().values().stream().flatMap(Arrays::stream).collect(Collectors.toList());
+            return !tableNames.contains(tableName);
+        }
+        return true;
     }
 }
