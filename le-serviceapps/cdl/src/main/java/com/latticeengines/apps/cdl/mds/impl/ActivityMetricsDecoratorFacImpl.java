@@ -20,7 +20,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,9 +81,6 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     private ActivityMetricsProxy metricsProxy;
 
     @Inject
-    private Configuration yarnConfiguration;
-
-    @Inject
     private S3Service s3Service;
 
     @Override
@@ -105,7 +101,7 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                     Map<String, List<Product>> productMap = loadProductMap(customerSpace);
                     List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
                     return metadata.map(m -> {
-                        return staticFilter(m, productMap, metrics);
+                        return staticFilter(customerSpace.toString(), m, productMap, metrics);
                     });
                 }
 
@@ -115,7 +111,7 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                     Map<String, List<Product>> productMap = loadProductMap(customerSpace);
                     List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
                     return metadata.map(m -> {
-                        return staticFilter(m, productMap, metrics);
+                        return staticFilter(customerSpace.toString(), m, productMap, metrics);
                     });
                 }
             };
@@ -128,7 +124,8 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     /**
      * Static logic applied to all tenants
      */
-    private static ColumnMetadata staticFilter(ColumnMetadata cm, Map<String, List<Product>> productMap,
+    private static ColumnMetadata staticFilter(String customerSpace, ColumnMetadata cm,
+            Map<String, List<Product>> productMap,
             List<ActivityMetrics> metrics) {
         String attrName = cm.getAttrName();
         cm.setCategory(Category.PRODUCT_SPEND);
@@ -146,7 +143,7 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
         }
         cm.disableGroup(CompanyProfile);
         cm.disableGroup(Model);
-        return checkDeprecate(cm, productMap, metrics);
+        return checkDeprecate(customerSpace, cm, productMap, metrics);
     }
 
     /**
@@ -200,25 +197,31 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
         return metrics;
     }
 
-    private static ColumnMetadata checkDeprecate(ColumnMetadata cm, Map<String, List<Product>> productMap,
+    private static ColumnMetadata checkDeprecate(String customerSpace, ColumnMetadata cm,
+            Map<String, List<Product>> productMap,
             List<ActivityMetrics> metrics) {
         if (!ActivityMetricsUtils.isActivityMetricsAttr(cm.getAttrName())) {
             return cm;
         }
         String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
         if (StringUtils.isBlank(productId)) {
-            log.warn("Cannot parse product id from attribute name " + cm.getAttrName());
-            return cm;
+            log.warn("Cannot parse product id from attribute name {}. Marking {} as deprecated for tennant {}",
+                    cm.getAttrName(), cm.getAttrName(), customerSpace);
+            return markDeprecate(cm);
         }
         List<Product> products = productMap.get(productId);
         if (CollectionUtils.isEmpty(products)) {
-            log.warn("Cannot find product with ProductId {}", productId);
-            return cm;
+            log.warn(
+                    "Cannot find product with ProductId {} derived from attribute name {}. Marking {} as deprecated for tennant {}",
+                    productId, cm.getAttrName(), cm.getAttrName(), customerSpace);
+            return markDeprecate(cm);
         }
         Product product = products.stream().filter(Objects::nonNull).findFirst().orElse(null);
         if (product == null) {
-            log.warn("Cannot find product with ProductId {}", productId);
-            return cm;
+            log.warn(
+                    "Cannot find product with ProductId {} derived from attribute name {}. Marking {} as deprecated for tennant {}",
+                    productId, cm.getAttrName(), cm.getAttrName(), customerSpace);
+            return markDeprecate(cm);
         }
         if (ProductStatus.Obsolete.name().equalsIgnoreCase(product.getProductStatus())) {
             return markDeprecate(cm);

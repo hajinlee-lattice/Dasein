@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -78,8 +77,8 @@ public class ProductUtils {
     public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,
             List<String> productStatuses) {
         AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter);
-        return loadProducts(iter, productTypes == null ? Collections.emptySet() : new HashSet<>(productTypes),
-                productStatuses == null ? Collections.emptySet() : new HashSet<>(productStatuses));
+        return loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+                productStatuses == null ? null : new HashSet<>(productStatuses));
     }
 
     public static List<Product> loadProducts(Iterator<GenericRecord> iter, Set<String> productTypes,
@@ -122,7 +121,6 @@ public class ProductUtils {
             List<String> productTypes) {
         Set<String> productIds = new HashSet<>();
         filePath = getPath(filePath);
-        log.info("Load products from " + filePath + "/*.avro");
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
@@ -230,7 +228,6 @@ public class ProductUtils {
                 productMap.put(product.getProductId(), products);
             }
         });
-
         return productMap;
     }
 
