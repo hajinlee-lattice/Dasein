@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -40,10 +41,34 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
     private static final Logger log = LoggerFactory.getLogger(ProfileContact.class);
 
+    private boolean shortCut;
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        setEvaluationDateStrAndTimestamp();
+
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
+                Arrays.asList(CONTACT_SERVING_TABLE_NAME, CONTACT_PROFILE_TABLE_NAME, CONTACT_STATS_TABLE_NAME));
+        shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
+
+        if (shortCut) {
+            log.info("Found serving, profile and stats tables in workflow context, going thru short-cut mode.");
+            servingStoreTableName = tablesInCtx.get(0).getName();
+            profileTableName = tablesInCtx.get(1).getName();
+            statsTableName = tablesInCtx.get(2).getName();
+
+            TableRoleInCollection profileRole = profileTableRole();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), profileTableName, profileRole, inactive);
+
+            TableRoleInCollection servingStoreRole = BusinessEntity.Contact.getServingStore();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
+                    servingStoreRole, inactive);
+
+            exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
+            updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        } else {
+            setEvaluationDateStrAndTimestamp();
+        }
     }
 
     @Override
@@ -53,6 +78,10 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
+        if (shortCut) {
+            return null;
+        }
+
         String masterTableName = masterTable.getName();
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
@@ -82,6 +111,14 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         // -----------
         request.setSteps(steps);
         return request;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        exportToS3AndAddToContext(servingStoreTableName, CONTACT_SERVING_TABLE_NAME);
+        exportToS3AndAddToContext(profileTableName, CONTACT_PROFILE_TABLE_NAME);
+        exportToS3AndAddToContext(statsTableName, CONTACT_STATS_TABLE_NAME);
     }
 
     private TransformationStepConfig removeOrphan(int bucketStep) {

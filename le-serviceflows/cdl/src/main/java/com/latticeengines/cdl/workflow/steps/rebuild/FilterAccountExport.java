@@ -64,32 +64,31 @@ public class FilterAccountExport extends RunSparkJob<ProcessAccountStepConfigura
     protected CopyConfig configureJob(ProcessAccountStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        String accountExpotTableName = getStringValueFromContext(ACCOUNT_EXPORT_TABLE_NAME);
-        if (StringUtils.isNotBlank(accountExpotTableName)) {
-            Table accountFeatureTable = metadataProxy.getTable(customerSpace.toString(), accountExpotTableName);
-            if (accountFeatureTable != null) {
-                log.info("Found account export table in context, going thru short-cut mode.");
-                shortCutMode = true;
-                dataCollectionProxy.upsertTable(customerSpace.toString(), accountExpotTableName, //
-                        TableRoleInCollection.AccountExport, inactive);
-                return null;
+        Table accExportTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_EXPORT_TABLE_NAME);
+        shortCutMode = accExportTableInCtx != null;
+
+        if (shortCutMode) {
+            log.info("Found account export table in context, going thru short-cut mode.");
+            String accountExpotTableName = accExportTableInCtx.getName();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), accountExpotTableName, //
+                    TableRoleInCollection.AccountExport, inactive);
+            return null;
+        } else {
+            String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
+            if (StringUtils.isBlank(fullAccountTableName)) {
+                throw new IllegalStateException("Cannot find the fully enriched account table");
             }
-        }
+            Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
+            if (fullAccountTable == null) {
+                throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
+            }
 
-        String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
-        if (StringUtils.isBlank(fullAccountTableName)) {
-            throw new IllegalStateException("Cannot find the fully enriched account table");
+            CopyConfig config = new CopyConfig();
+            config.setInput(Collections.singletonList(fullAccountTable.toHdfsDataUnit("FullAccount")));
+            config.setSelectAttrs(getRetrainAttrNames());
+            config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+            return config;
         }
-        Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
-        if (fullAccountTable == null) {
-            throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
-        }
-
-        CopyConfig config = new CopyConfig();
-        config.setInput(Collections.singletonList(fullAccountTable.toHdfsDataUnit("FullAccount")));
-        config.setSelectAttrs(getRetrainAttrNames());
-        config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-        return config;
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -67,7 +68,8 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         String avroPath = sparkResult.getPath();
         Configuration yarnConfiguration = //
                 ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).getYarnConfiguration();
-        AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath + "/*.avro");
+        AvroUtils.AvroFilesIterator iterator = //
+                AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(avroPath));
         Map<String, Long> coverage = new TreeMap<>();
         iterator.forEachRemaining(record -> {
             String rating = record.get(InterfaceName.Rating.name()).toString();

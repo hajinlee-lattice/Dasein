@@ -57,19 +57,17 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
 
     @Override
     public void execute() {
-        if (configuration.isEntityMatchEnabled()) {
-            customerSpace = configuration.getCustomerSpace();
-            boolean isCompleted = Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
-            if (!isCompleted) {
-                for (String contextKey : Arrays.asList( //
-                        ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
-                        ENTITY_MATCH_CONTACT_TARGETTABLE, //
-                        ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE //
-                )) {
-                    exportToS3AndAddToTempList(contextKey);
-                }
-                putObjectInContext(ENTITY_MATCH_COMPLETED, true);
+        customerSpace = configuration.getCustomerSpace();
+        boolean isCompleted = Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
+        if (!isCompleted) {
+            for (String contextKey : Arrays.asList( //
+                    ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+                    ENTITY_MATCH_CONTACT_TARGETTABLE, //
+                    ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE //
+            )) {
+                exportToS3AndAddToTempList(contextKey);
             }
+            putObjectInContext(ENTITY_MATCH_COMPLETED, true);
         }
     }
 

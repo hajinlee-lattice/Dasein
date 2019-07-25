@@ -27,16 +27,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
-import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -54,7 +50,6 @@ import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
@@ -124,24 +119,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
-        Set<String> renewableKeys = Sets.newHashSet( //
-                ENTITY_MATCH_COMPLETED, //
-                NEW_ENTITY_MATCH_ENVS, //
-                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
-                ACCOUNT_DIFF_TABLE_NAME, //
-                ACCOUNT_MASTER_TABLE_NAME, //
-                FULL_ACCOUNT_TABLE_NAME, //
-                ACCOUNT_EXPORT_TABLE_NAME, //
-                ACCOUNT_FEATURE_TABLE_NAME, //
-                ACCOUNT_PROFILE_TABLE_NAME, //
-                ACCOUNT_SERVING_TABLE_NAME, //
-                ACCOUNT_STATS_TABLE_NAME, //
-                FULL_REMATCH_PA, //
-                ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
-                NEW_RECORD_CUT_OFF_TIME
-        );
+        Set<String> renewableKeys = new HashSet<>(TABLE_NAMES_FOR_PA_RETRY);
+        renewableKeys.addAll(EXTRA_KEYS_FOR_PA_RETRY);
         clearExecutionContext(renewableKeys);
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
@@ -171,7 +150,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
-        putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
+        if (!hasKeyInContext(PA_TIMESTAMP)) {
+            putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
+        }
         putObjectInContext(PA_SKIP_ENTITIES, configuration.getSkipEntities());
 
         setupDataCollectionStatus(evaluationDate);
@@ -184,7 +165,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         resetEntityMatchFlagsForRetry();
         setAttributeQuotaLimit();
         setDataQuotaLimit();
-//        bumpEntityMatchVersion();
     }
 
     private void updateDataFeed() {
@@ -515,22 +495,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setupInactiveVersion() {
-        Set<String> tableKeysForRetry = Sets.newHashSet( //
-                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
-                ACCOUNT_DIFF_TABLE_NAME, //
-                ACCOUNT_MASTER_TABLE_NAME, //
-                FULL_ACCOUNT_TABLE_NAME, //
-                ACCOUNT_EXPORT_TABLE_NAME, //
-                ACCOUNT_FEATURE_TABLE_NAME, //
-                ACCOUNT_PROFILE_TABLE_NAME, //
-                ACCOUNT_SERVING_TABLE_NAME, //
-                ACCOUNT_STATS_TABLE_NAME, //
-                REMATCHED_ACCOUNT_TABLE_NAME, //
-                ENRICHED_ACCOUNT_DIFF_TABLE_NAME
-        );
-        Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
+        Set<String> tableNamesForRetry = TABLE_NAMES_FOR_PA_RETRY.stream() //
                 .map(this::getStringValueFromContext) //
                 .filter(StringUtils::isNotBlank) //
                 .collect(Collectors.toSet());
@@ -581,57 +546,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             throw new IllegalArgumentException("Data Quota Limit Can not find.");
         }
         putObjectInContext(DATAQUOTA_LIMIT, dataLimit);
-    }
-
-    /*
-     * bump up entity match version
-     */
-    // TODO: to be removed
-    private void bumpEntityMatchVersion() {
-        Boolean alreadyBumpedUp = getObjectFromContext(NEW_ENTITY_MATCH_ENVS, Boolean.class);
-        if (Boolean.TRUE.equals(alreadyBumpedUp)) {
-            log.info("Already handled entity match version bumping up in previous PA.");
-            return;
-        }
-
-        if (!configuration.isEntityMatchEnabled()) {
-            log.debug("Entity match is not enabled, not bumping up version");
-            return;
-        }
-        List<EntityMatchEnvironment> environments = getEnvironmentsToBumpVersion();
-        if (CollectionUtils.isNotEmpty(environments)) {
-            BumpVersionRequest request = new BumpVersionRequest();
-            request.setTenant(new Tenant(customerSpace.toString()));
-            request.setEnvironments(environments);
-            log.info("Bump up entity match version for environments = {}", environments);
-            BumpVersionResponse response = matchProxy.bumpVersion(request);
-            log.info("Current entity match versions = {}", response.getVersions());
-        } else {
-            log.debug("No entity match environment requires bump up version");
-        }
-        putObjectInContext(NEW_ENTITY_MATCH_ENVS, Boolean.TRUE);
-    }
-
-    /*
-     * Get all entity match environments that requires bump up version. Currently
-     * only consider Account import & rebuild.
-     */
-    @VisibleForTesting
-    List<EntityMatchEnvironment> getEnvironmentsToBumpVersion() {
-        Set<EntityMatchEnvironment> environments = new HashSet<>();
-        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
-                BusinessEntity.class, List.class);
-        if (MapUtils.isNotEmpty(entityImportsMap) && entityImportsMap.containsKey(BusinessEntity.Account)) {
-            // if there is account import, bump up staging version
-            environments.add(EntityMatchEnvironment.STAGING);
-        }
-        if (CollectionUtils.isNotEmpty(configuration.getRebuildEntities())
-                && configuration.getRebuildEntities().contains(BusinessEntity.Account)) {
-            // when rebuilding for account, bump up both staging & serving version
-            environments.add(EntityMatchEnvironment.STAGING);
-            environments.add(EntityMatchEnvironment.SERVING);
-        }
-        return new ArrayList<>(environments);
     }
 
     public static class RebuildEntitiesProvider {

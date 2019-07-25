@@ -72,35 +72,36 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
 
-        statsTableName = getStringValueFromContext(ACCOUNT_STATS_TABLE_NAME);
-        if (StringUtils.isNotBlank(statsTableName)) {
-            Table statsTable = metadataProxy.getTable(customerSpace.toString(), statsTableName);
-            if (statsTable != null) {
-                log.info("Found stats table in context, going thru short-cut mode.");
-                finishing();
-                return null;
+        boolean shortCut;
+        Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_STATS_TABLE_NAME);
+        shortCut = statsTableInCtx != null;
+
+        if (shortCut) {
+            log.info("Found stats table in context, going thru short-cut mode.");
+            statsTableName = statsTableInCtx.getName();
+            finishing();
+            return null;
+        } else {
+            // reset result table names
+            statsTableName = null;
+
+            fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
+            if (StringUtils.isBlank(fullAccountTableName)) {
+                throw new IllegalStateException("Cannot find the fully enriched account table");
             }
+            Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
+            if (fullAccountTable == null) {
+                throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
+            }
+            double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, fullAccountTable);
+            scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
+            log.info("Set scalingMultiplier=" + scalingMultiplier + " base on master table size=" + sizeInGb + " gb.");
+
+            setEvaluationDateStrAndTimestamp();
+
+            PipelineTransformationRequest request = getTransformRequest();
+            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
         }
-
-        // reset result table names
-        statsTableName = null;
-
-        fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
-        if (StringUtils.isBlank(fullAccountTableName)) {
-            throw new IllegalStateException("Cannot find the fully enriched account table");
-        }
-        Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
-        if (fullAccountTable == null) {
-            throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
-        }
-        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, fullAccountTable);
-        scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
-        log.info("Set scalingMultiplier=" + scalingMultiplier + " base on master table size=" + sizeInGb + " gb.");
-
-        setEvaluationDateStrAndTimestamp();
-
-        PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override

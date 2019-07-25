@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,6 +63,8 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     // run this step's transformation.
     boolean skipTransformation;
 
+    boolean shortCut;
+
     @Override
     protected BusinessEntity getEntity() {
         return BusinessEntity.CuratedAccount;
@@ -92,44 +95,62 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     protected void initializeConfiguration() {
         super.initializeConfiguration();
 
-        accountTableName = getAccountTableName();
-        contactTableName = getContactTableName();
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
+                Arrays.asList(CURATED_ACCOUNT_SERVING_TABLE_NAME, CURATED_ACCOUNT_STATS_TABLE_NAME));
+        shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
-        // Get a map of the imported BusinessEntities.
-        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
-                BusinessEntity.class, List.class);
+        if (shortCut) {
+            log.info("Found both serving and stats tables in workflow context, going thru short-cut mode.");
+            servingStoreTableName = tablesInCtx.get(0).getName();
+            statsTableName = tablesInCtx.get(1).getName();
 
-        // Do not run this step if there is no account table, since accounts are required for this step to be
-        // meaningful.
-        if (StringUtils.isBlank(accountTableName)) {
-            log.warn("Cannot find account master table.  Skipping CuratedAccountAttributes Step.");
-            skipTransformation = true;
-        } else if (StringUtils.isBlank(contactTableName)) {
-            // Do not run this step if there is no contact table, since contacts are required for this step to be
+            TableRoleInCollection servingStoreRole = BusinessEntity.CuratedAccount.getServingStore();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
+                    servingStoreRole, inactive);
+            exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
+            updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+
+            finishing();
+        } else {
+            accountTableName = getAccountTableName();
+            contactTableName = getContactTableName();
+
+            // Get a map of the imported BusinessEntities.
+            Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                    BusinessEntity.class, List.class);
+
+            // Do not run this step if there is no account table, since accounts are required for this step to be
             // meaningful.
-            log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
-            skipTransformation = true;
-        } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
-                && !entityImportsMap.containsKey(BusinessEntity.Contact)))
-                && (configuration.getRebuild() == null || !configuration.getRebuild())) {
-            // Skip this step if there are no newly imported accounts and no newly imported contacts, and force rebuild
-            // for BusinessEntity CuratedAccounts is null or has been set to false.
-            log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
-            skipTransformation = true;
-        } else if (shouldResetCuratedAttributesContext()) {
-            log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
-            skipTransformation = true;
-        }
+            if (StringUtils.isBlank(accountTableName)) {
+                log.warn("Cannot find account master table.  Skipping CuratedAccountAttributes Step.");
+                skipTransformation = true;
+            } else if (StringUtils.isBlank(contactTableName)) {
+                // Do not run this step if there is no contact table, since contacts are required for this step to be
+                // meaningful.
+                log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
+                skipTransformation = true;
+            } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
+                    && !entityImportsMap.containsKey(BusinessEntity.Contact)))
+                    && (configuration.getRebuild() == null || !configuration.getRebuild())) {
+                // Skip this step if there are no newly imported accounts and no newly imported contacts, and force rebuild
+                // for BusinessEntity CuratedAccounts is null or has been set to false.
+                log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
+                skipTransformation = true;
+            } else if (shouldResetCuratedAttributesContext()) {
+                log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
+                skipTransformation = true;
+            }
 
-        if (!skipTransformation) {
-            Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
-            Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
-            double accSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, accountTable);
-            double ctcSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, contactTable);
-            int multiplier = ScalingUtils.getMultiplier(Math.max(accSize, ctcSize));
-            log.info("Set scalingMultiplier=" + multiplier + " base on account table size=" //
-                    + accSize + " gb and contact table size=" + ctcSize + " gb.");
-            scalingMultiplier = multiplier;
+            if (!skipTransformation) {
+                Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
+                Table contactTable = metadataProxy.getTable(customerSpace.toString(), contactTableName);
+                double accSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, accountTable);
+                double ctcSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, contactTable);
+                int multiplier = ScalingUtils.getMultiplier(Math.max(accSize, ctcSize));
+                log.info("Set scalingMultiplier=" + multiplier + " base on account table size=" //
+                        + accSize + " gb and contact table size=" + ctcSize + " gb.");
+                scalingMultiplier = multiplier;
+            }
         }
     }
 
@@ -272,8 +293,13 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
+        exportToS3AndAddToContext(servingStoreTableName, CURATED_ACCOUNT_SERVING_TABLE_NAME);
+        exportToS3AndAddToContext(statsTableName, CURATED_ACCOUNT_STATS_TABLE_NAME);
+    }
+
+    private void finishing() {
         updateDCStatusForCuratedAccountAttributes();
-        registerDynamoExport();
+        exportToDynamo(servingStoreTableName, InterfaceName.AccountId.name(), null);
     }
 
     @Override
@@ -316,11 +342,5 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
         }
-    }
-
-    private void registerDynamoExport() {
-        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), getEntity().getServingStore(),
-                inactive);
-        exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 }
