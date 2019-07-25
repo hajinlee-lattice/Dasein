@@ -4,8 +4,8 @@ from os import getenv
 
 sys.path.append('{}/le-migration/python'.format(getenv('WSHOME')))
 
-STATUS = ["SCHEDULED", "STARTED", "FAILED", "COMPLETED"]
-USAGE = 'Usage: updateMigrationStatus -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID -s <SCHEDULED/STARTED/FAILED/COMPLETED>\n'
+STATUS = ["STARTED", "FAILED", "COMPLETED"]
+USAGE = 'Usage: updateMigrationStatus -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID -s <STARTED/FAILED/COMPLETED>\n'
 
 
 def getArgs():

@@ -75,7 +75,7 @@ def createTenantTrack(tenant):
     track = MigrationTrack()
     track.fkCollectionId = tenant.metadataDataCollection[0].pid
     track.fkTenantId = tenant.tenantPid
-    track.status = 'SCHEDULED'
+    track.status = 'STARTED'
     track.version = tenant.metadataDataCollection[0].version
     track.curActiveTable = {}
     for record in tenant.metadataDataCollection[0].metadataDataCollectionTable:

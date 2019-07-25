@@ -132,8 +132,8 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void deleteTableAndCleanup(CustomerSpace customerSpace, final String tableName) {
-        if (migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace.toString()))) {
-            log.error("Tenant {} is in migration. Deleting tables is not allowed.", customerSpace.toString());
+        if (!migrationTrackEntityMgr.canDeleteOrRenameTable(tenantEntityMgr.findByTenantId(customerSpace.toString()), tableName)) {
+            log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
         }
         DatabaseUtils.retry("deleteTable", //
@@ -159,7 +159,7 @@ public class MetadataServiceImpl implements MetadataService {
                     input -> {
                         Table found = tableEntityMgr.findByName(table.getName(), false);
                         if (migrationTrackEntityMgr.tenantInMigration(found.getTenant())) {
-                            log.error("Tenant {} is in migration. Deleting tables is not allowed.", customerSpace.toString());
+                            log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
                             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
                         }
                         if (found != null) {
@@ -176,7 +176,7 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void renameTable(CustomerSpace customerSpace, String oldName, String newName) {
-        if (migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace.toString()))) {
+        if (!migrationTrackEntityMgr.canDeleteOrRenameTable(tenantEntityMgr.findByTenantId(customerSpace.toString()), oldName)) {
             log.error("Tenant {} is in migration. Renaming tables is not allowed.", customerSpace.toString());
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
         }

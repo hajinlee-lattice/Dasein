@@ -168,6 +168,6 @@ public class MigrationTrack implements HasPid, HasTenant {
     }
 
     public enum Status {
-        SCHEDULED, STARTED, FAILED, COMPLETED;
+        STARTED, FAILED, COMPLETED;
     }
 }
