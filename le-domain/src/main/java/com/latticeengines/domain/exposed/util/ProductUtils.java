@@ -77,8 +77,10 @@ public class ProductUtils {
     public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,
             List<String> productStatuses) {
         AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter);
-        return loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+        List<Product> products = loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
                 productStatuses == null ? null : new HashSet<>(productStatuses));
+        iter.close();
+        return products;
     }
 
     public static List<Product> loadProducts(Iterator<GenericRecord> iter, Set<String> productTypes,
