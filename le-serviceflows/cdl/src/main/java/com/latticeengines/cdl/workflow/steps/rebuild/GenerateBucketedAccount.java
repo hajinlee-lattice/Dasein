@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(GenerateBucketedAccount.BEAN_NAME)
 @Lazy
@@ -99,6 +100,11 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             statsTablePrefix = null;
             fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
             setEvaluationDateStrAndTimestamp();
+            Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
+            double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, fullAccountTable);
+            scalingMultiplier = ScalingUtils.getMultiplier(sizeInGb);
+            log.info("Update scalingMultiplier=" + scalingMultiplier + " base on full account table size=" //
+                    + sizeInGb + " gb.");
         }
     }
 

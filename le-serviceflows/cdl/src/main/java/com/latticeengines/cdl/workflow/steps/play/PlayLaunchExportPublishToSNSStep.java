@@ -70,7 +70,7 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
     public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
         PlayLaunchExportPublishToSNSConfiguration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
-        sourceFiles = getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, s3ExportFilePaths);
+        sourceFiles = getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, s3ExportFilePaths);
 
         // TODO: Add the same call method to get the deleteFiles
 

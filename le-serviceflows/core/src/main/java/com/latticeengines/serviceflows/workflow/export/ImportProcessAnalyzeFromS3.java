@@ -91,6 +91,7 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
                 ACCOUNT_DIFF_TABLE_NAME, //
                 ACCOUNT_MASTER_TABLE_NAME, //
                 FULL_ACCOUNT_TABLE_NAME, //
+                ACCOUNT_EXPORT_TABLE_NAME, //
                 ACCOUNT_FEATURE_TABLE_NAME, //
                 ACCOUNT_PROFILE_TABLE_NAME, //
                 ACCOUNT_SERVING_TABLE_NAME, //

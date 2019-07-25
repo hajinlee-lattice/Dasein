@@ -205,8 +205,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                         ProductType.Spending.name());
                 return new DataPage(retList);
             } catch (Exception e) {
-                if (e instanceof java.sql.SQLException
-                        && ExceptionUtils.getStackTrace(e).contains("ac.spendanalyticssegment does not exist")) {
+                if (ExceptionUtils.getStackTrace(e).contains("spendanalyticssegment does not exist")) {
                     log.warn("spendanalyticssegment column does not exist");
                     return new DataPage(Collections.emptyList());
                 } else {

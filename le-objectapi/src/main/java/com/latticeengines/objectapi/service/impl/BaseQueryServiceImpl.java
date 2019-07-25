@@ -102,7 +102,7 @@ public abstract class BaseQueryServiceImpl {
 
         if (CollectionUtils.isNotEmpty(accountMaxLookups)) {
             Query accountQuery = Query.builder() //
-                    .select(accountMaxLookups.toArray(new Lookup[accountMaxLookups.size()])) //
+                    .select(accountMaxLookups.toArray(new Lookup[0])) //
                     .from(BusinessEntity.Account) //
                     .build();
             DataPage dataPage = queryEvaluatorService.getData(attrRepo, accountQuery,
@@ -114,7 +114,7 @@ public abstract class BaseQueryServiceImpl {
         }
         if (CollectionUtils.isNotEmpty(contactMaxLookups)) {
             Query contactQuery = Query.builder() //
-                    .select(contactMaxLookups.toArray(new Lookup[contactMaxLookups.size()])) //
+                    .select(contactMaxLookups.toArray(new Lookup[0])) //
                     .from(BusinessEntity.Contact) //
                     .build();
             DataPage dataPage = queryEvaluatorService.getData(attrRepo, contactQuery,
@@ -125,9 +125,7 @@ public abstract class BaseQueryServiceImpl {
             });
         }
         log.info("maxDate results are");
-        results.forEach((k, v) -> {
-            log.info(k + ":" + v);
-        });
+        results.forEach((k, v) -> log.info(k + ":" + v));
         return results;
     }
 

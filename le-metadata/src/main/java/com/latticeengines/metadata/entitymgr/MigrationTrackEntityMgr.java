@@ -8,4 +8,6 @@ public interface MigrationTrackEntityMgr extends BaseEntityMgrRepository<Migrati
     MigrationTrack findByTenant(Tenant tenant);
 
     boolean tenantInMigration(Tenant tenant);
+
+    boolean canDeleteOrRenameTable(Tenant tenant, String tableName);
 }

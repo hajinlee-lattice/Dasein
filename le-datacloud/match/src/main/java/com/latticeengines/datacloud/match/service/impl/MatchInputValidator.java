@@ -101,7 +101,6 @@ public class MatchInputValidator {
         // Perform a different set of validation operations for Entity Match
         // case.
         if (OperationalMode.isEntityMatch(input.getOperationalMode())) {
-            // TODO add validation for entity match attr lookup
             validateEntityMatch(input, decisionGraph);
         } else {
             input.setKeyMap(validateNonEntityMatch(input));
@@ -120,8 +119,13 @@ public class MatchInputValidator {
         // Validate naming conflict in match input fields
         validateEntityMatchInputFields(input);
 
-        // Verify that column selection is set appropriately for Entity Match.
-        validateEntityMatchColumnSelection(input);
+        if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
+            // validate with legacy path when in attribute lookup
+            validateNonEntityMatchColumnSelection(input);
+        } else {
+            // Verify that column selection is set appropriately for Entity Match.
+            validateEntityMatchColumnSelection(input);
+        }
 
         // Verify whether decision graph and entity are matched in MatchInput.
         validateEntityMatchDecisionGraph(input, decisionGraph);
@@ -153,13 +157,16 @@ public class MatchInputValidator {
             EntityKeyMap entityKeyMap = input.getEntityKeyMaps().get(BusinessEntity.Account.name());
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
-            validateAccountMatchKeys(keyMap, input.isFetchOnly());
+            validateAccountMatchKeys(keyMap, input.isFetchOnly(), input.getOperationalMode());
         }
     }
 
     private static void validateEntityMatchFlags(MatchInput input) {
         if (input.isAllocateId() && input.isFetchOnly()) {
             throw new IllegalArgumentException("AllocateID mode and FetchOnly mode cannot be set at same time");
+        }
+        if (input.isAllocateId() && OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
+            throw new IllegalArgumentException("AllocateID mode cannot be enabled to attribute lookup");
         }
     }
 
@@ -176,7 +183,7 @@ public class MatchInputValidator {
      * @param input
      */
     private static void validateEntityMatchInputFields(MatchInput input) {
-        if (input.isFetchOnly()) {
+        if (input.isFetchOnly() || OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
             return;
         }
         List<String> reservedFields = input.getFields().stream() //
@@ -184,7 +191,7 @@ public class MatchInputValidator {
                 .collect(Collectors.toList());
         if (!reservedFields.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Reserved fields are not allowed to show up in Non-FetchOnly mode match input fields: "
+                    "Reserved fields are not allowed to show up in Non-FetchOnly and Non-AttributeLookup mode match input fields: "
                             + String.join(",", reservedFields));
         }
     }
@@ -213,7 +220,8 @@ public class MatchInputValidator {
                         "Entity Match Allocate ID mode only supports predefined column selection set to \"ID\".");
             }
         } else {
-            validatePredefinedSelection(input.getPredefinedSelection(), OperationalMode.ENTITY_MATCH);
+            validatePredefinedSelection(input.getPredefinedSelection(),
+                    input.getOperationalMode() == null ? OperationalMode.ENTITY_MATCH : input.getOperationalMode());
         }
     }
 
@@ -405,11 +413,17 @@ public class MatchInputValidator {
      * @param keyMap
      * @param fetchOnly
      */
-    private static void validateAccountMatchKeys(Map<MatchKey, List<String>> keyMap, boolean fetchOnly) {
+    private static void validateAccountMatchKeys(Map<MatchKey, List<String>> keyMap, boolean fetchOnly,
+            OperationalMode mode) {
         if (fetchOnly) {
             if (!isKeyMappedToField(keyMap, MatchKey.EntityId)) {
                 throw new IllegalArgumentException(
                         "For fetch-only mode Account match, must provide EntityId match key");
+            }
+        }
+        if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(mode)) {
+            if (isKeyMappedToField(keyMap, MatchKey.LookupId)) {
+                throw new IllegalArgumentException("Do not support LookupId match keys in entity match attr lookup");
             }
         }
     }
