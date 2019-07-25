@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -46,11 +48,19 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
+import com.latticeengines.domain.exposed.pls.frontend.CommitFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.CommitFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -155,7 +165,7 @@ public class ModelingFileUploadResource {
                 .validateFieldMappings(csvFileName, fieldMappingDocument, entity, source,
                         feedType);
     }
-    
+
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
@@ -261,6 +271,284 @@ public class ModelingFileUploadResource {
                                                     @RequestParam(value = "entity") String entity) {
         return ResponseDocument.successResponse(
                 uploadFileFromS3(csvFile, entity));
+    }
+
+    @RequestMapping(value = "fielddefinition/fetch", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
+            @RequestBody(required = true) FetchFieldDefinitionsRequest fetchRequest) {
+        log.error("JAW ------ BEGIN Fetch Field Definition -----");
+
+        log.error("fetchRequest is:\n" + fetchRequest.toString());
+
+        // Field Definition Requests must have a Template State section describing which tenant and template is being
+        // imported.
+        if (fetchRequest.getTemplateState() == null) {
+            log.error("Fetch Field Definition missing template state");
+            // throw new LedpException(LedpCode.LEDP_18228, new String[] { fetchRequest.toString() });
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18228,
+                    new String[] { fetchRequest.toString() }));
+        }
+
+        // TODO(jwinter): Add code to validate the Request further.
+        // Need to check that Tenant ID is valid.
+        // What other parameter checks should be included?
+
+        if (StringUtils.isBlank(fetchRequest.getTemplateState().getSystemName())) {
+            log.error("Validate Field Definition is missing SystemName");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18229,
+                    new String[] { fetchRequest.toString() }));
+        }
+
+        // For mock, decide on returned fetchResponse based on request's Template State's system name.
+        String fetchResponseFile = null;
+        if (fetchRequest.getTemplateState().getSystemName().toLowerCase().contains("account")) {
+            fetchResponseFile =
+                    "com/latticeengines/pls/controller/internal/account-fetch-field-definition-response.json";
+        } else if (fetchRequest.getTemplateState().getSystemName().toLowerCase().contains("contact")) {
+            fetchResponseFile =
+                    "com/latticeengines/pls/controller/internal/contact-fetch-field-definition-response.json";
+        }
+
+        String fetchResponseJson = "{ \"Result\": \"ERROR: Response processing failure\" }";
+        FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+
+
+        try {
+            InputStream fetchResponseInputStream = getClass().getClassLoader().getResourceAsStream(fetchResponseFile);
+            if (fetchResponseInputStream != null) {
+                fetchResponseJson = IOUtils.toString(fetchResponseInputStream, "UTF-8");
+                log.error("FetchFieldDefinitionResponse (5) is:\n" + fetchResponseJson);
+            } else {
+                log.error("Loading Fetch Response failed.");
+                return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18230,
+                        new String[] { fetchResponseFile }));
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method (5) threw IOException error:", e);
+            return ResponseDocument.failedResponse(e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method (5) threw Exception " + e2.toString(), e2);
+            return ResponseDocument.failedResponse(e2);
+        }
+
+
+
+        /*
+        try {
+            InputStream fetchResponseInputStream = ClassLoader.getSystemResourceAsStream(
+                    "com/latticeengines/pls/controller/internal/fetch-field-definition-response.json");
+            if (fetchResponseInputStream != null) {
+                fetchResponseJson = IOUtils.toString(fetchResponseInputStream, "UTF-8");
+                log.error("FetchFieldDefinitionResponse (1) is:\n" + fetchResponseJson);
+            } else {
+                log.error("Fetch Response load method (1) failed.  Trying next method...");
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method (1) threw IOException error:", e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method (1) threw Exception " + e2.toString(), e2);
+        }
+
+        try {
+            File fetchResponseFile = new File(ClassLoader
+                    .getSystemResource(
+                            "com/latticeengines/pls/controller/internal/fetch-field-definition-response.json")
+                    .getPath());
+            if (fetchResponseFile != null) {
+                fetchResponseJson = FileUtils.getContentsAsString(fetchResponseFile);
+                log.error("FetchFieldDefinitionResponse (2) is:\n" + fetchResponseJson);
+            } else {
+                log.error("Fetch Response load method (2) failed.  Trying next method...");
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method (2) threw IOException error:", e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method (2) threw Exception " + e2.toString(), e2);
+        }
+
+        try {
+            URL fetchResponseUrl = ClassLoader.getSystemResource(
+                    "com/latticeengines/pls/controller/internal/fetch-field-definition-response.json");
+            if (fetchResponseUrl != null) {
+                InputStream fetchResponseInputStream = new FileInputStream(new File(fetchResponseUrl.getPath()));
+                fetchResponse = JsonUtils.deserialize(fetchResponseInputStream, FetchFieldDefinitionsResponse.class);
+
+                log.error("FetchFieldDefinitionResponse (3) is:\n" + fetchResponse.toString());
+            } else {
+                log.error("Fetch Response load method (3) failed.  Trying next method...");
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method (3) threw IOException error:", e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method (3) threw Exception " + e2.toString(), e2);
+        }
+
+        try {
+            File fetchResponseFile = new File(ClassLoader
+                    .getSystemResource("com/latticeengines/pls/controller/internal/fetch-field-definition-response.json")
+                    .getFile());
+            if (fetchResponseFile != null) {
+                fetchResponseJson = org.apache.commons.io.FileUtils.readFileToString(fetchResponseFile,
+                        Charset.defaultCharset());
+                log.error("FetchFieldDefinitionResponse (4) is:\n" + fetchResponseJson);
+            } else {
+                log.error("Fetch Response load method (4) failed.  Trying next method...");
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method (4) threw IOException error:", e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method (4) threw Exception " + e2.toString(), e2);
+        }
+        */
+
+        if (fetchResponseJson != null) {
+            try {
+                fetchResponse = JsonUtils.deserialize(fetchResponseJson, FetchFieldDefinitionsResponse.class);
+            } catch (Exception e) {
+                log.error("JSON deserialization step failed with error " + e.getMessage(), e);
+                ResponseDocument.failedResponse(e);
+            }
+        } else {
+            log.error("===> fetchResponseJson was null!!!");
+        }
+
+        log.error("JAW ------ END Fetch Field Definition -----");
+
+        return ResponseDocument.successResponse(fetchResponse);
+    }
+
+    @RequestMapping(value = "fielddefinition/validate", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
+            @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
+        log.error("JAW ------ BEGIN Validate Field Definition -----");
+
+        log.error("validateRequest is:\n" + validateRequest.toString());
+
+        // Field Definition Requests must have a Template State section describing which tenant and template is being
+        // imported.
+        if (validateRequest.getTemplateState() == null) {
+            log.error("Validate Field Definition missing template state");
+            // throw new LedpException(LedpCode.LEDP_18228, new String[] { validateRequest.toString() });
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18228,
+                    new String[] { validateRequest.toString() }));
+        }
+
+        // TODO(jwinter): Add code to validate the Request further.
+        // Need to check that Tenant ID is valid.
+        // What other parameter checks should be included?
+
+        if (StringUtils.isBlank(validateRequest.getTemplateState().getSystemName())) {
+            log.error("Validate Field Definition is missing SystemName");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18229,
+                    new String[] { validateRequest.toString() }));
+        }
+
+        ValidateFieldDefinitionsResponse validateResponse = new ValidateFieldDefinitionsResponse();
+
+        // Decide how to handle the Validation Request for mock.  For now, provide either PASS, WARNING, or ERROR
+        // response depending on Template State page number.
+
+        if (validateRequest.getTemplateState().getPageNumber() == null) {
+            log.error("Validate Field Definition is missing Page Number");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18228,
+                    new String[] { validateRequest.toString() }));
+        }
+
+        int modulo = validateRequest.getTemplateState().getPageNumber() % 3;
+
+        if (modulo == 0) {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+        } else if (modulo == 1) {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
+
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
+                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+                List<FieldValidationMessage> warningList = new ArrayList<>();
+                for (FieldDefinition definition : changeEntry.getValue()) {
+                    FieldValidationMessage message = new FieldValidationMessage();
+                    message.setFieldName(definition.getFieldName());
+                    message.setColumnName(definition.getColumnName());
+                    message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
+                    message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
+                            definition.getFieldName());
+                }
+                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningList, true);
+            }
+
+        } else {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+
+            int count = 0;
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
+                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+                List<FieldValidationMessage> warningList = new ArrayList<>();
+                for (FieldDefinition definition : changeEntry.getValue()) {
+                    FieldValidationMessage message = new FieldValidationMessage();
+                    message.setFieldName(definition.getFieldName());
+                    message.setColumnName(definition.getColumnName());
+                    if (count++ % 2 == 0) {
+                        message.setMessageLevel(FieldValidationMessage.MessageLevel.ERROR);
+                        message.setMessage(definition.getColumnName() + " has OH BOY major problem when mapped to " +
+                                definition.getFieldName());
+                    } else {
+                        message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
+                        message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
+                                definition.getFieldName());
+                    }
+                }
+                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningList, true);
+            }
+        }
+
+        // For now, set fieldDefinitionsRecordsMap and fieldDefinitionsChangesMap to the values provided at input.
+        validateResponse.setFieldDefinitionsRecordsMap(validateRequest.getFieldDefinitionsRecordsMap());
+        validateResponse.setFieldDefinitionsChangesMap(validateRequest.getFieldDefinitionsChangesMap());
+
+        log.error("JAW ------ END Validate Field Definition -----");
+
+        return ResponseDocument.successResponse(validateResponse);
+    }
+
+    @RequestMapping(value = "fielddefinition/commit", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<CommitFieldDefinitionsResponse> vaidateFieldDefinitions(
+            @RequestBody(required = true) CommitFieldDefinitionsRequest commitRequest) {
+        log.error("JAW ------ BEGIN Commit Field Definition -----");
+
+        log.error("fetchRequest is: " + commitRequest.toString());
+
+        if (commitRequest.getTemplateState() == null) {
+            log.error("Commit Field Definition missing template state");
+            throw new LedpException(LedpCode.LEDP_18228, new String[] { commitRequest.toString() });
+        }
+
+        // Need to check that Tenant ID is valid.
+        // What other parameter checks should be included?
+
+        CommitFieldDefinitionsResponse commitResponse = new CommitFieldDefinitionsResponse();
+
+        if (commitRequest.getFieldDefinitionsRecordsMap() == null) {
+            log.error("Commit Request missing Field Definitions Record Map");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18231,
+                    new String[] { commitResponse.toString() }));
+        }
+
+        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
+
+
+        log.error("JAW ------ END Commit Field Definition -----");
+
+        return ResponseDocument.successResponse(commitResponse);
     }
 
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
