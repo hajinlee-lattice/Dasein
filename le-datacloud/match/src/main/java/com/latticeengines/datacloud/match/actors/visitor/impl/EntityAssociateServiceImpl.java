@@ -353,8 +353,9 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                         getConflictMessages(targetEntitySeed.getId(), request, maxPriorityResult, null, null));
             }
 
-            log.debug("Associate highest priority lookup entry successfully to target entity (ID={})," +
-                    " requestId={}, tenant (ID={}), entity={}",
+            log.debug(
+                    "Associate highest priority lookup entry ({}) successfully to target entity (ID={}),"
+                            + " requestId={}, tenant (ID={}), entity={}",
                     maxPriorityEntry, targetEntitySeed.getId(), requestId, tenantId, request.getEntity());
         } else {
             log.debug("Highest priority lookup entry {} already maps to target entity (ID={})," +
