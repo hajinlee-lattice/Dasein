@@ -76,11 +76,11 @@ public class ProductUtils {
 
     public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,
             List<String> productStatuses) {
-        AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter);
-        List<Product> products = loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
-                productStatuses == null ? null : new HashSet<>(productStatuses));
-        iter.close();
-        return products;
+        try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
+            List<Product> products = loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+                    productStatuses == null ? null : new HashSet<>(productStatuses));
+            return products;
+        }
     }
 
     public static List<Product> loadProducts(Iterator<GenericRecord> iter, Set<String> productTypes,
