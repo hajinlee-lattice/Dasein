@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.service.MetadataService;
@@ -44,6 +46,12 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Inject
     private TableTypeHolder tableTypeHolder;
+
+    @Inject
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public Table getTable(CustomerSpace customerSpace, String name) {
@@ -124,6 +132,10 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void deleteTableAndCleanup(CustomerSpace customerSpace, final String tableName) {
+        if (!migrationTrackEntityMgr.canDeleteOrRenameTable(tenantEntityMgr.findByTenantId(customerSpace.toString()), tableName)) {
+            log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
+        }
         DatabaseUtils.retry("deleteTable", //
                 input -> tableEntityMgr.deleteTableAndCleanupByName(tableName));
     }
@@ -145,14 +157,18 @@ public class MetadataServiceImpl implements MetadataService {
             log.info("Metadata UpdateTable: {}", table.getName());
             DatabaseUtils.retry("updateTable", 10, RollbackException.class, "RollbackException  detected performing", null,
                     input -> {
-                Table found = tableEntityMgr.findByName(table.getName(), false);
-                if (found != null) {
-                    log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
-                    tableEntityMgr.deleteByName(found.getName());
-                }
+                        Table found = tableEntityMgr.findByName(table.getName(), false);
+                        if (migrationTrackEntityMgr.tenantInMigration(found.getTenant())) {
+                            log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
+                            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
+                        }
+                        if (found != null) {
+                            log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
+                            tableEntityMgr.deleteByName(found.getName());
+                        }
 
-                tableEntityMgr.create(TableUtils.clone(table, table.getName()));
-            });
+                        tableEntityMgr.create(TableUtils.clone(table, table.getName()));
+                    });
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
         }
@@ -160,12 +176,16 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void renameTable(CustomerSpace customerSpace, String oldName, String newName) {
+        if (!migrationTrackEntityMgr.canDeleteOrRenameTable(tenantEntityMgr.findByTenantId(customerSpace.toString()), oldName)) {
+            log.error("Tenant {} is in migration. Renaming tables is not allowed.", customerSpace.toString());
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
+        }
         tableEntityMgr.rename(oldName, newName);
     }
 
     @Override
     public Map<String, Set<AnnotationValidationError>> validateTableMetadata(CustomerSpace customerSpace,
-            ModelingMetadata modelingMetadata) {
+                                                                             ModelingMetadata modelingMetadata) {
         BeanValidationService validationService = new BeanValidationServiceImpl();
         try {
             Map<String, Set<AnnotationValidationError>> errors = new HashMap<>();
@@ -194,7 +214,7 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void setStorageMechanism(CustomerSpace customerSpace, final String tableName,
-            StorageMechanism storageMechanism) {
+                                    StorageMechanism storageMechanism) {
         tableTypeHolder.setTableType(TableType.DATATABLE);
         DatabaseUtils.retry("addStorageMechanism", input -> {
             Table found = tableEntityMgr.findByName(tableName);
@@ -217,5 +237,4 @@ public class MetadataServiceImpl implements MetadataService {
         tableEntityMgr.fixAttributes(tableName, attributeFixerList);
         return true;
     }
-
 }
