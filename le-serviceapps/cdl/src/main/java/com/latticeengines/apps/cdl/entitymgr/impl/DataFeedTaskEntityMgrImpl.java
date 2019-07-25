@@ -298,6 +298,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     }
 
     @Override
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(List<String> uniqueIds) {
+        return datafeedTaskRepository.findByUniqueIdIn(uniqueIds);
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
         DataFeedTask datafeedTask = datafeedTaskRepository.findById(taskId).orElse(null);
@@ -321,6 +326,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setS3ImportStatus(dataFeedTask.getS3ImportStatus());
         deleteReferences(task.getImportTemplate());
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
+        task.setFeedType(dataFeedTask.getFeedType());
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());

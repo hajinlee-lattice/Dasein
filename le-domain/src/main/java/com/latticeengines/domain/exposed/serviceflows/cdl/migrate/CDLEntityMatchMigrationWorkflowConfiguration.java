@@ -71,9 +71,20 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             if (MapUtils.isEmpty(dataFeedTaskMap)) {
                 throw new RuntimeException("There's no template to be migrated!");
             }
+            startMigrateConfiguration.setDataFeedTaskMap(dataFeedTaskMap);
             accountImportMigrateConfigurationBuilder.dataFeedTaskList(dataFeedTaskMap.get(BusinessEntity.Account));
             contactImportMigrateConfigurationBuilder.dataFeedTaskList(dataFeedTaskMap.get(BusinessEntity.Contact));
             transactionImportMigrateConfigurationBuilder.dataFeedTaskList(dataFeedTaskMap.get(BusinessEntity.Transaction));
+            finishMigrateConfiguration.setDataFeedTaskMap(dataFeedTaskMap);
+            return this;
+        }
+
+        public Builder migrateTrackingPid(Long migrateTrackingPid) {
+            if (migrateTrackingPid == null) {
+                throw new RuntimeException("Migrate Tracking record id cannot be null!");
+            }
+            startMigrateConfiguration.setMigrateTrackingPid(migrateTrackingPid);
+            finishMigrateConfiguration.setMigrateTrackingPid(migrateTrackingPid);
             return this;
         }
 

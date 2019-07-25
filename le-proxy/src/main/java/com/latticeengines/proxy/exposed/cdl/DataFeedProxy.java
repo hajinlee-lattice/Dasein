@@ -217,6 +217,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, DataFeedTask.class);
     }
 
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/byuniqueids",
+                shortenCustomerSpace(customerSpace));
+        List<?> res = post("getDataFeedTaskWithSameEntity", url, uniqueIds, List.class);
+        return JsonUtils.convertList(res, DataFeedTask.class);
+    }
+
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks",
                 shortenCustomerSpace(customerSpace));

@@ -113,6 +113,15 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds) {
+        if (CollectionUtils.isEmpty(uniqueIds)) {
+            return null;
+        } else {
+            return dataFeedTaskEntityMgr.getDataFeedTaskByUniqueIds(uniqueIds);
+        }
+    }
+
+    @Override
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
     }

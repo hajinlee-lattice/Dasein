@@ -9,7 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.MigrateTrackingEntityMgr;
 import com.latticeengines.apps.cdl.service.MigrateTrackingService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.MigrateReport;
 import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("migrateTrackingService")
 public class MigrateTrackingServiceImpl implements MigrateTrackingService {
@@ -18,7 +21,7 @@ public class MigrateTrackingServiceImpl implements MigrateTrackingService {
     private MigrateTrackingEntityMgr migrateTrackingEntityMgr;
 
     @Override
-    public MigrateTracking create(MigrateTracking migrateTracking) {
+    public MigrateTracking create(String customerSpace, MigrateTracking migrateTracking) {
         List<MigrateTracking> migrateTrackings = migrateTrackingEntityMgr.findAll();
         if (!CollectionUtils.isEmpty(migrateTrackings)) {
             for (MigrateTracking tracking : migrateTrackings) {
@@ -38,7 +41,34 @@ public class MigrateTrackingServiceImpl implements MigrateTrackingService {
     }
 
     @Override
-    public MigrateTracking getByPid(Long pid) {
+    public MigrateTracking create(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        MigrateTracking migrateTracking = new MigrateTracking();
+        migrateTracking.setTenant(tenant);
+        migrateTracking.setStatus(MigrateTracking.Status.STARTING);
+        return create(customerSpace, migrateTracking);
+    }
+
+    @Override
+    public MigrateTracking getByPid(String customerSpace, Long pid) {
         return migrateTrackingEntityMgr.findByPid(pid);
+    }
+
+    @Override
+    public void updateStatus(String customerSpace, Long pid, MigrateTracking.Status status) {
+        MigrateTracking migrateTracking = migrateTrackingEntityMgr.findByPid(pid);
+        if (migrateTracking != null) {
+            migrateTracking.setStatus(status);
+            migrateTrackingEntityMgr.update(migrateTracking);
+        }
+    }
+
+    @Override
+    public void updateReport(String customerSpace, Long pid, MigrateReport report) {
+        MigrateTracking migrateTracking = migrateTrackingEntityMgr.findByPid(pid);
+        if (migrateTracking != null) {
+            migrateTracking.setReport(report);
+            migrateTrackingEntityMgr.update(migrateTracking);
+        }
     }
 }

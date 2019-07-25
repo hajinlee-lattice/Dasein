@@ -37,6 +37,12 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.MigrateTrackingServiceImpl.*(..))")
+    public void allMigrateTrackingService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+    }
+
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.AtlasExportServiceImpl.*(..))")
     public void allAtlasExportService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
