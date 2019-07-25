@@ -339,31 +339,4 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return model;
     }
 
-    @Test(groups = "functional")
-    public void testSparkSQLQueries() {
-        RatingModel model = ruleBasedModel();
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction rest1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
-        Restriction rest2 = Restriction.builder() //
-                .let(BusinessEntity.Account, "TechIndicator_1CBitrix").isNull().build();
-        Restriction restriction = Restriction.builder().or(rest1, rest2).build();
-        frontEndRestriction.setRestriction(restriction);
-        frontEndQuery.setAccountRestriction(frontEndRestriction);
-        Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(VALUE_CONTACT_TITLE));
-        Restriction contactRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
-        frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
-        frontEndQuery.setRatingModels(Collections.singletonList(model));
-        Map<String, String> sqls = queryService.getSparkSQLRuleBasedQueries(frontEndQuery, DataCollection.Version.Blue);
-        Assert.assertNotEquals(sqls.get("default"), "");
-        Assert.assertNotEquals(sqls.get("A"), "");
-        Assert.assertEquals(sqls.get("B"), "");
-        Assert.assertNotEquals(sqls.get("C"), "");
-        Assert.assertEquals(sqls.get("D"), "");
-        Assert.assertEquals(sqls.get("E"), "");
-        Assert.assertEquals(sqls.get("F"), "");
-    }
-
 }

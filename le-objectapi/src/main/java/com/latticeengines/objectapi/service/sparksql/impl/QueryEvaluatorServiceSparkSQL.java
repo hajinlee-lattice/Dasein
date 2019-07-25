@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -98,4 +99,17 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
         });
         return resultData;
     }
+
+    String createView(CustomerSpace customerSpace, String sql, String viewName) {
+        return sparkSQLService.createView(customerSpace, livySession, sql, viewName);
+    }
+
+    HdfsDataUnit mergeRules(CustomerSpace customerSpace, List<String> views, String defaultBucket) {
+        return sparkSQLService.mergeRules(customerSpace, livySession, views, defaultBucket);
+    }
+
+    Configuration getYarnConfiguration() {
+        return yarnConfiguration;
+    }
+
 }

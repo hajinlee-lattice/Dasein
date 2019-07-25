@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -47,8 +48,6 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 public class SparkSQLServiceImpl implements SparkSQLService {
 
     private static final Logger log = LoggerFactory.getLogger(SparkSQLServiceImpl.class);
-
-    private static final long GB = 1024 * 1024 * 1024;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -131,7 +130,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
         setSQLParam(sql, params);
-        params.put("SAVE", false);
+        params.put("OUTPUT_MODE", "count");
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
         return Long.valueOf(result.getOutput());
@@ -146,7 +145,40 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         Map<String, Object> params = new HashMap<>();
         setSQLParam(sql, params);
         params.put("DECODE_MAPPING", decodeMapping);
-        params.put("SAVE", true);
+        params.put("OUTPUT_MODE", "save");
+        jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+        String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
+        jobConfig.setWorkspace(workspace);
+        SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
+        return result.getTargets().get(0);
+    }
+
+    @Override
+    public String createView(CustomerSpace customerSpace, LivySession livySession, String sql, String viewName) {
+        if (StringUtils.isBlank(viewName)) {
+            viewName = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        }
+        InputStreamSparkScript sparkScript = getQueryScript();
+        ScriptJobConfig jobConfig = new ScriptJobConfig();
+        jobConfig.setNumTargets(0);
+        Map<String, Object> params = new HashMap<>();
+        setSQLParam(sql, params);
+        params.put("OUTPUT_MODE", "view");
+        params.put("VIEW_NAME", viewName);
+        jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+        SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
+        return result.getOutput();
+    }
+
+    @Override
+    public HdfsDataUnit mergeRules(CustomerSpace customerSpace, LivySession livySession, //
+                                   List<String> viewList, String defaultBucketName) {
+        InputStreamSparkScript sparkScript = getMergeRulesScript();
+        ScriptJobConfig jobConfig = new ScriptJobConfig();
+        jobConfig.setNumTargets(1);
+        Map<String, Object> params = new HashMap<>();
+        params.put("VIEW_LIST", viewList);
+        params.put("DEFAULT_BUCKET", defaultBucketName);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
         jobConfig.setWorkspace(workspace);
@@ -209,26 +241,24 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     private InputStreamSparkScript getAttrRepoScript() {
-        InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/attrrepo.scala");
-        InputStreamSparkScript sparkScript = new InputStreamSparkScript();
-        sparkScript.setStream(is);
-        sparkScript.setInterpreter(SparkInterpreter.Scala);
-        return sparkScript;
+        return getScalaScript("attrrepo");
     }
 
     private InputStreamSparkScript getQueryScript() {
-        InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/query.scala");
-        InputStreamSparkScript sparkScript = new InputStreamSparkScript();
-        sparkScript.setStream(is);
-        sparkScript.setInterpreter(SparkInterpreter.Scala);
-        return sparkScript;
+        return getScalaScript("query");
     }
 
     private InputStreamSparkScript getTrxnScript() {
+        return getScalaScript("trxn");
+    }
+
+    private InputStreamSparkScript getMergeRulesScript() {
+        return getScalaScript("merge-rules");
+    }
+
+    private InputStreamSparkScript getScalaScript(String script) {
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/trxn.scala");
+                .getResourceAsStream("scripts/" + script + ".scala");
         InputStreamSparkScript sparkScript = new InputStreamSparkScript();
         sparkScript.setStream(is);
         sparkScript.setInterpreter(SparkInterpreter.Scala);
@@ -271,6 +301,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
 
         // others
+        conf.put("spark.sql.crossJoin.enabled", "true");
         conf.put("spark.driver.maxResultSize", "4g");
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;

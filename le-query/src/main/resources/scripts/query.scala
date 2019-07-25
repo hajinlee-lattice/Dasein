@@ -7,7 +7,8 @@ import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 
-val saveResult = lattice.params.get("SAVE").asBoolean()
+val outputMode = lattice.params.get("OUTPUT_MODE").asText()
+
 val decodeMapping: Map[String, Map[String, String]] =
   if (lattice.params.has("DECODE_MAPPING")) {
     mapper.treeToValue[Map[String, Map[String, String]]](lattice.params.get("DECODE_MAPPING"))
@@ -42,7 +43,11 @@ if (lattice.params.hasNonNull("SQLS")) {
 } else {
   val sql = parseSql()
   println("----- BEGIN SCRIPT OUTPUT -----")
-  println("SQL Statement:")
+  if (lattice.params.hasNonNull("VIEW_NAME")) {
+    println("SQL Statement for " + lattice.params.get("VIEW_NAME").asText() + ":")
+  } else {
+    println("SQL Statement:")
+  }
   println(sql)
   println("----- END SCRIPT OUTPUT -----")
 }
@@ -78,8 +83,12 @@ def decode(df: DataFrame, decodeMapping: Map[String, Map[String, String]]): Data
   }
 }
 
-if (saveResult) {
-  lattice.output = decode(sqlDF, decodeMapping)::Nil
-} else {
-  lattice.outputStr = sqlDF.count().toString
+outputMode match {
+  case "count" => lattice.outputStr = sqlDF.count().toString
+  case "save" => lattice.output = decode(sqlDF, decodeMapping)::Nil
+  case "view" => {
+    val viewName = lattice.params.get("VIEW_NAME").asText()
+    sqlDF.createOrReplaceTempView(viewName)
+    lattice.outputStr = viewName
+  }
 }

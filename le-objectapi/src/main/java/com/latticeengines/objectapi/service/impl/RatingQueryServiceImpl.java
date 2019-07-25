@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -20,7 +19,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -37,9 +35,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.RatingQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
@@ -49,7 +45,6 @@ import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.latticeengines.query.factory.SparkQueryProvider;
 
 import reactor.core.publisher.Flux;
 
@@ -176,77 +171,6 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 msg += " in " + version;
             }
             throw new QueryEvaluationException(msg, e);
-        }
-    }
-
-    @Override
-    public Map<String, String> getSparkSQLRuleBasedQueries(FrontEndQuery frontEndQuery, //
-                                                                     DataCollection.Version version) {
-        List<RatingModel> models = frontEndQuery.getRatingModels();
-        if (models == null || models.size() != 1 || !(models.get(0) instanceof RuleBasedModel)) {
-            throw new IllegalArgumentException("Should provide one and only one rule based rating model");
-        }
-        RuleBasedModel model = (RuleBasedModel) models.get(0);
-
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
-        frontEndQuery.setLookups(Collections.singletonList(attrLookup));
-        frontEndQuery.setRatingModels(null);
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setPageFilter(null);
-
-        Map<String, String> sqls = new HashMap<>();
-        FrontEndQuery defaultQuery = frontEndQuery.getDeepCopy();
-        String defaultRatingSql = getQueryStr(defaultQuery, version, SparkQueryProvider.SPARK_BATCH_USER);
-        sqls.put("default", defaultRatingSql);
-        for (RatingBucketName bucketName: RatingBucketName.values()) {
-            // in natural order of the enum
-            String bucketSql = "";
-            Map<String, Restriction> rules = model.getRatingRule().getRuleForBucket(bucketName);
-            FrontEndQuery ruleQuery = mergeRules(frontEndQuery, rules);
-            if (ruleQuery != null) {
-                bucketSql = getQueryStr(ruleQuery, version, SparkQueryProvider.SPARK_BATCH_USER);
-            }
-            sqls.put(bucketName.getName(), bucketSql);
-        }
-
-        return sqls;
-    }
-
-    private static FrontEndQuery mergeRules(FrontEndQuery query, Map<String, Restriction> rules) {
-        FrontEndQuery mergedQuery = null;
-        if (MapUtils.isNotEmpty(rules)) {
-            Restriction accRestInRule = //
-                    RestrictionOptimizer.optimize(rules.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
-            Restriction ctcRestInRule = //
-                    RestrictionOptimizer.optimize(rules.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
-            if (accRestInRule != null || ctcRestInRule != null) {
-                mergedQuery = query.getDeepCopy();
-                Restriction accRestInQuery = mergedQuery.getAccountRestriction() == null ? //
-                        null : mergedQuery.getAccountRestriction().getRestriction();
-                Restriction accRest = mergeRestrictions(accRestInQuery, accRestInRule);
-                mergedQuery.setAccountRestriction(new FrontEndRestriction(accRest));
-                Restriction ctcRestInQuery = mergedQuery.getContactRestriction() == null ? //
-                        null : mergedQuery.getContactRestriction().getRestriction();
-                Restriction ctcRest = mergeRestrictions(ctcRestInQuery, ctcRestInRule);
-                mergedQuery.setContactRestriction(new FrontEndRestriction(ctcRest));
-            }
-        }
-        return mergedQuery;
-    }
-
-    private static Restriction mergeRestrictions(Restriction rest1, Restriction rest2) {
-        Restriction merged = null;
-        if (rest1 != null && rest2 != null) {
-            merged = Restriction.builder().and(rest1, rest2).build();
-        } else if (rest1 != null) {
-            merged = rest1;
-        } else if (rest2 != null) {
-            merged = rest2;
-        }
-        if (merged != null) {
-            return RestrictionOptimizer.optimize(merged);
-        } else {
-            return null;
         }
     }
 
