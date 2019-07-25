@@ -1,12 +1,15 @@
 package com.latticeengines.aws.s3.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +87,13 @@ public class S3ServiceImpl implements S3Service {
 
     @Value("${aws.s3.copy.part.size:524288000}")
     private long partSize;
+
+    public interface S3KeyFilter {
+        default boolean accept(String key) {
+            return key != null && key.endsWith(".avro");
+        }
+
+    }
 
     @Override
     public boolean objectExist(String bucket, String object) {
@@ -424,6 +434,11 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public Iterator<InputStream> getObjectStreamIterator(String bucket, String prefix, S3KeyFilter filter) {
+        return new ObjectStreamIterator(bucket, prefix, filter);
+    }
+
+    @Override
     public URL generateReadUrl(@NotNull String bucket, @NotNull String key, Date expireAt) {
         Preconditions.checkNotNull(bucket);
         Preconditions.checkNotNull(key);
@@ -552,5 +567,59 @@ public class S3ServiceImpl implements S3Service {
             }
         }
         return s3ObjectSummaries;
+    }
+
+    /**
+     * Iterator of input stream of S3 objects under specified bucket and prefix
+     * which satisfy S3KeyFilter
+     */
+    private class ObjectStreamIterator implements Iterator<InputStream>, Closeable {
+
+        private String bucket;
+        private List<String> objectKeys;
+        private int objectIdx = -1;
+        private InputStream current;
+
+        ObjectStreamIterator(String bucket, String prefix, S3KeyFilter filter) {
+            this.bucket = bucket;
+            objectKeys = listObjects(bucket, prefix).stream() //
+                    .map(S3ObjectSummary::getKey)
+                    .filter(key -> filter.accept(key))
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        public void close() {
+            closeCurrStream();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return objectKeys != null && objectIdx < objectKeys.size() - 1;
+        }
+
+        @Override
+        public InputStream next() {
+            if (!hasNext()) {
+                return null;
+            }
+            closeCurrStream();
+            current = readObjectAsStream(bucket, objectKeys.get(++objectIdx));
+            return current;
+        }
+
+        private void closeCurrStream() {
+            if (current == null) {
+                return;
+            }
+            try {
+                current.close();
+            } catch (IOException e) {
+                log.error("Fail to close input stream for S3 object " + objectKeys.get(objectIdx), e);
+            } finally {
+                current = null;
+            }
+        }
+
     }
 }

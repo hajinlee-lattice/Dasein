@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -67,9 +70,22 @@ public class ProductUtils {
             List<String> productTypes, List<String> productStatuses) {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
-        List<Product> productList = new ArrayList<>();
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
+        return loadProducts(iter, new HashSet<>(productTypes), new HashSet<>(productStatuses));
+    }
+
+    public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,
+            List<String> productStatuses) {
+        AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter);
+        return loadProducts(iter, productTypes == null ? Collections.emptySet() : new HashSet<>(productTypes),
+                productStatuses == null ? Collections.emptySet() : new HashSet<>(productStatuses));
+    }
+
+    public static List<Product> loadProducts(Iterator<GenericRecord> iter, Set<String> productTypes,
+            Set<String> productStatuses) {
+        List<Product> productList = new ArrayList<>();
+
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             Product product = new Product();

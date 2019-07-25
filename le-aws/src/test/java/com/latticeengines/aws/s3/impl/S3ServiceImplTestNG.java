@@ -1,19 +1,30 @@
 package com.latticeengines.aws.s3.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,6 +32,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.amazonaws.auth.policy.Policy;
@@ -36,10 +48,14 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.util.Md5Utils;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
 public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(S3ServiceImplTestNG.class);
 
     private static String DROP_FOLDER = "dropfolder";
 
@@ -235,6 +251,103 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         verifyNoAccess();
     }
 
+    @Test(groups = "functional", dataProvider = "S3AvroIteratorData")
+    public void testS3AvroRecordIterater(String[] data) {
+        String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterater";
+        String columnName = "TestColumn";
+        uploadAvroIterDataToS3(prefix, columnName, data);
+        Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix,
+                new S3ServiceImpl.S3KeyFilter() {
+                });
+        AvroStreamsIterator avroIter = AvroUtils.iterateAvroStreams(streamIter);
+        List<String> expected = Arrays.stream(data) //
+                .filter(Objects::nonNull) //
+                .flatMap(d -> Arrays.stream(d.split(""))) //
+                .collect(Collectors.toList());
+        int nRow = 0;
+        while (avroIter.hasNext()) {
+            GenericRecord record = avroIter.next();
+            Assert.assertNotNull(record);
+            Assert.assertEquals(record.get(columnName).toString(), "A");
+            nRow++;
+        }
+        Assert.assertEquals(nRow, expected.size());
+        avroIter.close();
+
+        if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
+            s3Service.cleanupPrefix(testBucket, prefix);
+        }
+    }
+
+    // Every 1-d ARRAY is a test case.
+    // Every STRING is a file. Null string is empty file.
+    // Every LETTER ("A") is an avro record in the file (single column
+    // "TestColumn" with value as "A")
+    @DataProvider(name = "S3AvroIteratorData")
+    private Object[][] getS3AvroIteratorData() {
+        return new Object[][] {
+                // Single file with single row
+                { new String[] { "A" } }, //
+                // Multiple files with multiple rows
+                { new String[] { "AA", "A", "A" } }, //
+                { new String[] { "A", "AA", "A" } }, //
+                { new String[] { "A", "A", "AA" } }, //
+                { new String[] { "AAA", "AAA", "AAA" } }, //
+                // Single empty file
+                { new String[] { null } }, //
+                // Multiple empty files
+                { new String[] { null, null, null } }, //
+                // Partial empty files
+                { new String[] { "AA", "A", null } }, //
+                { new String[] { "A", null, null, "AA" } }, //
+                { new String[] { null, "AA", "A" } }, //
+        };
+    }
+
+    private void uploadAvroIterDataToS3(String prefix, String columnName, String[] data) {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of(columnName, String.class));
+
+        if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
+            s3Service.cleanupPrefix(testBucket, prefix);
+        }
+
+        for (int i = 0; i < data.length; i++) {
+            String fileName = "File_" + i;
+            Schema schema = AvroUtils.constructSchema(fileName, columns);
+            List<GenericRecord> records = new ArrayList<>();
+            if (data[i] != null) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                String content = data[i];
+                for (int j = 0; j < content.length(); j++) {
+                    builder.set(columnName, content.substring(j, j + 1));
+                    records.add(builder.build());
+                }
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<>())) {
+                try (DataFileWriter<GenericRecord> creator = writer.create(schema, out)) {
+                    for (GenericRecord datum : records) {
+                        try {
+                            creator.append(datum);
+                        } catch (Exception e) {
+                            log.error("Data for the error row: " + datum.toString());
+                            throw new IOException(e);
+                        }
+
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Fail to convert GenericRecord to OutputStream", e);
+            }
+
+            String objectKey = prefix + "/" + fileName + ".avro";
+            s3Service.uploadInputStream(testBucket, objectKey, new ByteArrayInputStream(out.toByteArray()), true);
+            log.info("Uploaded data {} to S3 object {}", data[i], objectKey);
+        }
+    }
+
     private Policy getCustomerPolicy(String dropBoxId, String accountId) {
         String bucketPolicy = s3Service.getBucketPolicy(testBucket);
         List<Statement> statements = new ArrayList<>();
@@ -362,5 +475,4 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
             Assert.assertTrue(e.getMessage().contains("403"), e.getMessage());
         }
     }
-
 }

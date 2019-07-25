@@ -6,9 +6,10 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
 
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,9 +23,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.aws.s3.impl.S3ServiceImpl;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -43,6 +50,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -61,6 +69,12 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
             .getSystemAttributes(BusinessEntity.DepivotedPurchaseHistory, false).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
@@ -69,6 +83,9 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private S3Service s3Service;
 
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
@@ -84,9 +101,9 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
 
                 @Override
                 public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-                    String customerSpace = CustomerSpace.parse(tenantId).toString();
+                    CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
                     Map<String, List<Product>> productMap = loadProductMap(customerSpace);
-                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace);
+                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
                     return metadata.map(m -> {
                         return staticFilter(m, productMap, metrics);
                     });
@@ -94,9 +111,9 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
 
                 @Override
                 public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-                    String customerSpace = CustomerSpace.parse(tenantId).toString();
+                    CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
                     Map<String, List<Product>> productMap = loadProductMap(customerSpace);
-                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace);
+                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
                     return metadata.map(m -> {
                         return staticFilter(m, productMap, metrics);
                     });
@@ -133,22 +150,46 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     }
 
     /**
-     * Load product map from active table for table role ConsolidatedProduct
+     * Load product map from active product table for table role
+     * ConsolidatedProduct
      *
      * @param customerSpace
      * @return ProductId -> [Products]
      */
-    private Map<String, List<Product>> loadProductMap(String customerSpace) {
-        Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct);
-        if (productTable == null) {
-            log.warn("Fail to find active table with role {} for tenant {}", TableRoleInCollection.ConsolidatedProduct,
-                    customerSpace);
-            return Collections.emptyMap();
+    private Map<String, List<Product>> loadProductMap(CustomerSpace customerSpace) {
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedProduct);
+            if (productTable == null) {
+                log.warn(
+                        "Active product table with table role {} for tenant {} doesn't exist. Marking all the activity metrics attributes as deprecated.",
+                        TableRoleInCollection.ConsolidatedProduct, customerSpace.toString());
+                return Collections.emptyMap();
+            }
+
+            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            List<Product> productList = retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt={}: Loading product list from table {} for tenant {}", (ctx.getRetryCount() + 1),
+                            productTable.getName(), customerSpace);
+                }
+
+                String s3Prefix = pathBuilder.getS3AtlasTablePrefix(customerSpace.getTenantId(),
+                        productTable.getName());
+                Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(s3Bucket, s3Prefix,
+                        new S3ServiceImpl.S3KeyFilter() {
+                        });
+                return ProductUtils.loadProducts(streamIter,
+                        Arrays.asList(ProductType.Analytic.name()), null);
+            });
+
+            Map<String, List<Product>> productMap = ProductUtils.getProductMap(productList);
+            timer.setTimerMessage(String.format("Loaded product map from table %s for tenant %s",
+                    productTable.getName(), customerSpace));
+            return productMap;
         }
-        List<Product> productList = new ArrayList<>(ProductUtils.loadProducts(yarnConfiguration,
-                productTable.getExtracts().get(0).getPath(), Arrays.asList(ProductType.Analytic.name()), null));
-        log.info("Loaded product list from table {} for tenant {}", productTable.getName(), customerSpace);
-        return ProductUtils.getProductMap(productList);
+
     }
 
     private List<ActivityMetrics> getActivityMetrics(String customerSpace) {

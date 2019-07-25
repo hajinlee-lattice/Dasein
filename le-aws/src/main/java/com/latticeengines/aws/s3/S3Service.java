@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
@@ -11,6 +12,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.latticeengines.aws.s3.impl.S3ServiceImpl.S3KeyFilter;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {
@@ -38,6 +40,8 @@ public interface S3Service {
     void downloadS3File(S3ObjectSummary itemDesc, File file) throws Exception;
 
     InputStream readObjectAsStream(String bucket, String objectKey);
+
+    Iterator<InputStream> getObjectStreamIterator(String bucket, String prefix, S3KeyFilter filter);
 
     boolean objectExist(String bucket, String object);
 
