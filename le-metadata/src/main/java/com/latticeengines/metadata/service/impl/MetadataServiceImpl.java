@@ -158,15 +158,14 @@ public class MetadataServiceImpl implements MetadataService {
             DatabaseUtils.retry("updateTable", 10, RollbackException.class, "RollbackException  detected performing", null,
                     input -> {
                         Table found = tableEntityMgr.findByName(table.getName(), false);
-                        if (migrationTrackEntityMgr.tenantInMigration(found.getTenant())) {
-                            log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
-                            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
-                        }
                         if (found != null) {
                             log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
+                            if (migrationTrackEntityMgr.tenantInMigration(found.getTenant())) {
+                                log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
+                                throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
+                            }
                             tableEntityMgr.deleteByName(found.getName());
                         }
-
                         tableEntityMgr.create(TableUtils.clone(table, table.getName()));
                     });
         } finally {
