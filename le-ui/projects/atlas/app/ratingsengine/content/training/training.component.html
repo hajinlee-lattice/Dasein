@@ -59,8 +59,8 @@
                             </select>
                             <div class="input-group prepend" >
                                     <numerical-range-directive
-                                        mainconfig="{{ $ctrl.getNumericalConfig() }}"
-                                        config="{{ $ctrl.getSpendConfigString() }}"
+                                        mainconfig="$ctrl.numericalConfig"
+                                        config="$ctrl.spendingConfig"
                                         showfrom="true"
                                         fromlabel="$"
                                         fromdisabled="!$ctrl.checkboxModel.spend" 
@@ -93,8 +93,8 @@
                             </select>
                             <div class="input-group append">
                                 <numerical-range-directive 
-                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
-                                    config="{{ $ctrl.getQuantityConfigString() }}"
+                                    mainconfig="$ctrl.numericalConfig"
+                                    config="$ctrl.quantityConfig"
                                     fromdisabled="!$ctrl.checkboxModel.quantity" 
                                     initialvalidation="false"
                                     showfrom="true"
@@ -120,8 +120,8 @@
                             <p>When modeling, only use historical records from the last</p>
                             <div class="input-group append">
                                 <numerical-range-directive 
-                                    mainconfig="{{ $ctrl.getNumericalConfig() }}"
-                                    config ="{{ $ctrl.getPeriodConfigString() }}"
+                                    mainconfig="$ctrl.numericalConfig"
+                                    config ="$ctrl.periodConfig"
                                     initialvalidation="false"
                                     fromdisabled="!$ctrl.checkboxModel.periods" 
                                     showfrom="true"
