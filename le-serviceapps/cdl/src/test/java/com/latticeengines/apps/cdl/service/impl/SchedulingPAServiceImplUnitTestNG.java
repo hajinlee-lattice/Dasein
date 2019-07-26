@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -33,8 +34,6 @@ public class SchedulingPAServiceImplUnitTestNG {
     @Spy
     private SchedulingPAServiceImpl schedulingPAService;
 
-    private static final String RETRY_KEY = "RETRY_KEY";
-    private static final String OTHER_KEY = "OTHER_KEY";
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String TEST_SCHEDULER_NAME = "Default";
@@ -52,10 +51,10 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 10);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertEquals(result.getRetryPATenants().size(), 0);
+        Assert.assertEquals(result.getNewPATenants().size(), 10);
     }
 
     @Test(groups = "unit")
@@ -64,12 +63,13 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getNoRunningSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 7);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getRetryPATenants().size(), 3);
+        Assert.assertEquals(result.getNewPATenants().size(), 7);
         //Retry invalid, last finish time < 15min, can not poll from queue
-        Assert.assertFalse(canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
     }
 
     @Test(groups = "unit")
@@ -78,10 +78,10 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 5);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertEquals(result.getRetryPATenants().size(), 0);
+        Assert.assertEquals(result.getNewPATenants().size(), 5);
     }
 
     @Test(groups = "unit")
@@ -90,12 +90,12 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getScheduleNowLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 3);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 2);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertEquals(result.getRetryPATenants().size(), 3);
+        Assert.assertEquals(result.getNewPATenants().size(), 2);
         //Retry invalid, last finish time < 15min, can not poll from queue
-        Assert.assertTrue(!canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
     }
 
     @Test(groups = "unit")
@@ -104,12 +104,12 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getNoRetryTenantActivityList());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 0);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 5);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertEquals(result.getRetryPATenants().size(), 0);
+        Assert.assertEquals(result.getNewPATenants().size(), 5);
         //QA tenant has limit, can not poll from queue.
-        Assert.assertFalse(canRunJobTenantMap.get(OTHER_KEY).contains("tenant11"));
+        Assert.assertFalse(result.getNewPATenants().contains("tenant11"));
     }
 
     @Test(groups = "unit")
@@ -118,14 +118,14 @@ public class SchedulingPAServiceImplUnitTestNG {
         map.put(SYSTEM_STATUS, getLargeLimitSystemStatus());
         map.put(TENANT_ACTIVITY_LIST, getTenantActivityListWithRetry());
         doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(TEST_SCHEDULER_NAME);
-        log.info(JsonUtils.serialize(canRunJobTenantMap));
-        Assert.assertEquals(canRunJobTenantMap.get(RETRY_KEY).size(), 2);
-        Assert.assertEquals(canRunJobTenantMap.get(OTHER_KEY).size(), 3);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        log.info(JsonUtils.serialize(result));
+        Assert.assertEquals(result.getRetryPATenants().size(), 2);
+        Assert.assertEquals(result.getNewPATenants().size(), 3);
         //Retry invalid, last finish time < 15min, can not poll from queue
-        Assert.assertFalse(canRunJobTenantMap.get(RETRY_KEY).contains("Tenant18"));
+        Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
         //QA tenant has limit, can not poll from queue.
-        Assert.assertFalse(canRunJobTenantMap.get(OTHER_KEY).contains("tenant2"));
+        Assert.assertFalse(result.getNewPATenants().contains("tenant2"));
     }
 
     private SystemStatus getNoRunningSystemStatus() {

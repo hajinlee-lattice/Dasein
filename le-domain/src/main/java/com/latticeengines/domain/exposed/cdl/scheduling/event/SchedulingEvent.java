@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.cdl.scheduling.event;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.Scheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
 
 public class SchedulingEvent extends Event {
@@ -32,10 +32,10 @@ public class SchedulingEvent extends Event {
         // init scheduler
         Scheduler scheduler = new GreedyScheduler();
         // schedule PA jobs
-        Map<String, Set<String>> tenantMap = scheduler.schedule(SchedulingPAUtil.initQueue(simulationContext));
+        SchedulingResult result = scheduler.schedule(SchedulingPAUtil.initQueue(simulationContext));
         Set<String> tenantSet = new HashSet<>();
-        tenantSet.addAll(tenantMap.get(RETRY_KEY));
-        tenantSet.addAll(tenantMap.get(OTHER_KEY));
+        tenantSet.addAll(result.getRetryPATenants());
+        tenantSet.addAll(result.getNewPATenants());
         List<Event> events = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tenantSet)) {
             log.info("SchedulingEvent: " + getTime() + ", tenants=" + tenantSet + ", size=" + tenantSet.size());

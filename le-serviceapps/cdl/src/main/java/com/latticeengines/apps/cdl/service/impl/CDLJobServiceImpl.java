@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
-import com.latticeengines.domain.exposed.cdl.scheduling.Scheduler;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -363,15 +363,19 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (systemCheck()) {
             return;
         }
-        Map<String, Set<String>> canRunJobTenantMap = schedulingPAService.getCanRunJobTenantList(schedulerName);
-        log.info("Scheduled PAs for tenants = {}. schedulerName={} dryRun={}", canRunJobTenantMap, schedulerName,
-                dryRun);
-        Set<String> canRunRetryJobSet = canRunJobTenantMap.get(Scheduler.RETRY_KEY);
+
+        SchedulingResult result = schedulingPAService.getSchedulingResult(schedulerName);
+        log.info(
+                "Scheduled new PAs for tenants = {}, retry PAs for tenants = {}. schedulerName={}, dryRun={}, totalSize={}",
+                result.getNewPATenants(), result.getRetryPATenants(), schedulerName, dryRun,
+                result.getNewPATenants().size() + result.getRetryPATenants().size());
+        Set<String> canRunRetryJobSet = result.getRetryPATenants();
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String needRunJobTenantId : canRunRetryJobSet) {
                 try {
                     if (!dryRun) {
-                        cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
+                        ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
+                        logScheduledPA(needRunJobTenantId, retryAppId, true, result);
                     }
                 } catch (Exception e) {
                     log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
@@ -379,14 +383,25 @@ public class CDLJobServiceImpl implements CDLJobService {
                 }
             }
         }
-        Set<String> canRunJobSet = canRunJobTenantMap.get(Scheduler.OTHER_KEY);
+        Set<String> canRunJobSet = result.getNewPATenants();
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String needRunJobTenantId : canRunJobSet) {
                 if (!dryRun) {
-                    submitProcessAnalyzeJob(needRunJobTenantId);
+                    ApplicationId appId = submitProcessAnalyzeJob(needRunJobTenantId);
+                    logScheduledPA(needRunJobTenantId, appId, false, result);
                 }
             }
         }
+    }
+
+    private void logScheduledPA(String tenantId, ApplicationId appId, boolean isRetry, SchedulingResult result) {
+        if (StringUtils.isEmpty(tenantId) || appId == null || appId.toString() == null || result == null) {
+            return;
+        }
+
+        SchedulingResult.Detail detail = result.getDetails().get(tenantId);
+        log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}'", tenantId,
+                appId.toString(), isRetry, JsonUtils.serialize(detail));
     }
 
     private void updateRetryCount(String tenantId) {
@@ -514,12 +529,11 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetailEntityMgr.updateJobDetail(cdlJobDetail);
         log.info(String.format(
                 "Submit process analyze job with application id: %s, tenant id: %s, retry: %s, success" + " %s",
-                applicationId.toString(), tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
+                applicationId, tenant.getName(), retry ? "y" : "n", success ? "y" : "n"));
         return true;
     }
 
-    @VisibleForTesting
-    boolean submitProcessAnalyzeJob(String tenantId) {
+    private ApplicationId submitProcessAnalyzeJob(String tenantId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getShortTenantId());
@@ -534,9 +548,6 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
             }
-            if (dataFeed.isScheduleNow()) {
-                dataFeedService.updateDataFeedScheduleTime(tenantId, false, null);
-            }
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
 
         } catch (Exception e) {
@@ -545,7 +556,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, success" + " %s",
                 applicationId.toString(), tenant.getName(), success ? "y" : "n"));
-        return success;
+        return applicationId;
     }
 
     @VisibleForTesting
