@@ -23,7 +23,7 @@ public class DataLakeServiceImplEntityMatchEnabledDeploymentTestNG extends DataL
         setupTestEnvironmentWithOneTenant();
         mainTestTenant = testBed.getMainTestTenant();
         // Enable EntityMatch feature flag
-        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
         MultiTenantContext.setTenant(mainTestTenant);
 
         setupRedshiftData();

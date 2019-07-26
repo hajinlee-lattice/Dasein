@@ -61,7 +61,7 @@ public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Mig
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED, readOnly = true)
-    public List<Long> getStartedTenants() {
-        return migrationTrackRepository.findByStatus(MigrationTrack.Status.STARTED);
+    public List<Long> getTenantPidsByStatus(MigrationTrack.Status status) {
+        return migrationTrackRepository.findByStatus(status);
     }
 }
