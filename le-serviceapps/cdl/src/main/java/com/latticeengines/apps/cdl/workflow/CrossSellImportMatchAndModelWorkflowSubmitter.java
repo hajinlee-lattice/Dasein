@@ -166,7 +166,9 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .workflowContainerMem(workflowMemMb) //
                 .notesContent(parameters.getNotesContent()) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
-                .ratingEngineType(ratingEngineType); 
+                .ratingEngineType(ratingEngineType) //
+                .apsRollupPeriod(dataCollectionProxy
+                        .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod());
         return builder.build();
     }
 
