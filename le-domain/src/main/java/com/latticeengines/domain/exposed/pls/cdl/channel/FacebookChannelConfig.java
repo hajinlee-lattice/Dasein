@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FacebookChannelConfig implements ChannelConfig {
 
-    private static final CDLExternalSystemName systemName = CDLExternalSystemName.LinkedIn;
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.Facebook;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
