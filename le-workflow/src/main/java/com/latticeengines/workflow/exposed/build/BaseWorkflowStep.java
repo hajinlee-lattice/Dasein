@@ -1,11 +1,16 @@
 package com.latticeengines.workflow.exposed.build;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -24,6 +29,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.WorkflowConfigurationUtils;
@@ -36,9 +42,12 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
+
+import avro.shaded.com.google.common.collect.Sets;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
@@ -161,6 +170,17 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
+    protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
+    protected static final String CONTACT_PROFILE_TABLE_NAME = "CONTACT_PROFILE_TABLE_NAME";
+    protected static final String CONTACT_STATS_TABLE_NAME = "CONTACT_STATS_TABLE_NAME";
+    protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
+    protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
+    protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
+    protected static final String PH_STATS_TABLE_NAME = "PH_STATS_TABLE_NAME";
+    protected static final String PH_DEPIVOTED_TABLE_NAME = "PH_DEPIVOTED_TABLE_NAME";
+    protected static final String CURATED_ACCOUNT_SERVING_TABLE_NAME = "CURATED_ACCOUNT_SERVING_TABLE_NAME";
+    protected static final String CURATED_ACCOUNT_STATS_TABLE_NAME = "CURATED_ACCOUNT_STATS_TABLE_NAME";
     protected static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
     protected static final String REMATCHED_ACCOUNT_TABLE_NAME = "REMATCHED_ACCOUNT_TABLE_NAME";
     protected static final String ENRICHED_ACCOUNT_DIFF_TABLE_NAME = "ENRICHED_ACCOUNT_DIFF_TABLE_NAME";
@@ -193,6 +213,43 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
     public static final String ATTRIBUTE_QUOTA_LIMIT = "ATTRIBUTE_QUOTA_LIMIT";
 
+    // tables to be carried over in restarted PA
+    protected static final Set<String> TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
+            ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+            ENTITY_MATCH_CONTACT_TARGETTABLE, //
+            ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
+            ENTITY_MATCH_TXN_TARGETTABLE, //
+            ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, //
+            ACCOUNT_DIFF_TABLE_NAME, //
+            ACCOUNT_MASTER_TABLE_NAME, //
+            FULL_ACCOUNT_TABLE_NAME, //
+            ACCOUNT_EXPORT_TABLE_NAME, //
+            ACCOUNT_FEATURE_TABLE_NAME, //
+            ACCOUNT_PROFILE_TABLE_NAME, //
+            ACCOUNT_SERVING_TABLE_NAME, //
+            ACCOUNT_STATS_TABLE_NAME, //
+            REMATCHED_ACCOUNT_TABLE_NAME, //
+            ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
+            CONTACT_SERVING_TABLE_NAME, //
+            CONTACT_PROFILE_TABLE_NAME, //
+            CONTACT_STATS_TABLE_NAME, //
+            AGG_DAILY_TRXN_TABLE_NAME, //
+            AGG_PERIOD_TRXN_TABLE_NAME, //
+            PH_SERVING_TABLE_NAME, //
+            PH_DEPIVOTED_TABLE_NAME, //
+            PH_PROFILE_TABLE_NAME, //
+            PH_STATS_TABLE_NAME, //
+            CURATED_ACCOUNT_SERVING_TABLE_NAME, //
+            CURATED_ACCOUNT_STATS_TABLE_NAME);
+
+    // extra context keys to be carried over in restarted PA, beyond table names above
+    protected static final Set<String> EXTRA_KEYS_FOR_PA_RETRY = Sets.newHashSet( //
+            PA_TIMESTAMP, //
+            ENTITY_MATCH_COMPLETED, //
+            NEW_ENTITY_MATCH_ENVS, //
+            FULL_REMATCH_PA, //
+            NEW_RECORD_CUT_OFF_TIME);
+
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -207,6 +264,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Autowired
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Inject
+    protected MetadataProxy metadataProxy;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
@@ -408,4 +468,25 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 }));
         return result;
     }
+
+
+    protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameCtxKeys) {
+        if (CollectionUtils.isEmpty(tableNameCtxKeys)) {
+            return Collections.emptyList();
+        } else {
+            return tableNameCtxKeys.stream() //
+                    .map(k -> getTableSummaryFromKey(customer, k)).collect(Collectors.toList());
+        }
+    }
+
+
+    protected Table getTableSummaryFromKey(String customer, String tableNameCtxKey) {
+        String tableName = getStringValueFromContext(tableNameCtxKey);
+        if (StringUtils.isNotBlank(tableName)) {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            return retry.execute(ctx -> metadataProxy.getTableSummary(customer, tableName));
+        }
+        return null;
+    }
+
 }

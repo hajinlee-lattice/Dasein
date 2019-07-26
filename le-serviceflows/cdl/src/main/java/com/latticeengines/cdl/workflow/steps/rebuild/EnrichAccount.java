@@ -75,49 +75,52 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         customerSpace = configuration.getCustomerSpace();
-        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
-        masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                inactive);
-        if (StringUtils.isBlank(masterTableName)) {
-            masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                    active);
-            if (StringUtils.isNotBlank(masterTableName)) {
-                log.info("Found the batch store in active version " + active + ": " + masterTableName);
-                cloneTableService.setActiveVersion(active);
-                cloneTableService.setCustomerSpace(customerSpace);
-                cloneTableService.linkInactiveTable(batchStore);
-            }
+        Table fullAccountTableInCtx = getTableSummaryFromKey(customerSpace.toString(), FULL_ACCOUNT_TABLE_NAME);
+        if (fullAccountTableInCtx != null) {
+
+            log.info("Found full account table in context, go thru short-cut mode.");
+            String fullAccountTableName = fullAccountTableInCtx.getName();
+            addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
+            return null;
+
         } else {
-            log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
-        }
-        if (StringUtils.isBlank(masterTableName)) {
-            throw new IllegalStateException("Cannot find the master table in default collection");
-        }
-        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-        if (masterTable == null) {
-            throw new IllegalStateException("Cannot find the master table in default collection");
-        }
 
-        String fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
-        if (StringUtils.isNotBlank(fullAccountTableName)) {
-            Table fullAccountTable = metadataProxy.getTable(customerSpace.toString(), fullAccountTableName);
-            if (fullAccountTable != null) {
-                log.info("Found full account table in context, go thru short-cut mode.");
-                addToListInContext(TEMPORARY_CDL_TABLES, fullAccountTableName, String.class);
-                return null;
+            DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+            TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
+            masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
+                    inactive);
+            if (StringUtils.isBlank(masterTableName)) {
+                masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
+                        active);
+                if (StringUtils.isNotBlank(masterTableName)) {
+                    log.info("Found the batch store in active version " + active + ": " + masterTableName);
+                    cloneTableService.setActiveVersion(active);
+                    cloneTableService.setCustomerSpace(customerSpace);
+                    cloneTableService.linkInactiveTable(batchStore);
+                }
+            } else {
+                log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
             }
+            if (StringUtils.isBlank(masterTableName)) {
+                throw new IllegalStateException("Cannot find the master table in default collection");
+            }
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
+            if (masterTable == null) {
+                throw new IllegalStateException("Cannot find the master table in default collection");
+            }
+
+            double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
+            int multiplier = ScalingUtils.getMultiplier(sizeInGb);
+            log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+            scalingMultiplier = multiplier;
+
+            PipelineTransformationRequest request = getTransformRequest();
+            return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
+
         }
-
-        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
-        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-        log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
-        scalingMultiplier = multiplier;
-
-        PipelineTransformationRequest request = getTransformRequest();
-        return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
     }
 
     @Override
@@ -173,7 +176,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         List<Column> cols = new ArrayList<>();
         boolean useInternalAttrs = useInternalAttrs();
         for (ColumnMetadata cm : dcCols) {
-            if (useInternalAttrs || isNotInternalAttr(cm)) {
+            if (useInternalAttrs || canBeUsedInModelOrSegment(cm) || isNotInternalAttr(cm)) {
                 cols.add(new Column(cm.getAttrName()));
             }
         }
@@ -206,6 +209,11 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     private boolean isNotInternalAttr(ColumnMetadata columnMetadata) {
         return !Boolean.TRUE.equals(columnMetadata.getCanInternalEnrich());
+    }
+
+    private boolean canBeUsedInModelOrSegment(ColumnMetadata columnMetadata) {
+        return columnMetadata.isEnabledFor(ColumnSelection.Predefined.Model) ||
+                columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
     }
 
 }

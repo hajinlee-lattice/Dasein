@@ -16,6 +16,7 @@ public enum LatticeFeatureFlag {
     LATTICE_MARKETO_SCORING("LatticeMarketoScoring", "Lattice Integration for Marketo Scoring"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_ENTITY_MATCH("EnableEntityMatch", "Enable Entity Match"), //
+    // TODO: To be retired after all the tenants are migrated to entity match
     ENABLE_ENTITY_MATCH_GA("EnableEntityMatchGA", "Enable Entity Match GA"), //
     ENABLE_TARGET_SCORE_DERIVATION("EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
     ENABLE_APS_IMPUTATION("EnableApsImputation", "Enable APS null imputation with 0"), //

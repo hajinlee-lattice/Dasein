@@ -573,6 +573,7 @@ public class BatonServiceImpl implements BatonService {
         return loadDirectory(spaceConfig, spaceConfigPath);
     }
 
+    @Override
     public boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product) {
         String contractId = customerSpace.getContractId();
         String tenantId = customerSpace.getTenantId();
@@ -592,15 +593,30 @@ public class BatonServiceImpl implements BatonService {
         }
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
         return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
     }
 
+    @Override
+    public boolean isEntityMatchEnabled(CustomerSpace customerSpace) {
+        // ENABLE_ENTITY_MATCH_GA is for entity match while ENABLE_ENTITY_MATCH
+        // is for entity match + multi-template
+        // After all the tenants are migrated to entity match, we will retire
+        // feature flag ENABLE_ENTITY_MATCH_GA. By that time, we don't need this
+        // method -- could simply use isEnabled() to check whether
+        // multi-template is enabled or not.
+        return isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA)
+                || isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+    }
+
+    @Override
     public void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value) {
         FeatureFlagClient.setEnabled(customerSpace, flag.getName(), value);
     }
 
+    @Override
     @SuppressWarnings("deprecation")
     public FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace) {
         FeatureFlagValueMap valueMapInCamille = FeatureFlagClient.getFlags(customerSpace);

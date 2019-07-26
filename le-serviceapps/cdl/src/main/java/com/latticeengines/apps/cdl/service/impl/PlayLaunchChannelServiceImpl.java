@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
@@ -193,6 +194,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
         } else if (playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
             LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
+            playLaunch.setAudienceId(channelConfig.getAudienceId());
+            playLaunch.setAudienceName(channelConfig.getAudienceName());
+            channelConfig.setAudienceType(channelConfig.getAudienceType());
+        } else if (playLaunchChannel.getChannelConfig() instanceof FacebookChannelConfig) {
+            FacebookChannelConfig channelConfig = (FacebookChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
             playLaunch.setAudienceName(channelConfig.getAudienceName());
             channelConfig.setAudienceType(channelConfig.getAudienceType());

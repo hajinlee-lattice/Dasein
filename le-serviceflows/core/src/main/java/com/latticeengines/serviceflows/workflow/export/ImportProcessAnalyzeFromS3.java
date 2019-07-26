@@ -16,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -84,20 +83,7 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
     }
 
     private void buildTablesForRetryRequests(List<ImportExportRequest> requests) {
-        Set<String> tableKeysForRetry = Sets.newHashSet( //
-                ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_TARGETTABLE, //
-                ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
-                ACCOUNT_DIFF_TABLE_NAME, //
-                ACCOUNT_MASTER_TABLE_NAME, //
-                FULL_ACCOUNT_TABLE_NAME, //
-                ACCOUNT_EXPORT_TABLE_NAME, //
-                ACCOUNT_FEATURE_TABLE_NAME, //
-                ACCOUNT_PROFILE_TABLE_NAME, //
-                ACCOUNT_SERVING_TABLE_NAME, //
-                ACCOUNT_STATS_TABLE_NAME
-        );
-        Set<String> tableNamesForRetry = tableKeysForRetry.stream() //
+        Set<String> tableNamesForRetry = TABLE_NAMES_FOR_PA_RETRY.stream() //
                 .map(this::getStringValueFromContext) //
                 .filter(StringUtils::isNotBlank) //
                 .collect(Collectors.toSet());

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
@@ -78,7 +77,7 @@ public abstract class BaseQueryServiceImpl {
             log.warn("MultiTenant Context is empty!");
             return false;
         } else {
-            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            return batonService.isEntityMatchEnabled(customerSpace);
         }
     }
 

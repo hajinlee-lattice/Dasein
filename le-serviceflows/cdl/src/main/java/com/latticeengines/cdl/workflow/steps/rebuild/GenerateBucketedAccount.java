@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
@@ -77,26 +78,23 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     protected void initializeConfiguration() {
         super.initializeConfiguration();
 
-        profileTableName = getStringValueFromContext(ACCOUNT_PROFILE_TABLE_NAME);
-        servingStoreTableName = getStringValueFromContext(ACCOUNT_SERVING_TABLE_NAME);
-        if (StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(servingStoreTableName)) {
-            Table profileTable = metadataProxy.getTable(customerSpace.toString(), profileTableName);
-            Table servingStore = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
-            if (profileTable != null && servingStore != null) {
-                log.info("Found both profile and serving store tables in context, going thru short-cut mode.");
-                shortCutMode = true;
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList(
+                ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME));
+        shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
 
-                TableRoleInCollection profileRole = profileTableRole();
-                dataCollectionProxy.upsertTable(customerSpace.toString(), profileTableName, profileRole, inactive);
+        if (shortCutMode) {
+            log.info("Found both profile and serving store tables in context, going thru short-cut mode.");
+            servingStoreTableName = tablesInCtx.get(0).getName();
+            profileTableName = tablesInCtx.get(1).getName();
 
-                TableRoleInCollection servingStoreRole = BusinessEntity.Account.getServingStore();
-                exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
-                dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
-                        servingStoreRole, inactive);
-            }
-        }
+            TableRoleInCollection profileRole = profileTableRole();
+            dataCollectionProxy.upsertTable(customerSpace.toString(), profileTableName, profileRole, inactive);
 
-        if (!shortCutMode) {
+            TableRoleInCollection servingStoreRole = BusinessEntity.Account.getServingStore();
+            exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
+                    servingStoreRole, inactive);
+        } else {
             statsTablePrefix = null;
             fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
             setEvaluationDateStrAndTimestamp();

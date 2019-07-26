@@ -28,9 +28,9 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @BeforeClass(groups = "end2end")
     @Override
     public void setup() throws Exception {
-        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
+        log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         checkpointService
                 .setPrecedingCheckpoints(Arrays.asList(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT));
