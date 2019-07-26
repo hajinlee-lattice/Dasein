@@ -184,7 +184,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 } catch (Exception e) {
                     execution = null;
                 }
-                tenantActivity.setRetry(retryProcessAnalyze(execution));
+                tenantActivity.setRetry(retryProcessAnalyze(execution, tenantId));
                 if (execution != null && execution.getUpdated() != null) {
                     tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
                 }
@@ -296,13 +296,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return detail.getAccountCount() != null && detail.getAccountCount() > largeAccountCountLimit;
     }
 
-    private boolean retryProcessAnalyze(DataFeedExecution execution) {
+    private boolean retryProcessAnalyze(DataFeedExecution execution, String tenantId) {
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
-            } else if (execution.getDataFeed() != null && execution.getDataFeed().getTenant() != null) {
+            } else {
                 log.debug("Tenant {} exceeds retry limit and skip failed exeuction",
-                        execution.getDataFeed().getTenant().getId());
+                        tenantId);
             }
         }
         return false;
