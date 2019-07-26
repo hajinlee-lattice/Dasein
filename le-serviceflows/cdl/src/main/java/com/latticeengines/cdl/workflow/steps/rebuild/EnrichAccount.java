@@ -173,7 +173,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         List<Column> cols = new ArrayList<>();
         boolean useInternalAttrs = useInternalAttrs();
         for (ColumnMetadata cm : dcCols) {
-            if (useInternalAttrs || isNotInternalAttr(cm)) {
+            if (useInternalAttrs || canBeUsedInModelOrSegment(cm) || isNotInternalAttr(cm)) {
                 cols.add(new Column(cm.getAttrName()));
             }
         }
@@ -206,6 +206,11 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     private boolean isNotInternalAttr(ColumnMetadata columnMetadata) {
         return !Boolean.TRUE.equals(columnMetadata.getCanInternalEnrich());
+    }
+
+    private boolean canBeUsedInModelOrSegment(ColumnMetadata columnMetadata) {
+        return columnMetadata.isEnabledFor(ColumnSelection.Predefined.Model) ||
+                columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
     }
 
 }
