@@ -168,7 +168,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
                 .apsRollupPeriod(dataCollectionProxy
-                        .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), null).getApsRollingPeriod());
+                        .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod());
         return builder.build();
     }
 
