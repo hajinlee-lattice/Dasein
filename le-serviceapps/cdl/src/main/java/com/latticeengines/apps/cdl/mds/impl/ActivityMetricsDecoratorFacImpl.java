@@ -27,8 +27,8 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
+import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.aws.s3.impl.S3ServiceImpl;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -159,7 +159,8 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                     TableRoleInCollection.ConsolidatedProduct);
             if (productTable == null) {
                 log.warn(
-                        "Active product table with table role {} for tenant {} doesn't exist. Marking all the activity metrics attributes as deprecated.",
+                        "Active product table with table role {} for tenant {} doesn't exist. "
+                                + "Marking all the activity metrics attributes as deprecated.",
                         TableRoleInCollection.ConsolidatedProduct, customerSpace.toString());
                 return Collections.emptyMap();
             }
@@ -175,7 +176,7 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                 String s3Prefix = pathBuilder.getS3AtlasTablePrefix(customerSpace.getTenantId(),
                         productTable.getName());
                 Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(s3Bucket, s3Prefix,
-                        new S3ServiceImpl.S3KeyFilter() {
+                        new S3KeyFilter() {
                         });
                 return ProductUtils.loadProducts(streamIter,
                         Arrays.asList(ProductType.Analytic.name()), null);
@@ -212,14 +213,16 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
         List<Product> products = productMap.get(productId);
         if (CollectionUtils.isEmpty(products)) {
             log.warn(
-                    "Cannot find product with ProductId {} derived from attribute name {}. Marking {} as deprecated for tennant {}",
+                    "Cannot find product with ProductId {} derived from attribute name {}. "
+                            + "Marking {} as deprecated for tennant {}",
                     productId, cm.getAttrName(), cm.getAttrName(), customerSpace);
             return markDeprecate(cm);
         }
         Product product = products.stream().filter(Objects::nonNull).findFirst().orElse(null);
         if (product == null) {
             log.warn(
-                    "Cannot find product with ProductId {} derived from attribute name {}. Marking {} as deprecated for tennant {}",
+                    "Cannot find product with ProductId {} derived from attribute name {}. "
+                            + "Marking {} as deprecated for tennant {}",
                     productId, cm.getAttrName(), cm.getAttrName(), customerSpace);
             return markDeprecate(cm);
         }

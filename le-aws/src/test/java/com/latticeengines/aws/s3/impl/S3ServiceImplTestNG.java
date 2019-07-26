@@ -47,6 +47,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.util.Md5Utils;
+import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
@@ -256,17 +257,15 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterater";
         String columnName = "TestColumn";
         uploadAvroIterDataToS3(prefix, columnName, data);
-        Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix,
-                new S3ServiceImpl.S3KeyFilter() {
-                });
+        Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix, new S3KeyFilter() {
+        });
         AvroStreamsIterator avroIter = AvroUtils.iterateAvroStreams(streamIter);
         List<String> expected = Arrays.stream(data) //
                 .filter(Objects::nonNull) //
                 .flatMap(d -> Arrays.stream(d.split(""))) //
                 .collect(Collectors.toList());
         int nRow = 0;
-        while (avroIter.hasNext()) {
-            GenericRecord record = avroIter.next();
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> avroIter) {
             Assert.assertNotNull(record);
             Assert.assertEquals(record.get(columnName).toString(), "A");
             nRow++;
@@ -295,9 +294,9 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                 { new String[] { "AAA", "AAA", "AAA" } }, //
                 // Single empty file
                 { new String[] { null } }, //
-                // Multiple empty files
+                // All empty files
                 { new String[] { null, null, null } }, //
-                // Partial empty files
+                // Some empty files
                 { new String[] { "AA", "A", null } }, //
                 { new String[] { "A", null, null, "AA" } }, //
                 { new String[] { null, "AA", "A" } }, //

@@ -12,7 +12,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.latticeengines.aws.s3.impl.S3ServiceImpl.S3KeyFilter;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {

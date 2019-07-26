@@ -1336,7 +1336,7 @@ public class AvroUtils {
         @Override
         public GenericRecord next() {
             if (!hasNext()) {
-                return null;
+                throw new NoSuchElementException();
             }
             return reader.next();
         }

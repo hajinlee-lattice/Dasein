@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +67,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.google.common.base.Preconditions;
+import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -85,15 +87,8 @@ public class S3ServiceImpl implements S3Service {
     @Inject
     private AmazonS3 s3Client;
 
-    @Value("${aws.s3.copy.part.size:524288000}")
+    @Value("${aws.s3.copy.part.size}")
     private long partSize;
-
-    public interface S3KeyFilter {
-        default boolean accept(String key) {
-            return key != null && key.endsWith(".avro");
-        }
-
-    }
 
     @Override
     public boolean objectExist(String bucket, String object) {
@@ -601,7 +596,7 @@ public class S3ServiceImpl implements S3Service {
         @Override
         public InputStream next() {
             if (!hasNext()) {
-                return null;
+                throw new NoSuchElementException();
             }
             closeCurrStream();
             current = readObjectAsStream(bucket, objectKeys.get(++objectIdx));
