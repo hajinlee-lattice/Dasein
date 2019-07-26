@@ -236,6 +236,8 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .workflowContainerMem(workflowMemMb) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
+                .apsRollupPeriod(dataCollectionProxy
+                        .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod())
                 .build();
         return configuration;
     }
