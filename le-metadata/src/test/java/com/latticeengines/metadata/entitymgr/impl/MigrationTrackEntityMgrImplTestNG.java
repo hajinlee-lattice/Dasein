@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -23,7 +24,10 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({ SimpleRetryListener.class })
 public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Inject
@@ -116,19 +120,21 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(tenant.getPid(), created.getTenant().getPid());
     }
 
-    @Test(groups = "function", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
-    public void testGetStartedTenants(Tenant tenant, MigrationTrack track) {
+    @Test(groups = "function", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"}, retryAnalyzer = SimpleRetryAnalyzer.class)
+    public void testGetTenantsByStatus(Tenant tenant, MigrationTrack track) {
         List<Long> found, actualStarted;
 
         track.setStatus(MigrationTrack.Status.COMPLETED);
-        found = migrationTrackEntityMgr.getStartedTenants();
+        migrationTrackEntityMgr.update(track);
+        found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.STARTED);
         Assert.assertNotNull(found);
         Assert.assertEquals(0, found.size());
 
         track.setStatus(MigrationTrack.Status.STARTED);
+        migrationTrackEntityMgr.update(track);
         actualStarted = new ArrayList<>();
         actualStarted.add(tenant.getPid());
-        found = migrationTrackEntityMgr.getStartedTenants();
+        found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.STARTED);
         Assert.assertNotNull(found);
         Assert.assertArrayEquals(actualStarted.toArray(), found.toArray());
     }
@@ -140,7 +146,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(track.getPid(), created.getPid());
     }
 
-    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
+    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"}, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testTrackedTenants(Tenant tenant, MigrationTrack track) {
         Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
 
@@ -160,7 +166,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         migrationTrackEntityMgr.update(track);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testUntrackedTenants() {
         tenantEntityMgr.create(untracked);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(untracked));
