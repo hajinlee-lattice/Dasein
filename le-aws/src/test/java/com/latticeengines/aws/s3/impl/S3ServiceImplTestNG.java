@@ -259,19 +259,19 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         uploadAvroIterDataToS3(prefix, columnName, data);
         Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix, new S3KeyFilter() {
         });
-        AvroStreamsIterator avroIter = AvroUtils.iterateAvroStreams(streamIter);
         List<String> expected = Arrays.stream(data) //
                 .filter(Objects::nonNull) //
                 .flatMap(d -> Arrays.stream(d.split(""))) //
                 .collect(Collectors.toList());
         int nRow = 0;
-        for (GenericRecord record : (Iterable<GenericRecord>) () -> avroIter) {
-            Assert.assertNotNull(record);
-            Assert.assertEquals(record.get(columnName).toString(), "A");
-            nRow++;
+        try (AvroStreamsIterator avroIter = AvroUtils.iterateAvroStreams(streamIter)) {
+            for (GenericRecord record : (Iterable<GenericRecord>) () -> avroIter) {
+                Assert.assertNotNull(record);
+                Assert.assertEquals(record.get(columnName).toString(), "A");
+                nRow++;
+            }
         }
         Assert.assertEquals(nRow, expected.size());
-        avroIter.close();
 
         if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
             s3Service.cleanupPrefix(testBucket, prefix);
