@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -257,7 +258,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     @Override
-    public Map<String, Set<String>> getCanRunJobTenantList(@NotNull String schedulerName) {
+    public SchedulingResult getSchedulingResult(@NotNull String schedulerName) {
         List<SchedulingPAQueue> schedulingPAQueues = initQueue(schedulerName);
         GreedyScheduler greedyScheduler = new GreedyScheduler();
         return greedyScheduler.schedule(schedulingPAQueues);
@@ -299,8 +300,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
-            } else {
-                log.info("Tenant exceeds retry limit and skip failed exeuction");
+            } else if (execution.getDataFeed() != null) {
+                log.debug("Tenant {} exceeds retry limit and skip failed exeuction",
+                        execution.getDataFeed().getTenantId());
             }
         }
         return false;

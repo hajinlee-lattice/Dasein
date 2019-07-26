@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.ScheduleNowSchedulingPAO
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAObject;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATestTimeClock;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -42,7 +43,7 @@ public class SchedulingPAQueueUnitTestNG {
         Assert.assertEquals(queue.size(), expectedSizeAfterPush, String
                 .format("Queue(%s) size after adding %s does not match the expected one", queue.getQueueName(), input));
 
-        Set<String> tenants = queue.fillAllCanRunJobs();
+        Set<String> tenants = SchedulingPAUtil.getTenantIds(queue.fillAllCanRunJobs());
         Assert.assertEquals(tenants, expectedTenants, "Resulting can run PA tenants does not match the expected ones");
     }
 

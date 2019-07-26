@@ -1,11 +1,41 @@
 package com.latticeengines.domain.exposed.cdl.scheduling;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class SchedulingPAUtil {
+
+    /*
+     * helper to retrieve tenant ID from scheduling pa object
+     */
+    public static String getTenantId(SchedulingPAObject obj) {
+        if (obj == null || obj.getTenantActivity() == null) {
+            return null;
+        }
+        return obj.getTenantActivity().getTenantId();
+    }
+
+    /*
+     * helper to transform list of scheduling pa objects into set of tenant ID
+     */
+    public static Set<String> getTenantIds(List<SchedulingPAObject> objs) {
+        if (CollectionUtils.isEmpty(objs)) {
+            return Collections.emptySet();
+        }
+
+        return objs.stream() //
+                .map(SchedulingPAUtil::getTenantId) //
+                .filter(Objects::nonNull) //
+                .collect(Collectors.toSet());
+    }
 
     public static List<SchedulingPAQueue> initQueue(SimulationContext simulationContext) {
         return initQueue(simulationContext.timeClock, simulationContext.systemStatus,
