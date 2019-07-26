@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -124,6 +125,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -1688,6 +1690,52 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private boolean isEntityMatchEnabled() {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
         return FeatureFlagUtils.isEntityMatchEnabled(flags);
+    }
+
+    void runTestWithRetry(List<String> candidateFailingSteps) {
+        Random rand = new Random(System.currentTimeMillis());
+        String randomStepToFail = candidateFailingSteps.get(rand.nextInt(candidateFailingSteps.size()));
+        runTestWithRetry(randomStepToFail);
+    }
+
+    private void runTestWithRetry(String failingAtStep) {
+        log.info("Testing failing PA at " + failingAtStep + " and retry ");
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setSkipPublishToS3(isLocalEnvironment());
+        FailingStep failingStep = new FailingStep();
+        failingStep.setName(failingAtStep);
+        request.setFailingStep(failingStep);
+        long start = System.currentTimeMillis();
+        processAnalyze(request, JobStatus.FAILED);
+        long duration1 = System.currentTimeMillis() - start;
+        if (!isLocalEnvironment()) {
+            wipeOutContractDirInHdfs();
+        }
+        start = System.currentTimeMillis();
+        retryProcessAnalyze();
+        long duration2 = System.currentTimeMillis() - start;
+        log.info("Duration of first and second PA are: " + duration1 + " and " + duration2 + " respectively.");
+    }
+
+    private void wipeOutContractDirInHdfs() {
+        String contractPath = PathBuilder //
+                .buildContractPath(podId, CustomerSpace.parse(mainCustomerSpace).getContractId()).toString();
+        String tablesPath = PathBuilder //
+                .buildDataTablePath(podId, CustomerSpace.parse(mainCustomerSpace)).toString();
+        try {
+            String filePath = tablesPath + "/File";
+            String fileBkPath = contractPath + "/FileBackup";
+            System.out.println("Backing up " + filePath);
+            HdfsUtils.copyFiles(yarnConfiguration, filePath, fileBkPath);
+            System.out.println("Wiping out " + tablesPath);
+            HdfsUtils.rmdir(yarnConfiguration, tablesPath);
+            System.out.println("Resuming " + filePath);
+            HdfsUtils.copyFiles(yarnConfiguration, fileBkPath, filePath);
+            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, filePath));
+            HdfsUtils.rmdir(yarnConfiguration, fileBkPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to wipe out hdfs dir.", e);
+        }
     }
 
 }

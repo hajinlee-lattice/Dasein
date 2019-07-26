@@ -36,7 +36,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -88,8 +87,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(entity);
             if (render) {
@@ -110,8 +108,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         List<Category> categories = Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
                 .collect(Collectors.toList());
         final Tenant tenant = MultiTenantContext.getTenant();
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
 
         List<AttrConfig> configs = new ArrayList<>();
         List<Runnable> runnables = new ArrayList<>();
@@ -136,8 +133,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         ConcurrentMap<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new ConcurrentHashMap<>();
         log.info("categories are" + categories + ", propertyNames are " + propertyNames + ", activeOnly " + activeOnly);
         final Tenant tenant = MultiTenantContext.getTenant();
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
 
         List<Runnable> runnables = new ArrayList<>();
         categories.forEach(category -> {
@@ -189,7 +185,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 long accounts = DEFAULT_LIMIT;
                 try {
                     accounts =
-                            (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+                            zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
                 } catch (Exception e) {
                 }
                 overview.setLimit(accounts);
@@ -198,7 +194,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 long contacts = DEFAULT_LIMIT;
                 try {
                     contacts =
-                            (long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+                            zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
                 } catch (Exception e) {
                 }
                 overview.setLimit(contacts);
@@ -314,8 +310,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public List<AttrConfig> getRenderedList(Category category) {
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
         return getRenderedList(category, entityMatchEnabled);
     }
 
@@ -346,8 +341,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     public AttrConfigRequest validateRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
         String tenantId = MultiTenantContext.getShortTenantId();
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
             Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(request.getAttrConfigs(),
                     new ArrayList<>(), entityMatchEnabled);
             List<AttrConfig> renderedList = attrConfigGrpsForTrim.values().stream().flatMap(list -> {
@@ -391,8 +385,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
         List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = renderConfigs(attrConfigs, toDeleteEntities,
                 entityMatchEnabled);
         if (MapUtils.isEmpty(attrConfigGrpsForTrim)) {

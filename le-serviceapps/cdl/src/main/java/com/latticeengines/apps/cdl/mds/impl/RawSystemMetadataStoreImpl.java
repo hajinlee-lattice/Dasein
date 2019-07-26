@@ -19,7 +19,6 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -80,8 +79,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
 
         DataCollection.Version version = namespace.getCoord2();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
         List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
         if (BusinessEntity.Account.equals(entity) && CollectionUtils.isEmpty(tableNames)) {
             // for account try serving store

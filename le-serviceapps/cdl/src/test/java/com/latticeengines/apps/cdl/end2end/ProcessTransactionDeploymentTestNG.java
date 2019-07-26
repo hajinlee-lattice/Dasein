@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
-            processAnalyze();
+            runTestWithRetry(getFailableStepsForRebuild());
         }
         try {
             verifyProcess();
@@ -200,6 +201,39 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 VERIFY_DAILYTXN_AMOUNT_PT, //
                 VERIFY_DAILYTXN_QUANTITY_PT, //
                 VERIFY_DAILYTXN_COST_PT);
+    }
+
+    private List<String> getFailableStepsForRebuild() {
+        return Arrays.asList(
+                "matchTransaction", //
+                "mergeProduct", //
+                "profileProduct", //
+                "profileProductHierarchy", //
+                "mergeTransaction", //
+                "profileTransaction", //
+                "profileTransaction", //
+                "profileTransaction", //
+                "profileTransaction", //
+                "profileTransaction", //
+                "profilePurchaseHistory", //
+                "apsGeneration", //
+                "curatedAccountAttributesStep", //
+                "combineStatistics", //
+                "exportToRedshift", //
+                "exportToDynamo", //
+                "generateProcessingReport", // mimic failed in scoring
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "exportProcessAnalyzeToS3", //
+                "commitEntityMatch", //
+                "finishProcessing");
     }
 
 }

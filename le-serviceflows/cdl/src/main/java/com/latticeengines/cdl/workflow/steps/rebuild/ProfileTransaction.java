@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -72,6 +73,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private String sortedDailyTablePrefix;
     private String sortedPeriodTablePrefix;
 
+    private String sortedDailyTableName;
+    private String sortedPeriodTableName;
+
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
@@ -85,49 +89,66 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private boolean entityMatchEnabled;
 
+    private boolean shortCut = false;
+
     @Override
     protected BusinessEntity getEntity() {
         return BusinessEntity.PeriodTransaction;
     }
 
     private void initializeConfiguration() {
-        ChoreographerContext context = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
-        boolean isBusinessCalendarChanged = context.isBusinessCalenderChanged();
-        log.info("isBusinessCalendarChanged=" + isBusinessCalendarChanged);
-
         customerSpace = configuration.getCustomerSpace();
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
-        String rawTransactionTableName = getRawTransactionTableName();
-        rawTable = metadataProxy.getTable(customerSpace.toString(), rawTransactionTableName);
-        if (rawTable == null) {
-            throw new RuntimeException("Cannot find raw transaction table.");
-        }
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList(
+                AGG_DAILY_TRXN_TABLE_NAME, AGG_PERIOD_TRXN_TABLE_NAME));
+        shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
-        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
-        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-        log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
-        scalingMultiplier = multiplier;
+        if (shortCut) {
 
-        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
+            log.info("Found both daily and period aggregated tables in context, going thru short-cut mode.");
+            sortedDailyTableName = tablesInCtx.get(0).getName();
+            sortedPeriodTableName = tablesInCtx.get(1).getName();
+            finishing();
 
-        buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
-        buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
+        } else {
 
-        dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
-        periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+            ChoreographerContext context = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
+            boolean isBusinessCalendarChanged = context.isBusinessCalenderChanged();
+            log.info("isBusinessCalendarChanged=" + isBusinessCalendarChanged);
 
-        sortedDailyTablePrefix = TableRoleInCollection.AggregatedTransaction.name();
-        sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
+            String rawTransactionTableName = getRawTransactionTableName();
+            rawTable = metadataProxy.getTable(customerSpace.toString(), rawTransactionTableName);
+            if (rawTable == null) {
+                throw new RuntimeException("Cannot find raw transaction table.");
+            }
 
-        getProductTable();
+            double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
+            int multiplier = ScalingUtils.getMultiplier(sizeInGb);
+            log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+            scalingMultiplier = multiplier;
 
-        entityMatchEnabled = configuration.isEntityMatchEnabled();
-        if (entityMatchEnabled) {
-            log.info("Entity match is enabled for transaction rebuild");
+            periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
+
+            buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
+            buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
+
+            dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+            periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+
+            sortedDailyTablePrefix = TableRoleInCollection.AggregatedTransaction.name();
+            sortedPeriodTablePrefix = TableRoleInCollection.AggregatedPeriodTransaction.name();
+
+            getProductTable();
+
+            entityMatchEnabled = configuration.isEntityMatchEnabled();
+            if (entityMatchEnabled) {
+                log.info("Entity match is enabled for transaction rebuild");
+            }
+
         }
     }
 
@@ -199,30 +220,42 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     @Override
     protected void onPostTransformationCompleted() {
-        String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
+        sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
         Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
         if (sortedDailyTable == null) {
             throw new IllegalStateException("sortedDailyTable is null.");
         }
         sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
-        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
-        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
-                BusinessEntity.Transaction.getServingStore(), inactive);
+        exportToS3AndAddToContext(sortedDailyTableName, AGG_DAILY_TRXN_TABLE_NAME);
 
-        String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
+        sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
         Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
         if (sortedPeriodTable == null) {
             throw new IllegalStateException("sortedPeriodTable is null.");
         }
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
-        exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
+        exportToS3AndAddToContext(sortedPeriodTableName, AGG_PERIOD_TRXN_TABLE_NAME);
+
+        finishing();
+    }
+
+    private void finishing() {
+        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
+                BusinessEntity.Transaction.getServingStore(), inactive);
+        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
+
         dataCollectionProxy.upsertTable(customerSpace.toString(), sortedPeriodTableName,
                 BusinessEntity.PeriodTransaction.getServingStore(), inactive);
+        exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
     }
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
+
+        if (shortCut) {
+            return null;
+        }
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ProfileTransaction");

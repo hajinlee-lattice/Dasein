@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
@@ -63,9 +62,6 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     protected PeriodProxy periodProxy;
-
-    @Inject
-    protected MetadataProxy metadataProxy;
 
     @Inject
     protected TransformationProxy transformationProxy;

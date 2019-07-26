@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -95,6 +96,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private boolean accountHasSegment = false;
 
     private String curatedMetricsTablePrefix;
+    private String curatedMetricsTableName;
+    private boolean shortCut;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -117,6 +120,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
+        if (shortCut) {
+            return null;
+        }
+
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("ProfilePurchaseHistory");
         request.setSubmitter(customerSpace.getTenantId());
@@ -150,70 +157,93 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Override
     protected void onPostTransformationCompleted() {
-        String curatedMetricsTableName = TableUtils.getFullTableName(curatedMetricsTablePrefix, pipelineVersion);
+        curatedMetricsTableName = TableUtils.getFullTableName(curatedMetricsTablePrefix, pipelineVersion);
         Table curatedMetricsTable = metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName);
         if (curatedMetricsTable == null) {
             throw new IllegalStateException("Cannot find result curated metrics table");
         }
-
         curatedMetricsTableName = renameServingStoreTable(BusinessEntity.DepivotedPurchaseHistory, curatedMetricsTable);
-        exportTableRoleToRedshift(curatedMetricsTableName, BusinessEntity.DepivotedPurchaseHistory.getServingStore());
         dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,
                 BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
-
         publishToRedshift = false;
         super.onPostTransformationCompleted();
-        // Needs to be after super.onPostTransformationCompleted() to ensure
-        // serving store is renamed
-        registerDynamoExport();
-        generateReport();
-
-        updateDCStatusForProductSpend();
+        // Needs to be after super.onPostTransformationCompleted()
+        // to ensure serving store is renamed
+        exportToS3AndAddToContext(servingStoreTableName, PH_SERVING_TABLE_NAME);
+        exportToS3AndAddToContext(curatedMetricsTableName, PH_DEPIVOTED_TABLE_NAME);
+        exportToS3AndAddToContext(profileTableName, PH_PROFILE_TABLE_NAME);
+        exportToS3AndAddToContext(statsTableName, PH_STATS_TABLE_NAME);
+        finishing();
     }
 
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        loadProductMap();
 
-        String dailyTableName = getDailyTableName();
-        if (StringUtils.isBlank(dailyTableName)) {
-            throw new IllegalStateException("Cannot find daily table.");
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList( //
+                PH_SERVING_TABLE_NAME, PH_DEPIVOTED_TABLE_NAME, PH_PROFILE_TABLE_NAME, PH_STATS_TABLE_NAME));
+        shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
+
+        if (shortCut) {
+            log.info("Found serving, depivoted, profile and stats tables in workflow context, " + //
+                    "going thru short-cut mode.");
+            servingStoreTableName = tablesInCtx.get(0).getName();
+            curatedMetricsTableName = tablesInCtx.get(1).getName();
+            profileTableName = tablesInCtx.get(2).getName();
+            statsTableName = tablesInCtx.get(3).getName();
+
+            // link tables
+            dataCollectionProxy.upsertTable(customerSpace.toString(), profileTableName, profileTableRole(), inactive);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName,
+                    BusinessEntity.PurchaseHistory.getServingStore(), inactive);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,
+                    BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
+            // set stats
+            updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+            // other finishing steps
+            finishing();
+        } else {
+            loadProductMap();
+
+            String dailyTableName = getDailyTableName();
+            if (StringUtils.isBlank(dailyTableName)) {
+                throw new IllegalStateException("Cannot find daily table.");
+            }
+
+            accountTableName = getAccountTableName();
+            if (StringUtils.isBlank(accountTableName)) {
+                throw new IllegalStateException("Cannot find account master table.");
+            }
+
+            accountHasSegment = isAccountHasSegment();
+
+            evaluationDate = findEvaluationDate();
+            if (StringUtils.isBlank(evaluationDate)) {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+                evaluationDate = LocalDate.now().format(formatter);
+                log.info("Evaluation date for purchase history profiling: " + evaluationDate);
+            }
+
+            periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
+            if (CollectionUtils.isEmpty(periodStrategies)) {
+                throw new IllegalStateException("Cannot find period strategies");
+            }
+
+            purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
+            if (purchaseMetrics == null) {
+                purchaseMetrics = new ArrayList<>();
+            }
+            // HasPurchased is the default metrics to calculate
+            purchaseMetrics.add(createHasPurchasedMetrics());
+
+            periodTableNames = getPeriodTableNames();
+            if (CollectionUtils.isEmpty(periodTableNames)) {
+                throw new IllegalStateException("Cannot find period stores");
+            }
+            periodTableNames = selectPeriodTables(periodTableNames, purchaseMetrics);
+
+            curatedMetricsTablePrefix = TableRoleInCollection.CalculatedDepivotedPurchaseHistory.name();
         }
-
-        accountTableName = getAccountTableName();
-        if (StringUtils.isBlank(accountTableName)) {
-            throw new IllegalStateException("Cannot find account master table.");
-        }
-
-        accountHasSegment = isAccountHasSegment();
-
-        evaluationDate = findEvaluationDate();
-        if (StringUtils.isBlank(evaluationDate)) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-            evaluationDate = LocalDate.now().format(formatter);
-            log.info("Evaluation date for purchase history profiling: " + evaluationDate);
-        }
-
-        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
-        if (CollectionUtils.isEmpty(periodStrategies)) {
-            throw new IllegalStateException("Cannot find period strategies");
-        }
-
-        purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
-        if (purchaseMetrics == null) {
-            purchaseMetrics = new ArrayList<>();
-        }
-        // HasPurchased is the default metrics to calculate
-        purchaseMetrics.add(createHasPurchasedMetrics());
-
-        periodTableNames = getPeriodTableNames();
-        if (CollectionUtils.isEmpty(periodTableNames)) {
-            throw new IllegalStateException("Cannot find period stores");
-        }
-        periodTableNames = selectPeriodTables(periodTableNames, purchaseMetrics);
-
-        curatedMetricsTablePrefix = TableRoleInCollection.CalculatedDepivotedPurchaseHistory.name();
     }
 
     private String getDailyTableName() {
@@ -478,7 +508,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         Tenant tenant = MultiTenantContext.getTenant();
         ActivityMetrics metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.HasPurchased);
-        metrics.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
+        metrics.setPeriodsConfig(Collections.singletonList(TimeFilter.ever()));
         metrics.setType(ActivityType.PurchaseHistory);
         metrics.setTenant(tenant);
         metrics.setEOL(false);
@@ -486,6 +516,13 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         metrics.setCreated(new Date());
         metrics.setUpdated(metrics.getCreated());
         return metrics;
+    }
+
+    private void finishing() {
+        exportTableRoleToRedshift(curatedMetricsTableName, BusinessEntity.DepivotedPurchaseHistory.getServingStore());
+        exportToDynamo(servingStoreTableName, InterfaceName.AccountId.name(), null);
+        generateReport();
+        updateDCStatusForProductSpend();
     }
 
     private void generateReport() {
@@ -541,12 +578,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }
-    }
-
-    private void registerDynamoExport() {
-        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), getEntity().getServingStore(),
-                inactive);
-        exportToDynamo(tableName, InterfaceName.AccountId.name(), null);
     }
 
     private void updateDCStatusForProductSpend() {
