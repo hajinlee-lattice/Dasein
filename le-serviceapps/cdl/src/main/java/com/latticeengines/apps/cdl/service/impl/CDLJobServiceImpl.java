@@ -214,7 +214,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                     schedulePAJob(TEST_SCHEDULER, false);
                 }
             } catch (Exception e) {
-                log.error("schedule CDLJobType.SCHEDULINGPA failed" + e.getMessage());
+                log.error("schedule CDLJobType.SCHEDULINGPA failed", e);
                 throw e;
             }
         }
