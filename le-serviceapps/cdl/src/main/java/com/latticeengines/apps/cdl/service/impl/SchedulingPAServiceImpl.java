@@ -1,8 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,16 +16,12 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
@@ -43,9 +36,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -68,11 +59,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("SchedulingPAService")
 public class SchedulingPAServiceImpl implements SchedulingPAService {
@@ -83,10 +70,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
-    private static final String STACK_INFO_URL = "/pls/health/stackinfo";
-
-    private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
-    private List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -116,9 +99,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Inject
-    private WorkflowProxy workflowProxy;
-
     @Value("${cdl.processAnalyze.maximum.priority.large.account.count}")
     private long largeAccountCountLimit;
 
@@ -133,9 +113,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
-
-    @Value("${cdl.app.public.url:https://localhost:9081}")
-    private String appPublicUrl;
 
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
@@ -158,20 +135,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> skippedTestTenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
         log.debug("Action stats = {}", actionStats);
-
-        String clusterId = getCurrentClusterID();
-        log.debug(String.format("Current cluster id is : %s.", clusterId));
-        boolean clusterIdIsEmpty = StringUtils.isEmpty(clusterId);
-
-        List<String> clusterRunningTenantId = new ArrayList<>();
-
-        if (!clusterIdIsEmpty) {
-            List<WorkflowJob> runningPAJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
-                    jobStatuses);
-            for (WorkflowJob job : runningPAJobs) {
-                clusterRunningTenantId.add(job.getTenant().getId());
-            }
-        }
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
             if (simpleDataFeed.getTenant() == null) {
@@ -197,17 +160,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 log.error("Failed to get or create data collection status for tenant {}", tenantId);
             }
 
-            if (!clusterIdIsEmpty && CollectionUtils.isNotEmpty(clusterRunningTenantId) && clusterRunningTenantId.contains(tenantId)) {
-                //using cluster to set systemStatus
-                runningTotalCount++;
-                runningPATenantId.add(tenantId);
-                if (simpleDataFeed.isScheduleNow()) {
-                    runningScheduleNowCount++;
-                }
-                if (isLarge(dcStatus)) {
-                    runningLargeJobCount++;
-                }
-            }else if (clusterIdIsEmpty && simpleDataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
+            if (simpleDataFeed.getStatus() == DataFeed.Status.ProcessAnalyzing) {
                 runningTotalCount++;
                 runningPATenantId.add(tenantId);
                 if (simpleDataFeed.isScheduleNow()) {
@@ -542,28 +495,5 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Failed to check whether scheduler [{}] is enabled", schedulerName);
             return false;
         }
-    }
-
-    private String getCurrentClusterID() {
-        String url = appPublicUrl + STACK_INFO_URL;
-        String clusterId = null;
-        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-        restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        try {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                    Collections.singleton(HttpServerErrorException.class), null);
-            AtomicReference<Map<String, String>> stackInfo = new AtomicReference<>();
-            retry.execute(retryContext -> {
-                stackInfo.set(restTemplate.getForObject(url, Map.class));
-                return true;
-            });
-            if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("EMRClusterId")) {
-                clusterId = stackInfo.get().get("EMRClusterId");
-            }
-        } catch (Exception e) {
-            log.error("Get current cluster id failed. ", e);
-        }
-
-        return clusterId;
     }
 }
