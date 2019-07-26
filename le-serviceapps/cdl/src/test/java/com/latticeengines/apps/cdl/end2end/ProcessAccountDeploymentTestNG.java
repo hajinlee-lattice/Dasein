@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,12 +16,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -38,8 +33,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
-import com.latticeengines.domain.exposed.workflow.FailingStep;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 /**
@@ -61,7 +54,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
-            runTestWithRetry();
+            runTestWithRetry(getCandidateFailingSteps());
         }
 
         try {
@@ -70,28 +63,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
             if (isLocalEnvironment()) {
                 saveCheckpoint(saveToCheckPoint());
             }
-        }
-    }
-
-    private void runTestWithRetry() {
-        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setSkipPublishToS3(isLocalEnvironment());
-        FailingStep failingStep = new FailingStep();
-        failingStep.setName("mergeContact");
-        request.setFailingStep(failingStep);
-        long start = System.currentTimeMillis();
-        processAnalyze(request, JobStatus.FAILED);
-        long duration1 = System.currentTimeMillis() - start;
-        if (!isLocalEnvironment()) {
-            wipeOutContractDirInHdfs();
-        }
-        start = System.currentTimeMillis();
-        retryProcessAnalyze();
-        long duration2 = System.currentTimeMillis() - start;
-        if (isLocalEnvironment()) {
-            // retry should be faster than the first attempt
-            Assert.assertTrue(duration2 < duration1, //
-                    "Duration of first and second PA are: " + duration1 + " and " + duration2);
         }
     }
 
@@ -112,27 +83,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
-    }
-
-    private void wipeOutContractDirInHdfs() {
-        String contractPath = PathBuilder //
-                .buildContractPath(podId, CustomerSpace.parse(mainCustomerSpace).getContractId()).toString();
-        String tablesPath = PathBuilder //
-                .buildDataTablePath(podId, CustomerSpace.parse(mainCustomerSpace)).toString();
-        try {
-            String filePath = tablesPath + "/File";
-            String fileBkPath = contractPath + "/FileBackup";
-            System.out.println("Backing up " + filePath);
-            HdfsUtils.copyFiles(yarnConfiguration, filePath, fileBkPath);
-            System.out.println("Wiping out " + tablesPath);
-            HdfsUtils.rmdir(yarnConfiguration, tablesPath);
-            System.out.println("Resuming " + filePath);
-            HdfsUtils.copyFiles(yarnConfiguration, fileBkPath, filePath);
-            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, filePath));
-            HdfsUtils.rmdir(yarnConfiguration, fileBkPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to wipe out hdfs dir.", e);
-        }
     }
 
     protected void verifyProcess() {
@@ -315,6 +265,50 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
     protected String saveToCheckPoint() {
         return CHECK_POINT;
+    }
+
+    private List<String> getCandidateFailingSteps() {
+        return Arrays.asList(
+                "matchAccount", //
+                "matchContact", //
+                "entityMatchCheckpoint", //
+                "mergeAccount", //
+                "enrichAccount", //
+                "enrichAccount", //
+                "enrichAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "filterAccountFeature", //
+                "filterAccountExport", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "mergeContact", //
+                "profileContact", //
+                "mergeProduct", //
+                "profileProduct", //
+                "profileProductHierarchy", //
+                "combineStatistics", //
+                "exportToRedshift", //
+                "exportToDynamo", //
+                "generateProcessingReport", // mimic failed in scoring
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "exportProcessAnalyzeToS3", //
+                "commitEntityMatch", //
+                "finishProcessing");
     }
 
 }

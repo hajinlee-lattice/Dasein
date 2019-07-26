@@ -229,7 +229,8 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     protected int scaleBySize(double totalSizeInGb) {
         int ratingWeights = getTotalRatingWeights();
         int scalingByWeights = (int) Math.floor(ratingWeights / 40.) + 1;
-        int scalingFactor = Math.min(5, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
+        int maxMultiplier = ScalingUtils.getMultiplier(1000);
+        int scalingFactor = Math.min(maxMultiplier, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
         if (scalingFactor > 1) {
             log.info("Adjust scaling factor to " + scalingFactor + " based on total size " + totalSizeInGb //
                     + " gb and rating weights " + ratingWeights);
