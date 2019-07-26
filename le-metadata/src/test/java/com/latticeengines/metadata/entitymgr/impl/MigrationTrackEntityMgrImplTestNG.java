@@ -1,10 +1,13 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -23,7 +26,7 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 
 public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
     private static final MigrationTrack.Status STATUS = MigrationTrack.Status.STARTED;
@@ -52,6 +55,9 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
 
         String[] tableNames = {"This table", "That table"};
         ACTIVETABLE.put(ROLE, tableNames);
+
+        IMPORTACTION.getActions().add(-1L);
+        IMPORTACTION.getActions().add(-2L);
 
         track1.setStatus(STATUS);
         track1.setVersion(VERSION);
@@ -110,6 +116,23 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(tenant.getPid(), created.getTenant().getPid());
     }
 
+    @Test(groups = "function", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
+    public void testGetStartedTenants(Tenant tenant, MigrationTrack track) {
+        List<Long> found, actualStarted;
+
+        track.setStatus(MigrationTrack.Status.COMPLETED);
+        found = migrationTrackEntityMgr.getStartedTenants();
+        Assert.assertNotNull(found);
+        Assert.assertEquals(0, found.size());
+
+        track.setStatus(MigrationTrack.Status.STARTED);
+        actualStarted = new ArrayList<>();
+        actualStarted.add(tenant.getPid());
+        found = migrationTrackEntityMgr.getStartedTenants();
+        Assert.assertNotNull(found);
+        Assert.assertArrayEquals(actualStarted.toArray(), found.toArray());
+    }
+
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
     public void testFindByTenant(Tenant tenant, MigrationTrack track) {
         MigrationTrack created = migrationTrackEntityMgr.findByTenant(tenant);
@@ -118,11 +141,21 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
-    public void testTenantInMigrationForTrackedTenants(Tenant tenant, MigrationTrack track) {
+    public void testTrackedTenants(Tenant tenant, MigrationTrack track) {
         Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
+
+        // Can delete tables not in curActiveTable
+        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "can delete this table"));
+        // cannot delete tables in curActiveTable when tenant status STARTED
+        Assert.assertFalse(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
+
         track.setStatus(MigrationTrack.Status.COMPLETED);
         migrationTrackEntityMgr.update(track);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(tenant));
+
+        // can delete tables in curActiveTable if tenant status not STARTED
+        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
+
         track.setStatus(MigrationTrack.Status.STARTED);
         migrationTrackEntityMgr.update(track);
     }

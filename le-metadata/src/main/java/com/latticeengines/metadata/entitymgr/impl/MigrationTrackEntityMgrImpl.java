@@ -2,9 +2,9 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +22,10 @@ import com.latticeengines.metadata.repository.db.MigrationTrackRepository;
 public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<MigrationTrack, Long>
         implements MigrationTrackEntityMgr {
 
-    @Autowired
+    @Inject
     private MigrationTrackDao migrationTrackDao;
 
-    @Autowired
+    @Inject
     private MigrationTrackRepository migrationTrackRepository;
 
     @Override
@@ -55,9 +55,13 @@ public class MigrationTrackEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Mig
     public boolean canDeleteOrRenameTable(Tenant tenant, String tableName) {
         MigrationTrack track = findByTenant(tenant);
         if (track != null && track.getStatus() == MigrationTrack.Status.STARTED) {
-            List<String> tableNames = track.getCurActiveTable().values().stream().flatMap(Arrays::stream).collect(Collectors.toList());
-            return !tableNames.contains(tableName);
+            return track.getCurActiveTable().values().stream().flatMap(Arrays::stream).noneMatch(tableName::equals);
         }
         return true;
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED, readOnly = true)
+    public List<Long> getStartedTenants() {
+        return migrationTrackRepository.findByStatus(MigrationTrack.Status.STARTED);
     }
 }
