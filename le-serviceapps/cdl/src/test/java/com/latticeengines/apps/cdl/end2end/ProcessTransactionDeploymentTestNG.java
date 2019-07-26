@@ -53,7 +53,7 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
-            processAnalyze();
+            runTestWithRetry("combineStatistics");
         }
         try {
             verifyProcess();

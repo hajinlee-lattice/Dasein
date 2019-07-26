@@ -68,15 +68,16 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         String avroPath = sparkResult.getPath();
         Configuration yarnConfiguration = //
                 ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).getYarnConfiguration();
-        AvroUtils.AvroFilesIterator iterator = //
-                AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(avroPath));
-        Map<String, Long> coverage = new TreeMap<>();
-        iterator.forEachRemaining(record -> {
-            String rating = record.get(InterfaceName.Rating.name()).toString();
-            long count = coverage.getOrDefault(rating, 0L);
-            coverage.put(rating, count + 1);
-        });
-        return coverage;
+        try (AvroUtils.AvroFilesIterator iterator = //
+                AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(avroPath))) {
+            Map<String, Long> coverage = new TreeMap<>();
+            iterator.forEachRemaining(record -> {
+                String rating = record.get(InterfaceName.Rating.name()).toString();
+                long count = coverage.getOrDefault(rating, 0L);
+                coverage.put(rating, count + 1);
+            });
+            return coverage;
+        }
     }
 
     @Override

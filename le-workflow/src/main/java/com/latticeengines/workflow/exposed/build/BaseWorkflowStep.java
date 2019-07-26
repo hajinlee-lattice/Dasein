@@ -218,6 +218,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
             ENTITY_MATCH_CONTACT_TARGETTABLE, //
             ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
+            ENTITY_MATCH_TXN_TARGETTABLE, //
+            ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, //
             ACCOUNT_DIFF_TABLE_NAME, //
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //

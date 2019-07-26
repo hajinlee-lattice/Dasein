@@ -63,7 +63,9 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
             for (String contextKey : Arrays.asList( //
                     ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
                     ENTITY_MATCH_CONTACT_TARGETTABLE, //
-                    ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE //
+                    ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
+                    ENTITY_MATCH_TXN_TARGETTABLE, //
+                    ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE //
             )) {
                 exportToS3AndAddToTempList(contextKey);
             }
