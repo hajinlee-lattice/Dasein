@@ -55,6 +55,10 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return isRetryQueue;
     }
 
+    public TimeClock getTimeClock() {
+        return timeClock;
+    }
+
     /**
      * Return tenant location (index start at 1 instead of 0).
      *
@@ -66,11 +70,11 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
         return getPositionFromQueue(priorityQueue, tenantId);
     }
 
-    public String peek() {
+    public T peek() {
         return peekFromPriorityQueue(priorityQueue);
     }
 
-    public String poll() {
+    public T poll() {
         return pollFromPriorityQueue(priorityQueue);
     }
 
@@ -89,19 +93,22 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * Retrieve all tenants that should be scheduled jobs for and add them to the
      * input set.
      *
-     * @return set of tenantIds to run PA for, all elements in this set will also be
-     *         added to canRunJobSet
+     * @return set of {@link SchedulingPAObject} for tenants to run PA for, all
+     *         elements in this set will also be added to canRunJobSet
      */
-    public Set<String> fillAllCanRunJobs() {
+    public List<SchedulingPAObject> fillAllCanRunJobs() {
         String tenantId;
-        Set<String> canRunJobSetInQueue = new HashSet<>();
+        List<SchedulingPAObject> canRunJobSetInQueue = new ArrayList<>();
+        Set<String> canRunJobTenants = new HashSet<>();
         do {
-            tenantId = poll();
+            SchedulingPAObject obj = poll();
+            tenantId = SchedulingPAUtil.getTenantId(obj);
             if (tenantId != null) {
-                canRunJobSetInQueue.add(tenantId);
+                canRunJobSetInQueue.add(obj);
+                canRunJobTenants.add(tenantId);
             }
         }while (size() > 0);
-        systemStatus.getScheduleTenants().addAll(canRunJobSetInQueue);
+        systemStatus.getScheduleTenants().addAll(canRunJobTenants);
         log.debug("queue: " + this.getQueueName() + ", canRunJobs: " + JsonUtils.serialize(canRunJobSetInQueue));
         return canRunJobSetInQueue;
     }
@@ -153,14 +160,14 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * @param priorityQueue which contains all valid priority Object
      * @return According to popConstraintList and canRunJobSet peek the priority Object which obey the Constraint.
      */
-    private String peekFromPriorityQueue(PriorityQueue<T> priorityQueue) {
+    private T peekFromPriorityQueue(PriorityQueue<T> priorityQueue) {
         T priorityObject = priorityQueue.peek();
         while (priorityObject != null && !checkConstraint(systemStatus,
                 priorityObject.getTenantActivity(), priorityObject.getPopConstraints())) {
             priorityQueue.poll();
             priorityObject = priorityQueue.peek();
         }
-        return priorityObject == null ? null : priorityObject.getTenantActivity().getTenantId();
+        return priorityObject;
     }
 
     /**
@@ -168,7 +175,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
      * @param priorityQueue which contains all valid priority Object
      * @return According to popConstraintList and canRunJobSet pop the priority Object which obey the Constraint.
      */
-    private String pollFromPriorityQueue(PriorityQueue<T> priorityQueue) {
+    private T pollFromPriorityQueue(PriorityQueue<T> priorityQueue) {
         T priorityObject = priorityQueue.poll();
         while (priorityObject != null && !checkConstraint(systemStatus,
                 priorityObject.getTenantActivity(),
@@ -180,7 +187,7 @@ public class SchedulingPAQueue<T extends SchedulingPAObject> {
             return null;
         }
         systemStatus.changeSystemState(priorityObject.getTenantActivity());
-        return priorityObject.getTenantActivity().getTenantId();
+        return priorityObject;
     }
 
     /**

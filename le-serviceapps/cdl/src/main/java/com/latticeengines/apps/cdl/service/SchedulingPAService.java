@@ -2,10 +2,10 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 
 public interface SchedulingPAService {
 
@@ -13,7 +13,7 @@ public interface SchedulingPAService {
 
     List<SchedulingPAQueue> initQueue(@NotNull String schedulerName);
 
-    Map<String, Set<String>> getCanRunJobTenantList(@NotNull String schedulerName);
+    SchedulingResult getSchedulingResult(@NotNull String schedulerName);
 
     Map<String, List<String>> showQueue(@NotNull String schedulerName);
 
