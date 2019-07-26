@@ -242,6 +242,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder apsRollupPeriod(String apsRollupPeriod) {
+            generateAIRating.apsRollupPeriod(apsRollupPeriod);
+            return this;
+        }
+
         public Builder setUseScorederivation(boolean useScorederivation) {
             generateAIRating.setUseScorederivation(useScorederivation);
             return this;
