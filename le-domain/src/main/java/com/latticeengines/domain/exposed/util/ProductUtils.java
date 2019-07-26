@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -67,9 +69,25 @@ public class ProductUtils {
             List<String> productTypes, List<String> productStatuses) {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
-        List<Product> productList = new ArrayList<>();
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
+        return loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+                productStatuses == null ? null : new HashSet<>(productStatuses));
+    }
+
+    public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,
+            List<String> productStatuses) {
+        try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
+            List<Product> products = loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+                    productStatuses == null ? null : new HashSet<>(productStatuses));
+            return products;
+        }
+    }
+
+    public static List<Product> loadProducts(Iterator<GenericRecord> iter, Set<String> productTypes,
+            Set<String> productStatuses) {
+        List<Product> productList = new ArrayList<>();
+
         while (iter.hasNext()) {
             GenericRecord record = iter.next();
             Product product = new Product();
@@ -214,7 +232,6 @@ public class ProductUtils {
                 productMap.put(product.getProductId(), products);
             }
         });
-
         return productMap;
     }
 

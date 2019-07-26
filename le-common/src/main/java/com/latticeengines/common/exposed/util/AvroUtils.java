@@ -71,8 +71,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.transformer.AvroToCsvTransformer;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -1198,6 +1200,10 @@ public class AvroUtils {
         }
     }
 
+    public static AvroStreamsIterator iterateAvroStreams(Iterator<InputStream> streamIter) {
+        return new AvroStreamsIterator(streamIter);
+    }
+
     public static class AvroFilesIterator implements AvroRecordIterator {
 
         private List<String> matchedFiles;
@@ -1238,7 +1244,7 @@ public class AvroUtils {
                     try {
                         reader.close();
                     } catch (IOException e) {
-                        log.error("Failed to close avro file reader.");
+                        log.error("Failed to close avro file reader.", e);
                     }
                     reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
                 }
@@ -1278,11 +1284,95 @@ public class AvroUtils {
             try {
                 reader.close();
             } catch (IOException e) {
-                log.error("Failed to close avro file reader.");
+                log.error("Failed to close avro file reader.", e);
             } finally {
                 reader = null;
             }
         }
+    }
+
+    /**
+     * Iterator of GenericRecords in avros from input streams
+     */
+    public static class AvroStreamsIterator implements AvroRecordIterator {
+
+        private Iterator<InputStream> streamIter;
+        private InputStream currStream;
+        private DataFileStream<GenericRecord> reader;
+
+        AvroStreamsIterator(@NotNull Iterator<InputStream> streamIter) {
+            Preconditions.checkNotNull(streamIter);
+            this.streamIter = streamIter;
+            if (this.streamIter.hasNext()) {
+                currStream = this.streamIter.next();
+                try {
+                    reader = new DataFileStream<>(currStream, new GenericDatumReader<>());
+                } catch (IOException e) {
+                    throw new RuntimeException("Fail to initialize DataFileStream from InputStream", e);
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (reader == null) {
+                return false;
+            }
+            if (reader.hasNext()) {
+                return true;
+            }
+            while (!reader.hasNext() && streamIter.hasNext()) {
+                closeCurrStream();
+                currStream = this.streamIter.next();
+                try {
+                    reader = new DataFileStream<>(currStream, new GenericDatumReader<>());
+                } catch (IOException e) {
+                    throw new RuntimeException("Fail to initialize DataFileStream from InputStream", e);
+                }
+            }
+            return reader.hasNext();
+        }
+
+        @Override
+        public GenericRecord next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return reader.next();
+        }
+
+        @Override
+        public void close() {
+            closeFileReader();
+            closeCurrStream();
+        }
+
+        private void closeFileReader() {
+            if (reader == null) {
+                return;
+            }
+            try {
+                reader.close();
+            } catch (IOException e) {
+                log.error("Failed to close avro reader.", e);
+            } finally {
+                reader = null;
+            }
+        }
+
+        private void closeCurrStream() {
+            if (currStream == null) {
+                return;
+            }
+            try {
+                currStream.close();
+            } catch (IOException e) {
+                log.error("Failed to close input stream.", e);
+            } finally {
+                currStream = null;
+            }
+        }
+
     }
 
     public static String buildSchema(String avscFile, Object... params) {
