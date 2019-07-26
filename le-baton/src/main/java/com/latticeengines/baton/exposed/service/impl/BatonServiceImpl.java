@@ -601,6 +601,12 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public boolean isEntityMatchEnabled(CustomerSpace customerSpace) {
+        // ENABLE_ENTITY_MATCH_GA is for entity match while ENABLE_ENTITY_MATCH
+        // is for entity match + multi-template
+        // After all the tenants are migrated to entity match, we will retire
+        // feature flag ENABLE_ENTITY_MATCH_GA. By that time, we don't need this
+        // method -- could simply use isEnabled() to check whether
+        // multi-template is enabled or not.
         return isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA)
                 || isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
     }
