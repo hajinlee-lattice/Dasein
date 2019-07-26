@@ -45,12 +45,16 @@ public class HdfsToS3PathBuilder {
     private String s3EventTableDataDir = s3AnalyticsDir + "/data";
 
     private String s3BucketDir = PROTOCOL_SEPARATOR + "/%s";
-    private String s3AtlasDir = PROTOCOL_SEPARATOR + "/%s/%s/atlas";
+    private String s3AtlasPrefix = "%s/atlas";
+    private String s3AtlasDir = PROTOCOL_SEPARATOR + "/%s/" + s3AtlasPrefix;
     private String s3AtlasIntegrationDir = PROTOCOL_SEPARATOR + "/%s/dropfolder/%s/atlas";
     private String s3AtlasDataDir = s3AtlasDir + "/Data";
+    private String s3AtlasDataPrefix = s3AtlasPrefix + "/Data";
+    private String s3AtlasTablePrefix = s3AtlasDataPrefix + "/Tables";
     private String s3AtlasExportFileDir = s3AtlasDataDir + "/Files/Export";
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
     private String s3ExportDir = s3BucketDir + "/dropfolder/%s/export";
+
 
     public HdfsToS3PathBuilder() {
     }
@@ -177,6 +181,10 @@ public class HdfsToS3PathBuilder {
 
     public String getS3AtlasForTableDir(String s3Bucket, String tenantId, String tableName) {
         return getS3AtlasTablesDir(s3Bucket, tenantId) + PATH_SEPARATOR + tableName;
+    }
+
+    public String getS3AtlasTablePrefix(String tenantId, String tableName) {
+        return String.format(s3AtlasTablePrefix, tenantId) + PATH_SEPARATOR + tableName;
     }
 
     public String getS3AtlasForFileDir(String s3Bucket, String tenantId, String fileName) {
