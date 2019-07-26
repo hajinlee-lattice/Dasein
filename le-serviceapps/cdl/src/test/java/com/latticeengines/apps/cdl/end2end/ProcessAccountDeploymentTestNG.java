@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -34,8 +33,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
-import com.latticeengines.domain.exposed.workflow.FailingStep;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 /**
@@ -57,7 +54,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
-            runTestWithRetry("combineStatistics");
+            runTestWithRetry(getCandidateFailingSteps());
         }
 
         try {
@@ -268,6 +265,50 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
 
     protected String saveToCheckPoint() {
         return CHECK_POINT;
+    }
+
+    private List<String> getCandidateFailingSteps() {
+        return Arrays.asList(
+                "matchAccount", //
+                "matchContact", //
+                "entityMatchCheckpoint", //
+                "mergeAccount", //
+                "enrichAccount", //
+                "enrichAccount", //
+                "enrichAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "profileAccount", //
+                "filterAccountFeature", //
+                "filterAccountExport", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "generateBucketedAccount", //
+                "mergeContact", //
+                "profileContact", //
+                "mergeProduct", //
+                "profileProduct", //
+                "profileProductHierarchy", //
+                "combineStatistics", //
+                "exportToRedshift", //
+                "exportToDynamo", //
+                "generateProcessingReport", // mimic failed in scoring
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "exportProcessAnalyzeToS3", //
+                "commitEntityMatch", //
+                "finishProcessing");
     }
 
 }

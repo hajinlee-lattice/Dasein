@@ -16,12 +16,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.workflow.FailingStep;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -125,6 +125,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -1691,7 +1692,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return FeatureFlagUtils.isEntityMatchEnabled(flags);
     }
 
-    void runTestWithRetry(String failingAtStep) {
+    void runTestWithRetry(List<String> candidateFailingSteps) {
+        Random rand = new Random(System.currentTimeMillis());
+        String randomStepToFail = candidateFailingSteps.get(rand.nextInt(candidateFailingSteps.size()));
+        runTestWithRetry(randomStepToFail);
+    }
+
+    private void runTestWithRetry(String failingAtStep) {
+        log.info("Testing failing PA at " + failingAtStep + " and retry ");
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
         FailingStep failingStep = new FailingStep();
@@ -1706,9 +1714,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         start = System.currentTimeMillis();
         retryProcessAnalyze();
         long duration2 = System.currentTimeMillis() - start;
-        // retry should be faster than the first attempt
-        Assert.assertTrue(duration2 < duration1, //
-                "Duration of first and second PA are: " + duration1 + " and " + duration2);
+        log.info("Duration of first and second PA are: " + duration1 + " and " + duration2 + " respectively.");
     }
 
     private void wipeOutContractDirInHdfs() {
