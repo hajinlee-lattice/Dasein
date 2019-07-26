@@ -10,6 +10,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,6 +168,21 @@ public class PlayLaunchChannelEntityMgrImpl
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);
         return existingPlayLaunchChannel;
+    }
+
+    @Override
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteByChannelId(String id, boolean hardDelete) {
+        PlayLaunchChannel playLaunchChannel = findById(id);
+        if (playLaunchChannel != null) {
+            if (hardDelete) {
+                playLaunchChannelDao.delete(playLaunchChannel);
+            } else {
+                playLaunchChannel.setDeleted(true);
+                playLaunchChannelDao.update(playLaunchChannel);
+            }
+        }
     }
 
     @Override

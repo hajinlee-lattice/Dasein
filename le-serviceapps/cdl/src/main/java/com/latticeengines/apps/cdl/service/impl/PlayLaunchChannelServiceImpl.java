@@ -156,6 +156,14 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
+    public void deleteByChannelId(String channelId, boolean hardDelete) {
+        if (StringUtils.isBlank(channelId)) {
+            throw new LedpException(LedpCode.LEDP_18228);
+        }
+        playLaunchEntityMgr.deleteByLaunchId(channelId, hardDelete);
+    }
+
+    @Override
     public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
 
@@ -183,7 +191,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
             SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
-        } else if(playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
+        } else if (playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
             LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
             playLaunch.setAudienceName(channelConfig.getAudienceName());
