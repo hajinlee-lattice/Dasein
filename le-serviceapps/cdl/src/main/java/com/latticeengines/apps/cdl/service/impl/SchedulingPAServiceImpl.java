@@ -300,9 +300,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
-            } else if (execution.getDataFeed() != null) {
+            } else if (execution.getDataFeed() != null && execution.getDataFeed().getTenant() != null) {
                 log.debug("Tenant {} exceeds retry limit and skip failed exeuction",
-                        execution.getDataFeed().getTenantId());
+                        execution.getDataFeed().getTenant().getId());
             }
         }
         return false;
