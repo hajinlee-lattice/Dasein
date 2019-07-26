@@ -71,7 +71,8 @@ public class ProductUtils {
         log.info("Load products from " + filePath + "/*.avro");
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
-        return loadProducts(iter, new HashSet<>(productTypes), new HashSet<>(productStatuses));
+        return loadProducts(iter, productTypes == null ? null : new HashSet<>(productTypes),
+                productStatuses == null ? null : new HashSet<>(productStatuses));
     }
 
     public static List<Product> loadProducts(Iterator<InputStream> streamIter, List<String> productTypes,

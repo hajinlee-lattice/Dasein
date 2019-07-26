@@ -123,6 +123,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         saveCsvToLocal = true;
     }
 
+    @Override
     @Test(groups = { "deployment", "manual" })
     public void testWorkflow() throws Exception {
         DataCollection.Version version = dataCollectionService.getActiveVersion(mainCustomerSpace);
@@ -212,10 +213,15 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             Reader in = new InputStreamReader(gzipIs);
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
-            Assert.assertTrue(headerMap.containsKey("CEO Name"));
-            Assert.assertTrue(headerMap.containsKey("Test Date"));
-            Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"));
-            Assert.assertTrue(headerMap.containsKey("CMT3: Glassware: % Share of Wallet in last 1 week"));
+            Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
+            Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
+            Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"),
+                    "Header map: " + JsonUtils.serialize(headerMap));
+            // FIXME: This purchase history attribute is deprecated due to
+            // product table doesn't exist in S3. Should improve checkpoint.
+            // Assert.assertTrue(headerMap.containsKey("CMT3: Glassware: % Share
+            // of Wallet in last 1 week"),
+            // "Header map: " + JsonUtils.serialize(headerMap));
             for (CSVRecord record : records) {
                 String dateStr = record.get("Test Date");
                 SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
