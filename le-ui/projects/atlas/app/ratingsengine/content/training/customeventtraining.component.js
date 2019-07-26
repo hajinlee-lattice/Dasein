@@ -5,7 +5,7 @@ angular.module('lp.ratingsengine.wizard.training')
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         params: {
-            infoTemplate: "<div class='row divider'><div class='twelve columns'><h4>What is a Training File?</h4><p>A training set is a CSV file with records of your historical successes. It is used to build your ideal customer profile by leveraging the Lattice Predictive Insights platform. Ideal training set should have at least 7,000 accounts, 150 success events and a conversion rate of less than 10%.</p></div></div><div class='row'><div class='twelve columns'><h4>Account Model:</h4><p>Upload a CSV file with accounts</p><p>Required: Id (any unique value for each record), Website (domain of company website), Event (1 for success, 0 otherwise)</p></div></div>",
+            infoTemplate: "<div class='row divider'><div class='twelve columns'><h4>What is a Training File?</h4><p>A training set is a CSV file with records of your historical successes. It is used to build your ideal customer profile by leveraging the Lattice Predictive Insights platform. Ideal training set should have at least 7,000 accounts, 150 success events and a conversion rate of less than 10%.</p></div></div><div class='row'><div class='twelve columns'><h4>Account Model:</h4><p>Upload a CSV file with accounts</p><p>Required: Lattice Account ID (a unique value for each record allocated by Lattice Atlas), Website (domain of company website), Event (1 for success, 0 otherwise)</p></div></div>",
             compressed: true,
             importError: false,
             importErrorMsg: '',
