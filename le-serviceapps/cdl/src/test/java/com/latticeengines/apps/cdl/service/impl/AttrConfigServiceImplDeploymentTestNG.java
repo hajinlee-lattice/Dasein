@@ -113,7 +113,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     @Test(groups = "deployment-app", priority = 2)
     public void testEntityMatchEnabled() {
         // Enable EntityMatch feature flag
-        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
 
         testMyAttributes(true);
         testContactAttributes(true);
