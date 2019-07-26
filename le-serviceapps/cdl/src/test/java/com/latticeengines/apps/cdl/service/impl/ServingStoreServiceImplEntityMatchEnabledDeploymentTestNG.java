@@ -19,7 +19,7 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
     @Test(groups = "deployment-app")
     private void testDecoratedMetadata() {
         // Enable EntityMatch feature flag
-        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
 
         testAccountMetadata();
         testContactMetadata();
