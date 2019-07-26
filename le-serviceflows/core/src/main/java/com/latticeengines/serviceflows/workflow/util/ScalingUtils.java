@@ -28,10 +28,13 @@ public final class ScalingUtils {
      * 8G -> 2
      * 24G -> 3
      * 72G -> 4
+     * 216G -> 5
      */
     public static int getMultiplier(double sizeInGb) {
         int multiplier = 1;
-        if (sizeInGb >= 72) {
+        if (sizeInGb >= 216) {
+            multiplier = 5;
+        } else if (sizeInGb >= 72) {
             multiplier = 4;
         } else if (sizeInGb >= 24) {
             multiplier = 3;
