@@ -44,7 +44,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -310,8 +309,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
-            boolean entityMatchEnabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
             return StatsCubeUtils.constructTopNTree(cubes, cmMap, true, ColumnSelection.Predefined.Segment,
                     entityMatchEnabled);
         }
@@ -425,8 +423,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getShortTenantId();
-        boolean entityMatchEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
 
         Map<BusinessEntity, List<ColumnMetadata>> metadataInMds = new HashMap<>();
         Map<BusinessEntity, Set<String>> colsInServingStore = new HashMap<>();

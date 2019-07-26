@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ContactAttrsDecoratorFac;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
@@ -23,8 +22,7 @@ public class ContactAttrsDecoratorFacImpl implements ContactAttrsDecoratorFac {
     public Decorator getDecorator(Namespace1<String> namespace) {
         String tenantId = namespace.getCoord1();
         if (StringUtils.isNotBlank(tenantId)) {
-            boolean entityMatchEnabled = batonService.isEnabled(CustomerSpace.parse(tenantId),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
             return new ContactAttrsDecorator(entityMatchEnabled);
         } else {
             return new DummyDecorator();
