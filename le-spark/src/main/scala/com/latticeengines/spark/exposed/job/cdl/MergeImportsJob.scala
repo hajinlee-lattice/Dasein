@@ -17,7 +17,8 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
 
-    val processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc) }
+    val processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
+        config.getRenameSrcFields, config.getCloneSrcFields) }
 
     val merged = processedInputs.zipWithIndex.reduce((l, r) => {
       val lhsDf = l._1
@@ -55,16 +56,20 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     lattice.output = result :: Nil
   }
 
-  private def processSrc(src: DataFrame, srcId: String, joinKey: String, deduplicate: Boolean): DataFrame = {
+  private def processSrc(src: DataFrame, srcId: String, joinKey: String, deduplicate: Boolean,
+      renameFlds: Array[Array[String]], cloneFlds: Array[Array[String]]): DataFrame = {
+    var fldUpd =  cloneSrcFlds(src, cloneFlds)
+    fldUpd = renameSrcFlds(fldUpd, renameFlds)
+
     if (joinKey == null) {
-      return src
+      return fldUpd
     }
 
     val renamed =
-      if (srcId != null && !srcId.equals(joinKey) && src.columns.contains(srcId)) {
-        src.withColumnRenamed(srcId, joinKey)
+      if (srcId != null && !srcId.equals(joinKey) && fldUpd.columns.contains(srcId)) {
+        fldUpd.withColumnRenamed(srcId, joinKey)
       } else {
-        src
+        fldUpd
       }
 
     val dedup =
@@ -77,6 +82,42 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       }
 
     dedup
+  }
+
+  private def renameSrcFlds(src: DataFrame, renameFlds: Array[Array[String]]): DataFrame = {
+    if (renameFlds == null) {
+      return src
+    }
+
+    var result = src
+    for (fldPair <- renameFlds) {
+      result =
+        if (result.columns.contains(fldPair(0))) {
+          result.withColumnRenamed(fldPair(0), fldPair(1))
+        } else {
+          result
+        }
+    }
+
+    result
+  }
+
+  private def cloneSrcFlds(src: DataFrame, cloneFlds: Array[Array[String]]): DataFrame = {
+    if (cloneFlds == null) {
+      return src
+    }
+
+    var result = src
+    for (fldPair <- cloneFlds) {
+      result =
+        if (result.columns.contains(fldPair(0))) {
+          result.withColumn(fldPair(1), result.col(fldPair(0)))
+        } else {
+          result
+        }
+    }
+
+    result
   }
 
   private def addOrFill(df: DataFrame, tsCol: String, ts: Long): DataFrame = {

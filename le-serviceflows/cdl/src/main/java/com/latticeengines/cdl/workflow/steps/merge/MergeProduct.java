@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessP
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 
 @Component(MergeProduct.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -51,11 +52,13 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
     static final String BEAN_NAME = "mergeProduct";
     private Map<String, Object> mergeReport;
 
+    @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("MergeProduct");
-            TransformationStepConfig merge = mergeInputs(true, false, true);
+            TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(false, true, true),
+                    mergedBatchStoreName, ETLEngineLoad.LIGHT);
             List<TransformationStepConfig> steps = Collections.singletonList(merge);
             request.setSteps(steps);
             return request;

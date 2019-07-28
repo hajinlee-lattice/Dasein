@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
@@ -173,6 +174,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return false;
     }
 
+    @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
@@ -332,6 +334,44 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieve default system ID for target entity of current tenant. Return
+     * null if default system is not setup.
+     *
+     * @param entity
+     *            target entity
+     * @return default system ID
+     */
+    @VisibleForTesting
+    String getDefaultSystemId(BusinessEntity entity) {
+        if (entity != BusinessEntity.Account && entity != BusinessEntity.Contact) {
+            throw new UnsupportedOperationException(
+                    String.format("Does not support retrieving system IDs for entity [%s]", entity.name()));
+        }
+
+        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace.toString());
+        if (CollectionUtils.isEmpty(systems)) {
+            return null;
+        }
+
+        log.info("Current systems = {}", JsonUtils.serialize(systems));
+
+        return systems.stream() //
+                .filter(Objects::nonNull) //
+                .map(sys -> {
+                    if (entity == BusinessEntity.Account && Boolean.TRUE.equals(sys.isMapToLatticeAccount())) {
+                        return sys.getAccountSystemId();
+                    }
+                    if (entity == BusinessEntity.Contact && Boolean.TRUE.equals(sys.isMapToLatticeContact())) {
+                        return sys.getContactSystemId();
+                    }
+                    return null;
+                }) //
+                .filter(Objects::nonNull) //
+                .findFirst() //
+                .orElse(null);
+    }
+
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
         String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
         DynamoExportConfig config = new DynamoExportConfig();
@@ -354,5 +394,4 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected String getDiffTableName() {
         return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
     }
-
 }

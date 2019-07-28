@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -265,18 +266,11 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private TransformationStepConfig mergeRaw() {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<String> baseSources;
-        Map<String, SourceTable> baseTables;
-        String rawName = rawTable.getName();
-        baseSources = Collections.singletonList(rawName);
-        baseTables = new HashMap<>();
-        SourceTable sourceMasterTable = new SourceTable(rawName, customerSpace);
-        baseTables.put(rawName, sourceMasterTable);
-        step.setBaseSources(baseSources);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, rawTable.getName());
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(getConsolidateDataConfig(false, false, true));
+        step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true),
+                getEngineConfig(ETLEngineLoad.HEAVY)));
 
         return step;
     }
