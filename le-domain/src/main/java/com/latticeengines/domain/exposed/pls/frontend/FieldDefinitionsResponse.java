@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FieldDefinitionsResponse {
+
     // Contains the current state of the field definitions prior to the application of the requested changes.
     @JsonProperty
     protected Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap;
@@ -27,6 +30,9 @@ public class FieldDefinitionsResponse {
     // to the map.
     public boolean addFieldDefinitionsRecords(String fieldSectionName, List<FieldDefinition> fieldDefinitionsRecords,
                                               boolean replaceExisting) {
+        if (fieldDefinitionsRecordsMap == null) {
+            fieldDefinitionsRecordsMap = new HashMap<>();
+        }
         if (replaceExisting || !fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
             fieldDefinitionsRecordsMap.put(fieldSectionName, fieldDefinitionsRecords);
             return true;
@@ -36,7 +42,8 @@ public class FieldDefinitionsResponse {
 
     // Get the field definitions records for a specific section.
     public List<FieldDefinition> getFieldDefinitionsRecords(String fieldSectionName) {
-        if (fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
+        if (MapUtils.isNotEmpty(fieldDefinitionsRecordsMap) &&
+                fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
             return fieldDefinitionsRecordsMap.get(fieldSectionName);
         }
         return null;

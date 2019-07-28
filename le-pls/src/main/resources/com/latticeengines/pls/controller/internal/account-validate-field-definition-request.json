@@ -1,0 +1,347 @@
+{
+    "Success": true,
+    "Errors": null,
+    "Result": {
+        "fieldDefinitionsRecordsMap": {
+            "Unique ID": [
+                {
+                    "fieldName": "AccountId",
+                    "fieldType": "TEXT",
+                    "columnName": "Account ID",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": true,
+                    "idEntityType": "Account"
+                }
+            ],
+            "Match IDs": [
+                {
+                    "fieldName": "SfdcAccountId",
+                    "fieldType": "TEXT",
+                    "columnName": "SFDC Account ID",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "DataWarehouseAccountId",
+                    "fieldType": "TEXT",
+                    "columnName": "Data Warehouse Account ID",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ],
+            "Other IDs": [
+                {
+                    "fieldName": "SfdcAccountId",
+                    "fieldType": "TEXT",
+                    "columnName": "SFDC Account ID",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemType": "MAP",
+                    "externalSystemName": "SalesForce Accounts",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "DataWarehouseAccountId",
+                    "fieldType": "TEXT",
+                    "columnName": "Data Warehouse Account ID",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemType": "MAP",
+                    "externalSystemName": "Data Warehouse Accounts",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ],
+            "Account Matching Fields": [
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "columnName": "website",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Company Name",
+                    "fieldType": "TEXT",
+                    "columnName": "company",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Phone Number",
+                    "fieldType": "TEXT",
+                    "columnName": "phone",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ],
+            "Analysis Fields": [
+                {
+                    "fieldName": "Type",
+                    "fieldType": "TEXT",
+                    "columnName": "type",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Industry",
+                    "fieldType": "TEXT",
+                    "columnName": "industry",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "AnnualRevenue",
+                    "fieldType": "NUMBER",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ],
+            "Custom Fields": [
+                {
+                    "fieldName": "Custom1",
+                    "fieldType": "NUMBER",
+                    "columnName": "Custom1",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Custom2",
+                    "fieldType": "DATE",
+                    "columnName": "Custom2",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "MM/DD/YY",
+                    "timeFormat": "00 00 00 24H",
+                    "timeZone": "America/Halifax"
+                }
+            ]
+        },
+        "validationResult": "ERROR",
+        "fieldValidationMessagesMap": {
+            "Account Matching Fields": [
+                {
+                    "fieldName": "Website",
+                    "columnName": "website",
+                    "messageLevel": "ERROR",
+                    "message": "website has OH BOY major problem when mapped to Website"
+                },
+                {
+                    "fieldName": "DUNS",
+                    "messageLevel": "WARNING",
+                    "message": "null has BLAH BLAH minor issue when mapped to DUNS"
+                },
+                {
+                    "fieldName": "Company Name",
+                    "columnName": "company",
+                    "messageLevel": "ERROR",
+                    "message": "company has OH BOY major problem when mapped to Company Name"
+                },
+                {
+                    "fieldName": "Phone Number",
+                    "columnName": "phone",
+                    "messageLevel": "WARNING",
+                    "message": "phone has BLAH BLAH minor issue when mapped to Phone Number"
+                },
+                {
+                    "fieldName": "Country",
+                    "messageLevel": "ERROR",
+                    "message": "null has OH BOY major problem when mapped to Country"
+                }
+            ],
+            "Analysis Fields": [
+                {
+                    "fieldName": "Type",
+                    "columnName": "type",
+                    "messageLevel": "WARNING",
+                    "message": "type has BLAH BLAH minor issue when mapped to Type"
+                },
+                {
+                    "fieldName": "Industry",
+                    "columnName": "industry",
+                    "messageLevel": "ERROR",
+                    "message": "industry has OH BOY major problem when mapped to Industry"
+                },
+                {
+                    "fieldName": "AnnualRevenue",
+                    "messageLevel": "WARNING",
+                    "message": "null has BLAH BLAH minor issue when mapped to AnnualRevenue"
+                }
+            ]
+        },
+        "fieldDefinitionsChangesMap": {
+            "Account Matching Fields": [
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "columnName": "website",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Company Name",
+                    "fieldType": "TEXT",
+                    "columnName": "company",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Phone Number",
+                    "fieldType": "TEXT",
+                    "columnName": "phone",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ],
+            "Analysis Fields": [
+                {
+                    "fieldName": "Type",
+                    "fieldType": "TEXT",
+                    "columnName": "type",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "Industry",
+                    "fieldType": "TEXT",
+                    "columnName": "industry",
+                    "required": false,
+                    "inCurrentImport": true,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                },
+                {
+                    "fieldName": "AnnualRevenue",
+                    "fieldType": "NUMBER",
+                    "required": false,
+                    "inCurrentImport": false,
+                    "mappedToLatticeId": false,
+                    "externalSystemName": "",
+                    "dateFormat": "",
+                    "timeFormat": "",
+                    "timeZone": ""
+                }
+            ]
+        }
+    }
+}

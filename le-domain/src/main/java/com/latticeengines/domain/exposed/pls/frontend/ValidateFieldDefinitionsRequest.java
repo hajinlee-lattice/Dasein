@@ -1,11 +1,14 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ValidateFieldDefinitionsRequest extends CommitFieldDefinitionsRequest {
+public class ValidateFieldDefinitionsRequest extends FieldDefinitionsRequest {
 
     // Contains the set of user requested changes to the field definitions.
     @JsonProperty
@@ -23,6 +26,9 @@ public class ValidateFieldDefinitionsRequest extends CommitFieldDefinitionsReque
     // to the map.
     public boolean addFieldDefinitionsChanges(String fieldSectionName, List<FieldDefinition> fieldDefinitionsChanges,
                                               boolean replaceExisting) {
+        if (fieldDefinitionsChangesMap == null) {
+            fieldDefinitionsChangesMap = new HashMap<>();
+        }
         if (replaceExisting || !fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
             fieldDefinitionsChangesMap.put(fieldSectionName, fieldDefinitionsChanges);
             return true;
@@ -32,7 +38,8 @@ public class ValidateFieldDefinitionsRequest extends CommitFieldDefinitionsReque
 
     // Get the field definitions changes for a specific section.
     public List<FieldDefinition> getFieldDefinitionsChanges(String fieldSectionName) {
-        if (fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
+        if (MapUtils.isNotEmpty(fieldDefinitionsChangesMap) &&
+                fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
             return fieldDefinitionsChangesMap.get(fieldSectionName);
         }
         return null;

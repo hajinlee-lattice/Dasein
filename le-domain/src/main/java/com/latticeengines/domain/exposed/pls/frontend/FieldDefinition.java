@@ -1,5 +1,10 @@
 package com.latticeengines.domain.exposed.pls.frontend;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,6 +27,15 @@ public class FieldDefinition {
     @JsonProperty
     private UserDefinedType fieldType;
 
+    // The name to display on the UI for this field.  Only used for Lattice Fields and Match Fields.
+    @JsonProperty
+    private String displayName;
+
+    // A priority ordered list of column names that should be matched to this field.  Only set in the Import Workflow
+    // Specs.
+    @JsonProperty
+    private List<String> matchingColumnNames;
+
     // The name of the mapped column in the imported files for this schema field.  Also know as display name.
     @JsonProperty
     private String columnName;
@@ -30,7 +44,8 @@ public class FieldDefinition {
     @JsonProperty
     Boolean required;
 
-    // True if this field is mapped to a column in the current import process.
+    // True if this field is mapped to a column in the current import process.  Only provided in API request and
+    // response bodies.
     @JsonProperty
     Boolean inCurrentImport;
 
@@ -98,6 +113,31 @@ public class FieldDefinition {
 
     public void setFieldType(UserDefinedType fieldType) {
         this.fieldType = fieldType;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public List<String> getMatchingColumnNames() {
+        return matchingColumnNames;
+    }
+
+    public void setMatchingColumnNames(List<String> matchingColumnNames) {
+        this.matchingColumnNames = matchingColumnNames;
+    }
+
+    public void addMatchingColumnNames(String columnName) {
+        if (matchingColumnNames == null) {
+            matchingColumnNames = new ArrayList<>();
+        }
+        if (!matchingColumnNames.contains(columnName)) {
+            matchingColumnNames.add(columnName);
+        }
     }
 
     public String getColumnName() {
@@ -185,6 +225,13 @@ public class FieldDefinition {
         String output = "";
         output += "fieldName: " + fieldName;
         output += "\nfieldType: " + fieldType;
+        output += "\ndisplayName: " + displayName;
+        output += "\nmatchingColumnNames:";
+        if (CollectionUtils.isNotEmpty(matchingColumnNames)) {
+            for (String name : matchingColumnNames) {
+                output += " " + name;
+            }
+        }
         output += "\ncolumnName: " + columnName;
         output += "\nrequired: " + required;
         output += "\ninCurrentImport: " + inCurrentImport;

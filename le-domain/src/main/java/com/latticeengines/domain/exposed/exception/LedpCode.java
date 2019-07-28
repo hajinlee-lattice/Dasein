@@ -357,6 +357,7 @@ public enum LedpCode {
     LEDP_18229("Field Definition Request has invalid Template State.  Request was:\n{0}"),
     LEDP_18230("Fetch Field Definition Request could not load Fetch Response file: {0}"),
     LEDP_18231("Commit Field Definition Request is invalid: {0}"),
+    LEDP_18232("Field Definition Request is invalid parameter: {0}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

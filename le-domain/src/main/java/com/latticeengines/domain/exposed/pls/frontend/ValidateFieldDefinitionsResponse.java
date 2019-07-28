@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ValidateFieldDefinitionsResponse extends FieldDefinitionsResponse {
@@ -55,6 +57,9 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsResponse {
     public boolean addFieldValidationMessages(String fieldSectionName,
                                               List<FieldValidationMessage> fieldValidationMessages,
                                               boolean replaceExisting) {
+        if (fieldValidationMessagesMap == null) {
+            fieldValidationMessagesMap = new HashMap<>();
+        }
         if (replaceExisting || !fieldValidationMessagesMap.containsKey(fieldSectionName)) {
             fieldValidationMessagesMap.put(fieldSectionName, fieldValidationMessages);
             return true;
@@ -64,7 +69,8 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsResponse {
 
     // Get the field definitions record for a specific section.
     public List<FieldValidationMessage> getFieldValidationMessages(String fieldSectionName) {
-        if (fieldValidationMessagesMap.containsKey(fieldSectionName)) {
+        if (MapUtils.isNotEmpty(fieldValidationMessagesMap) &&
+                fieldValidationMessagesMap.containsKey(fieldSectionName)) {
             return fieldValidationMessagesMap.get(fieldSectionName);
         }
         return null;
@@ -82,6 +88,9 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsResponse {
     // to the map.
     public boolean addFieldDefinitionsChanges(String fieldSectionName, List<FieldDefinition> fieldDefinitionsChanges,
                                               boolean replaceExisting) {
+        if (fieldDefinitionsChangesMap == null) {
+            fieldDefinitionsChangesMap = new HashMap<>();
+        }
         if (replaceExisting || !fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
             fieldDefinitionsChangesMap.put(fieldSectionName, fieldDefinitionsChanges);
             return true;
@@ -91,7 +100,8 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsResponse {
 
     // Get the field definitions changes for a specific section.
     public List<FieldDefinition> getFieldDefinitionsChanges(String fieldSectionName) {
-        if (fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
+        if (MapUtils.isNotEmpty(fieldDefinitionsChangesMap) &&
+                fieldDefinitionsChangesMap.containsKey(fieldSectionName)) {
             return fieldDefinitionsChangesMap.get(fieldSectionName);
         }
         return null;
