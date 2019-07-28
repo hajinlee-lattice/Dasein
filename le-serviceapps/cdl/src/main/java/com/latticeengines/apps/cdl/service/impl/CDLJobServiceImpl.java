@@ -375,10 +375,10 @@ public class CDLJobServiceImpl implements CDLJobService {
                 try {
                     if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
-                        logScheduledPA(needRunJobTenantId, retryAppId, true, result);
+                        logScheduledPA(schedulerName, needRunJobTenantId, retryAppId, true, result);
                     }
                 } catch (Exception e) {
-                    log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
+                    log.error("Failed to retry PA for tenant {}, error = {}", needRunJobTenantId, e);
                     updateRetryCount(needRunJobTenantId);
                 }
             }
@@ -388,26 +388,32 @@ public class CDLJobServiceImpl implements CDLJobService {
             for (String needRunJobTenantId : canRunJobSet) {
                 if (!dryRun) {
                     ApplicationId appId = submitProcessAnalyzeJob(needRunJobTenantId);
-                    logScheduledPA(needRunJobTenantId, appId, false, result);
+                    logScheduledPA(schedulerName, needRunJobTenantId, appId, false, result);
                 }
             }
         }
     }
 
-    private void logScheduledPA(String tenantId, ApplicationId appId, boolean isRetry, SchedulingResult result) {
+    private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,
+            SchedulingResult result) {
         if (StringUtils.isEmpty(tenantId) || appId == null || appId.toString() == null || result == null) {
             return;
         }
 
         SchedulingResult.Detail detail = result.getDetails().get(tenantId);
-        log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}'", tenantId,
-                appId.toString(), isRetry, JsonUtils.serialize(detail));
+        log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}', schedulerName='{}'",
+                tenantId, appId.toString(), isRetry, JsonUtils.serialize(detail), schedulerName);
     }
 
     private void updateRetryCount(String tenantId) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
-        MultiTenantContext.setTenant(tenant);
-        dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
+        try {
+            // TODO test this call, throw error once
+            Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+            MultiTenantContext.setTenant(tenant);
+            dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
+        } catch (Exception e) {
+            log.error("Failed to increase retry count for tenant {}. error = {}", tenantId, e);
+        }
     }
 
     @SuppressWarnings("unchecked")
