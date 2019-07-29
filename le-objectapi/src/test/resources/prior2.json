@@ -91,6 +91,7 @@
   "restrict_without_sfdcid": false,
   "restrict_with_sfdcid": false,
   "lookups": [],
+  "period_name": "Month",
   "main_entity": "Account",
   "distinct": false
 }

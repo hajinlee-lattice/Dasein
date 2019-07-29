@@ -123,18 +123,21 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType) {
         ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
-                frontEndQuery.getSegmentQuery());
-        if (frontEndQuery.getMainEntity() == null) {
-            frontEndQuery.setMainEntity(BusinessEntity.Account);
-        }
-        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        TimeFilterTranslator timeTranslator = null;
         if (frontEndQuery.getSegmentQuery() != null) {
-            Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
-                    .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
-            map.putAll(segmentMap);
+            timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService, //
+                    frontEndQuery.getSegmentQuery());
+            if (frontEndQuery.getMainEntity() == null) {
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
+            }
+            Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+            if (frontEndQuery.getSegmentQuery() != null) {
+                Map<ComparisonType, Set<AttributeLookup>> segmentMap = queryTranslator
+                        .needPreprocess(frontEndQuery.getSegmentQuery(), timeTranslator);
+                map.putAll(segmentMap);
+            }
+            preprocess(map, attrRepo, timeTranslator);
         }
-        preprocess(map, attrRepo, timeTranslator);
         return queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, getBatchUser());
     }
 

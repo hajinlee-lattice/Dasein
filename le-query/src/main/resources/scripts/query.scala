@@ -85,7 +85,7 @@ def decode(df: DataFrame, decodeMapping: Map[String, Map[String, String]]): Data
 
 outputMode match {
   case "count" => lattice.outputStr = sqlDF.count().toString
-  case "save" => lattice.output = decode(sqlDF, decodeMapping)::Nil
+  case "save" => lattice.output = decode(sqlDF, decodeMapping) :: Nil
   case "view" => {
     val viewName = lattice.params.get("VIEW_NAME").asText()
     sqlDF.createOrReplaceTempView(viewName)
