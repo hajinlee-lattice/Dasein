@@ -60,6 +60,7 @@ public class AccountFileValidationService
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, errorFile, ImportProperty.ERROR_FILE);
+                format = format.withSkipHeaderRecord();
             } else {
                 format = format.withHeader(ImportProperty.ERROR_HEADER);
             }
