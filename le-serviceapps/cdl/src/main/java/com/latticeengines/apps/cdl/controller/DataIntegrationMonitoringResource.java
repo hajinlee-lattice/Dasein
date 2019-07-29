@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -29,13 +30,17 @@ public class DataIntegrationMonitoringResource {
     @Inject
     private DataIntegrationStatusMonitoringService dataIntegrationMonitoringService;
 
+    /**
+     * @param statuses
+     * @return Map<String, Boolean> with key representing workflowRequestId and
+     *         value the result of the update
+     */
     @PostMapping("")
     @ApiOperation(value = "Create data integration status.")
     @NoCustomerSpace
-    public boolean createOrUpdateDataIntegrationMonitoring(
-            @RequestBody DataIntegrationStatusMonitorMessage status) {
-        dataIntegrationMonitoringService.createOrUpdateStatus(status);
-        return true;
+    public Map<String, Boolean> createOrUpdateDataIntegrationMonitoring(
+            @RequestBody List<DataIntegrationStatusMonitorMessage> statuses) {
+        return dataIntegrationMonitoringService.createOrUpdateStatuses(statuses);
     }
 
     @GetMapping("/{workflowRequestId}")

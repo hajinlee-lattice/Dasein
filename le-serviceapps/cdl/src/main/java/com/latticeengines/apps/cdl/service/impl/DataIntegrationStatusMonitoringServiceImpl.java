@@ -35,6 +35,7 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
 
     private Map<DataIntegrationEventType, WorkflowStatusHandler> eventHandlerMap;
 
+
     @PostConstruct
     public void postConstruct() {
         eventHandlerMap = new HashMap<>();
@@ -57,11 +58,15 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
     private DataIntegrationStatusMessageEntityMgr dataIntegrationStatusMsgEntityMgr;
 
     @Override
-    public boolean createOrUpdateStatus(DataIntegrationStatusMonitorMessage status) {
-        log.info("Creating/updating status with monitoring message " + JsonUtils.serialize(status));
-        DataIntegrationStatusMonitor statusMonitor = handleStatusMonitor(status);
-        createNewStatusMessage(status, statusMonitor);
-        return true;
+    public Map<String, Boolean> createOrUpdateStatuses(List<DataIntegrationStatusMonitorMessage> statuses) {
+        log.info("Creating/updating statuses with monitoring message ");
+        Map<String, Boolean> statusesUpdate = new HashMap<>();
+        statuses.forEach(status -> {
+            DataIntegrationStatusMonitor statusMonitor = handleStatusMonitor(status);
+            statusesUpdate.put(status.getWorkflowRequestId(), createNewStatusMessage(status, statusMonitor));
+        });
+
+        return statusesUpdate;
     }
 
     private DataIntegrationStatusMonitor handleStatusMonitor(DataIntegrationStatusMonitorMessage status) {
@@ -74,18 +79,24 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
         return handler.handleWorkflowState(statusMonitor, status);
     }
 
-    private void createNewStatusMessage(DataIntegrationStatusMonitorMessage status,
+    private boolean createNewStatusMessage(DataIntegrationStatusMonitorMessage status,
             DataIntegrationStatusMonitor statusMonitor) {
         log.info("Creating new status message: " + JsonUtils.serialize(status));
-        DataIntegrationStatusMessage statusMessage = new DataIntegrationStatusMessage();
-        statusMessage.setTenant(statusMonitor.getTenant());
-        statusMessage.setStatusMonitor(statusMonitor);
-        statusMessage.setMessageType(MessageType.valueOf(status.getMessageType()));
-        statusMessage.setMessage(status.getMessage());
-        statusMessage.setEventType(status.getEventType());
-        statusMessage.setEventTime(status.getEventTime());
-        statusMessage.setEventDetail(status.getEventDetail());
-        dataIntegrationStatusMsgEntityMgr.create(statusMessage);
+        try {
+            DataIntegrationStatusMessage statusMessage = new DataIntegrationStatusMessage();
+            statusMessage.setTenant(statusMonitor.getTenant());
+            statusMessage.setStatusMonitor(statusMonitor);
+            statusMessage.setMessageType(MessageType.valueOf(status.getMessageType()));
+            statusMessage.setMessage(status.getMessage());
+            statusMessage.setEventType(status.getEventType());
+            statusMessage.setEventTime(status.getEventTime());
+            statusMessage.setEventDetail(status.getEventDetail());
+            dataIntegrationStatusMsgEntityMgr.create(statusMessage);
+            return true;
+        } catch (Exception ex) {
+            log.warn("Creation new status message " + ex.getMessage());
+            return false;
+        }
     }
 
     @Override
