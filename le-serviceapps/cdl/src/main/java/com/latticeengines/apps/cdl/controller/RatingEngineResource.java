@@ -630,13 +630,14 @@ public class RatingEngineResource {
             @PathVariable RatingEngineType engineType, @PathVariable String modelId) {
         return ratingEngineService.getDependingAttrsInModel(engineType, modelId);
     }
-    // -------------------
-    // RatingEngine Others
-    // -------------------
 
+    // -------------------
+    // RatingEngine dependent attribute lookup
+    // get all attributes related to all models/rating engines created in customer space
+    // -------------------
     @GetMapping(value = "/dependentattrs")
     @ResponseBody
-    @ApiOperation(value = "")
+    @ApiOperation(value = "get all attributes referenced by all models in customerspace")
     public List<AttributeLookup> getDependentAttrs(@PathVariable String customerSpace) {
         return ratingEngineService.getDependentAttrs();
     }

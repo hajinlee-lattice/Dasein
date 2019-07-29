@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -42,9 +44,11 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
@@ -261,12 +265,15 @@ public class ProductFileValidationService
             dependentAttrs.addAll(ratingEngineProxy.getDependentAttrs(space.toString()));
             Set<String>  attrInSegmentOrModel = dependentAttrs.stream().map(attr -> attr.getAttribute()).collect(Collectors.toSet());
             List<RatingEngineSummary> ratingEngines = ratingEngineProxy.getRatingEngineSummaries(space.toString());
-            // judge whether exists active CS model
-            boolean existActiveCS =
-                    ratingEngines.stream().anyMatch(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()) && RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()));
 
-            log.info("exist active cross shell model " + existActiveCS);
+            List<RatingEngineSummary> cSellSummaries =
+                    ratingEngines.stream().filter(ratingEngine -> RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())).collect(Collectors.toList());
+            // judge whether exists active cross-sell model
+            boolean existActiveCS =
+                    cSellSummaries.stream().anyMatch(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()) && RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()));
+
             log.info("bundle that will be removed " + JsonUtils.serialize(bundleToBeRemoved));
+            // error out all bundle to be removed if existing active c-shell
             if (existActiveCS) {
                 for (String bundle : bundleToBeRemoved) {
                     String errMsg = String.format("Error: %s can't be removed as exists active CE model",
@@ -274,33 +281,67 @@ public class ProductFileValidationService
                     csvFilePrinter.printRecord("", "", errMsg);
                     errorLine++;
                 }
-            } else {
-                String allAttrString = StringUtils.join(attrInSegmentOrModel);
-                log.info("current string in segment or model is " + allAttrString);
-                for (String bundle : bundleToBeRemoved) {
-                    List<Product> productList = currentBundleToProductList.get(bundle);
-
-                    for (Product product : productList) {
-                        String bundleId = product.getProductBundleId();
-                        // case that attr in old while not in new, also there are segment or model, error
-                        if (allAttrString.contains(bundleId)) {
-                            String errMsg = String.format("Error: %s which is referenced by segment or models can't be " +
-                                            "removed.",
-                                    bundle);
-                            csvFilePrinter.printRecord("", "", errMsg);
-                            errorLine++;
-                        } else {
-                            // case that attr in old while not in new, exist no segment or model, warning
-                            String errMsg = String.format("Info: %s will be removed",
-                                    bundle);
-                            csvFilePrinter.printRecord("", "", errMsg);
-                            errorLine++;
+            }
+            // generate warning for product list directly referenced by C-Sell model
+            if (CollectionUtils.isNotEmpty(cSellSummaries)) {
+                // retrieve the product list in cross-sell model
+                Set<String> productsInUse = new HashSet<>();
+                for (RatingEngineSummary summary: cSellSummaries) {
+                    String engineId = summary.getId();
+                    String modelId = summary.getPublishedIterationId(); // published id
+                    if (StringUtils.isNotBlank(modelId)) {
+                        AIModel model = (AIModel) ratingEngineProxy.getRatingModel(space.toString(), engineId, modelId);
+                        CrossSellModelingConfig config = (CrossSellModelingConfig) model.getAdvancedModelingConfig();
+                        //get the product list that need to be remodel
+                        if (CollectionUtils.isNotEmpty(config.getTargetProducts())) {
+                            productsInUse.addAll(config.getTargetProducts());
+                        }
+                        if (CollectionUtils.isNotEmpty(config.getTrainingProducts())) {
+                            productsInUse.addAll(config.getTrainingProducts());
                         }
                     }
                 }
+                for (String bundle : bundleToBeRemoved) {
+                    String generatedId =
+                            HashUtils.getCleanedString(HashUtils.getShortHash(ProductUtils.getCompositeId(ProductType.Analytic.name(), null,
+                            bundle, bundle,
+                            null,
+                            null,
+                            null)));
+                    log.info("generate id is " + generatedId);
+                    if (CollectionUtils.isNotEmpty(productsInUse) && productsInUse.contains(generatedId)) {
+                            String errMsg = String.format("Warning: %s need new iteration", bundle);
+                            csvFilePrinter.printRecord("", "", errMsg);
+                    }
+                }
             }
+
+            String allAttrString = StringUtils.join(attrInSegmentOrModel);
+            log.info("current string in segment or model is " + allAttrString);
+            for (String bundle : bundleToBeRemoved) {
+                List<Product> productList = currentBundleToProductList.get(bundle);
+
+                for (Product product : productList) {
+                    String bundleId = product.getProductBundleId();
+                    // case that attr in old while not in new, also there are segment or model, error
+                    if (allAttrString.contains(bundleId)) {
+                        String errMsg = String.format("Error: %s which is referenced by segment or models can't be " +
+                                        "removed.",
+                                bundle);
+                        csvFilePrinter.printRecord("", "", errMsg);
+                        errorLine++;
+                    } else {
+                        // case that attr in old while not in new, exist no segment or model, warning
+                        String errMsg = String.format("Info: %s will be removed",
+                                bundle);
+                        csvFilePrinter.printRecord("", "", errMsg);
+                        errorLine++;
+                    }
+                }
+            }
+
             // the relationship between Bundle and sku id is one to manny,  For each Bundle in old AND in new, compare
-            // the list of skus in the bundle to check warnings
+            // the list of skus in the bundle to generate warnings
             for (Map.Entry<String, List<Product>> entry : inputBundleToProductList.entrySet()) {
                 String bundle = entry.getKey();
                 if (currentBundleToProductList.containsKey(bundle)) {
