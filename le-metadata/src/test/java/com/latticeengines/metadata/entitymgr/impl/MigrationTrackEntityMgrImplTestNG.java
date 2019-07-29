@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -23,7 +24,10 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({SimpleRetryListener.class})
 public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Inject
@@ -89,7 +93,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         super.cleanup();
     }
 
-    @Test(groups = "functional", dataProvider = "entityProvider")
+    @Test(groups = "functional", dataProvider = "entityProvider", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCreate(Tenant tenant, MigrationTrack track) {
         Assert.assertNotNull(migrationTrackEntityMgr);
         Assert.assertNotNull(track);
