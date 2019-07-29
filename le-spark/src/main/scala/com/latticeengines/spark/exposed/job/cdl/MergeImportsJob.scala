@@ -92,7 +92,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     var result = src
     for (fldPair <- renameFlds) {
       result =
-        if (result.columns.contains(fldPair(0))) {
+        if (result.columns.contains(fldPair(0)) && !(result.columns.contains(fldPair(1)))) {
           result.withColumnRenamed(fldPair(0), fldPair(1))
         } else {
           result

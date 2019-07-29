@@ -32,6 +32,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     // All the schema should have Id field as row identifier for result
     // verification
     private static final String[] FIELDS1 = { InterfaceName.Id.name(), InterfaceName.AccountId.name() };
+    private static final String[] FIELDS3 = { InterfaceName.Id.name(), InterfaceName.AccountId.name(), "AID" };
 
     @Test(groups = "functional")
     public void test() {
@@ -165,7 +166,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     // Test concat imports -- with column rename and clone
     private void test3() {
         // input data same as test1
-        List<String> orderedInput = uploadDataTest1();
+        List<String> orderedInput = uploadDataTest3();
         log.info("Inputs for test3: {}", String.join(",", orderedInput));
 
         MergeImportsConfig config = new MergeImportsConfig();
@@ -173,11 +174,41 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey(null);
         config.setAddTimestamps(false);
         config.setCloneSrcFields(
-                new String[][] { { InterfaceName.AccountId.name(), "AID1" }, { "NON_EXISTS1", "AID3" } });
+                new String[][] { //
+                        // Copy AccountId to AID1
+                        { InterfaceName.AccountId.name(), "AID1" }, 
+                        // Cannot copy NON_EXISTS1 to AID3
+                        { "NON_EXISTS1", "AID3" } });
         config.setRenameSrcFields(
-                new String[][] { { InterfaceName.AccountId.name(), "AID2" }, { "NON_EXISTS2", "AID4" } });
+                new String[][] { //
+                        // Copy AccountId to AID2
+                        { InterfaceName.AccountId.name(), "AID2" }, //
+                        // Cannot copy NON_EXISTS2 to AID4
+                        { "NON_EXISTS2", "AID4" },
+                        // Cannot rename due to Id already exists
+                        { "AID", InterfaceName.Id.name() } });
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace3());
         verifyResult(result, Collections.singletonList(this::verifyTarget3));
+    }
+
+    private List<String> uploadDataTest3() {
+        List<String> orderedInput = new ArrayList<>();
+        List<Pair<String, Class<?>>> fields = new ArrayList<>();
+        for (String field : FIELDS3) {
+            fields.add(Pair.of(field, String.class));
+        }
+        Object[][] data = new Object[][] { //
+                { "1", "A1", "AID1" }, //
+                { "2", "A2", "AID2" }, //
+        };
+        orderedInput.add(uploadHdfsDataUnit(data, fields));
+
+        data = new Object[][] { //
+                { "3", "A1", "AID1" }, //
+                { "4", "A3", "AID3" }, //
+        };
+        orderedInput.add(uploadHdfsDataUnit(data, fields));
+        return orderedInput;
     }
 
     private String getWorkspace3() {
