@@ -93,10 +93,16 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         super.cleanup();
     }
 
+    int i = 0;
+
     @Test(groups = "functional", dataProvider = "entityProvider", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCreate(Tenant tenant, MigrationTrack track) {
         Assert.assertNotNull(migrationTrackEntityMgr);
         Assert.assertNotNull(track);
+        if (track.getPid() != null) {
+            migrationTrackEntityMgr.delete(track);
+        }
+        track.setPid(null);
         migrationTrackEntityMgr.create(track);
         Assert.assertNotNull(migrationTrackEntityMgr.findByKey(track));
         Assert.assertEquals(track.getPid(), migrationTrackEntityMgr.findByKey(track).getPid());
