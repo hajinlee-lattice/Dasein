@@ -2,22 +2,22 @@
     "fieldDefinitionsRecordsMap": {
         "Unique ID": [
             {
-                "fieldName": "ContactId",
+                "fieldName": "AccountId",
                 "fieldType": "TEXT",
-                "columnName": "Contact ID",
+                "columnName": "Account ID",
                 "required": false,
                 "inCurrentImport": true,
                 "mappedToLatticeId": true,
-                "idEntityType": "Contact"
+                "idEntityType": "Account"
             }
         ],
         "Match IDs": [
             {
-                "fieldName": "SfdcContactId",
+                "fieldName": "SfdcAccountId",
                 "fieldType": "TEXT",
-                "columnName": "SFDC Contact ID",
+                "columnName": "SFDC Account ID",
                 "required": false,
-                "inCurrentImport": true,
+                "inCurrentImport": false,
                 "mappedToLatticeId": false,
                 "idEntityType": null,
                 "externalSystemType": null,
@@ -27,9 +27,9 @@
                 "timeZone": ""
             },
             {
-                "fieldName": "DataWarehouseContactId",
+                "fieldName": "DataWarehouseAccountId",
                 "fieldType": "TEXT",
-                "columnName": "Data Warehouse Contact ID",
+                "columnName": "Data Warehouse Account ID",
                 "required": false,
                 "inCurrentImport": true,
                 "mappedToLatticeId": false,
@@ -43,157 +43,39 @@
         ],
         "Other IDs": [
             {
-                "fieldName": "SfdcContactId",
+                "fieldName": "SfdcAccountId",
                 "fieldType": "TEXT",
-                "columnName": "SFDC Contact ID",
+                "columnName": "SFDC Account ID",
+                "required": false,
+                "inCurrentImport": false,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": "MAP",
+                "externalSystemName": "SalesForce Accounts",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "DataWarehouseAccountId",
+                "fieldType": "TEXT",
+                "columnName": "Data Warehouse Account ID",
                 "required": false,
                 "inCurrentImport": true,
                 "mappedToLatticeId": false,
                 "idEntityType": null,
                 "externalSystemType": "MAP",
-                "externalSystemName": "SalesForce Contacts",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            },
-            {
-                "fieldName": "DataWarehouseContactId",
-                "fieldType": "TEXT",
-                "columnName": "Data Warehouse Contact ID",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": "MAP",
-                "externalSystemName": "Data Warehouse Contacts",
+                "externalSystemName": "Data Warehouse Accounts",
                 "dateFormat": "",
                 "timeFormat": "",
                 "timeZone": ""
             }
         ],
-        "Contact Fields": [
-            {
-                "fieldName": "FirstName",
-                "fieldType": "TEXT",
-                "columnName": "Given Name",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            },
-            {
-                "fieldName": "LastName",
-                "fieldType": "TEXT",
-                "columnName": "",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            },
-            {
-                "fieldName": "Title",
-                "fieldType": "TEXT",
-                "columnName": "Position",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            }
-        ],
-        "Analysis Fields": [
-            {
-                "fieldName": "LeadStatus",
-                "fieldType": "BOOLEAN",
-                "columnName": "Lead Status",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            },
-            {
-                "fieldName": "CreatedDate",
-                "fieldType": "DATE",
-                "columnName": "Created Date",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "YYYY.MM.DD",
-                "timeFormat": "",
-                "timeZone": "America/Los_Angeles"
-            },
-            {
-                "fieldName": "LastModifedDate",
-                "fieldType": "DATE",
-                "columnName": "Last Modified Date",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "YYYY-MM-DD",
-                "timeFormat": "00:00:00 24H",
-                "timeZone": "America/New_York"
-            }
-        ],
-        "Match to Account - ID": [
-            {
-                "fieldName": "CustomerAccountId",
-                "fieldType": "TEXT",
-                "columnName": "SfdcAccountId",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            }
-        ],
-        "Match to Account - Fields": [
+        "Account Matching Fields": [
             {
                 "fieldName": "Website",
                 "fieldType": "TEXT",
-                "columnName": "Website",
-                "required": false,
-                "inCurrentImport": true,
-                "mappedToLatticeId": false,
-                "idEntityType": null,
-                "externalSystemType": null,
-                "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
-            },
-            {
-                "fieldName": "CompanyName",
-                "fieldType": "TEXT",
-                "columnName": "Company Name",
+                "columnName": "website",
                 "required": false,
                 "inCurrentImport": true,
                 "mappedToLatticeId": false,
@@ -207,9 +89,95 @@
             {
                 "fieldName": "DUNS",
                 "fieldType": "TEXT",
-                "columnName": "DUN",
+                "columnName": null,
+                "required": false,
+                "inCurrentImport": false,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "Company Name",
+                "fieldType": "TEXT",
+                "columnName": "company",
                 "required": false,
                 "inCurrentImport": true,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "Phone Number",
+                "fieldType": "TEXT",
+                "columnName": "phone",
+                "required": false,
+                "inCurrentImport": true,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "columnName": null,
+                "required": false,
+                "inCurrentImport": false,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            }
+        ],
+        "Analysis Fields": [
+            {
+                "fieldName": "Type",
+                "fieldType": "TEXT",
+                "columnName": "type",
+                "required": false,
+                "inCurrentImport": true,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "Industry",
+                "fieldType": "TEXT",
+                "columnName": "industry",
+                "required": false,
+                "inCurrentImport": true,
+                "mappedToLatticeId": false,
+                "idEntityType": null,
+                "externalSystemType": null,
+                "externalSystemName": "",
+                "dateFormat": "",
+                "timeFormat": "",
+                "timeZone": ""
+            },
+            {
+                "fieldName": "AnnualRevenue",
+                "fieldType": "NUMBER",
+                "columnName": null,
+                "required": false,
+                "inCurrentImport": false,
                 "mappedToLatticeId": false,
                 "idEntityType": null,
                 "externalSystemType": null,
@@ -222,7 +190,7 @@
         "Custom Fields": [
             {
                 "fieldName": "Custom1",
-                "fieldType": "INTEGER",
+                "fieldType": "NUMBER",
                 "columnName": "Custom1",
                 "required": false,
                 "inCurrentImport": true,
@@ -236,7 +204,7 @@
             },
             {
                 "fieldName": "Custom2",
-                "fieldType": "BOOLEAN",
+                "fieldType": "DATE",
                 "columnName": "Custom2",
                 "required": false,
                 "inCurrentImport": true,
@@ -244,9 +212,9 @@
                 "idEntityType": null,
                 "externalSystemType": null,
                 "externalSystemName": "",
-                "dateFormat": "",
-                "timeFormat": "",
-                "timeZone": ""
+                "dateFormat": "MM/DD/YY",
+                "timeFormat": "00 00 00 24H",
+                "timeZone": "America/Halifax"
             }
         ]
     }
