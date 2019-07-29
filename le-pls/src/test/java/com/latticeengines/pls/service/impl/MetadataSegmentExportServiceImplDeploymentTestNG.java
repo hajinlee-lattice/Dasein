@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -12,11 +13,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
+import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -29,6 +32,9 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
 
     @Autowired
     private MetadataSegmentExportService metadataSegmentExportService;
+
+    @Autowired
+    private AtlasExportProxy atlasExportProxy;
 
     @Autowired
     private TestPlayCreationHelper testPlayCreationHelper;
@@ -66,6 +72,27 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertNotNull(retrievedMetadataSegmentExport.getExportId());
         Assert.assertTrue(retrievedMetadataSegmentExport.getFileName().startsWith(SEGMENT_NAME));
 
+        metadataSegmentExport =
+                metadataSegmentExportService.getSegmentExportByExportId(metadataSegmentExport.getExportId());
+        Assert.assertNotNull(metadataSegmentExport.getPid());
+        Assert.assertNotNull(metadataSegmentExport.getExportId());
+
+        AtlasExport atlasExport = createAtlasExport(AtlasExportType.ACCOUNT);
+        metadataSegmentExport =
+                metadataSegmentExportService.getSegmentExportByExportId(atlasExport.getUuid());
+        Assert.assertNotNull(metadataSegmentExport.getExportId());
+        Assert.assertEquals(metadataSegmentExportService.getSegmentExports().size(), 2);
         metadataSegmentExportService.deleteSegmentExportByExportId(exportId);
+    }
+
+    private AtlasExport createAtlasExport(AtlasExportType atlasExportType) {
+        AtlasExport atlasExport = new AtlasExport();
+        atlasExport.setCreatedBy("default@lattice-engines.com");
+        atlasExport.setAccountFrontEndRestriction(new FrontEndRestriction());
+        atlasExport.setContactFrontEndRestriction(new FrontEndRestriction());
+        atlasExport.setApplicationId(UUID.randomUUID().toString());
+        atlasExport.setExportType(atlasExportType);
+        atlasExport = atlasExportProxy.createAtlasExport(testPlayCreationHelper.getTenant().getId(), atlasExport);
+        return atlasExport;
     }
 }

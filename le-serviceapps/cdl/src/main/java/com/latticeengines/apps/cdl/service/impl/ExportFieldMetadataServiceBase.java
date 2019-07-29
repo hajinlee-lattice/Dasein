@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
+import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -21,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
 
@@ -32,7 +32,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     private ExportFieldMetadataDefaultsService defaultExportFieldMetadataService;
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
+    private ServingStoreService servingStoreService;
 
     private static Map<CDLExternalSystemName, ExportFieldMetadataService> registry = new HashMap<>();
 
@@ -57,8 +57,8 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     public Flux<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
         Flux<ColumnMetadata> cms = Flux.empty();
         if (entity != null) {
-            List<ColumnMetadata> cmList = servingStoreProxy
-                    .getDecoratedMetadata(customerSpace, entity, Collections.singletonList(Predefined.Enrichment))
+            List<ColumnMetadata> cmList = servingStoreService
+                    .getDecoratedMetadata(customerSpace, entity, null, Collections.singletonList(Predefined.Enrichment))
                     .collectList().block();
             if (CollectionUtils.isNotEmpty(cmList)) {
                 cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
@@ -72,8 +72,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         if (entities != null && !entities.isEmpty()) {
             List<ColumnMetadata> cmList = new ArrayList<ColumnMetadata>();
             entities.forEach(entity -> {
-                cmList.addAll(servingStoreProxy.getDecoratedMetadata(customerSpace, entity, Collections.singletonList(Predefined.Enrichment))
-                .collectList().block());
+                cmList.addAll(servingStoreService.getDecoratedMetadata(customerSpace, entity,
+                        null, Collections.singletonList(Predefined.Enrichment))
+                        .collectList().block());
             });
             if (CollectionUtils.isNotEmpty(cmList)) {
                 cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));

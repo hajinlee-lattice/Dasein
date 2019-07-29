@@ -61,6 +61,21 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
                 return null;
             }
 
+            @Override
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version, Boolean allCustomerAttrs) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+                return null;
+            }
+
         });
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService)
                 .setServingStoreService(spiedServingStoreService);
