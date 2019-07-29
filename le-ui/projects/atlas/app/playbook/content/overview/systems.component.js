@@ -135,9 +135,13 @@ class SystemsComponent extends Component {
     getLaunchStateText(connection, play) {
         var text = [];
         if(connection && connection.lastLaunch) {
-            var launch = connection.lastLaunch,
+            var successfulStates = [
+                    'Launched',
+                    'Synced'
+                ],
+                launch = connection.lastLaunch,
                 launchState = (launch ? launch.launchState : 'Unlaunched'),
-                launched = (launchState === 'Launched' ? true : false),
+                launched = (successfulStates.indexOf(launchState) !== -1 ? true : false),
                 launching = (launchState === 'Launching' ? true : false),
                 queued = (launchState === 'Queued' ? true : false);
 
@@ -145,7 +149,7 @@ class SystemsComponent extends Component {
                     this.checkLaunching();
                 }
 
-            if(launched && launch && launch.created && launch.accountsLaunched && launch.contactsLaunched) {
+            if(launch && launch.created && launch.accountsLaunched && launch.contactsLaunched && launched) {
                 text.push(
                     <div class="launch-text launched">
                         <ul>

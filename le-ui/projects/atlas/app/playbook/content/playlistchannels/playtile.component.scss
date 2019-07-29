@@ -1,0 +1,24 @@
+atlas-playlistchannels {
+    .playlist-tile {
+        .tile-metadata {
+            width: 100%;
+        }
+        .tile-footer {
+            text-align: left;
+            padding: 0;
+            .tile-count {
+                width: 50%;
+                padding: 13px;
+                border-right: 1px solid #ddd;
+                &:last-child {
+                    padding-right: 0;
+                    border-right: none;
+                }
+                h3 {
+                    font-size: 12px;
+                    font-weight: normal;
+                }
+            }
+        }
+    }
+}

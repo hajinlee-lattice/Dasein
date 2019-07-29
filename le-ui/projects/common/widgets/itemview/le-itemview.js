@@ -105,7 +105,6 @@ export default class LeItemView extends Component {
 
 	render() {
 		let state = this.state || {};
-
 		if (!state.itemview) {
 			return '';
 		}
@@ -119,7 +118,6 @@ export default class LeItemView extends Component {
 				items = this[name](stores[name], items);
 			}
 		});
-
 		items = this.pagination(items);
 
 		console.log('> render view', this);
