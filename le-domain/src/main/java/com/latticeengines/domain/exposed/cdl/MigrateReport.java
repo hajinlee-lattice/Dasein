@@ -18,11 +18,17 @@ public class MigrateReport {
     @JsonProperty("output_account_template")
     private String outputAccountTemplate;
 
+    @JsonProperty("output_account_task_id")
+    private String outputAccountTaskId;
+
     @JsonProperty("account_counts")
     private Long accountCounts;
 
     @JsonProperty("account_action_id")
     private Long accountActionId;
+
+    @JsonProperty("account_data_tables")
+    private List<String> accountDataTables;
 
     @JsonProperty("input_contact_templates")
     private List<String> inputContactTemplates;
@@ -30,12 +36,17 @@ public class MigrateReport {
     @JsonProperty("output_contact_template")
     private String outputContactTemplate;
 
+    @JsonProperty("output_contact_task_id")
+    private String outputContactTaskId;
+
     @JsonProperty("contact_counts")
     private Long contactCounts;
 
     @JsonProperty("contact_action_id")
     private Long contactActionId;
 
+    @JsonProperty("contact_data_tables")
+    private List<String> contactDataTables;
 
     @JsonProperty("input_transaction_templates")
     private List<String> inputTransactionTemplates;
@@ -43,11 +54,17 @@ public class MigrateReport {
     @JsonProperty("output_transaction_template")
     private String outputTransactionTemplate;
 
+    @JsonProperty("output_transaction_task_id")
+    private String outputTransactionTaskId;
+
     @JsonProperty("transaction_counts")
     private Long transactionCounts;
 
     @JsonProperty("transaction_action_id")
     private Long transactionActionId;
+
+    @JsonProperty("transaction_data_tables")
+    private List<String> transactionDataTables;
 
     public List<String> getInputAccountTemplates() {
         return inputAccountTemplates;
@@ -63,6 +80,14 @@ public class MigrateReport {
 
     public void setOutputAccountTemplate(String outputAccountTemplate) {
         this.outputAccountTemplate = outputAccountTemplate;
+    }
+
+    public String getOutputAccountTaskId() {
+        return outputAccountTaskId;
+    }
+
+    public void setOutputAccountTaskId(String outputAccountTaskId) {
+        this.outputAccountTaskId = outputAccountTaskId;
     }
 
     public Long getAccountCounts() {
@@ -81,6 +106,14 @@ public class MigrateReport {
         this.accountActionId = accountActionId;
     }
 
+    public List<String> getAccountDataTables() {
+        return accountDataTables;
+    }
+
+    public void setAccountDataTables(List<String> accountDataTables) {
+        this.accountDataTables = accountDataTables;
+    }
+
     public List<String> getInputContactTemplates() {
         return inputContactTemplates;
     }
@@ -95,6 +128,14 @@ public class MigrateReport {
 
     public void setOutputContactTemplate(String outputContactTemplate) {
         this.outputContactTemplate = outputContactTemplate;
+    }
+
+    public String getOutputContactTaskId() {
+        return outputContactTaskId;
+    }
+
+    public void setOutputContactTaskId(String outputContactTaskId) {
+        this.outputContactTaskId = outputContactTaskId;
     }
 
     public Long getContactCounts() {
@@ -113,6 +154,14 @@ public class MigrateReport {
         this.contactActionId = contactActionId;
     }
 
+    public List<String> getContactDataTables() {
+        return contactDataTables;
+    }
+
+    public void setContactDataTables(List<String> contactDataTables) {
+        this.contactDataTables = contactDataTables;
+    }
+
     public List<String> getInputTransactionTemplates() {
         return inputTransactionTemplates;
     }
@@ -129,6 +178,14 @@ public class MigrateReport {
         this.outputTransactionTemplate = outputTransactionTemplate;
     }
 
+    public String getOutputTransactionTaskId() {
+        return outputTransactionTaskId;
+    }
+
+    public void setOutputTransactionTaskId(String outputTransactionTaskId) {
+        this.outputTransactionTaskId = outputTransactionTaskId;
+    }
+
     public Long getTransactionCounts() {
         return transactionCounts;
     }
@@ -143,5 +200,13 @@ public class MigrateReport {
 
     public void setTransactionActionId(Long transactionActionId) {
         this.transactionActionId = transactionActionId;
+    }
+
+    public List<String> getTransactionDataTables() {
+        return transactionDataTables;
+    }
+
+    public void setTransactionDataTables(List<String> transactionDataTables) {
+        this.transactionDataTables = transactionDataTables;
     }
 }

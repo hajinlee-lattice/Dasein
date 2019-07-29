@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.migrate;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.HashedMap;
@@ -44,5 +45,23 @@ public class MigrateTransactionImports extends BaseMigrateImports<MigrateTransac
     @Override
     protected Map<String, String> getDuplicateMap() {
         return new HashedMap<>();
+    }
+
+    @Override
+    protected String getTaskId() {
+        if (migrateTracking == null) {
+            migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+                    configuration.getMigrateTrackingPid());
+        }
+        return migrateTracking.getReport().getOutputTransactionTaskId();
+    }
+
+    @Override
+    protected void updateMigrateTracking(Long migratedCounts, List<String> dataTables) {
+        migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+                configuration.getMigrateTrackingPid());
+        migrateTracking.getReport().setTransactionCounts(migratedCounts);
+        migrateTracking.getReport().setTransactionDataTables(dataTables);
+        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTracking.getPid(), migrateTracking.getReport());
     }
 }

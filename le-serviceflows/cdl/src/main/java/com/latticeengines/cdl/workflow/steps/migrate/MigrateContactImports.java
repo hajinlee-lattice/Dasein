@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.migrate;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.HashedMap;
@@ -47,5 +48,23 @@ public class MigrateContactImports extends BaseMigrateImports<MigrateContactImpo
             dupMap.put(InterfaceName.ContactId.name(), importSystem.getContactSystemId());
         }
         return dupMap;
+    }
+
+    @Override
+    protected String getTaskId() {
+        if (migrateTracking == null) {
+            migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+                    configuration.getMigrateTrackingPid());
+        }
+        return migrateTracking.getReport().getOutputContactTaskId();
+    }
+
+    @Override
+    protected void updateMigrateTracking(Long migratedCounts, List<String> dataTables) {
+        migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+                configuration.getMigrateTrackingPid());
+        migrateTracking.getReport().setContactCounts(migratedCounts);
+        migrateTracking.getReport().setContactDataTables(dataTables);
+        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTracking.getPid(), migrateTracking.getReport());
     }
 }

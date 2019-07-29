@@ -70,7 +70,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
     protected static final String MATCH_PREDEFINED_SELECTION_VERSION = "MATCH_PREDEFINED_SELECTION_VERSION";
     protected static final String MATCH_CUSTOMIZED_SELECTION = "MATCH_CUSTOMIZED_SELECTION";
-    protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
+    protected static final String MODcleanupTableNameELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
     protected static final String SCORING_AVG_SCORE = "SCORING_AVG_SCORE";
@@ -154,7 +154,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";
-    protected static final String MIGRATED_DATA_FEED_TASK_ID = "MIGRATED_DATA_FEED_TASK_ID";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";

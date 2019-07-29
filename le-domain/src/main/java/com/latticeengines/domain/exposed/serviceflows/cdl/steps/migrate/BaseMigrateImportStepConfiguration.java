@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -16,4 +17,14 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
         @Type(value = MigrateTransactionImportStepConfiguration.class, name = "MigrateTransactionImportStepConfiguration")})
 public abstract class BaseMigrateImportStepConfiguration extends BaseWrapperStepConfiguration {
 
+    @JsonProperty("migrate_tracking_pid")
+    private Long migrateTrackingPid;
+
+    public Long getMigrateTrackingPid() {
+        return migrateTrackingPid;
+    }
+
+    public void setMigrateTrackingPid(Long migrateTrackingPid) {
+        this.migrateTrackingPid = migrateTrackingPid;
+    }
 }

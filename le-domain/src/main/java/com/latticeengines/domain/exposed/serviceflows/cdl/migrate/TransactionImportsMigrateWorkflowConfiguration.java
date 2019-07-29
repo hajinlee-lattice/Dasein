@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateTransactionImportStepConfiguration;
@@ -61,9 +63,28 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             return this;
         }
 
+        public Builder action(Action action) {
+            if (action == null) {
+                importTemplateMigrateStepConfiguration.setSkipStep(true);
+                migrateTransactionImportStepConfiguration.setSkipStep(true);
+                registerImportActionStepConfiguration.setSkipStep(true);
+            } else {
+                registerImportActionStepConfiguration.setActionPid(action.getPid());
+            }
+            return this;
+        }
+
+        public Builder migrateTracking(Long trackingPid) {
+            importTemplateMigrateStepConfiguration.setMigrateTrackingPid(trackingPid);
+            migrateTransactionImportStepConfiguration.setMigrateTrackingPid(trackingPid);
+            registerImportActionStepConfiguration.setMigrateTrackingPid(trackingPid);
+            return this;
+        }
+
         public TransactionImportsMigrateWorkflowConfiguration build() {
             configuration.setContainerConfiguration("transactionImportsMigrationWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            registerImportActionStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(importTemplateMigrateStepConfiguration);
             configuration.add(migrateTransactionImportStepConfiguration);
             configuration.add(registerImportActionStepConfiguration);

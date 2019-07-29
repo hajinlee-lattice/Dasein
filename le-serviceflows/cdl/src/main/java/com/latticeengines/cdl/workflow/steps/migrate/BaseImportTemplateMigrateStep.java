@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTe
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -45,6 +46,9 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
     @Inject
     protected CDLProxy cdlProxy;
 
+    @Inject
+    protected MigrateTrackingProxy migrateTrackingProxy;
+
     @Override
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
@@ -60,7 +64,7 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
         if (optionalDataFeedTask.isPresent()) {
             DataFeedTask dataFeedTask = optionalDataFeedTask.get();
             dataFeedTask.setImportTemplate(newTemplate);
-            putStringValueInContext(MIGRATED_DATA_FEED_TASK_ID, dataFeedTask.getUniqueId());
+            updateMigrateTracking(dataFeedTask.getUniqueId(), newTemplate.getName());
         } else {
             String newTaskId = NamingUtils.uuid("DataFeedTask");
             DataFeedTask dataFeedTask = new DataFeedTask();
@@ -76,7 +80,7 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-            putStringValueInContext(MIGRATED_DATA_FEED_TASK_ID, newTaskId);
+            updateMigrateTracking(newTaskId, newTemplate.getName());
         }
     }
 
@@ -143,4 +147,6 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
     protected abstract String getFeedType();
 
     protected abstract void updateTemplate(Table templateTable, S3ImportSystem s3ImportSystem);
+
+    protected abstract void updateMigrateTracking(String taskId, String templateName);
 }

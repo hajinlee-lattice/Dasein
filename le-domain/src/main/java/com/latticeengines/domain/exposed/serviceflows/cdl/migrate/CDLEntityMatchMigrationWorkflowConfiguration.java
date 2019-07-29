@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
@@ -79,11 +80,24 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             return this;
         }
 
+        public Builder actionMap(Map<BusinessEntity, Action> actionMap) {
+            if (MapUtils.isEmpty(actionMap)) {
+                throw new RuntimeException("Migrate Action is empty!");
+            }
+            accountImportMigrateConfigurationBuilder.action(actionMap.get(BusinessEntity.Account));
+            contactImportMigrateConfigurationBuilder.action(actionMap.get(BusinessEntity.Contact));
+            transactionImportMigrateConfigurationBuilder.action(actionMap.get(BusinessEntity.Transaction));
+            return this;
+        }
+
         public Builder migrateTrackingPid(Long migrateTrackingPid) {
             if (migrateTrackingPid == null) {
                 throw new RuntimeException("Migrate Tracking record id cannot be null!");
             }
             startMigrateConfiguration.setMigrateTrackingPid(migrateTrackingPid);
+            accountImportMigrateConfigurationBuilder.migrateTracking(migrateTrackingPid);
+            contactImportMigrateConfigurationBuilder.migrateTracking(migrateTrackingPid);
+            transactionImportMigrateConfigurationBuilder.migrateTracking(migrateTrackingPid);
             finishMigrateConfiguration.setMigrateTrackingPid(migrateTrackingPid);
             return this;
         }
