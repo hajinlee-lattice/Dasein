@@ -853,7 +853,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days) {
         try {
-            log.info("Sending POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
+            log.info("Sending tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " started.");
             EmailTemplateBuilder builder;
             builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.TENANT_STATE_NOTICE);
@@ -867,10 +867,10 @@ public class EmailServiceImpl implements EmailService {
             sendMultiPartEmail(EmailSettings.TENANT_STATE_NOTICE_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
             log.info(
-                    "Sending POC tenant state email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+                    "Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Failed to send POC tenant state notice email to " + user.getEmail() + " on " + tenant.getName()
+            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
         }
     }
