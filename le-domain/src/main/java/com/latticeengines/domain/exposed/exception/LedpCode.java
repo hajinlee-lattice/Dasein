@@ -353,11 +353,9 @@ public enum LedpCode {
     LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"),
     LEDP_18227("Can't get entity data from cache when cache is in build."),
     LEDP_18228("Play Launch Channel {0} not found."),
-    LEDP_18228("Field Definition Request missing Template State.  Request was:\n{0}"),
-    LEDP_18229("Field Definition Request has invalid Template State.  Request was:\n{0}"),
-    LEDP_18230("Fetch Field Definition Request could not load Fetch Response file: {0}"),
-    LEDP_18231("Commit Field Definition Request is invalid: {0}"),
-    LEDP_18232("Field Definition Request is invalid parameter: {0}"),
+    LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
+    LEDP_18230("Fetch Field Definition Request could not generate Fetch Response: {0}"),
+    LEDP_18231("{0} Field Definition Request missing section: {1}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

@@ -48,25 +48,4 @@ public class FieldDefinitionsRequest {
         }
         return null;
     }
-
-
-    /*
-    // All Field Definition Requests in version 2.0 need to have a TemplateState object to identify basic state
-    // information for the request.
-    @JsonProperty
-    protected TemplateState templateState;
-
-    public TemplateState getTemplateState() {
-        return templateState;
-    }
-
-    public void setTemplateState(TemplateState templateState) {
-        this.templateState = templateState;
-    }
-
-    @Override
-    public String toString() {
-        return "templateState:\n" + templateState.toString();
-    }
-    */
 }
