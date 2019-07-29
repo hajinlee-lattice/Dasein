@@ -157,12 +157,13 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "can delete this table"));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testUntrackedTenantsConditions() {
         tenantEntityMgr.create(untracked);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(untracked));
         Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(untracked, "This table"));
         tenantEntityMgr.delete(untracked);
+        Assert.assertNull(tenantEntityMgr.findByKey(untracked));
     }
 
     @DataProvider(name = "entityProvider")
