@@ -102,6 +102,38 @@ angular
                     }
                 }
             })
+            // .state('home.playbook.listchannels', {
+            //     url: '/listchannels',
+            //     params: {
+            //         pageIcon: 'ico-playbook',
+            //         pageTitle: 'Campaign Playbook'
+            //     },
+            //     resolve: {
+            //         onExit: function ($state) {
+            //              actions.reset();
+            //         },
+            //         playList: function () {
+            //             actions.fetchPlays();
+            //         },
+            //         // PlayList: (playList) => { 
+            //         //     return playList; 
+            //         // },
+            //         path: () => {
+            //             return 'playlistChannels';
+            //         },
+            //         ngservices: (PlaybookWizardStore) => {
+            //             let obj = {
+            //                 PlaybookWizardStore: PlaybookWizardStore
+            //             }
+            //             return obj;
+            //         }
+            //     },
+            //     views: {
+            //         "main@": {
+            //             component: 'reactAngularMainComponent'
+            //         }
+            //     }
+            // })
             .state('home.playbook.plays.launchhistory', {
                 url: '/launchhistory',
                 resolve: {
@@ -211,7 +243,7 @@ angular
                 },
                 onEnter: function (BackStore, Play) {
                     BackStore.setBackLabel(Play.displayName);
-                    BackStore.setBackState('home.playbook');
+                    BackStore.setBackState('home.playbook.listchannels');
                     BackStore.setHidden(false);
                 },
                 onExit: function ($state) {
@@ -238,7 +270,6 @@ angular
                         return obj;
                     }
                 },
-
                 views: {
                     "navigation@home": {
                         controller: 'SidebarPlaybookController',
