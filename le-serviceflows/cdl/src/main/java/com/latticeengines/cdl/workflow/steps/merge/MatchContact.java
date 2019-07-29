@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactStepConfiguration> {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchContact.class);
 
     static final String BEAN_NAME = "matchContact";
@@ -73,7 +75,9 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
         int concatenateStep = 1;
-        TransformationStepConfig merge = concatImports(null);
+
+        Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
+        TransformationStepConfig merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight());
         TransformationStepConfig concatenate = concatenateContactName(mergeStep, null);
         TransformationStepConfig entityMatch = match(concatenateStep, matchTargetTablePrefix);
         steps.add(merge);
@@ -121,6 +125,41 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     private String getEntityMatchTargetTableName() {
         return TableUtils.getFullTableName(matchTargetTablePrefix, pipelineVersion);
+    }
+
+    /**
+     * For PA during entity match migration period: some files are imported with
+     * legacy template (having ContactId/AccountId) while some files are
+     * imported after template is upgraded (having
+     * CustomerContactId/CustomerAccountId)
+     *
+     * It's to rename ContactId/AccountId to CustomerContactId/CustomerAccountId
+     * and copy to DefaultSystem's ID with same value
+     *
+     * Copy happens before rename and the merge job has check whether specified
+     * original column (ContactId/AccountId) exists or not
+     *
+     * TODO: After all the tenants finish entity match migration, we could get
+     * rid of this field rename/copy logic
+     *
+     * @return <cloneFlds, renameFlds>
+     */
+    private Pair<String[][], String[][]> getPreProcessFlds() {
+        String defaultAcctSysId = getDefaultSystemId(BusinessEntity.Account);
+        String defaultContSysId = getDefaultSystemId(BusinessEntity.Contact);
+        List<String[]> cloneFldList = new ArrayList<>();
+        if (defaultAcctSysId != null) {
+            cloneFldList.add(new String[] { InterfaceName.AccountId.name(), defaultAcctSysId });
+        }
+        if (defaultContSysId != null) {
+            cloneFldList.add(new String[] { InterfaceName.ContactId.name(), defaultContSysId });
+        }
+        String[][] cloneFlds = cloneFldList.isEmpty() ? null : (String[][]) cloneFldList.toArray();
+        String[][] renameFlds = { //
+                { InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name() }, //
+                { InterfaceName.ContactId.name(), InterfaceName.CustomerContactId.name() } //
+        };
+        return Pair.of(cloneFlds, renameFlds);
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -70,7 +71,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     private Boolean useEmr;
 
     @Value("${common.le.stack}")
-    private String leStack;
+    protected String leStack;
 
     @Value("${dataflowapi.spark.driver.cores}")
     private String driverCores;
@@ -89,7 +90,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     protected LivySession session;
     private AtomicInteger inputSeq = new AtomicInteger(0);
-    private Map<String, DataUnit> inputUnits = new HashMap<>();
+    private Map<String, DataUnit> inputUnits = new ConcurrentHashMap<>();
 
     protected String getJobName() {
         return null;
@@ -205,6 +206,16 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return sparkJobService.runJob(session, jobClz, jobConfig);
     }
 
+    // If single test needs to run multiple jobs with different inputs (to cover
+    // different test cases), pass in orderedInput and workspace to start jobs
+    protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
+    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig, List<String> orderedInput, String workspace) {
+        initializeScenario();
+        jobConfig.setWorkspace(workspace);
+        jobConfig.setInput(getInputUnits(orderedInput));
+        return sparkJobService.runJob(session, jobClz, jobConfig);
+    }
+
     protected SparkJobResult runSparkScript(SparkScript script, ScriptJobConfig jobConfig) {
         initializeScenario();
         jobConfig.setWorkspace(getWorkspace());
@@ -213,9 +224,15 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected void verifyResult(SparkJobResult result) {
+        List<Function<HdfsDataUnit, Boolean>> verifiers = getTargetVerifiers();
+        verifyResult(result, verifiers);
+    }
+
+    // If single test needs to run multiple jobs with different inputs (to cover
+    // different test cases), pass in verifiers to verify each job's result
+    protected void verifyResult(SparkJobResult result, List<Function<HdfsDataUnit, Boolean>> verifiers) {
         verifyOutput(result.getOutput());
 
-        List<Function<HdfsDataUnit, Boolean>> verifiers = getTargetVerifiers();
         int numTargets = CollectionUtils.size(result.getTargets());
         int numVerifiers = CollectionUtils.size(verifiers);
         Assert.assertEquals(numTargets, numVerifiers, //
@@ -239,6 +256,10 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     private List<DataUnit> getInputUnits() {
         List<String> orderedInput = getInputOrder();
+        return getInputUnits(orderedInput);
+    }
+
+    private List<DataUnit> getInputUnits(List<String> orderedInput) {
         if (CollectionUtils.isNotEmpty(orderedInput)) {
             return orderedInput.stream().map(name -> {
                 if (inputUnits.containsKey(name)) {

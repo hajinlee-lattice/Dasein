@@ -30,8 +30,8 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRespo
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateReportConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -52,6 +52,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfiguration>
@@ -171,7 +172,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    TransformationStepConfig concatImports(String targetTablePrefix) {
+    TransformationStepConfig concatImports(String targetTablePrefix, String[][] cloneSrcFlds,
+            String[][] renameSrcFlds) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
@@ -180,6 +182,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setDedupSrc(false);
         config.setJoinKey(null);
         config.setAddTimestamps(false);
+        config.setCloneSrcFields(cloneSrcFlds);
+        config.setRenameSrcFields(renameSrcFlds);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -206,58 +210,30 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
-        return mergeInputs(useTargetTable, true, isDedupeSource, mergeOnly, mergedBatchStoreName,
-                InterfaceName.Id.name(),
-                batchStorePrimaryKey, inputTableNames);
-    }
-
-    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean addTimettamps,
-            boolean isDedupeSource, boolean mergeOnly,
-            String targetTableNamePrefix, String srcIdField, String masterIdField, List<String> tableNames) {
+    protected TransformationStepConfig mergeInputs(ConsolidateDataTransformerConfig config,
+            String targetTableNamePrefix, ETLEngineLoad engineLoad) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<String> baseSources = tableNames;
-        step.setBaseSources(baseSources);
-
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        for (String inputTableName : tableNames) {
-            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
-        }
-        step.setBaseTables(baseTables);
-        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(
-                getConsolidateDataConfig(isDedupeSource, addTimettamps, mergeOnly, srcIdField, masterIdField));
-        if (useTargetTable) {
+        inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+        if (targetTableNamePrefix != null) {
             setTargetTable(step, targetTableNamePrefix);
         }
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(engineLoad)));
         return step;
     }
 
-    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly) {
-        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, InterfaceName.Id.name(), //
-                batchStorePrimaryKey, true);
-    }
-
-    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
-            String srcIdField, String masterIdField) {
-        return getConsolidateDataConfig(isDedupeSource, addTimettamps, isMergeOnly, srcIdField, //
-                masterIdField, false);
-    }
-
-    private String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
-            String srcIdField, String masterIdField, boolean heavyEngine) {
-        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
-        config.setMasterIdField(masterIdField);
-        config.setDedupeSource(isDedupeSource);
-        config.setMergeOnly(isMergeOnly);
-        config.setAddTimestamps(addTimettamps);
-        config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
-        if (heavyEngine) {
-            return appendEngineConf(config, heavyEngineConfig());
-        } else {
-            return appendEngineConf(config, lightEngineConfig());
-        }
+    // For common use case. If need to customize more parameters, better to
+    // build ConsolidateDataTransformerConfig in workflow step itself instead of
+    // making shared method with large signature
+    protected ConsolidateDataTransformerConfig getConsolidateDataTxmfrConfig(boolean dedupeSource,
+            boolean addTimettamps, boolean mergeOnly) {
+        ConsolidateDataTxmfrConfigBuilder builder = new ConsolidateDataTxmfrConfigBuilder();
+        builder.dedupeSource(dedupeSource);
+        builder.addTimestamps(addTimettamps);
+        builder.mergeOnly(mergeOnly);
+        builder.srcIdField(InterfaceName.Id.name());
+        builder.masterIdField(batchStorePrimaryKey);
+        return builder.build();
     }
 
     protected void generateDiffReport() {
