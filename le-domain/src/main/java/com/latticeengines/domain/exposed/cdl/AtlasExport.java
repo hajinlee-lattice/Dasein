@@ -16,8 +16,10 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -25,11 +27,17 @@ import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @Entity
 @Table(name = "ATLAS_EXPORT",
@@ -49,7 +57,7 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @JsonProperty("uuid")
     private String uuid;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tenant")
@@ -59,10 +67,20 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MetadataSegment segment;
+
     @JsonProperty("export_type")
     @Column(name = "EXPORT_TYPE")
     @Enumerated(EnumType.STRING)
     private AtlasExportType exportType;
+
+    @JsonProperty("applicationId")
+    @Column(name = "APPLICATION_ID")
+    private String applicationId;
 
     @JsonProperty("date_prefix")
     @Column(name = "DATE_PREFIX", length = 15)
@@ -77,6 +95,39 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Column(name = "FILES_UNDER_DROPFOLDER", columnDefinition = "'JSON'")
     @Type(type = "json")
     private List<String> filesUnderDropFolder;
+
+    @JsonIgnore
+    @Column(name = "ACCOUNT_RESTRICTION")
+    @Type(type = "text")
+    private String accountRestrictionString;
+
+    @JsonIgnore
+    @Column(name = "CONTACT_RESTRICTION")
+    @Type(type = "text")
+    private String contactRestrictionString;
+
+    @JsonProperty("account_restriction")
+    @Transient
+    @ApiModelProperty("Account restriction for use in the front end")
+    private FrontEndRestriction accountFrontEndRestriction;
+
+    @JsonProperty("contact_restriction")
+    @Transient
+    @ApiModelProperty("Contact restriction for use in the front end")
+    private FrontEndRestriction contactFrontEndRestriction;
+
+    @JsonProperty("created_by")
+    @Column(name = "CREATED_BY")
+    private String createdBy;
+
+    @JsonProperty("status")
+    @Column(name = "STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MetadataSegmentExport.Status status;
+
+    @JsonProperty("path")
+    @Column(name = "PATH", length = 2048)
+    private String path;
 
     @Override
     public Long getPid() {
@@ -149,5 +200,67 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
 
     public void setFilesUnderDropFolder(List<String> filesUnderDropFolder) {
         this.filesUnderDropFolder = filesUnderDropFolder;
+    }
+
+    public FrontEndRestriction getAccountFrontEndRestriction() {
+        return StringUtils.isNoneBlank(accountRestrictionString)
+                ? JsonUtils.deserialize(accountRestrictionString, FrontEndRestriction.class)
+                : new FrontEndRestriction();
+    }
+
+    public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {
+        this.accountFrontEndRestriction = accountFrontEndRestriction;
+        this.accountRestrictionString = JsonUtils.serialize(accountFrontEndRestriction);
+    }
+
+    public FrontEndRestriction getContactFrontEndRestriction() {
+        return StringUtils.isNoneBlank(contactRestrictionString)
+                ? JsonUtils.deserialize(contactRestrictionString, FrontEndRestriction.class)
+                : new FrontEndRestriction();
+    }
+
+    public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
+        this.contactFrontEndRestriction = contactFrontEndRestriction;
+        this.contactRestrictionString = JsonUtils.serialize(contactFrontEndRestriction);
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public MetadataSegmentExport.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(MetadataSegmentExport.Status status) {
+        this.status = status;
+    }
+
+    public MetadataSegment getSegment() {
+        return segment;
+    }
+
+    public void setSegment(MetadataSegment segment) {
+        this.segment = segment;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

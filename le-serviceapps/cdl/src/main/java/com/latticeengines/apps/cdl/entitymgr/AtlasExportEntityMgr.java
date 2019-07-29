@@ -9,4 +9,6 @@ public interface AtlasExportEntityMgr extends BaseEntityMgrRepository<AtlasExpor
     AtlasExport findByUuid(String uuid);
 
     AtlasExport createAtlasExport(AtlasExportType exportType);
+
+    AtlasExport createAtlasExport(AtlasExport atlasExport);
 }

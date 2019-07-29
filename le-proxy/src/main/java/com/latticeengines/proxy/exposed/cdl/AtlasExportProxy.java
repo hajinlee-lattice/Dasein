@@ -1,11 +1,20 @@
 package com.latticeengines.proxy.exposed.cdl;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
 public interface AtlasExportProxy {
 
+    List<AtlasExport> findAll(String customerSpace);
+
+    AtlasExport createAtlasExport(String customerSpace, AtlasExport atlasExport);
+
     AtlasExport findAtlasExportById(String customerSpace, String uuid);
+
+    void updateAtlasExport(String customerSpace, String uuid, MetadataSegmentExport.Status status);
 
     void addFileToSystemPath(String customerSpace, String uuid, String fileName);
 

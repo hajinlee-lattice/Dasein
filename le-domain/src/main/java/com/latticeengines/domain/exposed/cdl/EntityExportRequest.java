@@ -22,4 +22,15 @@ public class EntityExportRequest {
     public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
         this.dataCollectionVersion = dataCollectionVersion;
     }
+
+    @JsonProperty("AtlasExportId")
+    private String atlasExportId;
+
+    public String getAtlasExportId() {
+        return atlasExportId;
+    }
+
+    public void setAtlasExportId(String atlasExportId) {
+        this.atlasExportId = atlasExportId;
+    }
 }

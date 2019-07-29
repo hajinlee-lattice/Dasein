@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
-public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
+    public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ActionResourceDeploymentTestNG.class);
 

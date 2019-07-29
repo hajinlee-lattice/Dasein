@@ -2,10 +2,14 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 
@@ -21,6 +25,13 @@ public class AtlasExportProxyImpl extends MicroserviceRestApiProxy implements At
         String url = constructUrl("/customerspaces/{customerSpace}/atlas/export?uuid={uuid}", //
                 shortenCustomerSpace(customerSpace), uuid);
         return get("find atlas export by id", url, AtlasExport.class);
+    }
+
+    @Override
+    public void updateAtlasExport(String customerSpace, String uuid, MetadataSegmentExport.Status status) {
+        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export?uuid={uuid}&status={status}", //
+                shortenCustomerSpace(customerSpace), uuid, status);
+        put("update atlas export", url);
     }
 
     @Override
@@ -59,5 +70,20 @@ public class AtlasExportProxyImpl extends MicroserviceRestApiProxy implements At
         String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/s3/path", //
                 shortenCustomerSpace(customerSpace));
         return post("Get s3 path with protocol", url, relativePath, String.class);
+    }
+
+    @Override
+    public List<AtlasExport> findAll(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/findAll", //
+                shortenCustomerSpace(customerSpace));
+        List<?> rawlist = get("find all atlas exports", url, List.class);
+        return JsonUtils.convertList(rawlist, AtlasExport.class);
+    }
+
+    @Override
+    public AtlasExport createAtlasExport(String customerSpace, AtlasExport atlasExport) {
+        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export", //
+                shortenCustomerSpace(customerSpace));
+        return post("create atlas export", url, atlasExport, AtlasExport.class);
     }
 }
