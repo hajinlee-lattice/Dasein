@@ -5,6 +5,9 @@ import StateTransitions from './transitions.config.js';
 import MainController from './app.controller.js';
 import HTTP from './http.interceptor.js';
 import Utils from './common.utils.js';
+import { react2angular } from "common/react-vendor";
+import LeItemBar from "widgets/itembar/le-itembar";
+import LeItemView from "widgets/itemview/le-itemview";
 
 angular
     .module('Atlas', [
@@ -22,6 +25,7 @@ angular
         'common.attributes',
         'common.datacloud',
         'atlas.segmentation',
+        'atlas.playlistchannels',
         'lp.navigation',
         'lp.widgets',
         'lp.jobs',
@@ -53,4 +57,6 @@ angular
     .factory('LeHTTP', HTTPFactory)
     .service('StateHistory', StateHistory)
     .filter('escape', Utils.EscapeFilter)
-    .controller('MainController', MainController);
+    .controller('MainController', MainController)
+    .component("leItemBar", react2angular(LeItemBar, ["store"], []))
+    .component("leItemView", react2angular(LeItemView, ["store"], []));

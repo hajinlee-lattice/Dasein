@@ -1,6 +1,7 @@
 import React, { Component } from "common/react-vendor";
 import { store } from 'store';
 import { actions } from '../../playbook.redux';
+//import ReactRouter from 'atlas/react/router';
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 import NgState from "atlas/ng-state";
@@ -26,6 +27,7 @@ import './overview.component.scss';
 export default class OverviewComponent extends Component {
     constructor(props) {
         super(props);
+        //this.PlaybookWizardStore = ReactRouter.getRouter().ngservices.PlaybookWizardStore;
         this.state = {
             play: props.play,
             connections: null,
@@ -35,7 +37,7 @@ export default class OverviewComponent extends Component {
 
     componentDidMount() {
         let playstore = store.getState()['playbook'];
-
+        
         actions.fetchConnections(playstore.play.name);
         actions.addPlaybookWizardStore(this.props.PlaybookWizardStore);
 
