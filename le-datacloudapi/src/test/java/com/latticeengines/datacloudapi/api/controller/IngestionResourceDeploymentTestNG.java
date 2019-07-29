@@ -17,7 +17,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +44,6 @@ import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 /**
  * dpltc deploy -a workflowapi,datacloudapi,eai
  */
-@Component
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     private static Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
 
@@ -54,7 +52,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
-    private static final String BOMBORA_INGESTION = "BomboraTest";
 
     @Value("${datacloud.test.sftp.host}")
     private String sftpHost;

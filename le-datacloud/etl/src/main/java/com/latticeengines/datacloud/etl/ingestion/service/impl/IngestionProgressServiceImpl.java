@@ -90,7 +90,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         case SFTP:
             SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
             String fileName = new Path(file).getName();
-            progress.setSource(new Path(sftpConfig.getSftpDir(), file).toString());
+            String source = StringUtils.isBlank(sftpConfig.getSftpDir()) ? file
+                    : new Path(sftpConfig.getSftpDir(), file).toString();
+            progress.setSource(source);
             // Arbitrary set version will not be respected
             progress.setVersion(ingestionVersionService.extractVersion(sftpConfig.getFileTimestamp(), fileName));
             progress.setDestination(ingestionDir.append(progress.getVersion()).append(fileName).toString());
