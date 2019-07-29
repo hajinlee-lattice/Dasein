@@ -18,6 +18,6 @@ public interface MigrationTrackRepository extends BaseJpaRepository<MigrationTra
     @Query("SELECT m FROM MigrationTrack m WHERE m.tenant = :tenant")
     MigrationTrack findByTenant(@Param("tenant") Tenant tenant);
 
-    @Query("SELECT m FROM MigrationTrack m WHERE m.status = :status")
+    @Query("SELECT m.tenant.pid FROM MigrationTrack m WHERE m.status = :status")
     List<Long> findByStatus(@Param("status") MigrationTrack.Status status);
 }
