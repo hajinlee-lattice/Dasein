@@ -34,7 +34,7 @@ public class CalculateExpectedRevenuePercentilePLS11356TestNG extends ScoringSer
         return "TEZ";
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testCalculationExpectedRevenuePercentile() {
         CalculateExpectedRevenuePercentileParameters parameters = prepareInputWithExpectedRevenue();
         executeDataFlow(parameters);
