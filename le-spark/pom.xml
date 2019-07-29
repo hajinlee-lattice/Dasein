@@ -215,12 +215,6 @@
             <artifactId>commons-csv</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>1.4.5.2.2.0.0-2041</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
