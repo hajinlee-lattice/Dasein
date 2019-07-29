@@ -242,11 +242,12 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         // Check with Invalid ID
         Exception exception = null;
         try {
-            srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext("Dummy Id");
+            srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext("DummyId");
         } catch (Exception e) {
             exception = e;
         }
         assertNotNull(exception);
+
         assertTrue(exception.getMessage().contains(LedpCode.LEDP_18194.toString()));
 
         // Check with Empty ID
