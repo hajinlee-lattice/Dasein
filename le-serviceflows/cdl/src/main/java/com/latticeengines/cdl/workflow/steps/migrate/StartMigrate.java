@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -41,6 +42,9 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -88,6 +92,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
         if (CollectionUtils.isEmpty(currentSystems)) {
             S3ImportSystem importSystem = createDefaultImportSystem(customerSpace, dataFeedTaskMap);
             cdlProxy.createS3ImportSystem(customerSpace.toString(), importSystem);
+            dropBoxProxy.createTemplateFolder(customerSpace.toString(), DEFAULT_SYSTEM, null, null);
             putStringValueInContext(PRIMARY_IMPORT_SYSTEM, DEFAULT_SYSTEM);
         } else {
             Optional<S3ImportSystem> s3ImportSystemOptional =
@@ -111,6 +116,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
             } else {
                 S3ImportSystem importSystem = createDefaultImportSystem(customerSpace, dataFeedTaskMap);
                 cdlProxy.createS3ImportSystem(customerSpace.toString(), importSystem);
+                dropBoxProxy.createTemplateFolder(customerSpace.toString(), DEFAULT_SYSTEM, null, null);
                 putStringValueInContext(PRIMARY_IMPORT_SYSTEM, DEFAULT_SYSTEM);
             }
         }

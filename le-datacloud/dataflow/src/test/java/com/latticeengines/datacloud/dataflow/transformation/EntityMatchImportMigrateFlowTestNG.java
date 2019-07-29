@@ -34,6 +34,7 @@ public class EntityMatchImportMigrateFlowTestNG extends DataCloudDataFlowFunctio
         Assert.assertEquals(records.size(), 7);
         for (GenericRecord record : records) {
             Schema schema = record.getSchema();
+            Assert.assertEquals(schema.getFields().size(), 6);
             Assert.assertNull(schema.getField("AccountId"));
             Assert.assertNull(schema.getField("ContactId"));
             Assert.assertNotNull(schema.getField("CustomerAccountId"));
@@ -73,6 +74,8 @@ public class EntityMatchImportMigrateFlowTestNG extends DataCloudDataFlowFunctio
         EntityMatchImportMigrateConfig config = new EntityMatchImportMigrateConfig();
         config.setRenameMap(ImmutableMap.of("AccountId", "CustomerAccountId", "ContactId", "CustomerContactId"));
         config.setDuplicateMap(ImmutableMap.of("AccountId", "SystemAccountId"));
+        config.setRetainFields(Arrays.asList("CustomerAccountId", "SystemAccountId", "CustomerContactId", "Key",
+                "Domain", "DUNS"));
         parameters.setConfJson(JsonUtils.serialize(config));
         return parameters;
     }

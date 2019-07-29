@@ -53,6 +53,7 @@ public class EntityMatchImportMigrateFlow extends ConfigurableFlowBase<EntityMat
             }
             result = result.rename(new FieldList(previousNames), new FieldList(newNames));
         }
+        result = result.retain(new FieldList(config.getRetainFields()));
         return result;
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +19,8 @@ public class EntityMatchImportMigrateConfig extends TransformerConfig {
     @JsonProperty("duplicate_map")
     private Map<String, String> duplicateMap;
 
+    private List<String> retainFields;
+
     public Map<String, String> getRenameMap() {
         return renameMap;
     }
@@ -32,5 +35,13 @@ public class EntityMatchImportMigrateConfig extends TransformerConfig {
 
     public void setDuplicateMap(Map<String, String> duplicateMap) {
         this.duplicateMap = duplicateMap;
+    }
+
+    public List<String> getRetainFields() {
+        return retainFields;
+    }
+
+    public void setRetainFields(List<String> retainFields) {
+        this.retainFields = retainFields;
     }
 }
