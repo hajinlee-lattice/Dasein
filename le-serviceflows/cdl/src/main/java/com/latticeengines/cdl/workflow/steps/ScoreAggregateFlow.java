@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component("scoreAggregateFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -33,6 +34,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
     private static final String MODEL_GUID_FIELD = "Model_GUID";
     private static final String AVERAGE_SCORE_FIELD = InterfaceName.AverageScore.name();
 
+    private int numModels = 1;
     private boolean isMultiModel = false;
 
     @Override
@@ -56,9 +58,14 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
     }
 
     protected int getScalingMultiplier(double sizeInGb) {
-        int multiplier = super.getScalingMultiplier(sizeInGb) * 4;
-        log.info("Adjust multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
-        return multiplier;
+        int bySize = super.getScalingMultiplier(sizeInGb);
+        int byNumModels = ScalingUtils.getMultiplierByNumModels(numModels);
+        if (byNumModels > bySize) {
+            log.info("Adjust multiplier=" + byNumModels + " base on number of models =" + numModels);
+            return byNumModels;
+        } else {
+            return bySize;
+        }
     }
 
     private void postProcessSingleModel(List<GenericRecord> records) {
@@ -100,6 +107,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             });
             params.setScoreFieldMap(scoreFieldMap);
             params.setModelGuidField(MODEL_GUID_FIELD);
+            numModels = scoreFieldMap.size();
         }
         configuration.setDataFlowParams(params);
     }
