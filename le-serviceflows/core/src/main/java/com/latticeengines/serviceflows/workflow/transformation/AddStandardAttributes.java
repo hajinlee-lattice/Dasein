@@ -51,12 +51,6 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         configuration.setDataFlowParams(parameters);
     }
 
-    protected int getScalingMultiplier(long count) {
-        int multiplier = super.getScalingMultiplier(count) * 4;
-        log.info("Set multiplier=" + multiplier + " base on count=" + count);
-        return multiplier;
-    }
-
     @Override
     protected Properties initJobProperties() {
         Properties jobProperties = new Properties();

@@ -97,4 +97,25 @@ public final class ScalingUtils {
         return Math.min(Math.max(1, div8), 6); // between 1 and 6
     }
 
+    /**
+     * 8 -> 1
+     * 16 -> 2
+     * 24 -> 3
+     * 32 -> 4
+     * 40 -> 5
+     */
+    public static int getMultiplierByNumModels(int numModels) {
+        int multiplier = 1;
+        if (numModels >= 40) {
+            multiplier = 5;
+        } else if (numModels >= 32) {
+            multiplier = 4;
+        } else if (numModels >= 24) {
+            multiplier = 3;
+        } else if (numModels >= 16) {
+            multiplier = 2;
+        }
+        return multiplier;
+    }
+
 }
