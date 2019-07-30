@@ -72,7 +72,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataFeedTaskManagerService")
@@ -108,14 +108,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
-    @Value("${common.pls.url}")
-    private String hostPort;
-
     @Inject
     private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
@@ -418,10 +418,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private void sendS3ImportEmail(String customerSpace, String result, S3ImportEmailInfo emailInfo) {
         try {
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-
             String tenantId = CustomerSpace.parse(customerSpace).toString();
-            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
@@ -430,7 +428,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private void sendS3TemplateChangeEmail(String customerSpace, DataFeedTask dataFeedTask, String user,
                                            boolean isCreate) {
         try {
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             if (dataFeedTask != null) {
                 S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
                 DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
@@ -445,9 +442,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
                 if (isCreate) {
-                    proxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
+                    plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
                 } else {
-                    proxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
+                    plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
                 }
             }
         } catch (Exception e) {

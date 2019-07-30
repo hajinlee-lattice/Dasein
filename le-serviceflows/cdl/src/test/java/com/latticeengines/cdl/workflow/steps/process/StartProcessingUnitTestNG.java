@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class StartProcessingUnitTestNG {
@@ -108,9 +107,6 @@ public class StartProcessingUnitTestNG {
                 .build());
 
         List<Job> jobs = Collections.singletonList(job);
-        InternalResourceRestApiProxy internalResourceProxy = mock(InternalResourceRestApiProxy.class);
-        when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
-
         Action action = new Action();
         action.setType(ActionType.CDL_OPERATION_WORKFLOW);
         action.setActionInitiator("Test_Action_Initiator");
@@ -140,9 +136,6 @@ public class StartProcessingUnitTestNG {
                 .build());
 
         jobs = Collections.singletonList(job);
-        internalResourceProxy = mock(InternalResourceRestApiProxy.class);
-        when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
-
         cleanupActionConfiguration = new CleanupActionConfiguration();
         cleanupActionConfiguration.addImpactEntity(Account);
         cleanupActionConfiguration.addImpactEntity(Contact);

@@ -7,7 +7,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.score.ScoreRequestConfigProcessor;
 
@@ -28,16 +28,13 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
 
     private Logger log = LoggerFactory.getLogger(ScoreRequestConfigProcessorImpl.class);
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     private Cache<String, ScoringRequestConfigContext> scoringRequestConfigCache;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
 
     @PostConstruct
     public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         scoringRequestConfigCache = Caffeine.newBuilder().initialCapacity(INITIAL_CACHE_SIZE)
                 .maximumSize(MAX_CACHE_SIZE).expireAfterWrite(6, TimeUnit.HOURS).build();
     }
@@ -50,7 +47,7 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
             return srcContext;
         }
         try {
-            srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext(configId);
+            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(configId);
         } catch (LedpException le) {
             if (LedpCode.LEDP_18194.equals(le.getCode())) {
                 throw new ScoringApiException(LedpCode.LEDP_18194, new String[] { configId });

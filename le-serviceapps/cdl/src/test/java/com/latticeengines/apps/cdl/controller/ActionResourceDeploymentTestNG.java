@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,9 +22,9 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 
-    public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
+public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ActionResourceDeploymentTestNG.class);
 
@@ -35,10 +34,8 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
     @Inject
     private ActionProxy actionProxy;
 
-    @Value("${common.test.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     private static final String ACTION_INITIATOR = "test@lattice-engines.com";
 
@@ -53,8 +50,6 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
         setupTestEnvironment();
 
         log.info("internalResourceHostPort is " + internalResourceHostPort);
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-
         actions = new ArrayList<>();
         Action actionWithOwner = generateCDLImportAction();
         actionWithOwner.setOwnerId(OWNER_ID);
@@ -148,7 +143,7 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
     }
 
     private List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
-        return internalResourceRestApiProxy.findJobsBasedOnActionIdsAndType(
+        return plsInternalProxy.findJobsBasedOnActionIdsAndType(
                 CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids, actionType);
     }
 
