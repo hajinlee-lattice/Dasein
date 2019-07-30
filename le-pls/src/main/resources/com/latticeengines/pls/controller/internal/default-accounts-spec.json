@@ -1,0 +1,196 @@
+{
+    "Unique ID": [
+        {
+            "fieldName": "CustomerContactId",
+            "fieldType": "TEXT",
+            "displayName": "Contact ID",
+            "matchingColumnNames": [
+                "ID",
+                "ACCOUNT",
+                "ACCOUNTID",
+                "ACCOUNT ID",
+                "ACCOUNT_ID",
+                "EXTERNAL ID",
+                "EXTERNAL_ID"
+            ],
+            "required": false
+        }
+    ],
+    "Match IDs": [],
+    "Other IDs": [],
+    "Account Matching Fields": [
+        {
+            "fieldName": "Website",
+            "fieldType": "TEXT",
+            "displayName": "Website",
+            "matchingColumnNames": [
+                "WEBSITE",
+                "DOMAIN"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "DUNS",
+            "fieldType": "TEXT",
+            "displayName": "D-U-N-S",
+            "matchingColumnNames": [
+                "DUNS",
+                "DUNS NUMBER",
+                "DUNS_NUMBER"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "CompanyName",
+            "fieldType": "TEXT",
+            "displayName": "Company Name",
+            "matchingColumnNames": [
+                "NAME",
+                "COMPANY",
+                "COMPANY NAME",
+                "COMPANY_NAME",
+                "ACCOUNT NAME",
+                "ACCOUNT_NAME",
+                "DISPLAY NAME",
+                "DISPLAY_NAME"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "PhoneNumber",
+            "fieldType": "TEXT",
+            "displayName": "Phone Number",
+            "matchingColumnNames": [
+                "PHONE",
+                "PHONE NUMBER",
+                "PHONE_NUMBER"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "City",
+            "fieldType": "TEXT",
+            "displayName": "City",
+            "matchingColumnNames": [
+                "CITY",
+                "BILLING CITY",
+                "BILLING_CITY"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Country",
+            "fieldType": "TEXT",
+            "displayName": "Country",
+            "matchingColumnNames": [
+                "COUNTRY",
+                "BILLING COUNTRY",
+                "BILLING_COUNTRY"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "State",
+            "fieldType": "TEXT",
+            "displayName": "State",
+            "matchingColumnNames": [
+                "STATE",
+                "STATE PROVINCE",
+                "STATE_PROVINCE",
+                "PROVINCE",
+                "BILLING STATE",
+                "BILLING_STATE",
+                "BILLING PROVINCE",
+                "BILLING_PROVINCE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "PostalCode",
+            "fieldType": "TEXT",
+            "displayName": "Postal Code",
+            "matchingColumnNames": [
+                "ZIP",
+                "POSTALCODE",
+                "POSTAL CODE",
+                "POSTAL_CODE",
+                "BILLINGZIP",
+                "BILLING ZIP",
+                "BILLING_ZIP",
+                "BILLINGZIPCODE",
+                "BILLING ZIP CODE",
+                "BILLING_ZIP_CODE",
+                "BILLINGPOSTALCODE",
+                "BILLING POSTALCODE",
+                "BILLING_POSTALCODE",
+                "BILLING POSTAL CODE",
+                "BILLING_POSTAL_CODE"
+            ],
+            "required": false
+        }
+    ],
+    "Analysis Fields": [
+        {
+            "fieldName": "Type",
+            "fieldType": "TEXT",
+            "displayName": "Type",
+            "matchingColumnNames": [
+                "TYPE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Industry",
+            "fieldType": "TEXT",
+            "displayName": "Industry",
+            "matchingColumnNames": [
+                "INDUSTRY"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "SpendAnalyticsSegment",
+            "fieldType": "TEXT",
+            "displayName": "Account Business Segment",
+            "matchingColumnNames": [
+                "SPENDANALYTICSSEGMENT",
+                "SPEND ANALYTICS SEGMENT",
+                "SPEND_ANALYTICS_SEGMENT",
+                "ACCOUNTBUSINESSSEGMENT",
+                "ACCOUNT BUSINESS SEGMENT",
+                "ACCOUNT_BUSINESS_SEGMENT"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "AnnualRevenue",
+            "fieldType": "DOUBLE",
+            "displayName": "Estimated Yearly Revenue",
+            "matchingColumnNames": [
+                "ANNUALREVENUE",
+                "ANNUAL REVENUE",
+                "ANNUAL_REVENUE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Longitude",
+            "fieldType": "TEXT",
+            "displayName": "Longitude",
+            "matchingColumnNames": [
+                "LONGITUDE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Latitude",
+            "fieldType": "TEXT",
+            "displayName": "Latitidue",
+            "matchingColumnNames": [
+                "LATITUDE"
+            ],
+            "required": false
+        }
+    ],
+    "Custom Fields": []
+}
