@@ -99,7 +99,7 @@ let controller = function ($state) {
                 containerClass: "pull-right",
                 callback: vm.clickAddPlay,
                 config: {
-                    label: "Add Play",
+                    label: "Create",
                     classNames: ["blue-button"]
                 }
             }
@@ -114,6 +114,7 @@ let controller = function ($state) {
     };
 
     vm.clickAddPlay = function (element) {
+        //$state.go('home.playbook.create');
         console.log('[click] Add Play', this);
     };
 };
