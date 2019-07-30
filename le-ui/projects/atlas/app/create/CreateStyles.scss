@@ -244,11 +244,13 @@ section.container.setup-import {
        background-position: 50px 50px;
     }
 }
-.s3help {
+.s3help-container {
     text-align: right;
-    font-size: 11px;
-    color: #26639b;
     display: block;
+    a.s3help {
+        font-size: 11px;
+        color: #26639b;
+    }
 }
 .file-upload {
     &.disabled,
