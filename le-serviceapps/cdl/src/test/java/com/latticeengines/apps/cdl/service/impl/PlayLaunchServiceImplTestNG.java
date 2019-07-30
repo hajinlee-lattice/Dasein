@@ -361,10 +361,10 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         // Flow
         DataIntegrationStatusMonitorMessage statusMessage1 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
                 DataIntegrationEventType.WorkflowSubmitted, playLaunch1);
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage1);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage1));
         DataIntegrationStatusMonitorMessage statusMessage2 = constructDefaultStatusMessage(UUID.randomUUID().toString(),
                 DataIntegrationEventType.WorkflowSubmitted, playLaunch2);
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage2));
 
         Thread.sleep(2000L);
         List<DataIntegrationStatusMonitor> statusMonitorList = dataIntegrationStatusMonitoringService
@@ -379,7 +379,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         eventDetail.setTotalRecordsSubmitted(1L);
         statusMessage2.setEventDetail(eventDetail);
         statusMessage2.setMessage("Workflow marked as Complete");
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage2);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage2));
         Thread.sleep(1000L);
 
         playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
@@ -574,5 +574,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunchList = playLaunchService.findByState(LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
+    }
+
+    private List<DataIntegrationStatusMonitorMessage> generateListMessages(
+            DataIntegrationStatusMonitorMessage... statusMessage) {
+        List<DataIntegrationStatusMonitorMessage> statusMessages = new ArrayList();
+        statusMessages.addAll(Arrays.asList(statusMessage));
+        return statusMessages;
     }
 }
