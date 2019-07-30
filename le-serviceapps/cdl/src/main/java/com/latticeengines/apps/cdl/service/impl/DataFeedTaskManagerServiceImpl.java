@@ -168,7 +168,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
-                enableEntityMatch || enableEntityMatchGA);
+                batonService.isEntityMatchEnabled(customerSpace));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -183,7 +183,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                if (!finalSchemaCheck(finalTemplate, entity, withoutId, enableEntityMatch)) {
+                if (!finalSchemaCheck(finalTemplate, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -200,7 +200,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
-            if (!finalSchemaCheck(newMeta, entity, withoutId, enableEntityMatch)) {
+            if (!finalSchemaCheck(newMeta, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -244,9 +244,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private void setCategoryForTable(Table table, String entity) {
         BusinessEntity businessEntity = BusinessEntity.valueOf(entity);
-        if (businessEntity == null) {
-            throw new RuntimeException(String.format("Cannot recognize entity: %s", entity));
-        }
         String category;
         switch (businessEntity) {
         case Account:
