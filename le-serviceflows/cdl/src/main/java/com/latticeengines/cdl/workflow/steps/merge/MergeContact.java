@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(MergeContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -37,47 +38,52 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     private String matchedContactTable;
 
     @Override
-    public PipelineTransformationRequest getConsolidateRequest() {
-        try {
-            matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
-            if (StringUtils.isBlank(matchedContactTable)) {
-                throw new RuntimeException("There's no matched table found!");
-            }
-
-            PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("MergeContact");
-            String matchedTable = matchedContactTable;
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            int upsertMasterStep;
-            int diffStep;
-            TransformationStepConfig upsert;
-            TransformationStepConfig diff;
-            if (configuration.isEntityMatchEnabled()) {
-                int dedupStep = 0;
-                upsertMasterStep = 1;
-                diffStep = 2;
-                TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
-                        Collections.singletonList(matchedTable));
-                upsert = upsertMaster(true, dedupStep);
-                diff = diff(dedupStep, upsertMasterStep);
-                steps.add(dedup);
-            } else {
-                upsertMasterStep = 0;
-                diffStep = 1;
-                upsert = upsertMaster(false, matchedTable);
-                diff = diff(matchedTable, upsertMasterStep);
-            }
-            steps.add(upsert);
-            steps.add(diff);
-            TransformationStepConfig report = reportDiff(diffStep);
-            steps.add(report);
-            request.setSteps(steps);
-            return request;
-
-        } catch (Exception e) {
-            log.error("Failed to run consolidate data pipeline!", e);
-            throw new RuntimeException(e);
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
+        if (StringUtils.isBlank(matchedContactTable)) {
+            throw new RuntimeException("There's no matched table found!");
         }
+
+        double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
+        Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), matchedContactTable);
+        double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+        scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
+        log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                scalingMultiplier, oldTableSize + newTableSize));
+    }
+
+    @Override
+    public PipelineTransformationRequest getConsolidateRequest() {
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName("MergeContact");
+        String matchedTable = matchedContactTable;
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        int upsertMasterStep;
+        int diffStep;
+        TransformationStepConfig upsert;
+        TransformationStepConfig diff;
+        if (configuration.isEntityMatchEnabled()) {
+            int dedupStep = 0;
+            upsertMasterStep = 1;
+            diffStep = 2;
+            TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
+                    Collections.singletonList(matchedTable));
+            upsert = upsertMaster(true, dedupStep);
+            diff = diff(dedupStep, upsertMasterStep);
+            steps.add(dedup);
+        } else {
+            upsertMasterStep = 0;
+            diffStep = 1;
+            upsert = upsertMaster(false, matchedTable);
+            diff = diff(matchedTable, upsertMasterStep);
+        }
+        steps.add(upsert);
+        steps.add(diff);
+        TransformationStepConfig report = reportDiff(diffStep);
+        steps.add(report);
+        request.setSteps(steps);
+        return request;
     }
 
     @Override

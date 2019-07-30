@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -82,19 +83,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     private String mergedImportTable;
 
     private boolean entityMatchEnabled;
-
-    @Override
-    protected void onPostTransformationCompleted() {
-        String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
-        Table diffTable = metadataProxy.getTable(
-                customerSpace.toString(), diffTableName);
-        addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
-        updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
-        generateDiffReport();
-        updateEarliestLatestTransaction();
-        enrichTableSchema(diffTable, null);
-        enrichTableSchema(rawTable, TableRoleInCollection.ConsolidatedRawTransaction);
-    }
 
     @Override
     protected void initializeConfiguration() {
@@ -146,8 +134,41 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (StringUtils.isBlank(mergedImportTable)) {
             throw new RuntimeException("There's no matched table found!");
         }
+
+        double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
+        Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), mergedImportTable);
+        double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+        scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
+        log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                scalingMultiplier, oldTableSize + newTableSize));
     }
 
+    @Override
+    public PipelineTransformationRequest getConsolidateRequest() {
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName("MergeTransaction");
+        List<TransformationStepConfig> steps;
+        if (schemaChanged) {
+            steps = getUpgradeSteps();
+        } else {
+            steps = getSteps();
+        }
+        request.setSteps(steps);
+        return request;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
+        Table diffTable = metadataProxy.getTable(
+                customerSpace.toString(), diffTableName);
+        addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
+        updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
+        generateDiffReport();
+        updateEarliestLatestTransaction();
+        enrichTableSchema(diffTable, null);
+        enrichTableSchema(rawTable, TableRoleInCollection.ConsolidatedRawTransaction);
+    }
 
     private void getTableFields(Table table, List<String> stringFields, List<String> longFields, List<String> intFields) {
         List<Attribute> attrs = table.getAttributes();
@@ -180,20 +201,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
         return false;
     }
-
-    @Override
-    public PipelineTransformationRequest getConsolidateRequest() {
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("MergeTransaction");
-        List<TransformationStepConfig> steps;
-        if (schemaChanged) {
-            steps = getUpgradeSteps();
-        } else {
-            steps = getSteps();
-        }
-        request.setSteps(steps);
-        return request;
-   }
 
     private List<TransformationStepConfig> getUpgradeSteps() {
         dailyStep = 0;
