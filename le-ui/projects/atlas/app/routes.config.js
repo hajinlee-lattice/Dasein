@@ -1,3 +1,4 @@
+import NgState from "atlas/ng-state";
 export default function ($stateProvider, $urlRouterProvider, $locationProvider) {
     'ngInject';
 
@@ -7,8 +8,9 @@ export default function ($stateProvider, $urlRouterProvider, $locationProvider) 
     $stateProvider
         .state('home', {
             url: '/tenant/:tenantName',
-            onEnter: function (SidebarStore) {
+            onEnter: function ($state, SidebarStore) {
                 SidebarStore.set(null);
+                NgState.setAngularState($state);
             },
             params: {
                 tenantName: { dynamic: true, value: '' }

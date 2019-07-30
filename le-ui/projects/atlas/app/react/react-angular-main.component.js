@@ -12,7 +12,7 @@ import ReactMessagingService from '../../../common/components/exceptions/react.m
 export default class ReactAngularMainComponent extends Component {
     constructor(props) {
         super(props);
-        NgState.setAngularState(this.props.$state);
+        // NgState.setAngularState(this.props.$state);
     }
     componentDidMount() {
         let router = ReactRouter.getRouter();

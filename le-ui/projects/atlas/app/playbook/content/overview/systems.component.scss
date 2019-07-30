@@ -9,7 +9,7 @@
             }
         }
         .connection-card {
-            border: 1px solid transparent;
+            border: 1px solid #dbdbdb;
             border-radius: 4px;
             align-items: center;
             padding: 26px;
@@ -47,6 +47,14 @@
                 padding: 0 19px;
                 margin: 0 19px;
                 font-size: 12px;
+                & > .launch-text {
+                    i {
+                        margin-left: 5px;
+                        font-size: 7px;
+                        padding: 0 5px;
+                        top: -3px;
+                    }
+                }
             }
             .connection-launch {
                 flex: 0 1 auto;
@@ -96,6 +104,9 @@
                         }
                     }
                 }
+            }
+            &.le-nowrap {
+                overflow: initial;
             }
         }
     }
