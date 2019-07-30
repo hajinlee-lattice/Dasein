@@ -25,6 +25,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerSyncLookupSource;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
@@ -89,20 +91,24 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     private int maxUpdateRows = 20;
     private String syncDestination = "SFDC";
     private Map<String, String> orgInfo;
+    private PlayLaunchConfig playLaunchConfig;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         badOrgInfo = new HashMap<>();
         badOrgInfo.put(CDLConstants.ORG_ID, "BAD_ID_" + System.currentTimeMillis());
         badOrgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
-        eloquaAppId1 = new HashMap<String, String>();
-        eloquaAppId2 = new HashMap<String, String>();
+        eloquaAppId1 = new HashMap<>();
+        eloquaAppId2 = new HashMap<>();
         eloquaAppId1.put(CDLConstants.AUTH_APP_ID, "lattice.eloqua01234");
         eloquaAppId2.put(CDLConstants.AUTH_APP_ID, "BIS01234");
 
-        String existingTenant = "";
-        //existingTenant = "LETest1557442767258";
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).build();
+        String testOrgName = CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis();
+        playLaunchConfig = new PlayLaunchConfig.Builder() //
+                .destinationSystemType(CDLExternalSystemType.CRM) //
+                .destinationSystemName(CDLExternalSystemName.Salesforce) //
+                .destinationSystemId(testOrgName) //
+                .build();
         testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
 
         tenant = testPlayCreationHelper.getTenant();
@@ -110,14 +116,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
         play = testPlayCreationHelper.getPlay();
         playLaunch = testPlayCreationHelper.getPlayLaunch();
-        orgInfo = testPlayCreationHelper.getOrgInfo();
+        orgInfo = getOrgInfo();
         playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launching);
-        // List<Recommendation> recommendations =
-        // recommendationEntityMgr.findAll();
-        // Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
-        // orgInfo = new HashMap<>();
-        // orgInfo.put(CDLConstants.ORG_ID, "DOID");
-        // orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
         launchTime = new Date();
         Long count = createDummyRecommendations(maxUpdateRows * 2, launchTime);
         playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(), playLaunch.getLaunchId(), 100.0, count,
@@ -125,8 +125,15 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
     }
 
+    private Map<String, String> getOrgInfo() {
+        Map<String, String> org = new HashMap<>();
+        org.put(CDLConstants.ORG_ID, playLaunchConfig.getDestinationSystemId());
+        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, playLaunchConfig.getDestinationSystemType().toString());
+        return org;
+    }
+
     @Test(groups = "deployment")
-    public void testRecommendations() throws Exception {
+    public void testRecommendations() {
 
         List<Recommendation> recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
@@ -196,7 +203,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
                 140000000L, Arrays.asList(play.getName()), orgInfo, eloquaAppId1);
         Assert.assertNotNull(contactsWithPlayFilter);
         assertEquals(contactsWithPlayFilter.size(), contacts.size());
-        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList(play.getName()), orgInfo, eloquaAppId1);
+        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList(play.getName()),
+                orgInfo, eloquaAppId1);
         assertEquals(contactCount, contactsWithPlayFilter.size());
 
         // Get Contacts with dummy play filter
@@ -204,7 +212,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
                 140000000L, Arrays.asList("DUMMY"), orgInfo, eloquaAppId1);
         Assert.assertNotNull(contactsWithDummyPlayFilter);
         assertEquals(contactsWithDummyPlayFilter.size(), 0);
-        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList("DUMMY"), orgInfo, eloquaAppId1);
+        contactCount = lpiReDaoAdapter.getContactCount(0, null, null, 140000000L, Arrays.asList("DUMMY"), orgInfo,
+                eloquaAppId1);
         assertEquals(contactCount, contactsWithDummyPlayFilter.size());
     }
 
@@ -262,7 +271,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     }
 
     private long createDummyRecommendations(int newRecommendationsCount, Date launchDate) {
-        for (int i=0; i<newRecommendationsCount; i++) {
+        for (int i = 0; i < newRecommendationsCount; i++) {
             Recommendation rec = new Recommendation();
             rec.setAccountId("Acc_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
             rec.setCompanyName("CN_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);

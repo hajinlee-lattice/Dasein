@@ -20,6 +20,8 @@ import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
@@ -27,16 +29,13 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
+import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
-/**
- * $ dpltc deploy -a admin,matchapi,microservice,pls -m metadata,cdl,lp,objectapi
- */
 public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(TalkingPointResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointResourceDeploymentTestNG.class);
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
@@ -44,25 +43,32 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Inject
     private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
-    @Value("${common.test.pls.url}")
-    private String internalResourceHostPort;
-
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
     @Inject
     private CDLTestDataService cdlTestDataService;
 
+    @Value("${common.test.pls.url}")
+    private String internalResourceHostPort;
+
     private Play testPlay;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        setupTestEnvironment();
-        cdlTestDataService.populateData(mainTestTenant.getId(), 3);
-        testPlayCreationHelper.setTenant(mainTestTenant);
-        testPlayCreationHelper.setDestinationOrgId("O" + System.currentTimeMillis());
-        testPlayCreationHelper.setDestinationOrgType(CDLExternalSystemType.CRM);
-        testPlayCreationHelper.setupRatingEngineAndSegment();
+
+        PlayLaunchConfig testConfig = new PlayLaunchConfig.Builder() //
+                .destinationSystemType(CDLExternalSystemType.CRM) //
+                .destinationSystemName(CDLExternalSystemName.Salesforce) //
+                .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis()) //
+                .build();
+
+        testPlayCreationHelper.setupTenantAndData(testConfig);
+        mainTestTenant = testPlayCreationHelper.getTenant();
+        mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+
+        testPlayCreationHelper.setupTestSegment();
+        testPlayCreationHelper.setupTestRulesBasedModel();
         testPlay = testPlayCreationHelper.createPlayOnlyAndGet();
     }
 
@@ -86,13 +92,11 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         tps.add(tp1);
 
         List<TalkingPointDTO> rawcreate = talkingPointProxy.createOrUpdate(mainCustomerSpace, tps);
-        List<TalkingPointDTO> createResponse =
-                JsonUtils.convertList(rawcreate, TalkingPointDTO.class);
+        List<TalkingPointDTO> createResponse = JsonUtils.convertList(rawcreate, TalkingPointDTO.class);
         Assert.assertNotNull(createResponse);
         Assert.assertEquals(createResponse.size(), 2);
 
-        List<TalkingPointDTO> raw =
-                talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
+        List<TalkingPointDTO> raw = talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
         List<TalkingPointDTO> playTpsResponse = JsonUtils.convertList(raw, TalkingPointDTO.class);
 
         Assert.assertNotNull(playTpsResponse);
@@ -116,34 +120,30 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(playTpsResponse.get(0).getOffset(), 2);
         Assert.assertEquals(playTpsResponse.get(1).getOffset(), 1);
 
-        TalkingPointPreview rawPreview =
-                talkingPointProxy.getTalkingPointPreview(mainCustomerSpace, testPlay.getName());
+        TalkingPointPreview rawPreview = talkingPointProxy.getTalkingPointPreview(mainCustomerSpace,
+                testPlay.getName());
         Assert.assertEquals(rawPreview.getNotionObject().getTalkingPoints().get(0).getOffset(), 1);
         Assert.assertEquals(rawPreview.getNotionObject().getTalkingPoints().get(1).getOffset(), 2);
 
     }
 
-    @Test(groups = {"deployment-app"}, dependsOnMethods = {"testCreateUpdate"})
+    @Test(groups = { "deployment-app" }, dependsOnMethods = { "testCreateUpdate" })
     public void testPreviewAndPublish() {
-        List<TalkingPointDTO> raw =
-                talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
+        List<TalkingPointDTO> raw = talkingPointProxy.findAllByPlayName(mainCustomerSpace, testPlay.getName());
         List<TalkingPointDTO> tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
         Assert.assertEquals(tps.size(), 2);
 
         // preview
-        TalkingPointPreview tpPreview =
-                talkingPointProxy.getTalkingPointPreview(mainCustomerSpace, testPlay.getName());
+        TalkingPointPreview tpPreview = talkingPointProxy.getTalkingPointPreview(mainCustomerSpace, testPlay.getName());
         Assert.assertNotNull(tpPreview);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().size(), 2);
-        Assert.assertEquals(
-                tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
+        Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
                 tps.get(1).getName());
 
         // publish
         talkingPointProxy.publish(mainCustomerSpace, testPlay.getName());
 
-        List<PublishedTalkingPoint> dtps =
-                publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
+        List<PublishedTalkingPoint> dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
         Assert.assertEquals(dtps.size(), 2);
 
         Assert.assertEquals(dtps.get(0).getName(), tps.get(0).getName());
@@ -186,8 +186,7 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     @Test(groups = "deployment-app")
     public void testDanteOauth() {
-        DantePreviewResources previewResources =
-                talkingPointProxy.getPreviewResources(mainTestTenant.getId());
+        DantePreviewResources previewResources = talkingPointProxy.getPreviewResources(mainTestTenant.getId());
 
         Assert.assertNotNull(previewResources);
         Assert.assertNotNull(previewResources.getDanteUrl());
@@ -200,13 +199,11 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         headers.add("Authorization", "Bearer " + previewResources.getoAuthToken());
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
-        String tenantNameViaToken =
-                restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        String tenantNameViaToken = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
         Assert.assertNotNull(tenantNameViaToken);
         Assert.assertEquals(tenantNameViaToken, mainTestTenant.getId());
 
-        DantePreviewResources previewResources1 =
-                talkingPointProxy.getPreviewResources(mainTestTenant.getId());
+        DantePreviewResources previewResources1 = talkingPointProxy.getPreviewResources(mainTestTenant.getId());
         Assert.assertEquals(previewResources.getoAuthToken(), previewResources1.getoAuthToken());
     }
 

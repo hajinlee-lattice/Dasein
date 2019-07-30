@@ -22,12 +22,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.TestException;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -37,7 +37,6 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
@@ -96,31 +95,17 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 @Component
 public class TestPlayCreationHelper {
 
-    private static final String ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = "PREMIUM_MARKETING_PRESCREEN";
-
     private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
 
-    @Autowired
+    @Inject
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
-    public static final String SEGMENT_NAME = NamingUtils.timestamp("Segment");
-    private static final String CREATED_BY = "lattice@lattice-engines.com";
-
-    @Autowired
-    private RatingEngineProxy ratingEngineProxy;
-
-    @Autowired
+    @Inject
     private SegmentProxy segmentProxy;
 
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private CDLTestDataService cdlTestDataService;
-
-    @Autowired
-    private EntityProxyImpl entityProxy;
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private PlayProxy playProxy;
@@ -131,13 +116,27 @@ public class TestPlayCreationHelper {
     @Inject
     private TalkingPointProxy talkingPointProxy;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
+    private EntityProxyImpl entityProxy;
+
+    @Value("${common.test.pls.url}")
+    private String deployedHostPort;
+
+    public static final String SEGMENT_NAME = NamingUtils.timestamp("Segment");
+
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String ACT_ATTR_PREMIUM_MARKETING_PRESCREEN = "PREMIUM_MARKETING_PRESCREEN";
+
     private RatingEngine ratingEngine;
-
     private String playName;
-
     private String destinationOrgId;
     private CDLExternalSystemType destinationOrgType;
-
     private String tenantIdentifier;
     private Tenant tenant;
     private String customerSpace;
@@ -152,52 +151,37 @@ public class TestPlayCreationHelper {
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
-    @Value("${common.test.pls.url}")
-    private String deployedHostPort;
-
-    protected String getRestAPIHostPort() {
-        return getDeployedRestAPIHostPort();
-    }
-
-    protected String getDeployedRestAPIHostPort() {
-        return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
-                : deployedHostPort;
-    }
-
-    public Map<String, String> getOrgInfo() {
-        Map<String, String> org = new HashMap<>();
-        org.put(CDLConstants.ORG_ID, destinationOrgId);
-        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, destinationOrgType.toString());
-        return org;
-    }
-
     public void setupTenantAndData() {
         setupTenantAndData(null);
     }
 
     public void setupTenantAndData(PlayLaunchConfig plConfig) {
-        log.info("Creating new Tenant");
-        Map<String, Boolean> featureFlags = plConfig != null ? plConfig.getFeatureFlags() : null;
-        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG, featureFlags);
-        tenantIdentifier = tenant.getId();
-        cdlTestDataService.populateData(tenantIdentifier, 3);
-        postInitializeTenantCreation(tenantIdentifier);
-    }
-
-    private void postInitializeTenantCreation(String fullTenantId) {
-        tenant = tenantEntityMgr.findByTenantId(fullTenantId);
-        log.info("Tenant = " + tenant.getId());
-        tenantIdentifier = tenant.getId();
-        MultiTenantContext.setTenant(tenant);
-        deploymentTestBed.switchToSuperAdmin(tenant);
-        destinationOrgId = "O_" + System.currentTimeMillis();
-        destinationOrgType = CDLExternalSystemType.CRM;
+        if (plConfig != null && StringUtils.isNotBlank(plConfig.getExistingTenantName())) {
+            useExistingTenant(plConfig.getExistingTenantName());
+        } else {
+            log.info("Creating new Tenant");
+            Map<String, Boolean> featureFlags = plConfig != null ? plConfig.getFeatureFlags() : null;
+            tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG, featureFlags);
+            tenantIdentifier = tenant.getId();
+            cdlTestDataService.populateData(tenantIdentifier, 3);
+            postInitializeTenantCreation(tenantIdentifier, plConfig);
+        }
     }
 
     public void useExistingTenant(String tenantName) {
         log.info("Reusing Existing Tenant and Data from Redshift: " + tenantName);
         Tenant tenant = deploymentTestBed.useExistingTenantAsMain(tenantName);
-        postInitializeTenantCreation(tenant.getId());
+        postInitializeTenantCreation(tenant.getId(), null);
+    }
+
+    private void postInitializeTenantCreation(String fullTenantId, PlayLaunchConfig testConfig) {
+        tenant = tenantEntityMgr.findByTenantId(fullTenantId);
+        log.info("Tenant = " + tenant.getId());
+        tenantIdentifier = tenant.getId();
+        MultiTenantContext.setTenant(tenant);
+        deploymentTestBed.switchToSuperAdmin(tenant);
+        destinationOrgId = testConfig == null ? "O_" + System.currentTimeMillis() : testConfig.getDestinationSystemId();
+        destinationOrgType = testConfig == null ? CDLExternalSystemType.CRM : testConfig.getDestinationSystemType();
     }
 
     public String getDestinationOrgId() {
@@ -206,14 +190,6 @@ public class TestPlayCreationHelper {
 
     public void setDestinationOrgId(String destinationOrgId) {
         this.destinationOrgId = destinationOrgId;
-    }
-
-    public CDLExternalSystemType getDestinationOrgType() {
-        return destinationOrgType;
-    }
-
-    public void setDestinationOrgType(CDLExternalSystemType type) {
-        this.destinationOrgType = type;
     }
 
     public Tenant getTenant() {
@@ -250,15 +226,19 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndCreatePlay(PlayLaunchConfig playLaunchConfig) throws Exception {
-        if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenant())) {
-            useExistingTenant(playLaunchConfig.getExistingTenant());
+        if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenantName())) {
+            useExistingTenant(playLaunchConfig.getExistingTenantName());
         } else {
             setupTenantAndData(playLaunchConfig);
         }
-        setupRatingEngineAndSegment();
+
+        setupTestSegment();
+        setupTestRulesBasedModel();
+
         if (playLaunchConfig.isMockRatingTable()) {
             cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
         }
+
         // setup Lattice_S3 lookupIdMapping
         lookupIdMappingProxy.getLookupIdsMapping(CustomerSpace.parse(tenant.getId()).getTenantId(), null, null, false);
 
@@ -276,19 +256,27 @@ public class TestPlayCreationHelper {
         }
     }
 
-    public void setupRatingEngineAndSegment() throws Exception {
+    public void setupTestSegment() {
         Restriction dynRest = createBucketRestriction(1, ComparisonType.EQUAL, BusinessEntity.Account,
                 ACT_ATTR_PREMIUM_MARKETING_PRESCREEN);
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
-        RatingRule ratingRule = createRatingRule();
 
-        log.info("Tenant = " + tenant.getId());
+        log.info("Creating test segment for test tenant: " + tenant.getId());
         segment = createSegment(SEGMENT_NAME, accountRestriction, contactRestriction);
-        log.info("Tenant = " + tenant.getId());
-        ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
-        playTargetSegment = createPlayTargetSegment();
 
+        // todo: remove this from here
+        playTargetSegment = createPlayTargetSegment();
+    }
+
+    public void setupTestRulesBasedModel() {
+        if (segment == null) {
+            throw new TestException("Segment not generated yet, model can only be created after creating a segment");
+        }
+
+        RatingRule ratingRule = createRatingRule();
+        log.info("Creating test rules based model for test tenant: " + tenant.getId());
+        ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
     }
 
     public void createPlay(PlayLaunchConfig playLaunchConfig) {
@@ -297,19 +285,23 @@ public class TestPlayCreationHelper {
         Assert.assertNotNull(play.getRatingEngine());
     }
 
-    public void createPlayOnly() {
-        createPlayOnlyAndGet();
-    }
-
     public Play createPlayOnlyAndGet() {
-        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlayObject());
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertRulesBasedPlay(createdPlay1);
         return createdPlay1;
     }
 
-    private Play createDefaultPlay() {
+    private Play createDefaultPlayObject() {
+        if (playTargetSegment == null) {
+            throw new TestException("Target segment for a play not created");
+        }
+
+        if (ratingEngine == null) {
+            throw new TestException("Rating engine not created");
+        }
+
         Play play = new Play();
         if (CollectionUtils.isEmpty(playTypes)) {
             playTypes = playProxy.getPlayTypes(tenant.getId());
@@ -415,7 +407,7 @@ public class TestPlayCreationHelper {
     public void createDefaultPlayAndTestCrud(PlayLaunchConfig playLaunchConfig) {
         List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
-        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlayObject());
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), createdPlay1.getName(),
                 true);
 
@@ -443,7 +435,7 @@ public class TestPlayCreationHelper {
                 .createOrUpdate(CustomerSpace.parse(tenant.getId()).toString(), tps);
         Assert.assertNotNull(createTPResponse);
 
-        Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
+        Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlayObject());
         Assert.assertNotNull(createdPlay2);
         channels = playProxy.getPlayLaunchChannels(tenant.getId(), createdPlay2.getName(), true);
 
@@ -476,21 +468,21 @@ public class TestPlayCreationHelper {
     private void createChannel(PlayLaunchConfig config, Play play, PlayLaunchChannel channel) {
         channel.setBucketsToLaunch(config.getBucketsToLaunch());
         switch (channel.getLookupIdMap().getExternalSystemName()) {
-        case Salesforce:
-            channel.setChannelConfig(new SalesforceChannelConfig());
-            break;
-        case Marketo:
-            channel.setChannelConfig(new MarketoChannelConfig());
-            break;
-        case AWS_S3:
-            channel.setChannelConfig(new S3ChannelConfig());
-            break;
-        case Eloqua:
-            channel.setChannelConfig(new EloquaChannelConfig());
-            break;
-        default:
-            channel.setChannelConfig(new SalesforceChannelConfig());
-            break;
+            case Salesforce:
+                channel.setChannelConfig(new SalesforceChannelConfig());
+                break;
+            case Marketo:
+                channel.setChannelConfig(new MarketoChannelConfig());
+                break;
+            case AWS_S3:
+                channel.setChannelConfig(new S3ChannelConfig());
+                break;
+            case Eloqua:
+                channel.setChannelConfig(new EloquaChannelConfig());
+                break;
+            default:
+                channel.setChannelConfig(new SalesforceChannelConfig());
+                break;
         }
         channel.setTenant(tenant);
         channel.setTenantId(tenant.getPid());
@@ -887,13 +879,6 @@ public class TestPlayCreationHelper {
         Restriction contactRestriction = createContactRestriction();
         this.playTargetSegment = createSegment(NamingUtils.timestamp("PlayTargetSegment"), accountRestriction,
                 contactRestriction);
-        return playTargetSegment;
-    }
-
-    public MetadataSegment getPlayTargetSegment() {
-        if (playTargetSegment == null) {
-            playTargetSegment = createPlayTargetSegment();
-        }
         return playTargetSegment;
     }
 
