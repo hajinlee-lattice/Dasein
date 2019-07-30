@@ -148,7 +148,7 @@ angular
                     sref: "home.ratingsengine",
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_RATING_ENGINE")
                 }, {
-                    if: store.showPlayBook && !store.alwaysOnCampaigns,
+                    if: store.showPlayBook,// && !store.alwaysOnCampaigns,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                     active: function () {
                         return store.state.includes('home.playbook') && !store.isTransitingFrom(['home.playbook']);
@@ -169,7 +169,7 @@ angular
                         return store.isTransitingTo(['home.playbook']);
                     },
                     sref: "home.playbook.listchannels",
-                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK") + ' (new)',
                     icon: "ico-playbook"
                 }, {
                     if: !store.showCdlEnabledPage,

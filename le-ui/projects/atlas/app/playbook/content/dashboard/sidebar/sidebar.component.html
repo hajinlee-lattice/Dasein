@@ -12,7 +12,7 @@
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}">
                 <span class="ico ico-back no-svg"></span>
             </span>
-            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}} (new)</span>
         </a>
     </li>
     <li ng-if="!vm.alwaysOnCampaigns" role="presentation" ng-class="{active: vm.state.current.name == 'home.playbook.dashboard'}" ng-disabled="vm.menuDisabled || vm.dashboardDisabled">
