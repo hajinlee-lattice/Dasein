@@ -166,8 +166,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         resetEntityMatchFlagsForRetry();
         setAttributeQuotaLimit();
         setDataQuotaLimit();
-        isDataQuotaLimit();
-//        bumpEntityMatchVersion();
+        reachTransactionLimit();
     }
 
     private void updateDataFeed() {
@@ -495,7 +494,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
 
-    private void isDataQuotaLimit() {
+    private void reachTransactionLimit() {
         Long dataCount;
         DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
         Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
