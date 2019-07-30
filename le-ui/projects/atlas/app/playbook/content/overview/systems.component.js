@@ -23,6 +23,8 @@ import {
   SPACEEVEN
 } from "common/widgets/container/le-alignments";
 import { LARGE_SIZE, MEDIUM_SIZE } from "common/widgets/modal/le-modal.utils";
+import "../../../../../common/assets/sass/mixins.scss";
+import "../../../../../common/assets/sass/_tooltips.scss";
 
 /**
  * need time utility
@@ -134,7 +136,7 @@ class SystemsComponent extends Component {
 
     getLaunchStateText(connection, play) {
         var text = [];
-        if(connection && connection.lastLaunch) {
+        if(connection) {
             var successfulStates = [
                     'Launched',
                     'Synced'
@@ -143,7 +145,42 @@ class SystemsComponent extends Component {
                 launchState = (launch ? launch.launchState : 'Unlaunched'),
                 launched = (successfulStates.indexOf(launchState) !== -1 ? true : false),
                 launching = (launchState === 'Launching' ? true : false),
-                queued = (launchState === 'Queued' ? true : false);
+                queued = (launchState === 'Queued' ? true : false),
+                launchStates = (launchState) => {
+                    // Has not been launched
+                    // Launching
+                    // Waiting for the Target System
+                    // Successfully Launched
+                    console.log(launchState);
+                    if(launchState === 'Synced') {
+                        return (
+                            <Aux>
+                                Should not say synced
+                            </Aux>
+                        );
+                    } else if(launchState === 'Launched') {
+                        return (
+                            <Aux>
+                                Successfully Launched
+                                <i className={'more-info show-tooltip left top'}> i
+                                    <div className={'tooltip_'}>
+                                        <div className={'cover'}>
+                                            <p>
+                                                The target system will need to process this data.  It may not be finished yet.  It will need to process duplicates or errors.  You can check the status in the target system.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </i>
+                            </Aux>
+                        );
+                    } else {
+                        return (
+                            <Aux>
+                                {launchState}
+                            </Aux>
+                        );
+                    }
+                };
 
                 if(launching || queued) {
                     this.checkLaunching();
@@ -161,6 +198,9 @@ class SystemsComponent extends Component {
                             </li>
                             <li>
                                 Contacts Sent: {launch.contactsLaunched.toLocaleString()}
+                            </li>
+                            <li>
+                                Status: {launchStates(launch.launchState)}
                             </li>
                         </ul>
                     </div>

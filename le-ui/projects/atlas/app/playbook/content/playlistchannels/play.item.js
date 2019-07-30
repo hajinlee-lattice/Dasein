@@ -176,4 +176,15 @@ export default class LeSegmentItem extends Component {
 			</div>
 		);
 	}
+
+	renderEditForm(item) {
+		return (
+			<edit-form
+				config="vm.editConfig"
+				dataobj="segment"
+				saving="vm.saveInProgress"
+				callback={() => { console.log('add campaign'); }}>
+			</edit-form>
+		);
+	}
 }
