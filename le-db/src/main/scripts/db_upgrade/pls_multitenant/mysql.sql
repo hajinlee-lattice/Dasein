@@ -1,5 +1,76 @@
 USE `PLS_MultiTenant`;
 
+CREATE PROCEDURE `CreatePlayChannels`()
+BEGIN
+  DECLARE finished, inner_finished BOOLEAN DEFAULT FALSE;  
+  DECLARE tenantId INT;
+  DECLARE playId INT;
+  DECLARE lookupIdMapId INT;
+  DECLARE playChannelCount INT;
+  DECLARE tenants TEXT;
+  DECLARE curs CURSOR FOR SELECT DISTINCT FK_TENANT_ID FROM PLS_MultiTenant.PLAY_LAUNCH WHERE FK_PLAY_LAUNCH_CHANNEL_ID IS NULL;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=TRUE;
+
+  OPEN curs;
+  big_loop: LOOP
+  FETCH curs INTO tenantId;
+	IF finished THEN
+		CLOSE curs;
+		LEAVE big_loop;
+	END IF;
+	
+    INNERBLOCK: BEGIN
+	DECLARE curs2 CURSOR FOR SELECT p.PID, m.PID FROM PLS_MultiTenant.PLAY p CROSS JOIN PLS_MultiTenant.LOOKUP_ID_MAP m WHERE p.FK_TENANT_ID = tenantId AND m.FK_TENANT_ID = tenantId;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET inner_finished=TRUE;
+    OPEN curs2;
+    inner_loop: LOOP
+    FETCH curs2 INTO playId, lookupIdMapId;
+		IF inner_finished THEN
+			SET inner_finished = 0;
+            CLOSE curs2;
+            LEAVE inner_loop;
+		END IF;
+		SELECT COUNT(PID) INTO playChannelCount FROM PLS_MultiTenant.PLAY_LAUNCH_CHANNEL WHERE FK_PLAY_ID = playId AND FK_LOOKUP_ID_MAP_ID = lookupIdMapId;
+		IF (playChannelCount < 1) THEN
+			INSERT INTO `PLS_MultiTenant`.`PLAY_LAUNCH_CHANNEL`
+				(`BUCKETS_TO_LAUNCH`,`CREATED`,`CREATED_BY`,`CRON_SCHEDULE_EXPRESSION`,`ID`,`ALWAYS_ON`,`LAUNCH_TYPE`,`LAUNCH_UNSCORED`,`NEXT_SCHEDULED_LAUNCH`,`TENANT_ID`,`MAX_ACCOUNTS_TO_LAUNCH`,`UPDATED`,`UPDATED_BY`,`FK_LOOKUP_ID_MAP_ID`,`FK_PLAY_ID`,`FK_TENANT_ID`,`CHANNEL_CONFIG`,`DELETED`)
+				VALUES
+				('[]', NOW(), 'build-admin@lattice-engines.com',NULL,CONCAT('channel__',UUID()),0,'FULL',0,NULL,tenantId,NULL,NOW(),'build-admin@lattice-engines.com',lookupIdMapId,playId,tenantId,NULL,0);
+				SET tenants = concat(tenants , tenantId, ', ');
+		END IF;
+	END LOOP inner_loop;
+    END INNERBLOCK;
+  END LOOP big_loop;
+END
+//
+DELIMITER
+
+CREATE PROCEDURE `AttachPlayChannelsToPlayLaunch`()
+BEGIN
+  DECLARE launchPid INT;
+  DECLARE tenantId INT;
+  DECLARE playId INT;
+  DECLARE destinationOrgId VARCHAR(255);
+  DECLARE finished BOOLEAN DEFAULT FALSE;
+
+  DECLARE curs CURSOR FOR SELECT PID, FK_PLAY_ID, FK_TENANT_ID, DESTINATION_ORG_ID FROM PLS_MultiTenant.PLAY_LAUNCH WHERE FK_PLAY_LAUNCH_CHANNEL_ID IS NULL AND DELETED = 0;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=TRUE;
+  OPEN curs;
+  loop_logic: LOOP
+  FETCH curs INTO launchPid, playId, tenantId, destinationOrgId;
+	IF finished THEN
+		CLOSE curs;
+		LEAVE loop_logic;
+	END IF;
+	UPDATE PLS_MultiTenant.PLAY_LAUNCH
+	SET FK_PLAY_LAUNCH_CHANNEL_ID = 
+		(SELECT PID FROM PLS_MultiTenant.PLAY_LAUNCH_CHANNEL WHERE FK_TENANT_ID = tenantId AND FK_PLAY_ID = playId AND FK_LOOKUP_ID_MAP_ID = (SELECT PID FROM PLS_MultiTenant.LOOKUP_ID_MAP WHERE ORG_ID = destinationOrgId AND FK_TENANT_ID = tenantID))
+	WHERE PID = launchPid;
+  END LOOP loop_logic;
+END
+//
+DELIMITER
+
 CREATE PROCEDURE `UpdatePLSTables`()
   BEGIN
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` ADD COLUMN `ACCOUNTS_DUPLICATED` BIGINT;
@@ -102,6 +173,10 @@ CREATE PROCEDURE `UpdatePLSTables`()
         ) engine=InnoDB;
 
   END;
+  
+  CALL `CreatePlayChannels`();
+  
+  CALL `AttachPlayChannelsToPlayLaunch`();
 //
 DELIMITER;
 
