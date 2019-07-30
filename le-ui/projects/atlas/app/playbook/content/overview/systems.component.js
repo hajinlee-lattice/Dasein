@@ -152,13 +152,13 @@ class SystemsComponent extends Component {
                     // Waiting for the Target System
                     // Successfully Launched
                     console.log(launchState);
-                    if(launchState === 'Synced') {
+                    if(launchState === 'Synced' || launchState === 'Queued') {
                         return (
                             <Aux>
-                                Should not say synced
+                                Waiting for the target system
                             </Aux>
                         );
-                    } else if(launchState === 'Launched') {
+                    } else if(launchState === 'Launched' || launchState === 'Partial Sync') {
                         return (
                             <Aux>
                                 Successfully Launched
