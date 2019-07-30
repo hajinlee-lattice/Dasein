@@ -236,6 +236,22 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public void unlinkTables(String customerSpace, String collectionName, TableRoleInCollection role, Version version) {
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        List<String> tableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
+        for (String tableName : tableNames) {
+            log.info("Removing " + tableName + " as " + role + " in " + version + " from collection.");
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, tableName, version);
+        }
+    }
+
+    @Override
     public void resetTable(String customerSpace, String collectionName, TableRoleInCollection role) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getDefaultCollection(customerSpace);

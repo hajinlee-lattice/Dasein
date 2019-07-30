@@ -223,6 +223,17 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @DeleteMapping(value = "/tables")
+    @ResponseBody
+    @ApiOperation(value = "Unlink all tables under tenant in current active data collection")
+    public SimpleBooleanResponse unlinkTables(@PathVariable String customerSpace, //
+                                             @RequestParam(value = "role") TableRoleInCollection role,
+                                             @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.unlinkTables(customerSpace, null, role, version);
+        return SimpleBooleanResponse.successResponse();
+    }
+
     @PostMapping(value = "/resettables")
     @ResponseBody
     @ApiOperation(value = "Create or insert a table into the collection")

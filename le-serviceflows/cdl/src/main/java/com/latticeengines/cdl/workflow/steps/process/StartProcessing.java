@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -101,6 +102,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private ObjectNode reportJson;
     private ChoreographerContext grapherContext = new ChoreographerContext();
     private Long newTransactionCount = 0L;
+    private boolean migrationMode;
 
     @PostConstruct
     public void init() {
@@ -126,6 +128,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
+        setMigrationMode();
+
+        if (migrationMode) {
+            verifyActiveDataCollectionVersion();
+            unlinkTables();
+        }
 
         String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         log.info("tenantName is :" + tenantName);
@@ -266,8 +274,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
             if (status != null
                     && (status.getDataCloudBuildNumber() == null
-                            || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
-                            || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
+                    || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
+                    || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
                 statusBuildNumber = DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber()) ? null
                         : status.getDataCloudBuildNumber();
@@ -555,7 +563,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
     }
 
-    private void setAttributeQuotaLimit(){
+    private void setAttributeQuotaLimit() {
         AttributeLimit attrLimit = dataFeedProxy.getAttributeQuotaLimit(customerSpace.toString());
         if (attrLimit == null) {
             throw new IllegalArgumentException("Attribute quota limit can not be found.");
@@ -569,6 +577,24 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             throw new IllegalArgumentException("Data Quota Limit Can not find.");
         }
         putObjectInContext(DATAQUOTA_LIMIT, dataLimit);
+    }
+
+    private void setMigrationMode() {
+        migrationMode = metadataProxy.getMigrationStatus(customerSpace.toString()).equals(MigrationTrack.Status.STARTED);
+    }
+
+    private void verifyActiveDataCollectionVersion() {
+        if (!activeVersion.equals(metadataProxy.getMigrationActiveVersion())) {
+            log.error("Current active version for tenant {} doesn't match the one in migration table", customerSpace);
+            throw new IllegalStateException(String.format("Current active data collection version not match for %s", customerSpace));
+        }
+    }
+
+    private void unlinkTables() {
+        Map<TableRoleInCollection, String[]> activeTables = metadataProxy.getActiveTables(customerSpace.toString());
+        for (Map.Entry<TableRoleInCollection, String[]> entry : activeTables.entrySet()) {
+            dataCollectionProxy.unlinkTables(customerSpace.toString(), entry.getKey(), activeVersion);
+        }
     }
 
     public static class RebuildEntitiesProvider {
