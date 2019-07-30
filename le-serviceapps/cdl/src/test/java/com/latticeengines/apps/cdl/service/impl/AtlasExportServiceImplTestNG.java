@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 
 public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
 
