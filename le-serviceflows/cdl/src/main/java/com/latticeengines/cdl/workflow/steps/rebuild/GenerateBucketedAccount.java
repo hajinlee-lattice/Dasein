@@ -190,7 +190,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         conf.setPartitions(1);
         conf.setCompressResult(true);
         conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
 
         setTargetTable(step, profileTablePrefix);

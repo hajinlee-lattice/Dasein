@@ -3,10 +3,12 @@ package com.latticeengines.cdl.workflow.steps.merge;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(MergeAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -48,30 +51,50 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String newAccountTableFromTxnMatch;
 
     @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
+                Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME));
+        shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
+        if (shortCutMode) {
+            log.info("Found diff table and batch store in context, using short-cut pipeline");
+            shortCutMode = true;
+            diffTableNameInContext = tablesInCtx.get(0).getName();
+            batchStoreNameInContext = tablesInCtx.get(1).getName();
+            diffTableName = diffTableNameInContext;
+        } else {
+            matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
+            newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
+            newAccountTableFromTxnMatch = getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE);
+            double newTableSize = 0.0D;
+            for (String key: Arrays.asList( //
+                    ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
+                    ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
+                    ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)) {
+                Table tableSummary = getTableSummaryFromKey(customerSpace.toString(), key);
+                if (tableSummary != null) {
+                    newTableSize += ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+                }
+            }
+            double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
+            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
+            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                    scalingMultiplier, oldTableSize + newTableSize));
+        }
+    }
+
+    @Override
     public PipelineTransformationRequest getConsolidateRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("MergeAccount");
 
-        if (isShortCutMode()) {
-            log.info("Found diff table and batch store in context, using short-cut pipeline");
-            shortCutMode = true;
-            diffTableName = diffTableNameInContext;
+        if (shortCutMode) {
             request.setSteps(shortCutSteps());
         } else {
             request.setSteps(regularSteps());
         }
 
         return request;
-    }
-
-    private boolean isShortCutMode() {
-        diffTableNameInContext = getStringValueFromContext(ACCOUNT_DIFF_TABLE_NAME);
-        batchStoreNameInContext = getStringValueFromContext(ACCOUNT_MASTER_TABLE_NAME);
-        Table diffTableInContext = StringUtils.isNotBlank(diffTableNameInContext) ? //
-                metadataProxy.getTable(customerSpace.toString(), diffTableNameInContext) : null;
-        Table batchStoreInContext = StringUtils.isNotBlank(batchStoreNameInContext) ? //
-                metadataProxy.getTable(customerSpace.toString(), batchStoreNameInContext) : null;
-        return diffTableInContext != null && batchStoreInContext != null;
     }
 
     private List<TransformationStepConfig> regularSteps() {
@@ -85,8 +108,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     }
 
     private List<TransformationStepConfig> entityMatchSteps() {
-        List<TransformationStepConfig> steps = new ArrayList<>();
-
         List<TransformationStepConfig> extracts = new ArrayList<>();
         List<Integer> extractSteps = new ArrayList<>();
         if (StringUtils.isNotBlank(newAccountTableFromContactMatch)) {
@@ -99,7 +120,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE)));
             extractSteps.add(extractSteps.size());
         }
-        steps.addAll(extracts);
+        List<TransformationStepConfig> steps = new ArrayList<>(extracts);
 
         int mergeStep = extractSteps.size();
         TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), //
@@ -158,14 +179,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             }
         });
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
-    }
-
-    @Override
-    protected void initializeConfiguration() {
-        super.initializeConfiguration();
-        matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
-        newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
-        newAccountTableFromTxnMatch = getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE);
     }
 
     @Override
