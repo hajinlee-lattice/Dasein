@@ -146,14 +146,14 @@ angular.module('lp.import')
             },{ 
                 label: 'Lattice Fields', 
                 state: 'contacts.ids.thirdpartyids.latticefields', 
-                nextLabel: 'Next, Map to Lattice Fields', 
+                nextLabel: 'Next, Match to Accounts', 
                 nextFn: function(nextState) {
                     this.userFieldsType = {};
                     // ImportWizardStore.removeSavedDocumentFieldsFrom($state.current);
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
-                label: 'Match to Fields', 
+                label: 'Match to Accounts', 
                 state: 'contacts.ids.thirdpartyids.latticefields.matchtoaccounts', 
                 nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
