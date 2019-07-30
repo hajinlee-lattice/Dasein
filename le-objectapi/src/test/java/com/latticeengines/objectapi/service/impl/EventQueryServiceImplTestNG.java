@@ -177,7 +177,9 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         );
         for (String fileName: queryFiles) {
             EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource(fileName);
-            frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
+            if (frontEndQuery.getSegmentQuery() != null) {
+                frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
+            }
             String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, //
                     DataCollection.Version.Blue);
             System.out.println("========== " + fileName + " ==========");

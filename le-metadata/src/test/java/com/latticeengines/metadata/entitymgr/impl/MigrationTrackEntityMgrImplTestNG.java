@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -23,13 +24,15 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({SimpleRetryListener.class})
 public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    private static final MigrationTrack.Status STATUS = MigrationTrack.Status.STARTED;
     private static final DataCollection.Version VERSION = DataCollection.Version.Blue;
     private static final String STATSNAME = "Test";
     private static Tenant tenant1, tenant2, untracked;
@@ -59,7 +62,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         IMPORTACTION.getActions().add(-1L);
         IMPORTACTION.getActions().add(-2L);
 
-        track1.setStatus(STATUS);
+        track1.setStatus(MigrationTrack.Status.STARTED);
         track1.setVersion(VERSION);
         track1.setStatsName(STATSNAME);
         track1.setTenant(tenant1);
@@ -68,7 +71,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         track1.setCollectionStatusDetail((DETAIL));
         track1.setStatsCubesData(CUBESDATA);
 
-        track2.setStatus(STATUS);
+        track2.setStatus(MigrationTrack.Status.COMPLETED);
         track2.setVersion(VERSION);
         track2.setStatsName(STATSNAME);
         track2.setTenant(tenant2);
@@ -90,10 +93,16 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         super.cleanup();
     }
 
-    @Test(groups = "functional", dataProvider = "entityProvider")
+    int i = 0;
+
+    @Test(groups = "functional", dataProvider = "entityProvider", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCreate(Tenant tenant, MigrationTrack track) {
         Assert.assertNotNull(migrationTrackEntityMgr);
         Assert.assertNotNull(track);
+        if (track.getPid() != null) {
+            migrationTrackEntityMgr.delete(track);
+        }
+        track.setPid(null);
         migrationTrackEntityMgr.create(track);
         Assert.assertNotNull(migrationTrackEntityMgr.findByKey(track));
         Assert.assertEquals(track.getPid(), migrationTrackEntityMgr.findByKey(track).getPid());
@@ -103,7 +112,7 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     public void testRead(Tenant tenant, MigrationTrack track) {
         MigrationTrack created = migrationTrackEntityMgr.findByKey(track);
 
-        Assert.assertEquals(STATUS, created.getStatus());
+        Assert.assertEquals(track.getStatus(), created.getStatus());
         Assert.assertEquals(VERSION, created.getVersion());
         Assert.assertNotNull(created.getCurActiveTable());
         Assert.assertNotNull(created.getCurActiveTable().get(ROLE));
@@ -116,21 +125,21 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(tenant.getPid(), created.getTenant().getPid());
     }
 
-    @Test(groups = "function", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
-    public void testGetStartedTenants(Tenant tenant, MigrationTrack track) {
-        List<Long> found, actualStarted;
+    @Test(groups = "functional", dependsOnMethods = {"testCreate"})
+    public void testGetTenantsByStatus() {
+        List<Long> found, actualStarted, actualCompleted;
 
-        track.setStatus(MigrationTrack.Status.COMPLETED);
-        found = migrationTrackEntityMgr.getStartedTenants();
-        Assert.assertNotNull(found);
-        Assert.assertEquals(0, found.size());
-
-        track.setStatus(MigrationTrack.Status.STARTED);
         actualStarted = new ArrayList<>();
-        actualStarted.add(tenant.getPid());
-        found = migrationTrackEntityMgr.getStartedTenants();
+        actualStarted.add(tenant1.getPid());
+        actualCompleted = new ArrayList<>();
+        actualCompleted.add(tenant2.getPid());
+        found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.STARTED);
         Assert.assertNotNull(found);
         Assert.assertArrayEquals(actualStarted.toArray(), found.toArray());
+
+        found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.COMPLETED);
+        Assert.assertNotNull(found);
+        Assert.assertArrayEquals(actualCompleted.toArray(), found.toArray());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
@@ -141,37 +150,26 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
-    public void testTrackedTenants(Tenant tenant, MigrationTrack track) {
-        Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
-
-        // Can delete tables not in curActiveTable
+    public void testTrackedTenantsConditions(Tenant tenant, MigrationTrack track) {
+        track = migrationTrackEntityMgr.findByTenant(tenant);
+        if (track.getStatus().equals(MigrationTrack.Status.STARTED)) {
+            Assert.assertTrue(migrationTrackEntityMgr.tenantInMigration(tenant));
+            Assert.assertFalse(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
+        } else {
+            Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(tenant));
+            Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
+        }
+        // Can delete tables not in curActiveTable regardless of tenant status
         Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "can delete this table"));
-        // cannot delete tables in curActiveTable when tenant status STARTED
-        Assert.assertFalse(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
-
-        track.setStatus(MigrationTrack.Status.COMPLETED);
-        migrationTrackEntityMgr.update(track);
-        Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(tenant));
-
-        // can delete tables in curActiveTable if tenant status not STARTED
-        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
-
-        track.setStatus(MigrationTrack.Status.STARTED);
-        migrationTrackEntityMgr.update(track);
     }
 
-    @Test(groups = "functional")
-    public void testUntrackedTenants() {
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    public void testUntrackedTenantsConditions() {
         tenantEntityMgr.create(untracked);
         Assert.assertFalse(migrationTrackEntityMgr.tenantInMigration(untracked));
         Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(untracked, "This table"));
         tenantEntityMgr.delete(untracked);
-    }
-
-    @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})
-    public void testCanDeleteOrRenameTableTrackedTenant(Tenant tenant, MigrationTrack track) {
-        Assert.assertFalse(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "This table"));
-        Assert.assertTrue(migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, "can delete this table"));
+        Assert.assertNull(tenantEntityMgr.findByKey(untracked));
     }
 
     @DataProvider(name = "entityProvider")

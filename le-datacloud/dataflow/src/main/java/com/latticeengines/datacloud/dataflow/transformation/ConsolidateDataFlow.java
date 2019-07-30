@@ -46,7 +46,12 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
+
         String groupByKey = processIdColumns(parameters, config, sources, sourceTables, sourceNames);
+
+        cloneSrcFlds(sources, config.getCloneSrcFields());
+        renameSrcFlds(sources, config.getRenameSrcFields());
+
         if (config.isCreateTimestampColumn()) {
             createTimestampColumns(config, sources);
         }
@@ -123,6 +128,44 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
             }
             Node newSource = source.groupByAndLimit(new FieldList(groupByKey), 1);
             sources.set(i, newSource);
+        }
+    }
+
+    private void cloneSrcFlds(List<Node> sources, String[][] cloneSrcFlds) {
+        if (cloneSrcFlds == null) {
+            return;
+        }
+        for (int i = 0; i < sources.size(); i++) {
+            Node source = sources.get(i);
+            for (String[] fldPair : cloneSrcFlds) {
+                FieldMetadata originFM = source.getSchema(fldPair[0]);
+                if (originFM != null) {
+                    FieldMetadata newFM = new FieldMetadata(fldPair[1], originFM.getJavaType());
+                    source = source.apply(fldPair[0], new FieldList(fldPair[0]), newFM);
+                }
+            }
+            sources.set(i, source);
+        }
+    }
+
+    private void renameSrcFlds(List<Node> sources, String[][] renameSrcFlds) {
+        if (renameSrcFlds == null) {
+            return;
+        }
+        for (int i = 0; i < sources.size(); i++) {
+            Node source = sources.get(i);
+            List<String> previousFlds = new ArrayList<>();
+            List<String> newFlds = new ArrayList<>();
+            for (String[] fldPair : renameSrcFlds) {
+                if (source.getSchema(fldPair[0]) != null) {
+                    previousFlds.add(fldPair[0]);
+                    newFlds.add(fldPair[1]);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(previousFlds)) {
+                source = source.rename(new FieldList(previousFlds), new FieldList(newFlds));
+                sources.set(i, source);
+            }
         }
     }
 

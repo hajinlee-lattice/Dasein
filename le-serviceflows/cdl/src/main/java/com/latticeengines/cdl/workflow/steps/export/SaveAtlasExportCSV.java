@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATLAS_EXPORT;
 
 import java.io.File;
 import java.io.IOException;
@@ -220,9 +221,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        AtlasExport exportRecord = atlasExportProxy.findAtlasExportById(customerSpaceStr,
-                configuration.getAtlasExportId());
+        AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
         if (exportRecord == null) {
             log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
                     configuration.getAtlasExportId()));

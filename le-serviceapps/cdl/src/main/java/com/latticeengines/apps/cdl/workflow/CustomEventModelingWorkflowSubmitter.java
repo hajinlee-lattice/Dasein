@@ -164,6 +164,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
         boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
         DataCollection.Version version = null;
+        String apsRollupPeriod = null;
         if (!isLPI) {
             version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         }
@@ -236,8 +237,9 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .workflowContainerMem(workflowMemMb) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
-                .apsRollupPeriod(dataCollectionProxy
-                        .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod())
+                .apsRollupPeriod(isLPI ? null
+                        : dataCollectionProxy.getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version)
+                                .getApsRollingPeriod())
                 .build();
         return configuration;
     }

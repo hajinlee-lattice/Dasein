@@ -510,9 +510,6 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                         seed -> seed.getLookupEntries().stream() //
                                 .map(lookupEntry -> Pair.of(lookupEntry, seed.getId()))) //
                 .collect(Collectors.toList());
-        List<EntityLookupEntry> lookups = lookupPairs.stream() //
-                .map(Pair::getLeft) //
-                .collect(Collectors.toList());
         setupLookupTable(EntityMatchEnvironment.STAGING, tenant1, lookupPairs);
         setupSeedTable(EntityMatchEnvironment.STAGING, tenant1, seeds);
 
@@ -523,9 +520,6 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         EntityRawSeed noiseSeed2 = newSeed(SEED_ID_2, "sfdc_1", "google.com", "abc.com");
         EntityRawSeed noiseSeed3 = newSeed(SEED_ID_3, null, "abc.com");
         List<EntityRawSeed> noiseSeeds = Arrays.asList(noiseSeed1, noiseSeed2, noiseSeed3);
-        List<String> noiseSeedIds = noiseSeeds.stream() //
-                .map(EntityRawSeed::getId) //
-                .collect(Collectors.toList());
         List<Pair<EntityLookupEntry, String>> noiseLookupPairs = noiseSeed2.getLookupEntries().stream() //
                 .map(lookupEntry -> Pair.of(lookupEntry, SEED_ID_2)) //
                 .collect(Collectors.toList());

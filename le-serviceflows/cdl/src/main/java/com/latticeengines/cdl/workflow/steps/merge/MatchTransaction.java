@@ -15,11 +15,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 
 @Component(MatchTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -40,12 +43,11 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
-        TransformationStepConfig merge = mergeInputs(true, true, false, true, matchTargetTablePrefix,
-                InterfaceName.Id.name(), batchStorePrimaryKey, inputTableNames);
+        TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                ETLEngineLoad.LIGHT);
         steps.add(merge);
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            merge = mergeInputs(true, false, true);
             TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix);
             steps.add(match);
         }
@@ -84,5 +86,22 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         Set<String> columnNames = getInputTableColumnNames();
         return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
                 Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
+    }
+
+    private ConsolidateDataTransformerConfig getConsolidateDataTxmfrConfig() {
+        ConsolidateDataTransformerConfig config = getConsolidateDataTxmfrConfig(false, true, true);
+        ConsolidateDataTxmfrConfigBuilder builder = new ConsolidateDataTxmfrConfigBuilder(config);
+        // For PA during entity match migration period: some files are imported
+        // with legacy template (having AccountId) while some files are imported
+        // after template is upgraded (having CustomerAccountId)
+        // The merge job has check whether specified original column (AccountId)
+        // exists or not
+        // TODO: After all the tenants finish entity match migration, we could
+        // get rid of this field rename logic
+        if (configuration.isEntityMatchEnabled()) {
+            builder.renameSrcFields(
+                    new String[][] { { InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name() } });
+        }
+        return builder.build();
     }
 }

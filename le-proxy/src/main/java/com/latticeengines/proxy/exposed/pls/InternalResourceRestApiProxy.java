@@ -1,35 +1,26 @@
 package com.latticeengines.proxy.exposed.pls;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
-import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
@@ -60,29 +51,29 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            String attributeDisplayNameFilter, Category category, //
-            Boolean onlySelectedAttributes) {
+                                                                     String attributeDisplayNameFilter, Category category, //
+                                                                     Boolean onlySelectedAttributes) {
         return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, onlySelectedAttributes,
                 Boolean.FALSE);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            String attributeDisplayNameFilter, Category category, //
-            Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
+                                                                     String attributeDisplayNameFilter, Category category, //
+                                                                     Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, null,
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            String attributeDisplayNameFilter, Category category, String subcategory, //
-            Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
+                                                                     String attributeDisplayNameFilter, Category category, String subcategory, //
+                                                                     Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, subcategory,
                 onlySelectedAttributes, null, null, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            String attributeDisplayNameFilter, Category category, String subcategory, //
-            Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
+                                                                     String attributeDisplayNameFilter, Category category, String subcategory, //
+                                                                     Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
@@ -101,7 +92,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
-            Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
+                                                Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
@@ -132,7 +123,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
-            LeadEnrichmentAttributesOperationMap attributes) {
+                                             LeadEnrichmentAttributesOperationMap attributes) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH, customerSpace.toString());
             restTemplate.put(url, attributes);
@@ -259,8 +250,8 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
-            Boolean considerInternalAttributes) {
+                                                   String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
+                                                   Boolean considerInternalAttributes) {
         url += "?" + "onlySelectedAttributes" + "=" + String.valueOf(Boolean.TRUE.equals(onlySelectedAttributes));
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
             url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
@@ -292,7 +283,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //
-            String exportId) {
+                                                          String exportId) {
         try {
             String url = constructUrl("pls/internal/segment/export/" + exportId + "/" + customerSpace.toString());
             log.debug("Find MetadataSegmentExport by exportId (" + exportId + ")" + url);
@@ -303,7 +294,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
-            String exportId, Status state) {
+                                                             String exportId, Status state) {
         if (exportId == null) {
             log.info("Skipping updating Metadata Segment Export as exportId is null");
             return null;
@@ -332,86 +323,5 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
         }
-    }
-
-    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, List<Long> actionPids,
-            ActionType actionType) {
-        try {
-            if (CollectionUtils.isEmpty(actionPids)) {
-                return Collections.emptyList();
-            }
-            String url = generateFindJobsBasedOnActionIdsAndTypeUrl(customerSpace, actionPids, actionType);
-            List<?> listObj = restTemplate.getForObject(url, List.class);
-            return JsonUtils.convertList(listObj, Job.class);
-        } catch (Exception e) {
-            throw new RuntimeException("findJobsBasedOnActionIdsAndType: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    public void sendS3ImportEmail(String result, String tenantId, S3ImportEmailInfo emailInfo) {
-        try {
-            String url = constructUrl("pls/internal/emails/s3import/result", result, tenantId);
-            log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, emailInfo);
-        } catch (Exception e) {
-            throw new RuntimeException("sendS3ImportEmail: Remote call failure", e);
-        }
-    }
-
-    public void sendS3TemplateUpdateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
-        try {
-            String url = constructUrl("pls/internal/emails/s3template/update", tenantId);
-            log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, emailInfo);
-        } catch (Exception e) {
-            throw new RuntimeException("sendS3TemplateUpdateEmail: Remote call failure", e);
-        }
-    }
-
-    public void sendS3TemplateCreateEmail(String tenantId, S3ImportEmailInfo emailInfo) {
-        try {
-            String url = constructUrl("pls/internal/emails/s3template/create", tenantId);
-            log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, emailInfo);
-        } catch (Exception e) {
-            throw new RuntimeException("sendS3TemplateCreateEmail: Remote call failure", e);
-        }
-    }
-
-    public ScoringRequestConfigContext retrieveScoringRequestConfigContext(String configUuid) {
-        try {
-            String url = constructUrl(
-                    "pls/internal/external-scoring-config-context/" + configUuid);
-            if (log.isDebugEnabled()) {
-                log.debug("Find ScoringRequestConfigContext by configId (" + configUuid + ")" + url);
-            }
-            return restTemplate.getForObject(url, ScoringRequestConfigContext.class);
-        } catch (RemoteLedpException rle) {
-            throw rle;
-        } catch (Exception e) {
-            throw new RuntimeException("retrieveScoringRequestConfigContext: Remote call failure: " + e.getMessage(), e);
-        }
-    }
-
-    @VisibleForTesting
-    String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
-            ActionType actionType) {
-        StringBuilder urlStr = new StringBuilder();
-        urlStr.append("pls/internal/jobs/all/").append(CustomerSpace.parse(customerSpace).toString());
-        if (CollectionUtils.isNotEmpty(actionPids) || actionType != null) {
-            urlStr.append("?");
-            if (CollectionUtils.isNotEmpty(actionPids)) {
-                for (Long pid : actionPids) {
-                    urlStr.append(String.format("pid=%s&", pid));
-                }
-            }
-            if (actionType != null) {
-                urlStr.append(String.format("type=%s", actionType));
-            }
-        }
-        if (urlStr.charAt(urlStr.length() - 1) == '&') {
-            urlStr.setLength(urlStr.length() - 1);
-        }
-        return constructUrl(urlStr.toString());
     }
 }

@@ -8,6 +8,9 @@ var CONST = {
     FETCHING: 'FETCHING',
     FETCH_PLAY: 'FETCH_PLAY',
     FETCH_PLAYS: 'FETCH_PLAYS',
+    SET_CONTEXT: 'SET_CONTEXT',
+    SET_ITEMBAR: 'SET_ITEMBAR',
+    SET_ITEMVIEW: 'SET_ITEMVIEW',
     FETCH_CONNECTIONS: 'FETCH_CONNECTIONS',
     FETCH_RATINGS: 'FETCH_RATINGS',
     FETCH_TYPES: 'FETCH_TYPES',
@@ -90,6 +93,24 @@ export const actions = {
             }
         );
         httpService.get('/pls/play', observer, {});
+    },
+    setContext: (payload) => {
+        return store.dispatch({
+            type: CONST.SET_CONTEXT,
+            payload: payload
+        });
+    },
+    setItemBar: (payload) => {
+        return store.dispatch({
+            type: CONST.SET_ITEMBAR,
+            payload: payload
+        });
+    },
+    setItemView: (payload) => {
+        return store.dispatch({
+            type: CONST.SET_ITEMVIEW,
+            payload: payload
+        });
     },
     fetchConnections: (play_name, force, cb, deferred) => {
         let playstore = store.getState()['playbook'];
@@ -469,6 +490,21 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 plays: action.payload
             }
+        case CONST.SET_CONTEXT:
+            return {
+                ...state,
+                context: action.payload
+            };
+        case CONST.SET_ITEMBAR:
+            return {
+                ...state,
+                itembar: action.payload
+            };
+        case CONST.SET_ITEMVIEW:
+            return {
+                ...state,
+                itemview: action.payload
+            };
         case CONST.FETCH_CONNECTIONS:
             return {
                 ...state,

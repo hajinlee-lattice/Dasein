@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATLAS_EXPORT;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -55,6 +57,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
 
     private DataCollection.Version version;
     private String evaluationDate;
+    private AtlasExport atlasExport;
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
 
@@ -65,6 +68,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
         schemaMap = getExportSchema();
+        atlasExport = parseAtlasExport();
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
@@ -131,11 +135,22 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
+    protected AtlasExport parseAtlasExport() {
+        AtlasExport atlasExport = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
+        if (atlasExport == null) {
+            throw new RuntimeException("Cannot find atlasExport in context");
+        }
+        return atlasExport;
+    }
+
     private FrontEndQuery getFrontEndQueryCopy() {
-        FrontEndQuery inConfig = configuration.getFrontEndQuery();
+        FrontEndQuery inConfig = new FrontEndQuery();
+        inConfig.setAccountRestriction(atlasExport.getAccountFrontEndRestriction());
+        inConfig.setContactRestriction(atlasExport.getContactFrontEndRestriction());
         FrontEndQuery frontEndQuery;
         if (inConfig != null) {
             frontEndQuery = JsonUtils.deserialize(JsonUtils.serialize(inConfig), FrontEndQuery.class);
+            frontEndQuery.setPageFilter(null);
             inConfig.setPageFilter(null);
         } else {
             frontEndQuery = new FrontEndQuery();

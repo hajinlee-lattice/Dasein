@@ -36,6 +36,7 @@ import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
+import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CronUtils;
@@ -43,6 +44,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
@@ -80,6 +82,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
     private static final String TEST_SCHEDULER = "qa_testing";
+
+    @Inject
+    private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
@@ -375,10 +380,10 @@ public class CDLJobServiceImpl implements CDLJobService {
                 try {
                     if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
-                        logScheduledPA(needRunJobTenantId, retryAppId, true, result);
+                        logScheduledPA(schedulerName, needRunJobTenantId, retryAppId, true, result);
                     }
                 } catch (Exception e) {
-                    log.info(String.format("Failed to submit job for retry tenantId: %s", needRunJobTenantId));
+                    log.error("Failed to retry PA for tenant {}, error = {}", needRunJobTenantId, e);
                     updateRetryCount(needRunJobTenantId);
                 }
             }
@@ -388,26 +393,32 @@ public class CDLJobServiceImpl implements CDLJobService {
             for (String needRunJobTenantId : canRunJobSet) {
                 if (!dryRun) {
                     ApplicationId appId = submitProcessAnalyzeJob(needRunJobTenantId);
-                    logScheduledPA(needRunJobTenantId, appId, false, result);
+                    logScheduledPA(schedulerName, needRunJobTenantId, appId, false, result);
                 }
             }
         }
     }
 
-    private void logScheduledPA(String tenantId, ApplicationId appId, boolean isRetry, SchedulingResult result) {
+    private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,
+            SchedulingResult result) {
         if (StringUtils.isEmpty(tenantId) || appId == null || appId.toString() == null || result == null) {
             return;
         }
 
         SchedulingResult.Detail detail = result.getDetails().get(tenantId);
-        log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}'", tenantId,
-                appId.toString(), isRetry, JsonUtils.serialize(detail));
+        log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}', schedulerName='{}'",
+                tenantId, appId.toString(), isRetry, JsonUtils.serialize(detail), schedulerName);
     }
 
     private void updateRetryCount(String tenantId) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
-        MultiTenantContext.setTenant(tenant);
-        dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
+        try {
+            // TODO test this call, throw error once
+            Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+            MultiTenantContext.setTenant(tenant);
+            dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
+        } catch (Exception e) {
+            log.error("Failed to increase retry count for tenant {}. error = {}", tenantId, e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -689,7 +700,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         try {
             EntityExportRequest request = new EntityExportRequest();
             request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace));
-            ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
+            ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
             applicationId = tempApplicationId.toString();
             if (!retry) {
                 EXPORT_APPID_MAP.put(applicationId, customerSpace);

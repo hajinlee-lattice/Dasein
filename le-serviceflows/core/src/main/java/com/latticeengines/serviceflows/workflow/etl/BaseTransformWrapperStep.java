@@ -40,6 +40,7 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 import com.latticeengines.serviceflows.workflow.util.HdfsS3ImporterExporter;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.workflow.exposed.build.BaseWrapperStep;
@@ -153,6 +154,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         return "";
     }
 
+    @Override
     protected Class<TransformationWorkflowConfiguration> getWrappedWorkflowConfClass() {
         return TransformationWorkflowConfiguration.class;
     }
@@ -213,6 +215,19 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         targetTable.setNamePrefix(tablePrefix);
         targetTable.setPrimaryKey(primaryKey);
         step.setTargetTable(targetTable);
+    }
+
+    protected TransformationFlowParameters.EngineConfiguration getEngineConfig(ETLEngineLoad load) {
+        switch (load) {
+        case LIGHT:
+            return lightEngineConfig();
+        case HEAVY:
+            return heavyEngineConfig();
+        case EXTRA_HEAVY:
+            return extraHeavyEngineConfig();
+        default:
+            throw new UnsupportedOperationException("Unknown engine load: " + load);
+        }
     }
 
     protected TransformationFlowParameters.EngineConfiguration heavyEngineConfig() {

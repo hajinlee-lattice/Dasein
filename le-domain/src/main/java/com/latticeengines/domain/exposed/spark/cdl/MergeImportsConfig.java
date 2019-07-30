@@ -22,6 +22,22 @@ public class MergeImportsConfig extends SparkJobConfig {
     @JsonProperty("AddTimestamps")
     private boolean addTimestamps; // add cdl timestamp cols
 
+    /*****************************************************************
+     * Following operations apply to every source input before merge.
+     *
+     * Sequence: clone -> rename
+     *****************************************************************/
+
+    // String[][0]: original field;
+    // String[][1]: NEW field copied value from original field
+    @JsonProperty("CloneSrcFields")
+    private String[][] cloneSrcFields;
+
+    // String[][0]: old field; String[][1]: new field
+    @JsonProperty("RenameSrcFields")
+    private String[][] renameSrcFields;
+
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -64,5 +80,21 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     public void setAddTimestamps(boolean addTimestamps) {
         this.addTimestamps = addTimestamps;
+    }
+
+    public String[][] getRenameSrcFields() {
+        return renameSrcFields;
+    }
+
+    public void setRenameSrcFields(String[][] renameSrcFields) {
+        this.renameSrcFields = renameSrcFields;
+    }
+
+    public String[][] getCloneSrcFields() {
+        return cloneSrcFields;
+    }
+
+    public void setCloneSrcFields(String[][] cloneSrcFields) {
+        this.cloneSrcFields = cloneSrcFields;
     }
 }

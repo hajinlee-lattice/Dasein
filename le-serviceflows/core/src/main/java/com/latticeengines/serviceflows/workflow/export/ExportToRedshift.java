@@ -41,7 +41,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ExportToDynamo.class);
+    private static final Logger log = LoggerFactory.getLogger(ExportToRedshift.class);
     private static final Long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
 
     @Inject

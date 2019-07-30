@@ -69,6 +69,9 @@ public class GreedyScheduler implements Scheduler {
             if (activity.getScheduleTime() != null && activity.isScheduledNow()) {
                 firstActivityTime = Math.min(activity.getScheduleTime(), firstActivityTime);
             }
+            if (activity.isRetry() && activity.getLastFinishTime() != null) {
+                firstActivityTime = Math.min(activity.getLastFinishTime(), firstActivityTime);
+            }
 
             SchedulingResult.Detail detail = new SchedulingResult.Detail(queueName,
                     clock.getCurrentTime() - firstActivityTime, activity);

@@ -110,6 +110,7 @@ angular
                 store.showCdlEnabledPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
                 store.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
                 store.showContactUs = false;
+                store.alwaysOnCampaigns = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALWAYS_ON_CAMPAIGNS);
 
                 store.isDataAvailable = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL) && QueryStore.collectionStatus != null ?
                     QueryStore.collectionStatus.AccountCount > 0 || QueryStore.collectionStatus.ContactCount > 0 : store.isDataAvailable;
@@ -147,7 +148,7 @@ angular
                     sref: "home.ratingsengine",
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_RATING_ENGINE")
                 }, {
-                    if: store.showPlayBook,
+                    if: store.showPlayBook && !store.alwaysOnCampaigns,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                     active: function () {
                         return store.state.includes('home.playbook') && !store.isTransitingFrom(['home.playbook']);
@@ -156,6 +157,18 @@ angular
                         return store.isTransitingTo(['home.playbook']);
                     },
                     sref: "home.playbook",
+                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
+                    icon: "ico-playbook"
+                }, {
+                    if: store.showPlayBook && store.alwaysOnCampaigns,
+                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                    active: function () {
+                        return store.state.includes('home.playbook.listchannels') && !store.isTransitingFrom(['home.playbook']);
+                    },
+                    transitioning: function () {
+                        return store.isTransitingTo(['home.playbook']);
+                    },
+                    sref: "home.playbook.listchannels",
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
                     icon: "ico-playbook"
                 }, {

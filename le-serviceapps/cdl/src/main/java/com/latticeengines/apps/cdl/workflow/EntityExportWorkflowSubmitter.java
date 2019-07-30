@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +30,18 @@ public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull EntityExportRequest request,
                                 @NotNull WorkflowPidWrapper pidWrapper) {
-        AtlasExport atlasExport = atlasExportService.createAtlasExport(customerSpace,
-                AtlasExportType.ACCOUNT_AND_CONTACT);
+        AtlasExport atlasExport;
+        if (StringUtils.isEmpty(request.getAtlasExportId())) {
+            atlasExport = atlasExportService.createAtlasExport(customerSpace,
+                    AtlasExportType.ACCOUNT_AND_CONTACT);
+        } else {
+            atlasExport = atlasExportService.getAtlasExport(customerSpace, request.getAtlasExportId());
+        }
         EntityExportWorkflowConfiguration configuration = configure(customerSpace, request, atlasExport);
-        return workflowJobService.submit(configuration, pidWrapper.getPid());
+        ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
+        atlasExport.setApplicationId(applicationId.toString());
+        atlasExportService.updateAtlasExport(customerSpace, atlasExport);
+        return applicationId;
     }
 
     @VisibleForTesting
@@ -42,7 +51,6 @@ public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .exportEntities(Arrays.asList(ExportEntity.Account, ExportEntity.Contact)) //
                 .dataCollectionVersion(request.getDataCollectionVersion()) //
-                .frontEndQuery(null) //
                 .compressResult(true) //
                 .saveToDropfolder(true) //
                 .atlasExportId(atlasExport.getUuid())

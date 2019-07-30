@@ -111,7 +111,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     public void sendPlsEnrichInternalAttributeEmail(String result, String tenantId,
-            AdditionalEmailInfo info) {
+                                                    AdditionalEmailInfo info) {
         try {
             String url = constructUrl("pls/internal/emails/enrichment/internal/result", result,
                     tenantId);

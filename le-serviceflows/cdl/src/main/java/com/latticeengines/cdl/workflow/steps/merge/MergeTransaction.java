@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema.Type;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -24,7 +23,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodCollectorConfig;
@@ -53,6 +51,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -89,7 +88,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
         Table diffTable = metadataProxy.getTable(
                 customerSpace.toString(), diffTableName);
-        isDataQuotaLimit(diffTable);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
@@ -265,18 +263,11 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private TransformationStepConfig mergeRaw() {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<String> baseSources;
-        Map<String, SourceTable> baseTables;
-        String rawName = rawTable.getName();
-        baseSources = Collections.singletonList(rawName);
-        baseTables = new HashMap<>();
-        SourceTable sourceMasterTable = new SourceTable(rawName, customerSpace);
-        baseTables.put(rawName, sourceMasterTable);
-        step.setBaseSources(baseSources);
-        step.setBaseTables(baseTables);
+        addBaseTables(step, rawTable.getName());
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(getConsolidateDataConfig(false, false, true));
+        step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true),
+                getEngineConfig(ETLEngineLoad.HEAVY)));
 
         return step;
     }
@@ -421,23 +412,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         detail.setMinTxnDate(newEarliest);
         log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
-    }
-
-    private void isDataQuotaLimit(Table table) {
-        List<Extract> extracts = table.getExtracts();
-        if (!CollectionUtils.isEmpty(extracts)) {
-            Long dataCount = 0L;
-            DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
-            Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
-            for (Extract extract : extracts) {
-                dataCount = dataCount + extract.getProcessedRecords();
-                log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
-                if (transactionDataQuotaLimit < dataCount)
-                    throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + transactionDataQuotaLimit +
-                            ", The data you uploaded has exceeded the limit.");
-            }
-            log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is " + transactionDataQuotaLimit);
-        }
     }
 
     private void enrichTableSchema(Table table, TableRoleInCollection tableRole) {

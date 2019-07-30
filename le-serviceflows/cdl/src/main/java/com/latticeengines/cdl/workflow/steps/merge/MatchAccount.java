@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,7 +47,8 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TransformationStepConfig merge;
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            merge = concatImports(null);
+            Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
+            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight());
         } else {
             merge = dedupAndConcatImports(InterfaceName.AccountId.name());
         }
@@ -56,6 +58,30 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
         request.setSteps(steps);
         return request;
+    }
+
+    /**
+     * For PA during entity match migration period: some files are imported with
+     * legacy template (having AccountId) while some files are imported after
+     * template is upgraded (having CustomerAccountId)
+     *
+     * It's to rename AccountId to CustomerAccountId and copy to DefaultSystem's
+     * ID with same value
+     *
+     * Copy happens before rename and the merge job has check whether specified
+     * original column (AccountId) exists or not
+     *
+     * TODO: After all the tenants finish entity match migration, we could get
+     * rid of this field rename/copy logic
+     *
+     * @return <cloneFlds, renameFlds>
+     */
+    private Pair<String[][], String[][]> getPreProcessFlds() {
+        String defaultAcctSysId = getDefaultSystemId(entity);
+        String[][] cloneFlds = defaultAcctSysId == null ? null
+                : new String[][] { { InterfaceName.AccountId.name(), defaultAcctSysId } };
+        String[][] renameFlds = { { InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name() } };
+        return Pair.of(cloneFlds, renameFlds);
     }
 
     private boolean isShortCutMode() {

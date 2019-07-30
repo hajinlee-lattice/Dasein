@@ -13,5 +13,5 @@ public interface MigrationTrackEntityMgr extends BaseEntityMgrRepository<Migrati
 
     boolean canDeleteOrRenameTable(Tenant tenant, String tableName);
 
-    List<Long> getStartedTenants();
+    List<Long> getTenantPidsByStatus(MigrationTrack.Status status);
 }

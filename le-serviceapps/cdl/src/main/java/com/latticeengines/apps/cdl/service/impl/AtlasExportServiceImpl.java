@@ -67,4 +67,19 @@ public class AtlasExportServiceImpl implements AtlasExportService {
     public AtlasExport getAtlasExport(String customerSpace, String uuid) {
         return atlasExportEntityMgr.findByUuid(uuid);
     }
+
+    @Override
+    public List<AtlasExport> findAll(String customerSpace) {
+        return atlasExportEntityMgr.findAll();
+    }
+
+    @Override
+    public void updateAtlasExport(String customerSpace, AtlasExport atlasExport) {
+        atlasExportEntityMgr.createOrUpdate(atlasExport);
+    }
+
+    @Override
+    public AtlasExport createAtlasExport(String customerSpace, AtlasExport atlasExport) {
+        return atlasExportEntityMgr.createAtlasExport(atlasExport);
+    }
 }

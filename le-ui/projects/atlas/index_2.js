@@ -7,6 +7,7 @@ import 'atlas/ratingsengine/ratingsengine.index';
 import 'atlas/setup/setup.index';
 import 'atlas/segmentation/segmentation.index';
 import 'atlas/segments/segments.index';
+import 'atlas/playbook/content/playlistchannels/playlistchannels.index';
 import 'atlas/sfdc/sfsc.index';
 import 'atlas/ssoconfig/ssocinfig.index';
 import 'atlas/userManagement/user-management.index';

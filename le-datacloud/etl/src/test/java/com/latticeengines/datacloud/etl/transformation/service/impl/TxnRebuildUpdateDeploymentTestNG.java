@@ -148,9 +148,8 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
     private List<TransformationStepConfig> mergeTxnRebuild(List<String> rawTxnTables, boolean update) {
         int txnDateStep, standardizeStep, collectDaysStep;
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(mergeInputs(rawTxnTables, false, false, true)); // Don't use
-                                                                  // target
-                                                                  // table
+        // Don't use target table
+        steps.add(mergeInputs(rawTxnTables, false, false, true));
         steps.add(addTrxDate(previousStep));
         txnDateStep = previousStep;
         if (update) {

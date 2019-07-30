@@ -236,8 +236,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         systemStatus.setRunningScheduleNowCount(runningScheduleNowCount);
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         systemStatus.setRunningPATenantId(runningPATenantId);
-        log.info("There are {} running PAs({} ScheduleNow PAs, {} large PAs). Tenants = {}. Large PA Tenants = {}",
-                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningPATenantId, largeJobTenantId);
+        log.info(
+                "There are {} running PAs({} ScheduleNow PAs, {} large PAs). Tenants = {}. Large PA Tenants = {}. schedulerName={}",
+                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningPATenantId, largeJobTenantId,
+                schedulerName);
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, systemStatus);
         map.put(TENANT_ACTIVITY_LIST, tenantActivityList);

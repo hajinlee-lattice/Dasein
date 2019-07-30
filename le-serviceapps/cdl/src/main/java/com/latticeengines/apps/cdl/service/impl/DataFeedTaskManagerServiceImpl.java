@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
@@ -70,9 +71,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Prepa
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("dataFeedTaskManagerService")
@@ -102,20 +102,20 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final S3ImportFolderService s3ImportFolderService;
 
+    @Inject
+    private DropBoxService dropBoxService;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
-
-    @Value("${common.pls.url}")
-    private String hostPort;
-
-    @Inject
-    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
@@ -132,6 +132,18 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         this.attrConfigEntityMgr = attrConfigEntityMgr;
         this.s3Service = s3Service;
         this.s3ImportFolderService = s3ImportFolderService;
+    }
+
+    private String formatFolder(String folder) {
+        if (StringUtils.isNotEmpty(folder)) {
+            if (folder.startsWith("/")) {
+                folder = folder.substring(1);
+            }
+            if (folder.endsWith("/")) {
+                folder = folder.substring(0, folder.length() - 1);
+            }
+        }
+        return folder;
     }
 
     @Override
@@ -156,7 +168,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
-                enableEntityMatch || enableEntityMatchGA);
+                batonService.isEntityMatchEnabled(customerSpace));
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
@@ -171,7 +183,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                if (!finalSchemaCheck(finalTemplate, entity, withoutId, enableEntityMatch)) {
+                if (!finalSchemaCheck(finalTemplate, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -188,7 +200,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
-            if (!finalSchemaCheck(newMeta, entity, withoutId, enableEntityMatch)) {
+            if (!finalSchemaCheck(newMeta, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -211,8 +223,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             if (StringUtils.isEmpty(S3PathBuilder.getSystemNameFromFeedType(feedType))) {
-                dropBoxProxy.createTemplateFolder(customerSpace.toString(), null,
-                        S3PathBuilder.getFolderNameFromFeedType(feedType), "");
+                String objectName = S3PathBuilder.getFolderNameFromFeedType(feedType);
+                dropBoxService.createFolder(customerSpace.toString(), null, formatFolder(objectName), "");
             }
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
@@ -232,9 +244,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private void setCategoryForTable(Table table, String entity) {
         BusinessEntity businessEntity = BusinessEntity.valueOf(entity);
-        if (businessEntity == null) {
-            throw new RuntimeException(String.format("Cannot recognize entity: %s", entity));
-        }
         String category;
         switch (businessEntity) {
         case Account:
@@ -393,7 +402,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private S3ImportEmailInfo generateEmailInfo(String customerSpace, String fileName, DataFeedTask dataFeedTask,
                                                 Date timeReceived) {
         S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
-        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
         emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                 dataFeedTask.getFeedType()));
         emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
@@ -409,10 +418,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private void sendS3ImportEmail(String customerSpace, String result, S3ImportEmailInfo emailInfo) {
         try {
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
-
             String tenantId = CustomerSpace.parse(customerSpace).toString();
-            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }
@@ -421,10 +428,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private void sendS3TemplateChangeEmail(String customerSpace, DataFeedTask dataFeedTask, String user,
                                            boolean isCreate) {
         try {
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             if (dataFeedTask != null) {
                 S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
-                DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+                DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
                 emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         dataFeedTask.getFeedType()));
                 emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
@@ -436,9 +442,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
                 if (isCreate) {
-                    proxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
+                    plsInternalProxy.sendS3TemplateCreateEmail(tenantId, emailInfo);
                 } else {
-                    proxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
+                    plsInternalProxy.sendS3TemplateUpdateEmail(tenantId, emailInfo);
                 }
             }
         } catch (Exception e) {

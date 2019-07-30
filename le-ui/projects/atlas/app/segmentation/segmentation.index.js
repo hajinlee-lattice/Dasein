@@ -9,6 +9,6 @@ const Dependencies = [];
 angular
     .module('atlas.segmentation', Dependencies)
     .config(Config)
-    .component('atlasSegmentation', Component)
-    .component("leItemBar", react2angular(LeItemBar, ["store"], []))
-    .component("leItemView", react2angular(LeItemView, ["store"], []));
+    .component('atlasSegmentation', Component);
+    // .component("leItemBar", react2angular(LeItemBar, ["store"], []))
+    // .component("leItemView", react2angular(LeItemView, ["store"], []));
