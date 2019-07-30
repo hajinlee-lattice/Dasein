@@ -89,10 +89,11 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             String s3nPath = getS3nPath(config.getS3Bucket(), config.getS3FilePath());
             Path hdfsPath = PathBuilder.buildS3FilePath(CamilleEnvironment.getPodId(), config.getCustomerSpace());
             String fileName = config.getS3FileName();
-            if (StringUtils.isNotEmpty(fileName) && fileName.endsWith(S3_FILE_SUFFIX)) {
+            if (StringUtils.isNotEmpty(fileName) && fileName.toLowerCase().endsWith(S3_FILE_SUFFIX)) {
                 fileName = fileName.substring(0, fileName.length() - S3_FILE_SUFFIX.length());
                 fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + S3_FILE_SUFFIX;
             } else {
+                log.error("Error when processing file: " + fileName);
                 throw new RuntimeException("Filename from s3 is empty or not a csv file!");
             }
             hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), fileName);
