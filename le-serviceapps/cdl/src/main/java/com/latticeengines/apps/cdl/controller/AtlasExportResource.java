@@ -41,7 +41,7 @@ public class AtlasExportResource {
 
     @PutMapping(value = "")
     @ApiOperation(value = "Update Export")
-    public void updateAtlasExport(@PathVariable String customerSpace, @RequestParam String uuid,
+    public void updateAtlasExportStatus(@PathVariable String customerSpace, @RequestParam String uuid,
                                   @RequestParam MetadataSegmentExport.Status status) {
         AtlasExport atlasExport = atlasExportService.getAtlasExport(customerSpace, uuid);
         atlasExport.setStatus(status);

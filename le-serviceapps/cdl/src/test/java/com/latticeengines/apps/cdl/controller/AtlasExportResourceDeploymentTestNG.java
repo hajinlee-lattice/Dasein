@@ -71,7 +71,7 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
         Assert.assertEquals(atlasExport.getFilesUnderSystemPath().size(), 1);
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord2.getUuid());
         verifyAtlasExport(atlasExport, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.RUNNING);
-        atlasExportProxy.updateAtlasExport(mainCustomerSpace, exportRecord2.getUuid(), MetadataSegmentExport.Status.COMPLETED);
+        atlasExportProxy.updateAtlasExportStatus(mainCustomerSpace, exportRecord2.getUuid(), MetadataSegmentExport.Status.COMPLETED);
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord2.getUuid());
         verifyAtlasExport(atlasExport, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.COMPLETED);
         List<AtlasExport> atlasExports = atlasExportProxy.findAll(mainCustomerSpace);

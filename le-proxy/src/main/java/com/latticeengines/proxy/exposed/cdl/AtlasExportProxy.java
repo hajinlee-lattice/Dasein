@@ -14,7 +14,7 @@ public interface AtlasExportProxy {
 
     AtlasExport findAtlasExportById(String customerSpace, String uuid);
 
-    void updateAtlasExport(String customerSpace, String uuid, MetadataSegmentExport.Status status);
+    void updateAtlasExportStatus(String customerSpace, String uuid, MetadataSegmentExport.Status status);
 
     void addFileToSystemPath(String customerSpace, String uuid, String fileName);
 

@@ -28,7 +28,7 @@ public class AtlasExportProxyImpl extends MicroserviceRestApiProxy implements At
     }
 
     @Override
-    public void updateAtlasExport(String customerSpace, String uuid, MetadataSegmentExport.Status status) {
+    public void updateAtlasExportStatus(String customerSpace, String uuid, MetadataSegmentExport.Status status) {
         String url = constructUrl("/customerspaces/{customerSpace}/atlas/export?uuid={uuid}&status={status}", //
                 shortenCustomerSpace(customerSpace), uuid, status);
         put("update atlas export", url);
