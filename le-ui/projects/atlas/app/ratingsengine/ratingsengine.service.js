@@ -193,7 +193,7 @@ angular.module('lp.ratingsengine')
                     state: 'segment.products.prioritization.training', 
                     progressDisabled: true,
                     nextLabel: 'Model',
-                    showNextSpinner: true,
+                    // showNextSpinner: true,
                     afterNextValidation: true,
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveAIRatingModel(nextState, 'training'); // validate here
