@@ -147,11 +147,6 @@ class SystemsComponent extends Component {
                 launching = (launchState === 'Launching' ? true : false),
                 queued = (launchState === 'Queued' ? true : false),
                 launchStates = (launchState) => {
-                    // Has not been launched
-                    // Launching
-                    // Waiting for the Target System
-                    // Successfully Launched
-                    console.log(launchState);
                     if(launchState === 'Synced' || launchState === 'Queued') {
                         return (
                             <Aux>
