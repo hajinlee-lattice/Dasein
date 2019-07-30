@@ -48,6 +48,8 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
@@ -266,39 +268,42 @@ public class ProductFileValidationService
             Set<String>  attrInSegmentOrModel = dependentAttrs.stream().map(attr -> attr.getAttribute()).collect(Collectors.toSet());
             List<RatingEngineSummary> ratingEngines = ratingEngineProxy.getRatingEngineSummaries(space.toString());
 
-            List<RatingEngineSummary> cSellSummaries =
-                    ratingEngines.stream().filter(ratingEngine -> RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())).collect(Collectors.toList());
-            // judge whether exists active cross-sell model
-            boolean existActiveCS =
-                    cSellSummaries.stream().anyMatch(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()) && RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()));
+            List<RatingEngineSummary> activeXSellSummaries =
+                    ratingEngines.stream().filter(ratingEngine -> RatingEngineType.CROSS_SELL.equals(ratingEngine.getType()) && RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus())).collect(Collectors.toList());
 
             log.info("bundle that will be removed " + JsonUtils.serialize(bundleToBeRemoved));
             // error out all bundle to be removed if existing active c-shell
-            if (existActiveCS) {
+            // generate warning for product list directly referenced by C-Sell model
+            if (CollectionUtils.isNotEmpty(activeXSellSummaries)) {
                 for (String bundle : bundleToBeRemoved) {
                     String errMsg = String.format("Error: %s can't be removed as exists active CE model",
                             bundle);
                     csvFilePrinter.printRecord("", "", errMsg);
                     errorLine++;
                 }
-            }
-            // generate warning for product list directly referenced by C-Sell model
-            if (CollectionUtils.isNotEmpty(cSellSummaries)) {
+
                 // retrieve the product list in cross-sell model
                 Set<String> productsInUse = new HashSet<>();
-                for (RatingEngineSummary summary: cSellSummaries) {
+                for (RatingEngineSummary summary: activeXSellSummaries) {
                     String engineId = summary.getId();
-                    String modelId = summary.getPublishedIterationId(); // published id
+                    String modelId = summary.getScoringIterationId(); // scoring id is current activated model
                     if (StringUtils.isNotBlank(modelId)) {
-                        AIModel model = (AIModel) ratingEngineProxy.getRatingModel(space.toString(), engineId, modelId);
-                        CrossSellModelingConfig config = (CrossSellModelingConfig) model.getAdvancedModelingConfig();
-                        //get the product list that need to be remodel
-                        if (CollectionUtils.isNotEmpty(config.getTargetProducts())) {
-                            productsInUse.addAll(config.getTargetProducts());
+                        RatingModel model = ratingEngineProxy.getRatingModel(space.toString(), engineId, modelId);
+                        if (model instanceof  AIModel) {
+                            AIModel ai = (AIModel) model;
+                            AdvancedModelingConfig config =  ai.getAdvancedModelingConfig();
+                            if (config instanceof CrossSellModelingConfig) {
+                                CrossSellModelingConfig csConfig = (CrossSellModelingConfig) config;
+                                //get the product list referenced by cross-sell model directly
+                                if (CollectionUtils.isNotEmpty(csConfig.getTargetProducts())) {
+                                    productsInUse.addAll(csConfig.getTargetProducts());
+                                }
+                                if (CollectionUtils.isNotEmpty(csConfig.getTrainingProducts())) {
+                                    productsInUse.addAll(csConfig.getTrainingProducts());
+                                }
+                            }
                         }
-                        if (CollectionUtils.isNotEmpty(config.getTrainingProducts())) {
-                            productsInUse.addAll(config.getTrainingProducts());
-                        }
+
                     }
                 }
                 for (String bundle : bundleToBeRemoved) {
@@ -310,7 +315,8 @@ public class ProductFileValidationService
                             null)));
                     log.info("generate id is " + generatedId);
                     if (CollectionUtils.isNotEmpty(productsInUse) && productsInUse.contains(generatedId)) {
-                            String errMsg = String.format("Warning: %s need new iteration", bundle);
+                            String errMsg = String.format("Warning: %s will be removed while also referenced by model",
+                                    bundle);
                             csvFilePrinter.printRecord("", "", errMsg);
                     }
                 }
