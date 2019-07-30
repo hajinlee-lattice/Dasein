@@ -196,6 +196,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     TransformationStepConfig dedupAndMerge(String joinKey, List<Integer> inputSteps, List<String> inputTables) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
+        if (CollectionUtils.isEmpty(inputSteps) && CollectionUtils.isEmpty(inputTables)) {
+            throw new IllegalArgumentException("No input to be merged.");
+        }
         if (CollectionUtils.isNotEmpty(inputSteps)) {
             step.setInputSteps(inputSteps);
         }

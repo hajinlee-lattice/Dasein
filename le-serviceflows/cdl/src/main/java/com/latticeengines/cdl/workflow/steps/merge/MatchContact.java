@@ -60,7 +60,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         mergeInputSchema(targetTableName);
         putStringValueInContext(ENTITY_MATCH_CONTACT_TARGETTABLE, targetTableName);
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
-        Table newAccountTable = metadataProxy.getTable(customerSpace.toString(), newAccountTableName);
+        Table newAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountTableName);
         if (newAccountTable != null) {
             putStringValueInContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, newAccountTableName);
             addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
@@ -116,9 +116,16 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
-        String configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
-                getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
-                getSystemIds(BusinessEntity.Contact), newAccountTableName);
+        String configStr;
+        if (configuration.isEntityMatchGAOnly()) {
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+                    getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
+                    getSystemIds(BusinessEntity.Contact), null);
+        } else {
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+                    getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
+                    getSystemIds(BusinessEntity.Contact), newAccountTableName);
+        }
         step.setConfiguration(configStr);
         return step;
     }
