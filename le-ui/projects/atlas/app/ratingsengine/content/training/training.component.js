@@ -287,6 +287,9 @@ angular
 					ratingEngine,
 					"EVENT"
 				).then(function(count) {
+                    if (count < 50) {
+                        RatingsEngineStore.setValidation("training", false);
+                    }
 					vm.purchasesCount = count;
 					vm.purchasesCountReturned = true;
 				});
