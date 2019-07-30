@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -34,10 +35,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
@@ -58,7 +59,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
     private DataFeedProxy dataFeedProxy;
 
     @Inject
-    private CDLAttrConfigProxy cdlAttrConfigProxy;
+    private AttrConfigService attrConfigService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(String customerSpace, OrphanRecordsExportRequest request,
@@ -117,8 +118,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         String productTableName = getTableName(TableRoleInCollection.ConsolidatedProduct,
                 request.getArtifactVersion());
 
-        AttrConfigRequest attrRequest = cdlAttrConfigProxy.getAttrConfigByProperty(customerSpace,
-                ColumnSelection.Predefined.Enrichment.getName(), true);
+        AttrConfigRequest attrRequest = new AttrConfigRequest();
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(ColumnSelection.Predefined.Enrichment.getName(), true);
+        attrRequest.setAttrConfigs(attrConfigs);
         if (CollectionUtils.isEmpty(attrRequest.getAttrConfigs())) {
             return null;
         }

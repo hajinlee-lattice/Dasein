@@ -20,11 +20,12 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrIm
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("atlasExportEntityMgr")
 public class AtlasExportEntityMgrImpl
-        extends BaseReadWriteRepoEntityMgrImpl<AtlasExportRepository, AtlasExport,Long>
+        extends BaseReadWriteRepoEntityMgrImpl<AtlasExportRepository, AtlasExport, Long>
         implements AtlasExportEntityMgr {
 
     private static final String UUID_PREFIX = "AtlasExport_";
@@ -80,9 +81,24 @@ public class AtlasExportEntityMgrImpl
         AtlasExport export = new AtlasExport();
         export.setTenant(tenant);
         export.setExportType(exportType);
+        export.setStatus(MetadataSegmentExport.Status.RUNNING);
         export.setUuid(NamingUtils.uuid(UUID_PREFIX));
         export.setDatePrefix(exportDateFormat.format(new Date()));
         atlasExportDao.create(export);
         return export;
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public AtlasExport createAtlasExport(AtlasExport atlasExport) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        atlasExport.setTenant(tenant);
+        atlasExport.setTenantId(tenant.getPid());
+        atlasExport.setUuid(NamingUtils.uuid(UUID_PREFIX));
+        atlasExport.setStatus(MetadataSegmentExport.Status.RUNNING);
+        atlasExport.setDatePrefix(exportDateFormat.format(new Date()));
+        atlasExportDao.create(atlasExport);
+        return atlasExport;
+    }
+
 }

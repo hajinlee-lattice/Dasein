@@ -32,6 +32,7 @@ import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -116,6 +117,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private ServingStoreService servingStoreService;
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -329,8 +333,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
                 CustomerSpace.shortenCustomerSpace(customerSpace), table.getName()).collectMap(this::getKey).block();
 
-        Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
-                .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
+        Map<String, ColumnMetadata> modelingAttributes = servingStoreService
+                .getAllowedModelingAttrs(customerSpace, null, dataCollectionService.getActiveVersion(customerSpace),
+                        false)
                 .collectMap(this::getKey, cm -> iterationAttributes.getOrDefault(getKey(cm), cm),
                         () -> iterationAttributes)
                 .block();
@@ -409,11 +414,12 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey).block();
 
-        Map<String, ColumnMetadata> modelingAttributes = servingStoreProxy
-                .getAllowedModelingAttrs(customerSpace, false, dataCollectionService.getActiveVersion(customerSpace))
+        Map<String, ColumnMetadata> modelingAttributes = servingStoreService
+                .getAllowedModelingAttrs(customerSpace, null, dataCollectionService.getActiveVersion(customerSpace),
+                        false)
                 .concatWith(
-                        servingStoreProxy.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
-                                false, dataCollectionService.getActiveVersion(customerSpace)))
+                        servingStoreService.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
+                                dataCollectionService.getActiveVersion(customerSpace), false))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {

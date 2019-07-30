@@ -50,7 +50,7 @@ public class MetadataSegmentExportCleanupServiceImpl implements MetadataSegmentE
                         if (CollectionUtils.isNotEmpty(exportJobs)) {
                             exportJobs.stream() //
                                     .forEach(exportJob -> {
-                                        if (exportJob.getCleanupBy().getTime() < System.currentTimeMillis()) {
+                                        if (exportJob.getCleanupBy() != null && exportJob.getCleanupBy().getTime() < System.currentTimeMillis()) {
                                             cleanupExportJob(tenant, exportJob);
                                         }
                                     });

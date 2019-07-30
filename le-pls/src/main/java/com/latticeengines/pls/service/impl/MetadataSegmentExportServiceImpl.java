@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,9 @@ import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
@@ -29,10 +33,14 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("metadataSegmentExportService")
@@ -43,11 +51,23 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Inject
     private Configuration yarnConfiguration;
 
+    @Value("${pls.cdl.export.usespark}")
+    private boolean useSparkSQL;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private CDLProxy cdlProxy;
+
     @Inject
     private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private AtlasExportProxy atlasExportProxy;
 
     @Inject
     private SegmentExportWorkflowSubmitter segmentExportWorkflowSubmitter;
@@ -63,36 +83,64 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Override
     public List<MetadataSegmentExport> getSegmentExports() {
-        return metadataSegmentExportEntityMgr.findAll();
+        List<AtlasExport> atlasExports = atlasExportProxy.findAll(getCustomerSpace().toString());
+        List<MetadataSegmentExport> metadataSegmentExports =
+                atlasExports.stream().map(AtlasExport -> MetadataSegmentExportConverter.convertToMetadataSegmentExport(AtlasExport)).collect(Collectors.toList());
+        List<MetadataSegmentExport> result = metadataSegmentExportEntityMgr.findAll();
+        result.addAll(metadataSegmentExports);
+        return result;
     }
 
     @Override
     public MetadataSegmentExport getSegmentExportByExportId(String exportId) {
-        return metadataSegmentExportEntityMgr.findByExportId(exportId);
+        MetadataSegmentExport metadataSegmentExport = metadataSegmentExportEntityMgr.findByExportId(exportId);
+        if (metadataSegmentExport != null) {
+            return metadataSegmentExport;
+        }
+        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(getCustomerSpace().toString(), exportId);
+        return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExport);
+    }
+
+    private CustomerSpace getCustomerSpace() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return customerSpace;
     }
 
     @Override
     public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
         checkExportSize(metadataSegmentExportJob);
-
         setCreatedBy(metadataSegmentExportJob);
+        if (useSparkSQL) {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            if (customerSpace == null) {
+                throw new LedpException(LedpCode.LEDP_18217);
+            }
+            EntityExportRequest request = new EntityExportRequest();
+            request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace.toString()));
+            AtlasExport atlasExport = atlasExportProxy.createAtlasExport(customerSpace.toString(),
+                    MetadataSegmentExportConverter.convertToAtlasExport(metadataSegmentExportJob));
+            cdlProxy.entityExport(customerSpace.toString(), request);
+            return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExportProxy.findAtlasExportById(customerSpace.toString(), atlasExport.getUuid()));
+        } else {
+            String displayName = "";
+            if (metadataSegmentExportJob.getSegment() != null) {
+                displayName = metadataSegmentExportJob.getSegment().getDisplayName();
+            }
+            String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
+                    displayName, metadataSegmentExportJob.getType());
+            String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
 
-        String displayName = "";
-        if (metadataSegmentExportJob.getSegment() != null) {
-            displayName = metadataSegmentExportJob.getSegment().getDisplayName();
+            metadataSegmentExportJob.setFileName(exportedFileName);
+            metadataSegmentExportJob.setTableName(tableName);
+
+            metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
+
+            submitExportWorkflowJob(metadataSegmentExportJob);
+            return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
         }
-        String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
-                displayName, metadataSegmentExportJob.getType());
-        String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
-
-        metadataSegmentExportJob.setFileName(exportedFileName);
-        metadataSegmentExportJob.setTableName(tableName);
-
-        metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
-
-        submitExportWorkflowJob(metadataSegmentExportJob);
-
-        return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
     }
 
     private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob) {
@@ -197,4 +245,5 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         metadataSegmentExportEntityMgr.create(metadataSegmentExport);
         return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExport.getExportId());
     }
+
 }

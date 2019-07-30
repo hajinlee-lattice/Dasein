@@ -23,7 +23,7 @@ public class ExportSegmentExportToS3 extends BaseImportExportS3<ImportExportS3St
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         ImportExportRequest request = new ImportExportRequest();
-        String exportId = getConfiguration().getMetadataSegmentExportId();
+        String exportId = getConfiguration().getAtlasExportId();
         InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 getConfiguration().getInternalResourceHostPort());
         MetadataSegmentExport metadataSegmentExport = internalResourceRestApiProxy

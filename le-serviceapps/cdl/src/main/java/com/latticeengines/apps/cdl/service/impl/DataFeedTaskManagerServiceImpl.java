@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
@@ -70,7 +71,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Prepa
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -102,14 +102,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final S3ImportFolderService s3ImportFolderService;
 
+    @Inject
+    private DropBoxService dropBoxService;
+
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
     @Value("${common.pls.url}")
     private String hostPort;
-
-    @Inject
-    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
@@ -132,6 +132,18 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         this.attrConfigEntityMgr = attrConfigEntityMgr;
         this.s3Service = s3Service;
         this.s3ImportFolderService = s3ImportFolderService;
+    }
+
+    private String formatFolder(String folder) {
+        if (StringUtils.isNotEmpty(folder)) {
+            if (folder.startsWith("/")) {
+                folder = folder.substring(1);
+            }
+            if (folder.endsWith("/")) {
+                folder = folder.substring(0, folder.length() - 1);
+            }
+        }
+        return folder;
     }
 
     @Override
@@ -211,8 +223,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             if (StringUtils.isEmpty(S3PathBuilder.getSystemNameFromFeedType(feedType))) {
-                dropBoxProxy.createTemplateFolder(customerSpace.toString(), null,
-                        S3PathBuilder.getFolderNameFromFeedType(feedType), "");
+                String objectName = S3PathBuilder.getFolderNameFromFeedType(feedType);
+                dropBoxService.createFolder(customerSpace.toString(), null, formatFolder(objectName), "");
             }
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
@@ -393,7 +405,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private S3ImportEmailInfo generateEmailInfo(String customerSpace, String fileName, DataFeedTask dataFeedTask,
                                                 Date timeReceived) {
         S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
-        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
         emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                 dataFeedTask.getFeedType()));
         emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
@@ -424,7 +436,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             if (dataFeedTask != null) {
                 S3ImportEmailInfo emailInfo = new S3ImportEmailInfo();
-                DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+                DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
                 emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         dataFeedTask.getFeedType()));
                 emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
