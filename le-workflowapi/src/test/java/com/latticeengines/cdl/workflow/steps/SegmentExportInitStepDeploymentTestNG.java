@@ -84,7 +84,8 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndData();
-        testPlayCreationHelper.setupRatingEngineAndSegment();
+        testPlayCreationHelper.setupTestSegment();
+        testPlayCreationHelper.setupTestRulesBasedModel();
         tenant = testPlayCreationHelper.getTenant();
 
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -113,8 +114,8 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     @Test(groups = "deployment", dependsOnMethods = { "testContactExport" })
     public void testAccountAndContactExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace,
-                AtlasExportType.ACCOUNT_AND_CONTACT, internalResourceRestApiProxy);
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT_AND_CONTACT,
+                internalResourceRestApiProxy);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
                 BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name(),

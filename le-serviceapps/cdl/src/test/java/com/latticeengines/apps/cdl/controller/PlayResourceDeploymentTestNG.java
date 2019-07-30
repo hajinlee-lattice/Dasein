@@ -58,29 +58,32 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        if (USE_EXISTING_TENANT) {
-            setupTestEnvironment(EXISTING_TENANT);
-        } else {
-            setupTestEnvironment();
-            cdlTestDataService.populateData(mainTestTenant.getId(), 3);
-        }
+        // if (USE_EXISTING_TENANT) {
+        // setupTestEnvironment(EXISTING_TENANT);
+        // } else {
+        // setupTestEnvironment();
+        // cdlTestDataService.populateData(mainTestTenant.getId(), 3);
+        // }
 
-        playLaunchConfig = new PlayLaunchConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
+        playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(USE_EXISTING_TENANT ? EXISTING_TENANT : null)
+                .destinationSystemType(CDLExternalSystemType.CRM)
                 .destinationSystemName(CDLExternalSystemName.Salesforce)
-                .destinationSystemId("Salesforce_" + System.currentTimeMillis())
+                .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis())
                 .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
 
-        playCreationHelper.setTenant(mainTestTenant);
-        playCreationHelper.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
-        playCreationHelper.setDestinationOrgType(playLaunchConfig.getDestinationSystemType());
-        MetadataSegment retrievedSegment = createSegment();
+        // playCreationHelper.setTenant(mainTestTenant);
+        // playCreationHelper.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
+        // playCreationHelper.setDestinationOrgType(playLaunchConfig.getDestinationSystemType());
+
+        playCreationHelper.setupTenantAndData(playLaunchConfig);
+        mainTestTenant = playCreationHelper.getTenant();
+
+        MetadataSegment retrievedSegment = playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null,
+                null);
+        ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
+
         playCreationHelper.createPlayTargetSegment();
         playCreationHelper.createLookupIdMapping(playLaunchConfig);
-        ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
-    }
-
-    private MetadataSegment createSegment() {
-        return playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null, null);
     }
 
     @Test(groups = "deployment-app")

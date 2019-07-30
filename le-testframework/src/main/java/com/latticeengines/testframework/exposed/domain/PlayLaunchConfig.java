@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 
 public class PlayLaunchConfig {
 
-    private String existingTenant;
+    private String existingTenantName;
 
     private boolean mockRatingTable;
 
@@ -46,7 +46,7 @@ public class PlayLaunchConfig {
         private PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig();
 
         public Builder existingTenant(String existingTenant) {
-            playLaunchConfig.existingTenant = existingTenant;
+            playLaunchConfig.existingTenantName = existingTenant;
             return this;
         }
 
@@ -120,8 +120,8 @@ public class PlayLaunchConfig {
         }
     }
 
-    public String getExistingTenant() {
-        return existingTenant;
+    public String getExistingTenantName() {
+        return existingTenantName;
     }
 
     public boolean isMockRatingTable() {
