@@ -15,6 +15,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -43,11 +46,16 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     private Play secondPlayWithLaunch;
     private Tenant tenant;
 
-    private PlayLaunchConfig playLaunchConfig = null;
+    private PlayLaunchConfig playLaunchConfig;
 
     @BeforeClass(groups = "deployment")
     public void setup() {
-        playLaunchConfig = new PlayLaunchConfig.Builder().build();
+        String testOrgName = CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis();
+        playLaunchConfig = new PlayLaunchConfig.Builder() //
+                .destinationSystemType(CDLExternalSystemType.CRM) //
+                .destinationSystemName(CDLExternalSystemName.Salesforce) //
+                .destinationSystemId(testOrgName) //
+                .build();
         testPlayCreationHelper.setupTenantAndData();
     }
 
@@ -60,7 +68,8 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountWithoutPlayCreation" })
     public void testGetPlayCountAfterCreatingPlayWithoutLaunch() throws Exception {
         PlayLaunchConfig plConfig = new PlayLaunchConfig.Builder().build();
-        testPlayCreationHelper.setupRatingEngineAndSegment();
+        testPlayCreationHelper.setupTestSegment();
+        testPlayCreationHelper.setupTestRulesBasedModel();
         testPlayCreationHelper.createPlay(plConfig);
 
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);
@@ -78,10 +87,16 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         playProxy.updatePlayLaunch(tenant.getId(), firstPlayWithLaunch.getName(), firstPlayLaunch.getLaunchId(),
                 LaunchState.Launched);
 
-        Map<String, String> org = new HashMap<String, String>();
-        org = testPlayCreationHelper.getOrgInfo();
+        Map<String, String> org = getOrgInfo();
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, org);
         Assert.assertEquals(playCount, 1);
+    }
+
+    private Map<String, String> getOrgInfo() {
+        Map<String, String> org = new HashMap<>();
+        org.put(CDLConstants.ORG_ID, playLaunchConfig.getDestinationSystemId());
+        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, playLaunchConfig.getDestinationSystemType().toString());
+        return org;
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithLaunch" })
