@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -111,32 +112,12 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         bucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
-        playLaunch1 = new PlayLaunch();
-        playLaunch1.setLaunchId(NamingUtils.randomSuffix("pl", 16));
-        playLaunch1.setTenant(mainTestTenant);
-        playLaunch1.setLaunchState(LaunchState.Launching);
-        playLaunch1.setPlay(play);
-        playLaunch1.setBucketsToLaunch(bucketsToLaunch);
-        playLaunch1.setDestinationAccountId("SFDC_ACC1");
-        playLaunch1.setDestinationOrgId(org1);
-        playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
-        playLaunch1.setCreatedBy(CREATED_BY);
-        playLaunch1.setUpdatedBy(CREATED_BY);
-
+        playLaunch1 = createPlayLaunch(play, NamingUtils.randomSuffix("pl", 16), LaunchState.Launching, bucketsToLaunch,
+                "SFDC_ACC1", org1, CDLExternalSystemType.CRM, CREATED_BY, CREATED_BY);
         playLaunchService.create(playLaunch1);
 
-        playLaunch2 = new PlayLaunch();
-        playLaunch2.setLaunchId(NamingUtils.randomSuffix("pl", 16));
-        playLaunch2.setTenant(mainTestTenant);
-        playLaunch2.setLaunchState(LaunchState.Launching);
-        playLaunch2.setPlay(play);
-        playLaunch2.setBucketsToLaunch(bucketsToLaunch);
-        playLaunch2.setDestinationAccountId("SFDC_ACC2");
-        playLaunch2.setDestinationOrgId(org2);
-        playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
-        playLaunch2.setCreatedBy(CREATED_BY);
-        playLaunch2.setUpdatedBy(CREATED_BY);
-
+        playLaunch2 = createPlayLaunch(play, NamingUtils.randomSuffix("pl", 16), LaunchState.Launching, bucketsToLaunch,
+                "SFDC_ACC2", org2, CDLExternalSystemType.CRM, CREATED_BY, CREATED_BY);
         playLaunchService.create(playLaunch2);
     }
 
@@ -151,7 +132,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         String workflowRequestId = UUID.randomUUID().toString();
         DataIntegrationStatusMonitorMessage statusMessage = createDefaultStatusMessage(workflowRequestId,
                 DataIntegrationEventType.WorkflowSubmitted.toString(), playLaunch1.getId());
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage));
 
         DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
@@ -197,7 +178,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         Boolean exceptionThrown = false;
         try {
-            dataIntegrationStatusMonitoringService.createOrUpdateStatus(statusMessage);
+            dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage));
         } catch (Exception e) {
             log.info("Caught exception creating status monitor: " + e.getMessage());
             exceptionThrown = true;
@@ -212,7 +193,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         DataIntegrationStatusMonitorMessage createStatusMonitorMessage = createDefaultStatusMessage(workflowRequestId,
                 DataIntegrationEventType.WorkflowSubmitted.toString(), playLaunch1.getId());
 
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(createStatusMonitorMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(createStatusMonitorMessage));
         DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
@@ -225,7 +206,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setMessage("test");
         updateStatusMonitorMessage.setEventDetail(null);
 
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
@@ -251,7 +232,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         DataIntegrationStatusMonitorMessage createStatusMonitorMessage = createDefaultStatusMessage(workflowRequestId,
                 DataIntegrationEventType.WorkflowSubmitted.toString(), playLaunch2.getId());
 
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(createStatusMonitorMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(createStatusMonitorMessage));
         DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
@@ -267,7 +248,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         eventDetail.setTotalRecordsSubmitted(4L);
         updateStatusMonitorMessage.setEventDetail(eventDetail);
 
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
@@ -287,7 +268,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
         updateStatusMonitorMessage.setEventDetail(new InitiatedEventDetail());
 
-        dataIntegrationStatusMonitoringService.createOrUpdateStatus(updateStatusMonitorMessage);
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
         statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
 
         Assert.assertNotNull(statusMonitor);
@@ -309,6 +290,30 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         } catch (Exception e) {
             //Ignore
         }
+    }
+
+    private List<DataIntegrationStatusMonitorMessage> generateListMessages(
+            DataIntegrationStatusMonitorMessage... statusMessage) {
+        List<DataIntegrationStatusMonitorMessage> statusMessages = new ArrayList();
+        statusMessages.addAll(Arrays.asList(statusMessage));
+        return statusMessages;
+    }
+
+    private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState,
+            Set<RatingBucketName> bucketToLaunch, String destinationAccountId, String destOrgId,
+            CDLExternalSystemType destSysType, String createdBy, String updatedBy) {
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setLaunchId(launchId);
+        playLaunch.setTenant(mainTestTenant);
+        playLaunch.setLaunchState(launchState);
+        playLaunch.setPlay(play);
+        playLaunch.setBucketsToLaunch(bucketToLaunch);
+        playLaunch.setDestinationAccountId(destinationAccountId);
+        playLaunch.setDestinationOrgId(destOrgId);
+        playLaunch.setDestinationSysType(destSysType);
+        playLaunch.setCreatedBy(updatedBy);
+        playLaunch.setUpdatedBy(createdBy);
+        return playLaunch;
     }
 
     @Test(groups = "functional")

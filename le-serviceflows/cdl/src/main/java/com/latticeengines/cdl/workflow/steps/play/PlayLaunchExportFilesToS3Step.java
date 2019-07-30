@@ -119,7 +119,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setMessage(String.format("Workflow Request Id %s has been launched to %s", workflowRequestId,
                 lookupIdMap.getOrgId()));
         message.setEventDetail(null);
-        dataIntegrationMonitoringProxy.createOrUpdateStatus(message);
+        List<DataIntegrationStatusMonitorMessage> messages = new ArrayList<>();
+        messages.add(message);
+        dataIntegrationMonitoringProxy.createOrUpdateStatus(messages);
         putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, workflowRequestId);
         putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, s3ExportFilePaths);
         log.info(JsonUtils.serialize(message));
