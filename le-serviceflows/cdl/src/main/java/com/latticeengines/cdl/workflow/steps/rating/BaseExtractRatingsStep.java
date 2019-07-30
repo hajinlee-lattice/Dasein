@@ -90,7 +90,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     @Override
     protected DataCollection.Version parseDataCollectionVersion(GenerateRatingStepConfiguration stepConfiguration) {
         if (version == null) {
-            version = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             if (version == null) {
                 version = configuration.getDataCollectionVersion();
             }
