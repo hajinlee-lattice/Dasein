@@ -100,6 +100,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataCollection.Version inactiveVersion;
     private ObjectNode reportJson;
     private ChoreographerContext grapherContext = new ChoreographerContext();
+    private Long newTransactionCount = 0L;
 
     @PostConstruct
     public void init() {
@@ -165,6 +166,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         resetEntityMatchFlagsForRetry();
         setAttributeQuotaLimit();
         setDataQuotaLimit();
+        reachTransactionLimit();
     }
 
     private void updateDataFeed() {
@@ -474,6 +476,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskId);
                     if (dataFeedTask == null) {
                         continue;
+                    } else if (dataFeedTask.getEntity().equals(BusinessEntity.Transaction.name())) {
+                        this.newTransactionCount += importActionConfiguration.getImportCount();
                     }
                 }
                 if (importActionConfiguration.getImportCount() == 0) {
@@ -487,6 +491,25 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
             }
         }
+    }
+
+
+    private void reachTransactionLimit() {
+        Long dataCount;
+        DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+        Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
+        DataCollectionStatus dataCollectionStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        dataCount = this.newTransactionCount;
+        if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null && dataCollectionStatus.getTransactionCount() != null) {
+            DataCollectionStatusDetail detail = dataCollectionStatus.getDetail();
+            dataCount = dataCount + detail.getTransactionCount();
+        }
+
+        log.info("stored Transaction data is " + dataCount);
+        if (transactionDataQuotaLimit < dataCount)
+            throw new IllegalStateException("the Transaction data quota limit is " + transactionDataQuotaLimit +
+                    ", The data you uploaded has exceeded the limit.");
+        log.info("stored data is " + dataCount + ", the Transaction data limit is " + transactionDataQuotaLimit);
     }
 
     private void createReportJson() {

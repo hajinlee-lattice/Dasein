@@ -1,10 +1,13 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +17,7 @@ import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.S3ExportFolderService;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +37,27 @@ public class AtlasExportResource {
     @ApiOperation(value = "Get Export record by UUID")
     public AtlasExport findAtlasExportById(@PathVariable String customerSpace, @RequestParam String uuid) {
         return atlasExportService.getAtlasExport(customerSpace, uuid);
+    }
+
+    @PutMapping(value = "")
+    @ApiOperation(value = "Update Export")
+    public void updateAtlasExportStatus(@PathVariable String customerSpace, @RequestParam String uuid,
+                                  @RequestParam MetadataSegmentExport.Status status) {
+        AtlasExport atlasExport = atlasExportService.getAtlasExport(customerSpace, uuid);
+        atlasExport.setStatus(status);
+        atlasExportService.updateAtlasExport(customerSpace, atlasExport);
+    }
+
+    @PostMapping(value = "")
+    @ApiOperation(value = "Create Export")
+    public AtlasExport createAtlasExport(@PathVariable String customerSpace, @RequestBody AtlasExport atlasExport) {
+        return atlasExportService.createAtlasExport(customerSpace, atlasExport);
+    }
+
+    @GetMapping(value = "/findAll")
+    @ApiOperation(value = "Get all atlas exports")
+    public List<AtlasExport> findAllAtlasExport(@PathVariable String customerSpace) {
+        return atlasExportService.findAll(customerSpace);
     }
 
     @PostMapping(value = "/systemfiles")

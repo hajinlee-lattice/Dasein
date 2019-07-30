@@ -1,14 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,40 +47,7 @@ public class ServingStoreResource {
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
             @RequestParam(name = "version", required = false) DataCollection.Version version) {
-        return getFlux(customerSpace, entity, version, groups);
-    }
-
-    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version,
-            List<ColumnSelection.Predefined> groups) {
-        AtomicLong timer = new AtomicLong();
-        AtomicLong counter = new AtomicLong();
-        Flux<ColumnMetadata> flux;
-        if (version == null) {
-            flux = servingStoreService
-                    .getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace))
-                    .sequential();
-        } else {
-            flux = servingStoreService.getFullyDecoratedMetadata(entity, version).sequential();
-        }
-        flux = flux //
-                .doOnSubscribe(s -> {
-                    timer.set(System.currentTimeMillis());
-                    log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
-                }) //
-                .doOnNext(cm -> counter.getAndIncrement()) //
-                .doOnComplete(() -> {
-                    long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
-                            + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
-                });
-        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(groups)) {
-            filterGroups.addAll(groups);
-        }
-        if (CollectionUtils.isNotEmpty(filterGroups)) {
-            flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
-        }
-        return flux;
+        return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups);
     }
 
     @GetMapping(value = "/systemmetadata")
@@ -94,7 +57,7 @@ public class ServingStoreResource {
             @PathVariable String customerSpace, //
             @RequestParam(name = "entity", required = true) BusinessEntity entity, //
             @RequestParam(name = "version", required = false) DataCollection.Version version) {
-        return getSystemMetadataAttrFlux(customerSpace, entity, version);
+        return servingStoreService.getSystemMetadataAttrFlux(customerSpace, entity, version);
     }
 
     @GetMapping(value = "/new-modeling")
@@ -108,7 +71,7 @@ public class ServingStoreResource {
         if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
             throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
         }
-        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, version,
+        Flux<ColumnMetadata> flux = servingStoreService.getDecoratedMetadata(customerSpace, entity, version,
                 Collections.singletonList(ColumnSelection.Predefined.Model));
         flux = flux.map(cm -> {
             cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
@@ -129,44 +92,10 @@ public class ServingStoreResource {
             @RequestParam(name = "version", required = false) DataCollection.Version version, //
             @RequestParam(name = "all-customer-attrs", required = false) Boolean allCustomerAttrs) {
         log.info(String.format("Get allow modeling attributes for %s with entity %s", customerSpace, entity));
-        if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
-            throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
-        }
-        Flux<ColumnMetadata> flux = getSystemMetadataAttrFlux(customerSpace, entity, version);
-        flux = flux.map(cm -> {
-            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
-                cm.setTagList(Collections.singletonList(Tag.INTERNAL));
-            }
-            return cm;
-        });
-        if (Boolean.TRUE.equals(allCustomerAttrs)) {
-            flux = flux.filter(cm -> // not external (not LDC) or can model
-            cm.getTagList().contains(Tag.INTERNAL) || Boolean.TRUE.equals(cm.getCanModel()));
-        } else {
-            flux = flux.filter(cm -> Boolean.TRUE.equals(cm.getCanModel()));
-        }
-        return flux;
+        return servingStoreService.getAllowedModelingAttrs(customerSpace, entity, version,
+                allCustomerAttrs);
     }
 
-    private Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version) {
-        AtomicLong timer = new AtomicLong();
-        AtomicLong counter = new AtomicLong();
-        Flux<ColumnMetadata> flux;
-        flux = servingStoreService.getSystemMetadata(entity,
-                version != null ? version : dataCollectionService.getActiveVersion(customerSpace)).sequential();
-        flux = flux //
-                .doOnSubscribe(s -> {
-                    timer.set(System.currentTimeMillis());
-                    log.info("Start serving system metadata for " + customerSpace + ":" + customerSpace);
-                }) //
-                .doOnNext(cm -> counter.getAndIncrement()) //
-                .doOnComplete(() -> {
-                    long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving system metadata for " + counter.get() + " attributes from "
-                            + customerSpace + " TimeElapsed=" + duration + " msec");
-                });
-        return flux;
-    }
+
 
 }

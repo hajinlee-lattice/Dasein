@@ -6,7 +6,6 @@ import java.util.Collection;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
@@ -36,11 +35,6 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
-        public Builder frontEndQuery(FrontEndQuery frontEndQuery) {
-            step.setFrontEndQuery(frontEndQuery);
-            return this;
-        }
-
         public Builder exportEntities(Collection<ExportEntity> entities) {
             step.setExportEntities(new ArrayList<>(entities));
             return this;
@@ -52,6 +46,7 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         }
 
         public Builder atlasExportId(String atlasExportId) {
+            importS3.setAtlasExportId(atlasExportId);
             step.setAtlasExportId(atlasExportId);
             return this;
         }

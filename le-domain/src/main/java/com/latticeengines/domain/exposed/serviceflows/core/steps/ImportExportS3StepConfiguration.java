@@ -11,7 +11,7 @@ public class ImportExportS3StepConfiguration extends MicroserviceStepConfigurati
     private CustomEventModelingType customEventModelingType;
 
     // for export
-    private String metadataSegmentExportId;
+    private String atlasExportId;
 
     public DataCollection.Version getVersion() {
         return version;
@@ -21,12 +21,12 @@ public class ImportExportS3StepConfiguration extends MicroserviceStepConfigurati
         this.version = version;
     }
 
-    public String getMetadataSegmentExportId() {
-        return metadataSegmentExportId;
+    public String getAtlasExportId() {
+        return atlasExportId;
     }
 
-    public void setMetadataSegmentExportId(String metadataSegmentExportId) {
-        this.metadataSegmentExportId = metadataSegmentExportId;
+    public void setAtlasExportId(String metadataSegmentExportId) {
+        this.atlasExportId = metadataSegmentExportId;
     }
 
     public CustomEventModelingType getCustomEventModelingType() {

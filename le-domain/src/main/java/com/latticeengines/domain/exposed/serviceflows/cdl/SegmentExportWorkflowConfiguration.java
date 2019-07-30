@@ -35,7 +35,7 @@ public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfigura
 
         public Builder metadataSegmentExportId(String metadataSegmentExportId) {
             initStepConf.setMetadataSegmentExportId(metadataSegmentExportId);
-            exportToS3.setMetadataSegmentExportId(metadataSegmentExportId);
+            exportToS3.setAtlasExportId(metadataSegmentExportId);
             return this;
         }
 

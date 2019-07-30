@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 import com.latticeengines.domain.exposed.pls.ScoringRequestConfigSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialProxy;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
 
@@ -45,7 +46,8 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String scoringWebhookResource;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
 
     private static final String CREDENTIAL_NAME = "TEST-DP-MARKETO-SCORING-CONFIG-";
 
@@ -69,7 +71,6 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
         MultiTenantContext.setTenant(mainTestTenant);
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         attachProtectedProxy(marketoCredProxy);
     }
 
@@ -230,7 +231,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         assertNotNull(configSummary.getConfigId());
         assertNotNull(configSummary.getModelUuid());
 
-        ScoringRequestConfigContext srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext(configSummary.getConfigId());
+        ScoringRequestConfigContext srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(configSummary.getConfigId());
         assertNotNull(srcContext);
         assertNotNull(srcContext.getConfigId());
         assertNotNull(srcContext.getSecretKey());
@@ -242,7 +243,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         // Check with Invalid ID
         Exception exception = null;
         try {
-            srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext("DummyId");
+            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext("DummyId");
         } catch (Exception e) {
             exception = e;
         }
@@ -253,7 +254,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
         // Check with Empty ID
         exception = null;
         try {
-            srcContext = internalResourceRestApiProxy.retrieveScoringRequestConfigContext(null);
+            srcContext = plsInternalProxy.retrieveScoringRequestConfigContext(null);
         } catch (Exception e) {
             exception = e;
         }

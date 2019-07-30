@@ -36,6 +36,7 @@ import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
+import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CronUtils;
@@ -43,6 +44,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
@@ -80,6 +82,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
     private static final String TEST_SCHEDULER = "qa_testing";
+
+    @Inject
+    private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
@@ -695,7 +700,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         try {
             EntityExportRequest request = new EntityExportRequest();
             request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace));
-            ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
+            ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
             applicationId = tempApplicationId.toString();
             if (!retry) {
                 EXPORT_APPID_MAP.put(applicationId, customerSpace);
