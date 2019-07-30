@@ -99,11 +99,11 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
-        checkPALimit(customerSpace, request);
         boolean isActivityBasedPA = cdlProxy.isActivityBasedPA(leStack);
         if (isActivityBasedPA) {
             return cdlProxy.scheduleProcessAnalyze(customerSpace, false, request);
         } else {
+            checkPALimit(customerSpace, request);
             return cdlProxy.processAnalyze(customerSpace, request);
         }
     }
