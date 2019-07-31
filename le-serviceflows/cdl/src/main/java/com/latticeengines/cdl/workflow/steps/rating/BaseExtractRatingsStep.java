@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -121,7 +122,20 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
     }
 
     private AttributeRepository constructAttrRepo() {
-        return dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
+        AttributeRepository attrRepo = dataCollectionProxy.getAttrRepo(customerSpace.toString(), version);
+        insertPurchaseHistory(attrRepo);
+        return attrRepo;
+    }
+
+    private void insertPurchaseHistory(AttributeRepository attrRepo) {
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), //
+                TableRoleInCollection.CalculatedPurchaseHistory, version);
+        if (table != null) {
+            log.info("Insert purchase history table into attribute repository.");
+            attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
+        } else {
+            log.warn("Did not find purchase history table in version " + version);
+        }
     }
 
     void extractAllContainers() {

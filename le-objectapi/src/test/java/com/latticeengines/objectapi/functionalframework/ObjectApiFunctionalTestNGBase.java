@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
@@ -62,10 +63,6 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
         if (version >= 3) {
-            for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
-                String tblName = QueryTestUtils.getServingStoreName(role, version);
-                attrRepo.changeServingStoreTableName(role, tblName);
-            }
             if (uploadHdfs) {
                 tblPathMap = new HashMap<>();
                 Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
@@ -75,6 +72,11 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                     tblPathMap.put(tblName, path);
                 }
                 uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
+            }
+            insertPurchaseHistory(attrRepo);
+            for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
+                String tblName = QueryTestUtils.getServingStoreName(role, version);
+                attrRepo.changeServingStoreTableName(role, tblName);
             }
         }
         customerSpace = attrRepo.getCustomerSpace();
@@ -104,6 +106,18 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
             }
         });
         return pathMap;
+    }
+
+    private void insertPurchaseHistory(AttributeRepository attrRepo) {
+        String downloadsDir = "downloads";
+        TableRoleInCollection role = TableRoleInCollection.CalculatedPurchaseHistory;
+        File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
+        try {
+            Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
+            attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot open table json file for " + role);
+        }
     }
 
     private void uploadTablesToHdfs(CustomerSpace customerSpace, int version) {

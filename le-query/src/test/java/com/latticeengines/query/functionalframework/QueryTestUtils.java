@@ -37,6 +37,7 @@ public class QueryTestUtils {
                 TableRoleInCollection.AggregatedTransaction,
                 TableRoleInCollection.AggregatedPeriodTransaction,
                 TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
+                TableRoleInCollection.CalculatedPurchaseHistory,
                 TableRoleInCollection.PivotedRating,
                 TableRoleInCollection.CalculatedCuratedAccountAttribute,
                 TableRoleInCollection.SortedProduct
