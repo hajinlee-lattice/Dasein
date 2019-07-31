@@ -905,7 +905,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo) {
         try {
-            log.info("Sending cdl ingestion status to " + user.getEmail() + " on " + tenant.getName() + " started.");
+            log.info("Sending cdl ingestion status " + status + " to " + user.getEmail() + " on " + tenant.getName() + " " +
+                    "started.");
             EmailTemplateBuilder builder;
             if ("Success".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_SUCCESS);
@@ -937,7 +938,7 @@ public class EmailServiceImpl implements EmailService {
             sendMultiPartEmail(
                     String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), emailInfo.getTemplateName()), mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
+            log.info("Sending cdl ingestion status " + status + " email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
