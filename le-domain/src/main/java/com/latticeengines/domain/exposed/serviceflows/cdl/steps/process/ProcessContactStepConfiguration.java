@@ -8,6 +8,9 @@ public class ProcessContactStepConfiguration extends BaseProcessEntityStepConfig
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
 
+    @JsonProperty("entity_match_ga_only")
+    private boolean entityMatchGAOnly;
+
     @Override
     public BusinessEntity getMainEntity() {
         return BusinessEntity.Contact;
@@ -19,5 +22,13 @@ public class ProcessContactStepConfiguration extends BaseProcessEntityStepConfig
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public boolean isEntityMatchGAOnly() {
+        return entityMatchGAOnly;
+    }
+
+    public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
+        this.entityMatchGAOnly = entityMatchGAOnly;
     }
 }

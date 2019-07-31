@@ -46,6 +46,22 @@ public class FeatureFlagUtils {
         }
     }
 
+    public static boolean isEntityMatchGAOnly(FeatureFlagValueMap flags) {
+        String[] entityMatchFeatureFlags = { LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(),
+                LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName() };
+        try {
+            boolean entityMatchGa = flags.containsKey(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName()));
+            boolean entityMatch = flags.containsKey(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName()));
+            return entityMatchGa && !entityMatch;
+        } catch (Exception e) {
+            log.error("Error when checking entity match feature flags: " + String.join(",", entityMatchFeatureFlags),
+                    e);
+            return true; // try to be conservative
+        }
+    }
+
     public static boolean isTargetScoreDerivation(FeatureFlagValueMap flags) {
         try {
             return flags.containsKey(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION.getName())

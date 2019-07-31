@@ -44,7 +44,6 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
-import com.latticeengines.serviceflows.workflow.zkconfig.ServiceflowsZKConfigService;
 
 @Component(EnrichAccount.BEAN_NAME)
 @Lazy
@@ -60,9 +59,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Inject
     private CloneTableService cloneTableService;
-
-    @Inject
-    private ServiceflowsZKConfigService serviceflowsZKConfigService;
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
@@ -204,7 +200,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     }
 
     private boolean useInternalAttrs() {
-        return serviceflowsZKConfigService.isEnabledForInternalEnrichment(customerSpace);
+        return configuration.isAllowInternalEnrichAttrs();
     }
 
     private boolean isNotInternalAttr(ColumnMetadata columnMetadata) {

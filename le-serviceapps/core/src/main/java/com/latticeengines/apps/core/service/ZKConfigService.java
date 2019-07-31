@@ -20,4 +20,5 @@ public interface ZKConfigService {
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity);
 
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type);
+
 }

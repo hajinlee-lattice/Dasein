@@ -171,12 +171,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         if (step == null) {
             return false;
         }
-        hasEmbeddedAccount = StringUtils
-                .isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE))
-                || StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
-        log.info("Found embedded account from contact: {}, from transaction: {}",
-                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE)),
-                StringUtils.isNotBlank(step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)));
+        boolean hasInContact = StringUtils.isNotBlank( //
+                step.getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE));
+        boolean hasInTrxn = StringUtils.isNotBlank( //
+                step.getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE));
+        hasEmbeddedAccount = hasInContact || hasInTrxn;
+        log.info("Found embedded account from contact: {}, from transaction: {}", hasInContact, hasInTrxn);
         return hasEmbeddedAccount;
     }
 }

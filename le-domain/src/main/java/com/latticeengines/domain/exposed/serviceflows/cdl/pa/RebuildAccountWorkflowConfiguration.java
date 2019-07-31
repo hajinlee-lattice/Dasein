@@ -33,6 +33,11 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder allowInternalEnrichAttrs(boolean allowInternalEnrichAttrs) {
+            processAccountStepConfiguration.setAllowInternalEnrichAttrs(allowInternalEnrichAttrs);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
