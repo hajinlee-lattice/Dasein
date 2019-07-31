@@ -83,9 +83,7 @@ def createTenantTrack(tenant):
             track.curActiveTable[record.role] = [record.metadataTable.name]
         else:
             track.curActiveTable[record.role].append(record.metadataTable.name)
-    # TODO - double check with Jinyang for import action (maybe list of ACTION.PID).
-    # TODO - If needs to be list of action objects, write model for ACTION object (table)
-    track.importAction = {'actions': []}
+    # track.trackingReport is default null and should be added by java PA
     if tenant.metadataDataCollectionStatus:
         track.collectionStatusDetail = tenant.metadataDataCollection[0].metadataDataCollectionStatus[0].detail
     if tenant.metadataStatistics:

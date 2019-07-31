@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 
 import io.swagger.annotations.Api;
@@ -44,19 +45,16 @@ public class MigrationTrackResource {
         return migrationTrackEntityMgr.getTenantPidsByStatus(status);
     }
 
-    @GetMapping(value = "/tenants/{customerSpace}/tables")
-    @ResponseBody
-    public Map<TableRoleInCollection, String[]> getCurActiveTables(@PathVariable(name = "customerSpace") String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getCurActiveTable();
-    }
-
     // get tenant active collection version in migration table
     @GetMapping(value = "/tenants/{customerSpace}/activeDataCollection/version")
     @ResponseBody
     public DataCollection.Version getActiveDataCollectionVersion(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getDataCollection().getVersion();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        return migrationTrackEntityMgr.findByTenant(tenant).getDataCollection().getVersion();
     }
 
     @GetMapping(value = "/tenants/{customerSpace}/tables/{tableName}/canDeleteOrRename")
@@ -64,20 +62,37 @@ public class MigrationTrackResource {
     public boolean canDeleteOrRenameTable(@PathVariable(name = "customerSpace") String customerSpace,
                                           @PathVariable(name = "tableName") String tableName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return migrationTrackEntityMgr.canDeleteOrRenameTable(tenantEntityMgr.findByTenantId(customerSpace), tableName);
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        return migrationTrackEntityMgr.canDeleteOrRenameTable(tenant, tableName);
     }
 
     @GetMapping(value = "/tenants/{customerSpace}/status")
     @ResponseBody
     public MigrationTrack.Status getMigrationStatus(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getStatus();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        MigrationTrack track = migrationTrackEntityMgr.findByTenant(tenant);
+        return track == null ? null : track.getStatus();
     }
 
     @GetMapping(value = "/tenants/{customerSpace}/activeTables")
     @ResponseBody
     public Map<TableRoleInCollection, String[]> getActiveTables(@PathVariable(name = "customerSpace") String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getCurActiveTable();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        MigrationTrack track = migrationTrackEntityMgr.findByTenant(tenant);
+        if (track == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s is not tracked for migration", customerSpace));
+        }
+        return track.getCurActiveTable();
     }
 }

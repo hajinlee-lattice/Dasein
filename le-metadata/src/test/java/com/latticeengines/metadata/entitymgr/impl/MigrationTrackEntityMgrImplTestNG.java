@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.MigrationTrack;
-import com.latticeengines.domain.exposed.metadata.MigrationTrackImportAction;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
@@ -37,7 +36,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     private static final String STATSNAME = "Test";
     private static Tenant tenant1, tenant2, untracked;
     private static Map<TableRoleInCollection, String[]> ACTIVETABLE = new HashMap<>();
-    private static final MigrationTrackImportAction IMPORTACTION = new MigrationTrackImportAction();
     private static final DataCollectionStatusDetail DETAIL = new DataCollectionStatusDetail();
     private static final TableRoleInCollection ROLE = TableRoleInCollection.BucketedAccount;
     private static byte[] CUBESDATA = new byte[5];
@@ -59,15 +57,11 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         String[] tableNames = {"This table", "That table"};
         ACTIVETABLE.put(ROLE, tableNames);
 
-        IMPORTACTION.getActions().add(-1L);
-        IMPORTACTION.getActions().add(-2L);
-
         track1.setStatus(MigrationTrack.Status.STARTED);
         track1.setVersion(VERSION);
         track1.setStatsName(STATSNAME);
         track1.setTenant(tenant1);
         track1.setCurActiveTable(ACTIVETABLE);
-        track1.setImportAction(IMPORTACTION);
         track1.setCollectionStatusDetail((DETAIL));
         track1.setStatsCubesData(CUBESDATA);
 
@@ -76,7 +70,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         track2.setStatsName(STATSNAME);
         track2.setTenant(tenant2);
         track2.setCurActiveTable(ACTIVETABLE);
-        track2.setImportAction(IMPORTACTION);
         track2.setCollectionStatusDetail((DETAIL));
         track2.setStatsCubesData(CUBESDATA);
 
@@ -92,8 +85,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
     private void removeTestData() {
         super.cleanup();
     }
-
-    int i = 0;
 
     @Test(groups = "functional", dataProvider = "entityProvider", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testCreate(Tenant tenant, MigrationTrack track) {
@@ -117,8 +108,6 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertNotNull(created.getCurActiveTable());
         Assert.assertNotNull(created.getCurActiveTable().get(ROLE));
         Assert.assertArrayEquals(ACTIVETABLE.get(ROLE), created.getCurActiveTable().get(ROLE));
-        Assert.assertNotNull(created.getImportAction());
-        Assert.assertArrayEquals(IMPORTACTION.getActions().toArray(), created.getImportAction().getActions().toArray());
         Assert.assertEquals(DETAIL.getEvaluationDate(), created.getCollectionStatusDetail().getEvaluationDate());
         Assert.assertArrayEquals(CUBESDATA, created.getStatsCubesData());
         Assert.assertEquals(STATSNAME, created.getStatsName());

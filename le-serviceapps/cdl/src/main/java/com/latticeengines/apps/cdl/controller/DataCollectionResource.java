@@ -227,10 +227,14 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Unlink all tables under tenant in current active data collection")
     public SimpleBooleanResponse unlinkTables(@PathVariable String customerSpace, //
-                                             @RequestParam(value = "role") TableRoleInCollection role,
+                                             @RequestParam(value = "role", required = false) TableRoleInCollection role,
                                              @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.unlinkTables(customerSpace, null, role, version);
+        if (role == null) {
+            dataCollectionService.unlinkTables(customerSpace, version);
+        } else {
+            dataCollectionService.unlinkTables(customerSpace, null, role, version);
+        }
         return SimpleBooleanResponse.successResponse();
     }
 

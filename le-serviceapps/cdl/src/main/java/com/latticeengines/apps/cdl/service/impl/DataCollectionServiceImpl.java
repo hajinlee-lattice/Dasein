@@ -59,6 +59,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataCollectionService")
@@ -84,6 +85,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
+
+    @Inject
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
     @Inject
     private S3Service s3Service;
@@ -235,6 +239,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
     }
 
+    /*
+     * Remove tables of specified tenant by specified role and version
+     */
     @Override
     public void unlinkTables(String customerSpace, String collectionName, TableRoleInCollection role, Version version) {
         if (version == null) {
@@ -249,6 +256,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             log.info("Removing " + tableName + " as " + role + " in " + version + " from collection.");
             dataCollectionEntityMgr.removeTableFromCollection(collectionName, tableName, version);
         }
+    }
+
+    /*
+     * Remove tables of specified tenant by version
+     */
+    @Override
+    public void unlinkTables(String customerSpace, Version version) {
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+        dataCollectionEntityMgr.removeAllTablesFromCollection(customerSpace, version);
     }
 
     @Override

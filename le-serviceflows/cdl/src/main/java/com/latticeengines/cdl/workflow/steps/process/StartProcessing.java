@@ -131,6 +131,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setMigrationMode();
 
         if (migrationMode) {
+            log.info("Tenant {} is marked as STARTED in migration table. Running with migration mode", customerSpace);
             verifyActiveDataCollectionVersion();
             unlinkTables();
         }
@@ -580,7 +581,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setMigrationMode() {
-        migrationMode = metadataProxy.getMigrationStatus(customerSpace.toString()).equals(MigrationTrack.Status.STARTED);
+        migrationMode = MigrationTrack.Status.STARTED.equals(metadataProxy.getMigrationStatus(customerSpace.toString()));
     }
 
     private void verifyActiveDataCollectionVersion() {
@@ -591,10 +592,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void unlinkTables() {
-        Map<TableRoleInCollection, String[]> activeTables = metadataProxy.getActiveTables(customerSpace.toString());
-        for (Map.Entry<TableRoleInCollection, String[]> entry : activeTables.entrySet()) {
-            dataCollectionProxy.unlinkTables(customerSpace.toString(), entry.getKey(), activeVersion);
-        }
+        dataCollectionProxy.unlinkTables(customerSpace.toString(), activeVersion);
     }
 
     public static class RebuildEntitiesProvider {
