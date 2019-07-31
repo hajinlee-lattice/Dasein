@@ -311,6 +311,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     LOG.warn(e.getMessage());
                 }
                 try {
+                    if (csvFieldValue.length() > MAX_STRING_LENGTH) {
+                        throw new RuntimeException(String.format( "%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
+                    }
                     validateAttribute(csvRecord, attr, csvColumnName);
                     if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                         if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
@@ -459,9 +462,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                         return Long.toString(timestamp);
                     }
-                }
-                if (fieldCsvValue.length() > MAX_STRING_LENGTH) {
-                    throw new RuntimeException(String.format( "%s exceeds %s chars", fieldCsvValue, MAX_STRING_LENGTH));
                 }
                 return fieldCsvValue;
             case ENUM:
