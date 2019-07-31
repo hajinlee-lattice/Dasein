@@ -63,7 +63,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
                 connectorConfig, csvImportFileInfo, prepareImportConfig, action.getPid(),
                 s3ImportEmail, emailInfo, enableEntityMatch);
