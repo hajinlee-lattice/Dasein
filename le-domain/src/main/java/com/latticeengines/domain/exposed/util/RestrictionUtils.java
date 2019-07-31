@@ -199,7 +199,7 @@ public class RestrictionUtils {
         }
 
         if (bkt.getChange() != null) {
-            bkt = StatsCubeUtils.convertChgBucketToBucket(bkt);
+            StatsCubeUtils.convertChgBucketToBucket(bkt);
         }
 
         if (bkt.getTransaction() != null) {

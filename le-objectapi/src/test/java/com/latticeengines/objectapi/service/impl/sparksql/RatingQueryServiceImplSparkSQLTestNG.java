@@ -101,12 +101,18 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
         AttributeLookup phAttr1 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
                 "AM_k4Pb7AhrIccPjW5jXiWzpwWX2mTvY7I__M_7_12__AS");
         AttributeLookup phAttr2 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
-                "AM_Hd3c9G01LBGBF7LKRGu9Oc0dS8HnuRdv__Q_1__TS");
-        Bucket bkt1 = Bucket.rangeBkt(1, null, true, false);
-        Bucket bkt2 = Bucket.rangeBkt(null, 1, false, true);
+                "AM_DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa__Q_2_2__TS");
+        AttributeLookup phAttr3 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
+                "AM_Hd3c9G01LBGBF7LKRGu9Oc0dS8HnuRdv__W_3__W_4_9__SC");
+        Bucket bkt1 = Bucket.rangeBkt(1, null);
+        Bucket bkt2 = Bucket.rangeBkt(null, 1);
+        Bucket bkt3 = Bucket.chgBkt(Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AS_MUCH_AS,
+                Collections.singletonList(1));
         BucketRestriction res1 = new BucketRestriction(phAttr1, bkt1);
         BucketRestriction res2 = new BucketRestriction(phAttr2, bkt2);
-        Restriction res = Restriction.builder().and(res1, res2).build();
+        BucketRestriction res3 = new BucketRestriction(phAttr3, bkt3);
+        Restriction res23 = Restriction.builder().or(res2, res3).build();
+        Restriction res = Restriction.builder().and(res1, res23).build();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(res));
         frontEndQuery.setMainEntity(BusinessEntity.Account);

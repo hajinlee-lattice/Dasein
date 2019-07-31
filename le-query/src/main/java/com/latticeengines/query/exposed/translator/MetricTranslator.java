@@ -2,6 +2,7 @@ package com.latticeengines.query.exposed.translator;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -13,10 +14,15 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
 public class MetricTranslator {
 
     public static Restriction convert(BucketRestriction bucketRestriction, boolean useDepivotedTable) {
+        if (bucketRestriction.getBkt().getChange() != null) {
+            Bucket bkt = StatsCubeUtils.convertChgBucketToBucket(bucketRestriction.getBkt());
+            bucketRestriction.setBkt(bkt);
+        }
         if (useDepivotedTable) {
             return convertToDepivotedTable(bucketRestriction);
         } else {
@@ -44,8 +50,8 @@ public class MetricTranslator {
         }
     }
 
-    private static SubQuery constructMajorSubQuery(AttributeLookup attr, ComparisonType comparator, //
-                                              List<Object> values) {
+    private static SubQuery constructMajorSubQuery(AttributeLookup attr, ComparisonType comparator,
+                                                   List<Object> values) {
         String fullAttrName = attr.getAttribute();
         String metricAttr = ActivityMetricsUtils.getNameWithPeriodFromFullName(fullAttrName);
         String bundleId = ActivityMetricsUtils.getProductIdFromFullName(fullAttrName);
