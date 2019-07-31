@@ -84,6 +84,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
         TenantEmailNotificationLevel notificationLevel = job.getTenant().getNotificationLevel();
+        log.info("tenant " + job.getTenant().getId() + " notification_level is: " + job.getTenant().getNotificationLevel().name());
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (eaiImportJobDetail == null) {
             log.warn(String.format("Cannot find the job detail for %s", applicationId));
