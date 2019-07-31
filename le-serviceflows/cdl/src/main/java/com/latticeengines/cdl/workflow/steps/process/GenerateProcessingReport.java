@@ -369,10 +369,12 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     if (StringUtils.isNotBlank(servingStoreTable)) {
                         frontEndQuery = new FrontEndQuery();
                         frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                        long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), //
-                                frontEndQuery, inactive);
-                        log.debug("There are " + nonOrphanContacts + " non-orphan contacts in redshift.");
-                        long orphanContacts = allContacts - nonOrphanContacts;
+                        long orphanContacts = 0;
+                        DataCollectionStatus dataCollectionStatus =
+                                dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(), null);
+                        if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null) {
+                            orphanContacts = dataCollectionStatus.getOrphanContactCount();
+                        }
                         log.debug("There are " + orphanContacts + " orphan contacts.");
                         return orphanContacts;
                     } else {
