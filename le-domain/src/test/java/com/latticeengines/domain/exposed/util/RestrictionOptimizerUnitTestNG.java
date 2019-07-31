@@ -3,19 +3,15 @@ package com.latticeengines.domain.exposed.util;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
-import java.util.Collections;
-
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 
@@ -31,11 +27,6 @@ public class RestrictionOptimizerUnitTestNG {
     private static final Restriction C3 = bucket(Contact, 3);
     private static final Restriction C4 = bucket(Contact, 4);
     private static final Restriction C5 = bucket(Contact, 5); // ignored
-
-    private static final Restriction M1 = RestrictionUtils.convertBucketRestriction(metricBkt1(), true);
-    private static final Restriction M2 = RestrictionUtils.convertBucketRestriction(metricBkt2(), true);
-    private static final Restriction M3 = RestrictionUtils.convertBucketRestriction(metricBkt3(), true);
-    private static final Restriction M4 = RestrictionUtils.convertBucketRestriction(metricBkt4(), true);
 
     @Test(groups = "unit", dataProvider = "optimizeTestData")
     public void testOptimize(Restriction restriction, Restriction expected) {
@@ -135,36 +126,11 @@ public class RestrictionOptimizerUnitTestNG {
         Restriction e41 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, Restriction.builder().and(m1, m2, m3).build());
         Restriction e4 = Restriction.builder().and(A1, e41).build();
 
-        Restriction r51 = Restriction.builder().and(M1, M2).build();
-        Restriction r52 = Restriction.builder().and(M3, M4).build();
-        Restriction r5 = Restriction.builder().or(r51, r52).build();
-
-        Restriction e51 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).eq("Bundle1").build();
-        Restriction e52 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M_8__MG").gte(30).build();
-        Restriction e53 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M_8__MG").lt(200).build();
-        Restriction e54 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).eq("Bundle2").build();
-        Restriction e55 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "W_40__SW").lt(150).build();
-
-        Restriction e56 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).eq("Bundle4").build();
-        Restriction e57 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "M_9__M_10_21__SC").lte(-5.0).build();
-
-        Restriction e58 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).isNull().build();
-        Restriction e59 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).eq("Bundle3").build();
-        Restriction e510 = Restriction.builder().let(BusinessEntity.DepivotedPurchaseHistory, "Y_1__AS").lt(70).build();
-
-        Restriction e5A = Restriction.builder().and(e51, e52, e53, e54, e55).build();
-        Restriction e5B = Restriction.builder().and(e59, e510).build();
-        Restriction e5C = Restriction.builder().or(e5B, e58).build();
-        Restriction e5D = Restriction.builder().and(e5C, e56, e57).build();
-        Restriction e5E = Restriction.builder().or(e5A, e5D).build();
-        Restriction e5 = new MetricRestriction(BusinessEntity.DepivotedPurchaseHistory, e5E);
-
         return new Object[][] { //
                  { r1, e1 }, //
                  { r2, e2 }, //
                  { r3, e3 }, //
-                 { r4, e4 }, //
-                 { r5, e5 }, //
+                 { r4, e4 } //
         };
     }
 
@@ -176,26 +142,6 @@ public class RestrictionOptimizerUnitTestNG {
             bucketRestriction.setIgnored(true);
         }
         return bucketRestriction;
-    }
-
-    private static BucketRestriction metricBkt1() {
-        Bucket bucket = Bucket.rangeBkt(30, 200, true, false);
-        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle1__M_8__MG", bucket);
-    }
-
-    private static BucketRestriction metricBkt2() {
-        Bucket bucket = Bucket.valueBkt(ComparisonType.LESS_THAN, Collections.singletonList(150));
-        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle2__W_40__SW", bucket);
-    }
-
-    private static BucketRestriction metricBkt3() {
-        Bucket bucket = Bucket.valueBkt(ComparisonType.LESS_THAN, Collections.singletonList(70));
-        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle3__Y_1__AS", bucket);
-    }
-
-    private static BucketRestriction metricBkt4() {
-        Bucket bucket = Bucket.chgBkt(Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST, Collections.singletonList(5));
-        return  new BucketRestriction(BusinessEntity.PurchaseHistory, "AM_Bundle4__M_9__M_10_21__SC", bucket);
     }
 
     private static Restriction and(Restriction... restrictions) {
