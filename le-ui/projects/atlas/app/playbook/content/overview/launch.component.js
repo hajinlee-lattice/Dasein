@@ -104,6 +104,7 @@ class LaunchComponent extends Component {
             connection: connection,
             lookupIdMapping: null,
             fetching: false,
+            errors: {},
             dirty: {}
         };
     }
@@ -405,7 +406,6 @@ class LaunchComponent extends Component {
         }
     }
 
-
     makeProgramsList(programs) {
         // program name = folder name
         // static list name dropdwon is audience name/id
@@ -415,10 +415,26 @@ class LaunchComponent extends Component {
 
         var newAudienceNameInput = [];
         if(this.state.showNewAudienceName) {
-            newAudienceNameInput.push(<input name={'newAudienceName'} onBlur={(event) => {
-                this.state.audienceParams.audienceName = event.target.value;
-                this.setState(this.state);
-            }} />);
+            newAudienceNameInput.push(
+                <Aux>
+                    <input name={'newAudienceName'} className={`${this.state.errors.audiencename ? 'error' : ''}`} onBlur={(event) => {
+                        var oldAudience = null;
+                        if(vm.state.staticList && vm.state.staticList.length && event.target.value) {
+                            oldAudience = vm.state.staticList.find(function(item) {
+                                return item.name === event.target.value;
+                            });
+                            if(oldAudience) {
+                                this.state.errors.audiencename = `* A static list with this name already exists. Please choose another.`;
+                                vm.setState({errors: this.state.errors});
+                                return false; // stop here
+                            }
+                        }
+                        this.state.errors.audiencename = null;
+                        this.state.audienceParams.audienceName = event.target.value;
+                        this.setState(this.state);
+                    }} />
+                </Aux>
+            );
         }
 
         if(programs && programs.length) {
@@ -431,6 +447,7 @@ class LaunchComponent extends Component {
                         <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'programName-container'}>
                             <label for={'programName'}>{this.state.externalSystemName} Program Name</label>
                             <select id={'programName'} onChange={(event) => { 
+                                this.state.errors.audiencename = null;
                                 this.getStaticList(event.target.value);
                             }}>
                                 {list}
@@ -441,8 +458,10 @@ class LaunchComponent extends Component {
                             {vm.makeStaticList(this.state.staticList)}
                             {newAudienceNameInput}
                         </LeHPanel>
+                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'audience-error-container red-text'}>
+                            {this.state.errors.audiencename}
+                        </LeHPanel>
                     </LeVPanel>
-
                 </div>
             );
         }
@@ -469,6 +488,7 @@ class LaunchComponent extends Component {
                         this.state.audienceParams.audienceName = (item && item.name ? item.name : '');
                     }
                     this.state.audienceParams.audienceId = event.target.value;
+                    this.state.errors.audiencename = null;
                     this.setState(this.state);
                 }}>
                     {options}
