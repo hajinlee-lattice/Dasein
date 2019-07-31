@@ -57,10 +57,9 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query = Query.builder() //
                 .select(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR) //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
-                .distinct(true) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("select distinct (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
+        sqlContains(sqlQuery, String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
                 BUCKETED_NOMINAL_ATTR));
     }
 
@@ -113,7 +112,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("lower(%s.AlexaViewsPerUser) = lower(?)", ACCOUNT));
+        sqlContains(sqlQuery, String.format("%s.AlexaViewsPerUser = ?", ACCOUNT));
 
         // column eqs column
         restriction = Restriction.builder() //
@@ -125,7 +124,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // collection look up with 2 elements
         Restriction inCollection = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
-                .inCollection(Arrays.asList('a', 'c')).build();
+                .inCollection(Arrays.asList("a", "c")).build();
         query = Query.builder().where(inCollection).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, String.format("lower(%s.%s) in (?, ?)", ACCOUNT, ATTR_ACCOUNT_NAME));
@@ -354,7 +353,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Restriction sumRestriction = Restriction.builder().let(sumLookup).gt(0).build();
         Restriction avgRestriction = Restriction.builder().let(avgLookup).gt(0).build();
         Restriction orRestriction = Restriction.builder().or(sumRestriction, avgRestriction).build();
-        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(44602)
+        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq("44602")
                 .build();
         Query query = Query.builder() //
                 .select(attrLookup, sumLookup, avgLookup) //

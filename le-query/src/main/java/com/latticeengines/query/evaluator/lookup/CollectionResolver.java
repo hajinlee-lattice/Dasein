@@ -24,7 +24,23 @@ public class CollectionResolver extends BaseLookupResolver<CollectionLookup>
         if (collection == null || collection.isEmpty()) {
             throw new QueryEvaluationException("Collection lookup must have at least one element.");
         }
-        return collection.stream().map(obj -> Expressions.asComparable(obj.toString())).collect(Collectors.toList());
+        return collection.stream().map(this::resolveValue).collect(Collectors.toList());
+    }
+
+    private ComparableExpression<? extends Comparable<?>> resolveValue(Object val) {
+        ComparableExpression<? extends Comparable<?>> expression;
+        if (val instanceof Integer) {
+            expression = Expressions.asComparable((Integer) val);
+        } else if (val instanceof Long) {
+            expression = Expressions.asComparable((Long) val);
+        } else if (val instanceof Double) {
+            expression = Expressions.asComparable((Double) val);
+        } else if (val instanceof Float) {
+            expression = Expressions.asComparable((Float) val);
+        } else {
+            expression = Expressions.asComparable(val.toString());
+        }
+        return expression;
     }
 
     @Override
