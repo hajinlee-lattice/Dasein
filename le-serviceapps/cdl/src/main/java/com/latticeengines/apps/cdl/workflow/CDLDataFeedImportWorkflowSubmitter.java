@@ -21,7 +21,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -63,7 +62,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
                 connectorConfig, csvImportFileInfo, prepareImportConfig, action.getPid(),
                 s3ImportEmail, emailInfo, enableEntityMatch);
