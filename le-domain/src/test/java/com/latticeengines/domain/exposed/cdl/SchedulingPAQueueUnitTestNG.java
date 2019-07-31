@@ -65,7 +65,7 @@ public class SchedulingPAQueueUnitTestNG {
                 }, //
                 {
                         new SchedulingPAQueue<>(newStatus(5, 5, 2), RetrySchedulingPAObject.class,
-                                schedulingPATestTimeClock, "RetryQueue"), //
+                                schedulingPATestTimeClock, true, "RetryQueue"), //
                         Arrays.asList(
                                 newRetryObj("t1", true, false, schedulingPATestTimeClock.getCurrentTime() - timestamp,
                         TenantType.QA),

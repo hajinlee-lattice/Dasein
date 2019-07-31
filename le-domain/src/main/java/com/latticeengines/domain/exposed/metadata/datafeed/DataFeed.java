@@ -162,7 +162,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     @Column(name = "SCHEDULING_GROUP")
     @JsonProperty("scheduling_group")
-    private String schedulingGroup;
+    private String schedulingGroup = "Default";
 
     @Transient
     @JsonIgnore
