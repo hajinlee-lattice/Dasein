@@ -38,7 +38,8 @@ angular.module('common.attributes')
                 original: {},
                 config: {},
                 overview: {},
-                buckets: {}
+                buckets: {},
+                lastRefresh: ''
             };
 
             this.saving = false;
