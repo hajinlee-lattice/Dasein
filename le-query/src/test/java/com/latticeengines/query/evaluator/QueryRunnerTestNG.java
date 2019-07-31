@@ -270,9 +270,6 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         }
         Restriction restriction = builder.build();
         Query query = Query.builder().where(restriction).build();
-        //DP-9687: Using the same query object to generate SQLQuery, is generating invalid SQLQuery.
-        //SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-        //logQuery(sqlUser, sqlQuery);
         testGetCountAndAssert(sqlUser, query, expectedCount);
     }
 

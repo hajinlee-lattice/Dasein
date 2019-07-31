@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
@@ -97,6 +96,36 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
         teardownQueryTester();
     }
 
+    @Test(groups = SPARK_TEST_GROUP, dataProvider = "userContexts")
+    public void testPhAndPh(String sqlUser, String queryContext) {
+        AttributeLookup phAttr1 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
+                "AM_k4Pb7AhrIccPjW5jXiWzpwWX2mTvY7I__M_7_12__AS");
+        AttributeLookup phAttr2 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
+                "AM_DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa__Q_2_2__TS");
+        AttributeLookup phAttr3 = new AttributeLookup(BusinessEntity.PurchaseHistory, //
+                "AM_Hd3c9G01LBGBF7LKRGu9Oc0dS8HnuRdv__W_3__W_4_9__SC");
+        Bucket bkt1 = Bucket.rangeBkt(1, null);
+        Bucket bkt2 = Bucket.rangeBkt(null, 1);
+        Bucket bkt3 = Bucket.chgBkt(Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AS_MUCH_AS,
+                Collections.singletonList(1));
+        BucketRestriction res1 = new BucketRestriction(phAttr1, bkt1);
+        BucketRestriction res2 = new BucketRestriction(phAttr2, bkt2);
+        BucketRestriction res3 = new BucketRestriction(phAttr3, bkt3);
+        Restriction res23 = Restriction.builder().or(res2, res3).build();
+        Restriction res = Restriction.builder().and(res1, res23).build();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(res));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        long count;
+        if (SPARK_BATCH_USER.equals(sqlUser)) {
+            count = ratingQueryServiceSparkSQL.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue, //
+                    sqlUser);
+        } else {
+            count = ratingQueryService.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue, sqlUser);
+        }
+        testAndAssertCountFromTester(sqlUser, count, 5806L);
+    }
 
     @Test(groups = SPARK_TEST_GROUP, dataProvider = "userContexts")
     public void testRatingCount(String sqlUser, String queryContext) {
@@ -151,15 +180,6 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
         model.setRatingRule(rule);
 
         return model;
-    }
-
-    private static Map<String, Restriction> defaultRulesFromUI() {
-        Map<String, Restriction> map = new HashMap<>();
-        map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, //
-                LogicalRestriction.builder().and(Collections.emptyList()).build());
-        map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, //
-                LogicalRestriction.builder().and(Collections.emptyList()).build());
-        return map;
     }
 
 }

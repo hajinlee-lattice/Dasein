@@ -199,7 +199,7 @@ public class RestrictionUtils {
         }
 
         if (bkt.getChange() != null) {
-            bkt = StatsCubeUtils.convertChgBucketToBucket(bkt);
+            StatsCubeUtils.convertChgBucketToBucket(bkt);
         }
 
         if (bkt.getTransaction() != null) {
@@ -214,11 +214,7 @@ public class RestrictionUtils {
                         "Bucket without comparator is obsolete. You might need to update your query to latest schema.");
             } else {
                 AttributeLookup attr = bucketRestriction.getAttr();
-                if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
-                    restriction = convertPurchaseHistoryBucket(attr, comparisonType, values);
-                } else {
-                    restriction = convertValueComparisons(attr, comparisonType, values);
-                }
+                restriction = convertValueComparisons(attr, comparisonType, values);
             }
         }
         return restriction;
@@ -343,7 +339,7 @@ public class RestrictionUtils {
         return restriction;
     }
 
-    private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType,
+    public static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType,
             List<Object> values) {
         Restriction restriction = null;
         switch (comparisonType) {
