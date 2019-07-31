@@ -42,7 +42,7 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
         List<String> s3UploadFiles = getListObjectFromContext(jobExecution,
                 PlayLaunchWorkflowConfiguration.RECOMMENDATION_EXPORT_FILES, String.class);
 
-        // hdfsIntermediateFiles.add(avroFile);
+        hdfsIntermediateFiles.add(avroFile);
         if (s3UploadFiles != null) {
             hdfsIntermediateFiles.addAll(s3UploadFiles);
         }
