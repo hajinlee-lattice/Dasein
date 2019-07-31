@@ -149,6 +149,8 @@ public class CampaignLaunchProcessor {
                 .setSourceDir(avroPath) //
                 .setDbCreds(dataDbCreds) //
                 .setCustomer(tenant) //
+                .addHadoopArg("-Dmapreduce.job.running.map.limit=8") //
+                .addHadoopArg("-Dmapreduce.tasktracker.map.tasks.maximum=8") //
                 .build();
 
         log.info("exporter is " + JsonUtils.serialize(exporter));

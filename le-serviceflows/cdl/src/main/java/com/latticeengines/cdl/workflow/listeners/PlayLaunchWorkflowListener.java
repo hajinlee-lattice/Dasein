@@ -16,7 +16,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
 
-
 @Component("playLaunchWorkflowListener")
 public class PlayLaunchWorkflowListener extends LEJobListener {
 
