@@ -406,7 +406,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
     }
 
     private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets,
-            String bktLbl) {
+                                    String bktLbl) {
         List<Object> ids = new ArrayList<>();
         if (bktLbl != null) {
             ids = buckets.getBucketList().stream() //
@@ -417,6 +417,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         if (ids.isEmpty()) {
             log.warn("Cannot find corresponding label for " + restriction.getRelation() + " " //
                     + bktLbl + " in statistics, use -1 bkt id instead.");
+            restriction.setRelation(ComparisonType.EQUAL);
             return new ValueLookup(-1);
         }
         if (ids.size() > 1) {

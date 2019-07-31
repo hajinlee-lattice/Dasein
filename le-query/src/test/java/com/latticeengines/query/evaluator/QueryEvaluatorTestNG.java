@@ -252,6 +252,18 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         case IS_NOT_NULL:
             builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).isNotNull();
             break;
+        case STARTS_WITH:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(vals[0]);
+            break;
+        case ENDS_WITH:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).endsWith(vals[0]);
+            break;
+        case CONTAINS:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(vals[0]);
+            break;
+        case NOT_CONTAINS:
+            builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains(vals[0]);
+            break;
         case IN_COLLECTION:
             builder = builder.let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).inCollection(Arrays.asList(vals));
             break;
@@ -274,6 +286,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         String notEqualPattern = String.format("%s and %s", notNullPattern, notNullPattern);
         String inCollectionPattern = String.format("(%s.%s>>?)&? in (?, ?)", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notInCollectionPattern = String.format("(%s.%s>>?)&? not in (?, ?)", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
+        String notNullAndNotEqualPattern = String.format("not (%s.%s>>?)&? = ? and (%s.%s>>?)&? != ?", //
+                ACCOUNT, BUCKETED_PHYSICAL_ATTR, ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         return new Object[][] { //
                 { "bucket = label", ComparisonType.EQUAL, new Object[] { "Yes" }, equalPattern }, //
                 { "bucket is null", ComparisonType.EQUAL, new Object[] { null }, equalPattern }, //
@@ -281,6 +295,12 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 { "bucket is not null", ComparisonType.NOT_EQUAL, new Object[] { null }, notNullPattern }, //
                 { "bucket is not null", ComparisonType.IS_NOT_NULL, null, notNullPattern }, //
                 { "bucket != label", ComparisonType.NOT_EQUAL, new Object[] { "Yes" }, notEqualPattern }, //
+                { "bucket contains non-existing value", ComparisonType.CONTAINS, new Object[] { "Z" }, equalPattern }, //
+                { "bucket contains existing value", ComparisonType.CONTAINS, new Object[] { "y" }, equalPattern }, //
+                { "bucket not contains non-existing value", ComparisonType.NOT_CONTAINS, new Object[] { "Z" },
+                        notNullAndNotEqualPattern }, //
+                { "bucket not contains existing value", ComparisonType.NOT_CONTAINS, new Object[] { "y" },
+                        notNullAndNotEqualPattern }, //
                 { "bucket in collection", ComparisonType.IN_COLLECTION, new Object[] { "YES", "no" },
                         inCollectionPattern }, //
                 { "bucket not in collection", ComparisonType.NOT_IN_COLLECTION, new Object[] { "yes", "no" },
