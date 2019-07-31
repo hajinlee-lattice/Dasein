@@ -49,6 +49,12 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
             return this;
         }
 
+        public Builder entityMatchGAOnly(boolean gaOnly) {
+            processContactStepConfiguration.setEntityMatchGAOnly(gaOnly);
+            processTxnStepConfiguration.setEntityMatchGAOnly(gaOnly);
+            return this;
+        }
+
         public MatchEntityWorkflowConfiguration build() {
             configuration.setContainerConfiguration("matchEntityWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

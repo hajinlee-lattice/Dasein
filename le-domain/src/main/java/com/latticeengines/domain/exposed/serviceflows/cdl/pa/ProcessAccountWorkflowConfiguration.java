@@ -41,6 +41,12 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder allowInternalEnrichAttrs(boolean allowInternalEnrichAttrs) {
+            processAccountStepConfiguration.setAllowInternalEnrichAttrs(allowInternalEnrichAttrs);
+            rebuildAccountWorkflowBuilder.allowInternalEnrichAttrs(allowInternalEnrichAttrs);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processAccountStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             rebuildAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);

@@ -9,8 +9,12 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     @JsonProperty("actionIds")
     private List<Long> actionIds;
+
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
+
+    @JsonProperty("entity_match_ga_only")
+    private boolean entityMatchGAOnly;
 
     @Override
     public BusinessEntity getMainEntity() {
@@ -31,5 +35,13 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public boolean isEntityMatchGAOnly() {
+        return entityMatchGAOnly;
+    }
+
+    public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
+        this.entityMatchGAOnly = entityMatchGAOnly;
     }
 }

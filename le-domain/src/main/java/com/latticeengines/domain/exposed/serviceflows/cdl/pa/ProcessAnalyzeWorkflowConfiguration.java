@@ -223,6 +223,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder allowInternalEnrichAttrs(boolean allowInternalEnrichAttrs) {
+            processAccountWorkflowBuilder.allowInternalEnrichAttrs(allowInternalEnrichAttrs);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
@@ -230,6 +235,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
+        public Builder entityMatchGAOnly(boolean gaOnly) {
+            matchEntityWorkflowBuilder.entityMatchGAOnly(gaOnly);
             return this;
         }
 

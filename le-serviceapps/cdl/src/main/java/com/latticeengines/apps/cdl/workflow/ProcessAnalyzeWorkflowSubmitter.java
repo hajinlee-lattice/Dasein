@@ -455,6 +455,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
 
+        boolean entityMatchGAOnly = FeatureFlagUtils.isEntityMatchGAOnly(flags);
+        boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
         int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations()
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
@@ -477,6 +479,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
+                .allowInternalEnrichAttrs(internalEnrichEnabled) //
                 .matchYarnQueue(scoringQueue) //
                 .inputProperties(inputProperties) //
                 .workflowContainerMem(workflowMemMb) //
@@ -487,6 +490,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
                 .entityMatchEnabled(entityMatchEnabled) //
+                .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //

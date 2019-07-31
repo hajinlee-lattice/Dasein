@@ -62,7 +62,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         mergeInputSchema(targetTableName);
         putStringValueInContext(ENTITY_MATCH_TXN_TARGETTABLE, targetTableName);
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
-        Table newAccountTable = metadataProxy.getTable(customerSpace.toString(), newAccountTableName);
+        Table newAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountTableName);
         if (newAccountTable != null) {
             putStringValueInContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, newAccountTableName);
             addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
@@ -84,8 +84,13 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
-        return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
-                Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
+        if (configuration.isEntityMatchGAOnly()) {
+            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null);
+        } else {
+            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
+        }
     }
 
     private ConsolidateDataTransformerConfig getConsolidateDataTxmfrConfig() {

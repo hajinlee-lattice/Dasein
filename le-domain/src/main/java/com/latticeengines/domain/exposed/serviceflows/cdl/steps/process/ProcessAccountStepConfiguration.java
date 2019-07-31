@@ -7,8 +7,12 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
 
     @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
+
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
+
+    @JsonProperty("allow_internal_enrich_attrs")
+    private boolean allowInternalEnrichAttrs;
 
     @Override
     public BusinessEntity getMainEntity() {
@@ -29,5 +33,13 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public boolean isAllowInternalEnrichAttrs() {
+        return allowInternalEnrichAttrs;
+    }
+
+    public void setAllowInternalEnrichAttrs(boolean allowInternalEnrichAttrs) {
+        this.allowInternalEnrichAttrs = allowInternalEnrichAttrs;
     }
 }

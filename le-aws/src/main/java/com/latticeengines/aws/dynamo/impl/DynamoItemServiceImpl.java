@@ -240,10 +240,8 @@ public class DynamoItemServiceImpl implements DynamoItemService {
                 KeyType keyType = KeyType.fromValue(schema.getKeyType());
                 if (KeyType.HASH.equals(keyType)) {
                     hashKey = schema.getAttributeName();
-                    log.info("Found hash key of table " + tableName + " to be " + hashKey);
                 } else if (KeyType.RANGE.equals(keyType)) {
                     rangeKey = schema.getAttributeName();
-                    log.info("Found range key of table " + tableName + " to be " + rangeKey);
                 }
             }
         } else {

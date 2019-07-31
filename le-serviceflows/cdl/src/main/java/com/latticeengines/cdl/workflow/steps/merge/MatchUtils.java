@@ -73,7 +73,12 @@ public final class MatchUtils {
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Contact.name());
         baseMatchInput.setAllocateId(true);
-        baseMatchInput.setOutputNewEntities(true);
+        if (StringUtils.isNotBlank(newAccountTableName)) {
+            baseMatchInput.setOutputNewEntities(true);
+            config.setNewEntitiesTableName(newAccountTableName);
+        } else {
+            baseMatchInput.setOutputNewEntities(false);
+        }
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
@@ -84,9 +89,7 @@ public final class MatchUtils {
                 Account.name(), accountKeyMap, //
                 Contact.name(), contactKeyMap
         )));
-
         config.setMatchInput(baseMatchInput);
-        config.setNewEntitiesTableName(newAccountTableName);
         return JsonUtils.serialize(config);
     }
 
