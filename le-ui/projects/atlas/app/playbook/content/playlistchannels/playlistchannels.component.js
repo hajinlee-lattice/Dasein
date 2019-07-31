@@ -37,7 +37,7 @@ let controller = function ($state) {
             },
             tile: {
                 component: PlayItem,
-                config: {
+                config: { // rename, delete
                     clickEdit: () => { },
                     clickDelete: () => { },
                     clickDuplicate: () => { }
