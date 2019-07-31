@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.sql.SQLQuery;
 
@@ -141,9 +142,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                             booleanExpression = lhsPath.eq(subselect);
                         }
                     } else {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            booleanExpression = ((StringExpression) lhsPath)
-                                    .equalsIgnoreCase(rhsPaths.get(0));
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
+                            booleanExpression = Expressions.asString(lhsPath).equalsIgnoreCase(rhsPaths.get(0));
                         } else {
                             booleanExpression = lhsPath.eq(rhsPaths.get(0));
                         }
@@ -161,9 +161,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                             booleanExpression = lhsPath.ne(subselect);
                         }
                     } else {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                            booleanExpression = ((StringExpression) lhsPath)
-                                    .notEqualsIgnoreCase(rhsPaths.get(0));
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
+                            booleanExpression = Expressions.asString(lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
                         } else {
                             booleanExpression = lhsPath.ne(rhsPaths.get(0));
                         }
@@ -195,9 +194,9 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         }
                     } else {
                         if (rhsPaths.size() > 1) {
-                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
                                 rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                                booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                booleanExpression = Expressions.asString(lhsPath).toLowerCase()
                                         .notIn(rhsPaths.toArray(new ComparableExpression[0]));
 
                             } else {
@@ -205,9 +204,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                                         .notIn(rhsPaths.toArray(new ComparableExpression[0]));
                             }
                         } else {
-                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                                booleanExpression = ((StringExpression) lhsPath)
-                                        .notEqualsIgnoreCase(rhsPaths.get(0));
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
+                                booleanExpression = Expressions.asString(lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
                             } else {
                                 booleanExpression = lhsPath.ne(rhsPaths.get(0));
                             }
@@ -232,9 +230,9 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         // treat
                         // it differently
                         if (rhsPaths.size() > 1) {
-                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
                                 rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                                booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                booleanExpression = Expressions.asString(lhsPath).toLowerCase()
                                         .in(rhsPaths.toArray(new ComparableExpression[0]));
 
                             } else {
@@ -242,9 +240,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                                         .in(rhsPaths.toArray(new ComparableExpression[0]));
                             }
                         } else {
-                            if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
-                                booleanExpression = ((StringExpression) lhsPath)
-                                        .equalsIgnoreCase(rhsPaths.get(0));
+                            if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
+                                booleanExpression = Expressions.asString(lhsPath).equalsIgnoreCase(rhsPaths.get(0));
                             } else {
                                 booleanExpression = lhsPath.eq(rhsPaths.get(0));
                             }
@@ -253,8 +250,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     break;
                 case CONTAINS:
                     if (lhsPath instanceof StringExpression) {
-                        booleanExpression = ((StringExpression) lhsPath)
-                                .containsIgnoreCase(rhsPaths.get(0));
+                        booleanExpression = Expressions.asString(lhsPath).containsIgnoreCase(rhsPaths.get(0));
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
@@ -262,8 +258,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     }
                 case STARTS_WITH:
                     if (lhsPath instanceof StringExpression) {
-                        booleanExpression = ((StringExpression) lhsPath)
-                                .startsWithIgnoreCase(rhsPaths.get(0));
+                        booleanExpression = Expressions.asString(lhsPath).startsWithIgnoreCase(rhsPaths.get(0));
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
@@ -271,8 +266,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     }
                 case ENDS_WITH:
                     if (lhsPath instanceof StringExpression) {
-                        booleanExpression = ((StringExpression) lhsPath)
-                                .endsWithIgnoreCase(rhsPaths.get(0));
+                        booleanExpression = Expressions.asString(lhsPath).endsWithIgnoreCase(rhsPaths.get(0));
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
@@ -300,10 +294,29 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
     }
 
-    private boolean applyEqualIgnoreCase(boolean isBitEncoded, Lookup lhs,
-            ComparableExpression<?> lhsPath) {
-        return !isBitEncoded && !(lhs instanceof CaseLookup)
-                && (lhsPath instanceof StringExpression);
+    private boolean isNotStringValue(Lookup rhs) {
+        boolean isNotStringVal = false;
+        if (rhs instanceof ValueLookup) {
+            ValueLookup valueLookup = (ValueLookup) rhs;
+            isNotStringVal = valueLookup.getValue() != null && !(valueLookup.getValue() instanceof String);
+        } else if (rhs instanceof CollectionLookup) {
+            CollectionLookup collectionLookup = (CollectionLookup) rhs;
+            Collection<Object> objs = collectionLookup.getValues();
+            if (CollectionUtils.isNotEmpty(objs)) {
+                for (Object val: objs) {
+                    if (val != null && !(val instanceof String || val instanceof Character)) {
+                        isNotStringVal = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return isNotStringVal;
+    }
+
+    private boolean applyEqualIgnoreCase(boolean isBitEncoded, Lookup lhs, Lookup rhs, ComparableExpression<?> lhsPath) {
+        boolean isNotStringVal = isNotStringValue(rhs);
+        return !isBitEncoded && !(lhs instanceof CaseLookup) && (lhsPath instanceof StringExpression) && !isNotStringVal;
     }
 
     private boolean isNullValueLookup(Lookup lookup) {
@@ -329,7 +342,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     return true;
                 }
                 Lookup rhs = restriction.getRhs();
-                if (rhs != null && rhs instanceof ValueLookup) {
+                if (rhs instanceof ValueLookup) {
                     ValueLookup valueLookup = (ValueLookup) rhs;
                     Object val = valueLookup.getValue();
                     if (val == null || (val instanceof String)) {
@@ -339,7 +352,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                                 "Bucket attribute can only do string value lookup. But found " + val
                                         + " instead.");
                     }
-                } else if (rhs != null && rhs instanceof CollectionLookup) {
+                } else if (rhs instanceof CollectionLookup) {
                     CollectionLookup colLookup = (CollectionLookup) rhs;
                     for (Object val : colLookup.getValues()) {
                         if (val != null && !(val instanceof String)) {
@@ -393,7 +406,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
     }
 
     private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets,
-            String bktLbl) {
+                                    String bktLbl) {
         List<Object> ids = new ArrayList<>();
         if (bktLbl != null) {
             ids = buckets.getBucketList().stream() //
@@ -402,16 +415,18 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     .collect(Collectors.toList());
         }
         if (ids.isEmpty()) {
-            log.warn("Cannot find corresponding label for " + bktLbl
-                    + " in statistics, use -1 bkt id instead.");
+            log.warn("Cannot find corresponding label for " + restriction.getRelation() + " " //
+                    + bktLbl + " in statistics, use -1 bkt id instead.");
+            restriction.setRelation(ComparisonType.EQUAL);
             return new ValueLookup(-1);
         }
         if (ids.size() > 1) {
             restriction.setRelation(ComparisonType.IN_COLLECTION);
             return new CollectionLookup(ids);
+        } else {
+            restriction.setRelation(ComparisonType.EQUAL);
+            return new ValueLookup(ids.get(0));
         }
-        restriction.setRelation(ComparisonType.EQUAL);
-        return new ValueLookup(ids.get(0));
     }
 
     private CollectionLookup convertCollectionLookup(Buckets buckets, Collection<Object> vals) {
