@@ -310,6 +310,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
         TenantEmailNotificationLevel notificationLevel = tenant.getNotificationLevel();
+        log.info("tenant " + tenant.getId() + " notification_level is: " + tenant.getNotificationLevel().name());
         if (notificationLevel.compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
             sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
         }

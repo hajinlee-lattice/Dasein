@@ -85,6 +85,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         String customerSpace = configuration.getCustomerSpace().toString();
         Tenant tenant = tenantService.findByTenantId(customerSpace);
         TenantEmailNotificationLevel notificationLevel = tenant.getNotificationLevel();
+        log.info("tenant " + tenant.getId() + " notification_level is: " + tenant.getNotificationLevel().name());
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, configuration.getDataFeedTaskId());
         S3ImportEmailInfo emailInfo = configuration.getEmailInfo();
         Table template = dataFeedTask.getImportTemplate();
