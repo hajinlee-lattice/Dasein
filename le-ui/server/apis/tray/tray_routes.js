@@ -302,8 +302,11 @@ class TrayRouter {
         this.router.put('/solutionInstances/:id', function(req, res){
             var solutionInstanceId = req.params.id;
             var solutionInstanceName = req.body.solutionInstanceName;
+            var authValues = req.body.authValues;
+            console.log(JSON.stringify(authValues))
             let options = this.getApiOptions(req, true);
-            options.json = Queries.updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName);
+            options.json = Queries.updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName, authValues);
+            console.log(JSON.stringify(options.json));
             this.request(options, function(error, response, body){
                 if (error || !body.data) {
                     res.send(UIActionsFactory.getUIActionsObject(error, 'Notice', 'Error'));

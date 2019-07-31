@@ -92,6 +92,7 @@ const Queries = {
                 node {
                   id
                   name
+                  customFields
                 }
               }
             }
@@ -99,20 +100,37 @@ const Queries = {
         }`
         return { query: q };
     },
-    updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName) {
-      let q = `mutation {
-          updateSolutionInstance(input: {solutionInstanceId: "${solutionInstanceId}",
-              instanceName: "${solutionInstanceName}", enabled: true
-          }) {
-            solutionInstance {
-              id
-              name
-              enabled
-              created
+    updateSolutionInstanceQuery(solutionInstanceId, solutionInstanceName, authValues) {
+      if (!authValues) {
+        let q = `mutation {
+            updateSolutionInstance(input: {solutionInstanceId: "${solutionInstanceId}",
+                instanceName: "${solutionInstanceName}", enabled: true
+            }) {
+              solutionInstance {
+                id
+                name
+                enabled
+                created
+              }
             }
-          }
-        }`
-        return { query: q };
+          }`
+          return { query: q };
+        } else {
+        let q = `mutation {
+            updateSolutionInstance(input: {solutionInstanceId: "${solutionInstanceId}",
+                instanceName: "${solutionInstanceName}", enabled: true, authValues: [{externalId: "${authValues.externalId}", authId: "${authValues.authId}"}]
+            }) {
+              solutionInstance {
+                id
+                name
+                enabled
+                created
+              }
+            }
+          }`
+          return { query: q };     
+        }
+        
     },
     getCreateSolutionInstanceMutation(solutionId, instanceName, authValues){
       if (!authValues) {

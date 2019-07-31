@@ -1,6 +1,6 @@
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
-import { MARKETO, SALESFORCE, ELOQUA } from './connectors.service';
+import { MARKETO, SALESFORCE, ELOQUA, LINKEDIN, FACEBOOK } from './connectors.service';
 
 export const solutionInstanceConfig = {
     orgType: null,
@@ -132,11 +132,20 @@ export const openConfigWindow = () => {
                         return authValue.externalId == authenticationExternalId;
                     });
                     var trayAuthenticationId = externalAuthentication[0].authId;
-                    var authenticationName = response.data.authentications.filter(function(auth) {
+                    var authentication = response.data.authentications.filter(function(auth) {
                         return auth.node.id == trayAuthenticationId;
                     });
-                    registerLookupIdMap(trayAuthenticationId, authenticationName[0].node.name);
-                    updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name);
+
+                    var httpClientAuth = authValues.filter(function(authValue) {
+                        return authValue.externalId == "external_http_client_authentication";
+                    });
+
+                    registerLookupIdMap(trayAuthenticationId, authentication[0].node.name, getLookupIdMapConfiguration(authentication[0]));
+                    if (solutionInstanceConfig.orgType == LINKEDIN || solutionInstanceConfig.orgType == FACEBOOK) {
+                        updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name, {externalId: "external_http_client_authentication", authId: trayAuthenticationId});
+                    } else {
+                        updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name);
+                    }
                     httpService.unsubscribeObservable(observer);
                 }
             },
@@ -147,7 +156,7 @@ export const openConfigWindow = () => {
         httpService.get('/tray/solutionInstances/' + solutionInstanceId, observer, {useraccesstoken: solutionInstanceConfig.accessToken});
     }
 
-    function registerLookupIdMap(trayAuthenticationId, trayAuthenticationName) {
+    function registerLookupIdMap(trayAuthenticationId, trayAuthenticationName, lookupIdMapConfiguration) {
         let observer = new Observer(
             response => {
                 console.log('response', response.data);
@@ -164,9 +173,11 @@ export const openConfigWindow = () => {
             }
         );
 
+        console.log(lookupIdMapConfiguration);
+
         var lookupIdMap = {
-            orgId: guidGenerator(),
-            orgName: trayAuthenticationName ? trayAuthenticationName : solutionInstanceConfig.orgType + '_' + (new Date()).getTime(),
+            orgId: lookupIdMapConfiguration.orgId,
+            orgName: lookupIdMapConfiguration.orgName,
             externalSystemType: "MAP",
             externalSystemName: solutionInstanceConfig.orgType,
             externalAuthentication: {
@@ -203,7 +214,7 @@ export const openConfigWindow = () => {
         return field.replace('CONTACT:', '');
     }
 
-    function updateSolutionInstance(solutionInstanceId, solutionInstanceName) {
+    function updateSolutionInstance(solutionInstanceId, solutionInstanceName, authValues) {
         let observer = new Observer(
             response => {
                 if (response.data) {
@@ -214,7 +225,7 @@ export const openConfigWindow = () => {
                 console.error("Error updating solution instance: " + JSON.stringify(response));
             }
         );
-        httpService.put('/tray/solutionInstances/' + solutionInstanceId, {solutionInstanceName: solutionInstanceName}, observer, {useraccesstoken: solutionInstanceConfig.accessToken});
+        httpService.put('/tray/solutionInstances/' + solutionInstanceId, {solutionInstanceName: solutionInstanceName, authValues: authValues}, observer, {useraccesstoken: solutionInstanceConfig.accessToken});
     }
 
     function updateSystem() {
@@ -270,6 +281,26 @@ export const openConfigWindow = () => {
 
     function isEmptyObject(obj) {
         return obj === Object(obj) && Object.entries(obj).length === 0;
+    }
+
+    function getLookupIdMapConfiguration(authentication) {
+        var trayAuthenticationName = authentication && authentication.node ? authentication.node.name : solutionInstanceConfig.orgType + '_' + (new Date()).getTime();
+        switch (solutionInstanceConfig.orgType) {
+            case MARKETO:
+                var customFields = JSON.parse(authentication.node.customFields);
+                return {
+                    orgId: customFields && customFields.identification ? customFields.identification.marketo_org_id : guidGenerator(),
+                    orgName: trayAuthenticationName
+                };
+            case LINKEDIN:
+            case FACEBOOK:
+            default:
+                return {
+                    orgId: guidGenerator(),
+                    orgName: trayAuthenticationName
+                }
+        }
+
     }
 
 
