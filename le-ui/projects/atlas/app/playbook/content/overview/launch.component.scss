@@ -83,6 +83,7 @@
             }
         }
         &.programs {
+            position: relative;
             label, select {
                 margin-right: 5px;
             }
@@ -95,6 +96,10 @@
             }
             .programName-container {
                 margin-bottom: 5px;
+            }
+            .audience-error-container {
+                position: absolute;
+                bottom: -1.5em;
             }
         }
         &.schedule {
