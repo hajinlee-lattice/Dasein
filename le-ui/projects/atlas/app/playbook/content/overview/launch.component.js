@@ -176,9 +176,11 @@ class LaunchComponent extends Component {
         let playstore = store.getState()['playbook'],
             vm = this;
 
-        this.state.fetching = true;
-        this.setState(this.state);
+        vm.state.fetching = true;
+        vm.setState(this.state);
 
+        let deepState = deepCopy(vm.state);
+        
         // creates this.state.launchAccountsCoverage, needed to load launch
         if(playstore.play.ratingEngine) {
             playstore.playbookWizardStore.launchAccountsCoverage(play.name, { 
@@ -204,12 +206,12 @@ class LaunchComponent extends Component {
                         vm.state.selectedBuckets.push(bucket.bucket);
                     });
                 }
-
                 vm.state.fetching = false;
                 vm.setState(vm.state);
             });
         } else {
             actions.fetchAccountsCount({ 'preexisting_segment_name': playstore.play.targetSegment.name }, function(data) {
+                vm.state.excludeItemsWithoutSalesforceId = deepState.excludeItemsWithoutSalesforceId; // this gets reset here. I don't know exactly why.
                 vm.state.launchAccountsCoverage = {
                     accountsCount: data
                 };
