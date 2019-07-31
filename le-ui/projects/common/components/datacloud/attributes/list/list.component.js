@@ -407,7 +407,9 @@ angular.module("common.attributes.list", []).component("attrResultsList", {
 
 		vm.refreshAttributes = () => {
 			vm.refreshDisabled = true;
-			alert("refreshing");
+			AttrConfigStore.refreshAttributes().then(() => {
+				vm.refreshDisabled = false;
+			});
 		};
 
 		vm.go = function(subcategory) {
