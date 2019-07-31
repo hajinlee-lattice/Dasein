@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
 
+
 @Component("playLaunchWorkflowListener")
 public class PlayLaunchWorkflowListener extends LEJobListener {
 
@@ -37,8 +38,8 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
     private void cleanupIntermediateFiles(JobExecution jobExecution) {
 
         List<String> hdfsIntermediateFiles = new ArrayList<>();
-        // String avroFile = getStringValueFromContext(jobExecution,
-        // PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
+        String avroFile = getStringValueFromContext(jobExecution,
+                PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
         List<String> s3UploadFiles = getListObjectFromContext(jobExecution,
                 PlayLaunchWorkflowConfiguration.RECOMMENDATION_EXPORT_FILES, String.class);
 
