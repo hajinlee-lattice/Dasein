@@ -1,73 +1,34 @@
-import { createStore, combineReducers, compose, applyMiddleware } from "redux";
-import thunk from "redux-thunk";
+import * as reduxStore from "./redux-store";
 import ngRedux from "ng-redux";
 
-const createReducer = asyncReducers => {
-    return combineReducers({
-        ...asyncReducers
-    });
-};
-
-const middleware = [
-    thunk
-];
-
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-export default function configureStore(initialState = {}) {
-    let store = createStore(
-        createReducer(),
-        initialState,
-        composeEnhancers(applyMiddleware(...middleware))
-    );
-    store.asyncReducers = {};
-    return store;
-}
-
-if (!window.store) {
-    window.store = configureStore();
-}
-
-export const store = window.store;
-
-export function injectAsyncReducer(store, name, asyncReducer) {
-    store.asyncReducers[name] = asyncReducer;
-    store.replaceReducer(createReducer(store.asyncReducers));
-}
-
-export function mount(path) {
-    return state => {
-        if (path) {
-            return { store: { ...state[path] } };
-        } else {
-            return { store: { ...state } };
-        }
-    };
-}
+export const store = reduxStore.store;
+export const injectAsyncReducer = reduxStore.injectAsyncReducer;
+export const mount = reduxStore.mount;
+const configureStore = reduxStore.configureStore;
+export default configureStore;
 
 angular
-    .module("mainApp.core.redux", [ngRedux])
-    .service("ReduxService", function ($ngRedux) {
-        this.connect = function (name, actions, reducer, context) {
-            context = context || {};
+	.module("mainApp.core.redux", [ngRedux])
+	.service("ReduxService", function($ngRedux) {
+		this.connect = function(name, actions, reducer, context) {
+			context = context || {};
 
-            if (!context.data) {
-                context.data = {};
-            }
+			if (!context.data) {
+				context.data = {};
+			}
 
-            let unsubscribe = $ngRedux.connect(
-                mount(name),
-                { ...actions }
-            )((context.data.redux = {}));
+			let unsubscribe = $ngRedux.connect(reduxStore.mount(name), {
+				...actions
+			})((context.data.redux = {}));
 
-            context.data.redux.unsubscribe = unsubscribe;
+			context.data.redux.unsubscribe = unsubscribe;
 
-            injectAsyncReducer(store, name, reducer);
+			reduxStore.injectAsyncReducer(store, name, reducer);
 
-            return context.data.redux;
-        };
-    })
-    .config($ngReduxProvider => {
-        $ngReduxProvider.provideStore(store);
-        // window.__REDUX_DEVTOOLS_EXTENSION__()
-    });
+			return context.data.redux;
+		};
+	})
+	.config($ngReduxProvider => {
+		$ngReduxProvider.provideStore(store);
+		// window.__REDUX_DEVTOOLS_EXTENSION__()
+	});
