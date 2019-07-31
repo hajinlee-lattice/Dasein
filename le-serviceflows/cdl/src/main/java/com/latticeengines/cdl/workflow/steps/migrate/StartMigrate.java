@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.MigrateReport;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -58,12 +58,12 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
             throw new RuntimeException("No import template to be migrated!");
         }
         // update migrate tracking record
-        migrateTrackingProxy.updateStatus(customerSpace.toString(), migrateTrackingPid, MigrateTracking.Status.MIGRATING);
+        migrateTrackingProxy.updateStatus(customerSpace.toString(), migrateTrackingPid, ImportMigrateTracking.Status.MIGRATING);
         List<String> uniqueIds = new ArrayList<>();
         dataFeedTaskMap.forEach((key, value) -> uniqueIds.addAll(value));
         List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskByUniqueIds(customerSpace.toString(),
                 uniqueIds);
-        MigrateReport report = new MigrateReport();
+        ImportMigrateReport report = new ImportMigrateReport();
         List<String> accountTemplates = new ArrayList<>();
         List<String> contactTemplates = new ArrayList<>();
         List<String> transactionTemplates = new ArrayList<>();

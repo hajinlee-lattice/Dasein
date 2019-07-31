@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.RegisterImportActionStepConfiguration;
@@ -36,9 +36,9 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
         if (action == null) {
             throw new RuntimeException("Cannot find action with PID: " + actionPid);
         }
-        MigrateTracking migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        ImportMigrateTracking importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                 configuration.getMigrateTrackingPid());
-        if (migrateTracking == null || migrateTracking.getReport() == null) {
+        if (importMigrateTracking == null || importMigrateTracking.getReport() == null) {
             throw new RuntimeException("Migrate Tracking Record is not correctly created!");
         }
 
@@ -47,19 +47,19 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
         importConfig.setWorkflowId(jobId);
         switch (configuration.getEntity()) {
             case Account:
-                importConfig.setDataFeedTaskId(migrateTracking.getReport().getOutputAccountTaskId());
-                importConfig.setImportCount(migrateTracking.getReport().getAccountCounts());
-                importConfig.setRegisteredTables(migrateTracking.getReport().getAccountDataTables());
+                importConfig.setDataFeedTaskId(importMigrateTracking.getReport().getOutputAccountTaskId());
+                importConfig.setImportCount(importMigrateTracking.getReport().getAccountCounts());
+                importConfig.setRegisteredTables(importMigrateTracking.getReport().getAccountDataTables());
                 break;
             case Contact:
-                importConfig.setDataFeedTaskId(migrateTracking.getReport().getOutputContactTaskId());
-                importConfig.setImportCount(migrateTracking.getReport().getContactCounts());
-                importConfig.setRegisteredTables(migrateTracking.getReport().getContactDataTables());
+                importConfig.setDataFeedTaskId(importMigrateTracking.getReport().getOutputContactTaskId());
+                importConfig.setImportCount(importMigrateTracking.getReport().getContactCounts());
+                importConfig.setRegisteredTables(importMigrateTracking.getReport().getContactDataTables());
                 break;
             case Transaction:
-                importConfig.setDataFeedTaskId(migrateTracking.getReport().getOutputTransactionTaskId());
-                importConfig.setImportCount(migrateTracking.getReport().getTransactionCounts());
-                importConfig.setRegisteredTables(migrateTracking.getReport().getTransactionDataTables());
+                importConfig.setDataFeedTaskId(importMigrateTracking.getReport().getOutputTransactionTaskId());
+                importConfig.setImportCount(importMigrateTracking.getReport().getTransactionCounts());
+                importConfig.setRegisteredTables(importMigrateTracking.getReport().getTransactionDataTables());
                 break;
             default:
                 throw new IllegalArgumentException("Not supported Entity for migrate!");

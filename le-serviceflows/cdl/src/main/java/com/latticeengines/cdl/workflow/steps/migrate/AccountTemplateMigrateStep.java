@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -48,13 +48,13 @@ public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep {
     @Override
     protected void updateMigrateTracking(String taskId, String templateName) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        MigrateTracking migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        ImportMigrateTracking importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                 configuration.getMigrateTrackingPid());
-        if (migrateTracking == null || migrateTracking.getReport() == null) {
+        if (importMigrateTracking == null || importMigrateTracking.getReport() == null) {
             throw new RuntimeException("The MigrateTracking record is not properly created!");
         }
-        migrateTracking.getReport().setOutputAccountTaskId(taskId);
-        migrateTracking.getReport().setOutputAccountTemplate(templateName);
-        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTracking.getPid(), migrateTracking.getReport());
+        importMigrateTracking.getReport().setOutputAccountTaskId(taskId);
+        importMigrateTracking.getReport().setOutputAccountTemplate(templateName);
+        migrateTrackingProxy.updateReport(customerSpace.toString(), importMigrateTracking.getPid(), importMigrateTracking.getReport());
     }
 }

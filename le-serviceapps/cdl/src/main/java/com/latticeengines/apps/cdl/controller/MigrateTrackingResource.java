@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.MigrateTrackingService;
-import com.latticeengines.domain.exposed.cdl.MigrateReport;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,35 +22,35 @@ import io.swagger.annotations.ApiOperation;
 public class MigrateTrackingResource {
 
     @Inject
-    private MigrateTrackingService migrateTrackingService;
+    private ImportMigrateTrackingService importMigrateTrackingService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a MigrateTracking record")
-    public MigrateTracking createMigrateTracking(@PathVariable String customerSpace) {
-        return migrateTrackingService.create(customerSpace);
+    public ImportMigrateTracking createMigrateTracking(@PathVariable String customerSpace) {
+        return importMigrateTrackingService.create(customerSpace);
     }
 
     @RequestMapping(value = "/get/{pid}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a MigrateTracking record by pid")
-    public MigrateTracking getMigrateTracking(@PathVariable String customerSpace, @PathVariable Long pid) {
-        return migrateTrackingService.getByPid(customerSpace, pid);
+    public ImportMigrateTracking getMigrateTracking(@PathVariable String customerSpace, @PathVariable Long pid) {
+        return importMigrateTrackingService.getByPid(customerSpace, pid);
     }
 
     @RequestMapping(value = "/update/{pid}/status/{status}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update MigrateTracking record status by pid")
     public void updateStatus(@PathVariable String customerSpace, @PathVariable Long pid,
-                             @PathVariable MigrateTracking.Status status) {
-        migrateTrackingService.updateStatus(customerSpace, pid, status);
+                             @PathVariable ImportMigrateTracking.Status status) {
+        importMigrateTrackingService.updateStatus(customerSpace, pid, status);
     }
 
     @RequestMapping(value = "/update/{pid}/report", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update MigrateTracking record report by pid")
     public void updateReport(@PathVariable String customerSpace, @PathVariable Long pid,
-                             @RequestBody MigrateReport report) {
-        migrateTrackingService.updateReport(customerSpace, pid, report);
+                             @RequestBody ImportMigrateReport report) {
+        importMigrateTrackingService.updateReport(customerSpace, pid, report);
     }
 }

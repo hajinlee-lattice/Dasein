@@ -26,9 +26,9 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MIGRATE_TRACKING")
+@Table(name = "IMPORT_MIGRATE_TRACKING")
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class MigrateTracking implements HasPid, HasTenant {
+public class ImportMigrateTracking implements HasPid, HasTenant {
 
     @JsonProperty("pid")
     @Id
@@ -51,7 +51,7 @@ public class MigrateTracking implements HasPid, HasTenant {
     @JsonProperty("report")
     @Column(name = "REPORT", columnDefinition = "'JSON'")
     @Type(type = "json")
-    private MigrateReport report;
+    private ImportMigrateReport report;
 
     @Override
     public Long getPid() {
@@ -81,11 +81,11 @@ public class MigrateTracking implements HasPid, HasTenant {
         this.status = status;
     }
 
-    public MigrateReport getReport() {
+    public ImportMigrateReport getReport() {
         return report;
     }
 
-    public void setReport(MigrateReport report) {
+    public void setReport(ImportMigrateReport report) {
         this.report = report;
     }
 

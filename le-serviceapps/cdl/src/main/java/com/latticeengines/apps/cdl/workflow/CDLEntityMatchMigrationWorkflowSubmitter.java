@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedService;
-import com.latticeengines.apps.cdl.service.MigrateTrackingService;
+import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -51,13 +51,13 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
     private ActionService actionService;
 
     @Inject
-    private MigrateTrackingService migrateTrackingService;
+    private ImportMigrateTrackingService importMigrateTrackingService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, String userId, WorkflowPidWrapper pidWrapper) {
         log.info(String.format("Start submit EntityMatchMigrate job for tenant %s, by user %s",
                 customerSpace.getTenantId(), userId));
-        MigrateTracking migrateTracking = migrateTrackingService.create(customerSpace.toString());
+        ImportMigrateTracking importMigrateTracking = importMigrateTrackingService.create(customerSpace.toString());
         Map<BusinessEntity, List<String>> dataFeedTaskMap = new HashMap<>();
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace.toString());
         if (dataFeed == null || CollectionUtils.isEmpty(dataFeed.getTasks())) {
@@ -70,7 +70,7 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
         }
         Map<BusinessEntity, Action> actionMap = registerEmptyAction(customerSpace, userId, pidWrapper.getPid());
         CDLEntityMatchMigrationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
-                migrateTracking.getPid(), dataFeedTaskMap, actionMap, userId);
+                importMigrateTracking.getPid(), dataFeedTaskMap, actionMap, userId);
 
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }

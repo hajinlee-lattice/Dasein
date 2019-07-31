@@ -52,19 +52,19 @@ public class MigrateContactImports extends BaseMigrateImports<MigrateContactImpo
 
     @Override
     protected String getTaskId() {
-        if (migrateTracking == null) {
-            migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        if (importMigrateTracking == null) {
+            importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                     configuration.getMigrateTrackingPid());
         }
-        return migrateTracking.getReport().getOutputContactTaskId();
+        return importMigrateTracking.getReport().getOutputContactTaskId();
     }
 
     @Override
     protected void updateMigrateTracking(Long migratedCounts, List<String> dataTables) {
-        migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                 configuration.getMigrateTrackingPid());
-        migrateTracking.getReport().setContactCounts(migratedCounts);
-        migrateTracking.getReport().setContactDataTables(dataTables);
-        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTracking.getPid(), migrateTracking.getReport());
+        importMigrateTracking.getReport().setContactCounts(migratedCounts);
+        importMigrateTracking.getReport().setContactDataTables(dataTables);
+        migrateTrackingProxy.updateReport(customerSpace.toString(), importMigrateTracking.getPid(), importMigrateTracking.getReport());
     }
 }

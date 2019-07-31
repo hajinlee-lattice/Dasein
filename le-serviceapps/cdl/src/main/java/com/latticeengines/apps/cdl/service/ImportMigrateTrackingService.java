@@ -1,30 +1,30 @@
 package com.latticeengines.apps.cdl.service;
 
-import com.latticeengines.domain.exposed.cdl.MigrateReport;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 
-public interface MigrateTrackingService {
+public interface ImportMigrateTrackingService {
 
     /**
      *
      * @param customerSpace Current customerSpace.
      * @return create a MigrateTracking record for current tenant.
      */
-    MigrateTracking create(String customerSpace);
+    ImportMigrateTracking create(String customerSpace);
 
     /**
      *
-     * @param migrateTracking tracking record tobe created.
+     * @param importMigrateTracking tracking record tobe created.
      * @return MigrateTracking object with PID
      */
-    MigrateTracking create(String customerSpace, MigrateTracking migrateTracking);
+    ImportMigrateTracking create(String customerSpace, ImportMigrateTracking importMigrateTracking);
 
     /**
      *
      * @param pid MigrateTracking PID
      * @return MigrateTracking record.
      */
-    MigrateTracking getByPid(String customerSpace, Long pid);
+    ImportMigrateTracking getByPid(String customerSpace, Long pid);
 
     /**
      *
@@ -32,7 +32,7 @@ public interface MigrateTrackingService {
      * @param pid PID for MigrateTracking record.
      * @param status record status
      */
-    void updateStatus(String customerSpace, Long pid, MigrateTracking.Status status);
+    void updateStatus(String customerSpace, Long pid, ImportMigrateTracking.Status status);
 
     /**
      *
@@ -40,6 +40,6 @@ public interface MigrateTrackingService {
      * @param pid PID for MigrateTracking record.
      * @param report Migrate report
      */
-    void updateReport(String customerSpace, Long pid, MigrateReport report);
+    void updateReport(String customerSpace, Long pid, ImportMigrateReport report);
 
 }

@@ -49,19 +49,19 @@ public class MigrateTransactionImports extends BaseMigrateImports<MigrateTransac
 
     @Override
     protected String getTaskId() {
-        if (migrateTracking == null) {
-            migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        if (importMigrateTracking == null) {
+            importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                     configuration.getMigrateTrackingPid());
         }
-        return migrateTracking.getReport().getOutputTransactionTaskId();
+        return importMigrateTracking.getReport().getOutputTransactionTaskId();
     }
 
     @Override
     protected void updateMigrateTracking(Long migratedCounts, List<String> dataTables) {
-        migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                 configuration.getMigrateTrackingPid());
-        migrateTracking.getReport().setTransactionCounts(migratedCounts);
-        migrateTracking.getReport().setTransactionDataTables(dataTables);
-        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTracking.getPid(), migrateTracking.getReport());
+        importMigrateTracking.getReport().setTransactionCounts(migratedCounts);
+        importMigrateTracking.getReport().setTransactionDataTables(dataTables);
+        migrateTrackingProxy.updateReport(customerSpace.toString(), importMigrateTracking.getPid(), importMigrateTracking.getReport());
     }
 }

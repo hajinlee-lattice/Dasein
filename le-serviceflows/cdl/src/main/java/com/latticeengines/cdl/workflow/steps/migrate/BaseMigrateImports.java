@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.MigrateTracking;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.EntityMatchImportMigrateConfig;
@@ -69,7 +69,7 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
 
     protected S3ImportSystem importSystem;
 
-    protected MigrateTracking migrateTracking;
+    protected ImportMigrateTracking importMigrateTracking;
 
     protected abstract String getTargetTablePrefix();
 
@@ -102,9 +102,9 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
 
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
-        migrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
+        importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
                 configuration.getMigrateTrackingPid());
-        if (migrateTracking == null || migrateTracking.getReport() == null) {
+        if (importMigrateTracking == null || importMigrateTracking.getReport() == null) {
             throw new RuntimeException("Migrate Tracking record is not properly createc!");
         }
         String taskUniqueId = getTaskId();
