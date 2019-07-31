@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -29,6 +30,9 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private BatonService batonService;
 
     private static Logger log = LoggerFactory.getLogger(MatchCdlWithAccountIdStep.class);
 
@@ -53,7 +57,13 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
         parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
-        parameters.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
+        String customerAccountId = InterfaceName.AccountId.name();
+        if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
+            if (accountTable.getAttribute(InterfaceName.CustomerAccountId) != null) {
+                customerAccountId = InterfaceName.CustomerAccountId.name();
+            }
+        }
+        parameters.setAccountMatchFields(Arrays.asList(customerAccountId));
         parameters.setHasAccountId(true);
 
         List<String> accountAttributeList = Arrays.asList(accountTable.getAttributeNames());
