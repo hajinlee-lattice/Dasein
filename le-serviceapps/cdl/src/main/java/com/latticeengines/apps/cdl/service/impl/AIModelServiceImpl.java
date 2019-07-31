@@ -415,7 +415,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .collectMap(this::getKey).block();
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreService
-                .getAllowedModelingAttrs(customerSpace, null, dataCollectionService.getActiveVersion(customerSpace),
+                .getAllowedModelingAttrs(customerSpace, BusinessEntity.Account,
+                        dataCollectionService.getActiveVersion(customerSpace),
                         false)
                 .concatWith(
                         servingStoreService.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
