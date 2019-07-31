@@ -90,6 +90,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String CACHE_PREFIX = CacheName.Constants.CSVImportMapperCacheName;
     private static final int MAX_CACHE_IDS = 5000000;
+    private static final int MAX_STRING_LENGTH = 1000;
 
     private Schema schema;
 
@@ -458,6 +459,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                         return Long.toString(timestamp);
                     }
+                }
+                if (fieldCsvValue.length() > MAX_STRING_LENGTH) {
+                    throw new RuntimeException(String.format( "%s exceeds %s chars", fieldCsvValue, MAX_STRING_LENGTH));
                 }
                 return fieldCsvValue;
             case ENUM:
