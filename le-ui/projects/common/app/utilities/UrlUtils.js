@@ -1,3 +1,7 @@
+/**
+ * This class is including the utils to manipulate the urls
+ * It is NOT a singleton
+ */
 class UrlUtils {
 	constructor() {}
 	encodeUrl(url) {
