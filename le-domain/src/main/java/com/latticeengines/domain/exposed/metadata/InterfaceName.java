@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public enum InterfaceName {
     Id, //
     InternalId, //
@@ -128,5 +132,21 @@ public enum InterfaceName {
     ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
     // Internal
-    __Composite_Key__ // primary key for internal use
+    __Composite_Key__; // primary key for internal use
+    
+    private static final Set<String> EntityIds = new HashSet<>(Arrays.asList( //
+            InterfaceName.EntityId.name(), //
+            InterfaceName.AccountId.name(), //
+            InterfaceName.ContactId.name()) //
+    );
+
+    /**
+     * Whether it is reserved field for internal entity ID
+     *
+     * @param id
+     * @return
+     */
+    public static boolean isEntityId(String id) {
+        return EntityIds.contains(id);
+    }
 }
