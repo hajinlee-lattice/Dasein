@@ -21,7 +21,7 @@ class CopyComponent extends Component {
 		);
 	}
 	getData() {
-		if (this.props.data && this.props.showData) {
+		if (this.props.data && this.props.showData == true) {
 			return <span>{this.props.data}</span>;
 		} else {
 			return null;
