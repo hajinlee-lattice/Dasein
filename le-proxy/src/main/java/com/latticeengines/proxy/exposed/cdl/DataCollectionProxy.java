@@ -260,6 +260,25 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         delete("unlinkTable", url);
     }
 
+    public void unlinkTables(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables?role={role}&version={version}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(role);
+        args.add(version);
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        delete("unlinkTables", url);
+    }
+
+    public void unlinkTables(String customerSpace, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables?version={version}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(version);
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        delete("unlinkTables", url);
+    }
+
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));

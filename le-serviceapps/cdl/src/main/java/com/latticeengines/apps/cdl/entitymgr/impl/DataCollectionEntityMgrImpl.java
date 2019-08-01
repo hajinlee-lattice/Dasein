@@ -27,8 +27,10 @@ import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.repository.reader.DataCollectionTableReaderRepository;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataCollectionEntityMgr")
@@ -57,6 +60,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Inject
     private DataFeedEntityMgr dataFeedEntityMgr;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Inject
     private DataCollectionTableReaderRepository dataCollectionTableReaderRepository;
@@ -97,7 +103,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<Table> findTablesOfRole(String collectionName, TableRoleInCollection tableRole,
-            DataCollection.Version version) {
+                                        DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -109,7 +115,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<String> findTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
-            DataCollection.Version version) {
+                                             DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -132,14 +138,14 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public Map<TableRoleInCollection, Map<DataCollection.Version, List<String>>> findTableNamesOfAllRole( //
-            String collectionName, TableRoleInCollection tableRole, DataCollection.Version version){
-        return dataCollectionDao.findTableNamesOfAllRole(collectionName,tableRole,version);
+                                                                                                          String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+        return dataCollectionDao.findTableNamesOfAllRole(collectionName, tableRole, version);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public DataCollectionTable upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
-            DataCollection.Version version) {
+                                                       DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
             DataCollection collection = getDataCollection(collectionName);
@@ -159,11 +165,28 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version) {
+        log.info("Unlinking table {} in version {} in collection {}", tableName, version, collectionName);
         List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByName(collectionName, tableName,
                 version);
         if (CollectionUtils.isNotEmpty(dataCollectionTables)) {
             dataCollectionTables.forEach(dataCollectionTableDao::delete);
         }
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public void removeAllTablesFromCollection(String customerSpace, DataCollection.Version version) {
+        log.info("Unlinking all tables in version {} under tenant {}", version, customerSpace);
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByFields(
+                "FK_TENANT_ID", tenant.getPid(),
+                "VERSION", version.toString()
+        );
+        dataCollectionTableReaderRepository.deleteInBatch(dataCollectionTables);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
