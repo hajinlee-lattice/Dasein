@@ -10,8 +10,10 @@ def chdirToProjectDir(project):
     os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/' + project)
     print("Change to directory: ", os.getcwd())
 
-def propDirsOpts():
-    if 'LE_ENVIRONMENT' not in os.environ or os.environ['LE_ENVIRONMENT'] == '':
+def propDirsOpts(remote):
+    if remote:
+        le_env = "devcluster"
+    elif 'LE_ENVIRONMENT' not in os.environ or os.environ['LE_ENVIRONMENT'] == '':
         le_env = "dev"
     else:
         le_env= os.environ['LE_ENVIRONMENT']
@@ -32,7 +34,9 @@ def commonOpts():
     return args
 
 def testOpts(args):
-    testPattern = '-Dtest=%s' % args.test if (args.test[-6:] == 'TestNG') or ('#' in args.test) else '-Dtest=*%s*' % args.test
+    if args.profiles is None:
+        args.profiles = "deployment" if args.remote else "functional"
+    testPattern = '-Dtest=%s' % args.test
     profile_opts = ['-P%s' % p for p in args.profiles.split(',')]
     group_opts = [] if args.groups is None else ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups]
     extra_opts = []
@@ -56,7 +60,8 @@ def testOpts(args):
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
     parser.add_argument('project', type=str, help='project name. e.g. pls, propdata, eai')
-    parser.add_argument('-p', dest='profiles', type=str, default='functional', help='comma separated list of maven profiles. default is functional')
+    parser.add_argument('-r', dest='remote', default=False, action='store_true', help = 'run test against remote workstation (mini-stack)')
+    parser.add_argument('-p', dest='profiles', type=str, help='comma separated list of maven profiles. default is functional for local, deployment for remote')
     parser.add_argument('-x', dest='xml', type=str, default='', help='testng xml in src/test/resources. when this is set, it will ignore -p and hard code profile to be testng')
     parser.add_argument('-g', dest='groups', type=str, default=None,
                         help='test groups (optional). can set multiple by comma separated list.')
@@ -75,6 +80,6 @@ if __name__ == "__main__":
     my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":
         my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
-    commands = ['mvn'] + propDirsOpts() + commonOpts() + testOpts(args)
+    commands = ['mvn'] + propDirsOpts(args.remote) + commonOpts() + testOpts(args)
     print('Executing [with common opts added]: ', ' '.join(commands))
     subprocess.call(commands, env=my_env)

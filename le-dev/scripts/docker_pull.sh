@@ -4,7 +4,7 @@ export PYTHONPATH=${WSHOME}/le-dev/scripts:${PYTHONPATH}
 
 IMAGE=$1
 
-if [ -z "${IMAGE}" ]; then
+if [[ -z "${IMAGE}" ]]; then
 
     for img in 'mysql' 'zookeeper' 'redis' 'tez-ui'
     do
