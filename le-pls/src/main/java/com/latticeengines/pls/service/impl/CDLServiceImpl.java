@@ -88,9 +88,6 @@ public class CDLServiceImpl implements CDLService {
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    @Value("${common.le.stack}")
-    private String leStack;
-
     private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name", "Data Type");
 
     private static final String CUSTOM = "Custom";
@@ -99,7 +96,8 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
-        boolean isActivityBasedPA = cdlProxy.isActivityBasedPA(leStack);
+        boolean isActivityBasedPA = cdlProxy.isActivityBasedPA();
+        log.info("Submitting PA request for tenant = {}, isActivityBasedPA = {}", customerSpace, isActivityBasedPA);
         if (isActivityBasedPA) {
             return cdlProxy.scheduleProcessAnalyze(customerSpace, false, request);
         } else {

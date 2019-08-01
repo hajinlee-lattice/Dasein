@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -466,5 +467,18 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     public Boolean isActivityBasedPA(String schedulerName) {
         String url = constructUrl("/schedulingPAQueue/isActivityBasedPA/{schedulerName}", schedulerName);
         return get("get isActivityBasedPA Flag", url, Boolean.class);
+    }
+
+    /*
+     * check if scheduler is enabled for current stack
+     */
+    public boolean isActivityBasedPA() {
+        String url = constructUrl("/schedulingPAQueue/isActivityBasedPA");
+        return get("get isActivityBasedPA Flag for current stack", url, Boolean.class);
+    }
+
+    public SchedulingStatus getSchedulingStatus(String customerSpace) {
+        String url = constructUrl("/schedulingPAQueue/status/{customerSpace}", shortenCustomerSpace(customerSpace));
+        return get("get schedulingStatus for tenant", url, SchedulingStatus.class);
     }
 }

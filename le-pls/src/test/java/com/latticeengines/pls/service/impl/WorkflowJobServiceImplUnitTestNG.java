@@ -37,6 +37,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -87,6 +89,9 @@ public class WorkflowJobServiceImplUnitTestNG {
     @Mock
     private ModelSummaryProxy modelSummaryProxy;
 
+    @Mock
+    private CDLProxy cdlProxy;
+
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplUnitTestNG.class);
 
     private Long[] jobIds = { 123L, 456L };
@@ -107,6 +112,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         mockActionService();
         mockDataFeedProxy();
         mockModelSummaryProxy();
+        mockCdlProxy();
 
         Tenant tenant = tenantEntityMgr.findByTenantId("tenant");
         MultiTenantContext.setTenant(tenant);
@@ -152,7 +158,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     public void testGenerateUnstartedProcessAnalyzeJob() {
         // Auto Schedule is off
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
-        Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
+        Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false, null);
         testUnstartedPnAJob(job);
         Assert.assertNotNull(job.getInputs());
         Assert.assertNotNull(job.getInputs().get(WorkflowContextConstants.Inputs.ACTION_IDS));
@@ -164,7 +170,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
         // Auto Schedule is on
         when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(true);
-        job = workflowJobService.generateUnstartedProcessAnalyzeJob(true);
+        job = workflowJobService.generateUnstartedProcessAnalyzeJob(true, null);
         Assert.assertNotNull(job.getSubJobs());
         Assert.assertEquals(job.getSubJobs().size(), 4);
         Assert.assertNotNull(job.getNote());
@@ -172,7 +178,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
         // test when no action, we still have P&A job
         when(actionProxy.getActionsByOwnerId(anyString(), isNull())).thenReturn(Collections.EMPTY_LIST);
-        job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
+        job = workflowJobService.generateUnstartedProcessAnalyzeJob(false, null);
         testUnstartedPnAJob(job);
     }
 
@@ -525,6 +531,10 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private void mockModelSummaryProxy() {
         when(modelSummaryProxy.getByModelId(anyString())).thenReturn(new ModelSummary());
+    }
+
+    private void mockCdlProxy() {
+        when(cdlProxy.getSchedulingStatus(anyString())).thenReturn(new SchedulingStatus("", false, null, null));
     }
 
     private void mockTenantEntityManager() {

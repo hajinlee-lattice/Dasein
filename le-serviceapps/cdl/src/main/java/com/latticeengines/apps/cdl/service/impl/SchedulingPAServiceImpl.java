@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -288,6 +289,18 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             }
         }
         return "cannot find this tenant " + tenantName + " in Queue.";
+    }
+
+    @Override
+    public SchedulingStatus getSchedulingStatus(@NotNull String customerSpace, @NotNull String schedulerName) {
+        boolean schedulerEnabled = isSchedulerEnabled(schedulerName);
+        DataFeed feed = dataFeedService.getDefaultDataFeed(customerSpace);
+        DataFeedExecution execution = null;
+        if (feed != null) {
+            execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(feed,
+                    DataFeedExecutionJobType.PA);
+        }
+        return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution);
     }
 
     private boolean isLarge(DataCollectionStatus status) {

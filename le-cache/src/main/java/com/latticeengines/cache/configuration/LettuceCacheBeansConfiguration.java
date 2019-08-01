@@ -163,6 +163,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DataCloudVersionCacheName));
 
+        RedisCacheConfiguration activeStackInfoCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofMinutes(10)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.ActiveStackInfoCacheName));
+
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put(CacheName.Constants.SessionCacheName, sessionCacheConfig);
         cacheConfigs.put(CacheName.Constants.DataLakeCMCacheName, dataLakeCMCacheConfig);
@@ -175,6 +182,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DantePreviewTokenCacheName, dantePreviewTokenCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
+        cacheConfigs.put(CacheName.Constants.ActiveStackInfoCacheName, activeStackInfoCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.EMRClusterCacheName, emrClusterCacheConfig);
 
