@@ -347,9 +347,5 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
                         : (record.get(field) instanceof Utf8 ? record.get(field).toString() : record.get(field)))
                 .collect(Collectors.toList());
         Assert.assertEquals(actual, expected);
-//        for (int i = 0; i < expected.size(); i++) {
-//            Assert.assertEquals(actual.get(i), expected.get(i), String.format("Actual type: %s, expected type: %s",
-//                    actual.get(i).getClass().getSimpleName(), expected.get(i).getClass().getSimpleName()));
-//        }
     }
 }
