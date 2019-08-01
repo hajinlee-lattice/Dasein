@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -71,8 +71,8 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        PlayLaunchConfig plConfig = new PlayLaunchConfig.Builder().build();
-        
+        TestPlaySetupConfig plConfig = new TestPlaySetupConfig.Builder().build();
+
         testPlayCreationHelper.setupTenantAndCreatePlay(plConfig);
 
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();

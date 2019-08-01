@@ -48,7 +48,8 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
@@ -141,15 +142,18 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void setup() throws Exception {
         topNCount = 1500L;
 
-        PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().excludeItemsWithoutSalesforceId(true)
-                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())))
-                .destinationSystemType(CDLExternalSystemType.MAP).destinationSystemName(CDLExternalSystemName.Marketo)
-                .destinationSystemId("Marketo_" + System.currentTimeMillis())
-                .trayAuthenticationId(UUID.randomUUID().toString()).topNCount(topNCount).playLaunchDryRun(true).build();
+        TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder()
+                .addChannel(new TestPlayChannelConfig.Builder().excludeItemsWithoutSalesforceId(true)
+                        .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())))
+                        .destinationSystemType(CDLExternalSystemType.MAP)
+                        .destinationSystemName(CDLExternalSystemName.Marketo)
+                        .destinationSystemId("Marketo_" + System.currentTimeMillis())
+                        .trayAuthenticationId(UUID.randomUUID().toString()).topNCount(topNCount).build())
+                .playLaunchDryRun(true).build();
 
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
-        testPlayCreationHelper.createPlayLaunch(playLaunchConfig);
-        testPlayCreationHelper.launchPlayWorkflow(playLaunchConfig);
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
+        testPlayCreationHelper.createPlayLaunch(testPlaySetupConfig);
+        testPlayCreationHelper.launchPlayWorkflow(testPlaySetupConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         rulesBasedPlay = testPlayCreationHelper.getPlay();

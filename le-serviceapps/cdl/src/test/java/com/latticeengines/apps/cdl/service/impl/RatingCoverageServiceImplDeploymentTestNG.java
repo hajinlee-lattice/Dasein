@@ -30,6 +30,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -59,7 +61,8 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -98,15 +101,17 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        String existingTenant = null;// "LETest1546299140564";
+        String existingTenant = null;
 
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant)
-                .mockRatingTable(true).build();
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        final TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder()
+                .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
+                        .destinationSystemName(CDLExternalSystemName.Salesforce)
+                        .destinationSystemId("test_sfdc_" + System.currentTimeMillis()).build())
+                .existingTenant(existingTenant).mockRatingTable(true).build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
 
         play = testPlayCreationHelper.getPlay();
         String ratingEngineId = play.getRatingEngine().getId();
-        // ratingEngineId = "engine_3r2jgb3stpy5heu0rm8nda";
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(), ratingEngineId);
 
         Assert.assertNotNull(ratingEngine);
@@ -429,7 +434,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
             RatingBucketCoverage coverage2Bucket = coverage2.getCoverageForBucket(rbc.getBucket());
             Long computedCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null
-                    ? coverage1Bucket.getCount() : 0)
+                    ? coverage1Bucket.getCount()
+                    : 0)
                     + (coverage2Bucket != null && coverage2Bucket.getCount() != null ? coverage2Bucket.getCount() : 0);
             Assert.assertEquals(computedCnt, rbc.getCount(), "Bucket Count doesnot match for: " + rbc.getBucket());
         });
@@ -503,15 +509,18 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
             RatingBucketCoverage coverage2Bucket = coverage2.getCoverageForBucket(rbc.getBucket());
             Long computedAccountCnt = (coverage1Bucket != null && coverage1Bucket.getCount() != null
-                    ? coverage1Bucket.getCount() : 0)
+                    ? coverage1Bucket.getCount()
+                    : 0)
                     + (coverage2Bucket != null && coverage2Bucket.getCount() != null ? coverage2Bucket.getCount() : 0);
             Assert.assertEquals(computedAccountCnt, rbc.getCount(),
                     "Account Bucket Count doesnot match for: " + rbc.getBucket());
 
             Long computedContactCnt = (coverage1Bucket != null && coverage1Bucket.getContactCount() != null
-                    ? coverage1Bucket.getContactCount() : 0)
+                    ? coverage1Bucket.getContactCount()
+                    : 0)
                     + (coverage2Bucket != null && coverage2Bucket.getContactCount() != null
-                            ? coverage2Bucket.getContactCount() : 0);
+                            ? coverage2Bucket.getContactCount()
+                            : 0);
             Assert.assertEquals(computedContactCnt, rbc.getContactCount(),
                     "Contact Bucket Count doesnot match for: " + rbc.getBucket());
         });
@@ -563,7 +572,6 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         DataPage data = entityProxy.getProducts(tenantId);
         List<String> productIds;
         if (data != null && CollectionUtils.isNotEmpty(data.getData())) {
-            log.info(JsonUtils.serialize(data.getData()));
             productIds = data.getData().stream()
                     .map(product -> (String) product.get(InterfaceName.ProductId.toString())).limit(5)
                     .collect(Collectors.toList());

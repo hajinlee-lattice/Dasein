@@ -164,6 +164,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchEntityMgr.deleteByLaunchId(channelId, hardDelete);
     }
 
+    @SuppressWarnings("checkstyle:methodlength")
     @Override
     public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
@@ -227,16 +228,17 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
-        boolean enableS3 = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ALPHA_FEATURE);
         List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         if (CollectionUtils.isNotEmpty(allConnections)) {
-            allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels, enableS3));
+            allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels));
         }
         return channels;
     }
 
-    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels, boolean enableS3) {
+    private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels) {
+        // TODO: Remove when Launch to S3 is GA
+        boolean enableS3 = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
+                LatticeFeatureFlag.ALPHA_FEATURE);
         if (mapping.getExternalSystemName() == null
                 || (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3)) {
             return;
@@ -314,8 +316,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (channel.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (channel.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

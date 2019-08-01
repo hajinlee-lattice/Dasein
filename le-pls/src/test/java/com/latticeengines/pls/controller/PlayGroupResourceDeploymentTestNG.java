@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Component
@@ -47,9 +47,9 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void setup() throws Exception {
         String existingTenant = null;// "LETest1546299140564";
 
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant)
+        final TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
                 .mockRatingTable(true).build();
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
         tenant = testPlayCreationHelper.getTenant();
     }
 

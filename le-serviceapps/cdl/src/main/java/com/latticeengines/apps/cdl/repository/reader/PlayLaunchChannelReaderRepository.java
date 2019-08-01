@@ -13,6 +13,7 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
 
     @Query("SELECT c FROM PlayLaunchChannel c "
             + "WHERE c.isAlwaysOn = :isAlwaysOn AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate AND c.play.deleted = false "
+            + "AND (c.play.ratingEngine = null OR c.play.ratingEngine.status = 'ACTIVE') "
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("isAlwaysOn") Boolean isAlwaysOn,
             @Param("startDate") Date startDate, @Param("endDate") Date endDate);
