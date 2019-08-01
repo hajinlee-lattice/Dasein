@@ -8,20 +8,6 @@ STATUS = ["STARTED", "FAILED", "COMPLETED"]
 USAGE = 'Usage: updateMigrationStatus -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID -s <STARTED/FAILED/COMPLETED>\n'
 
 
-def checkEnvironment():
-    valid = True
-    print('\n===== Checking environment ==========\n')
-    if not getenv('WSHOME'):
-        print('Environment variable WSHOME is not set')
-        valid = False
-    if getcwd() != getenv('WSHOME'):
-        print('Please run this script at WSHOME')
-        valid = False
-    print('\n===== Finish checking environment ===\n')
-    if not valid:
-        quit(-1)
-
-
 def getArgs():
     parser = argparse.ArgumentParser(description='Parse conn variables')
     parser.add_argument('-u', dest='user', type=str)
@@ -59,7 +45,6 @@ def checkCanUpdate(tenant, args):
 
 
 if __name__ == '__main__':
-    checkEnvironment()
     args, storage = None, None
     try:
         args = getArgs()
