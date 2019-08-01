@@ -352,8 +352,10 @@ public enum LedpCode {
     LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."),
     LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"),
     LEDP_18227("Can't get entity data from cache when cache is in build."),
-    LEDP_18228("Play Launch Channel {0} not found."), 
-    
+    LEDP_18228("Play Launch Channel {0} not found."),
+    LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
+    LEDP_18230("Fetch Field Definition Request could not generate Fetch Response: {0}"),
+    LEDP_18231("{0} Field Definition Request missing section: {1}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

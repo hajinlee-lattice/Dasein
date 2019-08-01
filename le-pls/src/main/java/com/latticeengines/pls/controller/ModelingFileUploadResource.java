@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -46,11 +48,18 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
+import com.latticeengines.domain.exposed.pls.frontend.CommitFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.CommitFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -155,7 +164,7 @@ public class ModelingFileUploadResource {
                 .validateFieldMappings(csvFileName, fieldMappingDocument, entity, source,
                         feedType);
     }
-    
+
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
@@ -263,6 +272,195 @@ public class ModelingFileUploadResource {
                 uploadFileFromS3(csvFile, entity));
     }
 
+    // Mock API for Import Workflow 2.0 Fetch Field Definitions.
+    @RequestMapping(value = "fielddefinition/fetch", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
+            @RequestParam(value = "tenantId", required =  true) String tenantId, //
+            @RequestParam(value = "systemName", required = true) String systemName, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "importFile", required = true) String importFile) {
+        //log.error("JAW ------ BEGIN Fetch Field Definition -----");
+
+        try {
+            validateFieldDefinitionRequestParameters(tenantId, systemName, systemType, importFile, "Fetch");
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+
+        // For mock, decide on returned fetchResponse based on request's Template State's system name.
+        String fetchResponseFile = null;
+        if (systemName.toLowerCase().contains("account")) {
+            fetchResponseFile =
+                    "com/latticeengines/pls/controller/internal/account-fetch-field-definition-response.json";
+        } else if (systemName.toLowerCase().contains("contact")) {
+            fetchResponseFile =
+                    "com/latticeengines/pls/controller/internal/contact-fetch-field-definition-response.json";
+        }
+
+        String fetchResponseJson = "{ \"Result\": \"ERROR: Response processing failure\" }";
+        FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+
+        try {
+            InputStream fetchResponseInputStream = getClass().getClassLoader().getResourceAsStream(fetchResponseFile);
+            if (fetchResponseInputStream != null) {
+                fetchResponseJson = IOUtils.toString(fetchResponseInputStream, "UTF-8");
+                log.error("FetchFieldDefinitionResponse is:\n" + fetchResponseJson);
+            } else {
+                log.error("Loading Fetch Response failed.");
+                return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18230,
+                        new String[] { fetchResponseFile }));
+            }
+        } catch (IOException e) {
+            log.error("Fetch Response load method threw IOException error:", e);
+            return ResponseDocument.failedResponse(e);
+            //log.error("Could not load mock response from resource");
+        } catch (Exception e2) {
+            log.error("Fetch Response load method threw Exception " + e2.toString(), e2);
+            return ResponseDocument.failedResponse(e2);
+        }
+
+        if (fetchResponseJson != null) {
+            try {
+                fetchResponse = JsonUtils.deserialize(fetchResponseJson, FetchFieldDefinitionsResponse.class);
+            } catch (Exception e) {
+                log.error("JSON deserialization step failed with error:", e);
+                ResponseDocument.failedResponse(e);
+            }
+        } else {
+            log.error("===> fetchResponseJson was null!!!");
+        }
+
+        //log.error("JAW ------ END Fetch Field Definition -----");
+
+        return ResponseDocument.successResponse(fetchResponse);
+    }
+
+    @RequestMapping(value = "fielddefinition/validate", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
+            @RequestParam(value = "tenantId", required =  true) String tenantId, //
+            @RequestParam(value = "systemName", required = true) String systemName, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "importFile", required = true) String importFile, //
+            @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
+        //log.error("JAW ------ BEGIN Validate Field Definition -----");
+        //log.error("validateRequest is:\n" + validateRequest.toString());
+
+        try {
+            validateFieldDefinitionRequestParameters(tenantId, systemName, systemType, importFile, "Validate");
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+        // Make sure that the validate request has both records and changes sections.
+        if (validateRequest.getFieldDefinitionsRecordsMap() == null) {
+            log.error("Validate Field Definition missing Field Definitions Records");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18231,
+                    new String[] { "Validate", "Field Definitions Records" }));
+        }
+
+        if (validateRequest.getFieldDefinitionsChangesMap() == null) {
+            log.error("Validate Field Definition missing Field Definitions Changes");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18231,
+                    new String[] { "Validate", "Field Definitions Changes" }));
+        }
+
+        ValidateFieldDefinitionsResponse validateResponse = new ValidateFieldDefinitionsResponse();
+
+        // Decide how to handle the Validation Request for mock.  For now, provide either PASS, WARNING, or ERROR
+        // response depending on Template State page number.
+        int modulo = tenantId.length() % 3;
+        if (modulo == 0) {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+        } else if (modulo == 1) {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
+
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
+                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+                List<FieldValidationMessage> warningList = new ArrayList<>();
+                for (FieldDefinition definition : changeEntry.getValue()) {
+                    FieldValidationMessage message = new FieldValidationMessage();
+                    message.setFieldName(definition.getFieldName());
+                    message.setColumnName(definition.getColumnName());
+                    message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
+                    message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
+                            definition.getFieldName());
+                    warningList.add(message);
+                }
+                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningList, true);
+            }
+            validateResponse.setFieldDefinitionsChangesMap(validateRequest.getFieldDefinitionsChangesMap());
+
+        } else {
+            validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+
+            int count = 0;
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
+                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+                List<FieldValidationMessage> warningErrorList = new ArrayList<>();
+                for (FieldDefinition definition : changeEntry.getValue()) {
+                    FieldValidationMessage message = new FieldValidationMessage();
+                    message.setFieldName(definition.getFieldName());
+                    message.setColumnName(definition.getColumnName());
+                    if (count++ % 2 == 0) {
+                        message.setMessageLevel(FieldValidationMessage.MessageLevel.ERROR);
+                        message.setMessage(definition.getColumnName() + " has OH BOY major problem when mapped to " +
+                                definition.getFieldName());
+                    } else {
+                        message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
+                        message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
+                                definition.getFieldName());
+                    }
+                    warningErrorList.add(message);
+                }
+                validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningErrorList, true);
+            }
+            validateResponse.setFieldDefinitionsChangesMap(validateRequest.getFieldDefinitionsChangesMap());
+        }
+
+        // For now, set fieldDefinitionsRecordsMap and fieldDefinitionsChangesMap to the values provided at input.
+        validateResponse.setFieldDefinitionsRecordsMap(validateRequest.getFieldDefinitionsRecordsMap());
+
+        //log.error("JAW ------ END Validate Field Definition -----");
+
+        return ResponseDocument.successResponse(validateResponse);
+    }
+
+    @RequestMapping(value = "fielddefinition/commit", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
+    public ResponseDocument<CommitFieldDefinitionsResponse> vaidateFieldDefinitions(
+            @RequestParam(value = "tenantId", required =  true) String tenantId, //
+            @RequestParam(value = "systemName", required = true) String systemName, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "importFile", required = true) String importFile, //
+            @RequestBody(required = true) CommitFieldDefinitionsRequest commitRequest) {
+        //log.error("JAW ------ BEGIN Commit Field Definition -----");
+        //log.error("commitRequest is: " + commitRequest.toString());
+
+        try {
+            validateFieldDefinitionRequestParameters(tenantId, systemName, systemType, importFile, "Commit");
+        } catch (LedpException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+        // Make sure that the commit request has field definition records section.
+        if (commitRequest.getFieldDefinitionsRecordsMap() == null) {
+            log.error("Commit Field Definition missing Field Definitions Records");
+            return ResponseDocument.failedResponse(new LedpException(LedpCode.LEDP_18231,
+                    new String[] { "Commit", "Field Definitions Records" }));
+        }
+
+
+        CommitFieldDefinitionsResponse commitResponse = new CommitFieldDefinitionsResponse();
+        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
+
+        //log.error("JAW ------ END Commit Field Definition -----");
+
+        return ResponseDocument.successResponse(commitResponse);
+    }
+
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
             SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat, boolean outsizeFlag) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
@@ -315,6 +513,34 @@ public class ModelingFileUploadResource {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
+        }
+    }
+
+    private void validateFieldDefinitionRequestParameters(String tenantId, String systemName, String systemType,
+                                                          String importFile, String requestType) throws LedpException {
+        log.error("Field Definition Request Parameters:\n   tenantId: " + tenantId + "\n   systemName: " + systemName +
+                "\n   systemType: " + systemType + "\n   importFile: " + importFile);
+
+        // TODO(jwinter): Figure out what validation is needed.
+
+        if (StringUtils.isBlank(tenantId)) {
+            log.error("tenantId is null or blank");
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "tenantId" });
+        }
+
+        if (StringUtils.isBlank(systemName)) {
+            log.error("systemName is null or blank");
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemName" });
+        }
+
+        if (StringUtils.isBlank(systemType)) {
+            log.error("systemType is null or blank");
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemType" });
+        }
+
+        if (StringUtils.isBlank(importFile)) {
+            log.error("importFile is null or blank");
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "importFile" });
         }
     }
 }
