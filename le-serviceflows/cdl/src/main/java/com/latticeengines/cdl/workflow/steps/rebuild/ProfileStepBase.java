@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.So
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -65,6 +67,9 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     protected TransformationProxy transformationProxy;
+
+    @Inject
+    private CloneTableService cloneTableService;
 
     protected abstract BusinessEntity getEntity();
 
@@ -220,6 +225,34 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         config.setUpdateMode(false);
 
         addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
+    }
+
+    /**
+     * Try to get batch store for {@link this#getEntity()} in inactive version. If
+     * table not exist in inactive version, link the table from active version.
+     *
+     * @return batch store table name
+     */
+    protected String ensureInactiveBatchStoreExists() {
+        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        TableRoleInCollection batchStore = getEntity().getBatchStore();
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        if (StringUtils.isBlank(tableName)) {
+            tableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
+            if (StringUtils.isNotBlank(tableName)) {
+                log.info("Found the batch store for entity {} in active version {}: {}", getEntity().name(), active,
+                        tableName);
+                cloneTableService.setActiveVersion(active);
+                cloneTableService.setCustomerSpace(customerSpace);
+                cloneTableService.linkInactiveTable(batchStore);
+            }
+        } else {
+            log.info("Found the batch store for entity {} in inactive version {}: {}", getEntity().name(), inactive,
+                    tableName);
+        }
+        return tableName;
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
