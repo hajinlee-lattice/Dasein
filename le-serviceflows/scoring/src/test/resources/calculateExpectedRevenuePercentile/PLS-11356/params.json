@@ -29,6 +29,11 @@
       "ms__d46fa446-ccba-4d9d-87fe-104d56e4a0e2-ai_3gs6p": "RawScore",
       "ms__5bb75f06-43e2-4e43-bc96-bd7d5d999a41-ai_wepzs": "RawScore"
     },
+    "normalization_ratio_map": {
+      "ms__d4bcdf8b-c9bb-4584-a7ae-cff5360804b8-ai_bar14": 1.23456,
+      "ms__052cd3e9-a140-4499-ada0-f5855653c062-ai_2tu6u": 1.1011,
+      "ms__72452f22-a378-4ba7-a7a8-8aa1c76ae350-ai_a4rzj": 1.38
+    },
     "score_derivation_maps": {
       "ms__d4bcdf8b-c9bb-4584-a7ae-cff5360804b8-ai_bar14": {
         "EV": {
