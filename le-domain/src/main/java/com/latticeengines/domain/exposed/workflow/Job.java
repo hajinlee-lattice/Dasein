@@ -348,11 +348,22 @@ public class Job implements HasId<Long>, HasName {
      * scheduler information for this job and its tenant
      */
     public static class SchedulingInfo {
-        private final boolean schedulerEnabled;
-        private final boolean scheduled;
+        private boolean schedulerEnabled;
+        private boolean scheduled;
+
+        public SchedulingInfo() {
+        }
 
         public SchedulingInfo(boolean schedulerEnabled, boolean scheduled) {
             this.schedulerEnabled = schedulerEnabled;
+            this.scheduled = scheduled;
+        }
+
+        public void setSchedulerEnabled(boolean schedulerEnabled) {
+            this.schedulerEnabled = schedulerEnabled;
+        }
+
+        public void setScheduled(boolean scheduled) {
             this.scheduled = scheduled;
         }
 
