@@ -28,9 +28,23 @@ public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMeta
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public List<ExportFieldMetadataDefaults> getDefaultExportFieldMetadata(CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsDao.getDefaultExportFields(systemName);
+    public
+    List<ExportFieldMetadataDefaults> getAllDefaultExportFieldMetadata(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsDao.getAllDefaultExportFields(systemName);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadata(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsDao.getExportEnabledDefaultFields(systemName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsDao.getHistoryEnabledDefaultFields(systemName);
+    }
+
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -44,7 +44,7 @@ public class ExportFieldMetadataDefaultsResource {
     @NoCustomerSpace
     public List<ExportFieldMetadataDefaults> getDefaultFields(
             @RequestParam(value = "systemName", required = true) CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsService.getAttributes(systemName);
+        return exportFieldMetadataDefaultsService.getAllAttributes(systemName);
     }
 
     @DeleteMapping(value = "")

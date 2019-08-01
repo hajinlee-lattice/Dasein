@@ -8,7 +8,11 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 
 public interface ExportFieldMetadataDefaultsDao extends BaseDao<ExportFieldMetadataDefaults> {
 
-    List<ExportFieldMetadataDefaults> getDefaultExportFields(CDLExternalSystemName systemName);
+    List<ExportFieldMetadataDefaults> getAllDefaultExportFields(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFields(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledDefaultFields(CDLExternalSystemName systemName);
 
     void deleteBySystemName(CDLExternalSystemName systemName);
 

@@ -9,7 +9,11 @@ public interface ExportFieldMetadataDefaultsEntityMgr {
 
     List<ExportFieldMetadataDefaults> createAll(List<ExportFieldMetadataDefaults> defaultFields);
 
-    List<ExportFieldMetadataDefaults> getDefaultExportFieldMetadata(CDLExternalSystemName systemName);
+    List<ExportFieldMetadataDefaults> getAllDefaultExportFieldMetadata(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
 
     List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultFields);
