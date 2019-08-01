@@ -45,6 +45,7 @@ public class Job implements HasId<Long>, HasName {
     private Long tenantPid;
     private String tenantId;
     private String errorCategory;
+    private SchedulingInfo schedulingInfo;
 
     @JsonProperty
     public Long getPid() {
@@ -302,6 +303,18 @@ public class Job implements HasId<Long>, HasName {
         this.errorCategory = errorCategory;
     }
 
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public SchedulingInfo getSchedulingInfo() {
+        return schedulingInfo;
+    }
+
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void setSchedulingInfo(SchedulingInfo schedulingInfo) {
+        this.schedulingInfo = schedulingInfo;
+    }
+
     public Job shallowClone() {
         Job job = new Job();
         job.pid = this.pid;
@@ -327,6 +340,28 @@ public class Job implements HasId<Long>, HasName {
         job.tenantPid = this.tenantPid;
         job.tenantId = this.tenantId;
         job.errorCategory = this.errorCategory;
+        job.schedulingInfo = this.schedulingInfo;
         return job;
+    }
+
+    /*
+     * scheduler information for this job and its tenant
+     */
+    public static class SchedulingInfo {
+        private final boolean schedulerEnabled;
+        private final boolean scheduled;
+
+        public SchedulingInfo(boolean schedulerEnabled, boolean scheduled) {
+            this.schedulerEnabled = schedulerEnabled;
+            this.scheduled = scheduled;
+        }
+
+        public boolean isSchedulerEnabled() {
+            return schedulerEnabled;
+        }
+
+        public boolean isScheduled() {
+            return scheduled;
+        }
     }
 }

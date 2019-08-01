@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -59,6 +60,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -102,6 +104,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -149,7 +154,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         String customerSpace = null;
         // For unfinished ProcessAnalyze job
         if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
-            return generateUnstartedProcessAnalyzeJob(true);
+            return generateUnstartedProcessAnalyzeJob(true, getSchedulingStatus(MultiTenantContext.getCustomerSpace()));
         } else {
             if (useCustomerSpace) {
                 customerSpace = MultiTenantContext.getCustomerSpace().toString();
@@ -246,13 +251,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             jobs.removeIf(job -> (job == null) || (job.getJobType() == null)
                     || (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase())));
         }
+        SchedulingStatus schedulingStatus = getSchedulingStatus(MultiTenantContext.getCustomerSpace());
         updateAllJobs(jobs);
         if (generateEmptyPAJob != null && generateEmptyPAJob) {
-            Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
+            Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true, schedulingStatus);
             if (unstartedPnAJob != null) {
                 jobs.add(unstartedPnAJob);
             }
         }
+        // TODO set last failed PA to pending retry if still have quota
         return jobs;
     }
 
@@ -404,7 +411,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @VisibleForTesting
-    Job generateUnstartedProcessAnalyzeJob(boolean expandChildrenJobs) {
+    Job generateUnstartedProcessAnalyzeJob(boolean expandChildrenJobs, SchedulingStatus schedulingStatus) {
         Job job = new Job();
         job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
         job.setName(PA_JOB_TYPE);
@@ -413,10 +420,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         String tenantId = MultiTenantContext.getShortTenantId();
         List<Action> actions = actionProxy.getActionsByOwnerId(tenantId, null);
         updateStartTimeStampAndForJob(job);
+        setSchedulingInfo(job, MultiTenantContext.getCustomerSpace(), schedulingStatus);
         if (CollectionUtils.isNotEmpty(actions)) {
             Map<String, String> unfinishedInputContext = new HashMap<>();
             List<Long> unfinishedActionIds = actions.stream()
-                    .filter(action -> isVisibleAction(action))
+                    .filter(this::isVisibleAction)
                     .map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
@@ -425,6 +433,39 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
         return job;
+    }
+
+    private SchedulingStatus getSchedulingStatus(CustomerSpace customerSpace) {
+        if (customerSpace == null) {
+            log.warn("Customerspace should not be null");
+            return null;
+        }
+
+        return cdlProxy.getSchedulingStatus(customerSpace.toString());
+    }
+
+    /*
+     * Set scheduling info for unstarted PA job
+     */
+    private void setSchedulingInfo(Job job, CustomerSpace customerSpace, SchedulingStatus schedulingStatus) {
+        if (schedulingStatus == null) {
+            log.error("Failed to get scheduling status for tenant = {}", customerSpace.toString());
+            return;
+        }
+
+        // construct scheduling info
+        boolean scheduleNowClicked = false;
+        if (schedulingStatus.getDataFeed() != null) {
+            scheduleNowClicked = Boolean.TRUE.equals(schedulingStatus.getDataFeed().isScheduleNow());
+        }
+        // currently only consider schedule now
+        boolean tenantScheduled = schedulingStatus.isSchedulerEnabled() && scheduleNowClicked;
+        job.setSchedulingInfo(new Job.SchedulingInfo(schedulingStatus.isSchedulerEnabled(), tenantScheduled));
+
+        // change the job status for scheduled tenant
+        if (tenantScheduled) {
+            job.setJobStatus(JobStatus.PENDING);
+        }
     }
 
     private Boolean isVisibleAction(Action action) {

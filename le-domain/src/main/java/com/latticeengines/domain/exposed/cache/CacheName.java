@@ -21,6 +21,8 @@ public enum CacheName {
 
     EMRClusterCache(Constants.EMRClusterCacheName), //
 
+    ActiveStackInfoCache(Constants.ActiveStackInfoCacheName), //
+
     SessionCache(Constants.SessionCacheName);//
 
     private String name;
@@ -78,5 +80,6 @@ public enum CacheName {
         public static final String EMRClusterCacheName = "EMRClusterCache";
         public static final String CSVImportMapperCacheName = "CSVImportMapperCache";
         public static final String ModelSummaryCacheName = "ModelSummaryCache";
+        public static final String ActiveStackInfoCacheName = "ActiveStackInfoCache";
     }
 }
