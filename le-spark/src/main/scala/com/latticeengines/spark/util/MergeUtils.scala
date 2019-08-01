@@ -66,7 +66,7 @@ private[spark] object MergeUtils {
               } else {
                 (row.get(rhsColPos(attr)), row.get(lhsColPos(attr)))
               }
-            if (InterfaceName.AccountId.name().equals(attr) //
+            if (InterfaceName.isEntityId(attr) //
               && DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(firstVal)) {
               if (secondVal == null) {
                 firstVal
