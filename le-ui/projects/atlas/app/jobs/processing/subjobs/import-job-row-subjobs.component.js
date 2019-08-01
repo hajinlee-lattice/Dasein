@@ -1,6 +1,7 @@
 import { MessagingFactory } from 'common/app/utilities/messaging-service';
 import { NGPAJobsService } from '../pa-jobs.service';
 import Observer from "common/app/http/observer";
+import UrlUtils from "common/app/utilities/UrlUtils";
 import Message, {
     MODAL,
     WARNING,
@@ -146,7 +147,11 @@ angular.module('lp.jobs.row.subjobs', [])
                 var auth = BrowserStorageUtility.getTokenDocument();
                 var clientSession = BrowserStorageUtility.getClientSession();
                 var tenantId = clientSession.Tenant.Identifier;
-                return path + fileName + '&filePath=' + filePath + '&Authorization=' + auth;
+                let fileNameEncoded = UrlUtils.encodeUrl(fileName);
+                let filePathEncoded = UrlUtils.encodeUrl(filePath);
+                let ret = path + fileNameEncoded + '&filePath=' + filePathEncoded + '&Authorization=' + auth;
+                return ret;
+
             };
 
             $scope.canBeDownload = function (subjob) {

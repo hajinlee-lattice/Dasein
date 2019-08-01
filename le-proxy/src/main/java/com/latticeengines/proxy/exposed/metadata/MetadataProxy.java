@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,9 +26,12 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
@@ -61,7 +65,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public List<String> getImportTableNames(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables", customerSpace);
         String[] importTableNames = get("getImportTables", url, String[].class);
-        return Arrays.<String> asList(importTableNames);
+        return Arrays.<String>asList(importTableNames);
     }
 
     public List<Table> getImportTables(String customerSpace) {
@@ -198,7 +202,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public List<String> getTableNames(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables", customerSpace);
         String[] importTableNames = get("getTables", url, String[].class);
-        return Arrays.<String> asList(importTableNames);
+        return Arrays.<String>asList(importTableNames);
     }
 
     public Table getTable(String customerSpace, String tableName) {
@@ -359,5 +363,27 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public Boolean provisionImportTables(Tenant tenant) {
         String url = constructUrl("/admin/provision");
         return post("provisionImportTables", url, tenant, Boolean.class);
+    }
+
+    public DataCollection.Version getMigrationActiveVersion() {
+        String url = constructUrl("/migration/tenants/{customerSpace}/activeDataCollection/version");
+        return get("get active version in migration", url, DataCollection.Version.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Long> getTenantPidsByStatus(MigrationTrack.Status status) {
+        String url = constructUrl("/migration/tenants/getByStatus/{status}", status);
+        return get("getTenantPidsByStatus", url, List.class);
+    }
+
+    public MigrationTrack.Status getMigrationStatus(String customerSpace) {
+        String url = constructUrl("/migration/tenants/{customerSpace}/status", customerSpace);
+        return get("getTenantStatus", url, MigrationTrack.Status.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<TableRoleInCollection, String[]> getActiveTables(String customerSpace) {
+        String url = constructUrl("/migration/tenants/{customerSpace}/activeTables", customerSpace);
+        return get("getActiveTables", url, Map.class);
     }
 }

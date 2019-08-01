@@ -38,6 +38,11 @@ public interface DataCollectionService {
     void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
                      DataCollection.Version version);
 
+    void unlinkTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
+                      DataCollection.Version version);
+
+    void unlinkTables(String customerSpace, DataCollection.Version version);
+
     List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
                           DataCollection.Version version);
 

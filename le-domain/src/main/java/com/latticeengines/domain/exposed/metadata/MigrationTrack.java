@@ -65,10 +65,11 @@ public class MigrationTrack implements HasPid, HasTenant {
     // Role -> Table.names
     private Map<TableRoleInCollection, String[]> curActiveTable; // List of all active tables' names under tenant
 
-    @Type(type = "json")
-    @JsonProperty("importAction")
-    @Column(name = "IMPORT_ACTION", columnDefinition = "'JSON'")
-    private MigrationTrackImportAction importAction; // mimic import actions
+    // TODO - uncomment after MIGRATE_TRACKING table is in
+//    @OneToOne(cascade = CascadeType.REMOVE)
+//    @JoinColumn(name = "FK_TRACKING_REPORT")
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    private MigrateTracking trackingReport;
 
     @Type(type = "json")
     @Column(name = "DETAIL", columnDefinition = "'JSON'")
@@ -135,13 +136,14 @@ public class MigrationTrack implements HasPid, HasTenant {
         this.curActiveTable = curActiveTable;
     }
 
-    public MigrationTrackImportAction getImportAction() {
-        return importAction;
-    }
-
-    public void setImportAction(MigrationTrackImportAction importAction) {
-        this.importAction = importAction;
-    }
+    // TODO - uncomment after MIGRATE_TRACKING table is in
+//    public MigrateTracking getTrackingReport() {
+//        return trackingReport;
+//    }
+//
+//    public void setTrackingReport(MigrateTracking trackingReport) {
+//        this.trackingReport = trackingReport;
+//    }
 
     public DataCollectionStatusDetail getCollectionStatusDetail() {
         return collectionStatusDetail;
