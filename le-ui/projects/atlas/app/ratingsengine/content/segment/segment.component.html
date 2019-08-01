@@ -42,18 +42,18 @@
                             <li class="accounts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'accounts'">
                                 Accounts
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort"></i>
-                                <i ng-if="vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'accounts')" class="fa fa-sort-{{up ? 'desc' : 'asc'}}"></i>
                             </li>
                             <li class="contacts" ng-click="up = !up; vm.sortBy = (up ? '-' : '') + 'contacts'">
                                 Contacts 
                                 <i ng-if="!vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort"></i>
-                                <i ng-if="vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort-{{up ? 'asc' : 'desc'}}"></i>
+                                <i ng-if="vm.endsWith(vm.sortBy, 'contacts')" class="fa fa-sort-{{up ? 'desc' : 'asc'}}"></i>
                             </li>
                         </ul>
                     </li>
                     <li 
                         ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) 
-                                    | orderBy: vm.sortBy
+                                    | orderBy: vm.sortBy.toLowerCase()
                                     | startFrom: (vm.currentPage - 1) * vm.pageSize 
                                     | limitTo: vm.pageSize"
                         ng-disabled="vm.block_user || vm.scoreTrainingFile"

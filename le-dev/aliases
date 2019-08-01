@@ -118,6 +118,8 @@ alias zk-prod='zk-shell 10.151.1.24,10.151.101.242,10.151.201.50'
 alias hub-pr='bash $WSHOME/le-dev/scripts/hub_pr.sh'
 
 alias my-stack='bash $WSHOME/le-dev/scripts/my_stack.sh'
+alias setup-ms='bash $WSHOME/le-dev/scripts/setup_ms.sh'
 alias deploy-emr='bash $WSHOME/le-dev/scripts/deploy_emr.sh'
 alias deploy-ms='bash $WSHOME/le-dev/scripts/deploy_ms.sh'
 alias deploy-props='bash $WSHOME/le-dev/scripts/deploy_props.sh'
+alias toggle-ms='bash $WSHOME/le-dev/scripts/toggle_ms.sh'

@@ -30,6 +30,8 @@ CLUSTER_ID=$(aws emr list-clusters --region us-east-1 --query 'Clusters[?Name==`
 EMR_HOST_NAME=$(aws emr list-instances --region us-east-1 --cluster-id ${CLUSTER_ID} --instance-group-types MASTER | jq -r .Instances[0].PrivateIpAddress)
 echo "Find emr master ip: ${EMR_HOST_NAME}"
 
+cfgbld
+
 PROP_FILE=${WSHOME}/le-config/conf/env/devcluster/latticeengines.properties
 if [[ $(uname) == 'Darwin' ]]; then
     echo "You are on Mac"
