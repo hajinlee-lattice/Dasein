@@ -418,6 +418,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @BeforeClass(groups = { "end2end", "manual", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
+        if (!isLocalEnvironment()) {
+            checkpointService.enableCopyToS3();
+        }
     }
 
     @AfterClass(groups = { "end2end", "precheckin" })
@@ -1725,11 +1728,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         try {
             String filePath = tablesPath + "/File";
             String fileBkPath = contractPath + "/FileBackup";
-            System.out.println("Backing up " + filePath);
+            log.info("Backing up " + filePath);
             HdfsUtils.copyFiles(yarnConfiguration, filePath, fileBkPath);
-            System.out.println("Wiping out " + tablesPath);
+            log.info("Wiping out " + tablesPath);
             HdfsUtils.rmdir(yarnConfiguration, tablesPath);
-            System.out.println("Resuming " + filePath);
+            log.info("Resuming " + filePath);
             HdfsUtils.copyFiles(yarnConfiguration, fileBkPath, filePath);
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, filePath));
             HdfsUtils.rmdir(yarnConfiguration, fileBkPath);
