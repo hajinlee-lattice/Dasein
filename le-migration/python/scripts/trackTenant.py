@@ -31,20 +31,19 @@ def checkCanTrack(tenant=None):
     if not tenant:
         print('Tenant not found.')
         return False
-    elif len(tenant.migrationTrack):
+    elif tenant.migrationTrack:
         print('Tenant already being tracked.')
         return False
     elif len(tenant.metadataDataCollection) != 1:
         print('Tenant must have one active data collection')
         return False
-    elif len(tenant.metadataDataCollection[0].metadataDataCollectionTable) <= 0:
+    elif len(tenant.metadataDataCollection[0].activeMetadataDataCollectionTable) <= 0:
         print('No records found for the active data collection of this tenant')
         return False
-    elif len([stats for stats in tenant.metadataStatistics if
-              tenant.metadataDataCollection[0].version == stats.version]) != 1:
+    elif len(tenant.activeMetadataStatistics) != 1:
         print('Tenant must have one statistics record for its active data collection')
         return False
-    elif len(tenant.metadataDataCollection[0].metadataDataCollectionStatus) != 1:
+    elif len(tenant.metadataDataCollection[0].activeMetadataDataCollectionStatus) != 1:
         print('Tenant must have one status record for its active data collection')
         return False
     return True
@@ -62,7 +61,7 @@ def getArgs():
 
 def getStorage(args):
     try:
-        if any([not item for item in [args.user, args.pwd, args.host, args.db]]):
+        if not all([item for item in [args.user, args.pwd, args.host, args.db]]):
             raise AttributeError('Missing conn variables')
         return __import__('models').db_storage.DBStorage(args.user, args.pwd, args.host, args.db)
     except AttributeError:
@@ -78,18 +77,16 @@ def createTenantTrack(tenant):
     track.status = 'STARTED'
     track.version = tenant.metadataDataCollection[0].version
     track.curActiveTable = {}
-    for record in tenant.metadataDataCollection[0].metadataDataCollectionTable:
+    for record in tenant.metadataDataCollection[0].activeMetadataDataCollectionTable:
         if not track.curActiveTable.get(record.role):
             track.curActiveTable[record.role] = [record.metadataTable.name]
         else:
             track.curActiveTable[record.role].append(record.metadataTable.name)
     # track.trackingReport is default null and should be added by java PA
-    if tenant.metadataDataCollectionStatus:
-        track.collectionStatusDetail = tenant.metadataDataCollection[0].metadataDataCollectionStatus[0].detail
-    if tenant.metadataStatistics:
-        stats = [stats for stats in tenant.metadataStatistics if tenant.metadataDataCollection[0].version == stats.version][0]
-        track.statsCubesData = stats.cubesData
-        track.statsName = stats.name
+    track.collectionStatusDetail = tenant.metadataDataCollection[0].activeMetadataDataCollectionStatus[0].detail
+    stats = tenant.activeMetadataStatistics[0]
+    track.statsCubesData = stats.cubesData
+    track.statsName = stats.name
     track.save()
     return track
 

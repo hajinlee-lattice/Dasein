@@ -17,4 +17,4 @@ class MetadataTable(BaseModel, Base):
     type = Column('TYPE', INTEGER(11), nullable=False)
     tenantId = Column('TENANT_ID', BIGINT(20), nullable=False)
     fkTenantId = Column('FK_TENANT_ID', BIGINT(20), ForeignKey('TENANT.TENANT_PID'), nullable=False)
-    metadataDataCollectionTable = relationship(MetadataDataCollectionTable, backref='metadataTable', cascade='delete')
+    metadataDataCollectionTable = relationship(MetadataDataCollectionTable, backref='metadataTable', uselist=False, cascade='delete')

@@ -23,5 +23,13 @@ class MetadataDataCollection(BaseModel, Base):
         MetadataDataCollectionTable, backref='metadataDataCollection', cascade='delete'
     )
     migrationTrack = relationship(
-        MigrationTrack, backref='metadataDataCollection', cascade='delete'
+        MigrationTrack, backref='metadataDataCollection', uselist=False, cascade='delete'
     )
+
+    @property
+    def activeMetadataDataCollectionStatus(self):
+        return [record for record in self.metadataDataCollectionStatus if record.version == self.version]
+
+    @property
+    def activeMetadataDataCollectionTable(self):
+        return [record for record in self.metadataDataCollectionTable if record.version == self.version]
