@@ -52,7 +52,7 @@
                             <option value="" ng-selected="$ctrl.createNewList"> ------ Create new list ------ </option>
                         </select>
                         <input type="text" ng-if="$ctrl.createNewList" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updatePlayStore()" maxlength="255">
-                        <div ng-if="$ctrl.audienceName && !$ctrl.isValidAudienceName()" class="red-text">  * A static list with this name already exists. Please choose another. </div>
+                        <div ng-if="$ctrl.createNewList && $ctrl.audienceName && !$ctrl.isValidAudienceName()" class="red-text">  * A static list with this name already exists. Please choose another. </div>
                     </td>
                 </tr>
             </tbody>
