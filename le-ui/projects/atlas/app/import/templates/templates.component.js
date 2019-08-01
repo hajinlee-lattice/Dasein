@@ -320,9 +320,9 @@ export default class TemplatesComponent extends Component {
                         if (!cell.state.saving && !cell.state.editing) {
                             if (cell.props.rowData.Exist) {
                                 return (
-                                    <div className={!cell.props.rowData.Object ? 'no-name' : ''}>
+                                    <div className={`${!cell.props.rowData.Object ? 'no-name' : ''} ${'edit-container'}`}>
                                         {cell.props.rowData.Object ? cell.props.rowData.Object : 'Name is not defined'}
-                                        <ul className="unstyled">
+                                        <ul className="edit-control">
                                             <EditControl
                                                 icon="fa fa-pencil-square-o"
                                                 title="Edit Name"
