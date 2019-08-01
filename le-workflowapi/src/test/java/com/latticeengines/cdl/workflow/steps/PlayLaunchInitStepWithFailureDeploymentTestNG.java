@@ -31,7 +31,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -119,8 +119,8 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     // TODO - enable when we have a way to simulate full/partial failure
     @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        final TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();

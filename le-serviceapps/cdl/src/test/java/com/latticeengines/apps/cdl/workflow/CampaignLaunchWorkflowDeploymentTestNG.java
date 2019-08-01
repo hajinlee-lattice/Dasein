@@ -40,7 +40,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportF
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDeploymentTestNGBase {
@@ -70,9 +71,11 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     private Play defaultPlay;
     private PlayLaunch defaultPlayLaunch;
 
-    private PlayLaunchConfig marketoPlayLaunchConfig;
+    private TestPlaySetupConfig marketoTestPlaySetupConfig;
+    private TestPlayChannelConfig marketoTestPlayChannelSetupConfig;
 
-    private PlayLaunchConfig s3PlayLaunchConfig;
+    private TestPlaySetupConfig s3TestPlaySetupConfig;
+    private TestPlayChannelConfig s3TestPlayChannelSetupConfig;
 
     private DropBoxSummary dropboxSummary = null;
 
@@ -88,22 +91,27 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
 
-        marketoPlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
-                .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.MAP)
-                .destinationSystemName(CDLExternalSystemName.Marketo)
+        marketoTestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
+                .destinationSystemType(CDLExternalSystemType.MAP).destinationSystemName(CDLExternalSystemName.Marketo)
                 .destinationSystemId("Marketo_" + System.currentTimeMillis())
-                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B)))
-                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
-                .topNCount(160L).featureFlags(featureFlags).build();
+                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B))).topNCount(160L)
+                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
 
-        s3PlayLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
-                .testPlayCrud(false).destinationSystemType(CDLExternalSystemType.FILE_SYSTEM)
+        marketoTestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
+                .mockRatingTable(false).testPlayCrud(false).addChannel(marketoTestPlayChannelSetupConfig)
+                .featureFlags(featureFlags).build();
+
+        s3TestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
+                .destinationSystemType(CDLExternalSystemType.FILE_SYSTEM)
                 .bucketsToLaunch(
                         new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B, RatingBucketName.C)))
                 .destinationSystemName(CDLExternalSystemName.AWS_S3).destinationSystemId("Lattice_S3").topNCount(200L)
-                .featureFlags(featureFlags).build();
+                .build();
 
-        testPlayCreationHelper.setupTenantAndCreatePlay(marketoPlayLaunchConfig);
+        s3TestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
+                .testPlayCrud(false).addChannel(s3TestPlayChannelSetupConfig).featureFlags(featureFlags).build();
+
+        testPlayCreationHelper.setupTenantAndCreatePlay(marketoTestPlaySetupConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
         setMainTestTenant(super.testBed.getMainTestTenant());
         checkpointService.setMainTestTenant(super.testBed.getMainTestTenant());
@@ -126,7 +134,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     @Test(groups = "deployment-app", enabled = false)
     public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
-        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoPlayLaunchConfig, true);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoTestPlaySetupConfig, true);
         assertNotNull(defaultPlayLaunch);
         assertNotNull(defaultPlayLaunch.getApplicationId());
         log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
@@ -143,9 +151,9 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
         config.setPlayName(defaultPlay.getName());
         config.setPlayLaunchId(defaultPlayLaunch.getId());
-        config.setDestinationOrgId(marketoPlayLaunchConfig.getDestinationSystemId());
-        config.setDestinationSysType(marketoPlayLaunchConfig.getDestinationSystemType());
-        config.setDestinationSysName(marketoPlayLaunchConfig.getDestinationSystemName());
+        config.setDestinationOrgId(marketoTestPlayChannelSetupConfig.getDestinationSystemId());
+        config.setDestinationSysType(marketoTestPlayChannelSetupConfig.getDestinationSystemType());
+        config.setDestinationSysName(marketoTestPlayChannelSetupConfig.getDestinationSystemName());
 
         PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
@@ -185,8 +193,8 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File", enabled = false)
     public void testS3LaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
-        testPlayCreationHelper.createPlayLaunch(s3PlayLaunchConfig);
-        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(s3PlayLaunchConfig, true);
+        testPlayCreationHelper.createPlayLaunch(s3TestPlaySetupConfig);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(s3TestPlaySetupConfig, true);
         assertNotNull(defaultPlayLaunch);
         assertNotNull(defaultPlayLaunch.getApplicationId());
         log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
@@ -203,14 +211,15 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
         config.setPlayName(defaultPlay.getName());
         config.setPlayLaunchId(defaultPlayLaunch.getId());
-        config.setDestinationOrgId(s3PlayLaunchConfig.getDestinationSystemId());
-        config.setDestinationSysType(s3PlayLaunchConfig.getDestinationSystemType());
-        config.setDestinationSysName(s3PlayLaunchConfig.getDestinationSystemName());
+        config.setDestinationOrgId(s3TestPlayChannelSetupConfig.getDestinationSystemId());
+        config.setDestinationSysType(s3TestPlayChannelSetupConfig.getDestinationSystemType());
+        config.setDestinationSysName(s3TestPlayChannelSetupConfig.getDestinationSystemName());
 
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         String s3FolderPath = pathBuilder.getS3CampaignExportDir(customerS3Bucket, dropboxFolderName)
                 .replace(pathBuilder.getProtocol() + pathBuilder.getProtocolSeparator() + pathBuilder.getPathSeparator()
                         + customerS3Bucket + pathBuilder.getPathSeparator(), "");
+
         log.info("Verifying S3 Folder Path " + s3FolderPath);
         // Get S3 Files for this PlayLaunch Config
         List<S3ObjectSummary> s3Objects = s3Service.listObjects(customerS3Bucket, s3FolderPath);
@@ -241,14 +250,13 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     }
 
     @Override
-    public void testWorkflow() throws Exception {
-        // TODO Auto-generated method stub
-
+    public void testWorkflow() {
+        // Unused
     }
 
     @Override
     protected void verifyTest() {
-        // TODO Auto-generated method stub
+        // // Unused
 
     }
 }

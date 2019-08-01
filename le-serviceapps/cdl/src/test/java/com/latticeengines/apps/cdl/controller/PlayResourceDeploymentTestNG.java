@@ -23,9 +23,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -54,28 +54,20 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private long totalRatedAccounts;
 
-    PlayLaunchConfig playLaunchConfig = null;
+    TestPlaySetupConfig testPlaySetupConfig = null;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        // if (USE_EXISTING_TENANT) {
-        // setupTestEnvironment(EXISTING_TENANT);
-        // } else {
-        // setupTestEnvironment();
-        // cdlTestDataService.populateData(mainTestTenant.getId(), 3);
-        // }
+        testPlaySetupConfig = new TestPlaySetupConfig.Builder()
+                .existingTenant(USE_EXISTING_TENANT ? EXISTING_TENANT : null)
+                .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
+                        .destinationSystemName(CDLExternalSystemName.Salesforce)
+                        .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis())
+                        .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
+                        .isAlwaysOn(true).cronSchedule("0 0 12 ? * THU *").build())
+                .build();
 
-        playLaunchConfig = new PlayLaunchConfig.Builder().existingTenant(USE_EXISTING_TENANT ? EXISTING_TENANT : null)
-                .destinationSystemType(CDLExternalSystemType.CRM)
-                .destinationSystemName(CDLExternalSystemName.Salesforce)
-                .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis())
-                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
-
-        // playCreationHelper.setTenant(mainTestTenant);
-        // playCreationHelper.setDestinationOrgId(playLaunchConfig.getDestinationSystemId());
-        // playCreationHelper.setDestinationOrgType(playLaunchConfig.getDestinationSystemType());
-
-        playCreationHelper.setupTenantAndData(playLaunchConfig);
+        playCreationHelper.setupTenantAndData(testPlaySetupConfig);
         mainTestTenant = playCreationHelper.getTenant();
 
         MetadataSegment retrievedSegment = playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null,
@@ -83,18 +75,18 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
 
         playCreationHelper.createPlayTargetSegment();
-        playCreationHelper.createLookupIdMapping(playLaunchConfig);
+        playCreationHelper.createLookupIdMapping(testPlaySetupConfig);
     }
 
     @Test(groups = "deployment-app")
     public void testCrud() {
-        playCreationHelper.createDefaultPlayAndTestCrud(playLaunchConfig);
+        playCreationHelper.createDefaultPlayAndTestCrud(testPlaySetupConfig);
         playName = playCreationHelper.getPlayName();
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
     public void createPlayLaunch() {
-        playCreationHelper.createPlayLaunch(playLaunchConfig);
+        playCreationHelper.createPlayLaunch(testPlaySetupConfig);
         play = playCreationHelper.getPlay();
         playLaunch = playCreationHelper.getPlayLaunch();
         playLaunch = playProxy.launchPlay(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(), true);
@@ -148,8 +140,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         List<PlayLaunchChannel> configurations = playProxy.getPlayLaunchChannels(mainTestTenant.getId(), playName,
                 true);
         Assert.assertNotNull(configurations);
-        // Assert.assertEquals(configurations.getLaunchChannelMap().get(playLaunch.getDestinationOrgId()).getPid(),
-        // playLaunch.getPid());
 
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
@@ -172,10 +162,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
         Assert.assertNull(retrievedFullPlay.getLaunchHistory().getLastIncompleteLaunch());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastCompletedLaunch());
-        // TODO will change to NotNull after integration with RatingEngine is
-        // fully done
-        // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewAccountsNum());
-        // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewContactsNum());
         System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
         List<Play> retrievedFullPlayList = playProxy.getPlays(mainTestTenant.getId(), null, null);
@@ -222,11 +208,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     public void deletePlayLaunch(String playName, String playLaunchId) {
         playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId, false);
-    }
-
-    public void useExistingtenant(boolean shouldSkipAutoTenantCreation, Tenant tenant) {
-        USE_EXISTING_TENANT = shouldSkipAutoTenantCreation;
-        EXISTING_TENANT = tenant.getId();
     }
 
     public RatingEngine getRatingEngine() {
