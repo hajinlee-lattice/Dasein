@@ -2,12 +2,14 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,9 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -74,12 +78,20 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                     launchingPlayLaunches.size()));
             return true;
         }
+        Set<Pair<Play, PlayLaunchChannel>> currentlyLaunchingPlayAndChannels = launchingPlayLaunches.stream()
+                .map(launch -> Pair.of(launch.getPlay(), launch.getPlayLaunchChannel()))
+                .collect(Collectors.toSet());
 
         Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
         int i = launchingPlayLaunches.size();
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
+            if (currentlyLaunchingPlayAndChannels
+                    .contains(Pair.of(launch.getPlay(), launch.getPlayLaunchChannel()))) {
+                continue;
+            }
+
             String url = constructUrl(kickoffLaunchPrefix,
                     CustomerSpace.parse(launch.getTenant().getId()).getTenantId(), launch.getPlay().getName(),
                     launch.getId());
