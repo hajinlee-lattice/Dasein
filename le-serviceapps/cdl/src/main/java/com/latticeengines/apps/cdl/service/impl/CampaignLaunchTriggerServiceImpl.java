@@ -78,8 +78,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                     launchingPlayLaunches.size()));
             return true;
         }
-        Set<Pair<Play, PlayLaunchChannel>> currentlyLaunchingPlayAndChannels = launchingPlayLaunches.stream()
-                .map(launch -> Pair.of(launch.getPlay(), launch.getPlayLaunchChannel()))
+        Set<Pair<String, String>> currentlyLaunchingPlayAndChannels = launchingPlayLaunches.stream()
+                .map(launch -> Pair.of(launch.getPlay().getName(), launch.getPlayLaunchChannel().getId()))
                 .collect(Collectors.toSet());
 
         Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
@@ -88,7 +88,7 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
             if (currentlyLaunchingPlayAndChannels
-                    .contains(Pair.of(launch.getPlay(), launch.getPlayLaunchChannel()))) {
+                    .contains(Pair.of(launch.getPlay().getName(), launch.getPlayLaunchChannel().getId()))) {
                 continue;
             }
 
