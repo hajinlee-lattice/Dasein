@@ -1,243 +1,261 @@
 ul.attr-list-results {
-    & > li {
-        border-bottom: 1px solid #ccc;
-        height: 40px;
-        vertical-align: middle;
-        display: flex;
-        align-items: center;
-        -webkit-transition: none;
-        -moz-transition: none;
-        -ms-transition: none;
-        transition: none;
-        
-        &:first-child {
-            font-weight: bold;
-            
-            label {
-                font-weight: bold;
-            }
-        }
-        
-        &.attr-back-text,
-        &.attr-text {
-            position: relative;
-            top: 0.1em;
-            font-size: 16px;
-            margin-right: .75em;
-        }
+	& > li {
+		border-bottom: 1px solid #ccc;
+		height: 40px;
+		vertical-align: middle;
+		display: flex;
+		align-items: center;
+		-webkit-transition: none;
+		-moz-transition: none;
+		-ms-transition: none;
+		transition: none;
 
-        &.attr-back-text {
-            font-size: 1.2em; 
-            
-            span {
-                margin-right: 1em;
-                cursor: pointer;
-                
-                i.fa-arrow-left {
-                    margin-right: .5em;
-                }
-            }
-        }
-        
-        div.attr-result-checkbox { 
-            height: 100%;
-            width: 40px;
-            line-height: 45px;
-            text-align: center;
-            vertical-align: middle;
-            
-            input {
-                display: inline-block;
-                pointer-events: none;
-            }
-        }
+		&:first-child {
+			font-weight: bold;
 
-        &:not(.category):not(.disabled):hover {
-            background: #fff;
-        }
-        
-        &.category:not(.disabled) div.attr-result-checkbox {
-            &:hover {
-                background: #fff; //#457eba;
-                transition: none;
-            }
-        }
+			label {
+				font-weight: bold;
+			}
+		}
 
-        i.fa-exclamation-triangle {
-            color: #ef6a30;
-        }
+		&.attr-back-text,
+		&.attr-text {
+			position: relative;
+			top: 0.1em;
+			font-size: 16px;
+			margin-right: 0.75em;
+		}
 
-        .fa-square {
-            position: relative;
-            bottom: 2px;
-        }
+		&.attr-back-text {
+			font-size: 1.2em;
 
-        .fa-minus-square-o,
-        .fa-check-square-o,
-        .fa-square-o,
-        .fa-check-square,
-        .fa-minus-square {
-            position: relative;
-            bottom: 1px;
-            font-size: 1.1em;
-            
-            &, &:after, &:before {
-                transition: none;
-            }
-        }
-        
-        .fa-check-square-o,
-        i.fa-toggle-on {
-            color: #60af3a;
+			span {
+				margin-right: 1em;
+				cursor: pointer;
 
-            &.fa-rotate-180 {
-                color: #aaa;
-            }
-        }
+				i.fa-arrow-left {
+					margin-right: 0.5em;
+				}
+			}
+		}
 
-        .fa-minus-square-o {
-            color: #222;
-        }
+		div.attr-result-checkbox {
+			height: 100%;
+			width: 40px;
+			line-height: 45px;
+			text-align: center;
+			vertical-align: middle;
 
-        .fa-check-square,
-        .fa-minus-square,
-        .fa-square {
-            color: #d7d7d7;
-            cursor: not-allowed;
-        }
+			input {
+				display: inline-block;
+				pointer-events: none;
+			}
+		}
 
-        .fa-square-o {
-            color: #999 ;
-        } 
+		&:not(.category):not(.disabled):hover {
+			background: #fff;
+		}
 
-        i.fa-toggle-off {
-            color: #aaa;
-            cursor: not-allowed;
+		&.category:not(.disabled) div.attr-result-checkbox {
+			&:hover {
+				background: #fff; //#457eba;
+				transition: none;
+			}
+		}
 
-            &.fa-rotate-180 {
-                color: #60af3a;
-            }
-        }
+		i.fa-exclamation-triangle {
+			color: #ef6a30;
+		}
 
-        i.fa-toggle-off,
-        i.fa-toggle-on {
-            font-size: 1.2em;
-            
-            &, &:after, &:before {
-                transition: none;
-            }
-        }
+		.fa-square {
+			position: relative;
+			bottom: 2px;
+		}
 
-        div.attr-result-label {
-            display: flex;
-            
-            div.attr-result-buckets-container{
-                width: 66%;
-                    
-            }
-            div.attr-result-label-container {
-                width: 33%;
-                flex-shrink: 1;
-            }
-        }
+		.fa-minus-square-o,
+		.fa-check-square-o,
+		.fa-square-o,
+		.fa-check-square,
+		.fa-minus-square {
+			position: relative;
+			bottom: 1px;
+			font-size: 1.1em;
 
-        div.attr-result-label {
-            position: relative;
-            height: 100%;
-            width: 100%;
-            line-height: 40px;
-            vertical-align: middle;
-            
-            label {
-                display: inline-block;
-                padding-left: 1em;
-                white-space: nowrap;
+			&,
+			&:after,
+			&:before {
+				transition: none;
+			}
+		}
 
-                span.attr-result-name {
-                    display: inline-block;
-                    width: 100%;
-                    height: 2.5em;
-                    
-                    > span {
-                        display: inline-block;
-                        width: 100%;
-                        @include text-ellipsis;
-                    }
-                }
-            }
+		.fa-check-square-o,
+		i.fa-toggle-on {
+			color: #60af3a;
 
-            i.fa-info-circle,
-            i.fa-exclamation-circle {
-                position: absolute;
-                top: 50%;
-                left: -0.4em;
-                -webkit-transform: translateY(-50%);
-                -ms-transform: translateY(-50%);
-                transform: translateY(-50%);
-                z-index: 1;
-            }
+			&.fa-rotate-180 {
+				color: #aaa;
+			}
+		}
 
-            i.fa-info-circle {
-                color: #457eba;
-            }
+		.fa-minus-square-o {
+			color: #222;
+		}
 
-            i.fa-exclamation-circle {
-                color: #ef6a30;
-            }
+		.fa-check-square,
+		.fa-minus-square,
+		.fa-square {
+			color: #d7d7d7;
+			cursor: not-allowed;
+		}
 
-            i.fa-chevron-right {
-                position: relative;
-                float: right;
-                top: 1.1em;
-                right: 2em;
-                font-size: 12px;
-            }
+		.fa-square-o {
+			color: #999;
+		}
 
-            .attr-result-buckets {
-                display: flex;
-                justify-content: start;
-                
-                li {
-                    display: flex;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    height: 2.8em;
-                    width: 33%;
-                    text-align: unset;
-                    justify-content: start;
-                    
-                    &:first-child {
-                        margin-left: 0;
-                    }
+		i.fa-toggle-off {
+			color: #aaa;
+			cursor: not-allowed;
 
-                    span {
-                        overflow: hidden;
-                        width: 66%;
-                        display: block;
-                        text-align: right;
-                        padding-right: 1.4em;
-                        text-overflow: ellipsis;
-                    }
+			&.fa-rotate-180 {
+				color: #60af3a;
+			}
+		}
 
-                    em {
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        width: 33%;
-                        display: block;
-                        color: #999;                        
-                    }
-                }
-            }
-        }
-        
-        &.category:not(.disabled) div.attr-result-label {
-            -webkit-transition: none;
-            -moz-transition: none;
-            -ms-transition: none;
-            transition: none;
-            &:hover {
-                background: #fff;
-            }
-        }
-    }
+		i.fa-toggle-off,
+		i.fa-toggle-on {
+			font-size: 1.2em;
+
+			&,
+			&:after,
+			&:before {
+				transition: none;
+			}
+		}
+
+		div.attr-result-label {
+			display: flex;
+
+			div.attr-result-buckets-container {
+				width: 66%;
+			}
+			div.attr-result-label-container {
+				width: 33%;
+				flex-shrink: 1;
+			}
+		}
+
+		div.attr-result-label {
+			position: relative;
+			height: 100%;
+			width: 100%;
+			line-height: 40px;
+			vertical-align: middle;
+
+			label {
+				display: inline-block;
+				padding-left: 1em;
+				white-space: nowrap;
+
+				span.attr-result-name {
+					display: inline-block;
+					width: 100%;
+					height: 2.5em;
+
+					> span {
+						display: inline-block;
+						width: 100%;
+						@include text-ellipsis;
+					}
+				}
+			}
+
+			i.fa-info-circle,
+			i.fa-exclamation-circle {
+				position: absolute;
+				top: 50%;
+				left: -0.4em;
+				-webkit-transform: translateY(-50%);
+				-ms-transform: translateY(-50%);
+				transform: translateY(-50%);
+				z-index: 1;
+			}
+
+			i.fa-info-circle {
+				color: #457eba;
+			}
+
+			i.fa-exclamation-circle {
+				color: #ef6a30;
+			}
+
+			i.fa-chevron-right {
+				position: relative;
+				float: right;
+				top: 1.1em;
+				right: 2em;
+				font-size: 12px;
+			}
+
+			.attr-result-buckets {
+				display: flex;
+				justify-content: start;
+
+				li {
+					display: flex;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					height: 2.8em;
+					width: 33%;
+					text-align: unset;
+					justify-content: start;
+
+					&:first-child {
+						margin-left: 0;
+					}
+
+					span {
+						overflow: hidden;
+						width: 66%;
+						display: block;
+						text-align: right;
+						padding-right: 1.4em;
+						text-overflow: ellipsis;
+					}
+
+					em {
+						overflow: hidden;
+						text-overflow: ellipsis;
+						width: 33%;
+						display: block;
+						color: #999;
+					}
+				}
+			}
+		}
+		&.category:not(.disabled) div.attr-result-label {
+			-webkit-transition: none;
+			-moz-transition: none;
+			-ms-transition: none;
+			transition: none;
+			&:hover {
+				background: #fff;
+			}
+		}
+	}
+}
+.attr-footer {
+	margin-top: 1em;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	.refresh-label {
+		margin-right: 1em;
+	}
+	button > span {
+		margin-right: 0.6em;
+	}
+
+	&.showRefresh {
+		justify-content: flex-end;
+	}
 }

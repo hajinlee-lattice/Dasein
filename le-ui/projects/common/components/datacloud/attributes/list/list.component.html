@@ -1,144 +1,229 @@
 <div class="attr-results-container">
-    <ul class="attr-pagination-top" ng-if="$ctrl.subcategory || filteredList.length > $ctrl.filters.pagesize">
-        <li class="attr-back-text pull-left" ng-if="$ctrl.subcategory && $ctrl.data.config.Subcategories.length != 1">
-            <span ng-click="$ctrl.back()"><i class="fa fa-arrow-left"></i>Back</span>{{$ctrl.subcategory}}
-        </li>
+	<ul
+		class="attr-pagination-top"
+		ng-if="$ctrl.subcategory || filteredList.length > $ctrl.filters.pagesize"
+	>
+		<li
+			class="attr-back-text pull-left"
+			ng-if="$ctrl.subcategory && $ctrl.data.config.Subcategories.length != 1"
+		>
+			<span ng-click="$ctrl.back()"
+				><i class="fa fa-arrow-left"></i>Back</span
+			>{{ $ctrl.subcategory }}
+		</li>
 
-        <li class="attr-pagination" ng-if="filteredList.length > $ctrl.filters.pagesize">
-            <pd-pagination-controls current="$ctrl.filters.page"
-                max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
-            </pd-pagination-controls>
-        </li>
-    </ul>
+		<li
+			class="attr-pagination"
+			ng-if="filteredList.length > $ctrl.filters.pagesize"
+		>
+			<pd-pagination-controls
+				current="$ctrl.filters.page"
+				max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize"
+			>
+			</pd-pagination-controls>
+		</li>
+	</ul>
 
-    <div class="attr-list-noresults" ng-if="!filteredList || filteredList.length === 0">
-        No Results.
-    </div>
+	<div
+		class="attr-list-noresults"
+		ng-if="!filteredList || filteredList.length === 0"
+	>
+		No Results.
+	</div>
 
-    <ul class="attr-list-results noselect-children">
-        <li ng-if="filteredList && filteredList.length > 0">
-            <div class="attr-result-checkbox" ng-click="$ctrl.toggleAll()">
-                <!--input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" /-->
+	<ul class="attr-list-results noselect-children">
+		<li ng-if="filteredList && filteredList.length > 0">
+			<div class="attr-result-checkbox" ng-click="$ctrl.toggleAll()">
+				<!--input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" /-->
 
-                <i class="fa" ng-class="{ 
+				<i
+					class="fa"
+					ng-class="{ 
                         'fa-square-o': !$ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
                         'fa-check-square-o': $ctrl.isAllChecked() && !$ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
                         'fa-minus-square-o': $ctrl.indeterminate[$ctrl.subcategory || 'all_attributes'],
-                    }">
-                </i>
-            </div>
+                    }"
+				>
+				</i>
+			</div>
 
-            <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
-                <label for="check_all">
-                    Attribute
-                    <span>({{($ctrl.getAttributes(filteredList) | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})</span>
-                </label>
-            </div>
-        </li>
+			<div class="attr-result-label" ng-click="$ctrl.toggleAll()">
+				<label for="check_all">
+					Attribute
+					<span
+						>({{
+							(
+								$ctrl.getAttributes(filteredList)
+								| filter: $ctrl.store.searchFilter
+								| filter: $ctrl.getFiltering(true)
+							).length | number
+						}})</span
+					>
+				</label>
+			</div>
+		</li>
 
-        <li ng-repeat="item in (filteredList = ($ctrl.getResults()
+		<li
+			ng-repeat="item in (filteredList = ($ctrl.getResults()
                         | filter: $ctrl.store.searchFilter
                         | filter: $ctrl.getFiltering()))
                         | orderBy: [ $ctrl.filters.sortPrefix + 'DisplayName' ]
                         | startFrom: ($ctrl.filters.page - 1) * $ctrl.getPageSize()
-                        | limitTo: $ctrl.getPageSize()" ng-class="{
+                        | limitTo: $ctrl.getPageSize()"
+			ng-class="{
                 'disabled': $ctrl.isDisabled(item),
                 'category': item.Attributes
-            }">
-            <div class="attr-result-checkbox" ng-click="$ctrl.toggleSelected(item)">
-                <!--input  ng-checked="$ctrl.isChecked(item)" 
+            }"
+		>
+			<div
+				class="attr-result-checkbox"
+				ng-click="$ctrl.toggleSelected(item)"
+			>
+				<!--input  ng-checked="$ctrl.isChecked(item)" 
                         ng-disabled="$ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)"
                         ng-if="item.Attributes"
                         name="{{item.DisplayName}}" 
                         type="checkbox" /-->
 
-                <i class="fa" ng-if="item.Attributes && !item.IsFrozen" ng-class="{ 
+				<i
+					class="fa"
+					ng-if="item.Attributes && !item.IsFrozen"
+					ng-class="{ 
                         'fa-square-o': !$ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-check-square-o': $ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-minus-square-o': $ctrl.indeterminate[item.DisplayName] && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-square': !$ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-check-square': $ctrl.isChecked(item) && !$ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item)),
                         'fa-minus-square': $ctrl.indeterminate[item.DisplayName] && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))
-                    }">
-                </i>
-                <i class="fa fa-toggle-on"
-                    ng-if="!item.Attributes && !item.IsFrozen && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
-                    ng-class="{ 'fa-rotate-180': !$ctrl.isChecked(item) }"></i>
-                <i class="fa fa-toggle-off"
-                    ng-if="!item.Attributes && !item.IsFrozen && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
-                    ng-class="{ 'fa-rotate-180': $ctrl.isChecked(item) }"></i>
-                <i class="fa fa-exclamation-triangle show-tooltip delay top left" ng-if="item.IsFrozen">
-                    <div class="tooltip_" ng-if="item.IsFrozen">
-                        <div class="cover">
-                            <em>Deprecated Attribute:</em>
-                            <p>You can't take any action on these attributes. It is advised to disable them from your
-                                workflows as they are no longer supported</p>
-                        </div>
-                    </div>
-                </i>
-            </div>
+                    }"
+				>
+				</i>
+				<i
+					class="fa fa-toggle-on"
+					ng-if="!item.Attributes && !item.IsFrozen && !($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
+					ng-class="{ 'fa-rotate-180': !$ctrl.isChecked(item) }"
+				></i>
+				<i
+					class="fa fa-toggle-off"
+					ng-if="!item.Attributes && !item.IsFrozen && ($ctrl.isDisabled(item) || $ctrl.isStartsDisabled(item))"
+					ng-class="{ 'fa-rotate-180': $ctrl.isChecked(item) }"
+				></i>
+				<i
+					class="fa fa-exclamation-triangle show-tooltip delay top left"
+					ng-if="item.IsFrozen"
+				>
+					<div class="tooltip_" ng-if="item.IsFrozen">
+						<div class="cover">
+							<em>Deprecated Attribute:</em>
+							<p>
+								You can't take any action on these attributes.
+								It is advised to disable them from your
+								workflows as they are no longer supported
+							</p>
+						</div>
+					</div>
+				</i>
+			</div>
 
-            <div class="attr-result-label" ng-click="$ctrl.click(item)">
-                <div class="attr-result-label-container">
-                    <label for="{{item.DisplayName}}">
-                        <i class="fa fa-exclamation-circle show-tooltip delay top left" ng-if="item.HasFrozenAttrs">
-                            <div class="tooltip_">
-                                <div class="cover">
-                                    <em>Deprecated Attributes:</em>
-                                    <p>This category contains some Deprecated Attributes that can not be altered</p>
-                                </div>
-                            </div>
-                        </i>
+			<div class="attr-result-label" ng-click="$ctrl.click(item)">
+				<div class="attr-result-label-container">
+					<label for="{{ item.DisplayName }}">
+						<i
+							class="fa fa-exclamation-circle show-tooltip delay top left"
+							ng-if="item.HasFrozenAttrs"
+						>
+							<div class="tooltip_">
+								<div class="cover">
+									<em>Deprecated Attributes:</em>
+									<p>
+										This category contains some Deprecated
+										Attributes that can not be altered
+									</p>
+								</div>
+							</div>
+						</i>
 
-                        <i class="fa fa-info-circle show-tooltip delay top left" ng-if="$ctrl.isStartsDisabled(item)">
-                            <div class="tooltip_">
-                                <div class="cover">
-                                    <em>Attribute Active:</em>
-                                    <p>This attribute is Active and can not be disabled</p>
-                                </div>
-                            </div>
-                        </i>
+						<i
+							class="fa fa-info-circle show-tooltip delay top left"
+							ng-if="$ctrl.isStartsDisabled(item)"
+						>
+							<div class="tooltip_">
+								<div class="cover">
+									<em>Attribute Active:</em>
+									<p>
+										This attribute is Active and can not be
+										disabled
+									</p>
+								</div>
+							</div>
+						</i>
 
-                        <span class="show-tooltip delay top left" ng-class="{
+						<span
+							class="show-tooltip delay top left"
+							ng-class="{
                             'attr-result-name': $ctrl.subcategory
-                        }">
-                            <div class="tooltip_" ng-if="item.Description">
-                                <div class="cover">
-                                    <em>Description:</em>
-                                    <p>{{item.Description}}</p>
-                                </div>
-                            </div>
-                            <span title="{{item.DisplayName}}">
-                                {{item.DisplayName}}
-                            </span>
-                        </span>
+                        }"
+						>
+							<div class="tooltip_" ng-if="item.Description">
+								<div class="cover">
+									<em>Description:</em>
+									<p>{{ item.Description }}</p>
+								</div>
+							</div>
+							<span title="{{ item.DisplayName }}">
+								{{ item.DisplayName }}
+							</span>
+						</span>
 
-                        <span ng-if=" item.Attributes">
-                            ({{(item.Attributes | filter: $ctrl.store.searchFilter | filter: $ctrl.getFiltering(true)).length | number}})
-                        </span>
-                    </label>
-                </div>
+						<span ng-if=" item.Attributes">
+							({{
+								(
+									item.Attributes
+									| filter: $ctrl.store.searchFilter
+									| filter: $ctrl.getFiltering(true)
+								).length | number
+							}})
+						</span>
+					</label>
+				</div>
 
-                <div class="attr-result-buckets-container">
-                    <ul class="attr-result-buckets" ng-if="$ctrl.subcategory">
-                        <li
-                            ng-repeat="bucket in $ctrl.getBuckets(item.Attribute) | orderBy: ['-Cnt','Lbl'] | limitTo: 3">
-                            <span>{{bucket.Lbl}}</span>
-                            <em>{{bucket.Cnt}}</em>
-                        </li>
-                    </ul>
-                </div>
+				<div class="attr-result-buckets-container">
+					<ul class="attr-result-buckets" ng-if="$ctrl.subcategory">
+						<li
+							ng-repeat="bucket in $ctrl.getBuckets(item.Attribute) | orderBy: ['-Cnt','Lbl'] | limitTo: 3"
+						>
+							<span>{{ bucket.Lbl }}</span>
+							<em>{{ bucket.Cnt }}</em>
+						</li>
+					</ul>
+				</div>
 
-                <i class="fa fa-chevron-right" ng-if="item.Attributes"></i>
-            </div>
-        </li>
-    </ul>
-
-    <ul class="attr-pagination-bottom" ng-if="filteredList.length > $ctrl.filters.pagesize">
-        <li class="attr-pagination pull-right">
-            <pd-pagination-controls current="$ctrl.filters.page"
-                max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize">
-            </pd-pagination-controls>
-        </li>
-    </ul>
+				<i class="fa fa-chevron-right" ng-if="item.Attributes"></i>
+			</div>
+		</li>
+	</ul>
+	<div class="attr-footer" ng-class="$ctrl.showRefresh ? '' : 'showRefresh'">
+		<div ng-if="$ctrl.showRefresh">
+			<span class="refresh-label">Data was last refreshed on</span>
+			<button
+				class="button gray-button"
+				ng-click="$ctrl.refreshAttributes()"
+				ng-disabled="$ctrl.refreshDisabled"
+			>
+				<span class="fa fa-undo"></span>Refresh
+			</button>
+		</div>
+		<ul
+			class="attr-pagination-bottom"
+			ng-if="filteredList.length > $ctrl.filters.pagesize"
+		>
+			<li class="attr-pagination pull-right">
+				<pd-pagination-controls
+					current="$ctrl.filters.page"
+					max="$ctrl.max = filteredList.length / $ctrl.filters.pagesize"
+				>
+				</pd-pagination-controls>
+			</li>
+		</ul>
+	</div>
 </div>

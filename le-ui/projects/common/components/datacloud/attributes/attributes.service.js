@@ -38,7 +38,8 @@ angular.module('common.attributes')
                 original: {},
                 config: {},
                 overview: {},
-                buckets: {}
+                buckets: {},
+                lastRefresh: ''
             };
 
             this.saving = false;
@@ -341,6 +342,18 @@ angular.module('common.attributes')
             return deferred.promise;
         };
 
+        this.refreshAttributes = () => { 
+         var deferred = $q.defer();
+
+			AttrConfigService.refreshAttributes(
+            ).then(function (data) {
+                data.lastRefresh ? store.data.lastRefresh : '';
+				deferred.resolve(data);
+			});
+
+			return deferred.promise;   
+        }
+
         this.init();
     })
     .service('AttrConfigService', function ($q, $http) {
@@ -403,4 +416,9 @@ angular.module('common.attributes')
 
             return deferred.promise;
         };
+        this.refreshAttributes = function () { 
+            var deferred = $q.defer();
+            
+            return deferred.promise;
+        }
     });
