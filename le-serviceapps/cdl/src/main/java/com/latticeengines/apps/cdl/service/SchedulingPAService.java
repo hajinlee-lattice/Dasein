@@ -6,8 +6,12 @@ import java.util.Map;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 
 public interface SchedulingPAService {
+
+    String ACTIVE_STACK_SCHEDULER_NAME = "active";
+    String INACTIVE_STACK_SCHEDULER_NAME = "inactive";
 
     Map<String, Object> setSystemStatus(@NotNull String schedulerName);
 
@@ -20,4 +24,9 @@ public interface SchedulingPAService {
     String getPositionFromQueue(@NotNull String schedulerName, String tenantName);
 
     boolean isSchedulerEnabled(@NotNull String schedulerName);
+
+    /**
+     * Retrieve all scheduler-related information for a specific tenant
+     */
+    SchedulingStatus getSchedulingStatus(@NotNull String customerSpace, @NotNull String schedulerName);
 }
