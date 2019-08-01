@@ -12,6 +12,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -66,8 +67,10 @@ public class CSVFileImportEntityMatchGASchemaDeploymentTestNG extends CSVFileImp
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dfIdExtra);
         Assert.assertNotNull(dataFeedTask);
-        Assert.assertNotNull(dataFeedTask.getImportTemplate().getAttribute(InterfaceName.CustomerAccountId));
+        Attribute accountId = dataFeedTask.getImportTemplate().getAttribute(InterfaceName.CustomerAccountId);
+        Assert.assertNotNull(accountId);
         Assert.assertNull(dataFeedTask.getImportTemplate().getAttribute(InterfaceName.AccountId));
-
+        Assert.assertTrue(accountId.getRequired());
+        Assert.assertFalse(accountId.getNullable());
     }
 }
