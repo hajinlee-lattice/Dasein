@@ -74,9 +74,10 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
     val dedup =
       if (deduplicate) {
-        val w = Window.partitionBy(col(joinKey)).orderBy(col(joinKey))
-        val rn = "__rn_over_w__"
-        renamed.withColumn(rn, row_number.over(w)).filter(col(rn) === 1).drop(rn)
+        val mergeInGrp = new MergeInGroup(renamed.schema, false)
+        renamed.groupBy(joinKey).
+          agg(mergeInGrp(renamed.columns map col: _*).as("ColumnStruct")).
+          select(col("ColumnStruct.*"))
       } else {
         renamed
       }
