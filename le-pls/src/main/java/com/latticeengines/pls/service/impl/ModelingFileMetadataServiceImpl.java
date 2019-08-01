@@ -106,6 +106,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         schemaInterpretation = isModel && enableEntityMatch && schemaInterpretation.equals(SchemaInterpretation.Account) ?
                 SchemaInterpretation.ModelAccount : schemaInterpretation;
         SourceFile sourceFile = getSourceFile(sourceFileName);
+        log.info("SchemaInterpretation=" + schemaInterpretation + " isModel=" + isModel + " enableEntityMatch="
+                + enableEntityMatch);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
             sourceFileService.update(sourceFile);

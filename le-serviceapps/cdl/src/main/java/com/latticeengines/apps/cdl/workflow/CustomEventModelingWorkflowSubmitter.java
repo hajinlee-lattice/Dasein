@@ -164,11 +164,15 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
         boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
         DataCollection.Version version = null;
-        String apsRollupPeriod = null;
         if (!isLPI) {
             version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         }
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
+        String idColumnName = InterfaceName.InternalId.name();
+        if (trainingTable.getPrimaryKey() != null
+                && CollectionUtils.isNotEmpty(trainingTable.getPrimaryKey().getAttributes())) {
+            idColumnName = trainingTable.getPrimaryKey().getAttributes().get(0);
+        }
         CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -229,7 +233,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .setUseScorederivation(false) //
                 .setModelIdFromRecord(false) //
                 .saveBucketMetadata() //
-                .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0), isLPI) //
+                .idColumnName(idColumnName, isLPI) //
                 .cdlMultiModel(!isLPI) //
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
