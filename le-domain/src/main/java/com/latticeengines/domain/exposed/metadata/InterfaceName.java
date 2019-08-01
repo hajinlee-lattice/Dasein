@@ -1,8 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 public enum InterfaceName {
     Id, //
@@ -134,10 +134,10 @@ public enum InterfaceName {
     // Internal
     __Composite_Key__; // primary key for internal use
     
-    private static final Set<String> EntityIds = new HashSet<>(Arrays.asList( //
+    private static final Set<String> EntityIds = ImmutableSet.of( //
             InterfaceName.EntityId.name(), //
             InterfaceName.AccountId.name(), //
-            InterfaceName.ContactId.name()) //
+            InterfaceName.ContactId.name() //
     );
 
     /**
