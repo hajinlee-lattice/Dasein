@@ -1,0 +1,412 @@
+[
+  {
+    "attrName": "PID",
+    "displayName": "PID",
+    "entity": "Account",
+    "javaClass": "Long",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "EXTERNAL_ID",
+    "displayName": "Recommendation ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "AccountId",
+    "displayName": "Account ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LE_ACCOUNT_EXTERNAL_ID",
+    "displayName": "Lattice Account ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "PLAY_ID",
+    "displayName": "Campaign ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LAUNCH_ID",
+    "displayName": "Campaign Launch ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "DESCRIPTION",
+    "displayName": "Campaign Description",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LAUNCH_DATE",
+    "displayName": "Campaign Launch Date",
+    "entity": "Account",
+    "javaClass": "Long",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LAST_UPDATED_TIMESTAMP",
+    "displayName": "Campaign Launch Time",
+    "entity": "Account",
+    "javaClass": "Long",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "MONETARY_VALUE",
+    "displayName": "Expected Revenue",
+    "entity": "Account",
+    "javaClass": "Double",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LIKELIHOOD",
+    "displayName": "Lattice Score",
+    "entity": "Account",
+    "javaClass": "Double",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "CompanyName",
+    "displayName": "Account Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "SalesforceAccountID",
+    "displayName": "SFDC Account ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "PRIORITY_ID",
+    "displayName": "Lattice Rating",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "PRIORITY_DISPLAY_NAME",
+    "displayName": "Lattice Rating",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "MONETARY_VALUE_ISO4217_ID",
+    "displayName": "MONETARY_VALUE_ISO4217_ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "LIFT",
+    "displayName": "Lift",
+    "entity": "Account",
+    "javaClass": "Double",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "RATING_MODEL_ID",
+    "displayName": "Model ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "MODEL_SUMMARY_ID",
+    "displayName": "MODEL_SUMMARY_ID",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "SYNC_DESTINATION",
+    "displayName": "SYNC_DESTINATION",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "DESTINATION_ORG_ID",
+    "displayName": "Campaign Launch System",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "DESTINATION_SYS_TYPE",
+    "displayName": "Campaign Launch System Type",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "TENANT_ID",
+    "displayName": "TENANT_ID",
+    "entity": "Account",
+    "javaClass": "Long",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "DELETED",
+    "displayName": "DELETED",
+    "entity": "Account",
+    "javaClass": "Boolean",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "Website",
+    "displayName": "Account Domain",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "DESTINATION_SYS_NAME",
+    "displayName": "Campaign Launch System Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "PLAY_NAME",
+    "displayName": "Campaign Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "RATING_MODEL_NAME",
+    "displayName": "Model Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "SEGMENT_NAME",
+    "displayName": "Segment Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": false,
+    "exportEnabled": false,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "Email",
+    "displayName": "Contact Email",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "Address_Street_1",
+    "displayName": "Contact Address",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "PhoneNumber",
+    "displayName": "Contact Phone No.",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "State",
+    "displayName": "Contact State",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "PostalCode",
+    "displayName": "Contact ZipCode",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "Country",
+    "displayName": "Contact Country",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "SalesforceContactID",
+    "displayName": "Contact SFDC ID",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "City",
+    "displayName": "Contact City",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "ContactID",
+    "displayName": "Contact ID",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "ContactName",
+    "displayName": "Contact Name",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": true
+  },
+  {
+    "attrName": "FirstName",
+    "displayName": "Contact First Name",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": false
+  },
+  {
+    "attrName": "LastName",
+    "displayName": "Contact Last Name",
+    "entity": "Contact",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": false,
+    "historyEnabled": false
+  }
+]

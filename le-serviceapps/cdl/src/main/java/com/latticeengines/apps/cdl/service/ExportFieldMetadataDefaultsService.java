@@ -9,7 +9,11 @@ public interface ExportFieldMetadataDefaultsService {
 
     List<ExportFieldMetadataDefaults> createDefaultExportFields(List<ExportFieldMetadataDefaults> defaultExportFields);
 
-    List<ExportFieldMetadataDefaults> getAttributes(CDLExternalSystemName systemName);
+    List<ExportFieldMetadataDefaults> getAllAttributes(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledAttributes(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getHistoryEnabledAttributes(CDLExternalSystemName systemName);
 
     List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultExportFields);
@@ -17,5 +21,4 @@ public interface ExportFieldMetadataDefaultsService {
     void deleteBySystemName(CDLExternalSystemName systemName);
 
     void deleteByAttrNames(CDLExternalSystemName systemName, List<String> attrNames);
-
 }
