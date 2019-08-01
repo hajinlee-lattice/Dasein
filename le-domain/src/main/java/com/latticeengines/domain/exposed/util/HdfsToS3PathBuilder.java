@@ -142,6 +142,10 @@ public class HdfsToS3PathBuilder {
         return String.format(protocol + s3AtlasDataDir, s3Bucket, tenantId);
     }
 
+    public String getS3AtlasDataPrefix(String s3Bucket, String tenantId) {
+        return String.format(s3AtlasDataPrefix, tenantId);
+    }
+
     public String getS3AtlasExportFileDir(String s3Bucket, String tenantId) {
         return String.format(protocol + s3AtlasExportFileDir, s3Bucket, tenantId);
     }

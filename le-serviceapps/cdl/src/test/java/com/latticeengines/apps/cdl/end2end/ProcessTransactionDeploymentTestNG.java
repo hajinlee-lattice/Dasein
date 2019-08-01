@@ -206,8 +206,6 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
     private List<String> getFailableStepsForRebuild() {
         return Arrays.asList(
                 "matchTransaction", //
-                "mergeProduct", //
-                "profileProduct", //
                 "profileProductHierarchy", //
                 "mergeTransaction", //
                 "profileTransaction", //
