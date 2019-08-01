@@ -124,9 +124,9 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
                 "Tenant 3: " + playCreationHelper3.getTenant().getId() + " Play: " + playCreationHelper3.getPlayName());
     }
 
-    @Test
+    @Test(groups = "deployment-app")
     public void testGettingScheduledChannels() {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllScheduledChannels();
-        Assert.assertEquals(channels.size(), 18);
+        Assert.assertEquals(channels.size(), 9);
     }
 }
