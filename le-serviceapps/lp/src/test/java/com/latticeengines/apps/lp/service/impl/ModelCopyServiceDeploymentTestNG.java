@@ -95,17 +95,20 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 2700000)
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
-
-        Pair<String, String> s3ConnectorTmpPath = setupTmpDir();
-        cleanup();
-        setupHdfs();
-        MultiTenantContext.setTenant(tenant1);
-        log.info("Wait for 900 seconds to download model summary");
-        waitToDownloadModel(ORIGINAL_MODELID);
-        setupTables();
-        testModelCopy();
-        cleanup();
-        cleanupTmpDir(s3ConnectorTmpPath);
+        try {
+            Pair<String, String> s3ConnectorTmpPath = setupTmpDir();
+            cleanup();
+            setupHdfs();
+            MultiTenantContext.setTenant(tenant1);
+            log.info("Wait for 900 seconds to download model summary");
+            waitToDownloadModel(ORIGINAL_MODELID);
+            setupTables();
+            testModelCopy();
+            cleanup();
+            cleanupTmpDir(s3ConnectorTmpPath);
+        } catch (Exception e) {
+            log.error("Unexpected exception happened:", e);
+        }
     }
 
     /*
