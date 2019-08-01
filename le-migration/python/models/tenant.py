@@ -29,4 +29,9 @@ class Tenant(BaseModel, Base):
     metadataDataCollectionTable = relationship(MetadataDataCollectionTable, backref='tenant', cascade='delete')
     metadataTable = relationship(MetadataTable, backref='tenant', cascade='delete')
     metadataStatistics = relationship(MetadataStatistics, backref='tenant', cascade='delete')
-    migrationTrack = relationship(MigrationTrack, cascade='delete', backref='tenant')
+    migrationTrack = relationship(MigrationTrack, cascade='delete', uselist=False, backref='tenant')
+
+    @property
+    def activeMetadataStatistics(self):
+        version = self.metadataDataCollection[0].version
+        return [record for record in self.metadataStatistics if record.version == version]
