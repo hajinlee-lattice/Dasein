@@ -116,3 +116,8 @@ alias zk-qa='zk-shell 10.141.1.6 10.141.101.104 10.141.201.211'
 alias zk-prod='zk-shell 10.151.1.24,10.151.101.242,10.151.201.50'
 
 alias hub-pr='bash $WSHOME/le-dev/scripts/hub_pr.sh'
+
+alias my-stack='bash $WSHOME/le-dev/scripts/my_stack.sh'
+alias deploy-emr='bash $WSHOME/le-dev/scripts/deploy_emr.sh'
+alias deploy-ms='bash $WSHOME/le-dev/scripts/deploy_ms.sh'
+alias deploy-props='bash $WSHOME/le-dev/scripts/deploy_props.sh'
