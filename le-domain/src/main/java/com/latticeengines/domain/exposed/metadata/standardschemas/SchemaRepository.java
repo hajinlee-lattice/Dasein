@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;
@@ -141,6 +142,29 @@ public class SchemaRepository {
             break;
         }
         return idAttrs;
+    }
+
+    public Table getSchema(BusinessEntity entity, boolean enableEntityMatch, boolean enableEntityMatchGA) {
+        Table table = getSchema(entity, true, false, enableEntityMatch || enableEntityMatchGA);
+        if (enableEntityMatchGA && !enableEntityMatch && table != null && CollectionUtils.isNotEmpty(table.getAttributes())) {
+            if (BusinessEntity.Account.equals(entity)) {
+                table.getAttributes().forEach(attribute -> {
+                    if (InterfaceName.CustomerAccountId.equals(attribute.getInterfaceName())) {
+                        attribute.setRequired(true);
+                        attribute.setNullable(false);
+                    }
+                });
+
+            } else if (BusinessEntity.Contact.equals(entity)) {
+                table.getAttributes().forEach(attribute -> {
+                    if (InterfaceName.CustomerContactId.equals(attribute.getInterfaceName())) {
+                        attribute.setRequired(true);
+                        attribute.setNullable(false);
+                    }
+                });
+            }
+        }
+        return table;
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
