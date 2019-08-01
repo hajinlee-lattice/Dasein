@@ -311,7 +311,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     LOG.warn(e.getMessage());
                 }
                 try {
-                    if (csvFieldValue.length() > MAX_STRING_LENGTH) {
+                    if (StringUtils.isNotEmpty(csvFieldValue) && csvFieldValue.length() > MAX_STRING_LENGTH) {
                         throw new RuntimeException(String.format( "%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                     }
                     validateAttribute(csvRecord, attr, csvColumnName);
