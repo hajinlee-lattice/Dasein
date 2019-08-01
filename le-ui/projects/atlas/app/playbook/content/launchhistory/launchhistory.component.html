@@ -136,8 +136,8 @@
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'created',
-                                'fa fa-sort-desc': vm.sortBy === 'created' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'created' && vm.sortDesc, 
+                                'fa fa-sort-desc': vm.sortBy === 'created' && !vm.sortDesc}"></i>
                     </th>
                     <th ng-if="vm.allPlaysHistory">
                         Campaign Name
@@ -158,24 +158,24 @@
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'accountsSelected',
-                                'fa fa-sort-desc': vm.sortBy === 'accountsSelected' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'accountsSelected' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'accountsSelected' && vm.sortDesc, 
+                                'fa fa-sort-desc': vm.sortBy === 'accountsSelected' && !vm.sortDesc}"></i>
                    </th>
     				<th class="sortable" ng-click="vm.sort('accountsSuppressed'); vm.sortDesc = !vm.sortDesc">
                         Suppressed
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'accountsSuppressed',
-                                'fa fa-sort-desc': vm.sortBy === 'accountsSuppressed' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'accountsSuppressed' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'accountsSuppressed' && vm.sortDesc, 
+                                'fa fa-sort-desc': vm.sortBy === 'accountsSuppressed' && !vm.sortDesc}"></i>
                    </th>
                     <th class="sortable" ng-click="vm.sort('accountsErrored'); vm.sortDesc = !vm.sortDesc">
                         Errors
                         <i  aria-hidden="true" 
                             ng-class="{
                                 'fa fa-sort': vm.sortBy != 'accountsErrored',
-                                'fa fa-sort-desc': vm.sortBy === 'accountsErrored' && vm.sortDesc, 
-                                'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
+                                'fa fa-sort-asc': vm.sortBy === 'accountsErrored' && vm.sortDesc, 
+                                'fa fa-sort-desc': vm.sortBy === 'accountsErrored' && !vm.sortDesc}"></i>
                    </th>
                     <th ng-if="vm.externalIntegrationEnabled && !vm.allPlaysHistory">
                         Duplicates
@@ -197,11 +197,22 @@
     			</tr>
     		</thead>
     		<tbody ng-if="!vm.noFilteredData">
-    			<tr ng-repeat="launch in vm.launches.launchSummaries">
+    			<tr ng-repeat="launch in vm.launches.launchSummaries | orderBy: vm.sortBy">
     				<td>{{launch.launchTime | date:'hh:mm a on MM/dd/yyyy'}}</td>
-                    <td ng-if="vm.allPlaysHistory" class="text-ellipsis" title="{{launch.playDisplayName}}">{{launch.playDisplayName}}</td>
-                    <td class="text-ellipsis" title="{{vm.systemMap[launch.destinationOrgId].orgName}}">{{vm.systemMap[launch.destinationOrgId].orgName}}</td>
-                    <td ng-if="!vm.allPlaysHistory" class="text-ellipsis" >
+                    <td 
+                        ng-if="vm.allPlaysHistory" 
+                        class="text-ellipsis" 
+                        title="{{launch.playDisplayName}}">
+                        {{launch.playDisplayName}}
+                    </td>
+                    <td 
+                        class="text-ellipsis" 
+                        title="{{vm.systemMap[launch.destinationOrgId].orgName}}">
+                        {{vm.systemMap[launch.destinationOrgId].orgName}}
+                    </td>
+                    <td 
+                        ng-if="!vm.allPlaysHistory" 
+                        class="text-ellipsis">
                         <span ng-if="launch.audienceName" title="{{launch.audienceName}}"> {{launch.audienceName}} </span>
                         <span ng-if="vm.isS3Launch(launch) && !launch.audienceName" title="{{vm.getSourceFilePath(launch)}}"> {{vm.getSourceFilePath(launch)}} </span>
                     </td>
@@ -215,7 +226,9 @@
                         <span ng-if="!vm.isAccountBasedLaunch(launch)"> {{launch.stats.contactsSuppressed || 0 | number}}</span>                    
                     </td>
                     <td class="red-text">
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">
+                        <a 
+                            href="/files/datafiles/sourcefile?fileName={{vm.getErrorFileName(launch)}}&filePath={{vm.getErrorFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" 
+                            ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.errorFile">
                             <i class="fa fa-download" aria-hidden="true"></i>
                         </a>
 
@@ -231,7 +244,9 @@
                     </td>
                     <td class="green-text">{{launch.stats.recommendationsLaunched | number}}</td>
                     <td class="green-text">
-                        <a href="/files/datafiles/sourcefile?fileName={{vm.getSourceFileName(launch)}}&filePath={{vm.getSourceFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.sourceFile">
+                        <a 
+                            href="/files/datafiles/sourcefile?fileName={{vm.getSourceFileName(launch)}}&filePath={{vm.getSourceFilePath(launch)}}&bucketName={{launch.integrationStatusMonitor.s3Bucket}}&Authorization={{vm.auth}}&TenantId={{vm.tenantId}}" 
+                            ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.s3Bucket && launch.integrationStatusMonitor.sourceFile">
                             <i class="fa fa-download" aria-hidden="true"></i>
                         </a>
 
@@ -239,20 +254,40 @@
                     </td>
 
                     <td ng-if="launch.launchState != 'PartialSync' && launch.launchState != 'SyncFailed'">
-                        <span class="fa fa-check" ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'"></span>
-                        <span class="fa fa-spinner fa-pulse fw" ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'"></span>
-                        <span class="fa fa-hourglass-start gray-text" ng-if="launch.launchState === 'Queued'"></span>
-                        <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'Failed'"></span>
+                        <span 
+                            class="fa fa-check" 
+                            ng-if="launch.launchState === 'Launched' || launch.launchState === 'Synced'">
+                        </span>
+                        <span 
+                            class="fa fa-spinner fa-pulse fw" 
+                            ng-if="launch.launchState === 'Launching' || launch.launchState === 'Syncing'">
+                        </span>
+                        <span 
+                            class="fa fa-hourglass-start gray-text" 
+                            ng-if="launch.launchState === 'Queued'">
+                        </span>
+                        <span 
+                            class="fa fa-exclamation-triangle red-text" 
+                            ng-if="launch.launchState === 'Failed'">
+                        </span>
                         {{launch.launchState}}
                     </td>
                     <td ng-if="launch.launchState === 'PartialSync' || launch.launchState === 'SyncFailed'">
-                        <span class="fa fa-exclamation-triangle orange-text" ng-if="launch.launchState === 'PartialSync'"></span>
+                        <span 
+                            class="fa fa-exclamation-triangle orange-text" 
+                            ng-if="launch.launchState === 'PartialSync'">
+                        </span>
                         <span ng-if="launch.launchState === 'PartialSync'">Partially Synced</span>
-
-
-                        <span class="show-tooltip top delay" ng-if="launch.launchState === 'SyncFailed'">
-                            <span class="fa fa-exclamation-triangle red-text" ng-if="launch.launchState === 'SyncFailed'"> </span>
-                            <div class="tooltip_ small" ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.errorMessage">
+                        <span 
+                            class="show-tooltip top delay" 
+                            ng-if="launch.launchState === 'SyncFailed'">
+                            <span 
+                                class="fa fa-exclamation-triangle red-text" 
+                                ng-if="launch.launchState === 'SyncFailed'">
+                            </span>
+                            <div 
+                                class="tooltip_ small" 
+                                ng-if="launch.integrationStatusMonitor && launch.integrationStatusMonitor.errorMessage">
                                 <div class="cover">
                                     <p class="white">
                                         Error: {{launch.integrationStatusMonitor.errorMessage}}

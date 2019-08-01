@@ -40,7 +40,7 @@
             <div class="row panel-heading custom-heading">
                 <div class="columns two" ng-click="$ctrl.sort('UIVersion')">
                     Ver.
-                    <i ng-if="$ctrl.SortProperty == 'UIVersion'" class="fa fa-caret-{{$ctrl.SortDirection ? 'up' : 'down'}}"></i>
+                    <i ng-if="$ctrl.SortProperty == 'UIVersion'" class="fa fa-caret-{{$ctrl.SortDirection ? 'down' : 'up'}}"></i>
                 </div>
                 <div class="columns six" ng-click="$ctrl.sort('DisplayName')">
                     Name
@@ -48,7 +48,7 @@
                 </div>
                 <div class="columns four" ng-click="$ctrl.sort('RegisteredTime')">
                     Created
-                    <i ng-if="$ctrl.SortProperty == 'RegisteredTime'" class="fa fa-caret-{{$ctrl.SortDirection ? 'up' : 'down'}}"></i>
+                    <i ng-if="$ctrl.SortProperty == 'RegisteredTime'" class="fa fa-caret-{{$ctrl.SortDirection ? 'down' : 'up'}}"></i>
                 </div>
             </div>
             <div class="row panel-body tenant-selection-list" ng-mouseover="$ctrl.hover()">
