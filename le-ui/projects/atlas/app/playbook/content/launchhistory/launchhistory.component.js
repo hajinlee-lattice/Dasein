@@ -67,14 +67,13 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     // Set sort
     vm.sort = function(header) {
-
-        console.log("sort");
-
         vm.sortBy = header;
 
         vm.currentPage = 1;
         vm.offset = 0;
-        vm.updateLaunchData();
+        $timeout( function(){
+            vm.updateLaunchData();
+        }, 0 );
     }
 
     // Set play name
@@ -96,6 +95,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     
     // Get data
     vm.updateLaunchData = function() {
+
 
         var params = {
                 playName: vm.playName || $stateParams.play_name,
@@ -155,7 +155,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             recommendationsLaunched: stats.recommendationsLaunched,
             contactsWithinRecommendations: stats.contactsWithinRecommendations
         }
-        console.log(vm.summaryData);
 
     }
 
@@ -163,8 +162,6 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
     $scope.$watch('vm.currentPage', function(newValue, oldValue) {
         vm.loading = true;
         if (newValue != oldValue) {
-
-            console.log("watch");
             vm.offset = (vm.currentPage - 1) * vm.pagesize,
             vm.updateLaunchData();
         }
