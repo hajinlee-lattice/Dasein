@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.service.RecommendationCleanupService;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -69,8 +69,8 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        final PlayLaunchConfig playLaunchConfig = new PlayLaunchConfig.Builder().build();
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        final TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder().build();
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         play = testPlayCreationHelper.getPlay();

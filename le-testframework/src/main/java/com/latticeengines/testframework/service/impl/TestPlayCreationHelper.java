@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -88,7 +89,8 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.proxy.objectapi.EntityProxyImpl;
 import com.latticeengines.proxy.objectapi.RatingProxyImpl;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -135,8 +137,6 @@ public class TestPlayCreationHelper {
 
     private RatingEngine ratingEngine;
     private String playName;
-    private String destinationOrgId;
-    private CDLExternalSystemType destinationOrgType;
     private String tenantIdentifier;
     private Tenant tenant;
     private String customerSpace;
@@ -148,14 +148,19 @@ public class TestPlayCreationHelper {
     private Play play;
     private PlayLaunch playLaunch;
     private List<PlayType> playTypes;
+    private List<LookupIdMap> connections = new ArrayList<>();
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    // Todo 1: Remove testCrud from here, this class should only be a helper class no testing
+    // Todo 2: Make it stateless
+    // Todo 3: Make it less monolithic
 
     public void setupTenantAndData() {
         setupTenantAndData(null);
     }
 
-    public void setupTenantAndData(PlayLaunchConfig plConfig) {
+    public void setupTenantAndData(TestPlaySetupConfig plConfig) {
         if (plConfig != null && StringUtils.isNotBlank(plConfig.getExistingTenantName())) {
             useExistingTenant(plConfig.getExistingTenantName());
         } else {
@@ -174,85 +179,48 @@ public class TestPlayCreationHelper {
         postInitializeTenantCreation(tenant.getId(), null);
     }
 
-    private void postInitializeTenantCreation(String fullTenantId, PlayLaunchConfig testConfig) {
+    private void postInitializeTenantCreation(String fullTenantId, TestPlaySetupConfig testConfig) {
         tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
         tenantIdentifier = tenant.getId();
         MultiTenantContext.setTenant(tenant);
         deploymentTestBed.switchToSuperAdmin(tenant);
-        destinationOrgId = testConfig == null ? "O_" + System.currentTimeMillis() : testConfig.getDestinationSystemId();
-        destinationOrgType = testConfig == null ? CDLExternalSystemType.CRM : testConfig.getDestinationSystemType();
     }
 
-    public String getDestinationOrgId() {
-        return destinationOrgId;
-    }
-
-    public void setDestinationOrgId(String destinationOrgId) {
-        this.destinationOrgId = destinationOrgId;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public Play getPlay() {
-        return play;
-    }
-
-    public PlayLaunch getPlayLaunch() {
-        return playLaunch;
-    }
-
-    public String getPlayName() {
-        return playName;
-    }
-
-    public RatingEngine getRatingEngine() {
-        return ratingEngine;
-    }
-
-    public RatingEngine getRulesBasedRatingEngine() {
-        return ruleBasedRatingEngine;
-    }
-
-    public void publishRatingEngines(List<String> ratingIdsToPublish) {
-        cdlTestDataService.mockRatingTable(tenant.getId(), ratingIdsToPublish, null);
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        MultiTenantContext.setTenant(tenant);
-    }
-
-    public void setupTenantAndCreatePlay(PlayLaunchConfig playLaunchConfig) throws Exception {
-        if (StringUtils.isNotBlank(playLaunchConfig.getExistingTenantName())) {
-            useExistingTenant(playLaunchConfig.getExistingTenantName());
+    public void setupTenantAndCreatePlay(TestPlaySetupConfig testPlaySetupConfig) throws Exception {
+        if (StringUtils.isNotBlank(testPlaySetupConfig.getExistingTenantName())) {
+            useExistingTenant(testPlaySetupConfig.getExistingTenantName());
         } else {
-            setupTenantAndData(playLaunchConfig);
-        }
-
-        setupTestSegment();
-        setupTestRulesBasedModel();
-
-        if (playLaunchConfig.isMockRatingTable()) {
-            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+            setupTenantAndData(testPlaySetupConfig);
         }
 
         // setup Lattice_S3 lookupIdMapping
         lookupIdMappingProxy.getLookupIdsMapping(CustomerSpace.parse(tenant.getId()).getTenantId(), null, null, false);
 
-        if (playLaunchConfig.getTrayAuthenticationId() != null) {
-            createLookupIdMapping(playLaunchConfig);
+        if (CollectionUtils.isEmpty(testPlaySetupConfig.getChannels())) {
+            // Create default channel
+            testPlaySetupConfig.getChannels()
+                    .add(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
+                            .destinationSystemName(CDLExternalSystemName.Salesforce)
+                            .destinationSystemId("ID_" + System.currentTimeMillis()).build());
         }
-        createDefaultPlayAndTestCrud(playLaunchConfig);
-        createPlayLaunch(playLaunchConfig);
+
+        createLookupIdMapping(testPlaySetupConfig);
+        setupTestSegment();
+        setupTestRulesBasedModel();
+
+        if (testPlaySetupConfig.isMockRatingTable()) {
+            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+        }
+
+        createDefaultPlayAndTestCrud(testPlaySetupConfig);
+        createPlayLaunch(testPlaySetupConfig);
 
         Assert.assertNotNull(play);
         Assert.assertNotNull(playLaunch);
 
-        if (playLaunchConfig.isLaunchPlay()) {
-            launchPlayWorkflow(playLaunchConfig);
+        if (testPlaySetupConfig.isLaunchPlay()) {
+            launchPlayWorkflow(testPlaySetupConfig);
         }
     }
 
@@ -277,12 +245,6 @@ public class TestPlayCreationHelper {
         RatingRule ratingRule = createRatingRule();
         log.info("Creating test rules based model for test tenant: " + tenant.getId());
         ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
-    }
-
-    public void createPlay(PlayLaunchConfig playLaunchConfig) {
-        createDefaultPlayAndTestCrud(playLaunchConfig);
-        Assert.assertNotNull(play);
-        Assert.assertNotNull(play.getRatingEngine());
     }
 
     public Play createPlayOnlyAndGet() {
@@ -322,38 +284,37 @@ public class TestPlayCreationHelper {
         return play;
     }
 
-    public List<Play> getPlays() {
-        return playProxy.getPlays(tenantIdentifier, false, null);
-    }
-
-    public Play updatePlay(Play play) {
-        return playProxy.createOrUpdatePlay(tenantIdentifier, play, false);
-    }
-
-    public void createPlayLaunch(PlayLaunchConfig playLaunchConfig) {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(playLaunchConfig));
+    public void createPlayLaunch(TestPlaySetupConfig testPlaySetupConfig) {
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(testPlaySetupConfig));
         assertPlayLaunch(playLaunch);
     }
 
-    public LookupIdMap createLookupIdMapping(PlayLaunchConfig playLaunchConfig) {
-        LookupIdMap lookupIdMap = new LookupIdMap();
-        lookupIdMap.setTenant(tenant);
-        lookupIdMap.setExternalSystemType(playLaunchConfig.getDestinationSystemType());
-        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
-        lookupIdMap.setOrgName("OrgName_" + new Date().toString());
-        lookupIdMap.setOrgId(playLaunchConfig.getDestinationSystemId());
-        ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
-        extSysAuth.setTrayAuthenticationId(playLaunchConfig.getTrayAuthenticationId());
-        extSysAuth.setTrayWorkflowEnabled(true);
-        extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
-        lookupIdMap.setExternalAuthentication(extSysAuth);
-        return lookupIdMappingProxy.registerExternalSystem(tenant.getId(), lookupIdMap);
+    public List<LookupIdMap> createLookupIdMapping(TestPlaySetupConfig testPlaySetupConfig) {
+        List<LookupIdMap> createdLookups = new ArrayList<>();
+
+        for (TestPlayChannelConfig config : testPlaySetupConfig.getChannels()) {
+            LookupIdMap lookupIdMap = new LookupIdMap();
+            lookupIdMap.setTenant(tenant);
+            lookupIdMap.setExternalSystemType(config.getDestinationSystemType());
+            lookupIdMap.setExternalSystemName(config.getDestinationSystemName());
+            lookupIdMap.setOrgName("OrgName_" + new Date().toString());
+            lookupIdMap.setOrgId(config.getDestinationSystemId());
+            ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
+            extSysAuth.setTrayAuthenticationId(config.getTrayAuthenticationId());
+            extSysAuth.setTrayWorkflowEnabled(true);
+            extSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
+            lookupIdMap.setExternalAuthentication(extSysAuth);
+            lookupIdMap = lookupIdMappingProxy.registerExternalSystem(tenant.getId(), lookupIdMap);
+            createdLookups.add(lookupIdMap);
+        }
+        connections.addAll(createdLookups);
+        return createdLookups;
     }
 
-    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig, boolean useSpark) {
+    public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig, boolean useSpark) {
         playLaunch = playProxy.launchPlay(tenant.getId(), playName, playLaunch.getLaunchId(),
-                playLaunchConfig.isPlayLaunchDryRun(), useSpark);
-        if (playLaunchConfig.isPlayLaunchDryRun()) {
+                testPlaySetupConfig.isPlayLaunchDryRun(), useSpark);
+        if (testPlaySetupConfig.isPlayLaunchDryRun()) {
             Assert.assertNull(playLaunch.getApplicationId());
         } else {
             Assert.assertNotNull(playLaunch.getApplicationId());
@@ -361,23 +322,28 @@ public class TestPlayCreationHelper {
         return playLaunch;
     }
 
-    public PlayLaunch launchPlayWorkflow(PlayLaunchConfig playLaunchConfig) {
-        return launchPlayWorkflow(playLaunchConfig, false);
+    public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig) {
+        return launchPlayWorkflow(testPlaySetupConfig, false);
     }
 
-    private PlayLaunch preparePlayLaunchObject(PlayLaunchConfig playLaunchConfig) {
+    private PlayLaunch preparePlayLaunchObject(TestPlaySetupConfig testPlaySetupConfig) {
+        TestPlayChannelConfig testPlayChannelConfig = testPlaySetupConfig.getSinglePlayLaunchChannelConfig();
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setBucketsToLaunch(playLaunchConfig.getBucketsToLaunch() != null
-                ? playLaunchConfig.getBucketsToLaunch() : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
-        playLaunch.setDestinationOrgId(playLaunchConfig.getDestinationSystemId() != null
-                ? playLaunchConfig.getDestinationSystemId() : destinationOrgId);
-        playLaunch.setDestinationSysType(playLaunchConfig.getDestinationSystemType() != null
-                ? playLaunchConfig.getDestinationSystemType() : destinationOrgType);
+
+        playLaunch.setBucketsToLaunch(
+                testPlayChannelConfig.getBucketsToLaunch() != null ? testPlayChannelConfig.getBucketsToLaunch()
+                        : (new HashSet<>(Arrays.asList(RatingBucketName.values()))));
+        playLaunch.setDestinationOrgId(
+                testPlayChannelConfig.getDestinationSystemId() != null ? testPlayChannelConfig.getDestinationSystemId()
+                        : "DummyOrgId" + System.currentTimeMillis()); // default
+        playLaunch.setDestinationSysType(testPlayChannelConfig.getDestinationSystemType() != null
+                ? testPlayChannelConfig.getDestinationSystemType()
+                : CDLExternalSystemType.CRM); // default
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
-        playLaunch.setExcludeItemsWithoutSalesforceId(playLaunchConfig.isExcludeItemsWithoutSalesforceId());
+        playLaunch.setExcludeItemsWithoutSalesforceId(testPlayChannelConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
-        playLaunch.setTopNCount(playLaunchConfig.getTopNCount());
-        playLaunch.setAudienceId(playLaunchConfig.getAudienceId());
+        playLaunch.setTopNCount(testPlayChannelConfig.getTopNCount());
+        playLaunch.setAudienceId(testPlayChannelConfig.getAudienceId());
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
@@ -404,7 +370,7 @@ public class TestPlayCreationHelper {
         }
     }
 
-    public void createDefaultPlayAndTestCrud(PlayLaunchConfig playLaunchConfig) {
+    public void createDefaultPlayAndTestCrud(TestPlaySetupConfig testPlaySetupConfig) {
         List<Play> playList = playProxy.getPlays(tenant.getId(), null, null);
         int existingPlays = playList == null ? 0 : playList.size();
         Play createdPlay1 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlayObject());
@@ -412,13 +378,13 @@ public class TestPlayCreationHelper {
                 true);
 
         channels.stream().filter(c -> StringUtils.isEmpty(c.getId()))
-                .forEach(c -> createChannel(playLaunchConfig, createdPlay1, c));
+                .forEach(c -> createChannel(testPlaySetupConfig, createdPlay1, c));
 
         playName = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
 
-        if (!playLaunchConfig.isTestPlayCrud()) {
+        if (!testPlaySetupConfig.isTestPlayCrud()) {
             return;
         }
 
@@ -440,7 +406,7 @@ public class TestPlayCreationHelper {
         channels = playProxy.getPlayLaunchChannels(tenant.getId(), createdPlay2.getName(), true);
 
         channels.stream().filter(c -> StringUtils.isEmpty(c.getId()))
-                .forEach(c -> createChannel(playLaunchConfig, createdPlay2, c));
+                .forEach(c -> createChannel(testPlaySetupConfig, createdPlay2, c));
 
         dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine.getId());
         Assert.assertNotNull(dependencies);
@@ -465,8 +431,14 @@ public class TestPlayCreationHelper {
         this.play = retrievedPlay;
     }
 
-    private void createChannel(PlayLaunchConfig config, Play play, PlayLaunchChannel channel) {
-        channel.setBucketsToLaunch(config.getBucketsToLaunch());
+    private void createChannel(TestPlaySetupConfig config, Play play, PlayLaunchChannel channel) {
+        Optional<TestPlayChannelConfig> oConfig = config.getChannels().stream()
+                .filter(ch -> ch.getDestinationSystemType() == channel.getLookupIdMap().getExternalSystemType()
+                        && ch.getDestinationSystemName() == channel.getLookupIdMap().getExternalSystemName())
+                .findFirst();
+        TestPlayChannelConfig channelConfig = oConfig.isPresent() ? oConfig.get()
+                : new TestPlayChannelConfig.Builder().build();
+
         switch (channel.getLookupIdMap().getExternalSystemName()) {
             case Salesforce:
                 channel.setChannelConfig(new SalesforceChannelConfig());
@@ -489,9 +461,12 @@ public class TestPlayCreationHelper {
         channel.setCreatedBy("ga_dev@lattice-engines.com");
         channel.setUpdatedBy("ga_dev@lattice-engines.com");
         channel.setPlay(play);
-        channel.setLaunchType(LaunchType.FULL);
-        channel.setIsAlwaysOn(true);
-        channel.setCronScheduleExpression("0 0 12 ? * THU *");
+        channel.setLaunchType(channelConfig.getLaunchType() != null ? channelConfig.getLaunchType() : LaunchType.FULL);
+        channel.setIsAlwaysOn(channelConfig.isAlwaysOn());
+        channel.setBucketsToLaunch(channelConfig.getBucketsToLaunch());
+        channel.setCronScheduleExpression(
+                StringUtils.isNotBlank(channelConfig.getCronSchedule()) ? channelConfig.getCronSchedule()
+                        : "0 0 12 ? * THU *");
         playProxy.createPlayLaunchChannel(tenant.getId(), play.getName(), channel, false);
 
     }
@@ -644,6 +619,14 @@ public class TestPlayCreationHelper {
         try {
             log.info("Cleaning up play: " + play.getName());
             deletePlay(play.getName(), hardDelete);
+        } catch (Exception ex) {
+            ignoreException(ex);
+        }
+
+        try {
+            log.info("Cleaning up Connections ");
+            connections
+                    .forEach(connection -> lookupIdMappingProxy.deleteLookupIdMap(customerSpace, connection.getId()));
         } catch (Exception ex) {
             ignoreException(ex);
         }
@@ -896,6 +879,39 @@ public class TestPlayCreationHelper {
         Restriction accountRestriction = createAccountRestriction(dynRest);
         Restriction contactRestriction = createContactRestriction();
         return createSegment(NamingUtils.timestamp("TargetSegment"), accountRestriction, contactRestriction);
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public Play getPlay() {
+        return play;
+    }
+
+    public PlayLaunch getPlayLaunch() {
+        return playLaunch;
+    }
+
+    public String getPlayName() {
+        return playName;
+    }
+
+    public RatingEngine getRatingEngine() {
+        return ratingEngine;
+    }
+
+    public RatingEngine getRulesBasedRatingEngine() {
+        return ruleBasedRatingEngine;
+    }
+
+    public void publishRatingEngines(List<String> ratingIdsToPublish) {
+        cdlTestDataService.mockRatingTable(tenant.getId(), ratingIdsToPublish, null);
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        MultiTenantContext.setTenant(tenant);
     }
 
 }

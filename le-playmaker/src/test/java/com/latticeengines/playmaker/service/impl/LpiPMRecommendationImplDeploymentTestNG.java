@@ -41,7 +41,8 @@ import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -91,7 +92,7 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     private int maxUpdateRows = 20;
     private String syncDestination = "SFDC";
     private Map<String, String> orgInfo;
-    private PlayLaunchConfig playLaunchConfig;
+    private TestPlaySetupConfig testPlaySetupConfig;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -104,12 +105,13 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
         eloquaAppId2.put(CDLConstants.AUTH_APP_ID, "BIS01234");
 
         String testOrgName = CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis();
-        playLaunchConfig = new PlayLaunchConfig.Builder() //
-                .destinationSystemType(CDLExternalSystemType.CRM) //
-                .destinationSystemName(CDLExternalSystemName.Salesforce) //
-                .destinationSystemId(testOrgName) //
+        testPlaySetupConfig = new TestPlaySetupConfig.Builder() //
+                .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM) //
+                        .destinationSystemName(CDLExternalSystemName.Salesforce) //
+                        .destinationSystemId(testOrgName) //
+                        .build())
                 .build();
-        testPlayCreationHelper.setupTenantAndCreatePlay(playLaunchConfig);
+        testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
 
         tenant = testPlayCreationHelper.getTenant();
         customerSpace = CustomerSpace.parse(tenant.getId());
@@ -127,8 +129,9 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     private Map<String, String> getOrgInfo() {
         Map<String, String> org = new HashMap<>();
-        org.put(CDLConstants.ORG_ID, playLaunchConfig.getDestinationSystemId());
-        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, playLaunchConfig.getDestinationSystemType().toString());
+        org.put(CDLConstants.ORG_ID, testPlaySetupConfig.getSinglePlayLaunchChannelConfig().getDestinationSystemId());
+        org.put(CDLConstants.EXTERNAL_SYSTEM_TYPE,
+                testPlaySetupConfig.getSinglePlayLaunchChannelConfig().getDestinationSystemType().toString());
         return org;
     }
 

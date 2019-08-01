@@ -29,7 +29,8 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
-import com.latticeengines.testframework.exposed.domain.PlayLaunchConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -57,10 +58,11 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
 
-        PlayLaunchConfig testConfig = new PlayLaunchConfig.Builder() //
-                .destinationSystemType(CDLExternalSystemType.CRM) //
-                .destinationSystemName(CDLExternalSystemName.Salesforce) //
-                .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis()) //
+        TestPlaySetupConfig testConfig = new TestPlaySetupConfig.Builder() //
+                .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM) //
+                        .destinationSystemName(CDLExternalSystemName.Salesforce) //
+                        .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis()) //
+                        .build())
                 .build();
 
         testPlayCreationHelper.setupTenantAndData(testConfig);
