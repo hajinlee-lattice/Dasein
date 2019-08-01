@@ -1,11 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -16,10 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -39,49 +33,23 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling MarketoExportFieldMetadataService");
-        Map<String, ColumnMetadata> attributesMap = getServingMetadata(customerSpace,
-                Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact))
-                        .collect(HashMap<String, ColumnMetadata>::new,
-                                (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
-                .block();
 
-        Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getStandardExportFields(
-                channel.getLookupIdMap().getExternalSystemName()).stream()
-                        .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
-        
+        Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
+                Arrays.asList(BusinessEntity.Account));
+
+        Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
+                Arrays.asList(BusinessEntity.Contact));
+
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId());
 
-        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<ColumnMetadata>();
+        List<ColumnMetadata> exportColumnMetadataList;
 
         if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
-            mappedFieldNames.forEach(fieldName -> {
-                ColumnMetadata cm = null;
-                if (attributesMap.containsKey(fieldName)) {
-                    cm = attributesMap.get(fieldName);
-                    if (defaultFieldsMetadataMap.containsKey(fieldName)) {
-                        cm.setDisplayName(defaultFieldsMetadataMap.get(fieldName).getDisplayName());
-                    }
-                } else if (defaultFieldsMetadataMap.containsKey(fieldName)) {
-                    cm = constructCampaignDerivedColumnMetadata(defaultFieldsMetadataMap.get(fieldName));
-                } else {
-                    throw new LedpException(LedpCode.LEDP_40069, new String[] { fieldName, "Marketo" });
-                }
-                exportColumnMetadataList.add(cm);
-            });
+            exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Marketo, mappedFieldNames,
+                    accountAttributesMap, contactAttributesMap);
         } else {
-            defaultFieldsMetadataMap.values().forEach(defaultField -> {
-                ColumnMetadata cm;
-                String attrName = defaultField.getAttrName();
-                if (attributesMap.containsKey(attrName)) {
-                    cm = attributesMap.get(attrName);
-                    cm.setDisplayName(defaultField.getDisplayName());
-                } else {
-                    cm = constructCampaignDerivedColumnMetadata(defaultField);
-                }
-
-                exportColumnMetadataList.add(cm);
-            });
-
+            exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo,
+                    accountAttributesMap, contactAttributesMap);
         }
 
         return exportColumnMetadataList;

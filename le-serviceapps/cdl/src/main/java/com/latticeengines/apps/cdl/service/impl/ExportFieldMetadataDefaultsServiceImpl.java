@@ -28,8 +28,18 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     }
 
     @Override
-    public List<ExportFieldMetadataDefaults> getAttributes(CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsEntityMgr.getDefaultExportFieldMetadata(systemName);
+    public List<ExportFieldMetadataDefaults> getAllAttributes(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsEntityMgr.getAllDefaultExportFieldMetadata(systemName);
+    }
+    
+    @Override
+    public List<ExportFieldMetadataDefaults> getExportEnabledAttributes(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsEntityMgr.getExportEnabledDefaultFieldMetadata(systemName);
+    }
+    
+    @Override
+    public List<ExportFieldMetadataDefaults> getHistoryEnabledAttributes(CDLExternalSystemName systemName) {
+        return exportFieldMetadataDefaultsEntityMgr.getHistoryEnabledDefaultFieldMetadata(systemName);
     }
 
     @Override

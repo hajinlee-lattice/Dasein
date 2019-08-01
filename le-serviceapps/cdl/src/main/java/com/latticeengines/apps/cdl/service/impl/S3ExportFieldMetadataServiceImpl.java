@@ -1,8 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -30,37 +27,26 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling S3ExportFieldMetadataService");
-        Map<String, ColumnMetadata> attributesMap = getServingMetadata(customerSpace,
-                Arrays.asList(BusinessEntity.Account))
-                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
-                .block();
+        
+        Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
+                Arrays.asList(BusinessEntity.Account));
+        
+        Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
+                Arrays.asList(BusinessEntity.Contact));
 
-        List<ExportFieldMetadataDefaults> defaultFieldsMetadata = getStandardExportFields(
-                channel.getLookupIdMap().getExternalSystemName());
-
-        List<ColumnMetadata> result = new ArrayList<ColumnMetadata>();
-        Map<String, ColumnMetadata> defaultExportFieldsMap = new HashMap<String, ColumnMetadata>();
-
-        defaultFieldsMetadata.forEach(field -> {
-            if (!defaultExportFieldsMap.containsKey(field.getAttrName())) {
-                ColumnMetadata cm = field.getStandardField() && attributesMap.containsKey(field.getAttrName())
-                        ? attributesMap.get(field.getAttrName())
-                        : constructCampaignDerivedColumnMetadata(field);
-
-                result.add(cm);
-                defaultExportFieldsMap.put(field.getAttrName(), cm);
-            }
-        });
+        List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
+                accountAttributesMap, contactAttributesMap);
 
         S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();
 
         if (channelConfig.isIncludeExportAttributes()) {
-            List<ColumnMetadata> exportEnabledAttributes = attributesMap.values().stream()
-                    .filter(cm -> !defaultExportFieldsMap.containsKey(cm.getAttrName()))
-                    .collect(Collectors.toList());
-            result.addAll(exportEnabledAttributes);
+            exportColumnMetadataList.addAll(accountAttributesMap.values());
+            exportColumnMetadataList.addAll(contactAttributesMap.values());
+            exportColumnMetadataList.addAll(getServingMetadata(customerSpace,
+                    Arrays.asList(BusinessEntity.Rating, BusinessEntity.PurchaseHistory, BusinessEntity.CuratedAccount))
+                            .collect(Collectors.toList()).block());
         }
 
-        return result;
+        return exportColumnMetadataList;
     }
 }
