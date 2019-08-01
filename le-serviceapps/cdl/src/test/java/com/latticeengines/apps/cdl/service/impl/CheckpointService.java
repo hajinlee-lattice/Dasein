@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -76,6 +77,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -87,6 +89,7 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -137,6 +140,12 @@ public class CheckpointService {
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private EMREnvService emrEnvService;
+
+    @Inject
+    private S3Service s3Service;
+
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
@@ -148,6 +157,12 @@ public class CheckpointService {
 
     @Value("${common.test.matchapi.url}")
     private String matchapiHostPort;
+
+    @Value("${aws.s3.bucket}")
+    protected String s3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -167,12 +182,18 @@ public class CheckpointService {
 
     private Map<TableRoleInCollection, String> savedRedshiftTables = new HashMap<>();
 
+    private boolean copyToS3 = false;
+
     public void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
     }
 
     public void setPrecedingCheckpoints(List<String> precedingCheckpoints) {
         this.precedingCheckpoints = precedingCheckpoints;
+    }
+
+    public void enableCopyToS3() {
+        copyToS3 = true;
     }
 
     public void resumeCheckpoint(String checkpoint, int checkpointVersion) throws IOException {
@@ -251,6 +272,9 @@ public class CheckpointService {
 
         cloneRedshiftTables(redshiftTablesToClone);
         uploadCheckpointHdfs(checkpoint);
+        if (copyToS3) {
+            uploadCheckpointS3(checkpoint);
+        }
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
         resumeDbState();
@@ -363,9 +387,22 @@ public class CheckpointService {
         log.info("Start uploading checkpoint " + checkpoint + " to hdfs.");
         String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
-        String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
+        String targetPath = PathBuilder.buildDataPath(podId, cs).toString();
         HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, localDir, targetPath);
         log.info("Upload checkpoint to hdfs path " + targetPath);
+    }
+
+    private void uploadCheckpointS3(String checkpoint) {
+        log.info("Start uploading checkpoint " + checkpoint + " to S3.");
+        CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String s3Prefix = pathBuilder.getS3AtlasDataPrefix(s3Bucket, cs.getTenantId());
+        if (s3Service.isNonEmptyDirectory(s3Bucket, s3Prefix)) {
+            log.info("S3 prefix {} already exists, delete first.", s3Prefix);
+            s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+        }
+        String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
+        s3Service.uploadLocalDirectory(s3Bucket, s3Prefix, localDir, true);
     }
 
     private DataCollection.Version getCheckpointVersion(String checkpoint) throws IOException {

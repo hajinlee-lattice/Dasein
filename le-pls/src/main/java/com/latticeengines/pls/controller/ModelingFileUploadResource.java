@@ -34,7 +34,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
@@ -142,7 +141,7 @@ public class ModelingFileUploadResource {
                 LatticeProduct.CG);
         if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             return ResponseDocument.successResponse(modelingFileMetadataService
                     .getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters, true, false, enableEntityMatch));
         } else {
@@ -180,7 +179,7 @@ public class ModelingFileUploadResource {
         }
         if (!hasCgProduct || StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, true, enableEntityMatch);
         } else {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument, entity, source, feedType);

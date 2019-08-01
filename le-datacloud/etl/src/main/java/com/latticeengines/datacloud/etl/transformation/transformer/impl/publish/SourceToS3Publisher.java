@@ -241,7 +241,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private Configuration createConfiguration(String sourceName, String jobNameSuffix) {
-        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(yarnConfiguration, new Properties());
+        Configuration hadoopConfiguration = ConfigurationUtils.createFrom(distCpConfiguration, new Properties());
         String jobName = SERVICE_TENANT + "~" + sourceName + "~" + jobNameSuffix;
         hadoopConfiguration.set(JobContext.JOB_NAME, jobName);
         if (StringUtils.isNotEmpty(hadoopConfiguration.get("mapreduce.application.classpath"))) {

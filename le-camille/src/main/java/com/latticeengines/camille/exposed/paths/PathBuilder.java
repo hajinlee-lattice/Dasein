@@ -69,6 +69,10 @@ public final class PathBuilder {
                 PathConstants.SPACES, spaceId);
     }
 
+    public static Path buildDataPath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA);
+    }
+
     public static Path buildDataTablePath(String podId, CustomerSpace space) {
         return buildDataTablePath(podId, space, "");
     }
