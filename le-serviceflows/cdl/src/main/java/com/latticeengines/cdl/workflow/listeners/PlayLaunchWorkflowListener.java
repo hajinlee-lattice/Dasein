@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +45,7 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         try {
-            if (jobExecution.getStatus() == BatchStatus.FAILED) {
+            if (jobExecution.getStatus().isUnsuccessful()) {
                 WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
                 customerSpace = job.getTenant().getId();
                 String playName = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
