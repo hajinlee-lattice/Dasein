@@ -51,7 +51,6 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         pushConstraintList = new LinkedList<>();
         pushConstraintList.add(new RetryExist());
         pushConstraintList.add(new LastFinishTimePending());
-        pushConstraintList.add(new RetryPendingTime());
     }
 
     private static void initPopConstraint() {
