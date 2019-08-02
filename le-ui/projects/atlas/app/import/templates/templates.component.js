@@ -467,6 +467,7 @@ export default class TemplatesComponent extends Component {
                             <ul>
                                 <CopyComponent
                                     title="Copy Link"
+                                    showData={true}
                                     label={`${'S3 Root Folder: '}`}
                                     data={`${rootFolder}`}
                                     callback={() => {
