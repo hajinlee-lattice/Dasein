@@ -27,13 +27,13 @@
     <div
         class="audience-selection"
         ng-if="$ctrl.externalIntegrationEnabled && $ctrl.destinationOrg && $ctrl.destinationOrg.externalAuthentication">
-        <p>  
+        <p ng-if="$ctrl.destinationOrg.destintationSysName == 'Marketo'">  
             Provide the folder name, static list ID, and static list name of an existing Marketo list. The contacts in this segment will be sent to that list. 
         </p>
 
         <table>
             <tbody>
-                <tr>
+                <tr ng-if="$ctrl.destinationOrg.externalSystemName == 'Marketo'">
                     <th>
                         <p> <p class="red-asterisk"> * </p>Marketo Program Name: </p>
                     </th>
@@ -43,8 +43,8 @@
                     </td>
                 </tr>
                 
-                <tr>
-                    <th>
+                <tr ng-if="$ctrl.destinationOrg.externalSystemName == 'Marketo'">
+                    <th >
                         <p> <p class="red-asterisk"> * </p>Marketo Static List Name: </p>
                     </th>
                     <td>
@@ -55,11 +55,28 @@
                         <div ng-if="$ctrl.createNewList && $ctrl.audienceName && !$ctrl.isValidAudienceName()" class="red-text">  * A static list with this name already exists. Please choose another. </div>
                     </td>
                 </tr>
+                
+                <tr ng-if="$ctrl.destinationOrg.externalSystemName != 'Marketo'">
+                    <input type="radio"
+                       ng-model="$ctrl.audienceType"
+                       value="ACCOUNTS"> Accounts
+                    <input type="radio"
+                       ng-model="$ctrl.audienceType"
+                       value="CONTACTS"> Contacts
+
+                    <div> After this audience is sent to {{$ctrl.destinationOrg.externalSystemName}}, it will take 24 - 48 hours to be available for use. </div>
+
+                    <span> <p class="red-asterisk"> * </p> {{$ctrl.destinationOrg.externalSystemName}} Audience Name </span>
+                    
+
+                    <input type="text" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updatePlayStore()" maxlength="255">
+                </tr>
             </tbody>
         </table>
 
 
     </div>
-
     <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="$ctrl.launching || $ctrl.isInvalidAudienceSelection()">{{$ctrl.status}}</button>
+
+    <!-- <button class="button blue-button" ng-click="$ctrl.nextSaveLaunch()" ng-disabled="false">{{$ctrl.status}}</button> -->
 </div>

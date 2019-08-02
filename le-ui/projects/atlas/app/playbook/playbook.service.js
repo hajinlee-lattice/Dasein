@@ -16,7 +16,8 @@ angular.module('lp.playbook')
     this.bucketsToLaunch = null;
     this.topNCount = null;
     this.selectedBucket = 'A';
-    this.externalSystemAuthentication = null;;
+    this.externalSystemAuthentication = null;
+    this.channelConfig = null;
     this.destinationOrgId = null;
     this.destinationSysType = null;
     this.destinationAccountId = null;
@@ -330,7 +331,9 @@ angular.module('lp.playbook')
                 folderName: PlaybookWizardStore.getMarketoProgramName(),
                 topNCount: PlaybookWizardStore.getTopNCount(),
                 launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
-                excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems()
+                excludeItemsWithoutSalesforceId: PlaybookWizardStore.getExcludeItems(),
+                // adding channel config for audiencetype
+                channelConfig: PlaybookWizardStore.getChannelConfig()
             },
             saveOnly = opts.saveOnly || false,
             lastIncompleteLaunchId = (PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch ? PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch.launchId : ''),
@@ -433,7 +436,8 @@ angular.module('lp.playbook')
                 audienceName: PlaybookWizardStore.getAudienceName(),
                 folderName: PlaybookWizardStore.getMarketoProgramName(),
                 excludeItems: PlaybookWizardStore.getExcludeItems(),
-                launchUnscored: PlaybookWizardStore.getLaunchUnscored()
+                launchUnscored: PlaybookWizardStore.getLaunchUnscored(),
+                channelConfig: PlaybookWizardStore.getChannelConfig()
             }
 
         PlaybookWizardStore.launchPlay(play, opts).then(function(data) {
@@ -594,6 +598,14 @@ angular.module('lp.playbook')
 
     this.getExternalAuthentication = function() {
         this.externalSystemAuthentication;
+    }
+
+    this.setChannelConfig = function(channelConfig) {
+        this.channelConfig = channelConfig;
+    }
+
+    this.getChannelConfig = function() {
+        return this.channelConfig;
     }
 
     this.setExcludeItems = function(excludeItems) {
@@ -1124,7 +1136,9 @@ angular.module('lp.playbook')
             audienceName = opts.audienceName,
             folderName = opts.programName,
             excludeItems = opts.excludeItems,
-            launchUnscored = opts.launchUnscored;
+            launchUnscored = opts.launchUnscored,
+            channelConfig =  opts.channelConfig;
+
         $http({
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
@@ -1139,7 +1153,8 @@ angular.module('lp.playbook')
                 launchUnscored: launchUnscored,
                 audienceId: audienceId,
                 audienceName: audienceName,
-                folderName: folderName
+                folderName: folderName,
+                channelConfig: channelConfig
             }
         }).then(
             function onSuccess(response) {

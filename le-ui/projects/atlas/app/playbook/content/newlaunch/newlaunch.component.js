@@ -20,6 +20,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             destinationOrg: PlaybookWizardStore.crmselection_form ? PlaybookWizardStore.crmselection_form.crm_selection : {},
             audienceId: "",
             audienceName: "",
+            audienceType: "",
             folderName: "",
             createNewList: true,
             useExistingList: false,
@@ -30,27 +31,20 @@ angular.module('lp.playbook.wizard.newlaunch', [])
         });
 
         vm.$onInit = function() {
-            var mostRecentProgramName = vm.mostRecentLaunch != null ? vm.mostRecentLaunch.folderName : '';
             vm.externalAuthenticationId = vm.destinationOrg.externalAuthentication ? vm.destinationOrg.externalAuthentication.trayAuthenticationId : null;
             vm.loadingFolders = true;
             if (vm.externalIntegrationEnabled && vm.externalAuthenticationId && vm.trayuser) {
                 PlaybookWizardService.getTrayAuthorizationToken(vm.trayuser).then(function(result) {
                     vm.userAccessToken = result;
-                    PlaybookWizardService.getMarketoPrograms(vm.externalAuthenticationId, vm.userAccessToken).then(function(programResults) {
-                        vm.programs = programResults.result;
-                        vm.loadingFolders = false;
-                        if (vm.programs != undefined) {
-                            var mostRecentProgram = vm.programs.filter((program) => {
-                                return program.name == mostRecentProgramName;
-                            });
-                            if (mostRecentProgram.length == 1 && mostRecentProgram[0].name) {
-                                vm.programName = mostRecentProgram[0].name;
-                                vm.updateProgramName(true);
-                            }
-                        } else {
-                            Banner.error({message: "Error retrieving Marketo programs. Please retry later."});
-                        }
-                    });
+                    switch (vm.destinationOrg.externalSystemName) {
+                        case "Marketo":
+                            vm.getMarketoPrograms();
+                            break;
+                        case "Facebook":
+                        case "LinkedIn":
+                        default:
+                            break;
+                    }
                 })
             }
         }
@@ -62,8 +56,28 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             PlaybookWizardStore.setAudienceId(vm.audienceId);
             PlaybookWizardStore.setAudienceName(vm.audienceName);
             PlaybookWizardStore.setMarketoProgramName(vm.programName);
+            PlaybookWizardStore.setChannelConfig(constructChannelConfig());
 
             PlaybookWizardStore.nextSaveLaunch(null, {lastIncompleteLaunch: PlaybookWizardStore.currentPlay.launchHistory.lastIncompleteLaunch});
+        }
+
+        vm.getMarketoPrograms = function() {
+            var mostRecentProgramName = vm.mostRecentLaunch != null ? vm.mostRecentLaunch.folderName : '';
+            PlaybookWizardService.getMarketoPrograms(vm.externalAuthenticationId, vm.userAccessToken).then(function(programResults) {
+                vm.programs = programResults.result;
+                vm.loadingFolders = false;
+                if (vm.programs != undefined) {
+                    var mostRecentProgram = vm.programs.filter((program) => {
+                        return program.name == mostRecentProgramName;
+                    });
+                    if (mostRecentProgram.length == 1 && mostRecentProgram[0].name) {
+                        vm.programName = mostRecentProgram[0].name;
+                        vm.updateProgramName(true);
+                    }
+                } else {
+                    Banner.error({message: "Error retrieving Marketo programs. Please retry later."});
+                }
+            });
         }
 
         vm.updateListSelection = function(onInit) {
@@ -103,6 +117,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             PlaybookWizardStore.setAudienceId(vm.audienceId);
             PlaybookWizardStore.setAudienceName(vm.audienceName);
             PlaybookWizardStore.setMarketoProgramName(vm.programName);
+            PlaybookWizardStore.setChannelConfig(constructChannelConfig());
         }
 
         vm.isValidAudienceName = function() {
@@ -115,7 +130,11 @@ angular.module('lp.playbook.wizard.newlaunch', [])
 
         vm.isInvalidAudienceSelection = function() {
             if (vm.externalIntegrationEnabled && vm.destinationOrg.externalAuthentication && vm.destinationOrg.externalAuthentication.trayAuthenticationId) {
-                return vm.createNewList ? (!vm.programName || !vm.audienceName || !vm.isValidAudienceName()) : (vm.listSelection == {});
+                if (vm.destinationOrg.externalSystemName == "Marketo") {
+                    return vm.createNewList ? (!vm.programName || !vm.audienceName || !vm.isValidAudienceName()) : (vm.listSelection == {});
+                } else if (vm.destinationOrg.externalSystemName == "LinkedIn" || vm.destinationOrg.externalSystemName == "Facebook") {
+                    return !vm.audienceName || !vm.audienceType;
+                }
             }
             return false;
         }
@@ -124,6 +143,31 @@ angular.module('lp.playbook.wizard.newlaunch', [])
             return PlaybookWizardStore.getCurrentPlay() && PlaybookWizardStore.getCurrentPlay().launchHistory 
                     ? PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch 
                     : null;
+        }
+
+        function constructChannelConfig() {
+            var channelConfig;
+            switch (vm.destinationOrg.externalSystemName) {
+                case "LinkedIn":
+                    channelConfig = {
+                        linkedin: {
+                            audienceName: vm.audienceName,
+                            audienceType: vm.audienceType
+                        }
+                    }
+                    break;
+                case "Facebook":
+                    channelConfig = {
+                        facebook: {
+                            audienceName: vm.audienceName,
+                            audienceType: vm.audienceType
+                        }
+                    }
+                    break;
+                default:
+                    channelConfig = {};
+            }
+            return channelConfig;
         }
 
     }});
