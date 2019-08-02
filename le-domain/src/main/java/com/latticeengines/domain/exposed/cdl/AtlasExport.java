@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -29,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -68,10 +68,8 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     private Long tenantId;
 
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private MetadataSegment segment;
+    @JoinColumn(name = "SEGMENT_NAME")
+    private String segmentName;
 
     @JsonProperty("export_type")
     @Column(name = "EXPORT_TYPE")
@@ -128,6 +126,14 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @JsonProperty("path")
     @Column(name = "PATH", length = 2048)
     private String path;
+
+    @JsonProperty("scheduled")
+    @Column(name = "SCHEDULED", nullable = false)
+    private Boolean scheduled;
+
+    @JsonProperty("cleanup_by")
+    @Column(name = "CLEANUP_BY", nullable = false)
+    private Date cleanupBy;
 
     @Override
     public Long getPid() {
@@ -248,19 +254,35 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
         this.status = status;
     }
 
-    public MetadataSegment getSegment() {
-        return segment;
-    }
-
-    public void setSegment(MetadataSegment segment) {
-        this.segment = segment;
-    }
-
     public String getPath() {
         return path;
     }
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Boolean getScheduled() {
+        return scheduled;
+    }
+
+    public void setScheduled(Boolean scheduled) {
+        this.scheduled = scheduled;
+    }
+
+    public Date getCleanupBy() {
+        return cleanupBy;
+    }
+
+    public void setCleanupBy(Date cleanupBy) {
+        this.cleanupBy = cleanupBy;
+    }
+
+    public String getSegmentName() {
+        return segmentName;
+    }
+
+    public void setSegmentName(String segmentName) {
+        this.segmentName = segmentName;
     }
 }
