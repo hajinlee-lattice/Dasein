@@ -47,10 +47,12 @@ public class AccountFileValidationService
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
+        boolean enableEntityMatchGA = accountFileValidationServiceConfiguration.isEnableEntityMatchGA();
         InterfaceName interfaceName = InterfaceName.AccountId;
-        if (enableEntityMatch) {
+        if (enableEntityMatch || enableEntityMatchGA) {
             interfaceName = InterfaceName.CustomerAccountId;
         }
+        boolean checkNull = !enableEntityMatch && enableEntityMatchGA;
 
         long errorLine = 0L;
         List<String> pathList = accountFileValidationServiceConfiguration.getPathList();
@@ -93,12 +95,22 @@ public class AccountFileValidationService
                                     boolean rowError = false;
                                     String id = getFieldValue(record, interfaceName.name());
                                     if (StringUtils.isEmpty(id)) {
-                                        id = getFieldValue(record, InterfaceName.Id.name());
+                                        id = getFieldValue(record, InterfaceName.AccountId.name());
                                     }
                                     if (StringUtils.isEmpty(id)) {
                                         log.info("Empty id is found from avro file");
-                                        dataFileWriter.append(record);
-                                        continue;
+                                        if (checkNull) {
+                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                            csvFilePrinter.printRecord(lineId, "", "AccountId / CustomerAccountId " +
+                                                    "cannot be NULL!");
+                                            rowError = true;
+                                            fileError = true;
+                                            errorInPath++;
+                                            errorLine++;
+                                        } else {
+                                            dataFileWriter.append(record);
+                                            continue;
+                                        }
                                     }
                                     for (Character c : invalidChars) {
                                         if (id.indexOf(c) != -1) {

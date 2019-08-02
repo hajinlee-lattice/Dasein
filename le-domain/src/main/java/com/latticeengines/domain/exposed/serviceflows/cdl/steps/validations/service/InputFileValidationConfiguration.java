@@ -23,6 +23,9 @@ public class InputFileValidationConfiguration {
     @JsonProperty("path_list")
     private List<String> pathList;
 
+    @JsonProperty("enable_entity_match_ga")
+    private boolean enableEntityMatchGA;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -39,4 +42,11 @@ public class InputFileValidationConfiguration {
         this.pathList = pathList;
     }
 
+    public boolean isEnableEntityMatchGA() {
+        return enableEntityMatchGA;
+    }
+
+    public void setEnableEntityMatchGA(boolean enableEntityMatchGA) {
+        this.enableEntityMatchGA = enableEntityMatchGA;
+    }
 }
