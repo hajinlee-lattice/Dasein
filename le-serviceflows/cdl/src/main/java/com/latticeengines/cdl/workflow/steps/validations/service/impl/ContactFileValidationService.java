@@ -44,10 +44,9 @@ public class ContactFileValidationService
     public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
             List<String> processedRecords) {
         // first check entity match
-        if (contactFileValidationServiceConfiguration.isEnableEntityMatch()) {
-            log.info("skip check as entity match is true");
-            return 0L;
-        }
+
+        boolean enableEntityMatch = contactFileValidationServiceConfiguration.isEnableEntityMatch();
+        boolean enableEntityMatchGA = contactFileValidationServiceConfiguration.isEnableEntityMatchGA();
 
         long errorLine = 0L;
         List<String> pathList = contactFileValidationServiceConfiguration.getPathList();
@@ -87,32 +86,8 @@ public class ContactFileValidationService
                                 // iterate through record in avro file
                                 for (GenericRecord record : reader) {
                                     boolean rowError = false;
-                                    String id = StringUtils
-                                            .isNotBlank(getFieldValue(record, InterfaceName.ContactId.name()))
-                                                    ? getFieldValue(record, InterfaceName.ContactId.name())
-                                                    : getFieldValue(record, InterfaceName.Id.name());
-                                    String accountId = getFieldValue(record, InterfaceName.AccountId.name());
-                                    String errorMessage = "";
-                                    if (StringUtils.isNotBlank(id)) {
-                                        boolean isIllegalContacId = invalidChars.stream()
-                                                .anyMatch(e -> id.indexOf(e) != -1);
-                                        if (isIllegalContacId == true) {
-                                            errorMessage += String.format(
-                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
-                                                    id);
-                                        }
-                                    }
-                                    if (StringUtils.isNotBlank(accountId)) {
-                                        boolean isIllegalAccountId = invalidChars.stream()
-                                                .anyMatch(e -> accountId.indexOf(e) != -1);
-                                        if (isIllegalAccountId == true) {
-                                            errorMessage += String.format(
-                                                    "Invalid character found \"/\" or \"&\" from attribute \"%s\".",
-                                                    accountId);
-                                        }
-                                    }
-
-                                    if (StringUtils.isNotBlank(errorMessage)) {
+                                    String errorMessage = checkId(record, enableEntityMatch, enableEntityMatchGA);
+                                    if (StringUtils.isNotEmpty(errorMessage)) {
                                         String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                         csvFilePrinter.printRecord(lineId, "", errorMessage);
                                         rowError = true;
@@ -120,22 +95,16 @@ public class ContactFileValidationService
                                         errorInPath++;
                                         errorLine++;
                                     }
-
-                                    String email = getFieldValue(record, InterfaceName.Email.name());
-                                    String firstName = getFieldValue(record, InterfaceName.FirstName.name());
-                                    String lastName = getFieldValue(record, InterfaceName.LastName.name());
-                                    String phone = getFieldValue(record, InterfaceName.PhoneNumber.name());
-                                    if (StringUtils.isBlank(id) && StringUtils.isBlank(email)
-                                            && (StringUtils.isBlank(firstName) || StringUtils.isBlank(lastName)
-                                                    || StringUtils.isBlank(phone))) {
-                                        String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                        String message = "The contact does not have sufficient information. The contact should have should have at least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
-                                        csvFilePrinter.printRecord(lineId, "", message);
-                                        rowError = true;
-                                        fileError = true;
-                                        errorInPath++;
-                                        errorLine++;
-                                        continue;
+                                    if (!rowError) {
+                                        errorMessage = checkMatchField(record, enableEntityMatch);
+                                        if (StringUtils.isNotEmpty(errorMessage)) {
+                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                            csvFilePrinter.printRecord(lineId, "", errorMessage);
+                                            rowError = true;
+                                            fileError = true;
+                                            errorInPath++;
+                                            errorLine++;
+                                        }
                                     }
                                     if (!rowError) {
                                         dataFileWriter.append(record);
@@ -182,6 +151,73 @@ public class ContactFileValidationService
             }
         }
         return errorLine;
+    }
+
+    private String checkId(GenericRecord record, boolean enableEntityMatch, boolean enableEntityMatchGA) {
+        if (record == null) {
+            return null;
+        }
+        boolean checkEmpty = !enableEntityMatch && enableEntityMatchGA;
+        String message = null;
+
+        String contactIdName = (enableEntityMatch || enableEntityMatchGA) ? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
+        String accountIdName = (enableEntityMatch || enableEntityMatchGA) ? InterfaceName.CustomerAccountId.name() :
+                InterfaceName.AccountId.name();
+        String contactId = getFieldValue(record, contactIdName);
+        String accountId = getFieldValue(record, accountIdName);
+        if (checkEmpty && StringUtils.isEmpty(contactId)) {
+            contactId = getFieldValue(record, InterfaceName.ContactId.name());
+            if (StringUtils.isEmpty(contactId)) {
+                message = "ContactId should not be empty!";
+                return message;
+            }
+        }
+        if (checkEmpty && StringUtils.isEmpty(accountId)) {
+            accountId = getFieldValue(record, InterfaceName.AccountId.name());
+            if (StringUtils.isEmpty(accountId)) {
+                message = "AccountId should not be empty!";
+                return message;
+            }
+        }
+        if (StringUtils.isNotEmpty(contactId)) {
+            String finalContactId = contactId;
+            if (invalidChars.stream().anyMatch(e -> finalContactId.indexOf(e) != -1)) {
+                message = String.format(
+                        "Invalid character found \"/\" or \"&\" from attribute \"%s\".", finalContactId);
+            }
+        }
+        if (StringUtils.isNotEmpty(accountId)) {
+            String finalAccountId = accountId;
+            if (invalidChars.stream().anyMatch(e -> finalAccountId.indexOf(e) != -1)) {
+                message = StringUtils.isEmpty(message) ? String.format(
+                        "Invalid character found \"/\" or \"&\" from attribute \"%s\".", finalAccountId) :
+                        message + String.format("Invalid character found \"/\" or \"&\" from attribute \"%s\".", finalAccountId);
+            }
+        }
+        return message;
+    }
+
+    private String checkMatchField(GenericRecord record, boolean enableEntityMatch) {
+        if (enableEntityMatch) {
+            return null;
+        }
+        String message = null;
+        String contactId = getFieldValue(record, InterfaceName.CustomerContactId.name());
+        if (StringUtils.isEmpty(contactId)) {
+            contactId = getFieldValue(record, InterfaceName.ContactId.name());
+        }
+        String email = getFieldValue(record, InterfaceName.Email.name());
+        String firstName = getFieldValue(record, InterfaceName.FirstName.name());
+        String lastName = getFieldValue(record, InterfaceName.LastName.name());
+        String phone = getFieldValue(record, InterfaceName.PhoneNumber.name());
+        if (StringUtils.isBlank(contactId) && StringUtils.isBlank(email)
+                && (StringUtils.isBlank(firstName) || StringUtils.isBlank(lastName)
+                || StringUtils.isBlank(phone))) {
+            message = "The contact does not have sufficient information. The contact should have should have at " +
+                    "least one of the three mentioned: 1. Contact ID  2. Email 3. First name + last name + phone";
+        }
+        return message;
     }
 
 }

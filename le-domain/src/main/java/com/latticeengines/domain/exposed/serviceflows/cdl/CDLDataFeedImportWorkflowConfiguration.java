@@ -99,9 +99,11 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         // special case for entity match
-        public Builder fileValidation(BusinessEntity businessEntity, boolean enableEntityMatch) {
+        public Builder fileValidation(BusinessEntity businessEntity, boolean enableEntityMatch,
+                                      boolean enableEntityMatchGA) {
             inputFileValidatorConfiguration.setEntity(businessEntity);
             inputFileValidatorConfiguration.setEnableEntityMatch(enableEntityMatch);
+            inputFileValidatorConfiguration.setEnableEntityMatchGA(enableEntityMatchGA);
             return this;
         }
 

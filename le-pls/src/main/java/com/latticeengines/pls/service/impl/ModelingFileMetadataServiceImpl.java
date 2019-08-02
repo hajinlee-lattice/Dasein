@@ -135,8 +135,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
-        Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), enableEntityMatch,
-                enableEntityMatchGA);
+        Table table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                batonService.isEntityMatchEnabled(customerSpace));
         FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
         generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true);
         FieldMappingDocument resultDocument;
@@ -525,7 +525,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         if (dataFeedTask == null) {
-            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), enableEntityMatch, enableEntityMatchGA);
+            table = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                    batonService.isEntityMatchEnabled(customerSpace));
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
             EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
         } else {
@@ -535,8 +536,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
             }
         }
-        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), enableEntityMatch,
-                enableEntityMatchGA);
+        schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+                batonService.isEntityMatchEnabled(customerSpace));
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
     }
 
