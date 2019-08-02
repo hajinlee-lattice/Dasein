@@ -71,9 +71,11 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         boolean enableEntityMatch = configuration.isEnableEntityMatch();
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
                 String.valueOf(enableEntityMatch)));
+        boolean enableEntityMatchGA = configuration.isEnableEntityMatchGA();
         // errorLine is used to count number of error found in this step
         long errorLine;
-        InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList, enableEntityMatch);
+        InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
+                enableEntityMatch, enableEntityMatchGA);
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
@@ -117,25 +119,28 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
     }
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
-            boolean enableEntityMatch) {
+            boolean enableEntityMatch, boolean enableEntityMatchGA) {
         switch (entity) {
         case Account:
             AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
             accountConfig.setEntity(entity);
             accountConfig.setPathList(pathList);
             accountConfig.setEnableEntityMatch(enableEntityMatch);
+            accountConfig.setEnableEntityMatchGA(enableEntityMatchGA);
             return accountConfig;
         case Contact:
             ContactFileValidationConfiguration contactConfig = new ContactFileValidationConfiguration();
             contactConfig.setEntity(entity);
             contactConfig.setPathList(pathList);
             contactConfig.setEnableEntityMatch(enableEntityMatch);
+            contactConfig.setEnableEntityMatchGA(enableEntityMatchGA);
             return contactConfig;
         case Product:
             ProductFileValidationConfiguration productConfig = new ProductFileValidationConfiguration();
             productConfig.setCustomerSpace(configuration.getCustomerSpace());
             productConfig.setEntity(entity);
             productConfig.setPathList(pathList);
+            productConfig.setEnableEntityMatchGA(enableEntityMatchGA);
             return productConfig;
         default:
             return null;

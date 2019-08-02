@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -62,10 +63,11 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("CDLDataFeedImport WorkflowJob created for customer=%s with pid=%s", customerSpace,
                 pidWrapper.getPid()));
         Action action = registerAction(customerSpace, dataFeedTask, csvImportFileInfo, pidWrapper.getPid());
-        boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
+        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
                 connectorConfig, csvImportFileInfo, prepareImportConfig, action.getPid(),
-                s3ImportEmail, emailInfo, enableEntityMatch);
+                s3ImportEmail, emailInfo, enableEntityMatch, enableEntityMatchGA);
 
         ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return appId;
@@ -135,8 +137,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo, PrepareImportConfiguration prepareImportConfig,
-            @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo, boolean enableEntityMatch) {
+                DataFeedTask dataFeedTask, String connectorConfig, CSVImportFileInfo csvImportFileInfo, PrepareImportConfiguration prepareImportConfig,
+                @NonNull Long actionPid, boolean s3ImportEmail, S3ImportEmailInfo emailInfo, boolean enableEntityMatch,
+                boolean enableEntityMatchGA) {
         String filePath = "";
         if (StringUtils.isNotEmpty(csvImportFileInfo.getReportFilePath())) {
             filePath = csvImportFileInfo.getReportFilePath();
@@ -152,7 +155,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
-                .fileValidation(entity, enableEntityMatch) //
+                .fileValidation(entity, enableEntityMatch, enableEntityMatchGA) //
                 .importConfig(connectorConfig) //
                 .userId(csvImportFileInfo.getFileUploadInitiator()) //
                 .prepareImportConfig(prepareImportConfig)

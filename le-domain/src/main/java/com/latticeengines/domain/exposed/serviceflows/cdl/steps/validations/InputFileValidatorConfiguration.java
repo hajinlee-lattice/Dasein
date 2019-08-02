@@ -11,6 +11,9 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
     @JsonProperty("enable_entity_match")
     private boolean enableEntityMatch;
 
+    @JsonProperty("enable_entity_match_ga")
+    private boolean enableEntityMatchGA;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -27,4 +30,11 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
         this.enableEntityMatch = enableEntityMatch;
     }
 
+    public boolean isEnableEntityMatchGA() {
+        return enableEntityMatchGA;
+    }
+
+    public void setEnableEntityMatchGA(boolean enableEntityMatchGA) {
+        this.enableEntityMatchGA = enableEntityMatchGA;
+    }
 }
