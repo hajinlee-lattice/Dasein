@@ -84,6 +84,10 @@ const Queries = {
                     externalId
                     authId
                   }
+                  configValues {
+                    externalId
+                    value
+                  }
                 }
               }
             }

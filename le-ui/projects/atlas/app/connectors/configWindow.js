@@ -125,7 +125,9 @@ export const openConfigWindow = () => {
         let observer = new Observer(
             response => {
                 if (response.data) {
+                    console.log(response.data);
                     var authValues = response.data.solutionInstance.authValues;
+                    var configValues = response.data.solutionInstance.configValues;
                     var authenticationExternalId = "external_" + solutionInstanceConfig.orgType.toLowerCase() + "_authentication";
                     console.log(authenticationExternalId);
                     var externalAuthentication = authValues.filter(function(authValue) {
@@ -140,7 +142,7 @@ export const openConfigWindow = () => {
                         return authValue.externalId == "external_http_client_authentication";
                     });
 
-                    registerLookupIdMap(trayAuthenticationId, authentication[0].node.name, getLookupIdMapConfiguration(authentication[0]));
+                    registerLookupIdMap(trayAuthenticationId, authentication[0].node.name, getLookupIdMapConfiguration(authentication[0], configValues));
                     if (solutionInstanceConfig.orgType == LINKEDIN || solutionInstanceConfig.orgType == FACEBOOK) {
                         updateSolutionInstance(response.data.solutionInstance.id, response.data.solutionInstance.name, {externalId: "external_http_client_authentication", authId: trayAuthenticationId});
                     } else {
@@ -178,6 +180,7 @@ export const openConfigWindow = () => {
         var lookupIdMap = {
             orgId: lookupIdMapConfiguration.orgId,
             orgName: lookupIdMapConfiguration.orgName,
+            accountId: lookupIdMapConfiguration.accountId || null,
             externalSystemType: "MAP",
             externalSystemName: solutionInstanceConfig.orgType,
             externalAuthentication: {
@@ -283,7 +286,7 @@ export const openConfigWindow = () => {
         return obj === Object(obj) && Object.entries(obj).length === 0;
     }
 
-    function getLookupIdMapConfiguration(authentication) {
+    function getLookupIdMapConfiguration(authentication, configValues) {
         var trayAuthenticationName = authentication && authentication.node ? authentication.node.name : solutionInstanceConfig.orgType + '_' + (new Date()).getTime();
         switch (solutionInstanceConfig.orgType) {
             case MARKETO:
@@ -294,6 +297,14 @@ export const openConfigWindow = () => {
                 };
             case LINKEDIN:
             case FACEBOOK:
+                var externalAdAccount = configValues.filter(function(configValue) {
+                    return configValue.externalId == "external_ad_account";
+                });
+                var adAccount = externalAdAccount.length > 0 ? externalAdAccount[0].value.replace(/['"]+/g, '') : guidGenerator();
+                return {
+                    orgId: adAccount,
+                    orgName: trayAuthenticationName
+                }
             default:
                 return {
                     orgId: guidGenerator(),
