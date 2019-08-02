@@ -115,6 +115,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
 
+    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
 
@@ -256,7 +258,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private List<SchedulingPAQueue> initQueue(SystemStatus systemStatus, List<TenantActivity> tenantActivityList) {
-        SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
         return SchedulingPAUtil.initQueue(schedulingPATimeClock, systemStatus, tenantActivityList);
     }
 
@@ -312,7 +313,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private boolean retryProcessAnalyze(DataFeedExecution execution, String tenantId) {
-        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))) {
+        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus())) && checkRetryPendingTime(execution.getUpdated().getTime())) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
             } else {
@@ -471,6 +472,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Unable to check datacloud refresh for tenant {}. Error = {}", tenant.getId(), e);
         }
         return false;
+    }
+
+    private boolean checkRetryPendingTime(long lastFinishedTime) {
+        return lastFinishedTime - (schedulingPATimeClock.getCurrentTime() - 6*7*24*3600000L) > 0;
     }
 
     private String getSchedulingGroup(String schedulerName) {
