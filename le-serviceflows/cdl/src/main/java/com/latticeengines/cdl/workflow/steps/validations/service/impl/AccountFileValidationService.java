@@ -101,8 +101,7 @@ public class AccountFileValidationService
                                         log.info("Empty id is found from avro file");
                                         if (checkNull) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                            csvFilePrinter.printRecord(lineId, "", "AccountId / CustomerAccountId " +
-                                                    "cannot be NULL!");
+                                            csvFilePrinter.printRecord(lineId, "", "AccountId cannot be empty!");
                                             rowError = true;
                                             fileError = true;
                                             errorInPath++;

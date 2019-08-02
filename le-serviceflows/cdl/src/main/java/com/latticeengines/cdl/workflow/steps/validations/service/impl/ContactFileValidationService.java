@@ -169,14 +169,14 @@ public class ContactFileValidationService
         if (checkEmpty && StringUtils.isEmpty(contactId)) {
             contactId = getFieldValue(record, InterfaceName.ContactId.name());
             if (StringUtils.isEmpty(contactId)) {
-                message = "ContactId / CustomerContactId should not be empty!";
+                message = "ContactId should not be empty!";
                 return message;
             }
         }
         if (checkEmpty && StringUtils.isEmpty(accountId)) {
             accountId = getFieldValue(record, InterfaceName.AccountId.name());
             if (StringUtils.isEmpty(accountId)) {
-                message = "AccountId / CustomerAccountId should not be empty!";
+                message = "AccountId should not be empty!";
                 return message;
             }
         }
