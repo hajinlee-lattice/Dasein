@@ -25,7 +25,9 @@ export default class SummaryBox extends Component {
 					<div className="title">
 						{this.props.name}
 						<p className="asidecount pull-right">
-							{this.getValueWithComma(this.props.asidecount)}
+							{this.props.asidename
+								? this.getValueWithComma(this.props.asidecount)
+								: ""}
 						</p>
 					</div>
 					<div className="count">

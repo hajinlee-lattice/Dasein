@@ -209,12 +209,12 @@ export default class MultipleTemplatesList extends Component {
 				{
 					name: "ImportSystem.system_type",
 					displayName: "System",
-					sortable: false
+					sortable: true
 				},
 				{
 					name: "Object",
 					displayName: "Object",
-					sortable: false
+					sortable: true
 				},
 				{
 					name: "Path",
