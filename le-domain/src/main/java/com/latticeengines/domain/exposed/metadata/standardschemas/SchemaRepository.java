@@ -1532,7 +1532,7 @@ public class SchemaRepository {
             attrs.add(accountCompanyName);
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
-        } else if (schema == SchemaInterpretation.Account) {
+        } else if (schema == SchemaInterpretation.Account || schema == SchemaInterpretation.ModelAccount) {
             attrs.addAll(
                     Arrays.asList(website, accountCompanyName, duns, city, state, country, postalCode, phoneNumber));
             attrs.addAll(Arrays.asList(address1, address2));
