@@ -65,9 +65,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
-        masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                inactive);
+        masterTableName = ensureInactiveBatchStoreExists();
         if (StringUtils.isBlank(masterTableName)) {
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
