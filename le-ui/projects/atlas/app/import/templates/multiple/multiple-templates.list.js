@@ -295,26 +295,37 @@ export default class MultipleTemplatesList extends Component {
 				},
 				{
 					colSpan: 4,
+					onlyTemplate: true,
 					template: cell => {
 						if (cell.props.rowData.Exist) {
 							return (
-								<CopyComponent
-									title="Copy Link"
-									data={
-										cell.props.rowData[cell.props.colName]
-									}
-									callback={() => {
-										messageService.sendMessage(
-											new Message(
-												null,
-												NOTIFICATION,
-												"success",
-												"",
-												"Copied to Clipboard"
-											)
-										);
-									}}
-								/>
+								<div>
+									<span className={"path-value"}>
+										{cell.props.rowData[cell.props.colName]}
+									</span>
+									<div className={"path-copy"}>
+										<CopyComponent
+											title="Copy Link"
+											showData={true}
+											data={
+												cell.props.rowData[
+													cell.props.colName
+												]
+											}
+											callback={() => {
+												messageService.sendMessage(
+													new Message(
+														null,
+														NOTIFICATION,
+														"success",
+														"",
+														"Copied to Clipboard"
+													)
+												);
+											}}
+										/>
+									</div>
+								</div>
 							);
 						} else {
 							return null;

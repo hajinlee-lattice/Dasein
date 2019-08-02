@@ -1,107 +1,166 @@
 // @import "common/widgets/layout/layout.scss";
 @import "common/widgets/colors.scss";
+
 .multitemplates-toolbar {
-  overflow: hidden;
-  .manage-priorities{
-    margin-right: 6px;
-  }
+	overflow: hidden;
+	.manage-priorities {
+		margin-right: 6px;
+	}
 }
+// multiple-templates
+
 .multiple-templates {
-  .no-name {
-    color: gray;
-  }
-  .cell-error {
-    background-color: $ruby;
-  }
-  .disabled-error {
-    pointer-events: all;
-    background-color: $orange-text;
-  }
-  .menu-content {
-    margin-left: -134px;
-    margin-top: 24px;
-  }
-  .le-cell-template > div {
-    width: 100%;
-  }
-  .le-menu {
-    float: right;
-    .menu-container {
-      padding: 0.5em 1em;
-    }
-  }
-  .le-table-cell {
-    display: flex;
-    overflow: inherit;
-    .actions {
-      flex: 1;
-    }
-    &.Path {
-      display: flex;
-      flex-wrap: nowrap;
-    }
-    &.LastEditedDate {
-      display: flex;
-    }
-  }
-  .le-table-row > .le-table-cell > .le-cell-template {
-    flex: 1;
-    .le-blu-link {
-      .le-link {
-        border-bottom: 0px solid white;
-        color: none;
-      }
-      color: $blue-text;
-      justify-content: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+	// margin-top: 1.5em;
+	.no-name {
+		color: gray;
+	}
+	.cell-error {
+		background-color: $ruby;
+	}
+	.disabled-error {
+		pointer-events: all;
+		background-color: $orange-text;
+	}
+	.menu-content {
+		margin-left: -134px;
+		margin-top: 24px;
+	}
+	.le-cell-template {
+		& > div {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		& > .edit-container {
+			justify-content: normal;
+			.edit-control {
+				display: none;
+			}
+		}
+		& .path-value {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		& .path-copy {
+			display: none;
+		}
+	}
 
-      &.edit-button > .wrapper,
-      &.import-button > .wrapper {
-        width: 100%;
-        text-align: center;
-      }
-    }
-    .le-copy-controlls {
-      display: none;
-      width: 0px;
-    }
-  }
+	.le-menu {
+		float: right;
+		.menu-container {
+			padding: 0.5em 1em;
+			&:hover {
+				background-color: #2b5f96;
+				box-shadow: none;
+			}
+		}
+	}
+	.le-table-cell {
+		display: block;
+		overflow: inherit;
+		.actions {
+			flex: 1;
+		}
+	}
+	.le-table-row > .le-table-cell > .le-cell-template {
+		flex: 1;
+		.le-blu-link {
+			.le-link {
+				border-bottom: 0px solid white;
+				color: none;
+			}
+			color: $blue-text;
+			justify-content: center;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 
-  .le-table-row:hover {
-    & > .le-table-cell > * {
-      color: $pearl-white;
-    }
-    & > .le-table-cell {
-      .no-name {
-        color: $pearl-white;
-      }
-      .fa.play-pause {
-        border-color: rgba(255, 255, 255, 0.5);
-      }
-      .le-blu-link {
-        color: $pearl-white;
+			&.edit-button > .wrapper,
+			&.import-button > .wrapper {
+				width: 100%;
+				text-align: center;
+			}
+		}
+		.le-copy-controlls {
+			display: none;
+			width: 0px;
+		}
+	}
+	.le-table-row {
+		min-height: 55px;
+		align-items: center;
+	}
+	.le-table-row:hover {
+		& > .le-table-cell > * {
+			color: $pearl-white;
+		}
+		& > .le-table-cell {
+			.no-name {
+				color: $pearl-white;
+			}
+			.fa.play-pause {
+				border-color: rgba(255, 255, 255, 0.5);
+			}
+			.le-blu-link {
+				color: $pearl-white;
 
-        & > .wrapper {
-          border: 1px solid $pearl-white;
-          border-radius: 6px;
-          .le-link {
-            color: $pearl-white;
-          }
-        }
-      }
-    }
-   
-    & > .le-table-cell > .le-cell-template {
-      & > div{
-        display: flex;
-      }
-      & > .le-copy-controlls {
-        display: inline-flex;
-        color: $pearl-white;
-        width: 100%;
-      }
-    }
-  }
+				& > .wrapper {
+					border: 1px solid $pearl-white;
+					border-radius: 6px;
+					.le-link {
+						color: $pearl-white;
+					}
+				}
+			}
+		}
+		& > .le-table-cell > .le-cell-template {
+			& .edit-control {
+				display: flex;
+			}
+			& .le-copy-controlls {
+				display: inline-flex;
+				color: $pearl-white;
+				width: 100%;
+			}
+			& .path-value {
+				display: none;
+			}
+			& .path-copy {
+				display: initial;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+	}
+	.indicator-row {
+		display: inline-flex;
+	}
+}
+
+.templates {
+	.unstyled {
+		margin-left: 6px;
+		display: inline-block;
+	}
+}
+
+.fa.play-pause {
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 50%;
+	&:hover {
+		cursor: pointer;
+	}
+	&.fa-play {
+		border-color: gray;
+		padding: 8px 8px 7px 10px;
+	}
+	&.fa-pause {
+		border-color: green;
+		padding: 8px 8px 7px 8px;
+	}
 }
