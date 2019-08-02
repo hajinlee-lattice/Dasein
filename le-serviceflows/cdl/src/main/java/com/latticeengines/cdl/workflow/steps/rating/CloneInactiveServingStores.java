@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -29,10 +30,13 @@ public class CloneInactiveServingStores extends BaseWorkflowStep<GenerateRatingS
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         cloneTableService.setActiveVersion(active);
         cloneTableService.setCustomerSpace(customerSpace);
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         Arrays.stream(BusinessEntity.values()).forEach(entity -> {
-            TableRoleInCollection servingStore = entity.getServingStore();
-            if (servingStore != null) {
-                cloneTableService.linkInactiveTable(servingStore);
+            if (resetEntities == null || !resetEntities.contains(entity)) {
+                TableRoleInCollection servingStore = entity.getServingStore();
+                if (servingStore != null) {
+                    cloneTableService.linkInactiveTable(servingStore);
+                }
             }
         });
     }
