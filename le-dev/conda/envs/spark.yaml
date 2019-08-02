@@ -1,4 +1,4 @@
-name: leds
+name: spark
 channels:
   - anaconda
   - conda-forge
