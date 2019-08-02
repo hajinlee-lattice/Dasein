@@ -187,7 +187,7 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<PlayLaunchChannel> getAllScheduledChannels() {
+    public List<PlayLaunchChannel> getAllValidScheduledChannels() {
         List<PlayLaunchChannel> channels = readerRepository.findAlwaysOnChannelsByNextScheduledTime(true,
                 new Date(Long.MIN_VALUE), DateUtils.addMinutes(new Date(), 15));
         channels.forEach(c -> {
