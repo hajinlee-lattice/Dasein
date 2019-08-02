@@ -95,20 +95,16 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
     @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 2700000)
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
-        try {
-            Pair<String, String> s3ConnectorTmpPath = setupTmpDir();
-            cleanup();
-            setupHdfs();
-            MultiTenantContext.setTenant(tenant1);
-            log.info("Wait for 900 seconds to download model summary");
-            waitToDownloadModel(ORIGINAL_MODELID);
-            setupTables();
-            testModelCopy();
-            cleanup();
-            cleanupTmpDir(s3ConnectorTmpPath);
-        } catch (Exception e) {
-            log.error("Unexpected exception happened:", e);
-        }
+        Pair<String, String> s3ConnectorTmpPath = setupTmpDir();
+        cleanup();
+        setupHdfs();
+        MultiTenantContext.setTenant(tenant1);
+        log.info("Wait for 900 seconds to download model summary");
+        waitToDownloadModel(ORIGINAL_MODELID);
+        setupTables();
+        testModelCopy();
+        cleanup();
+        cleanupTmpDir(s3ConnectorTmpPath);
     }
 
     /*
@@ -164,7 +160,12 @@ public class ModelCopyServiceDeploymentTestNG extends LPDeploymentTestNGBase {
 
         ModelSummary model = modelSummaryService.getModelSummaryByModelId(ORIGINAL_MODELID);
         if (model != null) {
-            modelSummaryService.delete(model);
+            Tenant tenant = model.getTenant();
+            if (tenant != null) {
+                // make sure model summary has tenant
+                MultiTenantContext.setTenant(tenant);
+                modelSummaryService.delete(model);
+            }
         }
     }
 
