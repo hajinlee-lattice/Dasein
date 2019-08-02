@@ -46,7 +46,7 @@ public final class ScalingUtils {
 
     public static double getTableSizeInGb(Configuration configuration, Table table) {
         double totalSize = 0.;
-        if (CollectionUtils.isNotEmpty(table.getExtracts())) {
+        if (table != null && CollectionUtils.isNotEmpty(table.getExtracts())) {
             for (Extract extract: table.getExtracts()) {
                 String path = extract.getPath();
                 double extractSize = getHdfsPathSizeInGb(configuration, path);
