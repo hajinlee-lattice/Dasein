@@ -49,7 +49,7 @@ fi
 ${ANACONDA_HOME}/bin/conda update -n base -c defaults conda
 
 CONDA_ENVS_DIR=${WSHOME}//le-dev/conda/envs
-for envname in 'p2' 'leds'
+for envname in 'p2' 'spark'
     do
         if [[ -d ${ANACONDA_HOME}/envs/$envname ]]; then
             echo "Removing existing Anaconda environment: $envname"
@@ -63,8 +63,8 @@ source ${ANACONDA_HOME}/bin/activate p2
 pip install -r $WSHOME/le-dev/scripts/requirements.txt
 source ${ANACONDA_HOME}/bin/deactivate
 
-source ${ANACONDA_HOME}/bin/activate leds
+source ${ANACONDA_HOME}/bin/activate spark
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/leds/lib/python3.7/site-packages/sparkmagic/kernels/sparkkernel
-jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/leds/lib/python3.7/site-packages/sparkmagic/kernels/pysparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/sparkkernel
+jupyter-kernelspec install --user ${ANACONDA_HOME}/envs/spark/lib/python3.7/site-packages/sparkmagic/kernels/pysparkkernel
 source ${ANACONDA_HOME}/bin/deactivate
