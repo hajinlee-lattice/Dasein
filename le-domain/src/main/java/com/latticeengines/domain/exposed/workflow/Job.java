@@ -350,6 +350,7 @@ public class Job implements HasId<Long>, HasName {
     public static class SchedulingInfo {
         private boolean schedulerEnabled;
         private boolean scheduled;
+        private String message;
 
         public SchedulingInfo() {
         }
@@ -373,6 +374,14 @@ public class Job implements HasId<Long>, HasName {
 
         public boolean isScheduled() {
             return scheduled;
+        }
+
+        public String getMessage() {
+            return message == null ? "" : message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
         }
     }
 }
