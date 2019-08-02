@@ -13,7 +13,12 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("playLaunchWorkflowListener")
@@ -24,6 +29,14 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
     @Inject
     private Configuration yarnConfiguration;
 
+    @Inject
+    private PlayProxy playProxy;
+
+    private String customerSpace;
+
+    @Inject
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
 
@@ -31,7 +44,19 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
 
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
-        cleanupIntermediateFiles(jobExecution);
+        try {
+            if (jobExecution.getStatus().isUnsuccessful()) {
+                WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+                customerSpace = job.getTenant().getId();
+                String playName = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
+                String playLaunchId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID);
+                log.warn(String.format("CampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
+                        playLaunchId, playName, customerSpace));
+                playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+            }
+        } finally {
+            cleanupIntermediateFiles(jobExecution);
+        }
     }
 
     private void cleanupIntermediateFiles(JobExecution jobExecution) {

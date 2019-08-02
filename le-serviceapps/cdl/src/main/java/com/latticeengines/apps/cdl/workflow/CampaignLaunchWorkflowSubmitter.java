@@ -47,7 +47,8 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId submit(PlayLaunch playLaunch) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignLaunchWorkflow");
-
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID, playLaunch.getLaunchId());
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
 
