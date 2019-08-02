@@ -11,7 +11,9 @@ public class MetadataSegmentExportConverter {
         }
         AtlasExport atlasExport = new AtlasExport();
         atlasExport.setUuid(metadataSegmentExport.getExportId());
-        atlasExport.setSegment(metadataSegmentExport.getSegment());
+        if (metadataSegmentExport.getSegment() != null) {
+            atlasExport.setSegmentName(metadataSegmentExport.getSegment().getName());
+        }
         atlasExport.setTenant(metadataSegmentExport.getTenant());
         atlasExport.setCreatedBy(metadataSegmentExport.getCreatedBy());
         atlasExport.setAccountFrontEndRestriction(metadataSegmentExport.getAccountFrontEndRestriction());
@@ -32,7 +34,6 @@ public class MetadataSegmentExportConverter {
         metadataSegmentExport.setExportId(atlasExport.getUuid());
         metadataSegmentExport.setTenant(atlasExport.getTenant());
         metadataSegmentExport.setTenantId(atlasExport.getTenantId());
-        metadataSegmentExport.setSegment(atlasExport.getSegment());
         metadataSegmentExport.setType(atlasExport.getExportType());
         metadataSegmentExport.setApplicationId(atlasExport.getApplicationId());
         metadataSegmentExport.setAccountFrontEndRestriction(atlasExport.getAccountFrontEndRestriction());
