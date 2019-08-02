@@ -196,20 +196,20 @@ export default class MultipleTemplatesList extends Component {
 					displayName: "Active",
 					sortable: false
 				},
-				// {
-				// 	name: "ImportSystem.priority",
-				// 	displayName: "Priority",
-				// 	sortable: false
-				// },
 				{
-					name: "SystemName",
+					name: "ImportSystem.priority",
+					displayName: "Priority",
+					sortable: true
+				},
+				{
+					name: "ImportSystem.display_name",
 					displayName: "System Name",
-					sortable: false
+					sortable: true
 				},
 				{
 					name: "ImportSystem.system_type",
 					displayName: "System",
-					sortable: true
+					sortable: false
 				},
 				{
 					name: "Object",
@@ -254,9 +254,9 @@ export default class MultipleTemplatesList extends Component {
 						}
 					}
 				},
-				// {
-				// 	colSpan: 1
-				// },
+				{
+					colSpan: 1
+				},
 				{
 					colSpan: 2,
 					onlyTemplate: true,
@@ -294,7 +294,7 @@ export default class MultipleTemplatesList extends Component {
 					colSpan: 1
 				},
 				{
-					colSpan: 4,
+					colSpan: 3,
 					onlyTemplate: true,
 					template: cell => {
 						if (cell.props.rowData.Exist) {
