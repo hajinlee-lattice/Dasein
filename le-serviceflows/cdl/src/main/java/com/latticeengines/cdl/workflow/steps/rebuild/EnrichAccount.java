@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -31,11 +29,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Ma
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -56,9 +52,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private CloneTableService cloneTableService;
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
@@ -82,24 +75,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
         } else {
 
-            DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-
-            TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
-            masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                    inactive);
-            if (StringUtils.isBlank(masterTableName)) {
-                masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                        active);
-                if (StringUtils.isNotBlank(masterTableName)) {
-                    log.info("Found the batch store in active version " + active + ": " + masterTableName);
-                    cloneTableService.setActiveVersion(active);
-                    cloneTableService.setCustomerSpace(customerSpace);
-                    cloneTableService.linkInactiveTable(batchStore);
-                }
-            } else {
-                log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
-            }
+            masterTableName = ensureInactiveBatchStoreExists();
             if (StringUtils.isBlank(masterTableName)) {
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
