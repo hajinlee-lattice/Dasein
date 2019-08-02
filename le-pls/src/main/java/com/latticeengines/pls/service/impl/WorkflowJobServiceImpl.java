@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -74,6 +75,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     static final String ORPHAN_JOB_TYPE = "orphanRecordsExportWorkflow";
     static final String ORPHAN_ARTIFACT_EXPIRED = "ORPHAN_ARTIFACT_EXPIRED";
 
+    private static final String SCHEDULED_MESSAGE = "Scheduled";
     public static final String CDLNote = "Scheduled at %s.";
     // Special workflow id for unstarted ProcessAnalyze workflow
     public static final Long UNSTARTED_PROCESS_ANALYZE_ID = 0L;
@@ -458,13 +460,19 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (schedulingStatus.getDataFeed() != null) {
             scheduleNowClicked = Boolean.TRUE.equals(schedulingStatus.getDataFeed().isScheduleNow());
         }
-        // currently only consider schedule now
+        boolean paRunning = schedulingStatus.getDataFeed() != null
+                && schedulingStatus.getDataFeed().getStatus() == DataFeed.Status.ProcessAnalyzing;
+        log.info("Tenant = {}, schedulerEnabled = {}, scheduleNowClicked = {}, paRunning = {}",
+                customerSpace.toString(), schedulingStatus.isSchedulerEnabled(), scheduleNowClicked, paRunning);
+        // currently only consider schedule now & pa not running
         boolean tenantScheduled = schedulingStatus.isSchedulerEnabled() && scheduleNowClicked;
         job.setSchedulingInfo(new Job.SchedulingInfo(schedulingStatus.isSchedulerEnabled(), tenantScheduled));
 
-        // change the job status for scheduled tenant
-        if (tenantScheduled) {
+        // change the job status for scheduled tenant (when job is running, status
+        // should be ready)
+        if (tenantScheduled && !paRunning) {
             job.setJobStatus(JobStatus.PENDING);
+            job.getSchedulingInfo().setMessage(SCHEDULED_MESSAGE);
         }
     }
 
