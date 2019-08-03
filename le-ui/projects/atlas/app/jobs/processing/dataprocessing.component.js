@@ -153,6 +153,21 @@ angular.module('lp.jobs.import', [
             return isOneRunning;
         }
 
+        function isOneScheduled() { 
+            let isOneScheduled = false;
+            for (let i = 0; i < vm.jobs.length; i++) { 
+                if (
+                    vm.jobs[i].jobStatus === "Running" ||
+                    vm.jobs[i].jobStatus === "Pending" ||
+                    (vm.jobs[i].schedulingInfo && vm.jobs[i].schedulingInfo.scheduled == true)
+                ) {
+                    isOneScheduled = true;
+                    return isOneScheduled;
+				}
+            }
+            return isOneScheduled;
+        }
+
         vm.isLastOneFailed = function(){
             return isLastOneFailed();
         };
@@ -166,6 +181,14 @@ angular.module('lp.jobs.import', [
             }
             return canRun;
         };
+        vm.canLastBeScheduled = () => { 
+            // let canSchedule = false;
+            let oneSchedule = isOneScheduled();
+            if (!oneSchedule) {
+                return true;
+            }
+            return false;
+        }
 
         vm.clearMessages = function () {
             vm.successMsg = null;
