@@ -1,18 +1,25 @@
 package com.latticeengines.apps.lp.qbean;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
+import org.apache.hadoop.yarn.api.records.NodeReport;
+import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -36,12 +43,22 @@ public class EMRScalingRunnable implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(EMRScalingRunnable.class);
 
     private static final int MAX_SCALE_IN_SIZE = 8;
+    private static final int MAX_SCALE_IN_ATTEMPTS = 3;
+    private static final int MAX_SCALE_OUT_ATTEMPTS = 5;
     private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
     private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
-    private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(50);
+    private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(40);
+    private static final long SLOW_DECOMMISSION_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
     private static final ConcurrentMap<String, AtomicLong> lastScalingOutMap = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, AtomicInteger> scalingDownAttemptMap = new ConcurrentHashMap<>();
+
+
+    // each cluster has a PQ<(target, attempts)> ordered by target.
+    private static final ConcurrentMap<String, PriorityQueue<Pair<Integer, Integer>>> scalingInAttemptMap //
+            = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, PriorityQueue<Pair<Integer, Integer>>> scalingOutAttemptMap //
+            = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Long> decommissionTimeMap = new ConcurrentHashMap<>();
 
     private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
             Sets.newEnumSet(Arrays.asList(//
@@ -49,15 +66,6 @@ public class EMRScalingRunnable implements Runnable {
                     YarnApplicationState.NEW_SAVING, //
                     YarnApplicationState.SUBMITTED, //
                     YarnApplicationState.ACCEPTED //
-            ), YarnApplicationState.class);
-
-    private static final EnumSet<YarnApplicationState> ACTIVE_APP_STATES = //
-            Sets.newEnumSet(Arrays.asList(//
-                    YarnApplicationState.NEW, //
-                    YarnApplicationState.NEW_SAVING, //
-                    YarnApplicationState.SUBMITTED, //
-                    YarnApplicationState.ACCEPTED, //
-                    YarnApplicationState.RUNNING
             ), YarnApplicationState.class);
 
     private long coreMb;
@@ -71,7 +79,6 @@ public class EMRScalingRunnable implements Runnable {
     private final String clusterId;
     private final EMRService emrService;
     private final EMREnvService emrEnvService;
-    private final int minTaskNodes;
     private final int maxTaskCoreRatio;
     private ClusterMetrics metrics = new ClusterMetrics();
     private ReqResource reqResource = new ReqResource();
@@ -81,10 +88,9 @@ public class EMRScalingRunnable implements Runnable {
     private InstanceFleet taskFleet;
     private InstanceFleet coreFleet;
 
-    EMRScalingRunnable(String emrCluster, String clusterId, int minTaskNodes, int maxTaskCoreRatio, //
+    EMRScalingRunnable(String emrCluster, String clusterId, int maxTaskCoreRatio, //
                        EMRService emrService, EMREnvService emrEnvService) {
         this.emrCluster = emrCluster;
-        this.minTaskNodes = minTaskNodes;
         this.maxTaskCoreRatio = maxTaskCoreRatio;
         this.emrService = emrService;
         this.emrEnvService = emrEnvService;
@@ -122,15 +128,15 @@ public class EMRScalingRunnable implements Runnable {
         }
         log.debug(String.format("taskMb=%d, taskVCores=%d", taskMb, taskVCores));
 
-        // -512 mb and -1 vcore to avoid flapping scaling out/in
-        // when available resource is right at the threshold
-        minAvailMemMb = minTaskNodes * taskMb - 512;
-        minAvailVCores = minTaskNodes * taskVCores - 1;
+        // always available free resource, until maxed out: 25% core nodes
+        minAvailMemMb = getStaticMemBuffer();
+        minAvailVCores = getStaticVCoreBuffer();
 
         if (needToScale()) {
             attemptScale();
         } else {
             resetScaleInCounter();
+            resetScaleOutCounter();
         }
 
         metrics = new ClusterMetrics();
@@ -160,7 +166,8 @@ public class EMRScalingRunnable implements Runnable {
             // low vcores
             log.info(scaleLogPrefix + "available vcores " + availableVCores + " is not enough.");
             scale = true;
-        } else if (availableMB >= getMaxAvailMemMb() && availableVCores >= getMaxAvailVCores()) {
+        } else if (availableMB >= 3 * minAvailMemMb && availableVCores >= 3 * minAvailVCores //
+                && running > 1) {
             // too much mem and vcores
             log.info(scaleLogPrefix + "available mb " + availableMB + " and vcores " //
                     + availableVCores + " are both too high.");
@@ -181,35 +188,66 @@ public class EMRScalingRunnable implements Runnable {
     private void attemptScale() {
         int running = getRunningTaskNodes();
         int requested = getRequestedTaskNodes();
+
+        if (requested < running) {
+            // during scaling in
+            if (updateDecommissionTime()) {
+                log.info("Found stuck decommissioning node, cancel scale in.");
+                scale(running);
+                clearScaleInCounter(running);
+                return;
+            }
+        }
+
         int target = getTargetTaskNodes();
         if (target > requested) {
-            // attempt to scale out
-            log.info(String.format("Scale out %s, running=%d, requested=%d, target=%d", //
-                    emrCluster, running, requested, target));
-            scale(target);
-            getLastScaleOutTime().set(System.currentTimeMillis());
-            resetScaleInCounter();
+            attemptScaleOut(running, requested, target);
         } else if (target < requested) {
-            // attempt to scale in
-            log.info(String.format(
-                    "Scale in %s, attempt=%d, running=%d, requested=%d, target=%d", //
-                    emrCluster, getScaleInAttempt().incrementAndGet(), running, requested,
-                    target));
-            if (getLastScaleOutTime().get() + SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT > System.currentTimeMillis()) {
-                log.info("Still in cool down period, won't attempt to scale in.");
-            } else if (running > requested) {
-                log.info("Still in the process of scaling in, won't attempt to scale in again.");
-            } else if (hasActiveTezApps()) {
-                log.info("Has active TEZ applications, won't attempt to scale in.");
-            } else if (getScaleInAttempt().get() >= 5) {
-                target = Math.max(requested - MAX_SCALE_IN_SIZE, target);
-                log.info("Going to scale in " + emrCluster + " from " + requested + " to " + target);
-                scale(target);
-                resetScaleInCounter();
-            }
+            attemptScaleIn(running, requested, target);
         } else {
             log.info(String.format("No need to scale %s, running=%d, requested=%d, target=%d", //
                     emrCluster, running, requested, target));
+            resetScaleInCounter();
+            resetScaleOutCounter();
+        }
+    }
+
+    private void attemptScaleOut(int running, int requested, int target) {
+        resetScaleInCounter();
+        Pair<Integer, Integer> pair = incrementScaleOutCounter(target);
+        int scaleOutTarget = pair.getLeft();
+        int attempts = pair.getValue();
+        log.info(String.format("Would like to scale out %s, attempt=%d, running=%d, requested=%d, target=%d, scaleOutTarget=%d", //
+                emrCluster, attempts, running, requested, target, scaleOutTarget));
+        if (attempts >= MAX_SCALE_OUT_ATTEMPTS) {
+            scale(scaleOutTarget);
+            getLastScaleOutTime().set(System.currentTimeMillis());
+            clearScaleOutCounter(scaleOutTarget);
+        }
+    }
+
+    private void attemptScaleIn(int running, int requested, int target) {
+        resetScaleOutCounter();
+
+        Pair<Integer, Integer> pair = incrementScaleInCounter(target);
+        int scaleInTarget = pair.getLeft();
+        int attempts = pair.getValue();
+        int idle = getIdleTaskNodes();
+        log.info(String.format(
+                "Would like to scale in %s, attempt=%d, running=%d, requested=%d, target=%d, scaleInTarget=%d, idle=%d", //
+                emrCluster, attempts, running, requested, target, scaleInTarget, idle));
+        if (getLastScaleOutTime().get() + SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT > System.currentTimeMillis()) {
+            log.info("Still in cool down period, won't attempt to scale in.");
+        } else if (running > requested) {
+            log.info("Still in the process of scaling in, won't attempt to scale in again.");
+        } else if (idle == 0) {
+            log.info("There is no idle task nodes, won't attempt to scale in.");
+        } else if (attempts >= MAX_SCALE_IN_ATTEMPTS) {
+            int nodesToTerminate = Math.min(idle, MAX_SCALE_IN_SIZE);
+            scaleInTarget = Math.max(requested - nodesToTerminate, scaleInTarget);
+            log.info("Going to scale in " + emrCluster + " from " + requested + " to " + scaleInTarget);
+            scale(scaleInTarget);
+            clearScaleInCounter(scaleInTarget);
         }
     }
 
@@ -238,27 +276,6 @@ public class EMRScalingRunnable implements Runnable {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private boolean hasActiveTezApps() {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        try {
-            return retry.execute(context -> {
-                try {
-                    try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
-                        yarnClient.start();
-                        List<ApplicationReport> apps = yarnClient.getApplications(ACTIVE_APP_STATES);
-                        return apps.stream().anyMatch(appReport ->
-                                appReport.getApplicationType().equalsIgnoreCase("TEZ"));
-                    }
-                } catch (IOException | YarnException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (Exception e) {
-            log.error("Failed to check active TEZ applications in emr cluster " + emrCluster, e);
-            return false;
-        }
     }
 
     private ReqResource getReqs(List<ApplicationReport> apps) {
@@ -293,7 +310,6 @@ public class EMRScalingRunnable implements Runnable {
         int targetByMb = determineTargetByMb(reqResource.reqMb);
         int targetByVCores = determineTargetByVCores(reqResource.reqVCores);
         int target = Math.max(targetByMb, targetByVCores);
-        target += determineMomentumBuffer();
         if (reqResource.hangingApps > 0) {
             target += reqResource.hangingApps;
         }
@@ -307,8 +323,8 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         long avail = metrics.availableMB;
         long total = metrics.totalMB;
-        long newTotal = total - avail + req + minAvailMemMb - coreMb * coreCount;
-        int target = (int) Math.max(minTaskNodes, Math.ceil(1.0 * newTotal / taskMb));
+        long newTotal = total - avail + req + (2 * minAvailMemMb) - coreMb * coreCount;
+        int target = (int) Math.max(1, Math.ceil(1.0 * newTotal / taskMb));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to mb: " + "total="
                 + total + " avail=" + avail + " req=" + req +" newTaskTotal=" + newTotal);
         return target;
@@ -318,29 +334,158 @@ public class EMRScalingRunnable implements Runnable {
         int coreCount = getCoreCount();
         int avail = metrics.availableVirtualCores;
         int total = metrics.totalVirtualCores;
-        int newTotal = total - avail + req + minAvailVCores - coreVCores * coreCount;
-        int target = (int) Math.max(minTaskNodes, Math.ceil(1.0 * newTotal / taskVCores));
+        int newTotal = total - avail + req + (2 * minAvailVCores) - coreVCores * coreCount;
+        int target = (int) Math.max(1, Math.ceil(1.0 * newTotal / taskVCores));
         log.info(emrCluster + " should have " + target + " TASK nodes, according to vcores: "
                 + "total=" + total + " avail=" + avail + " req=" + req+" newTaskTotal=" + newTotal);
         return target;
     }
 
-    // use 25% of used resource as buffer
-    private int determineMomentumBuffer() {
-        long usedMb = metrics.totalMB - metrics.availableMB;
-        double buffer1 = 0.25 * usedMb / taskMb;
-        int usedVCores = metrics.totalVirtualCores - metrics.availableVirtualCores;
-        double buffer2 = 0.25 * usedVCores / taskVCores;
-        int buffer = (int) Math.round(Math.max(buffer1, buffer2));
-        log.info("Set momentum buffer to " + buffer + " for using " //
-                + usedMb + " mb and " + usedVCores + " vcores.");
-        return buffer;
+    private int getStaticVCoreBuffer() {
+        int coreCount = getCoreCount();
+        return (int) Math.round(0.25 * coreVCores * coreCount / taskVCores);
+    }
+
+    private long getStaticMemBuffer() {
+        int coreCount = getCoreCount();
+        return Math.round(0.25 * coreMb * coreCount / taskMb);
+    }
+
+    private Pair<Integer, Integer> incrementScaleOutCounter(int target) {
+        Pair<Integer, Integer> pair = incrementScaleCounter(-target, true);
+        return Pair.of(-pair.getLeft(), pair.getRight());
+    }
+
+    private Pair<Integer, Integer> incrementScaleInCounter(int target) {
+        return incrementScaleCounter(target, false);
+    }
+
+    // pair = (target, attempts)
+    private Pair<Integer, Integer> incrementScaleCounter(int target, boolean scaleOut) {
+        PriorityQueue<Pair<Integer, Integer>> pq = scaleOut ? getScaleOutAttempt() : getScaleInAttempt();
+        insertTargetToPq(pq, target, scaleOut);
+        int maxAttempts = scaleOut ? MAX_SCALE_OUT_ATTEMPTS : MAX_SCALE_IN_ATTEMPTS;
+        return findBestAttempt(pq, maxAttempts, scaleOut);
+    }
+
+    private void insertTargetToPq(PriorityQueue<Pair<Integer, Integer>> pq, int target, boolean scaleOut) {
+        // consider scaling in:
+        // if target not in PQ, its attempt is the max attempts of all targets below it, + 1
+        // for all targets in PQ, if the recorded target above the passed in target, attempt + 1
+        // if the recorded target is below, discard that counter (because the streak discontinued)
+        int maxAttemptsAboveTarget = 0;
+        // remove all pairs having more target
+        while (!pq.isEmpty()) {
+            Pair<Integer, Integer> head = pq.poll();
+            if (head.getKey() <= target) {
+                // notice that we also removed the record that key == target
+                if (scaleOut) {
+                    log.info("Discard {} scale out counter: target={}, attempts={}", //
+                            emrCluster, -head.getLeft(), head.getRight());
+                } else {
+                    log.info("Discard {} scale in counter: target={}, attempts={}", //
+                            emrCluster, head.getLeft(), head.getRight());
+                }
+                maxAttemptsAboveTarget = Math.max(maxAttemptsAboveTarget, head.getRight());
+            } else {
+                pq.offer(head);
+                break;
+            }
+        }
+        // for pairs in pq, increment attempts
+        List<Pair<Integer, Integer>> collector = new ArrayList<>();
+        while(!pq.isEmpty()) {
+            Pair<Integer, Integer> pair = pq.poll();
+            int oldTarget = pair.getLeft();
+            int oldAttempts = pair.getRight();
+            int attempts = oldAttempts + 1;
+            collector.add(Pair.of(oldTarget, attempts));
+            if (scaleOut) {
+                log.info("Increment {} scale out counter: target={}, attempts={}", emrCluster, -oldTarget, attempts);
+            } else {
+                log.info("Increment {} scale in counter: target={}, attempts={}", emrCluster, oldTarget, attempts);
+            }
+        }
+        // add the new value to pq.
+        int attempts = maxAttemptsAboveTarget + 1;
+        if (scaleOut) {
+            log.info("Add {} scale out counter: target={}, attempts={}", emrCluster, -target, attempts);
+        } else {
+            log.info("Add {} scale in counter: target={}, attempts={}", emrCluster, target, attempts);
+        }
+        collector.add(Pair.of(target, attempts));
+        collector.forEach(pq::offer);
+    }
+
+    private Pair<Integer, Integer> findBestAttempt(PriorityQueue<Pair<Integer, Integer>> pq, //
+                                                   int maxAttempts, boolean scaleOut) {
+        // 1. find the smallest target that reaches max attempts
+        // 2. if not found, return the max attempts for all targets
+        Pair<Integer, Integer> finalAttempt = Pair.of(0 ,0);
+        List<Pair<Integer, Integer>> collector = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            Pair<Integer, Integer> head = pq.poll();
+            collector.add(head);
+            if (head.getRight() >= maxAttempts) {
+                if (scaleOut) {
+                    log.info("Attempts in {} to scale out to {} has reached maximum.", emrCluster, -head.getLeft());
+                } else {
+                    log.info("Attempts in {} to scale in to {} has reached maximum.", emrCluster, head.getLeft());
+                }
+                finalAttempt = head;
+                break;
+            } else if (head.getRight() > finalAttempt.getRight()) {
+                finalAttempt = head;
+            }
+        }
+        collector.forEach(pq::offer);
+        return finalAttempt;
     }
 
     private void resetScaleInCounter() {
-        if (getScaleInAttempt().get() > 0) {
-            log.info("Reset " + emrCluster +" scaling in counter from " + getScaleInAttempt().get());
-            getScaleInAttempt().set(0);
+        PriorityQueue<Pair<Integer, Integer>> pq = getScaleInAttempt();
+        if (!pq.isEmpty()) {
+            log.info("Reset " + emrCluster + " scale in counter: " + JsonUtils.serialize(pq));
+            pq.clear();
+        }
+    }
+
+    private void resetScaleOutCounter() {
+        PriorityQueue<Pair<Integer, Integer>> pq = getScaleOutAttempt();
+        if (!pq.isEmpty()) {
+            log.info("Reset " + emrCluster + " scale out counter: " + JsonUtils.serialize(pq));
+            pq.clear();
+        }
+    }
+
+    private void clearScaleInCounter(int scaleInTarget) {
+        clearScaleCounter(scaleInTarget, false);
+    }
+
+    private void clearScaleOutCounter(int scaleOutTarget) {
+        clearScaleCounter(-scaleOutTarget, true);
+    }
+
+    private void clearScaleCounter(int scaleTarget, boolean scaleOut) {
+        PriorityQueue<Pair<Integer, Integer>> pq = scaleOut ? getScaleOutAttempt() : getScaleInAttempt();
+        if (CollectionUtils.isNotEmpty(pq)) {
+            // wipe out all pairs having higher target
+            List<Pair<Integer, Integer>> collector = new ArrayList<>();
+            while (!pq.isEmpty()) {
+                Pair<Integer, Integer> head = pq.poll();
+                if (head.getKey() >= scaleTarget) {
+                    if (scaleOut) {
+                        log.info("Discard {} scaling out count: target={}, attempts={}", //
+                                emrCluster, -head.getLeft(), head.getRight());
+                    } else {
+                        log.info("Discard {} scaling in count: target={}, attempts={}", //
+                                emrCluster, head.getLeft(), head.getRight());
+                    }
+                } else {
+                    collector.add(head);
+                }
+            }
+            collector.forEach(pq::offer);
         }
     }
 
@@ -351,9 +496,14 @@ public class EMRScalingRunnable implements Runnable {
         return lastScalingOutMap.get(clusterId);
     }
 
-    private AtomicInteger getScaleInAttempt() {
-        scalingDownAttemptMap.putIfAbsent(clusterId, new AtomicInteger(0));
-        return scalingDownAttemptMap.get(clusterId);
+    private PriorityQueue<Pair<Integer, Integer>> getScaleInAttempt() {
+        scalingInAttemptMap.putIfAbsent(clusterId, new PriorityQueue<>(Comparator.comparing(Pair::getLeft)));
+        return scalingInAttemptMap.get(clusterId);
+    }
+
+    private PriorityQueue<Pair<Integer, Integer>> getScaleOutAttempt() {
+        scalingOutAttemptMap.putIfAbsent(clusterId, new PriorityQueue<>(Comparator.comparing(Pair::getLeft)));
+        return scalingOutAttemptMap.get(clusterId);
     }
 
     private int getMaxTaskNodes() {
@@ -380,22 +530,6 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             return coreGrp.getRunningInstanceCount();
         }
-    }
-
-    private long getMaxAvailMemMb() {
-        int coreCount = getCoreCount();
-        long maxAvailMb = (long) Math.floor((minTaskNodes + 0.5) * taskMb + coreCount * coreMb);
-        log.debug(String.format("minTaskNodes=%d, taskMb=%d, coreCount=%d, coreMb=%d: maxAvailMb=%d", //
-                minTaskNodes, taskMb, coreCount,coreMb, maxAvailMb));
-        return maxAvailMb;
-    }
-
-    private int getMaxAvailVCores() {
-        int coreCount = getCoreCount();
-        int maxAvailVCores =  (int) Math.floor((minTaskNodes + 0.5) * taskVCores + coreCount * coreVCores);
-        log.debug(String.format("minTaskNodes=%d, taskVCores=%d, coreCount=%d, coreVCores=%d: maxAvailVCores=%d", //
-                minTaskNodes, taskVCores, coreCount, coreVCores, maxAvailVCores));
-        return maxAvailVCores;
     }
 
     private int getInstanceVCores(InstanceFleet fleet) {
@@ -438,7 +572,7 @@ public class EMRScalingRunnable implements Runnable {
     private EC2InstanceType getGroupInstanceType(InstanceGroup grp) {
         EC2InstanceType instanceType = EC2InstanceType.fromName(grp.getInstanceType());
         if (instanceType == null) {
-            throw new UnsupportedOperationException("Instance type " + instanceType + " is not defined.");
+            throw new UnsupportedOperationException("Instance type " + grp.getInstanceType() + " is not defined.");
         }
         return instanceType;
     }
@@ -457,6 +591,86 @@ public class EMRScalingRunnable implements Runnable {
         } else {
             return taskGrp.getRequestedInstanceCount();
         }
+    }
+
+    private int getIdleTaskNodes() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            return retry.execute(context -> {
+                try {
+                    try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                        yarnClient.start();
+                        List<NodeReport> reports = yarnClient.getNodeReports(NodeState.RUNNING, NodeState.NEW);
+                        return reports.stream().mapToInt(report -> {
+                            Resource cap = report.getCapability();
+                            if (cap.getMemorySize() == taskMb && cap.getVirtualCores() == taskVCores) {
+                                // is a task node
+                                Resource used = report.getUsed();
+                                if (used.getVirtualCores() == 0) {
+                                    return 1;
+                                }
+                            }
+                            return 0;
+                        }).sum();
+                    }
+                } catch (IOException | YarnException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Failed to check idle task nodes in emr cluster " + emrCluster, e);
+            return 0;
+        }
+    }
+
+    /**
+     * update the concurrent map decommissionTimeMap
+     * @return return true if there is one node has been decommissioning for too long
+     */
+    private boolean updateDecommissionTime() {
+        long now = System.currentTimeMillis();
+        Set<String> trackingNodes = new HashSet<>();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        boolean hasStuckNode;
+        try {
+            hasStuckNode = retry.execute(context -> {
+                try {
+                    trackingNodes.clear();
+                    trackingNodes.addAll(decommissionTimeMap.keySet());
+                    try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                        yarnClient.start();
+                        List<NodeReport> reports = yarnClient.getNodeReports(NodeState.DECOMMISSIONING);
+                        int indicator = reports.stream().mapToInt(report -> {
+                            String address = addressToIp(report.getNodeId().getHost());
+                            decommissionTimeMap.putIfAbsent(address, now);
+                            trackingNodes.remove(address);
+                            long detectedTime = decommissionTimeMap.get(address);
+                            long duration = now - detectedTime;
+                            if (duration >= SLOW_DECOMMISSION_THRESHOLD) {
+                                log.info(String.format("Node %s has being decommissioning for %.2f sec", //
+                                        address, duration / 1000.));
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }).max().orElse(0);
+                        return indicator > 0;
+                    }
+                } catch (IOException | YarnException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to check decommissioning task nodes in emr cluster " + emrCluster, e);
+            return false;
+        }
+        trackingNodes.forEach(decommissionTimeMap::remove);
+        return hasStuckNode;
+    }
+
+    private static String addressToIp(String address) {
+        String firstPart = address.substring(0, address.indexOf("."));
+        return firstPart.replace("ip-", "").replace("-", ".");
     }
 
     private static class ReqResource {
