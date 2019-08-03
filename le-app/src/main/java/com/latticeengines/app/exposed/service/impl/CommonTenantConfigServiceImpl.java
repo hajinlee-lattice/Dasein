@@ -173,6 +173,18 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
         return tenantConfiguration;
     }
 
+    @Override
+    public boolean isEntityMatchEnabled() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return batonService.isEntityMatchEnabled(customerSpace);
+    }
+
+    @Override
+    public boolean onlyEntityMatchGAEnabled() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return batonService.onlyEntityMatchGAEnabled(customerSpace);
+    }
+
     private SpaceConfiguration getSpaceConfiguration(String tenantId) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);

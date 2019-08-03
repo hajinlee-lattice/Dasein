@@ -17,6 +17,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -41,7 +42,7 @@ public class RateLimitingResourceManagerUnitTestNG {
         CamilleTestEnvironment.stop();
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", retryAnalyzer = SimpleRetryPolicy.class)
     public void testHappyCase() throws Exception {
         String resource = "HappyTest";
         RateLimitDefinition definition = RateLimitDefinition.divisionPrivateDefinition();
@@ -67,7 +68,7 @@ public class RateLimitingResourceManagerUnitTestNG {
         Assert.assertTrue(acquisition.isAllowed(), "Acquisition should be allowed.");
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", retryAnalyzer = SimpleRetryPolicy.class)
     public void testLocalStore() throws Exception {
         String resource = "LocalStoreTest";
         RateLimitDefinition definition = RateLimitDefinition.divisionPrivateDefinition();
@@ -106,17 +107,17 @@ public class RateLimitingResourceManagerUnitTestNG {
         Assert.assertTrue(acquisition.isAllowed(), "Acquisition should be allowed with local store.");
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", retryAnalyzer = SimpleRetryPolicy.class)
     public void testLimitingCorrectnessZK() throws Exception {
         testLimitingCorrectness(false);
     }
 
-    @Test(groups = "unit", dependsOnMethods = "testLimitingCorrectnessZK")
+    @Test(groups = "unit", dependsOnMethods = "testLimitingCorrectnessZK", retryAnalyzer = SimpleRetryPolicy.class)
     public void testLimitingCorrectnessLocal() throws Exception {
         testLimitingCorrectness(true);
     }
 
-    public void testLimitingCorrectness(boolean localMode) throws Exception {
+    private void testLimitingCorrectness(boolean localMode) throws Exception {
         String resource = "LimitingCorrectness";
         int numThreads = 16;
         int numLoops = 100;

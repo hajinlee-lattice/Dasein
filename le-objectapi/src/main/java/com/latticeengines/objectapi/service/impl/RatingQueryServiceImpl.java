@@ -39,7 +39,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.RatingQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
-import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
@@ -67,12 +66,11 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         try {
             RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                     attrRepo);
-            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
             preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, true, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -116,11 +114,10 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 queryEvaluatorService);
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
         TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateRatingQuery(frontEndQuery, false, timeTranslator, sqlUser);
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
@@ -197,7 +194,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                     queryEvaluatorService);
             preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator, sqlUser);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, true, timeTranslator, sqlUser);
             query.setPageFilter(null);
             query.setSort(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);

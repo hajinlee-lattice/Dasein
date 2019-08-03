@@ -20,4 +20,9 @@ public interface CommonTenantConfigService {
     TenantConfiguration getTenantConfiguration();
 
     int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
+
+    boolean isEntityMatchEnabled();
+
+    boolean onlyEntityMatchGAEnabled();
+
 }

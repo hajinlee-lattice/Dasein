@@ -40,7 +40,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
 
     @Inject
     public ContactResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy,
-                           GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+            GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         super(entityProxy, segmentProxy, dataCollectionProxy, graphDependencyToUIActionUtil);
     }
 
@@ -81,7 +81,15 @@ public class ContactResource extends BaseFrontEndEntityResource {
         return Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name())
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()));
+    }
+
+    @Override
+    List<AttributeLookup> getFreeTextSearchAttrs() {
+        return Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
         );
     }
 

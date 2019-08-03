@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +18,17 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -40,6 +45,9 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private BatonService batonService;
 
     List<String> accountFields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.CompanyName.name(), //
@@ -190,19 +198,19 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
             boolean restrictNotNullSalesforceId, String freeFormTextSearch, String lookupIdColumn) {
         entityFrontEndQuery.setMainEntity(entityType);
 
-        if (ratingEngine.getSegment().getAccountFrontEndRestriction() == null) {
-            entityFrontEndQuery
-                    .setAccountRestriction(new FrontEndRestriction(ratingEngine.getSegment().getAccountRestriction()));
-        } else {
-            entityFrontEndQuery.setAccountRestriction(ratingEngine.getSegment().getAccountFrontEndRestriction());
-        }
+        Restriction accTotalRestriction = combineFreeTextSearchRestrictions(
+                ratingEngine.getSegment().getAccountFrontEndRestriction(),
+                ratingEngine.getSegment().getAccountRestriction(),
+                translateFreeTextSearchForAccount(entityType, freeFormTextSearch)
+        );
+        entityFrontEndQuery.setAccountRestriction(new FrontEndRestriction(accTotalRestriction));
 
-        if (ratingEngine.getSegment().getContactFrontEndRestriction() == null) {
-            entityFrontEndQuery
-                    .setContactRestriction(new FrontEndRestriction(ratingEngine.getSegment().getContactRestriction()));
-        } else {
-            entityFrontEndQuery.setContactRestriction(ratingEngine.getSegment().getContactFrontEndRestriction());
-        }
+        Restriction contactTotalRestriction = combineFreeTextSearchRestrictions(
+                ratingEngine.getSegment().getContactFrontEndRestriction(),
+                ratingEngine.getSegment().getContactRestriction(),
+                translateFreeTextSearchForContact(entityType, freeFormTextSearch)
+        );
+        entityFrontEndQuery.setContactRestriction(new FrontEndRestriction(contactTotalRestriction));
 
         if (entityType == BusinessEntity.Account) {
             Restriction accRestriction = entityFrontEndQuery.getAccountRestriction().getRestriction();
@@ -216,7 +224,89 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         } else {
             entityFrontEndQuery.setRestrictNotNullSalesforceId(restrictNotNullSalesforceId);
         }
-        entityFrontEndQuery.setFreeFormTextSearch(freeFormTextSearch);
+    }
+
+    private Restriction combineFreeTextSearchRestrictions(FrontEndRestriction frontEnd, Restriction backEnd, //
+                                                          Restriction freeText) {
+        Restriction feRestriction = frontEnd != null ? frontEnd.getRestriction() : backEnd;
+        Restriction totalRestriction;
+        if (feRestriction != null && freeText != null) {
+            totalRestriction = Restriction.builder().and(feRestriction, freeText).build();
+        } else if (feRestriction != null) {
+            totalRestriction = feRestriction;
+        } else if (freeText != null) {
+            totalRestriction = freeText;
+        } else {
+            totalRestriction = Restriction.builder().or(Collections.emptyList()).build();
+        }
+        return totalRestriction;
+    }
+
+    private Restriction translateFreeTextSearchForAccount(BusinessEntity entityType, String freeTextSearch) {
+        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(entityType).stream() //
+                .filter(attributeLookup -> BusinessEntity.Account.equals(attributeLookup.getEntity())) //
+                .collect(Collectors.toList());
+        return translateFreeTextSearch(searchAttrs, freeTextSearch);
+    }
+
+    private Restriction translateFreeTextSearchForContact(BusinessEntity entityType, String freeTextSearch) {
+        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(entityType).stream() //
+                .filter(attributeLookup -> BusinessEntity.Contact.equals(attributeLookup.getEntity())) //
+                .collect(Collectors.toList());
+        return translateFreeTextSearch(searchAttrs, freeTextSearch);
+    }
+
+    private Restriction translateFreeTextSearch(List<AttributeLookup> searchAttrs, String freeTextSearch) {
+        if (StringUtils.isBlank(freeTextSearch)) {
+            return null;
+        }
+
+        List<Restriction> searchRestrictions = searchAttrs.stream().map(attributeLookup -> {
+            Bucket bucket = new Bucket();
+            bucket.setComparisonType(ComparisonType.CONTAINS);
+            bucket.setValues(Collections.singletonList(freeTextSearch));
+            return new BucketRestriction(attributeLookup, bucket);
+        }).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(searchRestrictions)) {
+            return null;
+        } else if (CollectionUtils.size(searchRestrictions) == 1) {
+            return searchRestrictions.get(0);
+        } else {
+            return Restriction.builder().or(searchRestrictions).build();
+        }
+    }
+
+    private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity entityType) {
+        if (BusinessEntity.Account.equals(entityType)) {
+            if (batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace())) {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
+                );
+            } else {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                );
+            }
+        } else if (BusinessEntity.Contact.equals(entityType)) {
+            return Arrays.asList( //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
+            );
+        } else {
+            throw new UnsupportedOperationException("Unknown entity " + entityType);
+        }
     }
 
     private void setSortField(BusinessEntity entityType, String sortBy, boolean descending, String bucketFieldName,
