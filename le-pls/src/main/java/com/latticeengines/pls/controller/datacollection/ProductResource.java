@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -79,6 +80,13 @@ public class ProductResource extends BaseFrontEndEntityResource {
         return Arrays.asList( //
                 new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.name()), //
                 new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.name()));
+    }
+
+    @Override
+    List<AttributeLookup> getFreeTextSearchAttrs() {
+        return Collections.singletonList( //
+                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.name())
+        );
     }
 
 }

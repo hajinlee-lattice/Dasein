@@ -68,6 +68,8 @@ public interface BatonService {
 
     boolean isEntityMatchEnabled(CustomerSpace customerSpace);
 
+    boolean onlyEntityMatchGAEnabled(CustomerSpace customerSpace);
+
     void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value);
 
     boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product);

@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -42,11 +39,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
     private static final Logger log = LoggerFactory.getLogger(AccountResource.class);
 
     @Inject
-    private BatonService batonService;
-
-    @Inject
     public AccountResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy,
-                           GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+            GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         super(entityProxy, segmentProxy, dataCollectionProxy, graphDependencyToUIActionUtil);
     }
 
@@ -84,6 +78,17 @@ public class AccountResource extends BaseFrontEndEntityResource {
 
     @Override
     List<Lookup> getDataLookups() {
+        return Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
+    }
+
+    @Override
+    List<AttributeLookup> getFreeTextSearchAttrs() {
         if (isEntityMatchEnabled()) {
             return Arrays.asList( //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
@@ -91,7 +96,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()));
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
+            );
         } else {
             return Arrays.asList( //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
@@ -99,13 +105,9 @@ public class AccountResource extends BaseFrontEndEntityResource {
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
                     new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+            );
         }
-    }
-
-    private boolean isEntityMatchEnabled() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        return batonService.isEntityMatchEnabled(customerSpace);
     }
 
 }

@@ -612,6 +612,14 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
+    public boolean onlyEntityMatchGAEnabled(CustomerSpace customerSpace) {
+        // ENABLE_ENTITY_MATCH_GA=True && ENABLE_ENTITY_MATCH=False
+        // Certain logic needs to apply to make those tenant behave the same way as legacy ones.
+        return isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA)
+                && !isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+    }
+
+    @Override
     public void setFeatureFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag, boolean value) {
         FeatureFlagClient.setEnabled(customerSpace, flag.getName(), value);
     }
