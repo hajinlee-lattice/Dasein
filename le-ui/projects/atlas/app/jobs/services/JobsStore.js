@@ -162,6 +162,17 @@ angular
             });
             return ret;
         };
+        this.filterOutScheduled = jobsArray => {
+			let ret = jobsArray.filter(job => {
+				if (
+					!job.schedulingInfo ||
+					job.schedulingInfo.scheduled == false
+				) {
+					return job;
+				}
+			});
+			return ret;
+		};
 
         this.getJob = function(jobId) {
             var deferred = $q.defer();
@@ -255,6 +266,7 @@ angular
                                 jobsByStatus,
                                 { playLaunchWorkflow: true }
                             );
+                            jobsFiltered = JobsStore.filterOutScheduled(jobsFiltered);
                             JobsStore.data.allActiveJobs = jobsFiltered;
                             for (var i = 0; i < res.length; i++) {
                                 var job = res[i];
