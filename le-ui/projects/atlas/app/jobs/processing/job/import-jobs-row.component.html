@@ -1,96 +1,177 @@
 <div class="le-cell le-col-start-1 le-col-span-2">
-
-    <span>
-        {{getTimeStamp(job)}}
-    </span>
+	<span>
+		{{ getTimeStamp(job) }}
+	</span>
 </div>
 <div class="le-cell le-col-start-3 le-col-span-2">
-    <span>
-        {{job.displayName}}
-    </span>
+	<span>
+		{{ job.displayName }}
+	</span>
 </div>
 <div class="le-cell le-col-start-5 le-col-span-1">
-        <div class="tooltip-cell">
-                <div class="text-ellipsis text-container"><span>{{getActionsCount()}}</span></div>
-                <div ng-if="getSubJobsPartialSuccess().length > 0" class="text-icon-tooltip-container">
-                    <span class="tooltip-container-text">
-                        <li class="show-tooltip title-tooltip top delay">
-                            <div class="tooltip_">
-                                <div class="cover">
-                                        <h3>Partial Success</h3>
-                                        <p>The following actions are partially validated and will not be taken into data processing:</p>
-                                        <ol>
-                                            <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
-                                            <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
-                                        </ol>
-                                </div>
-                            </div>
-                            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true"></i>
-                        </li>
-                    </span>
-                </div>
-            </div>
+	<div class="tooltip-cell">
+		<div class="text-ellipsis text-container">
+			<span>{{ getActionsCount() }}</span>
+		</div>
+		<div
+			ng-if="getSubJobsPartialSuccess().length > 0"
+			class="text-icon-tooltip-container"
+		>
+			<span class="tooltip-container-text">
+				<li class="show-tooltip title-tooltip top delay">
+					<div class="tooltip_">
+						<div class="cover">
+							<h3>Partial Success</h3>
+							<p>
+								The following actions are partially validated
+								and will not be taken into data processing:
+							</p>
+							<ol>
+								<li
+									ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip"
+								>
+									{{
+										getSubjobActionName($index + 1, subjob)
+									}}
+								</li>
+								<li ng-if="actions.length > maxRowsTooltip ">
+									And
+									{{ actions.length - maxRowsTooltip }} other
+									partial success
+								</li>
+							</ol>
+						</div>
+					</div>
+					<i
+						class="fa fa-exclamation-triangle icon-failed"
+						aria-hidden="true"
+					></i>
+				</li>
+			</span>
+		</div>
+	</div>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
-    <div class="tooltip-cell">
-        <div class="text-ellipsis text-container " ng-class="job.jobStatus == 'Failed' ? 'failed' : ''"><span>{{getJobStatus(job)}}</span></div>
-        <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="isJobRunning(job)"></i>
-        <div ng-if="getJobMessage(job) != '' && !isJobRunning(job)" class="text-icon-tooltip-container">
-            <span class="tooltip-container-text">
-                <li class="show-tooltip title-tooltip top delay">
-                    <div class="tooltip_"><div class="cover warning"><p>{{getJobMessage(job)}}</p></div></div>
-                    <i class="fa fa-exclamation-triangle" ng-class="'icon-'+getJobMsgType(job)" aria-hidden="true"></i>
-                </li>
-            </span>
-        </div>
-    </div>
-    <!-- <span>
+	<div class="tooltip-cell">
+		<div
+			class="text-ellipsis text-container "
+			ng-class="job.jobStatus == 'Failed' ? 'failed' : ''"
+		>
+			<span>{{ getJobStatus(job) }}</span>
+		</div>
+		<i
+			class="fa fa-spinner fa-spin icon-failed"
+			aria-hidden="true"
+			ng-if="isJobRunning(job) && !isJobScheduled(job)"
+		></i>
+		<div
+			ng-if="getJobMessage(job) != '' && !isJobRunning(job)"
+			class="text-icon-tooltip-container"
+		>
+			<span class="tooltip-container-text">
+				<li class="show-tooltip title-tooltip top delay">
+					<div class="tooltip_">
+						<div class="cover warning">
+							<p>{{ getJobMessage(job) }}</p>
+						</div>
+					</div>
+					<i
+						class="fa fa-exclamation-triangle"
+						ng-class="'icon-'+getJobMsgType(job)"
+						aria-hidden="true"
+					></i>
+				</li>
+			</span>
+		</div>
+	</div>
+	<!-- <span>
         <span>{{getJobStatus(job)}}</span>
         <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="isJobRunning(job)"></i>
         <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="isJobFailed(job) && !isJobRunning(job)"></i>
     </span> -->
 </div>
 <div class="le-cell le-col-start-7 le-col-span-2">
-    <span ng-if="showScheduleTime(job)" class="contact">
-        {{job.note}}
-    </span>
+	<span ng-if="showScheduleTime(job)" class="contact">
+		{{ job.note }}
+	</span>
 </div>
 <div class="le-cell le-col-start-9 le-col-span-3">
-    <button class="button blue-button" ng-if="showRunButton(job)" ng-mousedown="mouseDownRun(job)" ng-disabled="disableRunButton(job)">
-        Run Now
-    </button>
-
-    <a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="showReport(job)">
-        Report
-    </a>
-    <span>
-        <span ng-if="isJobFailed(job)">Please contact Lattice support</span>
-    </span>
+	<button
+		class="button blue-button"
+		ng-if="showRunButton(job) && !showScheduleButton(job)"
+		ng-mousedown="mouseDownRun(job)"
+		ng-disabled="disableRunButton(job)"
+	>
+		Run Now
+	</button>
+	<button
+		class="button blue-button"
+		ng-if="showScheduleButton(job) && !showRuButton(job)"
+		ng-mousedown="mouseDownSchedule(job)"
+		ng-disabled="disableScheduleButton(job)"
+	>
+		Schedule Now
+	</button>
+	<a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="showReport(job)">
+		Report
+	</a>
+	<span>
+		<span ng-if="isJobFailed(job)">Please contact Lattice support</span>
+		<span ng-if="isJobScheduled(job) && !isJobFailed(job)">{{
+			job.schedulingInfo.message
+		}}</span>
+	</span>
 </div>
 <div class="le-cell le-col-start-10 le-col-span-1 le-cell-right-align">
+	<a
+		href="javascript:void(0)"
+		data-toggle="collapse"
+		ng-click="expandRow()"
+		ng-show="!expanded"
+	>
+		<span>
+			<i class="fa fa-angle-double-down fa-lg"></i>
+		</span>
+	</a>
 
-    <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" ng-show="!expanded">
-        <span>
-            <i class="fa fa-angle-double-down fa-lg"></i>
-        </span>
-    </a>
-
-    <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" data-ng-show="expanded">
-        <span>
-            <i class="fa fa-angle-double-up fa-lg"></i>
-        </span>
-    </a>
-
+	<a
+		href="javascript:void(0)"
+		data-toggle="collapse"
+		ng-click="expandRow()"
+		data-ng-show="expanded"
+	>
+		<span>
+			<i class="fa fa-angle-double-up fa-lg"></i>
+		</span>
+	</a>
 </div>
 <div class="le-row" ng-if="loading">
-    <div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
-        <span>
-            <span class="loading-small"></span>
-        </span>
-    </div>
+	<div class="le-cell le-cell-centered le-col-start-1 le-col-span-12">
+		<span>
+			<span class="loading-small"></span>
+		</span>
+	</div>
 </div>
-<chevron class="le-row" chevronconfig="chevronConfig" stepscompleted="job.steps" jobstatus="job.jobStatus" ng-if="showChevron(job)"></chevron>
-<import-job-row-sub-jobs ng-if="expanded" subjobs="job.subJobs" getjobstatus='getJobStatusFn(job)'></import-job-row-sub-jobs>
-<div class="le-row le-cell le-col-start-1 le-col-span-12" ng-if="expanded && job.applicationId && job.applicationLogUrl != null && hasRight()">
-    <span>Application Id: <a ng-href="{{job.applicationLogUrl}}" target="_blank">{{job.applicationId}}</a></span>
+<chevron
+	class="le-row"
+	chevronconfig="chevronConfig"
+	stepscompleted="job.steps"
+	jobstatus="job.jobStatus"
+	ng-if="showChevron(job)"
+></chevron>
+<import-job-row-sub-jobs
+	ng-if="expanded"
+	subjobs="job.subJobs"
+	getjobstatus="getJobStatusFn(job)"
+></import-job-row-sub-jobs>
+<div
+	class="le-row le-cell le-col-start-1 le-col-span-12"
+	ng-if="expanded && job.applicationId && job.applicationLogUrl != null && hasRight()"
+>
+	<span
+		>Application Id:
+		<a ng-href="{{ job.applicationLogUrl }}" target="_blank">{{
+			job.applicationId
+		}}</a></span
+	>
 </div>

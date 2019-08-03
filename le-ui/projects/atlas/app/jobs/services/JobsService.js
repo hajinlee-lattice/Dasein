@@ -236,7 +236,8 @@ angular
                                     stepRunning,
                                     stepsCompleted
                                 ),
-                                reports: job.reports
+                                reports: job.reports,
+                                schedulingInfo: job.schedulingInfo
                             };
                         });
 

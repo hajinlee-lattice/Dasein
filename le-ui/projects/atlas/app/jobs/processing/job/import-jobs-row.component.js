@@ -5,6 +5,7 @@ angular.module('lp.jobs.import.row', [
     var controller = ['$scope', '$q', '$filter', 'JobsStore', 'Modal', 'AuthorizationUtility', 'HealthService', function ($scope, $q, $filter, JobsStore, Modal, AuthorizationUtility, HealthService) {
         $scope.thejob = $scope.job;
         $scope.disableButton = false;
+        $scope.scheduleButtonDisabled = false;
         $scope.maxRowsTooltip = 3;
         $scope.expanded = false;
         $scope.chevronConfig = {
@@ -149,6 +150,12 @@ angular.module('lp.jobs.import.row', [
                 callbackModalWindow({action: 'ok'});
             }
         };
+        
+        $scope.schedule = (job) => { 
+            job.schedulingInfo.scheduled = true;
+            callbackModalWindow({ action: 'ok' });
+        }
+
         $scope.getWarningMessage = function(job){
             var formerFailed = $scope.vm.isLastOneFailed();
             var someIncompleted = $scope.showWarningRun(job);
@@ -197,10 +204,10 @@ angular.module('lp.jobs.import.row', [
 
            
         };
-
+        
         $scope.getJobStatus = function(job){
             return job.jobStatus;
-        
+            
         };
         $scope.getJobStatusFn = function(job){
             return $scope.getJobStatus(job);
@@ -214,20 +221,65 @@ angular.module('lp.jobs.import.row', [
             }
             return disable;
         };
-
+        
         $scope.showRunButton = function (job) {
-            switch(job.jobStatus){
-                case 'Failed':
-                case 'Completed':
-                case 'Pending':
-                case 'Running':{
-                    return false;
-                }
-                default: {
-                    return true;
-                }
+            if (job.schedulingInfo && job.schedulingInfo.schedulerEnabled == true) {
+                return false;
             }
+				switch (job.jobStatus) {
+					case "Failed":
+					case "Completed":
+					case "Pending":
+					case "Running": {
+						return false;
+					}
+					default: {
+						return true;
+					}
+				}
         };
+                    
+        $scope.mouseDownSchedule = (job) => { 
+             HealthService.checkSystemStatus().then(function() {
+					$scope.scheduleButtonDisabled = true;
+					$scope.schedule(job);
+				});
+
+        }
+
+        $scope.disableScheduleButton = (job) => { 
+            // console.log(job.schedulingInfo);
+            if (job.schedulingInfo && job.schedulingInfo.scheduled == true) {
+                return true;
+           }
+            var canSchedule = $scope.vm.canLastBeScheduled();
+            // console.log($scope.scheduleButtonDisabled);
+            var disable = false;
+            if ($scope.scheduleButtonDisabled || !canSchedule) {
+				disable = true;
+			}
+            // console.log(disable);
+            return disable;
+        }
+        $scope.showScheduleButton = function (job) {
+            if (
+				job.schedulingInfo &&
+				job.schedulingInfo.schedulerEnabled == false
+			) {
+				return false;
+            }
+            switch (job.jobStatus) {
+				case "Failed":
+				case "Completed":
+				case "Pending":
+				case "Running": {
+					return false;
+				}
+				default: {
+					return true;
+				}
+			}
+        }
 
         $scope.showReport = function (job) {
             if($scope.showRunButton(job)){
@@ -310,6 +362,14 @@ angular.module('lp.jobs.import.row', [
                 return false;
             }
         };
+
+        $scope.isJobScheduled = (job) => { 
+            if (job.schedulingInfo) {
+                return job.schedulingInfo.scheduled;
+            } else {
+                false
+            }
+        }
 
         $scope.getActionsCount = function () {
             if ($scope.job.subJobs) {
