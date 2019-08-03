@@ -2,25 +2,30 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PERIOD_DATA_DISTRIBUTOR;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.util.TimeSeriesDistributer;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
 @Component(PeriodDataDistributor.TRANSFORMER_NAME)
@@ -29,14 +34,16 @@ public class PeriodDataDistributor
     private static final Logger log = LoggerFactory.getLogger(PeriodDataDistributor.class);
     public static final String TRANSFORMER_NAME = PERIOD_DATA_DISTRIBUTOR;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         PeriodDataDistributorConfig config = getConfiguration(step.getConfig());
 
+        // PeriodId table
         int periodIdx = config.getPeriodIdx() == null ? 0 : config.getPeriodIdx();
+        // Source table to distribute by PeriodId
         int inputIdx = config.getInputIdx() == null ? 1 : config.getInputIdx();
         String periodDir = getSourceHdfsDir(step, periodIdx);
         String inputDir = getSourceHdfsDir(step, inputIdx);
@@ -49,42 +56,90 @@ public class PeriodDataDistributor
         }
 
         if (!config.isMultiPeriod()) {
-            int transactionIdx = config.getTransactinIdx() == null ? 2 : config.getTransactinIdx();
-            String transactionDir = getSourceHdfsDir(step, transactionIdx);
-
-            Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
-                    config.getPeriodField());
-            for (Integer period : periods) {
-                log.debug("Period to distribute " + period);
-            }
-            TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, transactionDir, periods,
-                    config.getPeriodField());
+            distributeSinglePeriodStore(config, step, periodDir, inputDir);
         } else {
-            if (MapUtils.isEmpty(config.getTransactionIdxes())) {
-                throw new RuntimeException("In MultiPeriod mode, please provide PeriodName to TransactionIdx mapping");
-            }
-            Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
-                    config.getPeriodField(), config.getPeriodNameField());
-            Map<String, String> targetDirs = new HashMap<>(); // PeriodName -> TransactionDir
-            for (Map.Entry<String, Integer> ent : config.getTransactionIdxes().entrySet()) {
-                String periodName = ent.getKey();
-                String transactionDir = getSourceHdfsDir(step, config.getTransactionIdxes().get(periodName));
-                targetDirs.put(periodName, transactionDir);
-            }
-            TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDirs, periods,
-                    config.getPeriodField(), config.getPeriodNameField());
+            distributeMultiPeriodStore(config, step, periodDir, inputDir);
         }
 
-        try {
-            List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, periodDir, ".*.avro$");
-            for (String fileName : avroFiles) {
-                HdfsUtils.copyFiles(yarnConfiguration, fileName, workflowDir);
-            }
-        } catch (Exception e) {
-            log.error("Failed to copy file from " + periodDir + " to " + workflowDir, e);
-            return false;
-        }
+        step.setTarget(null);
+        step.setCount(0L);
         return true;
+    }
+
+    private void distributeSinglePeriodStore(PeriodDataDistributorConfig config, TransformStep step, String periodDir,
+            String inputDir) {
+        // Target table to distribute to
+        int targetIdx = config.getTransactinIdx() == null ? 2 : config.getTransactinIdx();
+        String targetDir = getSourceHdfsDir(step, targetIdx);
+
+        Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir, config.getPeriodField());
+        for (Integer period : periods) {
+            log.debug("Period to distribute " + period);
+        }
+
+        // Only retry for non-LedpException
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
+        retry.execute(ctx -> {
+            // Cleanup impacted periods in period store
+            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periods);
+
+            @SuppressWarnings("serial")
+            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                    .yarnConfig(yarnConfiguration) //
+                    .inputDir(inputDir) //
+                    .targetDirs(new HashMap<String, String>() {
+                        {
+                            put(TimeSeriesDistributer.DUMMY_PERIOD, targetDir);
+                        }
+                    }) //
+                    .periods(new HashMap<String, Set<Integer>>() {
+                        {
+                            put(TimeSeriesDistributer.DUMMY_PERIOD, periods);
+                        }
+                    }) //
+                    .periodField(config.getPeriodField()) //
+                    .periodNameField(null) //
+                    .build();
+            distributer.distributePeriodData();
+            return null;
+        });
+    }
+
+    private void distributeMultiPeriodStore(PeriodDataDistributorConfig config, TransformStep step, String periodDir,
+            String inputDir) {
+        if (MapUtils.isEmpty(config.getTransactionIdxes())) {
+            throw new RuntimeException("In MultiPeriod mode, please provide PeriodName to TransactionIdx mapping");
+        }
+        // PeriodName -> [PeriodIds]
+        Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
+                config.getPeriodField(), config.getPeriodNameField());
+        // PeriodName -> TargetDir
+        Map<String, String> targetDirs = new HashMap<>();
+        for (Map.Entry<String, Integer> ent : config.getTransactionIdxes().entrySet()) {
+            String periodName = ent.getKey();
+            String targetDir = getSourceHdfsDir(step, config.getTransactionIdxes().get(periodName));
+            targetDirs.put(periodName, targetDir);
+        }
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
+        retry.execute(ctx -> {
+            // Cleanup impacted periods in period store
+            for (String periodName : periods.keySet()) {
+                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDirs.get(periodName),
+                        periods.get(periodName));
+            }
+
+            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                    .yarnConfig(yarnConfiguration) //
+                    .inputDir(inputDir) //
+                    .targetDirs(targetDirs) //
+                    .periods(periods) //
+                    .periodField(config.getPeriodField()) //
+                    .periodNameField(config.getPeriodNameField()) //
+                    .build();
+            distributer.distributePeriodData();
+            return null;
+        });
     }
 
     @Override
@@ -97,6 +152,7 @@ public class PeriodDataDistributor
         return PeriodDataDistributorConfig.class;
     }
 
+    @Override
     protected boolean validateConfig(PeriodDataDistributorConfig config, List<String> sourceNames) {
         return true;
     }
