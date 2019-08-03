@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
@@ -91,7 +92,7 @@ abstract class QueryTranslator {
         inspectInnerRestriction(frontEndQuery, mainEntity, timeTranslator, map);
     }
 
-    Query translateProductQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
+    Query translateProductQuery(FrontEndQuery frontEndQuery, boolean isCountQuery) {
         QueryBuilder queryBuilder = Query.builder();
         BusinessEntity mainEntity = BusinessEntity.Product;
 
@@ -103,14 +104,13 @@ abstract class QueryTranslator {
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter()) //
-                .freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchAttrs()) //
                 .distinct(frontEndQuery.getDistinct());
 
-        if (decorator.isDataQuery()) {
+        if (isCountQuery) {
+            queryBuilder.select(new ValueLookup(1));
+        } else {
             queryBuilder.select(BusinessEntity.Product, InterfaceName.ProductId.name());
             queryBuilder.select(BusinessEntity.Product, InterfaceName.ProductName.name());
-        } else {
-            queryBuilder.select(decorator.getIdLookup());
         }
 
         return queryBuilder.build();
@@ -272,7 +272,8 @@ abstract class QueryTranslator {
                         log.warn("Ignored buckets should be filtered out by optimizer: " + JsonUtils.serialize(bucket));
                     } else {
                         Restriction converted;
-                        if (BusinessEntity.PurchaseHistory.equals(bucket.getAttr().getEntity())) {
+                        if (BusinessEntity.PurchaseHistory.equals(bucket.getAttr().getEntity()) && //
+                                bucket.getBkt().getTransaction() == null) {
                             converted = MetricTranslator.convert(bucket, useDepivotedPhTable);
                         } else {
                             converted = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);
@@ -291,7 +292,8 @@ abstract class QueryTranslator {
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
             if (!Boolean.TRUE.equals(bucket.getIgnored())) {
-                if (BusinessEntity.PurchaseHistory.equals(bucket.getAttr().getEntity())) {
+                if (BusinessEntity.PurchaseHistory.equals(bucket.getAttr().getEntity()) && //
+                        bucket.getBkt().getTransaction() == null) {
                     translated = MetricTranslator.convert(bucket, useDepivotedPhTable);
                 } else {
                     translated = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);

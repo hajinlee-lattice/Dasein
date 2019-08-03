@@ -7,17 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -27,11 +22,6 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
-import com.latticeengines.objectapi.util.AccountQueryDecorator;
-import com.latticeengines.objectapi.util.ContactQueryDecorator;
-import com.latticeengines.objectapi.util.EntityMatchAccountQueryDecorator;
-import com.latticeengines.objectapi.util.ProductQueryDecorator;
-import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
@@ -41,44 +31,12 @@ public abstract class BaseQueryServiceImpl {
 
     protected QueryEvaluatorService queryEvaluatorService;
 
-    @Inject
-    private BatonService batonService;
-
     BaseQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
         this.queryEvaluatorService = queryEvaluatorService;
     }
 
     public QueryEvaluatorService getQueryEvaluatorService() {
         return queryEvaluatorService;
-    }
-
-    QueryDecorator getDecorator(BusinessEntity entity, boolean isDataQuery) {
-        switch (entity) {
-        case Account:
-            if (isEntityMatchEnabled()) {
-                return isDataQuery ? EntityMatchAccountQueryDecorator.DATA_QUERY //
-                        : EntityMatchAccountQueryDecorator.COUNT_QUERY;
-            } else {
-                return isDataQuery ? AccountQueryDecorator.DATA_QUERY : AccountQueryDecorator.COUNT_QUERY;
-            }
-        case Contact:
-            return isDataQuery ? ContactQueryDecorator.DATA_QUERY : ContactQueryDecorator.COUNT_QUERY;
-        case Product:
-            return isDataQuery ? ProductQueryDecorator.DATA_QUERY : ProductQueryDecorator.COUNT_QUERY;
-        default:
-            log.warn("Cannot find a decorator for entity " + entity);
-            return null;
-        }
-    }
-
-    private boolean isEntityMatchEnabled() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            log.warn("MultiTenant Context is empty!");
-            return false;
-        } else {
-            return batonService.isEntityMatchEnabled(customerSpace);
-        }
     }
 
     private Map<AttributeLookup, Object> getMaxDatesViaFrontEndQuery(Set<AttributeLookup> lookups,

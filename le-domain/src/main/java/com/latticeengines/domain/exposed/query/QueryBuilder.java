@@ -78,6 +78,7 @@ public class QueryBuilder {
         return this;
     }
 
+    @Deprecated
     public QueryBuilder freeText(String freeFormTextSearch, AttributeLookup... attrs) {
         this.freeFormTextSearch = freeFormTextSearch;
         for (AttributeLookup attr : attrs) {

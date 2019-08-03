@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +39,12 @@ public class RatingQueryTranslator extends QueryTranslator {
         super(queryFactory, repository);
     }
 
-    public Query translateRatingQuery(FrontEndQuery frontEndQuery, QueryDecorator decorator, //
+    public Query translateRatingQuery(FrontEndQuery frontEndQuery, boolean isCountQuery, //
             TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
         if (BusinessEntity.Product.equals(mainEntity)) {
-            return translateProductQuery(frontEndQuery, decorator);
+            return translateProductQuery(frontEndQuery, isCountQuery);
         }
 
         Restriction restriction;
@@ -84,24 +82,8 @@ public class RatingQueryTranslator extends QueryTranslator {
             });
         }
 
-        if (!hasRatingLookup.get() && //
-                decorator != null && decorator.isDataQuery() && //
-                frontEndQuery.getRatingModels() != null) {
+        if (!hasRatingLookup.get() && !isCountQuery && frontEndQuery.getRatingModels() != null) {
             appendRuleLookups(frontEndQuery, queryBuilder, timeTranslator, sqlUser);
-        }
-
-        if (decorator != null && StringUtils.isNotBlank(frontEndQuery.getFreeFormTextSearch())) {
-            List<AttributeLookup> attrs = new ArrayList<>();
-            for (AttributeLookup attributeLookup : decorator.getFreeTextSearchAttrs()) {
-                if (repository != null && repository.getColumnMetadata(attributeLookup) != null) {
-                    attrs.add(attributeLookup);
-                }
-            }
-            if (CollectionUtils.isNotEmpty(attrs)) {
-                queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), attrs.toArray(new AttributeLookup[0]));
-            } else {
-                log.warn("None of the free text search attributes exists in attr repo, skip free text search.");
-            }
         }
 
         configurePagination(frontEndQuery);

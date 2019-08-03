@@ -55,7 +55,7 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
         Bucket.Transaction txn = new Bucket.Transaction(prodId, prior2Months, null, null, false);
         EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo);
         FrontEndQuery feQuery = toFrontEndQuery(txn);
-        Query query = translator.translateEntityQuery(feQuery, AccountQueryDecorator.COUNT_QUERY, timeTranslator, //
+        Query query = translator.translateEntityQuery(feQuery, true, timeTranslator, //
                 "segment");
         Assert.assertTrue(query.getRestriction() instanceof LogicalRestriction);
         LogicalRestriction logical = (LogicalRestriction) query.getRestriction();

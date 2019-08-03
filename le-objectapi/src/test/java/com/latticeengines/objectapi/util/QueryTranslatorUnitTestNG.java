@@ -34,7 +34,7 @@ public class QueryTranslatorUnitTestNG {
         query.setMainEntity(BusinessEntity.Account);
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query translated = queryTranslator.translateRatingQuery(query, AccountQueryDecorator.DATA_QUERY, null, "user");
+        Query translated = queryTranslator.translateRatingQuery(query, false, null, "user");
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 6, 8, 0);
         validateTranslatedLookups(translated, 0);
@@ -49,7 +49,7 @@ public class QueryTranslatorUnitTestNG {
         query.setMainEntity(BusinessEntity.Contact);
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query translated = queryTranslator.translateRatingQuery(query, ContactQueryDecorator.DATA_QUERY, null, "user");
+        Query translated = queryTranslator.translateRatingQuery(query, false, null, "user");
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 4, 6, 0);
         validateTranslatedLookups(translated, 0);
@@ -67,7 +67,7 @@ public class QueryTranslatorUnitTestNG {
         query.setMainEntity(BusinessEntity.Account);
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query translated = queryTranslator.translateRatingQuery(query, AccountQueryDecorator.DATA_QUERY, null, "user");
+        Query translated = queryTranslator.translateRatingQuery(query, false, null, "user");
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 7, 10, 0);
     }
@@ -84,7 +84,7 @@ public class QueryTranslatorUnitTestNG {
         query.setMainEntity(BusinessEntity.Contact);
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query translated = queryTranslator.translateRatingQuery(query, ContactQueryDecorator.COUNT_QUERY, null, "user");
+        Query translated = queryTranslator.translateRatingQuery(query, true, null, "user");
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 5, 8, 0);
         validateTranslatedLookups(translated, 0);
@@ -114,20 +114,6 @@ public class QueryTranslatorUnitTestNG {
         assertEquals(concreteCounter.intValue(), numConcrete);
         assertEquals(totalCounter.intValue(), numTotalRestrictions);
         assertEquals(existCounter.intValue(), numExists);
-    }
-
-    @Test(groups = "unit")
-    public void testTranslateWithDecorator() {
-        FrontEndQuery query = new FrontEndQuery();
-        query.setFreeFormTextSearch("intel");
-        FrontEndRestriction accountRestriction = new FrontEndRestriction();
-        accountRestriction.setRestriction(createAccountRestriction(Level.Simple));
-        query.setAccountRestriction(accountRestriction);
-        query.setMainEntity(BusinessEntity.Account);
-
-        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query result = queryTranslator.translateRatingQuery(query, AccountQueryDecorator.COUNT_QUERY, null, "user");
-        // assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
 
     private enum Level {
@@ -194,7 +180,6 @@ public class QueryTranslatorUnitTestNG {
     @Test(groups = "unit")
     public void testGenerateSampleQueries() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFreeFormTextSearch("Boulder");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
@@ -235,7 +220,6 @@ public class QueryTranslatorUnitTestNG {
     public void testDeletedRestrictions() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setFreeFormTextSearch("Boulder");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
@@ -264,7 +248,7 @@ public class QueryTranslatorUnitTestNG {
         frontEndRestriction.setRestriction(restriction);
 
         RatingQueryTranslator queryTranslator = new RatingQueryTranslator(null, null);
-        Query result = queryTranslator.translateRatingQuery(frontEndQuery, null, null, "user");
+        Query result = queryTranslator.translateRatingQuery(frontEndQuery, true, null, "user");
 
         // AND1 (OR1 (AND2(OR2(C,D))), A))))
         Restriction translated = result.getRestriction();
