@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.EntityQueryTranslator;
-import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
@@ -116,13 +115,11 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             boolean isCountQuery) {
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), !isCountQuery);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, isCountQuery, timeTranslator, sqlUser);
         if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         } else {
@@ -240,7 +237,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, true, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);
         AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);
