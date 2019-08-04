@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -48,6 +49,12 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
             add(Pair.of(InterfaceName.PeriodId.name(), Integer.class));
         }
     };
+
+    @AfterClass(groups = "functional")
+    public void destroy() {
+        String baseDir = "/tmp/" + this.getClass().getSimpleName();
+        cleanupHdfsPath(baseDir);
+    }
 
     @Test(groups = "functional")
     public void testSinglePeriodStrategy() {

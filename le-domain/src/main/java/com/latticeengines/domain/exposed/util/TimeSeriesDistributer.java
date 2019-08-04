@@ -39,7 +39,7 @@ public class TimeSeriesDistributer {
     public static final String DUMMY_PERIOD = "DUMMY_PERIOD";
     private static final int BATCH_SIZE = 1000;
     private static final int DISTRIBUTERS = 16;
-    private static final long BUFFER_THRESHOLD = 2 * 128 * 1024;
+    private static final int BUFFER_THRESHOLD = 2 * 128 * 1024;
     private static final long WRITER_TIMEOUT_SEC = 3600;
 
     private Configuration yarnConfig;
@@ -62,11 +62,8 @@ public class TimeSeriesDistributer {
     // Read buffer (records read from HDFS, but pending for writing):
     // (PeriodName, PeriodId) -> [Records]
     private Map<Pair<String, Integer>, List<GenericRecord>> readBuffer;
-    // Write buffer (records being written back to HDFS):
-    // (PeriodName, PeriodId) -> [Records]
-    Map<Pair<String, Integer>, List<GenericRecord>> writeBuffer;
-    // (PeriodName, PeriodId) -> writer's starting timestamp
-    Map<Pair<String, Integer>, Long> writerStartTime;
+    // (PeriodName, PeriodId) -> (Job start time, Job size -- number of records)
+    Map<Pair<String, Integer>, Pair<Long, Integer>> writers;
     ExecutorService executor;
     // ((PeriodName, PeriodId), success)
     List<Future<Pair<Pair<String, Integer>, Boolean>>> futures;
@@ -82,8 +79,7 @@ public class TimeSeriesDistributer {
         this.schema = AvroUtils.getSchemaFromGlob(yarnConfig, inputDir);
         this.targetFiles = getPeriodFileMap(targetDirs, periods);
         this.readBuffer = new HashMap<>();
-        this.writeBuffer = new HashMap<>();
-        this.writerStartTime = new HashMap<>();
+        this.writers = new HashMap<>();
         this.executor = ThreadPoolUtils.getFixedSizeThreadPool("periodDataDistributor", DISTRIBUTERS);
         this.futures = new LinkedList<>();
     }
@@ -185,20 +181,20 @@ public class TimeSeriesDistributer {
         while (readIter.hasNext()) {
             Map.Entry<Pair<String, Integer>, List<GenericRecord>> periodMap = readIter.next();
             Pair<String, Integer> period = periodMap.getKey();
+            List<GenericRecord> records = periodMap.getValue();
             // Only allow single thread writing to one period file (named by
             // PeriodName + PeriodId) as HDFS is multi-read but single-write
-            if (writeBuffer.containsKey(period)) {
+            if (writers.containsKey(period)) {
                 continue;
             }
-            if (sizeThreshold != null && periodMap.getValue().size() < sizeThreshold) {
+            if (sizeThreshold != null && records.size() < sizeThreshold) {
                 continue;
             }
-            // writeBuffer: (PeriodName, PeriodId) -> [records]
-            writeBuffer.put(period, periodMap.getValue());
-            writerStartTime.put(period, System.currentTimeMillis());
+            // (PeriodName, PeriodId) -> (start time, size)
+            writers.put(period, Pair.of(System.currentTimeMillis(), records.size()));
             // future: ((PeriodName, PeriodId), success)
             Future<Pair<Pair<String, Integer>, Boolean>> future = executor.submit(
-                    getBatchWriteCallable(targetFiles.get(period), periodMap.getValue(), period));
+                    getBatchWriteCallable(targetFiles.get(period), records, period));
             futures.add(future);
             readIter.remove();
             if (futures.size() >= DISTRIBUTERS) {
@@ -262,10 +258,8 @@ public class TimeSeriesDistributer {
                     throw new RuntimeException("Batch write of period data failed");
                 }
                 iter.remove();
-                // writeBuffer: (PeriodName, PeriodId) -> [records]
-                writeBuffer.remove(res.getLeft());
-                // writerStartTime: (PeriodName, PeriodId) -> starting time
-                writerStartTime.remove(res.getLeft());
+                // writers: (PeriodName, PeriodId) -> (start time, size)
+                writers.remove(res.getLeft());
                 if (!Boolean.TRUE.equals(res.getRight())) {
                     throw new RuntimeException("Batch write of period data failed");
                 }
@@ -279,8 +273,9 @@ public class TimeSeriesDistributer {
      */
     private void checkWriterTimeout() {
         long current = System.currentTimeMillis();
-        writerStartTime.forEach((period, ts) -> {
-            if (current - ts > WRITER_TIMEOUT_SEC) {
+        // writers: (PeriodName, PeriodId) -> (start time, size)
+        writers.forEach((period, status) -> {
+            if (current - status.getLeft() > WRITER_TIMEOUT_SEC) {
                 throw new RuntimeException(
                         String.format("Batch write for period %s-%d got timeout", period.getLeft(), period.getRight()));
             }
@@ -293,6 +288,7 @@ public class TimeSeriesDistributer {
      * timeout
      */
     private void syncConsumeBatchWriteFutures() {
+        // future: ((PeriodName, PeriodId), success)
         Iterator<Future<Pair<Pair<String, Integer>, Boolean>>> futureIter = futures.iterator();
         log.info("Last {} distribute jobs to finish.", futures.size());
         while (futureIter.hasNext()) {
@@ -304,8 +300,8 @@ public class TimeSeriesDistributer {
                 throw new RuntimeException("Batch write future got timeout");
             }
             futureIter.remove();
-            writeBuffer.remove(res.getLeft());
-            writerStartTime.remove(res.getLeft());
+            // writers: (PeriodName, PeriodId) -> (start time, size)
+            writers.remove(res.getLeft());
             if (!Boolean.TRUE.equals(res.getRight())) {
                 throw new RuntimeException("Batch write of period data failed");
             }
@@ -452,20 +448,16 @@ public class TimeSeriesDistributer {
         this.periodNameField = periodNameField;
     }
 
-    private long getTotalBufferSize() {
-        return getRecordBufferSize(readBuffer) + getRecordBufferSize(writeBuffer);
+    private int getTotalBufferSize() {
+        return getReadBufferSize() + getWriteBufferSize();
     }
 
-    private long getReadBufferSize() {
-        return getRecordBufferSize(readBuffer);
+    private int getReadBufferSize() {
+        return readBuffer.values().stream().collect(Collectors.summingInt(records -> records.size()));
     }
 
-    private long getWriteBufferSize() {
-        return getRecordBufferSize(readBuffer);
-    }
-
-    private long getRecordBufferSize(Map<Pair<String, Integer>, List<GenericRecord>> buffer) {
-        return buffer.values().stream().collect(Collectors.summingLong(records -> records.size()));
+    private int getWriteBufferSize() {
+        return writers.values().stream().collect(Collectors.summingInt(status -> status.getRight()));
     }
 
 
