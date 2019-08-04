@@ -88,6 +88,9 @@ public class PeriodDataDistributor
         // Only retry for non-LedpException
         RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("Attempt #{} to distribute period store", ctx.getRetryCount() + 1);
+            }
             // Cleanup impacted periods in period store
             TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periods);
 
@@ -140,6 +143,10 @@ public class PeriodDataDistributor
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("Attempt #{} to distribute period store", ctx.getRetryCount() + 1);
+            }
+
             // Cleanup impacted periods in period store
             for (String periodName : periods.keySet()) {
                 TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDirs.get(periodName),

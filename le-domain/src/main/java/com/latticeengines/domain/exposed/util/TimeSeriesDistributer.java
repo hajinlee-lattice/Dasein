@@ -428,95 +428,39 @@ public class TimeSeriesDistributer {
      * Getter & Setter
      ******************/
 
-    Configuration getYarnConfig() {
-        return yarnConfig;
-    }
-
     void setYarnConfig(Configuration yarnConfig) {
         this.yarnConfig = yarnConfig;
-    }
-
-    String getInputDir() {
-        return inputDir;
     }
 
     void setInputDir(String inputDir) {
         this.inputDir = standardizeDistributeInputDir(inputDir);
     }
 
-    Map<String, String> getTargetDirs() {
-        return targetDirs;
-    }
-
     void setTargetDirs(Map<String, String> targetDirs) {
         this.targetDirs = standardizeDistributeTgtDirs(targetDirs);
-    }
-
-    Map<String, Set<Integer>> getPeriods() {
-        return periods;
     }
 
     void setPeriods(Map<String, Set<Integer>> periods) {
         this.periods = periods;
     }
 
-    String getPeriodField() {
-        return periodField;
-    }
-
     void setPeriodField(String periodField) {
         this.periodField = periodField;
-    }
-
-    String getPeriodNameField() {
-        return periodNameField;
     }
 
     void setPeriodNameField(String periodNameField) {
         this.periodNameField = periodNameField;
     }
 
-    public AvroFilesIterator getAvroIter() {
-        return avroIter;
-    }
-
-    public Schema getSchema() {
-        return schema;
-    }
-
-    public Map<Pair<String, Integer>, String> getTargetFiles() {
-        return targetFiles;
-    }
-
-    public Map<Pair<String, Integer>, List<GenericRecord>> getReadBuffer() {
-        return readBuffer;
-    }
-
-    public Map<Pair<String, Integer>, List<GenericRecord>> getWriteBuffer() {
-        return writeBuffer;
-    }
-
-    public Map<Pair<String, Integer>, Long> getWriterStartTime() {
-        return writerStartTime;
-    }
-
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    public List<Future<Pair<Pair<String, Integer>, Boolean>>> getFutures() {
-        return futures;
-    }
-
-    public long getTotalBufferSize() {
+    private long getTotalBufferSize() {
         return getRecordBufferSize(readBuffer) + getRecordBufferSize(writeBuffer);
     }
 
-    public long getReadBufferSize() {
+    private long getReadBufferSize() {
         return getRecordBufferSize(readBuffer);
     }
 
-    public long getWriteBufferSize() {
+    private long getWriteBufferSize() {
         return getRecordBufferSize(readBuffer);
     }
 
