@@ -412,6 +412,9 @@ public class TimeSeriesDistributer {
             if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
                 if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    // Throw LedpException to avoid retry -- If somehow some
+                    // background thread is still writing to HDFS, it might mess
+                    // up data in retried job.
                     throw new LedpException(LedpCode.LEDP_41003);
                 }
             }

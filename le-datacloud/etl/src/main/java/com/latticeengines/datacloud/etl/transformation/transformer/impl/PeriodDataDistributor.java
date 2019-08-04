@@ -66,6 +66,14 @@ public class PeriodDataDistributor
         return true;
     }
 
+    /**
+     * For daily store which doesn't have different PeriodName
+     *
+     * @param config
+     * @param step
+     * @param periodDir
+     * @param inputDir
+     */
     private void distributeSinglePeriodStore(PeriodDataDistributorConfig config, TransformStep step, String periodDir,
             String inputDir) {
         // Target table to distribute to
@@ -105,6 +113,15 @@ public class PeriodDataDistributor
         });
     }
 
+    /**
+     * For multi-period store, eg. WeekStore, MonthStore, QuarterStore &
+     * YearStore
+     *
+     * @param config
+     * @param step
+     * @param periodDir
+     * @param inputDir
+     */
     private void distributeMultiPeriodStore(PeriodDataDistributorConfig config, TransformStep step, String periodDir,
             String inputDir) {
         if (MapUtils.isEmpty(config.getTransactionIdxes())) {

@@ -159,6 +159,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
 
     private String[] dailyDataFields = { InterfaceName.Id.name(), InterfaceName.PeriodId.name() };
 
+    // Test data is designed to use Id as identifier
     private Object[][] dailyData1 = new Object[][] { //
             // test case: single txn
             { "T1", 1 }, //
@@ -205,6 +206,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
             { 3 } //
     };
 
+    // Test data is designed to use Id as identifier
     private Object[][] dailyData2 = new Object[][] { //
             // test case: update existing period
             { "T4", 1 }, //
@@ -252,6 +254,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
     private String[] multiDataFields = { InterfaceName.Id.name(), InterfaceName.PeriodId.name(),
             InterfaceName.PeriodName.name() };
 
+    // Test data is designed to use Id as identifier
     private Object[][] multiData1 = new Object[][] { //
             // test case: single txn
             { "T1", 1, PeriodStrategy.Template.Week.name() }, //
@@ -312,6 +315,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
             { 3, PeriodStrategy.Template.Month.name() } //
     };
 
+    // Test data is designed to use Id as identifier
     private Object[][] multiData2 = new Object[][] { //
             // test case: update existing period
             { "T7", 1, PeriodStrategy.Template.Week.name() }, //
@@ -381,6 +385,13 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
         }
     }
 
+    /**
+     * Verify every record and every attribute has expected value
+     *
+     * @param inputData
+     * @param records
+     * @param fields
+     */
     private void verifyDataCorrectness(Object[][] inputData, Iterator<GenericRecord> records, String[] fields) {
         Map<String, List<Object>> expectedMap = Arrays.stream(inputData)
                 .collect(Collectors.toMap(arr -> (String) arr[0], arr -> Arrays.asList(arr)));
@@ -388,6 +399,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
             GenericRecord record = records.next();
             log.info(record.toString());
             Assert.assertNotNull(record);
+            // Test data is designed to use Id as identifier
             Assert.assertNotNull(record.get(InterfaceName.Id.name()));
             String id = record.get(InterfaceName.Id.name()).toString();
             List<Object> expected = expectedMap.get(id);
@@ -397,9 +409,18 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
                             : (record.get(field) instanceof Utf8 ? record.get(field).toString() : record.get(field)))
                     .collect(Collectors.toList());
             Assert.assertEquals(actual, expected);
+            expectedMap.remove(id);
         }
+        Assert.assertTrue(expectedMap.isEmpty());
     }
 
+    /**
+     * Verify PeriodId showing up in all distributed file names cover all the
+     * expected PeriodId
+     *
+     * @param periodStore
+     * @param expectedPeriods
+     */
     private void verifyPeriodPartition(Source periodStore, Set<Integer> expectedPeriods) {
         String sourcePath = hdfsPathBuilder.constructTransformationSourceDir(periodStore, baseSourceVersion).toString();
         List<String> files;
@@ -414,30 +435,45 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
         Assert.assertEquals(actualPeriod, expectedPeriods);
     }
 
-    // input2 is to update period store setup by input1. If there
-    // is overlapped PeriodId between input1 and input2, input1's data with
-    // overlapped PeriodId is wiped out
+    /**
+     * Merge input1 and input2 -- input2 is to update period store setup by
+     * input1. If there is overlapped PeriodId between input1 and input2,
+     * input1's data with overlapped PeriodId is wiped out
+     *
+     * @param input1
+     * @param input2
+     * @param fields
+     * @return
+     */
     private Object[][] mergeInputs(Object[][] input1, Object[][] input2, String[] fields) {
-        int periodFld = IntStream.range(0, fields.length) //
+        int periodFldIdx = IntStream.range(0, fields.length) //
                 .filter(i -> InterfaceName.PeriodId.name().equals(fields[i])) //
                 .findFirst() //
                 .orElse(-1);
-        if (periodFld == -1) {
+        if (periodFldIdx == -1) {
             throw new RuntimeException("Cannot find PeriodId field in fields");
         }
 
         List<Object[]> merged = Arrays.stream(input2) //
                 .collect(Collectors.toList());
-        Set<Integer> periodId = Arrays.stream(input2) //
-                .map(data -> (Integer) data[periodFld]) //
+        Set<Integer> periodId2 = Arrays.stream(input2) //
+                .map(data -> (Integer) data[periodFldIdx]) //
                 .collect(Collectors.toSet());
         merged.addAll(
-                Arrays.stream(input1).filter(data -> !periodId.contains(data[periodFld])) //
+                Arrays.stream(input1).filter(data -> !periodId2.contains(data[periodFldIdx])) //
                         .collect(Collectors.toList()));
         return merged.toArray(new Object[merged.size()][]);
 
     }
 
+    /**
+     * Filter input data by specified PeriodName
+     *
+     * @param input
+     * @param periodName
+     * @param fields
+     * @return
+     */
     private Object[][] filterInputByPeriod(Object[][] input, String periodName, String[] fields) {
         int periodNameFldIdx = IntStream.range(0, fields.length) //
                 .filter(i -> InterfaceName.PeriodName.name().equals(fields[i])) //
@@ -451,6 +487,13 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
                 .toArray(size -> new Object[size][input[0].length]);
     }
 
+    /**
+     * Get all distinct PeriodIds from all the inputs
+     *
+     * @param idFields
+     * @param periodInputs
+     * @return
+     */
     private Set<Integer> getPeriods(String[] idFields, Object[][]... periodInputs) {
         int periodIdFldIdx = IntStream.range(0, idFields.length) //
                 .filter(i -> InterfaceName.PeriodId.name().equals(idFields[i])) //

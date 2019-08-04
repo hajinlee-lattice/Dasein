@@ -81,6 +81,7 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
         cleanupHdfsPath(baseDir);
     }
 
+    // Test data is designed to use Id as identifier
     private Object[][] prepareSinglePeriodStrategyData() {
         Random random = new Random();
         Object[][] arr = new Object[TOTAL][SCHEMA.size()];
@@ -128,6 +129,7 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
 
     // Result verification is based on assumption that total size is large
     // enough that every PeriodName covers all the PeriodIds
+    // Test data is designed to use Id as identifier
     private Object[][] prepareMultiPeriodStrategyData() {
         Random random = new Random();
         Object[][] arr = new Object[TOTAL][SCHEMA.size()];
