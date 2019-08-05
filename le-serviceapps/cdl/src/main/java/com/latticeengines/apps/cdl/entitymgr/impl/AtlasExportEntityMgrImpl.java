@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -83,7 +84,9 @@ public class AtlasExportEntityMgrImpl
         export.setExportType(exportType);
         export.setStatus(MetadataSegmentExport.Status.RUNNING);
         export.setUuid(NamingUtils.uuid(UUID_PREFIX));
+        export.setScheduled(true);
         export.setDatePrefix(exportDateFormat.format(new Date()));
+        export.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
         atlasExportDao.create(export);
         return export;
     }
@@ -97,6 +100,7 @@ public class AtlasExportEntityMgrImpl
         atlasExport.setUuid(NamingUtils.uuid(UUID_PREFIX));
         atlasExport.setStatus(MetadataSegmentExport.Status.RUNNING);
         atlasExport.setDatePrefix(exportDateFormat.format(new Date()));
+        atlasExport.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
         atlasExportDao.create(atlasExport);
         return atlasExport;
     }
