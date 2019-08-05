@@ -41,6 +41,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
                             vm.getMarketoPrograms();
                             break;
                         case "Facebook":
+                            vm.audienceType = "CONTACTS";
                         case "LinkedIn":
                         default:
                             break;

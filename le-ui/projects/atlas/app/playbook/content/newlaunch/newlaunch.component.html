@@ -57,16 +57,18 @@
                 </tr>
                 
                 <tr ng-if="$ctrl.destinationOrg.externalSystemName != 'Marketo'">
-                    <input type="radio"
-                       ng-model="$ctrl.audienceType"
-                       value="ACCOUNTS"> Accounts
-                    <input type="radio"
-                       ng-model="$ctrl.audienceType"
-                       value="CONTACTS"> Contacts
+                    <div ng-if="$ctrl.destinationOrg.externalSystemName == 'LinkedIn'">
+                        <input type="radio"
+                           ng-model="$ctrl.audienceType"
+                           value="ACCOUNTS"> Accounts
+                        <input type="radio"
+                           ng-model="$ctrl.audienceType"
+                           value="CONTACTS"> Contacts
+                    </div>
 
                     <div> After this audience is sent to {{$ctrl.destinationOrg.externalSystemName}}, it will take 24 - 48 hours to be available for use. </div>
 
-                    <span> <p class="red-asterisk"> * </p> {{$ctrl.destinationOrg.externalSystemName}} Audience Name </span>
+                    <span> <p class="red-asterisk"> * </p> {{$ctrl.destinationOrg.externalSystemName}} Audience Name: </span>
                     
 
                     <input type="text" ng-model="$ctrl.audienceName" class="form-control" ng-change="$ctrl.updatePlayStore()" maxlength="255">
