@@ -253,6 +253,22 @@ angular
 						vm.modelId,
 						vm.ratingEngine
 					);
+
+                    if (!$stateParams.viewingIteration) {
+                        RatingsEngineStore.setValidation("training", false);
+                        RatingsEngineStore.setValidation("refine", false);
+
+                        vm.getPurchasesCount(
+                            vm.engineId,
+                            vm.modelId,
+                            vm.ratingEngine
+                        );
+                        vm.getRecordsCount(
+                            vm.engineId,
+                            vm.modelId,
+                            vm.ratingEngine
+                        );
+                    }
 				}
 			};
 
@@ -441,8 +457,8 @@ angular
 				}
 
 				if (valid == true) {
-					RatingsEngineStore.setValidation("training", true);
-					RatingsEngineStore.setValidation("refine", true);
+					// RatingsEngineStore.setValidation("training", true);
+					// RatingsEngineStore.setValidation("refine", true);
 					vm.recordsCountReturned = false;
 					vm.purchasesCountReturned = false;
 
