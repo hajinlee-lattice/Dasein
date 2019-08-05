@@ -31,6 +31,7 @@ angular
 
 			angular.extend(vm, {
 				viewingIteration: $stateParams.viewingIteration,
+                disableRemodelButton: true,
 				spendCriteria: "GREATER_OR_EQUAL",
 				spendValue: 1500,
 				quantityCriteria: "GREATER_OR_EQUAL",
@@ -247,16 +248,6 @@ angular
 					].modelingStrategy;
 
 				if (vm.engineType == "cross_sell") {
-					vm.getRecordsCount(
-						vm.engineId,
-						vm.modelId,
-						vm.ratingEngine
-					);
-					vm.getPurchasesCount(
-						vm.engineId,
-						vm.modelId,
-						vm.ratingEngine
-					);
 					vm.getScoringCount(
 						vm.engineId,
 						vm.modelId,
@@ -280,6 +271,11 @@ angular
 				});
 			};
 			vm.getPurchasesCount = function(engineId, modelId, ratingEngine) {
+
+                RatingsEngineStore.setValidation("training", false);
+                vm.disableRemodelButton = true;
+                vm.remodelingProgress = false;
+
 				vm.purchasesCountReturned = false;
 				RatingsEngineStore.getTrainingCounts(
 					engineId,
@@ -287,8 +283,10 @@ angular
 					ratingEngine,
 					"EVENT"
 				).then(function(count) {
-                    if (count < 50) {
-                        RatingsEngineStore.setValidation("training", false);
+                    if (count >= 50) {
+                        RatingsEngineStore.setValidation("training", true);
+                        vm.disableRemodelButton = false;
+                        vm.remodelingProgress = false;
                     }
 					vm.purchasesCount = count;
 					vm.purchasesCountReturned = true;
@@ -570,6 +568,9 @@ angular
 			// ============================================================================================
 
 			vm.formOnChange = function() {
+                vm.disableRemodelButton = true;
+                RatingsEngineStore.setValidation("training", false);
+
 				$timeout(function() {
 					if (vm.engineType === "cross_sell") {
 						vm.validateCrossSellForm();
@@ -596,6 +597,7 @@ angular
 						AI: vm.ratingModel
 					};
 
+                vm.disableRemodelButton = true;
 				vm.remodelingProgress = true;
 
 				RatingsEngineStore.setRemodelIteration(ratingModel);
