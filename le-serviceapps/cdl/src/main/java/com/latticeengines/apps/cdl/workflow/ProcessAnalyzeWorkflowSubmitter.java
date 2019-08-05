@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -135,9 +136,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("WorkflowJob created for customer=%s with pid=%s", customerSpace, pidWrapper.getPid()));
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
-        } else if (!request.skipMigrationCheck && migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace))) {
-            log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
-            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
+        }
+        boolean tenantInMigration = false;
+        if (!request.skipMigrationCheck) {
+            tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
+            if (tenantInMigration) {
+                log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
+                throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
+            }
         }
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
@@ -161,7 +167,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } catch (Exception e) {
             log.warn("Failed to check timeout configuration from DB session.", e);
         }
-
+        if (tenantInMigration) {
+            try {
+                return submitWithOnlyImportActions(customerSpace, request, datafeed, pidWrapper);
+            } catch (Exception e) {
+                log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
+                        + ExceptionUtils.getStackTrace(e));
+                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+                throw new RuntimeException(String.format("Failed to submit %s's P&A migration workflow", customerSpace), e);
+            }
+        }
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
                 request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit());
 
@@ -550,5 +565,45 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+        List<Long> importActionIds = getImportActionIds(customerSpace);
+        Status datafeedStatus = datafeed.getStatus();
+
+        if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
+            String errorMessage;
+            if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
+                errorMessage = String.format(
+                        "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
+            } else {
+                errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
+                        customerSpace, datafeedStatus.getName());
+            }
+
+            throw new RuntimeException(errorMessage);
+        }
+
+        Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
+
+        log.info(String.format("customer %s data feed %s initial status: %s", customerSpace, datafeed.getName(),
+                initialStatus.getName()));
+
+        log.info(String.format("Submitting migration PA workflow for customer %s", customerSpace));
+
+        updateActions(importActionIds, pidWrapper.getPid());
+
+        String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, importActionIds,
+                initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+
+        configuration.setFailingStep(request.getFailingStep());
+
+        return workflowJobService.submit(configuration, pidWrapper.getPid());
+    }
+
+    private List<Long> getImportActionIds(String customerSpace) {
+        // TODO get import action Ids using migrationTrackEntityMgr
+        return new ArrayList<>();
     }
 }
