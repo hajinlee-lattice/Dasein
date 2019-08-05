@@ -334,7 +334,7 @@ public enum LedpCode {
     LEDP_18206("Play validation failure: Segment is empty"), LEDP_18207(
             "Play validation failure: Segment Name is empty"), LEDP_18208(
                     "CSV file name validations failed: CSV injection in the file name or headers"), //
-    LEDP_18210("You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit help.lattice-engines.com"),
+    LEDP_18210("You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit <a href=\"http://help.lattice-engines.com/\">help.lattice-engines.com</a>"),
     LEDP_18211("Unable to cancel this action: {0}"),//
     LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."),
     LEDP_18213("Failed while generating playlaunch export file: {0}."),
