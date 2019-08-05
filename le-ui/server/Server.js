@@ -583,11 +583,15 @@ class Server {
         if (this.httpServer) {
             this.httpServer.listen(config.protocols.http, err => {
                 console.log(
-                    chalk.green(config.TIMESTAMP + ">") +
-                    " LISTENING: http://localhost:" +
-                    config.protocols.http
-                );
-
+					chalk.red(config.TIMESTAMP + ">") +
+						" LISTENING: http://localhost:" +
+						config.protocols.http
+				);
+                console.log(
+					chalk.white.bgRed(
+						"If you are developing an IFRAME with https protocol use the https protocol"
+					)
+				);
                 cb(err, {
                     proto: "http",
                     port: config.protocols.http,
