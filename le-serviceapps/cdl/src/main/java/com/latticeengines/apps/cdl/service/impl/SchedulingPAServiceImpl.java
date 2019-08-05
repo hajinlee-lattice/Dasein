@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -60,6 +62,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
+import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component("SchedulingPAService")
@@ -86,6 +89,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Inject
     private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
+
+    @Inject
+    private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
     @Lazy
     @Inject
@@ -135,7 +141,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         log.debug(String.format("Current build number is : %s.", currentBuildNumber));
 
         Map<Long, ActionStat> actionStats = getActionStats();
+        Set<Long> migrationTenantPids = getMigrationTenantPids();
         Set<String> skippedTestTenants = new HashSet<>();
+        Set<String> skippedMigrationTenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
         log.debug("Action stats = {}", actionStats);
 
@@ -147,6 +155,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             if (isTestTenant(simpleDataFeed)) {
                 // not scheduling for test tenants
                 skippedTestTenants.add(simpleDataFeed.getTenant().getId());
+                continue;
+            }
+            if (isMigrationTenant(simpleDataFeed.getTenant(), migrationTenantPids)) {
+                // skip entity match migration tenants
+                skippedMigrationTenants.add(simpleDataFeed.getTenant().getId());
                 continue;
             }
 
@@ -224,7 +237,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
 
         log.debug("Skipped test tenants = {}", skippedTestTenants);
-        log.info("Number of skipped test tenants = {}", skippedTestTenants.size());
+        // print all for migration tenants, shouldn't be too many at the same time
+        log.info("Number of skipped test tenants = {}. Skipped migration tenants = {}", skippedTestTenants.size(),
+                skippedMigrationTenants);
 
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
@@ -377,6 +392,22 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     }
                     return new ActionStat(s1.getTenantPid(), first, last);
                 }));
+    }
+
+    /*
+     * helpers for entity match migration
+     */
+    private Set<Long> getMigrationTenantPids() {
+        try {
+            return new HashSet<>(migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.STARTED));
+        } catch (Exception e) {
+            log.error("Failed to retrieve migration tenants", e);
+            return Collections.emptySet();
+        }
+    }
+
+    private boolean isMigrationTenant(@NotNull Tenant tenant, @NotNull Set<Long> migrationTenantPids) {
+        return tenant.getPid() != null && migrationTenantPids.contains(tenant.getPid());
     }
 
     private Date getInvokeTime(DataFeedExecution execution, int invokeHour, Date tenantCreateDate) {
