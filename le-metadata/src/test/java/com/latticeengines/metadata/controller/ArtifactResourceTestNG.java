@@ -31,17 +31,17 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ArtifactResourceTestNG.class);
 
     @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() {
         super.setup();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void createArtifact() {
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void validateArtifactWithError() throws IOException {
         String hdfsPath = "/tmp/artifact";
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
@@ -65,7 +65,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void validateArtifactWithoutError() throws IOException {
         String hdfsPath = "/tmp/artifact";
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
@@ -85,7 +85,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(error, "");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void getArtifactByPath() throws IOException {
         String hdfsPath = "/tmp/artifact";
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
