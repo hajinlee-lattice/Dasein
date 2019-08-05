@@ -113,7 +113,7 @@ public class AttributeRepository {
         table.getAttributes().forEach(attr -> {
             ColumnMetadata metadata = new ColumnMetadata();
             String javaClz = AttributeUtils.toJavaClass(attr.getPhysicalDataType(), attr.getDataType());
-            if ("string".equalsIgnoreCase(javaClz)) {
+            if (!"string".equalsIgnoreCase(javaClz)) {
                 metadata.setJavaClass(javaClz);
             }
             metadata.setNumBits(attr.getNumOfBits());
