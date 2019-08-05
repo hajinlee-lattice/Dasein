@@ -465,12 +465,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.info("Tenant = {}, schedulerEnabled = {}, scheduleNowClicked = {}, paRunning = {}",
                 customerSpace.toString(), schedulingStatus.isSchedulerEnabled(), scheduleNowClicked, paRunning);
         // currently only consider schedule now & pa not running
-        boolean tenantScheduled = schedulingStatus.isSchedulerEnabled() && scheduleNowClicked;
+        boolean tenantScheduled = schedulingStatus.isSchedulerEnabled() && scheduleNowClicked && !paRunning;
         job.setSchedulingInfo(new Job.SchedulingInfo(schedulingStatus.isSchedulerEnabled(), tenantScheduled));
 
         // change the job status for scheduled tenant (when job is running, status
         // should be ready)
-        if (tenantScheduled && !paRunning) {
+        if (tenantScheduled) {
             job.setJobStatus(JobStatus.PENDING);
             job.getSchedulingInfo().setMessage(SCHEDULED_MESSAGE);
         }
