@@ -20,7 +20,8 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
     @Autowired
     protected Configuration yarnConfiguration;
 
-    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedLines);
+    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedLines,
+                                  StringBuilder stastistics);
 
 
     public InputFileValidationService(String serviceName) {

@@ -632,13 +632,13 @@ public class RatingEngineResource {
     }
 
     // -------------------
-    // RatingEngine dependent attribute lookup
-    // get all attributes related to all models/rating engines created in customer space
+    // RatingEngine
+    // get all models created in customer space
     // -------------------
-    @GetMapping(value = "/dependentattrs")
+    @GetMapping(value = "/allmodels")
     @ResponseBody
-    @ApiOperation(value = "get all attributes referenced by all models in customerspace")
-    public List<AttributeLookup> getDependentAttrs(@PathVariable String customerSpace) {
-        return ratingEngineService.getDependentAttrs();
+    @ApiOperation(value = "get all models in customer space")
+    public List<RatingModel> getAllModels(@PathVariable String customerSpace) {
+        return ratingEngineService.getAllRatingModels();
     }
 }

@@ -42,7 +42,7 @@ public class ContactFileValidationService
 
     @Override
     public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
-            List<String> processedRecords) {
+            List<String> processedRecords, StringBuilder stastistics) {
         // first check entity match
 
         boolean enableEntityMatch = contactFileValidationServiceConfiguration.isEnableEntityMatch();

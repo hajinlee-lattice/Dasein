@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
+import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -78,9 +79,10 @@ public class ProductFileValidationService
     @Inject
     private SegmentProxy segmentProxy;
 
+
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
-            List<String> processedRecords) {
+            List<String> processedRecords, StringBuilder statistics) {
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
@@ -105,7 +107,8 @@ public class ProductFileValidationService
         // append error message to error file
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
-            errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter, productFileValidationServiceConfiguration.getCustomerSpace());
+            errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter,
+                    productFileValidationServiceConfiguration.getCustomerSpace(), statistics);
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
@@ -167,11 +170,13 @@ public class ProductFileValidationService
     }
 
     private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            CSVPrinter csvFilePrinter, CustomerSpace space) throws IOException {
+            CSVPrinter csvFilePrinter, CustomerSpace space, StringBuilder statistics) throws IOException {
         long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
+        // the product map after rollup
         Map<String, Product> inputProductMap = new HashMap<>();
         boolean foundProductBundle = false;
+        boolean foundProductHierarchy = false;
         for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
             Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
@@ -195,6 +200,7 @@ public class ProductFileValidationService
 
 
             if (inputProduct.getProductCategory() != null) {
+                foundProductHierarchy = true;
                 String category = inputProduct.getProductCategory();
                 String family = inputProduct.getProductFamily();
                 String line = inputProduct.getProductLine();
@@ -249,10 +255,15 @@ public class ProductFileValidationService
                         inputProductMap);
             }
         }
+
+        if (foundProductHierarchy && errorLine != 0L) {
+            generateStatistics(errorLine, 0, 0, statistics);
+        }
         if (foundProductBundle) {
 
+            // get inout bundle to product list mapping
             Map<String, List<Product>> inputBundleToProductList =
-                    inputProducts.values().stream().filter(product -> ProductType.Bundle.name().equals(product.getProductType())&&
+                    inputProductMap.values().stream().filter(product -> ProductType.Bundle.name().equals(product.getProductType())&&
                             StringUtils.isNotBlank(product.getProductBundle())).collect(Collectors.groupingBy(Product::getProductBundle));
             Map<String, List<Product>> currentBundleToProductList =
                     currentProducts.stream().filter(product -> ProductType.Bundle.name().equals(product.getProductType())&&
@@ -263,30 +274,69 @@ public class ProductFileValidationService
                     currentBundleToProductList.keySet().stream().filter(bundle -> !inputBundleToProductList.containsKey(bundle)).collect(Collectors.toSet());
 
             List<MetadataSegment> segments = segmentProxy.getMetadataSegments(space.toString());
-            List<AttributeLookup> dependentAttrs = segmentProxy.findDependingAttributes(space.toString(), segments);
-            dependentAttrs.addAll(ratingEngineProxy.getDependentAttrs(space.toString()));
-            Set<String>  attrInSegmentOrModel = dependentAttrs.stream().map(attr -> attr.getAttribute()).collect(Collectors.toSet());
-            List<RatingEngineSummary> ratingEngines = ratingEngineProxy.getRatingEngineSummaries(space.toString());
+            Map<String, Set<String>> attrToSegName = new HashMap<>();
+            // resolve attribute to segment name mapping
+            if (CollectionUtils.isNotEmpty(segments)) {
+                for (MetadataSegment metadataSegment : segments) {
+                    SegmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
+                    Set<AttributeLookup> attrLookups = metadataSegment.getSegmentAttributes();
+                    for (AttributeLookup attrLookup : attrLookups) {
+                        if (attrToSegName.containsKey(attrLookup.getAttribute())) {
+                            attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
+                        } else {
+                            attrToSegName.put(attrLookup.getAttribute(),
+                                    Collections.singleton(metadataSegment.getDisplayName()));
+                        }
+                    }
+                }
+            }
 
+            List<RatingModel> models = ratingEngineProxy.getAllModels(space.toString());
+            //resolve attribute to model name mapping
+            Map<String, Set<String>> attrToModelName = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(models)) {
+                for (RatingModel model : models) {
+                    Set<AttributeLookup>  attrLookups = model.getRatingModelAttributes();
+                    for (AttributeLookup attrLookup : attrLookups) {
+                        // model name means rating engine name in page here
+                        if (model.getRatingEngine() != null) {
+                            if (attrToModelName.containsKey(attrLookup.getAttribute())) {
+                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
+                            } else {
+                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
+                                attrToModelName.put(attrLookup.getAttribute(),
+                                        Collections.singleton(model.getRatingEngine().getDisplayName()));
+                            }
+                        }
+                    }
+                }
+            }
+            List<RatingEngineSummary> ratingEngines = ratingEngineProxy.getRatingEngineSummaries(space.toString());
             List<RatingEngineSummary> xSellSummaries =
                     ratingEngines.stream().filter(ratingEngine -> RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())).collect(Collectors.toList());
 
-            boolean existActiveModel =
-                    xSellSummaries.stream().anyMatch(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus()));
+            List<RatingEngineSummary> activeXSellModel =
+                    xSellSummaries.stream().filter(ratingEngine -> RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus())).collect(Collectors.toList());
+
+            int missingBundleInUse = 0;// record num of bundle that's removed and also referenced by model or segment
+            int bundleWithDiffSku = 0; // record num of bundle which have different sku
 
             log.info("bundle that will be removed " + JsonUtils.serialize(bundleToBeRemoved));
             // error out all bundle to be removed if existing active c-shell
             // generate warning for product list directly referenced by C-Sell model
-            if (existActiveModel) {
+            if (CollectionUtils.isNotEmpty(activeXSellModel)) {
+                Set<String> activeXsellModelNames =
+                        activeXSellModel.stream().map(RatingEngineSummary::getDisplayName).collect(Collectors.toSet());
                 for (String bundle : bundleToBeRemoved) {
-                    String errMsg = String.format("Error: %s can't be removed as exists active CE model",
-                            bundle);
+                    String errMsg = String.format("Error: \"%s\" can't be removed as existing active CE model %s",
+                            bundle, StringUtils.join(activeXsellModelNames));
                     csvFilePrinter.printRecord("", "", errMsg);
                     errorLine++;
                 }
             }
             if (CollectionUtils.isNotEmpty(xSellSummaries)) {
                 // retrieve the product list in cross-sell model
+                Map<String, Set<String>> bundleIdToModelName = new HashMap<>();
                 Set<String> productsInUse = new HashSet<>();
                 for (RatingEngineSummary summary : xSellSummaries) {
                     String engineId = summary.getId();
@@ -298,57 +348,71 @@ public class ProductFileValidationService
                             AdvancedModelingConfig config = ai.getAdvancedModelingConfig();
                             if (config instanceof CrossSellModelingConfig) {
                                 CrossSellModelingConfig csConfig = (CrossSellModelingConfig) config;
-                                //get the product list referenced by cross-sell model directly
+                                //get the product list referenced by cross-sell model directly, the content here is
+                                // the bundle id for product with bundle type
                                 if (CollectionUtils.isNotEmpty(csConfig.getTargetProducts())) {
                                     productsInUse.addAll(csConfig.getTargetProducts());
                                 }
                                 if (CollectionUtils.isNotEmpty(csConfig.getTrainingProducts())) {
                                     productsInUse.addAll(csConfig.getTrainingProducts());
                                 }
+                                // this generate bundle id to model name mapping
+                                productsInUse.forEach(product -> {
+                                    if (bundleIdToModelName.get(product) == null) {
+                                        bundleIdToModelName.put(product,
+                                                Collections.singleton(summary.getDisplayName()));
+                                    } else {
+                                        bundleIdToModelName.get(product).add(summary.getDisplayName());
+                                    }
+                                });
                             }
                         }
-
                     }
                 }
                 for (String bundle : bundleToBeRemoved) {
-                    String generatedId =
-                            HashUtils.getCleanedString(HashUtils.getShortHash(ProductUtils.getCompositeId(ProductType.Analytic.name(), null,
-                                    bundle, bundle,
-                                    null,
-                                    null,
-                                    null)));
+                    // there are two type of compositeId for analytic, For product has bundle name, logically, the
+                    // method will take bundle name as product name, and generate composite id
+                    String compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name(), null, bundle,
+                            bundle, null, null, null);
+                    if (compositeId == null) {
+                        continue;
+                    }
+                    // generate the bundle id
+                    String generatedId = HashUtils.getCleanedString(HashUtils.getShortHash(compositeId));
                     log.info("generate id is " + generatedId);
-                    if (CollectionUtils.isNotEmpty(productsInUse) && productsInUse.contains(generatedId)) {
-                        String errMsg = String.format("Warning: %s will be removed while also referenced by model",
-                                bundle);
+                    if (bundleIdToModelName.containsKey(generatedId)) {
+                        String errMsg = String.format("Error: \"%s\" will be removed while also referenced by model %s",
+                                bundle, StringUtils.join(bundleIdToModelName.get(generatedId)));
                         csvFilePrinter.printRecord("", "", errMsg);
+                        missingBundleInUse++;
                     }
                 }
             }
 
-            String allAttrString = StringUtils.join(attrInSegmentOrModel);
-            log.info("current string in segment or model is " + allAttrString);
             for (String bundle : bundleToBeRemoved) {
                 List<Product> productList = currentBundleToProductList.get(bundle);
-
                 for (Product product : productList) {
                     String bundleId = product.getProductBundleId();
+                    // caution: bundle id is part of attribute name, get segment name or model name by fuzzy match
+                    String keyForSegment =
+                            attrToSegName.keySet().stream().filter(key -> key.contains(bundleId)).findFirst().orElse(null);
+                    String keyForModel =
+                            attrToModelName.keySet().stream().filter(key -> key.contains(bundleId)).findFirst().orElse(null);
+                    Set<String> segmentNames = attrToSegName.getOrDefault(keyForSegment, new HashSet<>());
+                    Set<String> modelNames = attrToModelName.getOrDefault(keyForModel, new HashSet<>());
                     // case that attr in old while not in new, also there are segment or model, error
-                    if (allAttrString.contains(bundleId)) {
-                        String errMsg = String.format("Error: %s which is referenced by segment or models can't be " +
-                                        "removed.",
-                                bundle);
+                    if (CollectionUtils.isNotEmpty(segmentNames) || CollectionUtils.isNotEmpty(modelNames)) {
+                        String segmentNameStr = CollectionUtils.isNotEmpty(segmentNames) ? "" :
+                                StringUtils.join(segmentNames);
+                        String modelNameStr = CollectionUtils.isEmpty(modelNames) ? "" : StringUtils.join(modelNames);
+                        String errMsg = String.format("Error: \"%s\" which is referenced by segment %s or models %s " +
+                                        "can't be removed.", bundle, segmentNameStr, modelNameStr);
                         csvFilePrinter.printRecord("", "", errMsg);
-                        errorLine++;
-                    } else {
-                        // case that attr in old while not in new, exist no segment or model, warning
-                        String errMsg = String.format("Info: %s will be removed",
-                                bundle);
-                        csvFilePrinter.printRecord("", "", errMsg);
-                        errorLine++;
+                        missingBundleInUse++;
                     }
                 }
             }
+            errorLine += missingBundleInUse;
 
             // the relationship between Bundle and sku id is one to manny,  For each Bundle in old AND in new, compare
             // the list of skus in the bundle to generate warnings
@@ -357,14 +421,15 @@ public class ProductFileValidationService
                 if (currentBundleToProductList.containsKey(bundle)) {
                     List<Product> inputList = inputBundleToProductList.get(bundle);
                     List<Product> currentList = currentBundleToProductList.get(bundle);
-                    String errMsg = String.format("Warning: %s changed, Remodel may be needed for accurate scores",
+                    String errMsg = String.format("Warning: \"%s\" changed, Remodel may be needed for accurate scores",
                             bundle);
                     if (inputList.size() != currentList.size()) {
                         csvFilePrinter.printRecord("", "", errMsg);
+                        bundleWithDiffSku++;
                         continue;
                     }
-                    Collections.sort(inputList, Comparator.comparing(Product::getProductId));
-                    Collections.sort(currentList, Comparator.comparing(Product::getProductId));
+                    inputList.sort(Comparator.comparing(Product::getProductId));
+                    currentList.sort(Comparator.comparing(Product::getProductId));
                     boolean change = false;
                     for (int i=0; i< inputList.size(); i++) {
                         Product pro1 = inputList.get(i);
@@ -376,12 +441,32 @@ public class ProductFileValidationService
                     }
                     if (change) {
                         csvFilePrinter.printRecord("", "", errMsg);
+                        bundleWithDiffSku++;
                     }
                 }
+            }
+            // generate statistics info
+            if (errorLine != 0L) {
+                generateStatistics(errorLine, missingBundleInUse, bundleWithDiffSku, statistics);
             }
 
         }
         return errorLine;
+    }
+
+    private void generateStatistics(long errorLine, int missingBundleInUse, int bundleWithDiffSku,
+                                    StringBuilder statistics) {
+        statistics.append(String.format("Import failed because there were %s errors:", String.valueOf(errorLine)));
+        if (missingBundleInUse != 0) {
+            statistics.append(String.format("%s missing product bundles in use (this import will " +
+            "completely replace the previous one)", String.valueOf(missingBundleInUse)));
+        }
+        if (bundleWithDiffSku != 0) {
+            statistics.append(String.format(",%s product bundle has different product SKUs. Dependant models will " +
+                    "need" +
+                    " to be remodelled to get accurate" +
+                    " scores.", String.valueOf(missingBundleInUse)));
+        }
     }
 
     private Product mergeSpendingProduct(String id, String name, String categoryId, String familyId, String lineId,

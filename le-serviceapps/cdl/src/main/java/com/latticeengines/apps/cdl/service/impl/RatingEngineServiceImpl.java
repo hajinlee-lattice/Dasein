@@ -1033,8 +1033,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AttributeLookup> getDependentAttrs() {
-        Set<AttributeLookup> attrs = new HashSet<>();
+    public List<RatingModel> getAllRatingModels() {
+        List<RatingModel> models = new ArrayList<>();
         RatingModelService<RatingModel> ratingModelService;
         List<RatingEngine> ratingEngines = getAllRatingEngines();
         if (ratingEngines != null) {
@@ -1048,17 +1048,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     if (ratingModels != null) {
                         for (RatingModel ratingModel : ratingModels) {
                             ratingModelService.findRatingModelAttributeLookups(ratingModel);
-                            Set<AttributeLookup> attributeLookups = ratingModel.getRatingModelAttributes();
-                            if (attributeLookups != null) {
-                                attrs.addAll(attributeLookups);
-                            }
                         }
+                        models.addAll(ratingModels);
                     }
                 }
             }
         }
 
-        return new ArrayList<>(attrs);
+        return models;
     }
 
     @SuppressWarnings("unchecked")
