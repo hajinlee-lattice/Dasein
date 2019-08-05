@@ -471,7 +471,6 @@ angular.module('lp.ratingsengine')
 
 
     this.saveIteration = function(stateToValidate) {
-
         var deferred = $q.defer(),
             ratingEngine = RatingsEngineStore.getRatingEngine(),
             engineId = ratingEngine.id,
@@ -508,8 +507,6 @@ angular.module('lp.ratingsengine')
                 if (success) {
 
                     var enrichments = RatingsEngineStore.getIterationEnrichments();
-
-                    console.log(enrichments);
 
                     RatingsEngineService.launchModeling(engineId, modelId, enrichments).then(function(applicationId){
 
