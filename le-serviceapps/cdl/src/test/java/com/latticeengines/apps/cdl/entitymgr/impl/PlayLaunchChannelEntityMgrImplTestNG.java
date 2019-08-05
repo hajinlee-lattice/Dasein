@@ -32,7 +32,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void testGetPreCreate() {
-        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllScheduledChannels();
+        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
         Assert.assertNotNull(channels);
     }
 
