@@ -67,8 +67,8 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonIgnore
-    @JoinColumn(name = "SEGMENT_NAME")
+    @JsonProperty("segment_name")
+    @Column(name = "SEGMENT_NAME")
     private String segmentName;
 
     @JsonProperty("export_type")
@@ -129,7 +129,7 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
 
     @JsonProperty("scheduled")
     @Column(name = "SCHEDULED", nullable = false)
-    private Boolean scheduled;
+    private boolean scheduled;
 
     @JsonProperty("cleanup_by")
     @Column(name = "CLEANUP_BY", nullable = false)
