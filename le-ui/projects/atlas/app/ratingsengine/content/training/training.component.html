@@ -225,9 +225,9 @@
             ng-click="$ctrl.backToModel()">Back to Model</button>
         <button 
             class="button blue-button"
-            ng-class="{disabled: $ctrl.remodelingProgress}"
+            ng-class="{disabled: $ctrl.disableRemodelButton}"
             ng-click="$ctrl.remodelIteration()"
-            ng-disabled="$ctrl.remodelingProgress">
+            ng-disabled="$ctrl.disableRemodelButton">
             <i ng-if="$ctrl.remodelingProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
             Remodel
         </button>
