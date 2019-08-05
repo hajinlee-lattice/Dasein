@@ -22,15 +22,11 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
         private ImportTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ImportTemplateMigrateStepConfiguration();
         private ConvertBatchStoreToImportWorkflowConfiguration.Builder convertBatchStoreConfigurationBuilder =
                 new ConvertBatchStoreToImportWorkflowConfiguration.Builder();
-//        private MigrateTransactionImportStepConfiguration migrateTransactionImportStepConfiguration = new MigrateTransactionImportStepConfiguration();
-//        private RegisterImportActionStepConfiguration registerImportActionStepConfiguration = new RegisterImportActionStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             importTemplateMigrateStepConfiguration.setCustomerSpace(customerSpace);
             convertBatchStoreConfigurationBuilder.customer(customerSpace);
-//            migrateTransactionImportStepConfiguration.setCustomerSpace(customerSpace);
-//            registerImportActionStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -38,15 +34,12 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importTemplateMigrateStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             convertBatchStoreConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
-//            migrateTransactionImportStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-//            registerImportActionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importTemplateMigrateStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             convertBatchStoreConfigurationBuilder.microServiceHostPort(microServiceHostPort);
-//            registerImportActionStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -60,11 +53,8 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             if (CollectionUtils.isEmpty(dataFeedTaskList)) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
                 convertBatchStoreConfigurationBuilder.skipConvert(true);
-//                migrateTransactionImportStepConfiguration.setSkipStep(true);
-//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
                 importTemplateMigrateStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
-//                migrateTransactionImportStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
             }
             return this;
         }
@@ -73,10 +63,7 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             if (action == null) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
                 convertBatchStoreConfigurationBuilder.skipConvert(true);
-//                migrateTransactionImportStepConfiguration.setSkipStep(true);
-//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
-//                registerImportActionStepConfiguration.setActionPid(action.getPid());
                 convertBatchStoreConfigurationBuilder.actionPid(action.getPid());
             }
             return this;
@@ -88,8 +75,6 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             migrateImportServiceConfiguration.setMigrateTrackingPid(trackingPid);
             migrateImportServiceConfiguration.setEntity(BusinessEntity.Transaction);
             convertBatchStoreConfigurationBuilder.convertBatchStoreServiceConfiguration(migrateImportServiceConfiguration);
-//            migrateTransactionImportStepConfiguration.setMigrateTrackingPid(trackingPid);
-//            registerImportActionStepConfiguration.setMigrateTrackingPid(trackingPid);
             return this;
         }
 
@@ -97,11 +82,8 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
             configuration.setContainerConfiguration("transactionImportsMigrationWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreConfigurationBuilder.entity(BusinessEntity.Transaction);
-//            registerImportActionStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(importTemplateMigrateStepConfiguration);
             configuration.add(convertBatchStoreConfigurationBuilder.build());
-//            configuration.add(migrateTransactionImportStepConfiguration);
-//            configuration.add(registerImportActionStepConfiguration);
             return configuration;
         }
     }

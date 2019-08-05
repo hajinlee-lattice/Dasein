@@ -23,9 +23,6 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
     @Inject
     private ActionProxy actionProxy;
 
-//    @Inject
-//    private MigrateTrackingProxy migrateTrackingProxy;
-
     @SuppressWarnings("unchecked")
     @Override
     public void execute() {
@@ -42,11 +39,6 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
         if (action == null) {
             throw new RuntimeException("Cannot find action with PID: " + actionPid);
         }
-//        ImportMigrateTracking importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),
-//                configuration.getMigrateTrackingPid());
-//        if (importMigrateTracking == null || importMigrateTracking.getReport() == null) {
-//            throw new RuntimeException("Migrate Tracking Record is not correctly created!");
-//        }
 
         ImportActionConfiguration importConfig = new ImportActionConfiguration();
 
@@ -57,24 +49,6 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
                 configuration.getConvertServiceConfig()));
         importConfig.setRegisteredTables(convertBatchStoreService.getRegisteredDataTables(customerSpace.toString(),
                 configuration.getConvertServiceConfig()));
-//        switch (configuration.getEntity()) {
-//            case Account:
-//                i
-//                break;
-//            case Contact:
-//                importConfig.setDataFeedTaskId(importMigrateTracking.getReport().getOutputContactTaskId());
-//                importConfig.setImportCount(importMigrateTracking.getReport().getContactCounts());
-//                importConfig.setRegisteredTables(importMigrateTracking.getReport().getContactDataTables());
-//                break;
-//            case Transaction:
-//                importConfig.setDataFeedTaskId(importMigrateTracking.getReport().getOutputTransactionTaskId());
-//                importConfig.setImportCount(importMigrateTracking.getReport().getTransactionCounts());
-//                importConfig.setRegisteredTables(importMigrateTracking.getReport().getTransactionDataTables());
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Not supported Entity for migrate!");
-//
-//        }
 
         action.setActionConfiguration(importConfig);
         actionProxy.updateAction(customerSpace.toString(), action);

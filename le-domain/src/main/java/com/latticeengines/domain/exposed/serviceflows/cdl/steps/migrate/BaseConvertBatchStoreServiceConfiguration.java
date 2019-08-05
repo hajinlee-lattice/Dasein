@@ -11,7 +11,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = MigrateImportServiceConfiguration.class, name = "MigrateImportServiceConfiguration")})
+        @JsonSubTypes.Type(value = MigrateImportServiceConfiguration.class, name = "MigrateImportServiceConfiguration"),
+        @JsonSubTypes.Type(value = ConvertBatchStoreToImportServiceConfiguration.class, name = "ConvertBatchStoreToImportServiceConfiguration")})
 public class BaseConvertBatchStoreServiceConfiguration {
 
     @JsonProperty("entity")

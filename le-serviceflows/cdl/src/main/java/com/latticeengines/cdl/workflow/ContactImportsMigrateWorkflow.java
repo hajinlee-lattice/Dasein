@@ -24,18 +24,10 @@ public class ContactImportsMigrateWorkflow extends AbstractWorkflow<ContactImpor
     @Inject
     private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
-//    @Inject
-//    private MigrateContactImportWrapper migrateContactImportsWrapper;
-//
-//    @Inject
-//    private RegisterImportActionStep registerImportActionStep;
-
     @Override
     public Workflow defineWorkflow(ContactImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(contactTemplateMigrateStep)
-//                .next(migrateContactImportsWrapper)
-//                .next(registerImportActionStep)
                 .next(convertBatchStoreToImportWorkflow)
                 .build();
     }

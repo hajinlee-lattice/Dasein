@@ -18,7 +18,7 @@ public class MigrateTrackingProxy extends MicroserviceRestApiProxy implements Pr
         super("cdl");
     }
 
-    public ImportMigrateTracking creatMigrateTracking(String customerSpace) {
+    public ImportMigrateTracking createMigrateTracking(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/create", shortenCustomerSpace(customerSpace));
         return post("Create MigrateTracking record", url, null, ImportMigrateTracking.class);
     }

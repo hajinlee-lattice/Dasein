@@ -21,12 +21,6 @@ public class AccountImportsMigrateWorkflow extends AbstractWorkflow<AccountImpor
     @Inject
     private AccountTemplateMigrateStep accountTemplateMigrateStep;
 
-//    @Inject
-//    private MigrateAccountImportsWrapper migrateAccountImportsWrapper;
-//
-//    @Inject
-//    private RegisterImportActionStep registerImportActionStep;
-
     @Inject
     private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
@@ -34,8 +28,6 @@ public class AccountImportsMigrateWorkflow extends AbstractWorkflow<AccountImpor
     public Workflow defineWorkflow(AccountImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(accountTemplateMigrateStep)
-//                .next(migrateAccountImportsWrapper)
-//                .next(registerImportActionStep)
                 .next(convertBatchStoreToImportWorkflow)
                 .build();
     }

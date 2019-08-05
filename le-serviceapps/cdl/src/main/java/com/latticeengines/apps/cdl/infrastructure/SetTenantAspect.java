@@ -37,8 +37,14 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.MigrateTrackingServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.ImportMigrateTrackingServiceImpl.*(..))")
     public void allMigrateTrackingService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.ConvertBatchStoreInfoServiceImpl.*(..))")
+    public void allConvertBatchStoreInfoService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }

@@ -21,12 +21,6 @@ public class TransactionImportsMigrateWorkflow extends AbstractWorkflow<Transact
     @Inject
     private TransactionTemplateMigrateStep transactionTemplateMigrateStep;
 
-//    @Inject
-//    private MigrateTransactionImportWrapper migrateTransactionImportWrapper;
-//
-//    @Inject
-//    private RegisterImportActionStep registerImportActionStep;
-//
     @Inject
     private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
@@ -34,8 +28,6 @@ public class TransactionImportsMigrateWorkflow extends AbstractWorkflow<Transact
     public Workflow defineWorkflow(TransactionImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(transactionTemplateMigrateStep)
-//                .next(migrateTransactionImportWrapper)
-//                .next(registerImportActionStep)
                 .next(convertBatchStoreToImportWorkflow)
                 .build();
     }

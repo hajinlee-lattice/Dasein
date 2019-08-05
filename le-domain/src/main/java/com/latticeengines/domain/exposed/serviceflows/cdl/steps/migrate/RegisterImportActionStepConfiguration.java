@@ -12,9 +12,6 @@ public class RegisterImportActionStepConfiguration extends MicroserviceStepConfi
     @JsonProperty("action_pid")
     private Long actionPid;
 
-//    @JsonProperty("migrate_tracking_pid")
-//    private Long migrateTrackingPid;
-
     @JsonProperty("convert_service_config")
     private BaseConvertBatchStoreServiceConfiguration convertServiceConfig;
 
@@ -33,14 +30,6 @@ public class RegisterImportActionStepConfiguration extends MicroserviceStepConfi
     public void setActionPid(Long actionPid) {
         this.actionPid = actionPid;
     }
-
-//    public Long getMigrateTrackingPid() {
-//        return migrateTrackingPid;
-//    }
-//
-//    public void setMigrateTrackingPid(Long migrateTrackingPid) {
-//        this.migrateTrackingPid = migrateTrackingPid;
-//    }
 
     public BaseConvertBatchStoreServiceConfiguration getConvertServiceConfig() {
         return convertServiceConfig;

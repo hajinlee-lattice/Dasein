@@ -39,8 +39,6 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
 
     static final String BEAN_NAME = "convertBatchStoreToImport";
 
-//    private static int migrateStep;
-
     private static final String TRANSFORMER = "EntityMatchImportMigrateTransformer";
 
     @Inject
@@ -87,13 +85,9 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         convertBatchStoreService = ConvertBatchStoreService.getConvertService(convertServiceConfig.getClass());
 
         String taskUniqueId = convertBatchStoreService.getOutputDataFeedTaskId(customerSpace.toString(), convertServiceConfig);
-//        String systemName = getStringValueFromContext(PRIMARY_IMPORT_SYSTEM);
         if (StringUtils.isEmpty(taskUniqueId)) {
             throw new RuntimeException("Cannot find the target datafeed task for Account migrate!");
         }
-//        if (StringUtils.isEmpty(systemName)) {
-//            throw new RuntimeException("No ImportSystem for import migration!");
-//        }
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskUniqueId);
         if (dataFeedTask == null) {
             throw new RuntimeException("Cannot find the dataFeedTask with id: " + taskUniqueId);
@@ -102,10 +96,6 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         if (templateTable == null) {
             throw new RuntimeException("Template is NULL for dataFeedTask: " + taskUniqueId);
         }
-//        importSystem = cdlProxy.getS3ImportSystem(customerSpace.toString(), systemName);
-//        if (importSystem == null) {
-//            throw new RuntimeException("Cannot find ImportSystem with name: " + systemName);
-//        }
         TableRoleInCollection batchStore = convertBatchStoreService.getBatchStore(customerSpace.toString(),
                 convertServiceConfig);
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);

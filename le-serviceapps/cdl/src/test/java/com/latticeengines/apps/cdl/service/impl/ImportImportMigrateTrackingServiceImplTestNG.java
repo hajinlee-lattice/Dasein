@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymgr.impl;
+package com.latticeengines.apps.cdl.service.impl;
 
 import javax.inject.Inject;
 

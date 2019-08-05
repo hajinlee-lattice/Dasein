@@ -20,8 +20,6 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
         private AccountImportsMigrateWorkflowConfiguration configuration = new AccountImportsMigrateWorkflowConfiguration();
 
         private ImportTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ImportTemplateMigrateStepConfiguration();
-//        private MigrateAccountImportStepConfiguration migrateAccountImportStepConfiguration = new MigrateAccountImportStepConfiguration();
-//        private RegisterImportActionStepConfiguration registerImportActionStepConfiguration = new RegisterImportActionStepConfiguration();
         private ConvertBatchStoreToImportWorkflowConfiguration.Builder convertBatchStoreConfigurationBuilder =
                 new ConvertBatchStoreToImportWorkflowConfiguration.Builder();
 
@@ -29,9 +27,6 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.setCustomerSpace(customerSpace);
             importTemplateMigrateStepConfiguration.setCustomerSpace(customerSpace);
             convertBatchStoreConfigurationBuilder.customer(customerSpace);
-
-//            migrateAccountImportStepConfiguration.setCustomerSpace(customerSpace);
-//            registerImportActionStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -61,11 +56,8 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
             if (CollectionUtils.isEmpty(dataFeedTaskList)) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
                 convertBatchStoreConfigurationBuilder.skipConvert(true);
-//                migrateAccountImportStepConfiguration.setSkipStep(true);
-//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
                 importTemplateMigrateStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
-//                migrateAccountImportStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
             }
             return this;
         }
@@ -74,10 +66,7 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
             if (action == null) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
                 convertBatchStoreConfigurationBuilder.skipConvert(true);
-//                migrateAccountImportStepConfiguration.setSkipStep(true);
-//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
-//                registerImportActionStepConfiguration.setActionPid(action.getPid());
                 convertBatchStoreConfigurationBuilder.actionPid(action.getPid());
             }
             return this;
@@ -89,8 +78,6 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
             migrateImportServiceConfiguration.setMigrateTrackingPid(trackingPid);
             migrateImportServiceConfiguration.setEntity(BusinessEntity.Account);
             convertBatchStoreConfigurationBuilder.convertBatchStoreServiceConfiguration(migrateImportServiceConfiguration);
-//            migrateAccountImportStepConfiguration.setMigrateTrackingPid(trackingPid);
-//            registerImportActionStepConfiguration.setMigrateTrackingPid(trackingPid);
             return this;
         }
 
@@ -98,11 +85,8 @@ public class AccountImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.setContainerConfiguration("accountImportsMigrationWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             convertBatchStoreConfigurationBuilder.entity(BusinessEntity.Account);
-//            registerImportActionStepConfiguration.setEntity(BusinessEntity.Account);
             configuration.add(importTemplateMigrateStepConfiguration);
             configuration.add(convertBatchStoreConfigurationBuilder.build());
-//            configuration.add(migrateAccountImportStepConfiguration);
-//            configuration.add(registerImportActionStepConfiguration);
             return configuration;
         }
     }
