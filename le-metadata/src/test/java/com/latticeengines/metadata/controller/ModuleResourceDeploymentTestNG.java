@@ -6,34 +6,54 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
-public class ModuleResourceTestNG extends MetadataFunctionalTestNGBase {
+public class ModuleResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/artifact/validation";
 
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ArtifactResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModuleResourceDeploymentTestNG.class);
 
-    @BeforeClass(groups = "functional")
+    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
+
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Value("${common.test.microservice.url}")
+    private String hostPort;
+
+    @BeforeClass(groups = "deployment")
     public void setup() {
         super.setup();
+
+        addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getModule() throws IOException {
         String hdfsPath = "/tmp/artifact";
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
@@ -72,6 +92,10 @@ public class ModuleResourceTestNG extends MetadataFunctionalTestNGBase {
         System.out.println(m);
         assertEquals(m.getArtifacts().size(), 1);
 
+    }
+
+    private String getRestAPIHostPort() {
+        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
 }
