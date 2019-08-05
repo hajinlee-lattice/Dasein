@@ -90,6 +90,21 @@ angular.module('lp.jobs.import.row', [
                 return '-';
             }
         }
+        function getPayloadValue(subjob, field) {
+            if (subjob.reports && subjob.reports.length > 0) {
+                var json =
+                    subjob.reports[0].json
+                        .Payload;
+                var obj = JSON.parse(json);
+                var ret =
+                    obj[field] != undefined
+                        ? obj[field]
+                        : "-";
+                return ret;
+            } else {
+                return "-";
+            }
+        }
 
         $scope.getSubJobsPartialSuccess = function () {
             var listPartialSuccess = [];
@@ -152,8 +167,31 @@ angular.module('lp.jobs.import.row', [
         };
         
         $scope.schedule = (job) => { 
-            job.schedulingInfo.scheduled = true;
-            callbackModalWindow({ action: 'ok' });
+            let showWarning = $scope.showWarningSchedule(job);
+            if (showWarning) { 
+                Modal.warning(
+					{
+						name: "processJob_Warning",
+						title: "Schedule Job",
+						message:
+							"<p>The data refresh in your previous job failed to succeed. </p><p>Re-import your previous data if you need them in your latest data refresh</p>",
+						confrmtext: "Yes, Schedule"
+					},
+					callbackModalWindow
+				);
+            } else {
+                if (job.schedulingInfo) {
+					job.schedulingInfo.scheduled = true;
+				} else {
+					job.schedulingInfo = {};
+                    job.schedulingInfo.scheduled = true;
+                    job.schedulingInfo.schedulerEnabled = true;
+                    
+				}
+                callbackModalWindow({ action: "ok" });
+            }
+            
+            
         }
 
         $scope.getWarningMessage = function(job){
@@ -171,6 +209,62 @@ angular.module('lp.jobs.import.row', [
             }
             return msg;
         }
+
+        $scope.showWarningSchedule = (job) => { 
+            let oneFailed = false;
+            let subjobs = (job.subJobs && job.subJobs != null) ? job.subJobs : [];
+            for (let i = 0; i < subjobs.length; i++) { 
+                if (subjobs[i].jobStatus == 'Failed' || $scope.isOneJobFailed(subjobs)) {
+                    oneFailed = true;
+                    break;
+                }
+            }
+            return oneFailed;
+        }
+        $scope.isOneJobFailed = (subjobs) => { 
+            let oneFailed = false;
+            for (let i = 0; i < subjobs.length; i++){
+                if (
+					(!isNaN(
+						getPayloadValue(
+							subjobs[i],
+							"total_failed_rows"
+						)
+					) &&
+						!isNaN(
+							getPayloadValue(
+								subjobs[i],
+								"total_rows"
+							)
+						) &&
+						getPayloadValue(
+							subjobs[i],
+							"total_failed_rows"
+						) ===
+							getPayloadValue(
+								subjobs[i],
+								"total_rows"
+							)) ||
+					getPayloadValue(
+						subjobs[i],
+						"total_failed_rows"
+					) ==
+						getPayloadValue(
+							subjobs[i],
+							"total_rows"
+						)
+				) {
+                    oneFailed = true;
+                    break;
+				}
+            }
+            return oneFailed;
+
+            // if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows') || (getPayloadValue(subjob, 'total_failed_rows') == getPayloadValue(subjob, 'total_rows'))) {
+            //         return 'Failed';
+            //     }
+        }
+        
 
         $scope.showWarningRun = function (job) {
             var subJobs = job.subJobs;
@@ -225,18 +319,19 @@ angular.module('lp.jobs.import.row', [
         $scope.showRunButton = function (job) {
             if (job.schedulingInfo && job.schedulingInfo.schedulerEnabled == true) {
                 return false;
+            } else {
+                switch (job.jobStatus) {
+                    case "Failed":
+                    case "Completed":
+                    case "Pending":
+                    case "Running": {
+                        return false;
+                    }
+                    default: {
+                        return true;
+                    }
+                }
             }
-				switch (job.jobStatus) {
-					case "Failed":
-					case "Completed":
-					case "Pending":
-					case "Running": {
-						return false;
-					}
-					default: {
-						return true;
-					}
-				}
         };
                     
         $scope.mouseDownSchedule = (job) => { 
@@ -262,23 +357,26 @@ angular.module('lp.jobs.import.row', [
             return disable;
         }
         $scope.showScheduleButton = function (job) {
+            // console.log(job);
             if (
-				job.schedulingInfo &&
-				job.schedulingInfo.schedulerEnabled == false
-			) {
-				return false;
+                !job.schedulingInfo ||
+                job.schedulingInfo.schedulerEnabled !== true
+            ) {
+                return false;
+            } else {
+                switch (job.jobStatus) {
+                    case "Failed":
+                    case "Completed":
+                    case "Pending":
+                    case "Running":
+                    case "Waiting": {
+                        return false;
+                    }
+                    default: {
+                        return true;
+                    }
+                }
             }
-            switch (job.jobStatus) {
-				case "Failed":
-				case "Completed":
-				case "Pending":
-				case "Running": {
-					return false;
-				}
-				default: {
-					return true;
-				}
-			}
         }
 
         $scope.showReport = function (job) {

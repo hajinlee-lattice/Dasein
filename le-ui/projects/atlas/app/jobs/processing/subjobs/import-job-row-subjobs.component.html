@@ -61,7 +61,8 @@
 									</div>
 								</div>
 								<i
-									class="fa fa-exclamation-triangle icon-failed"
+									class="fa fa-exclamation-triangle"
+									ng-class="{'icon-partial': getValidation(subjob) == 'Partial Success', 'icon-failed': getValidation(subjob) == 'Failed'}"
 									aria-hidden="true"
 								></i>
 							</li>

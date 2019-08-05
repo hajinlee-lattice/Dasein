@@ -98,20 +98,39 @@
 <div class="le-cell le-col-start-9 le-col-span-3">
 	<button
 		class="button blue-button"
-		ng-if="showRunButton(job) && !showScheduleButton(job)"
+		ng-if="showRunButton(job)"
 		ng-mousedown="mouseDownRun(job)"
 		ng-disabled="disableRunButton(job)"
 	>
 		Run Now
 	</button>
-	<button
-		class="button blue-button"
-		ng-if="showScheduleButton(job) && !showRuButton(job)"
-		ng-mousedown="mouseDownSchedule(job)"
-		ng-disabled="disableScheduleButton(job)"
-	>
-		Schedule Now
-	</button>
+	<div class="tooltip-cell" ng-if="showScheduleButton(job)">
+		<div class="text-icon-tooltip-container schedule-container">
+			<span class="tooltip-container-text">
+				<li class="show-tooltip title-tooltip top delay">
+					<div
+						class="tooltip_"
+						ng-class="(disableScheduleButton(job) != true && vm.isOneRunning() != true)  ? 'scheduled-disabled' : ''"
+					>
+						<div class="cover">
+							<p>
+								You have a job is currently running. You’ll be
+								able to schedule to run the next job when the
+								previous one is done.
+							</p>
+						</div>
+					</div>
+					<button
+						class="button blue-button schedule-button"
+						ng-mousedown="mouseDownSchedule(job)"
+						ng-disabled="disableScheduleButton(job)"
+					>
+						Schedule Now
+					</button>
+				</li>
+			</span>
+		</div>
+	</div>
 	<a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="showReport(job)">
 		Report
 	</a>
