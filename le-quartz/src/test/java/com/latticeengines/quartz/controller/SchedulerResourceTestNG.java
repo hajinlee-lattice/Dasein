@@ -41,13 +41,13 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private QuartzSchedulerProxy quartzSchedulerProxy;
 
-    @Test(groups = "functional", dependsOnMethods = { "addJob", "addRepeatJob" })
+    @Test(groups = "functional", dependsOnMethods = { "addJob", "addRepeatJob" }, enabled = false)
     public void getJobList() {
         List<JobInfo> jobInfos = quartzSchedulerProxy.listJobs("groupTestNG");
         assertTrue(jobInfos.size() >= 1);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void addJob() {
         quartzSchedulerProxy.deleteJob("groupTestNG", "testNGJob");
         JobConfig jobTest = new JobConfig();
@@ -65,7 +65,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         assertEquals(success, Boolean.TRUE);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "addJob" })
+    @Test(groups = "functional", dependsOnMethods = { "addJob" }, enabled = false)
     public void getJobDetails() {
         JobInfoDetail jobInfoDetail = quartzSchedulerProxy.getJobDetail("groupTestNG",
                 "testNGJob");
@@ -73,7 +73,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         assertEquals(jobInfoDetail.getJobName(), "testNGJob");
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "addJob" })
+    @Test(groups = "functional", dependsOnMethods = { "addJob" }, enabled = false)
     public void addRepeatJob() {
         JobConfig jobTest = new JobConfig();
         jobTest.setCronTrigger("0/5 * * * * ?");
@@ -100,7 +100,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         assertEquals(success, Boolean.FALSE);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "getJobList" })
+    @Test(groups = "functional", dependsOnMethods = { "getJobList" }, enabled = false)
     public void deleteJob() {
         Boolean success = quartzSchedulerProxy.deleteJob("groupTestNG", "testNGJob");
         assertEquals(success, Boolean.TRUE);
