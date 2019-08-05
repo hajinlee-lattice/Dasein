@@ -345,28 +345,23 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     @Override
     public int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
         Session session = getSessionFactory().getCurrentSession();
-
-        Class<Recommendation> entityClz = getEntityClass();
-        String selectQueryStr = "SELECT recommendationId " //
-                + "FROM %s " //
-                + "WHERE playId = :playId " //
-                + "AND deleted = :deleted ";
+        String softDeleteQueryStr = "UPDATE " + getEntityClass().getSimpleName() + " " //
+                + "SET deleted = :deleted " //
+                + "WHERE playId = :playId AND deleted = :notDeleted ";
         if (cutoffDate != null) {
-            selectQueryStr += "AND UNIX_TIMESTAMP(launchDate) <= :launchDate ";
+            softDeleteQueryStr += "AND UNIX_TIMESTAMP(launchDate) <= :launchDate ";
         }
-
-        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
-
-        Query<?> query = session.createQuery(selectQueryStr);
+        Query<?> query = session.createQuery(softDeleteQueryStr);
         query.setParameter("playId", playId);
-        query.setParameter("deleted", Boolean.FALSE);
+        query.setParameter("deleted", Boolean.TRUE);
+        query.setParameter("notDeleted", Boolean.FALSE);
+        query.setMaxResults(maxUpdateRows);
+
         if (cutoffDate != null) {
             query.setBigInteger("launchDate", new BigInteger((dateToUnixTimestamp(cutoffDate).toString())));
         }
-        query.setMaxResults(maxUpdateRows);
-        List<?> recommendationIds = query.getResultList();
 
-        return runBulkUpdate(session, entityClz, recommendationIds);
+        return query.executeUpdate();
     }
 
     @SuppressWarnings("deprecation")
@@ -418,11 +413,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             int max) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        // String queryStr = "SELECT
-        // DISTINCT(accountId),UNIX_TIMESTAMP(lastUpdatedTimestamp)*1000 FROM %s
-        // " //
-        // + "WHERE deleted = :deleted AND launchId in (:launchIds) ORDER BY
-        // lastUpdatedTimestamp";
 
         String queryStr = "SELECT " + "DISTINCT( accountId ), "//
                 + "UNIX_TIMESTAMP( lastUpdatedTimestamp ) as lastUpdatedUnixTimestamp " //
@@ -447,7 +437,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         }
 
         List<Map<String, Object>> results = new ArrayList<>();
-        List<Object[]> queryResult = (List<Object[]>) query.list();
+        List<Object[]> queryResult = query.list();
 
         if (CollectionUtils.isNotEmpty(queryResult)) {
             queryResult.stream().forEach(result -> {
@@ -461,27 +451,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         }
         return results;
     }
-
-    // @SuppressWarnings("unchecked")
-    // @Override
-    // public List<String> findAccountIdsByLaunchIds(List<String> launchIds) {
-    // Session session = getSessionFactory().getCurrentSession();
-    // Class<Recommendation> entityClz = getEntityClass();
-    // String queryStr = "SELECT DISTINCT accountId FROM %s " //
-    // + "WHERE deleted = :deleted " + "AND launchId in (:launchIds) " + "order
-    // by accountId";
-    //
-    // queryStr = String.format(queryStr, entityClz.getSimpleName());
-    //
-    // Query<String> query = session.createQuery(queryStr);
-    // query.setParameter("deleted", Boolean.FALSE);
-    // if (CollectionUtils.isNotEmpty(launchIds)) {
-    // query.setParameterList("launchIds", launchIds);
-    // } else {
-    // return null;
-    // }
-    // return query.list();
-    // }
 
     @Override
     public int findAccountIdCountByLaunchIds(List<String> launchIds, long start) {
@@ -504,8 +473,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start,
-            int offset, int maximum, List<String> accountIds) {
+    public List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset,
+            int maximum, List<String> accountIds) {
         log.info("contact requst with launchIds: " + launchIds.toString());
         if (CollectionUtils.isEmpty(launchIds)) {
             return Collections.emptyList();
