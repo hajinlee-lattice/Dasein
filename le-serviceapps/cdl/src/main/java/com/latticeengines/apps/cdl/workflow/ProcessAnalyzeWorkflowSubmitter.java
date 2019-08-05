@@ -137,13 +137,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
-        boolean tenantInMigration = false;
-        if (!request.skipMigrationCheck) {
-            tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
-            if (tenantInMigration) {
-                log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
-                throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
-            }
+        boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
+        if (!request.skipMigrationCheck && tenantInMigration) {
+            log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
+        } else if (request.skipMigrationCheck && !tenantInMigration) {
+            log.error("Tenant {} is not in migration and should not kickoff migration PA", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s is not in migration.", customerSpace));
         }
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
