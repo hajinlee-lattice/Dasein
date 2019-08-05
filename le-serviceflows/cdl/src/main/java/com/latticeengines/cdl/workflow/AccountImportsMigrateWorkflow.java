@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.RegisterImportActionStep;
 import com.latticeengines.cdl.workflow.steps.migrate.AccountTemplateMigrateStep;
-import com.latticeengines.cdl.workflow.steps.migrate.MigrateAccountImportsWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.AccountImportsMigrateWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -23,18 +21,22 @@ public class AccountImportsMigrateWorkflow extends AbstractWorkflow<AccountImpor
     @Inject
     private AccountTemplateMigrateStep accountTemplateMigrateStep;
 
-    @Inject
-    private MigrateAccountImportsWrapper migrateAccountImportsWrapper;
+//    @Inject
+//    private MigrateAccountImportsWrapper migrateAccountImportsWrapper;
+//
+//    @Inject
+//    private RegisterImportActionStep registerImportActionStep;
 
     @Inject
-    private RegisterImportActionStep registerImportActionStep;
+    private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
     @Override
     public Workflow defineWorkflow(AccountImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(accountTemplateMigrateStep)
-                .next(migrateAccountImportsWrapper)
-                .next(registerImportActionStep)
+//                .next(migrateAccountImportsWrapper)
+//                .next(registerImportActionStep)
+                .next(convertBatchStoreToImportWorkflow)
                 .build();
     }
 }

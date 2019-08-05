@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.RegisterImportActionStep;
-import com.latticeengines.cdl.workflow.steps.migrate.MigrateTransactionImportWrapper;
 import com.latticeengines.cdl.workflow.steps.migrate.TransactionTemplateMigrateStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,19 +21,22 @@ public class TransactionImportsMigrateWorkflow extends AbstractWorkflow<Transact
     @Inject
     private TransactionTemplateMigrateStep transactionTemplateMigrateStep;
 
+//    @Inject
+//    private MigrateTransactionImportWrapper migrateTransactionImportWrapper;
+//
+//    @Inject
+//    private RegisterImportActionStep registerImportActionStep;
+//
     @Inject
-    private MigrateTransactionImportWrapper migrateTransactionImportWrapper;
-
-    @Inject
-    private RegisterImportActionStep registerImportActionStep;
-
+    private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
     @Override
     public Workflow defineWorkflow(TransactionImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(transactionTemplateMigrateStep)
-                .next(migrateTransactionImportWrapper)
-                .next(registerImportActionStep)
+//                .next(migrateTransactionImportWrapper)
+//                .next(registerImportActionStep)
+                .next(convertBatchStoreToImportWorkflow)
                 .build();
     }
 }

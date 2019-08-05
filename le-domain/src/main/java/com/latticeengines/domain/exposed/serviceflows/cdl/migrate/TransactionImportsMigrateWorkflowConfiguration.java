@@ -9,8 +9,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateTransactionImportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.RegisterImportActionStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateImportServiceConfiguration;
 
 public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -21,44 +20,51 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
         private TransactionImportsMigrateWorkflowConfiguration configuration = new TransactionImportsMigrateWorkflowConfiguration();
 
         private ImportTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ImportTemplateMigrateStepConfiguration();
-        private MigrateTransactionImportStepConfiguration migrateTransactionImportStepConfiguration = new MigrateTransactionImportStepConfiguration();
-        private RegisterImportActionStepConfiguration registerImportActionStepConfiguration = new RegisterImportActionStepConfiguration();
+        private ConvertBatchStoreToImportWorkflowConfiguration.Builder convertBatchStoreConfigurationBuilder =
+                new ConvertBatchStoreToImportWorkflowConfiguration.Builder();
+//        private MigrateTransactionImportStepConfiguration migrateTransactionImportStepConfiguration = new MigrateTransactionImportStepConfiguration();
+//        private RegisterImportActionStepConfiguration registerImportActionStepConfiguration = new RegisterImportActionStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             importTemplateMigrateStepConfiguration.setCustomerSpace(customerSpace);
-            migrateTransactionImportStepConfiguration.setCustomerSpace(customerSpace);
-            registerImportActionStepConfiguration.setCustomerSpace(customerSpace);
+            convertBatchStoreConfigurationBuilder.customer(customerSpace);
+//            migrateTransactionImportStepConfiguration.setCustomerSpace(customerSpace);
+//            registerImportActionStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importTemplateMigrateStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            migrateTransactionImportStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            registerImportActionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            convertBatchStoreConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+//            migrateTransactionImportStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+//            registerImportActionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importTemplateMigrateStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            registerImportActionStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            convertBatchStoreConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+//            registerImportActionStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder userId(String userId) {
             configuration.setUserId(userId);
+            convertBatchStoreConfigurationBuilder.userId(userId);
             return this;
         }
 
         public Builder dataFeedTaskList(List<String> dataFeedTaskList) {
             if (CollectionUtils.isEmpty(dataFeedTaskList)) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
-                migrateTransactionImportStepConfiguration.setSkipStep(true);
-                registerImportActionStepConfiguration.setSkipStep(true);
+                convertBatchStoreConfigurationBuilder.skipConvert(true);
+//                migrateTransactionImportStepConfiguration.setSkipStep(true);
+//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
                 importTemplateMigrateStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
-                migrateTransactionImportStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
+//                migrateTransactionImportStepConfiguration.setDataFeedTaskList(dataFeedTaskList);
             }
             return this;
         }
@@ -66,28 +72,36 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
         public Builder action(Action action) {
             if (action == null) {
                 importTemplateMigrateStepConfiguration.setSkipStep(true);
-                migrateTransactionImportStepConfiguration.setSkipStep(true);
-                registerImportActionStepConfiguration.setSkipStep(true);
+                convertBatchStoreConfigurationBuilder.skipConvert(true);
+//                migrateTransactionImportStepConfiguration.setSkipStep(true);
+//                registerImportActionStepConfiguration.setSkipStep(true);
             } else {
-                registerImportActionStepConfiguration.setActionPid(action.getPid());
+//                registerImportActionStepConfiguration.setActionPid(action.getPid());
+                convertBatchStoreConfigurationBuilder.actionPid(action.getPid());
             }
             return this;
         }
 
         public Builder migrateTracking(Long trackingPid) {
             importTemplateMigrateStepConfiguration.setMigrateTrackingPid(trackingPid);
-            migrateTransactionImportStepConfiguration.setMigrateTrackingPid(trackingPid);
-            registerImportActionStepConfiguration.setMigrateTrackingPid(trackingPid);
+            MigrateImportServiceConfiguration migrateImportServiceConfiguration = new MigrateImportServiceConfiguration();
+            migrateImportServiceConfiguration.setMigrateTrackingPid(trackingPid);
+            migrateImportServiceConfiguration.setEntity(BusinessEntity.Transaction);
+            convertBatchStoreConfigurationBuilder.convertBatchStoreServiceConfiguration(migrateImportServiceConfiguration);
+//            migrateTransactionImportStepConfiguration.setMigrateTrackingPid(trackingPid);
+//            registerImportActionStepConfiguration.setMigrateTrackingPid(trackingPid);
             return this;
         }
 
         public TransactionImportsMigrateWorkflowConfiguration build() {
             configuration.setContainerConfiguration("transactionImportsMigrationWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
-            registerImportActionStepConfiguration.setEntity(BusinessEntity.Transaction);
+            convertBatchStoreConfigurationBuilder.entity(BusinessEntity.Transaction);
+//            registerImportActionStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(importTemplateMigrateStepConfiguration);
-            configuration.add(migrateTransactionImportStepConfiguration);
-            configuration.add(registerImportActionStepConfiguration);
+            configuration.add(convertBatchStoreConfigurationBuilder.build());
+//            configuration.add(migrateTransactionImportStepConfiguration);
+//            configuration.add(registerImportActionStepConfiguration);
             return configuration;
         }
     }

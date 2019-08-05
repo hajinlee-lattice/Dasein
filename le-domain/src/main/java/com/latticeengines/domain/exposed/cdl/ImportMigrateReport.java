@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ImportMigrateReport {
 
+    @JsonProperty("system_name")
+    private String systemName;
+
     @JsonProperty("input_account_templates")
     private List<String> inputAccountTemplates;
 
@@ -65,6 +68,14 @@ public class ImportMigrateReport {
 
     @JsonProperty("transaction_data_tables")
     private List<String> transactionDataTables;
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
 
     public List<String> getInputAccountTemplates() {
         return inputAccountTemplates;

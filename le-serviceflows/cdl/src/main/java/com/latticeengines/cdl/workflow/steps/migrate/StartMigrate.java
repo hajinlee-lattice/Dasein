@@ -93,6 +93,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
             S3ImportSystem importSystem = createDefaultImportSystem(customerSpace, dataFeedTaskMap);
             cdlProxy.createS3ImportSystem(customerSpace.toString(), importSystem);
             dropBoxProxy.createTemplateFolder(customerSpace.toString(), DEFAULT_SYSTEM, null, null);
+            report.setSystemName(DEFAULT_SYSTEM);
             putStringValueInContext(PRIMARY_IMPORT_SYSTEM, DEFAULT_SYSTEM);
         } else {
             Optional<S3ImportSystem> s3ImportSystemOptional =
@@ -112,14 +113,17 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
                     }
                 }
                 cdlProxy.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                report.setSystemName(importSystem.getName());
                 putStringValueInContext(PRIMARY_IMPORT_SYSTEM, importSystem.getName());
             } else {
                 S3ImportSystem importSystem = createDefaultImportSystem(customerSpace, dataFeedTaskMap);
                 cdlProxy.createS3ImportSystem(customerSpace.toString(), importSystem);
                 dropBoxProxy.createTemplateFolder(customerSpace.toString(), DEFAULT_SYSTEM, null, null);
+                report.setSystemName(DEFAULT_SYSTEM);
                 putStringValueInContext(PRIMARY_IMPORT_SYSTEM, DEFAULT_SYSTEM);
             }
         }
+        migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTrackingPid, report);
     }
 
     private S3ImportSystem createDefaultImportSystem(CustomerSpace customerSpace,

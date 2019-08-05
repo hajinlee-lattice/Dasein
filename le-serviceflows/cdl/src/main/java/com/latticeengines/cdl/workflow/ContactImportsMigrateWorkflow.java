@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.RegisterImportActionStep;
 import com.latticeengines.cdl.workflow.steps.migrate.ContactTemplateMigrateStep;
-import com.latticeengines.cdl.workflow.steps.migrate.MigrateContactImportWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ContactImportsMigrateWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -24,17 +22,21 @@ public class ContactImportsMigrateWorkflow extends AbstractWorkflow<ContactImpor
     private ContactTemplateMigrateStep contactTemplateMigrateStep;
 
     @Inject
-    private MigrateContactImportWrapper migrateContactImportsWrapper;
+    private ConvertBatchStoreToImportWorkflow convertBatchStoreToImportWorkflow;
 
-    @Inject
-    private RegisterImportActionStep registerImportActionStep;
+//    @Inject
+//    private MigrateContactImportWrapper migrateContactImportsWrapper;
+//
+//    @Inject
+//    private RegisterImportActionStep registerImportActionStep;
 
     @Override
     public Workflow defineWorkflow(ContactImportsMigrateWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(contactTemplateMigrateStep)
-                .next(migrateContactImportsWrapper)
-                .next(registerImportActionStep)
+//                .next(migrateContactImportsWrapper)
+//                .next(registerImportActionStep)
+                .next(convertBatchStoreToImportWorkflow)
                 .build();
     }
 }

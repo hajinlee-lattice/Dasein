@@ -19,4 +19,12 @@ public class ConvertBatchStoreStepConfiguration extends BaseWrapperStepConfigura
     public void setEntity(BusinessEntity entity) {
         this.entity = entity;
     }
+
+    public BaseConvertBatchStoreServiceConfiguration getConvertServiceConfig() {
+        return convertServiceConfig;
+    }
+
+    public void setConvertServiceConfig(BaseConvertBatchStoreServiceConfiguration convertServiceConfig) {
+        this.convertServiceConfig = convertServiceConfig;
+    }
 }
