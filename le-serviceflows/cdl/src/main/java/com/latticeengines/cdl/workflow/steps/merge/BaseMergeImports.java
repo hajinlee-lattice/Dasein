@@ -153,9 +153,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
         config.setThresholdTime(getLongValueFromContext(NEW_RECORD_CUT_OFF_TIME));
-        // change to heavy engine to prevent this step to run in Flink
-        // (use a lot of native memory and exceeds memory limit)
-        String configStr = appendEngineConf(config, heavyEngineConfig());
+        String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
         setTargetTable(step, diffReportTablePrefix);
     }
