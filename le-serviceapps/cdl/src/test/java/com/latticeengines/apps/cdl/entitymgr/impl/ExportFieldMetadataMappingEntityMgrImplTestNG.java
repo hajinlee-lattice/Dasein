@@ -112,6 +112,8 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
             // Ignore
         }
 
+        lookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdMap.getId());
+
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
@@ -131,6 +133,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
 
+
         List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<ExportFieldMetadataMapping>();
 
         ExportFieldMetadataMapping fieldMapping_1 = new ExportFieldMetadataMapping();
@@ -147,7 +150,9 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         fieldMapping_2.setOverwriteValue(false);
         exportFieldMappings.add(fieldMapping_2);
 
-        exportFieldMetadataMappingEntityMgr.update(lookupIdMap, exportFieldMappings);
+        lookupIdMap.setExportFieldMappings(exportFieldMappings);
+
+        exportFieldMetadataMappingEntityMgr.update(lookupIdMap);
 
         try {
             Thread.sleep(2000L);

@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -111,6 +112,10 @@ public class AttributeRepository {
         Map<String, ColumnMetadata> attrMap = new HashMap<>();
         table.getAttributes().forEach(attr -> {
             ColumnMetadata metadata = new ColumnMetadata();
+            String javaClz = AttributeUtils.toJavaClass(attr.getPhysicalDataType(), attr.getDataType());
+            if (!"string".equalsIgnoreCase(javaClz)) {
+                metadata.setJavaClass(javaClz);
+            }
             metadata.setNumBits(attr.getNumOfBits());
             metadata.setBitOffset(attr.getBitOffset());
             metadata.setPhysicalName(attr.getPhysicalName());

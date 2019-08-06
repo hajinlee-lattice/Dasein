@@ -11,6 +11,5 @@ public interface ExportFieldMetadataMappingEntityMgr {
 
     List<ExportFieldMetadataMapping> findByOrgId(String orgId);
 
-    List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap,
-            List<ExportFieldMetadataMapping> exportFieldMappings);
+    List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap);
 }

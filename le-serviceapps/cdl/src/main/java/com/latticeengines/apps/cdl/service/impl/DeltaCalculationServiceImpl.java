@@ -1,6 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -33,6 +39,9 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     @Value("common.internal.app.url")
     private String internalAppUrl;
 
+    @Value("${cdl.delta.calculation.maximum.job.count}")
+    private int maxJobs;
+
     private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation";
 
     public DeltaCalculationServiceImpl() {
@@ -45,24 +54,51 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
             return false;
         }
 
-        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllScheduledChannels();
+        List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
 
         log.info("Found " + channels.size() + " channels scheduled for launch");
 
-        // ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("delta-calculation", 5);
+        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("delta-calculation", maxJobs);
 
-        channels.forEach(c -> {
+        List<Callable<JobStatus>> deltaCalculationJobs = channels.stream().map(DeltaCalculationJobWrapper::new)
+                .collect(Collectors.toList());
+
+        List<JobStatus> statuses = ThreadPoolUtils.runCallablesInParallel(executorService, deltaCalculationJobs,
+                (int) TimeUnit.DAYS.toMinutes(1), (int) TimeUnit.HOURS.toSeconds(2));
+
+        log.info(String.format(
+                "Total Delta Calculation Jobs queued: %s, Completed: %s, Unsuccessful: %s, Job Submission failed: %s",
+                statuses.size(), //
+                statuses.stream().filter(j -> j == JobStatus.COMPLETED).count(), //
+                statuses.stream().filter(Objects::nonNull).filter(JobStatus::isUnsuccessful).count(), //
+                statuses.stream().filter(Objects::isNull).count()));
+        return true;
+    }
+
+    private class DeltaCalculationJobWrapper implements Callable<JobStatus> {
+
+        private PlayLaunchChannel channel;
+
+        DeltaCalculationJobWrapper(PlayLaunchChannel channel) {
+            this.channel = channel;
+        }
+
+        @Override
+        public JobStatus call() {
             try {
+
                 String url = constructUrl(campaignDeltaCalculationUrlPrefix,
-                        CustomerSpace.parse(c.getTenant().getId()).getTenantId(), c.getPlay().getName(), c.getId());
+                        CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                        channel.getId());
                 String appId = post("Kicking off delta calculation", url, null, String.class);
-                log.info("Queued a delta calculation for campaignId " + c.getId() + " : " + appId);
-                waitForWorkflowStatus(c.getTenant().getId(), appId);
+                log.info("Queued a delta calculation job for campaignId " + channel.getPlay().getName()
+                        + ", Channel ID: " + channel.getId() + " : " + appId);
+                return waitForWorkflowStatus(channel.getTenant().getId(), appId);
             } catch (Exception e) {
                 log.error("Failed to Kick off delta calculation", e);
+                return null;
             }
-        });
-        return true;
+        }
     }
 
     private JobStatus waitForWorkflowStatus(String tenantId, String applicationId) {

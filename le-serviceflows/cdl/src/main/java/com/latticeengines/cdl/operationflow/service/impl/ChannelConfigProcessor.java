@@ -28,12 +28,13 @@ public class ChannelConfigProcessor {
     }
 
     private void updateSnsMessageWithChannelConfig(LinkedInChannelConfig channelConfig, ExternalIntegrationMessageBody messageBody) {
-        messageBody.setAudienceType(channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().toString() : null);
+        messageBody.setAudienceType(
+                channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().getType() : null);
     }
 
     private void updateSnsMessageWithChannelConfig(FacebookChannelConfig channelConfig,
             ExternalIntegrationMessageBody messageBody) {
         messageBody.setAudienceType(
-                channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().toString() : null);
+                channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().getType() : null);
     }
 }

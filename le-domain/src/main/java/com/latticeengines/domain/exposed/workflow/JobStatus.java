@@ -70,9 +70,8 @@ public enum JobStatus {
     }
 
     /*
-     * Technically we donot need to return a list. Because we are returning
-     * JobStatus as is without any mapping. Incase, if we want to map one status
-     * to multiple values, we will keep it as List.
+     * Technically we donot need to return a list. Because we are returning JobStatus as is without any mapping. Incase,
+     * if we want to map one status to multiple values, we will keep it as List.
      */
     public static List<String> mappedWorkflowJobStatuses(String jobStatusStr) {
         if (jobStatusStr == null) {
@@ -86,8 +85,7 @@ public enum JobStatus {
         return Collections.singletonList(jobStatusStr);
     }
 
-    public static JobStatus fromYarnStatus(FinalApplicationStatus status,
-            YarnApplicationState jobState) {
+    public static JobStatus fromYarnStatus(FinalApplicationStatus status, YarnApplicationState jobState) {
         if (jobState != null) {
             if (jobState == YarnApplicationState.RUNNING) {
                 return JobStatus.RUNNING;
@@ -146,6 +144,10 @@ public enum JobStatus {
 
     public boolean isTerminated() {
         return terminated;
+    }
+
+    public boolean isUnsuccessful() {
+        return this == FAILED || this == CANCELLED || this == SKIPPED;
     }
 
     public void setTerminated(boolean terminated) {
