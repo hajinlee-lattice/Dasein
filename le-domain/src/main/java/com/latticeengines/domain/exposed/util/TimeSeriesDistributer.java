@@ -403,6 +403,11 @@ public class TimeSeriesDistributer {
                 future.cancel(true);
             }
         });
+        avroIter.close();
+        targetFiles.clear();
+        readBuffer.clear();
+        writers.clear();
+        futures.clear();
         executor.shutdownNow();
         try {
             if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {

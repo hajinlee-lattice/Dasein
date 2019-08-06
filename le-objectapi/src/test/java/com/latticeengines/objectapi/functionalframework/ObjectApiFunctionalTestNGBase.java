@@ -72,8 +72,9 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                     tblPathMap.put(tblName, path);
                 }
                 uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
+                insertPurchaseHistory(attrRepo);
             }
-            insertPurchaseHistory(attrRepo);
+
             for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
                 String tblName = QueryTestUtils.getServingStoreName(role, version);
                 attrRepo.changeServingStoreTableName(role, tblName);
