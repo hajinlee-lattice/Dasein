@@ -1,0 +1,28 @@
+//import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+//import com.fasterxml.jackson.databind.node.{ObjectNode,ArrayNode,BooleanNode}
+//import com.fasterxml.jackson.module.scala.DefaultScalaModule
+//import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+//import org.apache.spark.sql.DataFrame
+//import org.apache.spark.sql.functions._
+//val mapper = new ObjectMapper() with ScalaObjectMapper
+//mapper.registerModule(DefaultScalaModule)
+//class LatticeContext(val input: List[DataFrame], val params: JsonNode, val targets: List[JsonNode]) {
+//  var output: List[DataFrame] = List[DataFrame]()
+//}
+//val lattice: LatticeContext = new LatticeContext(Nil, null, List[JsonNode]())
+
+// ============
+// BEGIN SCRIPT
+// ============
+if(lattice.params.get("Partition")==BooleanNode.TRUE){
+  println("----- BEGIN SCRIPT OUTPUT -----")
+  println("Partition true")
+  println("----- END SCRIPT OUTPUT -----")
+  setPartitionTargets(0, Seq("Field2"), lattice)
+}
+
+val result = lattice.input.head
+
+// finish
+lattice.output = result :: Nil
+lattice.outputStr = "This is my output!"

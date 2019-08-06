@@ -2,6 +2,7 @@ package com.latticeengines.spark.testframework;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,7 +54,7 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
 public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
 
     @Inject
     private LivySessionService sessionService;
@@ -293,6 +294,10 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         String path = target.getPath();
         try {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
+            if(CollectionUtils.isNotEmpty(target.getPartitionKeys())){
+                path = path + "/**";
+            }
+            log.info("Path: {}",path);
             if (DataUnit.DataFormat.PARQUET.equals(target.getDataFormat())) {
                 log.info("Read parquet files in " + path + " as avro records.");
                 return ParquetUtils.iteratorParquetFiles(yarnConfiguration, PathUtils.toParquetGlob(path));
@@ -315,4 +320,36 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return true;
     }
 
+    protected List<String> hdfsOutputsAsInputs(List<HdfsDataUnit> units, String... partitionKeys){
+        inputUnits = new HashMap<>();
+        int seq = inputSeq.getAndIncrement();
+        List<String> names = new ArrayList<>();
+        units.forEach(unit -> {
+            String recordName = "PartitionInput" + seq;
+            String dirPath = getWorkspace() + "/" + recordName;
+            try {
+                HdfsUtils.fileExists(yarnConfiguration, unit.getPath());
+            } catch (Exception e) {
+                throw new RuntimeException("Partitioned output path don't exist.",e);
+            }
+            try {
+                if(HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration,dirPath);
+                }
+                HdfsUtils.copyFiles(yarnConfiguration, unit.getPath(), dirPath);
+                HdfsUtils.rmdir(yarnConfiguration, dirPath + "/" + "_SUCCESS");
+            } catch (Exception e) {
+                throw new RuntimeException("Partition copy failed.",e);
+            }
+            HdfsDataUnit dataUnit = new HdfsDataUnit();
+            dataUnit.setName(recordName);
+            dataUnit.setPath(dirPath);
+            if (partitionKeys.length > 0) {
+                dataUnit.setPartitionKeys(Arrays.asList(partitionKeys));
+            }
+            inputUnits.put(recordName,dataUnit);
+            names.add(recordName);
+        });
+        return names;
+    }
 }

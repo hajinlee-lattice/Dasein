@@ -18,12 +18,14 @@ def load_data_unit(unit):
 def load_hdfs_unit(unit):
     path = unit['Path']
     fmt = unit['DataFormat'] if 'DataFormat' in unit else "avro"
-    suffix = "." + fmt
-    if path[-len(suffix):] != suffix:
-        if path[-1] == "/":
-            path += "*" + suffix
-        else:
-            path += "/*" + suffix
+    partition_keys = unit['PartitionKeys'] if 'PartitionKeys' in unit else []
+    if not partition_keys:
+        suffix = "." + fmt
+        if path[-len(suffix):] != suffix:
+            if path[-1] == "/":
+                path += "*" + suffix
+            else:
+                path += "/*" + suffix
     path = "hdfs://%s" % path
     return spark.read.format(fmt).load(path)
 
@@ -52,3 +54,8 @@ print("----- BEGIN SCRIPT OUTPUT -----")
 print("Params: %s" % json.dumps(script_params))
 
 lattice = LatticeContext(input=script_input, params=script_params, targets=script_targets)
+
+def set_partition_targets(index, lst, lattice):
+    lattice.targets[index]['PartitionKeys'] = lst
+
+

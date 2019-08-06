@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public abstract class DataUnit {
+
+    @JsonProperty("PartitionKeys")
+    private List<String> partitionKeys;
 
     @JsonProperty("Tenant")
     private String tenant;
@@ -63,6 +68,14 @@ public abstract class DataUnit {
 
     public void setDataFormat(DataFormat dataFormat) {
         this.dataFormat = dataFormat;
+    }
+
+    public List<String> getPartitionKeys() {
+        return partitionKeys;
+    }
+
+    public void setPartitionKeys(List<String> partitionKeys) {
+        this.partitionKeys = partitionKeys;
     }
 
     public enum StorageType {
