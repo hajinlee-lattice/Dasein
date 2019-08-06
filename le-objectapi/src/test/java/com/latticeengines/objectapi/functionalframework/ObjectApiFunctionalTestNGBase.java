@@ -116,7 +116,7 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
             Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
             attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot open table json file for " + role);
+            throw new RuntimeException("Cannot open table json file for " + role, e);
         }
     }
 
