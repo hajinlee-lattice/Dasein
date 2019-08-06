@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -46,6 +47,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
+        static final String NumFamilyMembers = "NUMBER_OF_FAMILY_MEMBERS";
     }
 
     private final class ContactAttr {
@@ -173,6 +175,26 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         long count = getEntityQueryService(sqlUser).getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         Assert.assertEquals(count, 132658);
         testAndAssertCount(sqlUser, count, 132658);
+    }
+
+    @Test(groups = "functional")
+    public void testConvertNumericalBucket() {
+        AttributeLookup intAttr = new AttributeLookup(BusinessEntity.Account, AccountAttr.NumFamilyMembers);
+        ColumnMetadata cm = attrRepo.getColumnMetadata(intAttr);
+        Assert.assertEquals(cm.getJavaClass(), Integer.class.getSimpleName());
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction = Restriction.builder() //
+                .let(intAttr) //
+                .inCollection(Arrays.asList("1", "2")) //
+                .build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        String sql = getEntityQueryService(SEGMENT_USER) //
+                .getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
+        Assert.assertFalse(sql.contains("lower(Account.NUMBER_OF_FAMILY_MEMBERS)"), sql);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

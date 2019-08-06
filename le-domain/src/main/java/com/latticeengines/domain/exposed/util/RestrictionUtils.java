@@ -478,6 +478,49 @@ public class RestrictionUtils {
         }
     }
 
+    public static <T> List<Object> convertNumericalValues(List<Object> vals, Class<T> attrClz) {
+        if (CollectionUtils.isNotEmpty(vals)) {
+            List<Object> newVals = new ArrayList<>();
+            vals.forEach(val -> {
+                Object newVal;
+                if (val == null) {
+                    newVal = null;
+                } else if (val.getClass().equals(attrClz)) {
+                    newVal = attrClz.cast(val);
+                } else {
+                    String strVal = val.toString();
+                    try {
+                        switch (attrClz.getSimpleName()) {
+                            case "Short":
+                                newVal = Short.parseShort(strVal);
+                                break;
+                            case "Integer":
+                                newVal = Integer.parseInt(strVal);
+                                break;
+                            case "Long":
+                                newVal = Long.parseLong(strVal);
+                                break;
+                            case "Double":
+                                newVal = Double.parseDouble(strVal);
+                                break;
+                            case "Float":
+                                newVal = Float.parseFloat(strVal);
+                                break;
+                            default:
+                                throw new UnsupportedOperationException("Unknown attribute type to convert: " + attrClz);
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new UnsupportedOperationException("Cannot cast value " + val + " to " + attrClz);
+                    }
+                }
+                newVals.add(newVal);
+            });
+            return newVals;
+        } else {
+            return vals;
+        }
+    }
+
     public static Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
         Set<AttributeLookup> attributes = new HashSet<>();
         DepthFirstSearch search = new DepthFirstSearch();
