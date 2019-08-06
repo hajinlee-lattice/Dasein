@@ -1,3 +1,23 @@
+/**
+x need linked in and facebook logos (just need beter linkedin)
+x keep target system in sync option, what do do when once (carmen: hide it)
+- linked in can do accounts or contacts, not both
+- facebook should be hardcoded to send contacts // audiencetype
+
+x Must have account id should be included by default
+- add description behavior is wrong
+
+Marketo
+x Select Program Marketo Demo 2019 and the whole screen goes blank
+
+All Channels
+- Include unscored accounts should be enabled/included if the campaign has no models ? blocked, /pls/count failing
+x Click on marketo launch settings and then click on eloqua launch settings. Now eloqua settings shows marketo settings
+x S3 folder sometimes disappears and will come back.
+- Retain last launch settings: When you eventually go back to the setting, the previous settings are no longer available.
+- When you disable always on, all the previous launch data is removed, but eventually comes back after a delay
+*/
+
 import React, { Component } from "common/react-vendor";
 //import ReactRouter from 'atlas/react/router';
 import Aux from 'common/widgets/hoc/_Aux';
@@ -128,7 +148,6 @@ class LaunchComponent extends Component {
         } else {
             this.setState({lookupIdMapping: playstore.lookupIdMapping});
         }
-
         if(this.state.externalSystemName && isAudience(this.state.externalSystemName)) {
             actions.fetchUserDocument({}, function() {
                 actions.fetchPrograms({ // get the programs list
@@ -165,7 +184,10 @@ class LaunchComponent extends Component {
     }
 
     componentWillUnmount() {
-      this.unsubscribe();
+        actions.reset({
+            FETCH_PROGRAMS: null
+        });
+        this.unsubscribe();
     }
 
     handleChange = () => {
@@ -436,7 +458,6 @@ class LaunchComponent extends Component {
                 </Aux>
             );
         }
-
         if(programs && programs.length) {
             programs.forEach(function(program) {
                 list.push(<option>{program.name}</option>);
@@ -469,9 +490,8 @@ class LaunchComponent extends Component {
 
     makeStaticList(list) {
         var options = [];
-
         if(list) {
-            if(!list[0].loadingState) {
+            if(!list.length || !list[0].loadingState) {
                 options.push(<option value={''}>-- Create new list --</option>);
             }
             list.forEach(function(item) {
@@ -644,13 +664,13 @@ class LaunchComponent extends Component {
     }
 
     getCoverageType(accountsCoverage) {
-        if(accountsCoverage.ratingModelsCoverageMap) {
+        if(accountsCoverage && accountsCoverage.ratingModelsCoverageMap) {
             return 'ratingModelsCoverageMap';
         }
-        if(accountsCoverage.ratingEngineIdCoverageMap) {
+        if(accountsCoverage && accountsCoverage.ratingEngineIdCoverageMap) {
             return 'ratingEngineIdCoverageMap';
         }
-        if(accountsCoverage.accountsCount) {
+        if(accountsCoverage && accountsCoverage.accountsCount) {
             return 'accountsCount';
         }
         
@@ -725,6 +745,9 @@ class LaunchComponent extends Component {
              * so the modal will wait for the response in this case, but it will still load even if it's empty
              */
             loaded = loaded && (this.state.programs && this.state.staticList);
+        }
+        if(this.state.externalSystemName === 'AWS_S3') {
+            loaded = (this.state.lookupIdMapping);
         }
         if(loaded) {
             var play = this.state.play,
@@ -810,7 +833,7 @@ class LaunchComponent extends Component {
                                         disabled={!canLaunch}
                                         config={{
                                             label: "Launch Now",
-                                            classNames: "white-button"
+                                            classNames: "blue-button"
                                         }}
                                         callback={() => { 
                                             this.launch(play, connection, {
