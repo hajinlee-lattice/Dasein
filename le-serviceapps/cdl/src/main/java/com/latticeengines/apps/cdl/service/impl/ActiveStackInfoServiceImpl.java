@@ -27,7 +27,7 @@ public class ActiveStackInfoServiceImpl implements ActiveStackInfoService {
 
     private RetryTemplate retryTemplate = getRetryTemplate();
 
-    @Value("${cdl.app.public.url:https://localhost:9081}")
+    @Value("${cdl.app.public.url}")
     private String appPublicUrl;
 
     @Value("${common.le.stack}")
