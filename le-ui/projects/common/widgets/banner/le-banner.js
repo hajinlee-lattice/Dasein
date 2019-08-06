@@ -40,7 +40,13 @@ export default class LeBanner extends Component {
 	}
 
 	getMessage(message) {
-		let msg = <p>{message}</p>;
+		let msg = (
+			<p
+				dangerouslySetInnerHTML={{
+					__html: message ? message : ""
+				}}
+			/>
+		);
 		return msg;
 	}
 
