@@ -291,7 +291,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(existingFieldMapping);
 
         List<ExportFieldMetadataMapping> updatedFieldMapping = new ArrayList<ExportFieldMetadataMapping>();
-        updatedFieldMapping.add(new ExportFieldMetadataMapping("City", "city", false));
+        updatedFieldMapping.add(new ExportFieldMetadataMapping("COMPANY_NAME", "company", false));
         updatedFieldMapping.add(new ExportFieldMetadataMapping("Address", "address", false));
         updatedFieldMapping.add(new ExportFieldMetadataMapping("ZipCode", "zipcode", false));
         lookupIdMapWithFieldMapping.setExportFieldMappings(updatedFieldMapping);
@@ -313,7 +313,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
         List<String> sourceFields = retrievedFieldMapping.stream().map(ExportFieldMetadataMapping::getSourceField)
                 .collect(Collectors.toList());
-        assertTrue(sourceFields.contains("City"));
+        assertTrue(sourceFields.contains("COMPANY_NAME"));
         assertTrue(sourceFields.contains("Address"));
         assertTrue(sourceFields.contains("ZipCode"));
     }

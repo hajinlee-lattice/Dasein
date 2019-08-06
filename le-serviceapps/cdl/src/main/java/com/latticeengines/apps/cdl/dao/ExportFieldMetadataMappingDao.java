@@ -10,4 +10,8 @@ public interface ExportFieldMetadataMappingDao extends BaseDao<ExportFieldMetada
 
     List<ExportFieldMetadataMapping> updateExportFieldMetadataMappings(LookupIdMap lookupIdMap,
             List<ExportFieldMetadataMapping> exportFieldMetadataMappings);
+
+    List<ExportFieldMetadataMapping> updateExportFieldMetadataMappings(
+            List<ExportFieldMetadataMapping> existingFieldMapping,
+            List<ExportFieldMetadataMapping> updatedFieldMapping);
 }

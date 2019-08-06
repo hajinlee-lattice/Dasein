@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.repository.ExportFieldMetadataMappingRepository;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
@@ -28,9 +27,6 @@ public class ExportFieldMetadataMappingEntityMgrImpl
 
     @Inject
     private ExportFieldMetadataMappingEntityMgrImpl _self;
-
-    @Inject
-    private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject
     private ExportFieldMetadataMappingDao exportFieldMappingDao;
@@ -77,10 +73,16 @@ public class ExportFieldMetadataMappingEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap,
-            List<ExportFieldMetadataMapping> exportFieldMappings) {
-        log.info(JsonUtils.serialize(exportFieldMappings));
-        return exportFieldMappingDao.updateExportFieldMetadataMappings(lookupIdMap, exportFieldMappings);
+    public List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap) {
+        List<ExportFieldMetadataMapping> existingExportFieldMapping = findByOrgId(lookupIdMap.getOrgId());
+        List<ExportFieldMetadataMapping> updatedExportFieldMapping = lookupIdMap.getExportFieldMetadataMappings();
+
+        updatedExportFieldMapping.forEach(fm -> {
+            fm.setTenant(lookupIdMap.getTenant());
+            fm.setLookupIdMap(lookupIdMap);
+        });
+        return exportFieldMappingDao.updateExportFieldMetadataMappings(existingExportFieldMapping,
+                updatedExportFieldMapping);
     }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.dao.ExternalSystemAuthenticationDao;
 import com.latticeengines.apps.cdl.dao.LookupIdMappingDao;
+import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.LookupIdMappingRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -45,6 +46,9 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Inject
     private ExportFieldMetadataMappingDao exportFieldMetadataMappingDao;
+
+    @Inject
+    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
 
     @Override
     public BaseDao<LookupIdMap> getDao() {
@@ -127,10 +131,8 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         }
 
         if (lookupIdMap.getExportFieldMetadataMappings() != null) {
-            List<ExportFieldMetadataMapping> exportFieldMetadataMapping = lookupIdMap.getExportFieldMetadataMappings();
-
-            List<ExportFieldMetadataMapping> updatedFieldMetadataMapping = exportFieldMetadataMappingDao
-                    .updateExportFieldMetadataMappings(lookupIdMap, exportFieldMetadataMapping);
+            List<ExportFieldMetadataMapping> updatedFieldMetadataMapping = exportFieldMetadataMappingEntityMgr
+                    .update(lookupIdMap);
 
             lookupIdMap.setExportFieldMappings(updatedFieldMetadataMapping);
         }
