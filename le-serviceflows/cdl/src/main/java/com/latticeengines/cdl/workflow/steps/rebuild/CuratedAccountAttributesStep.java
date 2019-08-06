@@ -59,11 +59,12 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     private int numberOfContactsStep, profileStep, bucketStep;
     private String accountTableName;
     private String contactTableName;
+
     // Set to true if either of the Account or Contact table is missing or empty and we should not
     // run this step's transformation.
-    boolean skipTransformation;
+    private boolean skipTransformation;
 
-    boolean shortCut;
+    private boolean shortCut;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -109,6 +110,8 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
                     servingStoreRole, inactive);
             exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
             updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+
+            skipTransformation = true;
 
             finishing();
         } else {
