@@ -1,6 +1,5 @@
 package com.latticeengines.aws.emr.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,6 @@ import com.amazonaws.services.elasticmapreduce.model.InstanceFleetType;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupType;
-import com.amazonaws.services.elasticmapreduce.model.InstanceState;
 import com.amazonaws.services.elasticmapreduce.model.InvalidRequestException;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
@@ -160,25 +157,6 @@ public class EMRServiceImpl implements EMRService {
     @Override
     public InstanceFleet getCoreFleet(String clusterId) {
         return getInstanceFleet(clusterId, InstanceFleetType.CORE);
-    }
-
-    @Override
-    public List<Instance> getRunningNodeFromTaskGroup(String clusterId, String taskGrpId) {
-        return getInstancesFromInstanceGroup(clusterId, taskGrpId, InstanceState.RUNNING);
-    }
-
-    @Override
-    public void terminateTaskInstances(String clusterId, String taskGrpId, List<String> ec2InstanceIds) {
-        if (CollectionUtils.isNotEmpty(ec2InstanceIds)) {
-            AmazonElasticMapReduce emr = getEmr();
-            InstanceGroupModifyConfig modifyConfig = new InstanceGroupModifyConfig()
-                    .withInstanceGroupId(taskGrpId)
-                    .withEC2InstanceIdsToTerminate(ec2InstanceIds.toArray(new String[0]));
-            ModifyInstanceGroupsRequest request = //
-                    new ModifyInstanceGroupsRequest().withClusterId(clusterId).withInstanceGroups(modifyConfig);
-            ModifyInstanceGroupsResult result = emr.modifyInstanceGroups(request);
-            log.info("Sent emr scaling request, got response: " + result);
-        }
     }
 
     @Override
@@ -318,37 +296,6 @@ public class EMRServiceImpl implements EMRService {
             if (e.getMessage().contains("mutually exclusive")) {
                 // it is an instance group cluster
                 return null;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    private List<Instance> getInstancesFromInstanceGroup(String clusterId, String instanceGrpId, //
-                                                         InstanceState... instanceStates) {
-        AmazonElasticMapReduce emr = getEmr();
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, null, //
-                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
-        try {
-            return retryTemplate.execute(context -> {
-                String marker = null;
-                List<Instance> instances = new ArrayList<>();
-                do {
-                    ListInstancesRequest request = new ListInstancesRequest()
-                            .withClusterId(clusterId) //
-                            .withInstanceGroupId(instanceGrpId) //
-                            .withInstanceStates(instanceStates) //
-                            .withMarker(marker);
-                    ListInstancesResult result = emr.listInstances(request);
-                    instances.addAll(result.getInstances());
-                    marker = result.getMarker();
-                } while(StringUtils.isNotBlank(marker));
-                return instances;
-            });
-        } catch (InvalidRequestException e) {
-            if (e.getMessage().contains("mutually exclusive")) {
-                // it is an instance fleet cluster
-                return Collections.emptyList();
             } else {
                 throw e;
             }

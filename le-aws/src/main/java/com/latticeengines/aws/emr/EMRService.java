@@ -28,13 +28,9 @@ public interface EMRService {
 
     InstanceFleet getCoreFleet(String clusterId);
 
-    List<Instance> getRunningNodeFromTaskGroup(String clusterId, String taskGrpId);
-
     void scaleTaskFleet(String clusterId, InstanceFleet taskFleet, int targetOnDemandCount, int targetSpotCount);
 
     void scaleTaskGroup(String clusterId, InstanceGroup taskGrp, int targetCount);
-
-    void terminateTaskInstances(String clusterId, String taskGrpId, List<String> ec2InstanceIds);
 
     List<ClusterSummary> findClusters(Predicate<ClusterSummary> filter);
 
