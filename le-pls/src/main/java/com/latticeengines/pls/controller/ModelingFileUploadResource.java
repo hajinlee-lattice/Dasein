@@ -235,9 +235,20 @@ public class ModelingFileUploadResource {
 
         SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,
                 schemaInterpretation, "", file, false, outsizeFlag);
-
-        return ResponseDocument.successResponse(
-                fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
+        try {
+            SourceFile resultSourceFile = fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation,
+                    cleanupOperationType);
+            return ResponseDocument.successResponse(resultSourceFile);
+        }  catch (LedpException ledp) {
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                    Status.Error, ledp.getMessage());
+            throw new UIActionException(action, ledp.getCode());
+        } catch (RuntimeException e) {
+            LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { e.getMessage() });
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
+                    Status.Error, ledp.getMessage());
+            throw new UIActionException(action, ledp.getCode());
+        }
     }
 
     @RequestMapping(value = "/cdlexternalsystems", method = RequestMethod.GET)
