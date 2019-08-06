@@ -161,7 +161,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         if (defaultContSysId != null) {
             cloneFldList.add(new String[] { InterfaceName.ContactId.name(), defaultContSysId });
         }
-        String[][] cloneFlds = cloneFldList.isEmpty() ? null : (String[][]) cloneFldList.toArray();
+        String[][] cloneFlds = cloneFldList.isEmpty() ? null : cloneFldList.toArray(new String[0][]);
         String[][] renameFlds = { //
                 { InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name() }, //
                 { InterfaceName.ContactId.name(), InterfaceName.CustomerContactId.name() } //
