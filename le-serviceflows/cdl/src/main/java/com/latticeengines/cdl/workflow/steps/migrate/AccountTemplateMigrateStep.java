@@ -38,10 +38,11 @@ public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep {
     protected void updateTemplate(Table templateTable, S3ImportSystem s3ImportSystem) {
         Preconditions.checkNotNull(s3ImportSystem);
         Preconditions.checkNotNull(templateTable);
+        String displayName = templateTable.getAttribute(InterfaceName.AccountId).getDisplayName();
         templateTable.removeAttribute(InterfaceName.AccountId.name());
-        templateTable.addAttribute(getCustomerAccountId());
+        templateTable.addAttribute(getCustomerAccountId(displayName));
         if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
-            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId()));
+            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), displayName));
         }
     }
 

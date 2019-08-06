@@ -106,9 +106,10 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
         return getStringValueFromContext(PRIMARY_IMPORT_SYSTEM);
     }
 
-    Attribute getCustomerAccountId() {
+    Attribute getCustomerAccountId(String displayName) {
         Attribute attribute = new Attribute();
         attribute.setName(InterfaceName.CustomerAccountId.name());
+        attribute.setDisplayName(displayName);
         attribute.setInterfaceName(InterfaceName.CustomerAccountId);
         attribute.setAllowedDisplayNames(Arrays.asList("ACCOUNT", "ACCOUNT_ID", "ACCOUNTID","ACCOUNT_EXTERNAL_ID"));
         attribute.setPhysicalDataType(Schema.Type.STRING.toString());
@@ -118,9 +119,10 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
         return attribute;
     }
 
-    Attribute getCustomerContactId() {
+    Attribute getCustomerContactId(String displayName) {
         Attribute attribute = new Attribute();
         attribute.setName(InterfaceName.CustomerContactId.name());
+        attribute.setDisplayName(displayName);
         attribute.setInterfaceName(InterfaceName.CustomerContactId);
         attribute.setAllowedDisplayNames(Arrays.asList("CONTACT", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT_ID"));
         attribute.setPhysicalDataType(Schema.Type.STRING.toString());
@@ -130,9 +132,10 @@ public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<Imp
         return attribute;
     }
 
-    Attribute getSystemId(String attrName) {
+    Attribute getSystemId(String attrName, String displayName) {
         Attribute attribute = new Attribute();
         attribute.setName(attrName);
+        attribute.setDisplayName(displayName);
         attribute.setPhysicalDataType(Schema.Type.STRING.toString());
         attribute.setLogicalDataType(LogicalDataType.Id);
         attribute.setFundamentalType(FundamentalType.ALPHA);

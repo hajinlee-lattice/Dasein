@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -52,6 +53,24 @@ public class ImportMigrateTrackingServiceImpl implements ImportMigrateTrackingSe
     @Override
     public ImportMigrateTracking getByPid(String customerSpace, Long pid) {
         return importMigrateTrackingEntityMgr.findByPid(pid);
+    }
+
+    @Override
+    public List<Long> getAllRegisteredActionIds(String customerSpace, Long pid) {
+        ImportMigrateTracking migrateTracking = importMigrateTrackingEntityMgr.findByPid(pid);
+        List<Long> actionIds = new ArrayList<>();
+        if (migrateTracking.getReport() != null) {
+            if (migrateTracking.getReport().getAccountActionId() != null) {
+                actionIds.add(migrateTracking.getReport().getAccountActionId());
+            }
+            if (migrateTracking.getReport().getContactActionId() != null) {
+                actionIds.add(migrateTracking.getReport().getContactActionId());
+            }
+            if (migrateTracking.getReport().getTransactionActionId() != null) {
+                actionIds.add(migrateTracking.getReport().getTransactionActionId());
+            }
+        }
+        return actionIds;
     }
 
     @Override

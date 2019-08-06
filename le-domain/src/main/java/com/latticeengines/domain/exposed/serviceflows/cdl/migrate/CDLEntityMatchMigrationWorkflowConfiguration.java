@@ -1,19 +1,30 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.migrate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public CDLEntityMatchMigrationWorkflowConfiguration(){
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.DataCloud.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {

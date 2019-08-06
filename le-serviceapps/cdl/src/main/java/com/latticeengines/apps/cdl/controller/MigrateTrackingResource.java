@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +38,13 @@ public class MigrateTrackingResource {
     @ApiOperation(value = "Get a MigrateTracking record by pid")
     public ImportMigrateTracking getMigrateTracking(@PathVariable String customerSpace, @PathVariable Long pid) {
         return importMigrateTrackingService.getByPid(customerSpace, pid);
+    }
+
+    @RequestMapping(value = "/actions/{pid}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all registered action list in MigrateTracking report by pid")
+    public List<Long> getRegisteredActions(@PathVariable String customerSpace, @PathVariable Long pid) {
+        return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, pid);
     }
 
     @RequestMapping(value = "/update/{pid}/status/{status}", method = RequestMethod.PUT, headers = "Accept=application/json")

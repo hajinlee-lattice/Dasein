@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 
@@ -25,6 +27,14 @@ public interface ImportMigrateTrackingService {
      * @return MigrateTracking record.
      */
     ImportMigrateTracking getByPid(String customerSpace, Long pid);
+
+    /**
+     *
+     * @param customerSpace Current customerSpace.
+     * @param pid MigrateTracking PID
+     * @return Registered import action ids
+     */
+    List<Long> getAllRegisteredActionIds(String customerSpace, Long pid);
 
     /**
      *
