@@ -462,11 +462,22 @@ angular.module('lp.jobs.import.row', [
         };
 
         $scope.isJobScheduled = (job) => { 
-            if (job.schedulingInfo) {
-                return job.schedulingInfo.scheduled;
-            } else {
-                false
+            if (
+                job.schedulingInfo &&
+				job.schedulingInfo.scheduled
+                ) {
+                    
+                    return job.schedulingInfo.scheduled;
+                } else {
+                    false;
+                }
             }
+        $scope.getScheduledMsg = (job) => {
+             if (job.schedulingInfo) {
+					return job.schedulingInfo.message != "" ? job.schedulingInfo.message :'Scheduled';
+				} else {
+                    return '';
+				}
         }
 
         $scope.getActionsCount = function () {
