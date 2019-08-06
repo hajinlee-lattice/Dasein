@@ -15,7 +15,6 @@ import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
-import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 @Component("exportFieldMetadataMappingDao")
 public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMetadataMapping> implements ExportFieldMetadataMappingDao {
@@ -25,102 +24,6 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
     @Override
     protected Class<ExportFieldMetadataMapping> getEntityClass() {
         return ExportFieldMetadataMapping.class;
-    }
-
-    @Override
-    public List<ExportFieldMetadataMapping> updateExportFieldMetadataMappings(LookupIdMap lookupIdMap,
-            List<ExportFieldMetadataMapping> exportFieldMetadataMappings) {
-
-        // if (lookupIdMap == null) {
-        // throw new LedpException(LedpCode.LEDP_40067);
-        // }
-        //
-        // Map<String, ExportFieldMetadataMapping> retrievedFieldMapping =
-        // super.findAllByField("FK_LOOKUP_ID_MAP",
-        // lookupIdMap.getPid()).stream()
-        // .collect(Collectors.toMap(ExportFieldMetadataMapping::getSourceField,
-        // Function.identity()));
-        //
-        // Map<String, ExportFieldMetadataMapping> updatedFieldMapping =
-        // exportFieldMetadataMappings.stream()
-        // .collect(Collectors.toMap(ExportFieldMetadataMapping::getSourceField,
-        // Function.identity()));
-        //
-        // return exportFieldMetadataMappings;
-        //
-        // List<ExportFieldMetadataMapping> updatedExportFieldMappings = new
-        // ArrayList<ExportFieldMetadataMapping>();
-        // List<ExportFieldMetadataMapping> newExportFieldMappings = new
-        // ArrayList<ExportFieldMetadataMapping>();
-        // Set<String> exportFieldMappingsToOverwrite =
-        // retrievedFieldMapping.keySet().stream()
-        // .filter(fieldName ->
-        // !updatedFieldMapping.containsKey(fieldName)).collect(Collectors.toSet());
-        //
-        //
-        // exportFieldMetadataMappings.forEach(fm -> {
-        // if (retrievedFieldMapping.containsKey(fm.getSourceField())
-        // || exportFieldMappingsToOverwrite.contains(fm.getSourceField())) {
-        // ExportFieldMetadataMapping updatedField =
-        // retrievedFieldMapping.get(fm.getSourceField());
-        // updatedField.setSourceField(fm.getSourceField());
-        // updatedField.setDestinationField(fm.getDestinationField());
-        // updatedField.setOverwriteValue(fm.getOverwriteValue());
-        // super.update(updatedField);
-        // updatedExportFieldMappings.add(updatedField);
-        // if (exportFieldMappingsToOverwrite.contains(fm.getSourceField())) {
-        // exportFieldMappingsToOverwrite.remove(fm.getSourceField());
-        // }
-        // } else {
-        // ExportFieldMetadataMapping newMapping = new
-        // ExportFieldMetadataMapping();
-        // newMapping.setTenant(lookupIdMap.getTenant());
-        // newMapping.setLookupIdMap(lookupIdMap);
-        // newMapping.setSourceField(fm.getSourceField());
-        // newMapping.setDestinationField(fm.getDestinationField());
-        // newMapping.setOverwriteValue(fm.getOverwriteValue());
-        // newExportFieldMappings.add(newMapping);
-        // updatedExportFieldMappings.add(newMapping);
-        // }
-        // });
-
-        // if (exportFieldMappingsToOverwrite.size() > 0) {
-        // exportFieldMappingsToOverwrite.forEach(fm -> {
-        // super.deleteByPid(retrievedFieldMapping.get(fm).getPid(), true);
-        // ;
-        // });
-        // }
-
-        // log.info(JsonUtils.serialize(updatedExportFieldMappings));
-        // super.create(newExportFieldMappings, true);
-        // return updatedExportFieldMappings;
-
-        // List<ExportFieldMetadataMapping> retrievedFieldMapping =
-        // super.findAllByField("FK_LOOKUP_ID_MAP",
-        // lookupIdMap.getPid());
-        //
-        // retrievedFieldMapping.stream().forEach(fm -> {
-        // super.deleteByPid(fm.getPid(), true);
-        // });
-        //
-        // List<ExportFieldMetadataMapping> updatedExportFieldMappings = new
-        // ArrayList<ExportFieldMetadataMapping>();
-        // exportFieldMetadataMappings.stream().forEach(fm -> {
-        // ExportFieldMetadataMapping newMapping = new
-        // ExportFieldMetadataMapping();
-        // newMapping.setTenant(lookupIdMap.getTenant());
-        // newMapping.setLookupIdMap(lookupIdMap);
-        // newMapping.setSourceField(fm.getSourceField());
-        // newMapping.setDestinationField(fm.getDestinationField());
-        // newMapping.setOverwriteValue(fm.getOverwriteValue());
-        // updatedExportFieldMappings.add(newMapping);
-        // });
-        //
-        // log.info(JsonUtils.serialize(updatedExportFieldMappings));
-        //
-        // super.create(updatedExportFieldMappings, true);
-        // return updatedExportFieldMappings;
-        return null;
     }
 
     @Override
