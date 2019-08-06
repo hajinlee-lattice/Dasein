@@ -24,8 +24,6 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_SCALE_IN_SIZE = 8;
     private static final int MAX_SCALE_IN_ATTEMPTS = 3;
     private static final int MAX_SCALE_OUT_ATTEMPTS = 5;
-    private static final long SLOW_START_THRESHOLD = TimeUnit.MINUTES.toMillis(1);
-    private static final long HANGING_START_THRESHOLD = TimeUnit.MINUTES.toMillis(5);
     private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(40);
     private static final long SLOW_DECOMMISSION_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
@@ -300,8 +298,7 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private YarnTracker constructYarnTracker() {
-        return new YarnTracker(emrCluster, clusterId, emrEnvService, taskMb, taskVCores, //
-                SLOW_START_THRESHOLD, HANGING_START_THRESHOLD, SLOW_DECOMMISSION_THRESHOLD);
+        return new YarnTracker(emrCluster, clusterId, emrEnvService, taskMb, taskVCores, SLOW_DECOMMISSION_THRESHOLD);
     }
 
     private EMRTracker getEMRTracker() {

@@ -1,8 +1,7 @@
 package com.latticeengines.apps.lp.qbean;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,8 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
@@ -22,21 +19,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.yarn.ApplicationMetrics;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 class YarnTracker {
 
     private static final Logger log = LoggerFactory.getLogger(YarnTracker.class);
     private static final ConcurrentMap<String, Long> decommissionTimeMap = new ConcurrentHashMap<>();
-    private static final EnumSet<YarnApplicationState> PENDING_APP_STATES = //
-            Sets.newEnumSet(Arrays.asList(//
-                    YarnApplicationState.NEW, //
-                    YarnApplicationState.NEW_SAVING, //
-                    YarnApplicationState.SUBMITTED, //
-                    YarnApplicationState.ACCEPTED //
-            ), YarnApplicationState.class);
+    private static final YarnApplicationState[] NON_TERMINAL_APP_STATES = new YarnApplicationState[] {
+            YarnApplicationState.NEW, //
+            YarnApplicationState.NEW_SAVING, //
+            YarnApplicationState.SUBMITTED, //
+            YarnApplicationState.ACCEPTED, //
+            YarnApplicationState.RUNNING //
+    };
 
     private final EMREnvService emrEnvService;
     private final String emrCluster;
@@ -45,13 +42,10 @@ class YarnTracker {
     private final long taskMb;
     private final int taskVCores;
 
-    private final long slowStartThreshold;
-    private final long hangingStartThreshold;
     private final long slowDecommissionThreshold;
 
     YarnTracker(String emrCluster, String clusterId, EMREnvService emrEnvService, //
-                long taskMb, int taskVCores, //
-                long slowStartThreshold, long hangingStartThreshold, long slowDecommissionThreshold) {
+                long taskMb, int taskVCores, long slowDecommissionThreshold) {
         this.emrCluster = emrCluster;
         this.clusterId = clusterId;
         this.emrEnvService = emrEnvService;
@@ -59,49 +53,29 @@ class YarnTracker {
         this.taskMb = taskMb;
         this.taskVCores = taskVCores;
 
-        this.slowStartThreshold = slowStartThreshold;
-        this.hangingStartThreshold = hangingStartThreshold;
         this.slowDecommissionThreshold = slowDecommissionThreshold;
     }
 
     ReqResource getRequestingResources() {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        List<ApplicationMetrics> metricsList = new ArrayList<>();
         return retry.execute(context -> {
             try {
-                try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
-                    yarnClient.start();
-                    List<ApplicationReport> apps = yarnClient.getApplications(PENDING_APP_STATES);
-                    return getReqs(apps);
-                }
-            } catch (IOException | YarnException e) {
+                metricsList.clear();
+                metricsList.addAll(emrEnvService.getAppMetrics(clusterId, NON_TERMINAL_APP_STATES));
+                return getReqs(metricsList);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    private ReqResource getReqs(List<ApplicationReport> apps) {
+    private ReqResource getReqs(List<ApplicationMetrics> apps) {
         ReqResource reqResource = new ReqResource();
         if (CollectionUtils.isNotEmpty(apps)) {
-            long now = System.currentTimeMillis();
-            for (ApplicationReport app : apps) {
-                ApplicationResourceUsageReport usageReport = app
-                        .getApplicationResourceUsageReport();
-                Resource used = usageReport.getUsedResources();
-                Resource asked = usageReport.getNeededResources();
-                if (now - app.getStartTime() >= slowStartThreshold && used.getMemorySize() < asked.getMemorySize()
-                        && used.getVirtualCores() < asked.getVirtualCores()) {
-                    // resource not full-filled after SLOW_START_THRESHOLD
-                    // must be stuck
-                    long mb = asked.getMemorySize();
-                    int vcores = asked.getVirtualCores();
-                    reqResource.reqMb += mb;
-                    reqResource.reqVCores += vcores;
-                    reqResource.maxMb = Math.max(mb, reqResource.maxMb);
-                    reqResource.maxVCores = Math.max(vcores, reqResource.maxVCores);
-                    if (now - app.getStartTime() >= hangingStartThreshold) {
-                        reqResource.hangingApps += 1;
-                    }
-                }
+            for (ApplicationMetrics app : apps) {
+                reqResource.reqMb += app.getPendingResource().memory;
+                reqResource.reqVCores += app.getPendingResource().vCores;
             }
         }
         return reqResource;
