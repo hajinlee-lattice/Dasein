@@ -69,21 +69,15 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
     }
 
-    @Test(groups = "end2end", priority = 0)
-    public void tesProductBundleAfterCreatingSegment() throws Exception {
+    @Test(groups = "end2end")
+    public void testProductBundle() throws Exception {
+        // create bundle related segment
         createTestSegmentProductBundle();
-        ApplicationId applicationId = importData2(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
-                false, false);
-        JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
-        Assert.assertEquals(status, JobStatus.FAILED);
-    }
-
-    @Test(groups = "end2end", priority = 1)
-    public void testProductBundleAfterCreatingXsellModel() throws Exception {
         // mock one active x-shell rating engine
         createModelingSegment();
         MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, SEGMENT_NAME_MODELING);
 
+        // create AI model
         Thread setupAIModelsThread = new Thread(this::setupAIModels);
         setupAIModelsThread.start();
         if(setupAIModelsThread != null) {
@@ -97,7 +91,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
         RatingEngine ai = createCrossSellEngine(segment, summary, PredictionType.EXPECTED_VALUE);
         activateRatingEngine(ai.getId());
-        ApplicationId applicationId = importData2(BusinessEntity.Product, "ProductBundles.csv", null,
+        ApplicationId applicationId = importData2(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
                 false, false);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
