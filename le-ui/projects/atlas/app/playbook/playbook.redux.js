@@ -49,10 +49,22 @@ const initialState = {
 };
 
 export const actions = {
-    reset: () => {
-        store.dispatch({
-            type: CONST.RESET
-        });
+    reset: (states) => {
+        if(states) {
+            var statesAr = Object.keys(states);
+            statesAr.forEach(function(state) {
+                if(CONST[state]) {
+                    store.dispatch({
+                        type: CONST[state],
+                        payload: states[state] || null
+                    });
+                }
+            });
+        } else {
+            store.dispatch({
+                type: CONST.RESET
+            });
+        }
     },
     setLoading: (state) => {
         store.dispatch({

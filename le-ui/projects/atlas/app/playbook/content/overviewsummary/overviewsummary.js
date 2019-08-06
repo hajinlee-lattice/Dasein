@@ -181,6 +181,7 @@ export default class OverviewSummaryContainer extends Component {
                 types = this.state.types,
                 defaultDescriptionText = (!this.state.editing.description && !play.description ? 'Add a description' : '');
 
+// console.log(this.state.saving, defaultDescriptionText);
                 if(this.state.saving) {
                     defaultDescriptionText = '';
                 }

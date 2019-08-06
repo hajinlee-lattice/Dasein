@@ -74,6 +74,30 @@ class SystemsComponent extends Component {
                     img: '/atlas/assets/images/logo_aws_s3.png', 
                     text: 'Activate audience segments based on your Customer 360 data to power your email campaigns, by connecting to AWS S3' 
                 }
+            },
+            LinkedIn:  {
+                name: 'LinkedIn',
+                config: { 
+                    name: 'LinkedIn',
+                    img: '/atlas/assets/images/logo_linkedin.png', 
+                    text: 'Generate leads and build brand awareness by running social ads on the world’s largest professional network' 
+                }
+            },
+            Facebook:  {
+                name: 'Facebook',
+                config: { 
+                    name: 'Facebook',
+                    img: '/atlas/assets/images/logo_facebook.png', 
+                    text: 'Display social ads to reach your future consumers by marketing to 2 billion people on Facebook' 
+                }
+            },
+            GoogleAds:  {
+                name: 'GoogleAds',
+                config: { 
+                    name: 'GoogleAds',
+                    img: '/atlas/assets/images/logo_google-ads.png', 
+                    text: '??' 
+                }
             }
         };
     }
