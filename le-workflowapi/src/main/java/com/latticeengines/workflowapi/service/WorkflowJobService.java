@@ -65,6 +65,16 @@ public interface WorkflowJobService {
 
     void updateParentJobIdByWorkflowPids(String customerSpace, List<Long> workflowPids, Long parentJobId);
 
+    /**
+     * Update status of an already retried job to status {@link JobStatus#RETRIED}
+     *
+     * @param customerSpace
+     *            customer tenant ID
+     * @param workflowId
+     *            retried job's workflow ID
+     */
+    void updateWorkflowStatusAfterRetry(String customerSpace, Long workflowId);
+
     ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowPid);
 
     String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration);

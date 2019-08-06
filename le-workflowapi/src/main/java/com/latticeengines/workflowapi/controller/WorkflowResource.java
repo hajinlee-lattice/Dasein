@@ -97,7 +97,15 @@ public class WorkflowResource {
         int memory = StringUtils.isNotBlank(memoryStr) ? Integer.parseInt(memoryStr) : 0;
         setupMemory(memory, job, workflowConfig);
 
-        return new AppSubmission(workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
+        AppSubmission submission = new AppSubmission(
+                workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
+        // update status of retried job
+        if (Boolean.TRUE.equals(autoRetry)) {
+            // TODO maybe update all retried jobs instead of only auto-retried ones
+            log.info("Updating retried job status, workflowId = {}", wfId);
+            workflowJobService.updateWorkflowStatusAfterRetry(customerSpace, wfId);
+        }
+        return submission;
     }
 
     private void setupMemory(Integer memory, Job job, WorkflowConfiguration workflowConfig) {

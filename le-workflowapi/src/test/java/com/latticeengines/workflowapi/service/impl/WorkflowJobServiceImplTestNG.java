@@ -551,6 +551,28 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(workflowjob2.getParentJobId(), parentJobId);
     }
 
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateParentJobId" })
+    private void testUpdateStatusAfterRetry() throws Exception {
+        long workflowId = workflowIds.get(30001L);
+
+        MultiTenantContext.setTenant(null);
+        WorkflowJob originalJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        Assert.assertNotNull(originalJob);
+
+        workflowJobService.updateWorkflowStatusAfterRetry(customerSpace3.toString(), workflowId);
+
+        try {
+            Thread.sleep(1000L);
+            MultiTenantContext.setTenant(null);
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId);
+            Assert.assertNotNull(job);
+            Assert.assertEquals(job.getStatus(), JobStatus.RETRIED.name(), "Job status should be retried after update");
+        } finally {
+            // restore to original state
+            workflowJobEntityMgr.updateWorkflowJob(originalJob);
+        }
+    }
+
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
     public void testMultiTenantFilter() {
         List<Long> testWorkflowIds1 = new ArrayList<>();
