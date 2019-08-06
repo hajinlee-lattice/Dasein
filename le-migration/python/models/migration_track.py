@@ -13,7 +13,7 @@ class MigrationTrack(BaseModel, Base):
     curActiveTable = Column('CUR_ACTIVE_TABLE_NAME', JSON, nullable=True,
                             comment='DataCollectionTable.ROLE -> list of Table.NAME')
     # TODO - after MIGRATION_TRACKING table is in, add ForeignKey
-    trackingReport = Column('FK_TRACKING_REPORT', BIGINT(20), nullable=True, comment='MIGRATE_TRACKING.pid')
+    fkImportTracking = Column('FK_TRACKING_REPORT', BIGINT(20), nullable=True, comment='MIGRATE_TRACKING.pid')
     collectionStatusDetail = Column('DETAIL', JSON, nullable=True, comment='from DATA_COLLECTION_STATUS.Detail')
     statsCubesData = Column('CUBES_DATA', LONGBLOB, nullable=True, comment='from STATISTICS.CUBES_DATA')
     statsName = Column('NAME', VARCHAR(255), nullable=False, comment='from STATISTICS.NAME')
