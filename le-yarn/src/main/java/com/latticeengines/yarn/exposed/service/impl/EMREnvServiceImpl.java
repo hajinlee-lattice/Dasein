@@ -115,13 +115,15 @@ public class EMREnvServiceImpl implements EMREnvService {
                 StringUtils.join(stateNames, ","));
         JsonNode json = restTemplate.getForObject(metricsUrl, JsonNode.class);
         List<ApplicationMetrics> metricsList = new ArrayList<>();
-        ObjectMapper om = new ObjectMapper();
-        for (JsonNode appNode: json.get("apps").get("app")) {
-            try {
-                ApplicationMetrics metrics = om.treeToValue(appNode, ApplicationMetrics.class);
-                metricsList.add(metrics);
-            } catch (IOException e) {
-                throw new RuntimeException("Cannot parse cluster metrics", e);
+        if (json != null && json.hasNonNull("apps") && json.get("apps").hasNonNull("app")) {
+            ObjectMapper om = new ObjectMapper();
+            for (JsonNode appNode : json.get("apps").get("app")) {
+                try {
+                    ApplicationMetrics metrics = om.treeToValue(appNode, ApplicationMetrics.class);
+                    metricsList.add(metrics);
+                } catch (IOException e) {
+                    throw new RuntimeException("Cannot parse cluster metrics", e);
+                }
             }
         }
         return metricsList;
