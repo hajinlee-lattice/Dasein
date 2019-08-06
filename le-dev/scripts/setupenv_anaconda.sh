@@ -49,7 +49,7 @@ fi
 ${ANACONDA_HOME}/bin/conda update -n base -c defaults conda
 
 CONDA_ENVS_DIR=${WSHOME}//le-dev/conda/envs
-for envname in 'p2' 'spark'
+for envname in 'p2' 'spark' 'migration'
     do
         if [[ -d ${ANACONDA_HOME}/envs/$envname ]]; then
             echo "Removing existing Anaconda environment: $envname"

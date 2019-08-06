@@ -549,8 +549,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         MultiTenantContext.setTenant(tenant);
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getShortTenantId());
         ApplicationId applicationId = null;
-        boolean success = true;
-
         try {
             ProcessAnalyzeRequest request;
             if (StringUtils.isNotEmpty(dataFeed.getScheduleRequest())) {
@@ -560,13 +558,10 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request.setUserId(USERID);
             }
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
-
+            log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
-            log.info(String.format("Failed to submit job for tenant name: %s", tenant.getName()));
-            success = false;
+            log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
         }
-        log.info(String.format("Submit process analyze job with application id: %s, tenant id: %s, success" + " %s",
-                applicationId.toString(), tenant.getName(), success ? "y" : "n"));
         return applicationId;
     }
 

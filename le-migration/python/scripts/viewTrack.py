@@ -1,23 +1,9 @@
 import argparse
 import sys
-from os import getenv, getcwd
+from os import getenv
 
 sys.path.append('{}/le-migration/python'.format(getenv('WSHOME')))
 USAGE = 'Usage: viewTrack -u <username> -p <password> -x <host> [-d <db name>] -t TENANT_PID'
-
-
-def checkEnvironment():
-    valid = True
-    print('\n===== Checking environment ==========\n')
-    if not getenv('WSHOME'):
-        print('Environment variable WSHOME is not set')
-        valid = False
-    if getcwd() != getenv('WSHOME'):
-        print('Please run this script at WSHOME')
-        valid = False
-    print('\n===== Finish checking environment ===\n')
-    if not valid:
-        quit(-1)
 
 
 def checkCanView(tenant):
@@ -51,7 +37,6 @@ def getStorage(args):
 
 
 if __name__ == '__main__':
-    checkEnvironment()
     args = getArgs()
     storage, tenant = None, None
     try:
