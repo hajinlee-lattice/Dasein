@@ -470,6 +470,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public void updateWorkflowStatusAfterRetry(String customerSpace, Long workflowId) {
+        if (workflowId == null) {
+            return;
+        }
+
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId);
+        if (job == null) {
+            log.error("Failed to update job status after retry for workflowId = {}, workflow job not found",
+                    workflowId);
+            return;
+        }
+
+        job.setStatus(JobStatus.RETRIED.name());
+        workflowJobEntityMgr.updateWorkflowJobStatus(job);
+        jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowId));
+    }
+
+    @Override
+    @WithCustomerSpace
     public ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration,
             Long workflowPid) {
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);
