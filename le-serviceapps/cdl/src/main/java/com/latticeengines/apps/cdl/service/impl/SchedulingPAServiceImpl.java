@@ -316,7 +316,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(feed,
                     DataFeedExecutionJobType.PA);
         }
-        return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution);
+        return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
+                retryProcessAnalyze(execution, customerSpace));
     }
 
     private boolean isLarge(DataCollectionStatus status) {
@@ -328,7 +329,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private boolean retryProcessAnalyze(DataFeedExecution execution, String tenantId) {
-        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus())) && checkRetryPendingTime(execution.getUpdated().getTime())) {
+        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))
+                && execution.getUpdated() != null && checkRetryPendingTime(execution.getUpdated().getTime())) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
             } else {

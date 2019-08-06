@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -261,8 +263,38 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 jobs.add(unstartedPnAJob);
             }
         }
-        // TODO set last failed PA to pending retry if still have quota
+        updateLastFailedPA(jobs, schedulingStatus);
         return jobs;
+    }
+
+    /*
+     * Update latest failed PA status to pending retry if scheduler is going to
+     * retry it
+     */
+    private void updateLastFailedPA(List<Job> jobs, SchedulingStatus status) {
+        // check scheduler is enabled and all references exist
+        if (CollectionUtils.isEmpty(jobs) || status == null || !status.isSchedulerEnabled()) {
+            return;
+        }
+        if (status.getDataFeed() == null || status.getLatestExecution() == null
+                || status.getLatestExecution().getStatus() != DataFeedExecution.Status.Failed) {
+            return;
+        }
+
+        DataFeedExecution exec = status.getLatestExecution();
+        if (exec.getWorkflowId() == null || !status.isPendingRetry()) {
+            if (exec.getWorkflowId() == null) {
+                log.warn("Got empty workflowId for last failed execution. ExecutionId={}, tenant={}", exec.getPid(),
+                        status.getCustomerSpace());
+            }
+            return;
+        }
+
+        jobs.stream() //
+                .filter(Objects::nonNull) //
+                .filter(job -> exec.getWorkflowId().equals(job.getId())) //
+                .findAny() //
+                .ifPresent(job -> job.setJobStatus(JobStatus.PENDING_RETRY));
     }
 
     @Override

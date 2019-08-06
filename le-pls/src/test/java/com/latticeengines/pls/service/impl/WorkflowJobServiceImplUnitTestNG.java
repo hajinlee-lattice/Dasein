@@ -534,7 +534,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     }
 
     private void mockCdlProxy() {
-        when(cdlProxy.getSchedulingStatus(anyString())).thenReturn(new SchedulingStatus("", false, null, null));
+        when(cdlProxy.getSchedulingStatus(anyString())).thenReturn(new SchedulingStatus("", false, null, null, false));
     }
 
     private void mockTenantEntityManager() {

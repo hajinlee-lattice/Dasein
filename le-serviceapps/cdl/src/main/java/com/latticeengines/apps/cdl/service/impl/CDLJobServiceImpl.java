@@ -376,24 +376,24 @@ public class CDLJobServiceImpl implements CDLJobService {
                 result.getNewPATenants().size() + result.getRetryPATenants().size());
         Set<String> canRunRetryJobSet = result.getRetryPATenants();
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
-            for (String needRunJobTenantId : canRunRetryJobSet) {
+            for (String tenantId : canRunRetryJobSet) {
                 try {
                     if (!dryRun) {
-                        ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(needRunJobTenantId, Boolean.TRUE);
-                        logScheduledPA(schedulerName, needRunJobTenantId, retryAppId, true, result);
+                        ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
+                        logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
                     }
                 } catch (Exception e) {
-                    log.error("Failed to retry PA for tenant {}, error = {}", needRunJobTenantId, e);
-                    updateRetryCount(needRunJobTenantId);
+                    log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
+                    updateRetryCount(tenantId);
                 }
             }
         }
         Set<String> canRunJobSet = result.getNewPATenants();
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
-            for (String needRunJobTenantId : canRunJobSet) {
+            for (String tenantId : canRunJobSet) {
                 if (!dryRun) {
-                    ApplicationId appId = submitProcessAnalyzeJob(needRunJobTenantId);
-                    logScheduledPA(schedulerName, needRunJobTenantId, appId, false, result);
+                    ApplicationId appId = submitProcessAnalyzeJob(tenantId);
+                    logScheduledPA(schedulerName, tenantId, appId, false, result);
                 }
             }
         }
