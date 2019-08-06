@@ -210,7 +210,9 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         if (minAllocationInMb < 1536) {
             return 1024;
         }
-        int count = minAllocationInMb > 16384 ? 8 : 10;
+        // FIXME change 4 back to 8 if we decide to disable flink (leave 2G more for
+        // large container)
+        int count = minAllocationInMb > 16384 ? 4 : 10;
         return minAllocationInMb - 512 * (IntMath.log2(minAllocationInMb, RoundingMode.CEILING) - count);
     }
 
