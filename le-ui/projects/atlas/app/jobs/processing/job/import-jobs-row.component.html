@@ -55,7 +55,7 @@
 	<div class="tooltip-cell">
 		<div
 			class="text-ellipsis text-container "
-			ng-class="job.jobStatus == 'Failed' ? 'failed' : ''"
+			ng-class="job.jobStatus == 'Failed' ? 'job-failed' : ''"
 		>
 			<span>{{ getJobStatus(job) }}</span>
 		</div>
@@ -136,9 +136,7 @@
 	</a>
 	<span>
 		<span ng-if="isJobFailed(job)">Please contact Lattice support</span>
-		<span ng-if="isJobScheduled(job) && !isJobFailed(job)">{{
-			job.schedulingInfo.message
-		}}</span>
+		<span ng-if="isJobScheduled(job)">{{ getScheduledMsg(job) }}</span>
 	</span>
 </div>
 <div class="le-cell le-col-start-10 le-col-span-1 le-cell-right-align">
