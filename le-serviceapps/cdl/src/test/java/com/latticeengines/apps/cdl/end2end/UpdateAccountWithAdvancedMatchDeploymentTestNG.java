@@ -127,16 +127,17 @@ public class UpdateAccountWithAdvancedMatchDeploymentTestNG extends UpdateAccoun
         String summaryPrefix = ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_";
 
         Map<String, Object> accountReport = new HashMap<>();
-        accountReport.put(summaryPrefix + ReportConstants.NEW, NEW_ACCOUNT_UA_EM);
-        accountReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_ACCOUNT_UA_EM);
+        accountReport.put(summaryPrefix + ReportConstants.NEW, NEW_ACCOUNT_UA_EMGA);
+        accountReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_ACCOUNT_UA_EMGA);
         accountReport.put(summaryPrefix + ReportConstants.UNMATCH, 1L);
         accountReport.put(summaryPrefix + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, ACCOUNT_UA_EM);
-        accountReport.put(ReportPurpose.ENTITY_MATCH_SUMMARY.name() + "_" + ReportConstants.PUBLISH_SEED, UPDATED_ACCOUNT_UA_EM);
+        accountReport.put(ReportPurpose.ENTITY_MATCH_SUMMARY.name() + "_" + ReportConstants.PUBLISH_SEED,
+                UPDATED_ACCOUNT_UA_EMGA);
 
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(summaryPrefix + ReportConstants.NEW, NEW_CONTACT_UA_EM);
-        contactReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_CONTACT_UA_EM);
+        contactReport.put(summaryPrefix + ReportConstants.NEW, NEW_CONTACT_UA_EMGA);
+        contactReport.put(summaryPrefix + ReportConstants.UPDATE, UPDATED_CONTACT_UA_EMGA);
         contactReport.put(summaryPrefix + ReportConstants.DELETE, 0L);
         contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_UA_EM);
 
