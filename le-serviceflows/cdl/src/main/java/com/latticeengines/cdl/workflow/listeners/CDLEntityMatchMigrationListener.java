@@ -60,7 +60,7 @@ public class CDLEntityMatchMigrationListener extends LEJobListener {
             migrateTrackingProxy.updateStatus(customerSpace, trackingPid, ImportMigrateTracking.Status.FAILED);
         } else if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
             migrateTrackingProxy.updateStatus(customerSpace, trackingPid, ImportMigrateTracking.Status.COMPLETED);
-//            metadataProxy.updateImportTracking(customerSpace, trackingPid);
+            metadataProxy.updateImportTracking(customerSpace, migrateTrackingProxy.getMigrateTracking(customerSpace, trackingPid));
             //TODO: remove old datafeed tasks.
         } else {
             log.warn(String.format("CDLEntityMatchMigration job ends in unknown status: %s",

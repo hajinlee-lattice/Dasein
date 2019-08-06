@@ -9,6 +9,7 @@ from models.metadata_data_collection_table import MetadataDataCollectionTable
 from models.metadata_statistics import MetadataStatistics
 from models.metadata_table import MetadataTable
 from models.migration_track import MigrationTrack
+from models.import_migrate_tracking import ImportMigrationTracking
 
 
 class Tenant(BaseModel, Base):
@@ -30,6 +31,7 @@ class Tenant(BaseModel, Base):
     metadataTable = relationship(MetadataTable, backref='tenant', cascade='delete')
     metadataStatistics = relationship(MetadataStatistics, backref='tenant', cascade='delete')
     migrationTrack = relationship(MigrationTrack, cascade='delete', uselist=False, backref='tenant')
+    importMigrateTracking = relationship(ImportMigrationTracking, cascade='delete', backref='tenant')
 
     @property
     def activeMetadataStatistics(self):
