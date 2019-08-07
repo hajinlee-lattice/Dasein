@@ -9,12 +9,8 @@ import LeTileFooter from "common/widgets/container/tile/le-tile-footer";
 import LeButton from "common/widgets/buttons/le-button";
 import SystemMappingComponent from "./system-mapping.component";
 // import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
-import ConfWindowService, { FIELD_MAPPING } from "./confWindowService";
-import ConnectorService, {
-	MARKETO,
-	SALESFORCE,
-	ELOQUA
-} from "./connectors.service";
+import ConfWindowService from "./confWindowService";
+import ConnectorService from "./connectors.service";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
@@ -22,7 +18,7 @@ import "./systems-list.component.scss";
 import LeHPanel from "common/widgets/container/le-h-panel";
 import GridLayout from "common/widgets/container/grid-layout.component";
 import { RIGHT, CENTER } from "common/widgets/container/le-alignments";
-import { actions, reducer } from "./connections.redux";
+import { reducer } from "./connections.redux";
 
 import { actions as modalActions } from "common/widgets/modal/le-modal.redux";
 import { store, injectAsyncReducer } from "store";
@@ -106,7 +102,7 @@ export default class SystemComponent extends Component {
 						let config = {
 							callback: action => {
 								modalActions.closeModal(store);
-								ConfWindowService.setUpdating(false);
+								// ConfWindowService.setUpdating(false);
 							},
 							className: "launch-modal",
 							template: () => {
@@ -116,7 +112,7 @@ export default class SystemComponent extends Component {
 											console.log("Iframe loaded");
 										}}
 										src={url}
-										mounted={this.props.setContainer}
+										mounted={this.props.iframeMounted}
 									/>
 								);
 							},
@@ -194,12 +190,12 @@ export default class SystemComponent extends Component {
 		switch (action) {
 			case "close":
 				modalActions.closeModal(store);
-				ConfWindowService.setUpdating(false);
+				// ConfWindowService.setUpdating(false);
 				break;
 			case "ok":
 				this.setState({ saving: true });
 				modalActions.closeModal(store);
-				ConfWindowService.setUpdating(false);
+				// ConfWindowService.setUpdating(false);
 				break;
 		}
 	}

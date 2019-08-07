@@ -11,10 +11,7 @@ import SystemsService from "./systems.service";
 import ConnectorService from "./connectors.service";
 import LeVPanel from "common/widgets/container/le-v-panel";
 import "./systems-list.component.scss";
-import ConfWindowService, { FIELD_MAPPING } from "./confWindowService";
 import { MEDIUM_GAP } from "../../../common/widgets/container/grid-layout.component";
-import { actions as modalActions } from "common/widgets/modal/le-modal.redux";
-import { store } from "store";
 
 export default class SystemsListComponent extends Component {
 	constructor(props) {
@@ -31,8 +28,6 @@ export default class SystemsListComponent extends Component {
 		this.alfaFeature = FeatureFlagService.FlagIsEnabled(
 			FeatureFlagService.Flags().ALPHA_FEATURE
 		);
-		this.setContainer = this.setContainer.bind(this);
-		this.handleIframeMessages = this.handleIframeMessages.bind(this);
 	}
 
 	getConnectors(response) {
@@ -48,105 +43,6 @@ export default class SystemsListComponent extends Component {
 		return connectors;
 	}
 
-	handleIframeMessages(e) {
-		// if (e.origin != "https://embedded.tray.io") {
-		// 	return;
-		// }
-
-		if (e.data.type === "tray.configPopup.error") {
-			// Handle popup error message
-			alert(`Error: ${e.data.err}`);
-		}
-		if (e.data.type === "tray.configPopup.cancel") {
-			modalActions.closeModal(store);
-		}
-		if (e.data.type === "tray.configPopup.finish") {
-			// Handle popup finish message
-			if (
-				ConfWindowService.getSolutionInstanceConfig()
-					.registerLookupIdMap == true
-			) {
-				console.log("Register new system");
-				if (ConfWindowService.getSolutionInstanceConfig().id) {
-					// get Tray auth values
-					// create lookup id map
-					// enable solution instance
-					ConfWindowService.getTrayAuthValues(
-						ConfWindowService.getSolutionInstanceConfig().id
-					);
-				} else {
-					alert("Error: Solution instance id is not defined");
-				}
-			} else {
-				console.log("Update system");
-				ConfWindowService.updateSystem();
-			}
-			// configFinished = true;
-			modalActions.closeModal(store);
-		}
-		if (e.data.type === "tray.configPopup.validate") {
-			// Return validation in progress
-			if (this.state.iframeRef && this.state.iframeRef.contentWindow) {
-				this.state.iframeRef.contentWindow.postMessage(
-					{
-						type: "tray.configPopup.client.validation",
-						data: {
-							inProgress: true
-						}
-					},
-					"*"
-				);
-			}
-
-			setTimeout(() => {
-				// Add errors to all inputs
-				console.log(e.data.data);
-				const errors = e.data.data.visibleValues.reduce(
-					(errors, externalId) => {
-						console.log(
-							`Visible ${externalId} value:`,
-							e.data.data.configValues[externalId]
-						);
-						if (externalId == FIELD_MAPPING) {
-							ConfWindowService.verifyFieldMapping(
-								e.data.data.configValues[externalId],
-								errors,
-								externalId
-							);
-						}
-						return errors;
-					},
-					{}
-				);
-
-				// Return validation
-				if (
-					this.state.iframeRef &&
-					this.state.iframeRef.contentWindow
-				) {
-					this.state.iframeRef.contentWindow.postMessage(
-						{
-							type: "tray.configPopup.client.validation",
-							data: {
-								inProgress: false,
-								errors: errors
-							}
-						},
-						"*"
-					);
-				}
-			}, 2000);
-		}
-	}
-
-	setContainer(ref) {
-		// this.iframeRef = ref.current;
-		this.setState({
-			iframeRef: ref.current
-		});
-		console.log("REFFFFFFF ", this.state);
-	}
-
 	getSystems() {
 		let ret = [];
 		if (this.state.connectors && this.state.connectors.length > 0) {
@@ -155,7 +51,7 @@ export default class SystemsListComponent extends Component {
 				ret.push(
 					<SystemComponent
 						system={system}
-						setContainer={this.setContainer}
+						iframeMounted={this.props.iframeMounted}
 						config={{
 							img: ConnectorService.getImgByConnector(
 								system.externalSystemName
@@ -202,7 +98,6 @@ export default class SystemsListComponent extends Component {
 
 	componentDidMount() {
 		this.setState({ loading: true });
-		window.addEventListener("message", this.handleIframeMessages);
 		httpService.get(
 			"/pls/lookup-id-mapping",
 			new Observer(response => {
@@ -215,10 +110,6 @@ export default class SystemsListComponent extends Component {
 				});
 			})
 		);
-	}
-
-	componentWillUnmount() {
-		window.removeEventListener("message", this.handleIframeMessages);
 	}
 
 	render() {

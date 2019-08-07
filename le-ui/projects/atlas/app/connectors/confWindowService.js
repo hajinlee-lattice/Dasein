@@ -33,6 +33,7 @@ class ConfWindowService {
 			fieldMapping: null,
 			system: null
 		};
+		this.lookupIdMapRegistered = false;
 	}
 	getSolutionInstanceConfig() {
 		return this.solutionInstanceConfig;
@@ -219,7 +220,7 @@ class ConfWindowService {
 				console.log("response", response.data);
 				if (response.data && response.data.configId) {
 					httpService.unsubscribeObservable(observer);
-					lookupIdMapRegistered = true;
+					this.lookupIdMapRegistered = true;
 					console.log("Set lookupIdMapRegistered as true");
 				} else {
 					console.log("response", response);
@@ -251,7 +252,7 @@ class ConfWindowService {
 
 		console.log(JSON.stringify(lookupIdMap));
 
-		if (lookupIdMapRegistered == false) {
+		if (this.lookupIdMapRegistered == false) {
 			httpService.post(
 				"/pls/lookup-id-mapping/register",
 				lookupIdMap,
