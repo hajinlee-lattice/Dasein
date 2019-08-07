@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -58,6 +60,33 @@ public class RestrictionUtilsUnitTestNG {
         RestrictionUtils.inspectBucketRestriction(br3, map, tft);
         Assert.assertEquals(map.size(), 1);
         Assert.assertEquals(map.get(ComparisonType.LATEST_DAY).size(), 2);
+    }
+
+    @Test(groups = "unit", dataProvider = "numericalBuckets")
+    public void testConvertNumericalBucketRestriction(List<Object> vals, Class<?> attrClz, boolean exception) {
+        if (exception) {
+            Assert.assertThrows(() -> RestrictionUtils.convertNumericalValues(vals, attrClz));
+        } else {
+            List<Object> newVals = RestrictionUtils.convertNumericalValues(vals, attrClz);
+            for (Object val: newVals) {
+                Assert.assertTrue(Number.class.isAssignableFrom(val.getClass()), JsonUtils.serialize(vals));
+            }
+        }
+    }
+
+    @DataProvider(name = "numericalBuckets")
+    public Object[][] provideNumericalBuckets() {
+        return new Object[][] {
+                { Arrays.asList("1", "2.5"), Integer.class, false },
+                { Arrays.asList("1.1", "2"), Long.class, false },
+                { Arrays.asList("1.2", "2"), Double.class, false },
+                { Arrays.asList("1", "2."), Float.class, false },
+                { Arrays.asList(1, "2"), Integer.class, false },
+                { Arrays.asList("1", 2), Long.class, false },
+                { Arrays.asList("1.2", 2), Double.class, false },
+                { Arrays.asList("1", 2.D), Float.class, false },
+                { Arrays.asList(">1", "2"), Integer.class, true }
+        };
     }
 
 }

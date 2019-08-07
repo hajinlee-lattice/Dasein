@@ -42,6 +42,7 @@ import com.latticeengines.objectapi.service.RatingQueryService;
 public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private static final String ATTR_ACCOUNT_NAME = "CompanyName";
+    private static final String ATTR_ACCOUNT_NUM_FAM_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
     private static final String ATTR_CONTACT_TITLE = "Occupation";
     private static final String VALUE_CONTACT_TITLE = "Analyst";
 
@@ -330,6 +331,49 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Bucket.Transaction txn = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.PurchaseHistory, "HasPurchased", Bucket.txnBkt(txn)));
+        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
+
+        rule.setDefaultBucketName(RatingBucketName.C.getName());
+
+        model.setRatingRule(rule);
+
+        return model;
+    }
+
+    @Test(groups = "functional")
+    public void testConvertNumericalBucket() {
+        RatingModel model = ruleBasedModelWithNumericalBucket();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction rest1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
+        Restriction rest2 = Restriction.builder() //
+                .let(BusinessEntity.Account, "TechIndicator_1CBitrix").isNull().build();
+        Restriction restriction = Restriction.builder().or(rest1, rest2).build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setContactRestriction(new FrontEndRestriction());
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+
+        String sql = ratingQueryService.getRatingCountQueryStr(frontEndQuery, DataCollection.Version.Blue, //
+                SEGMENT_USER);
+        Assert.assertFalse(sql.contains("lower(Account.NUMBER_OF_FAMILY_MEMBERS)"), sql);
+    }
+
+    private RuleBasedModel ruleBasedModelWithNumericalBucket() {
+        RuleBasedModel model = new RuleBasedModel();
+        model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
+        RatingRule rule = RatingRule.constructDefaultRule();
+
+        for (RatingBucketName bucket: RatingBucketName.values()) {
+            rule.getBucketToRuleMap().put(bucket.getName(), defaultRulesFromUI());
+        }
+
+        Map<String, Restriction> ruleA = new HashMap<>();
+        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and(
+                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NUM_FAM_MEMBERS, //
+                        Bucket.valueBkt(ComparisonType.IN_COLLECTION, Collections.singletonList("1")))
+        ).build());
         rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
 
         rule.setDefaultBucketName(RatingBucketName.C.getName());
