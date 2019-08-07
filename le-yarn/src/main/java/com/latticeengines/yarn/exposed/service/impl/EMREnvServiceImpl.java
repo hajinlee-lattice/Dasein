@@ -1,12 +1,17 @@
 package com.latticeengines.yarn.exposed.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.http.HttpHeaders;
@@ -21,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.HeaderRequestInterceptor;
+import com.latticeengines.domain.exposed.yarn.ApplicationMetrics;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.hadoop.bean.HadoopConfigurationUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
@@ -99,6 +105,28 @@ public class EMREnvServiceImpl implements EMREnvService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot parse cluster metrics", e);
         }
+    }
+
+    @Override
+    public List<ApplicationMetrics> getAppMetrics(String clusterId, YarnApplicationState... states) {
+        String masterIp = emrService.getMasterIp(clusterId);
+        List<String> stateNames = Arrays.stream(states).map(YarnApplicationState::name).collect(Collectors.toList());
+        String metricsUrl = String.format("http://%s:8088/ws/v1/cluster/apps?states=%s", masterIp, //
+                StringUtils.join(stateNames, ","));
+        JsonNode json = restTemplate.getForObject(metricsUrl, JsonNode.class);
+        List<ApplicationMetrics> metricsList = new ArrayList<>();
+        if (json != null && json.hasNonNull("apps") && json.get("apps").hasNonNull("app")) {
+            ObjectMapper om = new ObjectMapper();
+            for (JsonNode appNode : json.get("apps").get("app")) {
+                try {
+                    ApplicationMetrics metrics = om.treeToValue(appNode, ApplicationMetrics.class);
+                    metricsList.add(metrics);
+                } catch (IOException e) {
+                    throw new RuntimeException("Cannot parse cluster metrics", e);
+                }
+            }
+        }
+        return metricsList;
     }
 
     private RestTemplate getRestTemplate() {
