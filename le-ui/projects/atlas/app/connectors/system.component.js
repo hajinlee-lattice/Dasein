@@ -40,8 +40,7 @@ export default class SystemComponent extends Component {
 			openModal: false,
 			saving: false,
 			userId: null,
-			userAccessToken: null,
-			iframeRef: undefined
+			userAccessToken: null
 		};
 		this.editMappingClickHandler = this.editMappingClickHandler.bind(this);
 		this.modalCallback = this.modalCallback.bind(this);
@@ -49,8 +48,6 @@ export default class SystemComponent extends Component {
 		this.editMapping = Object.assign({}, props.system);
 		this.mappingClosed = this.mappingClosed.bind(this);
 		this.TemplatesStore = ReactRouter.getRouter().ngservices.TemplatesStore;
-		this.setContainer = this.setContainer.bind(this);
-		this.handleIframeTask = this.handleIframeTask.bind(this);
 	}
 
 	handleChange = () => {
@@ -66,102 +63,8 @@ export default class SystemComponent extends Component {
 	componentDidMount() {
 		injectAsyncReducer(store, "connections", reducer);
 		this.unsubscribe = store.subscribe(this.handleChange);
-		window.addEventListener("message", this.handleIframeTask);
 	}
-	// componentDidUn
 
-	handleIframeTask(e) {
-		// if (e.origin != "https://embedded.tray.io") {
-		// 	return;
-		// }
-
-		if (e.data.type === "tray.configPopup.error") {
-			// Handle popup error message
-			alert(`Error: ${e.data.err}`);
-		}
-		if (e.data.type === "tray.configPopup.cancel") {
-			modalActions.closeModal(store);
-		}
-		if (e.data.type === "tray.configPopup.finish") {
-			// Handle popup finish message
-			if (
-				ConfWindowService.getSolutionInstanceConfig()
-					.registerLookupIdMap == true
-			) {
-				console.log("Register new system");
-				if (ConfWindowService.getSolutionInstanceConfig().id) {
-					// get Tray auth values
-					// create lookup id map
-					// enable solution instance
-					ConfWindowService.getTrayAuthValues(
-						ConfWindowService.getSolutionInstanceConfig().id
-					);
-				} else {
-					alert("Error: Solution instance id is not defined");
-				}
-			} else {
-				console.log("Update system");
-				ConfWindowService.updateSystem();
-			}
-			// configFinished = true;
-			modalActions.closeModal(store);
-		}
-		if (e.data.type === "tray.configPopup.validate") {
-			// Return validation in progress
-			if (this.iframeRef && this.iframeRef.contentWindow) {
-				this.iframeRef.contentWindow.postMessage(
-					{
-						type: "tray.configPopup.client.validation",
-						data: {
-							inProgress: true
-						}
-					},
-					"*"
-				);
-			}
-
-			setTimeout(() => {
-				// Add errors to all inputs
-				console.log(e.data.data);
-				const errors = e.data.data.visibleValues.reduce(
-					(errors, externalId) => {
-						console.log(
-							`Visible ${externalId} value:`,
-							e.data.data.configValues[externalId]
-						);
-						if (externalId == FIELD_MAPPING) {
-							ConfWindowService.verifyFieldMapping(
-								e.data.data.configValues[externalId],
-								errors,
-								externalId
-							);
-						}
-						return errors;
-					},
-					{}
-				);
-
-				// Return validation
-				if (this.iframeRef && this.iframeRef.contentWindow) {
-					this.iframeRef.contentWindow.postMessage(
-						{
-							type: "tray.configPopup.client.validation",
-							data: {
-								inProgress: false,
-								errors: errors
-							}
-						},
-						"*"
-					);
-				}
-			}, 2000);
-		}
-	}
-	setContainer(ref) {
-		// this.iframeRef = ref.current;
-		this.iframeRef = ref.current;
-		console.log("REFFFFFFF ", this.iframeRef);
-	}
 	editMappingClickHandler() {
 		if (!this.isExternallyAuthenticatedSystem()) {
 			let config = {
@@ -203,6 +106,7 @@ export default class SystemComponent extends Component {
 						let config = {
 							callback: action => {
 								modalActions.closeModal(store);
+								ConfWindowService.setUpdating(false);
 							},
 							className: "launch-modal",
 							template: () => {
@@ -212,17 +116,8 @@ export default class SystemComponent extends Component {
 											console.log("Iframe loaded");
 										}}
 										src={url}
-										mounted={this.setContainer}
+										mounted={this.props.setContainer}
 									/>
-									// <div>
-
-									// 	<iframe
-									// 		ref={e => {
-									// 			this.container = e;
-									// 		}}
-									// 		src={url}
-									// 	/>
-									// </div>
 								);
 							},
 							title: () => {
@@ -299,10 +194,12 @@ export default class SystemComponent extends Component {
 		switch (action) {
 			case "close":
 				modalActions.closeModal(store);
+				ConfWindowService.setUpdating(false);
 				break;
 			case "ok":
 				this.setState({ saving: true });
 				modalActions.closeModal(store);
+				ConfWindowService.setUpdating(false);
 				break;
 		}
 	}

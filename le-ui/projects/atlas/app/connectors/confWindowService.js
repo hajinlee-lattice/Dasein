@@ -25,7 +25,6 @@ class ConfWindowService {
 	constructor() {
 		this.EMAIL = "email";
 		// this.FIELD_MAPPING = "external_field_mapping";
-		this.updating = false;
 		this.solutionInstanceConfig = {
 			orgType: null,
 			id: null,
@@ -313,9 +312,6 @@ class ConfWindowService {
 	}
 
 	updateSystem() {
-		if (this.updating == true) return;
-		console.log("UPDATE SYSTEM");
-		this.updating = true;
 		let observer = new Observer(
 			response => {
 				if (response.data && response.data.name) {
@@ -323,10 +319,8 @@ class ConfWindowService {
 				} else {
 					console.log("response", response);
 				}
-				this.updating = false;
 			},
 			error => {
-				this.updating = false;
 				console.error("Error registering lookupIdMap ", error);
 			}
 		);
