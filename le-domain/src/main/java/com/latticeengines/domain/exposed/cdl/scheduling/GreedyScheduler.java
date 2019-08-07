@@ -26,8 +26,10 @@ public class GreedyScheduler implements Scheduler {
         Set<String> canRunJobTenantSet = new HashSet<>();
         // queueName -> list(scheduling object)
         Map<String, SchedulingResult.Detail> details = new HashMap<>();
+        Set<String> allTenantsInQ = new HashSet<>();
         for (SchedulingPAQueue<?> schedulingPAQueue : schedulingPAQueues) {
             if (schedulingPAQueue.size() > 0) {
+                allTenantsInQ.addAll(schedulingPAQueue.getAll());
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("queue %s shows : %s", schedulingPAQueue.getQueueName(),
                             JsonUtils.serialize(schedulingPAQueue.getAll())));
@@ -43,7 +45,7 @@ public class GreedyScheduler implements Scheduler {
             }
         }
         canRunJobTenantSet.removeAll(canRunRetryJobTenantSet);
-        SchedulingResult result = new SchedulingResult(canRunJobTenantSet, canRunRetryJobTenantSet, details);
+        SchedulingResult result = new SchedulingResult(canRunJobTenantSet, canRunRetryJobTenantSet, details, allTenantsInQ);
         if (log.isDebugEnabled()) {
             log.debug("SchedulingResult = {}", JsonUtils.serialize(result));
         }

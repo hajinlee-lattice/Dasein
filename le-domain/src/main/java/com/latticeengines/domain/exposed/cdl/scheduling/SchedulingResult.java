@@ -11,11 +11,13 @@ public class SchedulingResult {
     private final Set<String> newPATenants;
     private final Set<String> retryPATenants;
     private final Map<String, Detail> details; // tenantId -> detail
+    private final Set<String> allTenantsInQ; // tenants' Ids
 
-    public SchedulingResult(Set<String> newPATenants, Set<String> retryPATenants, Map<String, Detail> details) {
+    public SchedulingResult(Set<String> newPATenants, Set<String> retryPATenants, Map<String, Detail> details, Set<String> allTenantsInQ) {
         this.newPATenants = newPATenants == null ? Collections.emptySet() : newPATenants;
         this.retryPATenants = retryPATenants == null ? Collections.emptySet() : retryPATenants;
         this.details = details == null ? Collections.emptyMap() : details;
+        this.allTenantsInQ = allTenantsInQ;
     }
 
     public Set<String> getNewPATenants() {
@@ -28,6 +30,10 @@ public class SchedulingResult {
 
     public Map<String, Detail> getDetails() {
         return details;
+    }
+
+    public Set<String> getAllTenantsInQ() {
+        return allTenantsInQ;
     }
 
     /*
