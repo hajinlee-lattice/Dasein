@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -385,5 +386,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public Map<TableRoleInCollection, String[]> getActiveTables(String customerSpace) {
         String url = constructUrl("/migration/tenants/{customerSpace}/activeTables", customerSpace);
         return get("getActiveTables", url, Map.class);
+    }
+
+    public Boolean updateImportTracking(String customerSpace, ImportMigrateTracking importMigrateTracking) {
+        String url = constructUrl("/migration/tenants/{customerSpace}/importMigrateTracking", customerSpace);
+        return put("link importMigrateTracking", url, importMigrateTracking, Boolean.class);
     }
 }

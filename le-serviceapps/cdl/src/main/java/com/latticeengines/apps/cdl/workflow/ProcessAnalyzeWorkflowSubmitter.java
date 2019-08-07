@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -28,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -77,11 +76,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private ImportMigrateTrackingService importMigrateTrackingService;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
@@ -568,6 +570,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+        checkImportTrackingLinked(customerSpace);
         List<Long> importActionIds = getImportActionIds(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
 
@@ -586,10 +589,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 
-        log.info(String.format("customer %s data feed %s initial status: %s", customerSpace, datafeed.getName(),
-                initialStatus.getName()));
+        log.info("customer {} data feed {} initial status: {}", customerSpace, datafeed.getName(),
+                initialStatus.getName());
 
-        log.info(String.format("Submitting migration PA workflow for customer %s", customerSpace));
+        log.info("Submitting migration PA workflow for customer {}", customerSpace);
 
         updateActions(importActionIds, pidWrapper.getPid());
 
@@ -602,8 +605,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
+    private void checkImportTrackingLinked(String customerSpace) {
+        if (migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking() == null) {
+            throw new IllegalStateException("No import migrate tracking record linked to current migration tracking record.");
+        }
+    }
+
     private List<Long> getImportActionIds(String customerSpace) {
-        // TODO get import action Ids using migrationTrackEntityMgr
-        return new ArrayList<>();
+        Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
+        return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
     }
 }

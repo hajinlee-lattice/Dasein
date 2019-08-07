@@ -215,7 +215,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
     public void testLinkedInLaunch() {
-        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.LinkedIn, "LinkedIn");
+        registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.LinkedIn, "LinkedIn");
 
         createPlayLaunchChannel(new LinkedInChannelConfig(), lookupIdMap);
 
@@ -234,7 +234,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInLaunch")
     public void testFacebookLaunch() {
-        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Facebook, "Facebook");
+        registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.Facebook, "Facebook");
 
         createPlayLaunchChannel(new FacebookChannelConfig(), lookupIdMap);
 

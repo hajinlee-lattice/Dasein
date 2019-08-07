@@ -8,12 +8,15 @@ import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -94,5 +97,23 @@ public class MigrationTrackResource {
             throw new IllegalArgumentException(String.format("Tenant %s is not tracked for migration", customerSpace));
         }
         return track.getCurActiveTable();
+    }
+
+    @PutMapping(value = "/tenants/{customerSpace}/importMigrateTracking")
+    @ResponseBody
+    public Boolean updateImportTracking(@PathVariable(name = "customerSpace") String customerSpace,
+                                        @RequestBody ImportMigrateTracking importMigrateTracking) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s not found", customerSpace));
+        }
+        MigrationTrack track = migrationTrackEntityMgr.findByTenant((tenant));
+        if (track == null) {
+            throw new IllegalArgumentException(String.format("Tenant %s is not tracked for migration", customerSpace));
+        }
+        track.setImportMigrateTracking(importMigrateTracking);
+        migrationTrackEntityMgr.update(track);
+        return true;
     }
 }
