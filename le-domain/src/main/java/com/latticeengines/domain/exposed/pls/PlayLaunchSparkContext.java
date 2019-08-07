@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +32,7 @@ public class PlayLaunchSparkContext implements Serializable {
     private String joinKey;
 
     @JsonProperty("Tenant")
-    private Tenant tenant;
+    private Long tenantPid;
 
     @JsonProperty("PlayName")
     private String playName;
@@ -39,11 +40,14 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("PlayLaunchId")
     private String playLaunchId;
 
-    @JsonProperty("PlayLaunch")
-    private PlayLaunch playLaunch;
+    @JsonProperty("Created")
+    private Date created;
 
-    @JsonProperty("Play")
-    private Play play;
+    @JsonProperty("TopNCount")
+    private Long topNCount;
+
+    @JsonProperty("PlayDescription")
+    private String playDescription;
 
     @JsonProperty("LaunchTimestampMillis")
     private long launchTimestampMillis;
@@ -51,8 +55,11 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("RatingId")
     private String ratingId;
 
-    @JsonProperty("PublishedIteration")
-    private RatingModel publishedIteration;
+    @JsonProperty("ModelId")
+    private String modelId;
+
+    @JsonProperty("ModelSummaryId")
+    private String modelSummaryId;
 
     @JsonProperty("SynchronizationDestination")
     private String synchronizationDestination;
@@ -73,15 +80,20 @@ public class PlayLaunchSparkContext implements Serializable {
             long launchTimestampMillis, String ratingId, RatingModel publishedIteration) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
-        this.tenant = tenant;
+        this.tenantPid = tenant.getPid();
         this.playName = playName;
         this.playLaunchId = playLaunchId;
-        this.playLaunch = playLaunch;
-        this.play = play;
+        this.created = playLaunch.getCreated();
+        this.topNCount = playLaunch.getTopNCount();
+        this.playDescription = play.getDescription();
         this.launchTimestampMillis = launchTimestampMillis;
         this.ratingId = ratingId;
-        this.publishedIteration = publishedIteration;
-        setSyncDestination(this.playLaunch);
+        this.modelId = publishedIteration != null ? publishedIteration.getId() : null;
+        RatingEngineType ratingEngineType = play.getRatingEngine() != null ? play.getRatingEngine().getType() : null;
+        this.modelSummaryId = publishedIteration != null && RatingEngineType.RULE_BASED != ratingEngineType
+                ? ((AIModel) publishedIteration).getModelSummaryId()
+                : "";
+        setSyncDestination(playLaunch);
     }
 
     public String getJoinKey() {
@@ -92,8 +104,8 @@ public class PlayLaunchSparkContext implements Serializable {
         this.joinKey = joinKey;
     }
 
-    public Tenant getTenant() {
-        return tenant;
+    public Long getTenantPid() {
+        return tenantPid;
     }
 
     public String getPlayName() {
@@ -112,14 +124,6 @@ public class PlayLaunchSparkContext implements Serializable {
         this.playLaunchId = playLaunchId;
     }
 
-    public PlayLaunch getPlayLaunch() {
-        return playLaunch;
-    }
-
-    public Play getPlay() {
-        return play;
-    }
-
     public long getLaunchTimestampMillis() {
         return launchTimestampMillis;
     }
@@ -128,8 +132,24 @@ public class PlayLaunchSparkContext implements Serializable {
         this.launchTimestampMillis = launchTimestampMillis;
     }
 
-    public RatingModel getPublishedIteration() {
-        return publishedIteration;
+    public Date getCreated() {
+        return this.created;
+    }
+
+    public Long getTopNCount() {
+        return this.topNCount;
+    }
+
+    public String getPlayDescription() {
+        return this.playDescription;
+    }
+
+    public String getRatingId() {
+        return this.ratingId;
+    }
+
+    public void setRatingId(String ratingId) {
+        this.ratingId = ratingId;
     }
 
     public String getSynchronizationDestination() {
@@ -164,12 +184,12 @@ public class PlayLaunchSparkContext implements Serializable {
         this.sfdcAccountID = sfdcAccountID;
     }
 
-    public String getRatingId() {
-        return ratingId;
+    public String getModelId() {
+        return this.modelId;
     }
 
-    public void setRatingId(String ratingId) {
-        this.ratingId = ratingId;
+    public String getModelSummaryId() {
+        return this.modelSummaryId;
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {
