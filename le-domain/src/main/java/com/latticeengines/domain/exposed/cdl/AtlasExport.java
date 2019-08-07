@@ -123,10 +123,6 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Enumerated(EnumType.STRING)
     private MetadataSegmentExport.Status status;
 
-    @JsonProperty("path")
-    @Column(name = "PATH", length = 2048)
-    private String path;
-
     @JsonProperty("scheduled")
     @Column(name = "SCHEDULED", nullable = false)
     private boolean scheduled;
@@ -252,14 +248,6 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
 
     public void setStatus(MetadataSegmentExport.Status status) {
         this.status = status;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public Boolean getScheduled() {

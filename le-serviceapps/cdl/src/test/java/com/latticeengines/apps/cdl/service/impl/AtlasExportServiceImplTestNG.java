@@ -77,7 +77,6 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNull(atlasExport.getContactFrontEndRestriction().getRestriction());
         Assert.assertEquals(atlasExport.getCreatedBy(), "default@lattice-engines.com");
         Assert.assertEquals(atlasExport.getStatus(), status);
-        Assert.assertNull(atlasExport.getPath());
         Tenant tenant = atlasExport.getTenant();
         Assert.assertEquals(tenant.getId(), mainCustomerSpace);
     }
