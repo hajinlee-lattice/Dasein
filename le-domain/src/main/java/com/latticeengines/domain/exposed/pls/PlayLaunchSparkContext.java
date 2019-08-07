@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -37,6 +38,9 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("PlayName")
     private String playName;
 
+    @JsonProperty("PlayDisplayName")
+    private String playDisplayName;
+
     @JsonProperty("PlayLaunchId")
     private String playLaunchId;
 
@@ -55,6 +59,12 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("RatingId")
     private String ratingId;
 
+    @JsonProperty("RatingEngineDisplayName")
+    private String ratingEngineDisplayName;
+
+    @JsonProperty("SegmentDisplayName")
+    private String segmentDisplayName;
+
     @JsonProperty("ModelId")
     private String modelId;
 
@@ -70,6 +80,9 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("DestinationOrgId")
     private String destinationOrgId;
 
+    @JsonProperty("LaunchSystemName")
+    private String launchSystemName;
+
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
 
@@ -77,7 +90,8 @@ public class PlayLaunchSparkContext implements Serializable {
     }
 
     public PlayLaunchSparkContext(Tenant tenant, String playName, String playLaunchId, PlayLaunch playLaunch, Play play,
-            long launchTimestampMillis, String ratingId, RatingModel publishedIteration) {
+            RatingEngine ratingEngine, MetadataSegment segment, long launchTimestampMillis, String ratingId,
+            RatingModel publishedIteration) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -86,10 +100,13 @@ public class PlayLaunchSparkContext implements Serializable {
         this.created = playLaunch.getCreated();
         this.topNCount = playLaunch.getTopNCount();
         this.playDescription = play.getDescription();
+        this.playDisplayName = play.getDisplayName();
         this.launchTimestampMillis = launchTimestampMillis;
         this.ratingId = ratingId;
         this.modelId = publishedIteration != null ? publishedIteration.getId() : null;
-        RatingEngineType ratingEngineType = play.getRatingEngine() != null ? play.getRatingEngine().getType() : null;
+        RatingEngineType ratingEngineType = ratingEngine != null ? ratingEngine.getType() : null;
+        this.ratingEngineDisplayName = ratingEngine != null ? ratingEngine.getDisplayName() : null;
+        this.segmentDisplayName = segment != null ? segment.getDisplayName() : null;
         this.modelSummaryId = publishedIteration != null && RatingEngineType.RULE_BASED != ratingEngineType
                 ? ((AIModel) publishedIteration).getModelSummaryId()
                 : "";
@@ -114,6 +131,14 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public void setPlayName(String playName) {
         this.playName = playName;
+    }
+
+    public String getPlayDisplayName() {
+        return playDisplayName;
+    }
+
+    public void setPlayDisplayName(String playDisplayName) {
+        this.playDisplayName = playDisplayName;
     }
 
     public String getPlayLaunchId() {
@@ -152,6 +177,22 @@ public class PlayLaunchSparkContext implements Serializable {
         this.ratingId = ratingId;
     }
 
+    public String getRatingEngineDisplayName() {
+        return this.ratingEngineDisplayName;
+    }
+
+    public void setRatingEngineDisplayName(String ratingEngineDisplayName) {
+        this.ratingEngineDisplayName = ratingEngineDisplayName;
+    }
+
+    public String getSegmentDisplayName() {
+        return this.segmentDisplayName;
+    }
+
+    public void setSegmentDisplayName(String segmentDisplayName) {
+        this.segmentDisplayName = segmentDisplayName;
+    }
+
     public String getSynchronizationDestination() {
         return this.synchronizationDestination;
     }
@@ -174,6 +215,14 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public void setDestinationOrgId(String destinationOrgId) {
         this.destinationOrgId = destinationOrgId;
+    }
+
+    public String getLaunchSystemName() {
+        return this.launchSystemName;
+    }
+
+    public void setLaunchSystemName(String launchSystemName) {
+        this.launchSystemName = launchSystemName;
     }
 
     public String getSfdcAccountID() {

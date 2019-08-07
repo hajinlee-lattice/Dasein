@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -58,7 +59,9 @@ public class TestSqoopTestNG extends TestJoinTestNGBase {
         playLaunch.setId(PlayLaunch.generateLaunchId());
         playLaunch.setDestinationAccountId(destinationAccountId);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        MetadataSegment segment = new MetadataSegment();
         Play play = new Play();
+        play.setTargetSegment(segment);
         play.setDescription("play description");
         play.setName(UUID.randomUUID().toString());
         playLaunch.setPlay(play);
@@ -74,7 +77,7 @@ public class TestSqoopTestNG extends TestJoinTestNGBase {
         ratingEngine.setLatestIteration(aiModel);
 
         PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContext(tenant, play.getName(), playLaunch.getId(),
-                playLaunch, play, launchTime, ratingId, aiModel);
+                playLaunch, play, ratingEngine, segment, launchTime, ratingId, aiModel);
         return sparkContext;
     }
 

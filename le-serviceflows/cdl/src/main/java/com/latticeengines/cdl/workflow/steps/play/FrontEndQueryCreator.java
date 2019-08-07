@@ -55,7 +55,7 @@ public class FrontEndQueryCreator {
         initLookupFieldsConfiguration();
     }
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -65,7 +65,7 @@ public class FrontEndQueryCreator {
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, launch.getDestinationAccountId());
 
-        prepareQueryWithRestrictions(playLaunchContext, separateActWithCnt);
+        prepareQueryWithRestrictions(playLaunchContext, useSpark);
 
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
@@ -153,7 +153,7 @@ public class FrontEndQueryCreator {
         entityFrontEndQuery.setSort(sort);
     }
 
-    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
+    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext, boolean useSpark) {
 
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -176,7 +176,7 @@ public class FrontEndQueryCreator {
             Restriction extractedContactRestriction = contactRestriction.getRestriction() == null
                     ? LogicalRestriction.builder().or(new ArrayList<>()).build()
                     : contactRestriction.getRestriction();
-            if (!separateActWithCnt) {
+            if (!useSpark) {
                 contactFrontEndQuery.setContactRestriction(prepareContactRestriction(extractedContactRestriction,
                         modifiableAccountIdCollectionForContacts));
             } else {
