@@ -171,6 +171,24 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         }
     }
 
+    @Override
+    public String getRatingCountQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+        try {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                    queryEvaluatorService);
+            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser);
+            return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
+        } catch (Exception e) {
+            String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
+                    + " for tenant " + MultiTenantContext.getShortTenantId();
+            if (version != null) {
+                msg += " in " + version;
+            }
+            throw new QueryEvaluationException(msg, e);
+        }
+    }
+
     private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
             DataCollection.Version version, String sqlUser) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
@@ -186,6 +204,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
                 frontEndQuery.setContactRestriction(null);
             }
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
             RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
                     queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
             TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
