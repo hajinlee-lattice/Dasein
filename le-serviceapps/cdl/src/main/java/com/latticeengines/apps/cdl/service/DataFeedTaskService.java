@@ -23,6 +23,8 @@ public interface DataFeedTaskService {
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity);
 
+    List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds);
+
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
     void updateS3ImportStatus(String customerSpace, String source, String dataFeedType, DataFeedTask.S3ImportStatus status);

@@ -6,6 +6,11 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.AccountImportsMigrateWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatchMigrationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ContactImportsMigrateWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ConvertBatchStoreToImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
@@ -45,6 +50,12 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
         @Type(value = UpdateAccountWorkflowConfiguration.class, name = "UpdateAccountWorkflowConfiguration"),
         @Type(value = RebuildAccountWorkflowConfiguration.class, name = "RebuildAccountWorkflowConfiguration"),
+
+        @Type(value = CDLEntityMatchMigrationWorkflowConfiguration.class, name = "CDLEntityMatchMigrationWorkflowConfiguration"),
+        @Type(value = AccountImportsMigrateWorkflowConfiguration.class, name = "AccountImportsMigrateWorkflowConfiguration"),
+        @Type(value = ContactImportsMigrateWorkflowConfiguration.class, name = "ContactImportsMigrateWorkflowConfiguration"),
+        @Type(value = TransactionImportsMigrateWorkflowConfiguration.class, name = "TransactionImportsMigrateWorkflowConfiguration"),
+        @Type(value = ConvertBatchStoreToImportWorkflowConfiguration.class, name = "ConvertBatchStoreToImportWorkflowConfiguration"),
 
         @Type(value = MatchEntityWorkflowConfiguration.class, name = "MatchEntityWorkflowConfiguration"),
         @Type(value = ProcessContactWorkflowConfiguration.class, name = "ProcessContactWorkflowConfiguration"),

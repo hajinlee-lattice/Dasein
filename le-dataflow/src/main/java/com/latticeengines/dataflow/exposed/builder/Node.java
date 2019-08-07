@@ -45,6 +45,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionO
 import com.latticeengines.dataflow.exposed.builder.strategy.KVAttrPicker;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddColumnWithFixedValueStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddStringFieldStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddUUIDStrategy;
 import com.latticeengines.dataflow.runtime.cascading.AppendOptLogFunction;
@@ -578,6 +579,11 @@ public class Node {
     public Node addColumnWithFixedValue(String fieldName, Object fieldValue, Class<?> fieldType) {
         return new Node(builder.register(new AddFieldOperation(opInput(identifier),
                 new AddColumnWithFixedValueStrategy(fieldName, fieldValue, fieldType))), builder);
+    }
+
+    public Node addStringColumnFromSource(String fieldName, String source) {
+        return new Node(builder.register(new AddFieldOperation(opInput(identifier),
+                new AddStringFieldStrategy(fieldName, source))), builder);
     }
 
     public Node bitEncode(String[] groupbyFields, String keyField, String valueField, String encodedField,
