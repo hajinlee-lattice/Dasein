@@ -184,9 +184,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of new account after ProcessTransaction entity match test (There
     // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
     static final Long NEW_ACCOUNT_PT_EM = 91L;
+    // Number of new account after ProcessTransaction entity match test for GA
+    // tenants
+    static final Long NEW_ACCOUNT_PT_EMGA = 0L;
     // Number of new account after UpdateTransaction entity match test (There
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     static final Long NEW_ACCOUNT_UT_EM = 190L;
+    // Number of new account after UpdateTransaction entity match test for GA
+    // tenants
+    static final Long NEW_ACCOUNT_UT_EMGA = 0L;
     // Number of new account after UpdateAccount entity match test
     // FIXME change back to 111 after using new ProcessAccount checkpoint.
     // currently
@@ -212,7 +218,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total account after UpdateTransaction entity match test (There
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     // -- 1184
+    // Number of total account after ProcessTransaction entity match test for GA
+    // tenants (use ACCOUNT_PA_EM since checkpoint is not changed yet)
+    static final Long ACCOUNT_PT_EMGA = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EMGA;
     static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
+    // Number of total account after UpdateTransaction entity match test for GA
+    // tenants (use ACCOUNT_PT_EM since checkpoint is not changed yet)
+    static final Long ACCOUNT_UT_EMGA = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EMGA;
     // Number of total account after UpdateAccount entity match test -- 1016
     static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
 
