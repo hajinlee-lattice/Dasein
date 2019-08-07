@@ -68,8 +68,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
@@ -79,8 +79,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
@@ -91,8 +91,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_PT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         return map;
     }
 
@@ -100,13 +100,13 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                NEW_ACCOUNT_PT_EM);
+                NEW_ACCOUNT_PT_EMGA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         // FIXME: Currently UNMATCH is same as new Account which is wrong
         // accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                ACCOUNT_PT_EM);
+                ACCOUNT_PT_EMGA);
 
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
