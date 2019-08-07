@@ -841,8 +841,14 @@ public enum LedpCode {
     LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
     LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
 
+    // le-domain
+    LEDP_41001("PeriodName field {0} is null for record {1}."),
+    LEDP_41002("PeriodId field {0} is null for record {1}."),
+    LEDP_41003("Fail to shutdown batch write executor properly"),
+
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
+
 
     private String message;
 
