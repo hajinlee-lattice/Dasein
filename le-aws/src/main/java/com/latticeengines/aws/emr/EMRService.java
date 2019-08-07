@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
+import com.amazonaws.services.elasticmapreduce.model.Instance;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 

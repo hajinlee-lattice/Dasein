@@ -54,8 +54,7 @@ class EMRScalingCallable implements Callable<Boolean> {
                 for (String segment: scalingClusters) {
                     String[] tokens = segment.split("\\|");
                     String pattern = tokens[0];
-                    int minTaskNodes = Integer.parseInt(tokens[1]);
-                    int maxTaskCoreRatio = Integer.parseInt(tokens[2]);
+                    int maxTaskCoreRatio = Integer.parseInt(tokens[1]);
                     List<ClusterSummary> clusterSummaries = clusterSummaryCache.get(pattern);
                     List<String> names = new ArrayList<>();
                     if (CollectionUtils.isNotEmpty(clusterSummaries)) {
@@ -64,12 +63,12 @@ class EMRScalingCallable implements Callable<Boolean> {
                             String clusterName = summary.getName();
                             names.add(clusterName);
                             runnables.add(new EMRScalingRunnable(clusterName, clusterId, //
-                                    minTaskNodes, maxTaskCoreRatio, emrService, emrEnvService));
+                                    maxTaskCoreRatio, emrService, emrEnvService));
                         });
                     }
-                    log.info(String.format("Found %d clusters with %d min TASK nodes and %d:1 max TASK:CORE ratio " + //
+                    log.info(String.format("Found %d clusters with %d:1 max TASK:CORE ratio " + //
                                     "by pattern [%s]: %s", //
-                            CollectionUtils.size(names), minTaskNodes, maxTaskCoreRatio, pattern, names));
+                            CollectionUtils.size(names), maxTaskCoreRatio, pattern, names));
                 }
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();

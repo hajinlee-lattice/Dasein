@@ -1,10 +1,14 @@
 package com.latticeengines.serviceflows.service.impl;
 
+import java.util.List;
+
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.domain.exposed.yarn.ApplicationMetrics;
 import com.latticeengines.domain.exposed.yarn.ClusterMetrics;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
@@ -54,6 +58,11 @@ public class ServiceflowsCoreEmrEnvServiceImpl implements EMREnvService {
 
     @Override
     public ClusterMetrics getClusterMetrics(String emrCluster) {
+        return null;
+    }
+
+    @Override
+    public List<ApplicationMetrics> getAppMetrics(String clusterId, YarnApplicationState... states) {
         return null;
     }
 
