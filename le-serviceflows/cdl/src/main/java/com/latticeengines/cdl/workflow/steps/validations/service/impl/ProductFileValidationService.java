@@ -370,21 +370,18 @@ public class ProductFileValidationService
                     }
                 }
                 for (String bundle : bundleToBeRemoved) {
-                    // there are two type of compositeId for analytic, For product has bundle name, logically, the
-                    // method will take bundle name as product name, and generate composite id
-                    String compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name(), null, bundle,
-                            bundle, null, null, null);
-                    if (compositeId == null) {
-                        continue;
-                    }
-                    // generate the bundle id
-                    String generatedId = HashUtils.getCleanedString(HashUtils.getShortHash(compositeId));
-                    log.info("generate id is " + generatedId);
-                    if (bundleIdToModelName.containsKey(generatedId)) {
-                        String errMsg = String.format("Error: \"%s\" will be removed while also referenced by model %s",
-                                bundle, StringUtils.join(bundleIdToModelName.get(generatedId)));
-                        csvFilePrinter.printRecord("", "", errMsg);
-                        missingBundleInUse++;
+
+                    // get bundle id from the product list, compare with the bundle id directly referenced by model
+                    List<Product> currentList = currentBundleToProductList.get(bundle);
+                    Set<String> bundleIds =
+                            currentList.stream().map(Product::getProductBundleId).collect(Collectors.toSet());
+                    for (String bundleId : bundleIds) {
+                        if (bundleIdToModelName.containsKey(bundleId)) {
+                            String errMsg = String.format("Error: \"%s\" will be removed while also referenced by model %s",
+                                    bundle, StringUtils.join(bundleIdToModelName.get(bundleId)));
+                            csvFilePrinter.printRecord("", "", errMsg);
+                            missingBundleInUse++;
+                        }
                     }
                 }
             }
@@ -402,7 +399,7 @@ public class ProductFileValidationService
                     Set<String> modelNames = attrToModelName.getOrDefault(keyForModel, new HashSet<>());
                     // case that attr in old while not in new, also there are segment or model, error
                     if (CollectionUtils.isNotEmpty(segmentNames) || CollectionUtils.isNotEmpty(modelNames)) {
-                        String segmentNameStr = CollectionUtils.isNotEmpty(segmentNames) ? "" :
+                        String segmentNameStr = CollectionUtils.isEmpty(segmentNames) ? "" :
                                 StringUtils.join(segmentNames);
                         String modelNameStr = CollectionUtils.isEmpty(modelNames) ? "" : StringUtils.join(modelNames);
                         String errMsg = String.format("Error: \"%s\" which is referenced by segment %s or models %s " +
@@ -456,13 +453,13 @@ public class ProductFileValidationService
 
     private void generateStatistics(long errorLine, int missingBundleInUse, int bundleWithDiffSku,
                                     StringBuilder statistics) {
-        statistics.append(String.format("Import failed because there were %s errors:", String.valueOf(errorLine)));
+        statistics.append(String.format("Import failed because there were %s errors : ", String.valueOf(errorLine)));
         if (missingBundleInUse != 0) {
             statistics.append(String.format("%s missing product bundles in use (this import will " +
-            "completely replace the previous one)", String.valueOf(missingBundleInUse)));
+            "completely replace the previous one), ", String.valueOf(missingBundleInUse)));
         }
         if (bundleWithDiffSku != 0) {
-            statistics.append(String.format(",%s product bundle has different product SKUs. Dependant models will " +
+            statistics.append(String.format("%s product bundle has different product SKUs. Dependant models will " +
                     "need" +
                     " to be remodelled to get accurate" +
                     " scores.", String.valueOf(missingBundleInUse)));
