@@ -92,7 +92,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
         baseSources.add(dailyStore.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(PERIOD_DATA_DISTRIBUTOR);
-        step1.setConfiguration("{}");
+        step1.setConfiguration(getSinglePeriodConfig());
 
         TransformationStepConfig step2 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -102,7 +102,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
         baseSources.add(dailyStore.getSourceName());
         step2.setBaseSources(baseSources);
         step2.setTransformer(PERIOD_DATA_DISTRIBUTOR);
-        step2.setConfiguration("{}");
+        step2.setConfiguration(getSinglePeriodConfig());
 
         TransformationStepConfig step3 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -136,6 +136,12 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
         return configuration;
     }
 
+    private String getSinglePeriodConfig() {
+        PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
+        config.setCleanupFirst(true);
+        return JsonUtils.serialize(config);
+    }
+
     private String getMultiPeriodConfig() {
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setMultiPeriod(true);
@@ -143,6 +149,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
                 PeriodStrategy.Template.Week.name(), 2, //
                 PeriodStrategy.Template.Month.name(), 3);
         config.setTransactionIdxes(periodNameIdxes);
+        config.setCleanupFirst(true);
         return JsonUtils.serialize(config);
     }
 
