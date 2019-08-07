@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -290,11 +289,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return;
         }
 
+        /*-
+         * FIXME re-enable or change this after UX finalized the behavior
         jobs.stream() //
                 .filter(Objects::nonNull) //
                 .filter(job -> exec.getWorkflowId().equals(job.getId())) //
                 .findAny() //
                 .ifPresent(job -> job.setJobStatus(JobStatus.PENDING_RETRY));
+         */
     }
 
     @Override
