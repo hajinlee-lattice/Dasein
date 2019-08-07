@@ -26,11 +26,7 @@ public class ContactAttrsDecorator implements Decorator {
 
     private final Set<String> systemAttrs;
 
-    private final Set<String> internalLookupIdAttrs;
-
-    private static final Set<String> exportAttrs = SchemaRepository //
-            .getDefaultExportAttributes(BusinessEntity.Contact).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
+    private final Set<String> exportAttrs;
 
     ContactAttrsDecorator(boolean entityMatchEnabled) {
         this.stdAttrs = SchemaRepository //
@@ -39,8 +35,8 @@ public class ContactAttrsDecorator implements Decorator {
         this.systemAttrs = SchemaRepository //
                 .getSystemAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
-        this.internalLookupIdAttrs = SchemaRepository //
-                .getInternalLookupIdAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
+        this.exportAttrs = SchemaRepository //
+                .getDefaultExportAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
     }
 
@@ -65,15 +61,6 @@ public class ContactAttrsDecorator implements Decorator {
             cm.setAttrState(AttrState.Active);
 
             if (systemAttrs.contains(cm.getAttrName())) {
-                return cm;
-            }
-
-            if (internalLookupIdAttrs.contains(cm.getAttrName())) {
-                cm.enableGroup(Enrichment);
-                cm.disableGroup(Segment);
-                cm.disableGroup(Model);
-                cm.disableGroup(TalkingPoint);
-                cm.disableGroup(CompanyProfile);
                 return cm;
             }
 

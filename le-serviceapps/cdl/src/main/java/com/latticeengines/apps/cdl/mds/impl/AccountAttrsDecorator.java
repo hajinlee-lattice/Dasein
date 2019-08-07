@@ -30,11 +30,7 @@ public class AccountAttrsDecorator implements Decorator {
 
     private final Set<String> systemAttrs;
 
-    private final Set<String> internalLookupIdAttrs;
-
-    private static final Set<String> exportAttrs = SchemaRepository //
-            .getDefaultExportAttributes(BusinessEntity.Account).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
+    private final Set<String> exportAttrs;
 
     private final boolean internalEnrichEnabled;
 
@@ -43,8 +39,8 @@ public class AccountAttrsDecorator implements Decorator {
         this.systemAttrs = SchemaRepository //
                 .getSystemAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
-        this.internalLookupIdAttrs = SchemaRepository //
-                .getInternalLookupIdAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
+        this.exportAttrs = SchemaRepository //
+                .getDefaultExportAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
     }
 
@@ -78,15 +74,6 @@ public class AccountAttrsDecorator implements Decorator {
         if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())
                 || InterfaceName.CustomerAccountId.name().equalsIgnoreCase(cm.getAttrName())) {
             cm.setSubcategory("Account IDs");
-        }
-
-        if (internalLookupIdAttrs.contains(cm.getAttrName())) {
-            cm.enableGroup(Enrichment);
-            cm.disableGroup(Segment);
-            cm.disableGroup(Model);
-            cm.disableGroup(TalkingPoint);
-            cm.disableGroup(CompanyProfile);
-            return cm;
         }
 
         cm.enableGroup(Segment);
