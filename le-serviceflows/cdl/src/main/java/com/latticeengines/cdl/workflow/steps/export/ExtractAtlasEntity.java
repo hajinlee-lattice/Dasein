@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -55,6 +56,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private AtlasExportProxy atlasExportProxy;
+
     private DataCollection.Version version;
     private String evaluationDate;
     private AtlasExport atlasExport;
@@ -68,7 +72,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
         schemaMap = getExportSchema();
-        atlasExport = parseAtlasExport();
+        atlasExport = buildAtlasExport();
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
@@ -135,13 +139,14 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
-    protected AtlasExport parseAtlasExport() {
-        AtlasExport atlasExport = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
-        if (atlasExport == null) {
-            throw new RuntimeException("Cannot find atlasExport in context");
-        }
+    private AtlasExport buildAtlasExport() {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpaceStr,
+                configuration.getAtlasExportId());
+        WorkflowStaticContext.putObject(ATLAS_EXPORT, atlasExport);
         return atlasExport;
     }
+
 
     private FrontEndQuery getFrontEndQueryCopy() {
         FrontEndQuery inConfig = new FrontEndQuery();
