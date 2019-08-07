@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATLAS_EXPORT;
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +60,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguration, ConvertToCSVConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(SaveAtlasExportCSV.class);
-    private static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm'Z'"; // default date format
+    private static final String ISO_8601 = ConvertToCSVConfig.ISO_8601; // default date format
 
     private Map<ExportEntity, HdfsDataUnit> inputUnits;
     private Map<ExportEntity, HdfsDataUnit> outputUnits = new HashMap<>();
@@ -123,6 +123,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             config.setTimeZone("UTC");
             config.setWorkspace(getRandomWorkspace());
             config.setCompress(configuration.isCompressResult());
+            if (configuration.isAddExportTimestamp()) {
+                config.setExportTimeAttr(InterfaceName.AtlasExportTime.name());
+            }
             log.info("Submit spark job to convert " + exportEntity + " csv.");
             SparkJobResult result = sparkJobService.runJob(session, getJobClz(), config);
             outputUnits.put(exportEntity, result.getTargets().get(0));
@@ -162,6 +165,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 dateFmtMap.put(cm.getAttrName(), ISO_8601);
             }
         });
+        if (configuration.isAddExportTimestamp()) {
+            dateFmtMap.put(InterfaceName.AtlasExportTime.name(), ISO_8601);
+        }
         return dateFmtMap;
     }
 
