@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.listeners.CDLEntityMatchMigrationListener;
 import com.latticeengines.cdl.workflow.steps.migrate.FinishMigrate;
 import com.latticeengines.cdl.workflow.steps.migrate.StartMigrate;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatchMigrationWorkflowConfiguration;
@@ -34,6 +35,9 @@ public class CDLEntityMatchMigrationWorkflow extends AbstractWorkflow<CDLEntityM
     @Inject
     private TransactionImportsMigrateWorkflow transactionImportsMigrateWorkflow;
 
+    @Inject
+    private CDLEntityMatchMigrationListener cdlEntityMatchMigrationListener;
+
 
     @Override
     public Workflow defineWorkflow(CDLEntityMatchMigrationWorkflowConfiguration workflowConfig) {
@@ -43,6 +47,7 @@ public class CDLEntityMatchMigrationWorkflow extends AbstractWorkflow<CDLEntityM
                 .next(contactImportsMigrateWorkflow)
                 .next(transactionImportsMigrateWorkflow)
                 .next(finishMigrate)
+                .listener(cdlEntityMatchMigrationListener)
                 .build();
     }
 }

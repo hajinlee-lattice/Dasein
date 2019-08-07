@@ -32,7 +32,8 @@ import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-public abstract class BaseImportTemplateMigrateStep extends BaseWorkflowStep<ImportTemplateMigrateStepConfiguration> {
+public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigrateStepConfiguration>
+        extends BaseWorkflowStep<T> {
 
     static final String TEMPLATE_PATTERN = "Migrated_%s_%s";
     static final String FEEDTYPE_PATTERN = "%s_%s";

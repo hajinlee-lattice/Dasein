@@ -136,6 +136,9 @@ public class MigrateImportService
                 if (dataFeedTask.getImportTemplate().getAttribute(InterfaceName.CustomerContactId) != null) {
                     renameMap.put(InterfaceName.ContactId.name(), InterfaceName.CustomerContactId.name());
                 }
+                if (dataFeedTask.getImportTemplate().getAttribute(InterfaceName.CustomerAccountId) != null) {
+                    renameMap.put(InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name());
+                }
                 break;
             case Transaction:
                 taskId = migrateTracking.getReport().getOutputTransactionTaskId();
@@ -168,6 +171,25 @@ public class MigrateImportService
             case Transaction:
                 migrateTracking.getReport().setTransactionCounts(importCounts);
                 migrateTracking.getReport().setTransactionDataTables(dataTables);
+                break;
+            default:
+                throw new IllegalArgumentException("Not supported entity: " + config.getEntity().name());
+        }
+        migrateTrackingProxy.updateReport(customerSpace, migrateTracking.getPid(), migrateTracking.getReport());
+    }
+
+    @Override
+    public void updateRegisteredAction(String customerSpace, MigrateImportServiceConfiguration config, Long actionId) {
+        ImportMigrateTracking migrateTracking = getImportMigrateTracking(customerSpace, config);
+        switch (config.getEntity()) {
+            case Account:
+                migrateTracking.getReport().setAccountActionId(actionId);
+                break;
+            case Contact:
+                migrateTracking.getReport().setContactActionId(actionId);
+                break;
+            case Transaction:
+                migrateTracking.getReport().setTransactionActionId(actionId);
                 break;
             default:
                 throw new IllegalArgumentException("Not supported entity: " + config.getEntity().name());

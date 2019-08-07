@@ -15,10 +15,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ContactTemplateMigrateStepConfiguration;
 
 @Component("contactTemplateMigrateStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ContactTemplateMigrateStep extends BaseImportTemplateMigrateStep {
+public class ContactTemplateMigrateStep extends BaseImportTemplateMigrateStep<ContactTemplateMigrateStepConfiguration> {
     @Override
     protected String getTemplateName() {
         return String.format(TEMPLATE_PATTERN, BusinessEntity.Contact.name(), RandomStringUtils.randomAlphanumeric(8));

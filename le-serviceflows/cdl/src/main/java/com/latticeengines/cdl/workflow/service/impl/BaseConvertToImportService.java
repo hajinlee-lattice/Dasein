@@ -61,6 +61,11 @@ public class BaseConvertToImportService
         convertBatchStoreInfoProxy.updateDetail(customerSpace, convertInfo.getPid(), detail);
     }
 
+    @Override
+    public void updateRegisteredAction(String customerSpace, ConvertBatchStoreToImportServiceConfiguration config, Long actionId) {
+        // do nothing.
+    }
+
     private ConvertBatchStoreInfo getConvertInfo(String customerSpace,
                                                  ConvertBatchStoreToImportServiceConfiguration config) {
         if (config == null || config.getConvertInfoPid() == null) {

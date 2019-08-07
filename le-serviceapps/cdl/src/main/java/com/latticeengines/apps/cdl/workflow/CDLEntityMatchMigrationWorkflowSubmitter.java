@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.core.service.ActionService;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatchMigrationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -121,6 +123,8 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
                 .migrateTrackingPid(trackingPid)
                 .dataFeedTaskMap(dataFeedTaskMap)
                 .actionMap(actionMap)
+                .inputProperties(ImmutableMap.of(
+                        WorkflowContextConstants.Inputs.IMPORT_MIGRATE_TRACKING_ID, String.valueOf(trackingPid)))
                 .build();
     }
 }

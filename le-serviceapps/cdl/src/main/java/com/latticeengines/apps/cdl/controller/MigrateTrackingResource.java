@@ -40,6 +40,13 @@ public class MigrateTrackingResource {
         return importMigrateTrackingService.getByPid(customerSpace, pid);
     }
 
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all MigrateTracking records")
+    public List<ImportMigrateTracking> getMigrateTracking(@PathVariable String customerSpace) {
+        return importMigrateTrackingService.getAll(customerSpace);
+    }
+
     @RequestMapping(value = "/actions/{pid}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all registered action list in MigrateTracking report by pid")

@@ -52,5 +52,8 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
 
         action.setActionConfiguration(importConfig);
         actionProxy.updateAction(customerSpace.toString(), action);
+
+        convertBatchStoreService.updateRegisteredAction(customerSpace.toString(),
+                configuration.getConvertServiceConfig(), action.getPid());
     }
 }

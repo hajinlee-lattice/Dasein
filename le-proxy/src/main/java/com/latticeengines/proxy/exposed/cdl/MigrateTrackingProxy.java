@@ -31,6 +31,12 @@ public class MigrateTrackingProxy extends MicroserviceRestApiProxy implements Pr
         return get("Get MigrateTracking record by pid", url, ImportMigrateTracking.class);
     }
 
+    public List<ImportMigrateTracking> getAllMigrateTracking(String customerSpace) {
+        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        List<?> raw = get("Get all MigrateTracking records", url, List.class);
+        return JsonUtils.convertList(raw, ImportMigrateTracking.class);
+    }
+
     public List<Long> getRegisteredActions(String customerSpace, Long pid) {
         String url = constructUrl(URL_PREFIX + "/actions/{pid}", shortenCustomerSpace(customerSpace), pid);
         List<?> rawActions = get("Get MigrateTracking record by pid", url, List.class);

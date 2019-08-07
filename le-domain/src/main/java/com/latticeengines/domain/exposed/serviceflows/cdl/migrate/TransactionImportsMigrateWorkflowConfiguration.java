@@ -8,8 +8,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateImportServiceConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.TransactionTemplateMigrateStepConfiguration;
 
 public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -19,7 +19,7 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
     public static class Builder {
         private TransactionImportsMigrateWorkflowConfiguration configuration = new TransactionImportsMigrateWorkflowConfiguration();
 
-        private ImportTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ImportTemplateMigrateStepConfiguration();
+        private TransactionTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new TransactionTemplateMigrateStepConfiguration();
         private ConvertBatchStoreToImportWorkflowConfiguration.Builder convertBatchStoreConfigurationBuilder =
                 new ConvertBatchStoreToImportWorkflowConfiguration.Builder();
 
@@ -79,7 +79,7 @@ public class TransactionImportsMigrateWorkflowConfiguration extends BaseCDLWorkf
         }
 
         public TransactionImportsMigrateWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("transactionImportsMigrationWorkflow",
+            configuration.setContainerConfiguration("transactionImportsMigrateWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreConfigurationBuilder.entity(BusinessEntity.Transaction);
             configuration.add(importTemplateMigrateStepConfiguration);

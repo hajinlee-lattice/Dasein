@@ -323,6 +323,27 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public ApplicationId migrateImport(String customerSpace, String userId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/migrateimport",
+                shortenCustomerSpace(customerSpace));
+        if (StringUtils.isEmpty(userId)) {
+            userId = "DEFAULT_MIGRATE_IMPORT_USER";
+        }
+        ResponseDocument<String> responseDoc = post("Migrate current import to entity match style", url, userId,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start migrate import job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
             BusinessEntity entity, String initiator) throws ParseException {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";

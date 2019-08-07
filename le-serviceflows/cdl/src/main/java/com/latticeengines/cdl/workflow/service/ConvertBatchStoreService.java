@@ -112,4 +112,12 @@ public abstract class ConvertBatchStoreService<T extends BaseConvertBatchStoreSe
      */
     public abstract void updateConvertResult(String customerSpace, T config, Long importCounts,
                                              List<String> dataTables);
+
+    /**
+     *
+     * @param customerSpace identify tenant.
+     * @param config config convert service configuration
+     * @param actionId Registered ActionId.
+     */
+    public abstract void updateRegisteredAction(String customerSpace, T config, Long actionId);
 }

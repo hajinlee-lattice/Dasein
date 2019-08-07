@@ -56,6 +56,11 @@ public class ImportMigrateTrackingServiceImpl implements ImportMigrateTrackingSe
     }
 
     @Override
+    public List<ImportMigrateTracking> getAll(String customerSpace) {
+        return importMigrateTrackingEntityMgr.findAll();
+    }
+
+    @Override
     public List<Long> getAllRegisteredActionIds(String customerSpace, Long pid) {
         ImportMigrateTracking migrateTracking = importMigrateTrackingEntityMgr.findByPid(pid);
         List<Long> actionIds = new ArrayList<>();

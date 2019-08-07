@@ -14,10 +14,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.TransactionTemplateMigrateStepConfiguration;
 
 @Component("transactionTemplateMigrateStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TransactionTemplateMigrateStep extends BaseImportTemplateMigrateStep {
+public class TransactionTemplateMigrateStep extends BaseImportTemplateMigrateStep<TransactionTemplateMigrateStepConfiguration> {
     @Override
     protected String getTemplateName() {
         return String.format(TEMPLATE_PATTERN, BusinessEntity.Transaction.name(), RandomStringUtils.randomAlphanumeric(8));

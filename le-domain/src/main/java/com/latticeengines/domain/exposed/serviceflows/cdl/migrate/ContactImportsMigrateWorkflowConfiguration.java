@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ContactTemplateMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateImportServiceConfiguration;
 
 public class ContactImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -20,7 +20,7 @@ public class ContactImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
         private ContactImportsMigrateWorkflowConfiguration configuration =
                 new ContactImportsMigrateWorkflowConfiguration();
 
-        private ImportTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ImportTemplateMigrateStepConfiguration();
+        private ContactTemplateMigrateStepConfiguration importTemplateMigrateStepConfiguration = new ContactTemplateMigrateStepConfiguration();
         private ConvertBatchStoreToImportWorkflowConfiguration.Builder convertBatchStoreConfigurationBuilder =
                 new ConvertBatchStoreToImportWorkflowConfiguration.Builder();
 
@@ -80,7 +80,7 @@ public class ContactImportsMigrateWorkflowConfiguration extends BaseCDLWorkflowC
         }
 
         public ContactImportsMigrateWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("contactImportsMigrationWorkflow", configuration.getCustomerSpace(),
+            configuration.setContainerConfiguration("contactImportsMigrateWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             convertBatchStoreConfigurationBuilder.entity(BusinessEntity.Contact);
             configuration.add(importTemplateMigrateStepConfiguration);

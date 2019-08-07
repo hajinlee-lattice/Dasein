@@ -113,6 +113,11 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             return this;
         }
 
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
         public CDLEntityMatchMigrationWorkflowConfiguration build() {
             configuration.setContainerConfiguration("cdlEntityMatchMigrationWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

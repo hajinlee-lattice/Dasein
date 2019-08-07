@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Star
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.RegisterImportActionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = UseConfiguredModelingAttributesConfiguration.class, name = "UseConfiguredModelingAttributesConfiguration"),
         @Type(value = RegisterImportActionStepConfiguration.class, name = "RegisterImportActionStepConfiguration"),
         @Type(value = EntityMatchMigrateStepConfiguration.class, name = "EntityMatchMigrateStepConfiguration"),
+        @Type(value = ImportTemplateMigrateStepConfiguration.class, name = "ImportTemplateMigrateStepConfiguration"),
         @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"), })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 

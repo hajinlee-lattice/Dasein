@@ -14,10 +14,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.AccountTemplateMigrateStepConfiguration;
 
 @Component("accountTemplateMigrateStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep {
+public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep<AccountTemplateMigrateStepConfiguration> {
 
     @Override
     protected String getTemplateName() {

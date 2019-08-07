@@ -3,8 +3,15 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = AccountTemplateMigrateStepConfiguration.class, name = "AccountTemplateMigrateStepConfiguration"),
+        @JsonSubTypes.Type(value = ContactTemplateMigrateStepConfiguration.class, name = "ContactTemplateMigrateStepConfiguration"),
+        @JsonSubTypes.Type(value = TransactionTemplateMigrateStepConfiguration.class, name = "TransactionTemplateMigrateStepConfiguration")})
 public class ImportTemplateMigrateStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("datafeedtask_list")

@@ -31,6 +31,13 @@ public interface ImportMigrateTrackingService {
     /**
      *
      * @param customerSpace Current customerSpace.
+     * @return All import migrate tracking records in current tenant.
+     */
+    List<ImportMigrateTracking> getAll(String customerSpace);
+
+    /**
+     *
+     * @param customerSpace Current customerSpace.
      * @param pid MigrateTracking PID
      * @return Registered import action ids
      */

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
@@ -39,6 +40,7 @@ public class DataFeedController {
     private final OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
     private final EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
     private final ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter;
+    private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final DataFeedService dataFeedService;
 
     @Inject
@@ -46,11 +48,12 @@ public class DataFeedController {
                               OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
                               EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
                               ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
-                              DataFeedService dataFeedService) {
+                              CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter, DataFeedService dataFeedService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
         this.convertBatchStoreToImportWorkflowSubmitter = convertBatchStoreToImportWorkflowSubmitter;
+        this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
     }
 
@@ -124,6 +127,23 @@ public class DataFeedController {
                             request.getFeedType(), request.getSubType(), request.getRenameMap(),
                             request.getDuplicateMap(),
                             new WorkflowPidWrapper(-1L));
+            if (applicationId == null) {
+                return null;
+            }
+            return ResponseDocument.successResponse(applicationId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/migrateimport", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
+    public ResponseDocument<String> migrateImport(@PathVariable String customerSpace, @RequestBody String userId) {
+        try {
+            ApplicationId applicationId =
+                    cdlEntityMatchMigrationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace),
+                            userId, new WorkflowPidWrapper(-1L));
             if (applicationId == null) {
                 return null;
             }
