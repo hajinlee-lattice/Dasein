@@ -144,27 +144,30 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
             }
-            try {
+            do {
                 round = containers.stream() //
                         .filter(container -> container.getExtractedTarget() == null) //
+                        .limit(20) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(round)) {
-                    boolean persistOnDisk = getTotalRatingWeights() > 8;
-                    startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
-                    String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
-                    if (StringUtils.isNotBlank(trxnTable)) {
-                        String period = configuration.getApsRollupPeriod();
-                        if (StringUtils.isBlank(period)) {
-                            period = "Month";
+                    try {
+                        boolean persistOnDisk = getTotalRatingWeights() > 8;
+                        startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
+                        String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+                        if (StringUtils.isNotBlank(trxnTable)) {
+                            String period = configuration.getApsRollupPeriod();
+                            if (StringUtils.isBlank(period)) {
+                                period = "Month";
+                            }
+                            prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
                         }
-                        prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
+                        round.forEach(this::extractOneContainer);
+                    } finally {
+                        stopSparkSQLSession();
                     }
-                    round.forEach(this::extractOneContainer);
                 }
-                return true;
-            } finally {
-                stopSparkSQLSession();
-            }
+            } while (CollectionUtils.isNotEmpty(round));
+            return true;
         });
     }
 
