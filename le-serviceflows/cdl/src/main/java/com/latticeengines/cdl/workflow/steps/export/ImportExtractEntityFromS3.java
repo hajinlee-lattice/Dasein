@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
-import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATLAS_EXPORT;
 
 import java.util.List;
 
@@ -14,14 +13,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
@@ -36,15 +33,11 @@ public class ImportExtractEntityFromS3 extends BaseImportExportS3<ImportExportS3
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private AtlasExportProxy atlasExportProxy;
-
+    
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         AttributeRepository attrRepo = buildAttrRepo(customerSpace);
-        buildAtlasExport();
         attrRepo.getTableNames().forEach(tblName -> {
             Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
             if (table == null) {
@@ -54,13 +47,6 @@ public class ImportExtractEntityFromS3 extends BaseImportExportS3<ImportExportS3
             }
             addTableToRequestForImport(table, requests);
         });
-    }
-
-    private void buildAtlasExport() {
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpaceStr,
-                configuration.getAtlasExportId());
-        WorkflowStaticContext.putObject(ATLAS_EXPORT, atlasExport);
     }
 
     private AttributeRepository buildAttrRepo(CustomerSpace customerSpace) {

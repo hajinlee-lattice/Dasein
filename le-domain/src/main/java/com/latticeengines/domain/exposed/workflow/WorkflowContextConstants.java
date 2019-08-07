@@ -39,6 +39,7 @@ public class WorkflowContextConstants {
         public static final String S3_IMPORT_EMAIL_FLAG = "S3_IMPORT_EMAIL_FLAG";
         public static final String S3_IMPORT_EMAIL_INFO = "S3_IMPORT_EMAIL_INFO";
         public static final String CHILDREN_WORKFLOW_JOB_IDS = "CHILDREN_WORKFLOW_JOB_IDS";
+        public static final String IMPORT_MIGRATE_TRACKING_ID = "IMPORT_MIGRATE_TRACKING_ID";
         public static final String ACTION_IDS = "ACTION_IDS";
         public static final String ACTION_ID = "ACTION_ID";
         public static final String DRAINING = "DRAINING";

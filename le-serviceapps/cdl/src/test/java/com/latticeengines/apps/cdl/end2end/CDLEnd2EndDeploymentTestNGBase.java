@@ -174,6 +174,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long ACCOUNT_PA = 900L;
     // Number of total account after ProcessAccount entity match test
     static final Long ACCOUNT_PA_EM = 903L;
+    // Number of total account after ProcessAccount entity match test for GA tenants
+    // (implicit accounts excluded)
+    static final Long ACCOUNT_PA_EMGA = 900L;
     // Number of total account after UpdateAccount test
     static final Long ACCOUNT_UA = 1000L;
     // Number of new account after UpdateAccount test
@@ -192,10 +195,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // ProcessAccount by one of its contact after updating checkpoint (back to
     // 111).
     static final Long NEW_ACCOUNT_UA_EM = 113L;
+    // Number of total account after UpdateAccount entity match test for GA tenants
+    static final Long NEW_ACCOUNT_UA_EMGA = 106L;
     // Number of updated account after UpdateAccount test
     static final Long UPDATED_ACCOUNT_UA = 100L;
     // Number of updated account after UpdateAccount entity match test
     static final Long UPDATED_ACCOUNT_UA_EM = 100L;
+    // Number of updated account after UpdateAccount entity match test for GA
+    // tenants
+    static final Long UPDATED_ACCOUNT_UA_EMGA = 100L;
 
     // Number of total account after ProcessTransaction entity match test (There
     // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
@@ -214,6 +222,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long CONTACT_PA = 900L;
     // Number of total contact after ProcessAccount entity match test
     static final Long CONTACT_PA_EM = 900L;
+    // Number of total contact after ProcessAccount entity match test for GA tenants
+    static final Long CONTACT_PA_EMGA = 900L;
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
@@ -224,10 +234,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of new contact after UpdateAccount entity match test
     // FIXME change back to 105 after using new ProcessAccount checkpoint
     static final Long NEW_CONTACT_UA_EM = 114L;
+    // Number of new contact after UpdateAccount entity match test for GA tenants
+    static final Long NEW_CONTACT_UA_EMGA = 114L;
     // Number of updated contact after UpdateContact test
     static final Long UPDATED_CONTACT_UC = 100L;
     // Number of updated contact after ProcessAccount entity match test
     static final Long UPDATED_CONTACT_UA_EM = 100L;
+    // Number of updated contact after ProcessAccount entity match test for GA
+    // tenants
+    static final Long UPDATED_CONTACT_UA_EMGA = 100L;
 
     /* Expected transaction result */
 

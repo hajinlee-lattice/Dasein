@@ -22,8 +22,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 @Service("testArtifactService")
@@ -76,6 +78,26 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     public boolean testArtifactExists(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
         return S3.doesObjectExist(S3_BUCKET, objectKey);
+    }
+
+    @Override
+    public boolean testArtifactFolderExists(String baseDir, String version, String folder) {
+        String folderKey = folderPrefix(objectKey(baseDir, version, folder));
+        return S3.listObjectsV2(S3_BUCKET, folderKey).getKeyCount() > 0;
+    }
+
+    @Override
+    public void copyTestArtifactFolder(String baseDir, String version, String folder, String targetBucket,
+            String targetPrefix) {
+        String sourcePrefix = folderPrefix(objectKey(baseDir, version, folder));
+        targetPrefix = folderPrefix(targetPrefix);
+        ListObjectsV2Result objects = S3.listObjectsV2(S3_BUCKET, sourcePrefix);
+        for (S3ObjectSummary object : objects.getObjectSummaries()) {
+            String fileName = object.getKey().substring(object.getKey().lastIndexOf("/") + 1);
+            String targetKey = targetPrefix + fileName;
+            log.info("Copy from s3://{}/{} to s3://{}/{}", S3_BUCKET, object.getKey(), targetBucket, targetKey);
+            S3.copyObject(S3_BUCKET, object.getKey(), targetBucket, targetKey);
+        }
     }
 
     @Override
@@ -170,6 +192,13 @@ public class TestArtifactServiceImpl implements TestArtifactService {
 
     private String objectKey(String objectDir, String version, String fileName) {
         return String.format("%s/%s/%s", objectDir, version, fileName).replace("//", "/");
+    }
+
+    private String folderPrefix(String prefix) {
+        if (prefix.endsWith("/")) {
+            return prefix;
+        }
+        return prefix + "/";
     }
 
 }

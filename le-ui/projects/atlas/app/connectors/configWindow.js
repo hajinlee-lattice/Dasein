@@ -181,7 +181,7 @@ export const openConfigWindow = () => {
             orgId: lookupIdMapConfiguration.orgId,
             orgName: lookupIdMapConfiguration.orgName,
             accountId: lookupIdMapConfiguration.accountId || null,
-            externalSystemType: "MAP",
+            externalSystemType: lookupIdMapConfiguration.externalSystemType || "MAP",
             externalSystemName: solutionInstanceConfig.orgType,
             externalAuthentication: {
                 solutionInstanceId: solutionInstanceConfig.id,
@@ -293,7 +293,8 @@ export const openConfigWindow = () => {
                 var customFields = JSON.parse(authentication.node.customFields);
                 return {
                     orgId: customFields && customFields.identification ? customFields.identification.marketo_org_id : guidGenerator(),
-                    orgName: trayAuthenticationName
+                    orgName: trayAuthenticationName,
+                    externalSystemType: "MAP"
                 };
             case LINKEDIN:
             case FACEBOOK:
@@ -303,12 +304,15 @@ export const openConfigWindow = () => {
                 var adAccount = externalAdAccount.length > 0 ? externalAdAccount[0].value.replace(/['"]+/g, '') : guidGenerator();
                 return {
                     orgId: adAccount,
-                    orgName: trayAuthenticationName
+                    orgName: trayAuthenticationName,
+                    externalSystemType: "ADS"
+
                 }
             default:
                 return {
                     orgId: guidGenerator(),
-                    orgName: trayAuthenticationName
+                    orgName: trayAuthenticationName,
+                    externalSystemType: "ADS"
                 }
         }
 

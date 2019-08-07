@@ -25,7 +25,9 @@ public enum JobStatus {
     FAILED(3, "Failed", true), //
     CANCELLED(4, "Cancelled", true), //
     SKIPPED(5, "Skipped", true), //
-    READY(6, "Ready", false); //
+    READY(6, "Ready", false), //
+    PENDING_RETRY(7, "Pending Retry", true), //
+    RETRIED(8, "Retried", true); //
 
     private static Logger log = LoggerFactory.getLogger(JobStatus.class);
     private static Map<String, JobStatus> statusCodeMap = new HashMap<>();

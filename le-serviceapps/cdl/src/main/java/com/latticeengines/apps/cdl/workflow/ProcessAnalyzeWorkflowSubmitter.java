@@ -18,7 +18,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -27,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -76,11 +76,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private ImportMigrateTrackingService importMigrateTrackingService;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
@@ -135,9 +138,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("WorkflowJob created for customer=%s with pid=%s", customerSpace, pidWrapper.getPid()));
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
-        } else if (!request.skipMigrationCheck && migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace))) {
+        }
+        boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
+        if (!request.skipMigrationCheck && tenantInMigration) {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
+        } else if (request.skipMigrationCheck && !tenantInMigration) {
+            log.error("Tenant {} is not in migration and should not kickoff migration PA", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s is not in migration.", customerSpace));
         }
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
@@ -161,7 +169,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } catch (Exception e) {
             log.warn("Failed to check timeout configuration from DB session.", e);
         }
-
+        if (tenantInMigration) {
+            try {
+                return submitWithOnlyImportActions(customerSpace, request, datafeed, pidWrapper);
+            } catch (Exception e) {
+                log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
+                        + ExceptionUtils.getStackTrace(e));
+                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+                throw new RuntimeException(String.format("Failed to submit %s's P&A migration workflow", customerSpace), e);
+            }
+        }
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
                 request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit());
 
@@ -550,5 +567,52 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.warn(msg);
             throw new RuntimeException(msg);
         }
+    }
+
+    private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+        checkImportTrackingLinked(customerSpace);
+        List<Long> importActionIds = getImportActionIds(customerSpace);
+        Status datafeedStatus = datafeed.getStatus();
+
+        if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
+            String errorMessage;
+            if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
+                errorMessage = String.format(
+                        "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
+            } else {
+                errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
+                        customerSpace, datafeedStatus.getName());
+            }
+
+            throw new RuntimeException(errorMessage);
+        }
+
+        Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
+
+        log.info("customer {} data feed {} initial status: {}", customerSpace, datafeed.getName(),
+                initialStatus.getName());
+
+        log.info("Submitting migration PA workflow for customer {}", customerSpace);
+
+        updateActions(importActionIds, pidWrapper.getPid());
+
+        String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, importActionIds,
+                initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+
+        configuration.setFailingStep(request.getFailingStep());
+
+        return workflowJobService.submit(configuration, pidWrapper.getPid());
+    }
+
+    private void checkImportTrackingLinked(String customerSpace) {
+        if (migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking() == null) {
+            throw new IllegalStateException("No import migrate tracking record linked to current migration tracking record.");
+        }
+    }
+
+    private List<Long> getImportActionIds(String customerSpace) {
+        Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
+        return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
     }
 }

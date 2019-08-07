@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -65,6 +66,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -94,6 +96,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
@@ -128,7 +136,10 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
         for (BusinessEntity entity : BusinessEntity.values()) {
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
+
         }
+        // Product data is needed for activity metrics metadata decorator
+        tasks.add(() -> populateBatchStore(shortTenantId, BusinessEntity.Product, String.valueOf(version)));
         tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
         updateDataCollectionStatus(shortTenantId, entityCounts);
@@ -154,6 +165,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 }
             });
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
+            tasks.add(() -> populateBatchStore(shortTenantId, entity, String.valueOf(version)));
         }
         tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
@@ -524,6 +536,25 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private String servingStoreName(String tenantId, BusinessEntity entity) {
         return NamingUtils.timestamp(tenantId + "_" + entity.getServingStore().name(), DATE);
+    }
+
+    private void populateBatchStore(String tenantId, BusinessEntity entity, String version) {
+        if (entity.getBatchStore() != null && testArtifactService.testArtifactExists(S3_DIR, version,
+                entity.getBatchStore().name() + ".json.gz")) {
+            String customerSpace = CustomerSpace.parse(tenantId).toString();
+            // populate metadata
+            populateTableRole(tenantId, entity.getBatchStore(), version);
+            // populate S3 data
+            if (testArtifactService.testArtifactFolderExists(S3_DIR, version, entity.getBatchStore().name())) {
+                HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+                String tableName = dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore());
+                String s3Prefix = pathBuilder.getS3AtlasTablePrefix(tenantId, tableName);
+                log.info("Copy {}'s batch store {} to {}", entity.name(), entity.getBatchStore().name(), s3Prefix);
+                testArtifactService.copyTestArtifactFolder(S3_DIR, version, entity.getBatchStore().name(), s3Bucket,
+                        s3Prefix);
+
+            }
+        }
     }
 
     private RetryTemplate getRedshiftRetryTemplate() {

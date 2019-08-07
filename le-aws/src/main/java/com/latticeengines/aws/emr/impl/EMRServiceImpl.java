@@ -248,10 +248,7 @@ public class EMRServiceImpl implements EMRService {
         try {
             cluster = retryTemplate.execute(context -> //
                     emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId)));
-        } catch (NoSuchEntityException e) {
-            log.warn("No cluster with id " + clusterId, e);
-            return null;
-        } catch (InvalidRequestException e) {
+        } catch (NoSuchEntityException | InvalidRequestException e) {
             log.warn("No cluster with id " + clusterId, e);
             return null;
         }

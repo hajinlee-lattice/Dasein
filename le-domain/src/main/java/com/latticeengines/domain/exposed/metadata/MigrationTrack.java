@@ -24,6 +24,7 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -62,14 +63,14 @@ public class MigrationTrack implements HasPid, HasTenant {
     @JsonProperty("curActiveTable")
     @Type(type = "json")
     @Column(name = "CUR_ACTIVE_TABLE_NAME", columnDefinition = "'JSON'")
-    // Role -> Table.names
-    private Map<TableRoleInCollection, String[]> curActiveTable; // List of all active tables' names under tenant
+    // Role -> list of Table.names
+    private Map<TableRoleInCollection, String[]> curActiveTable;
 
     // TODO - uncomment after MIGRATE_TRACKING table is in
-//    @OneToOne(cascade = CascadeType.REMOVE)
-//    @JoinColumn(name = "FK_TRACKING_REPORT")
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    private MigrateTracking trackingReport;
+    @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "FK_IMPORT_TRACKING")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private ImportMigrateTracking importMigrateTracking;
 
     @Type(type = "json")
     @Column(name = "DETAIL", columnDefinition = "'JSON'")
@@ -137,13 +138,15 @@ public class MigrationTrack implements HasPid, HasTenant {
     }
 
     // TODO - uncomment after MIGRATE_TRACKING table is in
-//    public MigrateTracking getTrackingReport() {
-//        return trackingReport;
-//    }
-//
-//    public void setTrackingReport(MigrateTracking trackingReport) {
-//        this.trackingReport = trackingReport;
-//    }
+
+
+    public ImportMigrateTracking getImportMigrateTracking() {
+        return importMigrateTracking;
+    }
+
+    public void setImportMigrateTracking(ImportMigrateTracking importMigrateTracking) {
+        this.importMigrateTracking = importMigrateTracking;
+    }
 
     public DataCollectionStatusDetail getCollectionStatusDetail() {
         return collectionStatusDetail;
