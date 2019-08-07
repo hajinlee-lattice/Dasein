@@ -304,10 +304,16 @@ export default class ConnectionsComponent extends Component {
 								/>
 							);
 						},
-						title: () => {
-							return <p />;
+						title: () => {},
+						titleIcon: () => {
+							return (
+								<img
+									src={ConnectorService.getImgByConnector(
+										ConnectorService.getConnectorName()
+									)}
+								/>
+							);
 						},
-
 						hideFooter: true,
 						size: LARGE_SIZE
 					};

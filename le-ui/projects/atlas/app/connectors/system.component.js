@@ -108,16 +108,41 @@ export default class SystemComponent extends Component {
 							template: () => {
 								return (
 									<IFrameComponent
+										name={"tray-iframe"}
 										onLoad={() => {
 											console.log("Iframe loaded");
+											var cssLink = document.createElement(
+												"link"
+											);
+											cssLink.href =
+												"./system.component.scss";
+											cssLink.rel = "stylesheet";
+											cssLink.type = "text/css";
+											console.log(
+												"IFRAMES ==> ",
+												frames["tray-iframe"]
+											);
+											frames[
+												"tray-iframe"
+											].document.head.appendChild(
+												cssLink
+											);
 										}}
 										src={url}
 										mounted={this.props.iframeMounted}
 									/>
 								);
 							},
-							title: () => {
-								return <p />;
+							title: () => {},
+							titleIcon: () => {
+								// externalSystemName
+								return (
+									<img
+										src={ConnectorService.getImgByConnector(
+											this.state.system.externalSystemName
+										)}
+									/>
+								);
 							},
 
 							hideFooter: true,

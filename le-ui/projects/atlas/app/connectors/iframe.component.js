@@ -15,6 +15,13 @@ export default class IFrameComponent extends Component {
 		// this.props.mounted(this.myRef);
 	}
 	render() {
-		return <iframe ref={this.myRef} {...this.props} />;
+		return (
+			<iframe
+				ref={this.myRef}
+				{...this.props}
+				name={this.props.name}
+				id={this.props.name}
+			/>
+		);
 	}
 }
