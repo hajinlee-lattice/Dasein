@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
@@ -21,8 +23,9 @@ public class MetadataSegmentExportConverter {
         atlasExport.setApplicationId(metadataSegmentExport.getApplicationId());
         atlasExport.setExportType(metadataSegmentExport.getType());
         atlasExport.setStatus(metadataSegmentExport.getStatus());
-        atlasExport.setPath(metadataSegmentExport.getPath());
         atlasExport.setTenantId(metadataSegmentExport.getTenantId());
+        atlasExport.setCleanupBy(metadataSegmentExport.getCleanupBy());
+        atlasExport.setSegmentName(metadataSegmentExport.getExportPrefix());
         return atlasExport;
     }
 
@@ -31,6 +34,7 @@ public class MetadataSegmentExportConverter {
             return null;
         }
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
+        metadataSegmentExport.setExportPrefix(atlasExport.getSegmentName());
         metadataSegmentExport.setExportId(atlasExport.getUuid());
         metadataSegmentExport.setTenant(atlasExport.getTenant());
         metadataSegmentExport.setTenantId(atlasExport.getTenantId());
@@ -40,7 +44,13 @@ public class MetadataSegmentExportConverter {
         metadataSegmentExport.setContactFrontEndRestriction(atlasExport.getContactFrontEndRestriction());
         metadataSegmentExport.setCreatedBy(atlasExport.getCreatedBy());
         metadataSegmentExport.setStatus(atlasExport.getStatus());
-        metadataSegmentExport.setPath(atlasExport.getPath());
+        if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
+            metadataSegmentExport.setPath(atlasExport.getFilesUnderSystemPath().get(0));
+        } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderDropFolder())) {
+            metadataSegmentExport.setPath(atlasExport.getFilesUnderDropFolder().get(0));
+        }
+        metadataSegmentExport.setCleanupBy(atlasExport.getCleanupBy());
+        metadataSegmentExport.setExportPrefix(atlasExport.getSegmentName());
         return metadataSegmentExport;
     }
 
