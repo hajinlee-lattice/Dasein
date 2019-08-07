@@ -277,6 +277,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setInputIdx(0);
         config.setPeriodIdx(1);
         config.setTransactinIdx(2);
+        config.setCleanupFirst(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -361,6 +362,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
+        config.setCleanupFirst(true);
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -74,25 +75,29 @@ public class PeriodDataDistributor
      * @param periodDir
      * @param inputDir
      */
-    private void distributeSinglePeriodStore(PeriodDataDistributorConfig config, TransformStep step, String periodDir,
-            String inputDir) {
+    private void distributeSinglePeriodStore(PeriodDataDistributorConfig config, TransformStep step,
+            String periodDir, String inputDir) {
         // Target table to distribute to
         int targetIdx = config.getTransactinIdx() == null ? 2 : config.getTransactinIdx();
         String targetDir = getSourceHdfsDir(step, targetIdx);
 
         Set<Integer> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir, config.getPeriodField());
-        for (Integer period : periods) {
-            log.debug("Period to distribute " + period);
-        }
+        log.info("Period to cleanup and distribute: {}",
+                String.join(",", periods.stream().map(String::valueOf).collect(Collectors.toList())));
 
-        // Only retry for non-LedpException
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
+        // Only retry for non-LedpException; If don't cleanup first, cannot
+        // retry
+        int maxAttempt = config.isCleanupFirst() ? 3 : 1;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+                Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("Attempt #{} to distribute period store", ctx.getRetryCount() + 1);
             }
             // Cleanup impacted periods in period store
-            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periods);
+            if (config.isCleanupFirst()) {
+                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periods);
+            }
 
             @SuppressWarnings("serial")
             TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
@@ -112,7 +117,7 @@ public class PeriodDataDistributor
                     .periodNameField(null) //
                     .build();
             distributer.distributePeriodData();
-            return null;
+            return true;
         });
     }
 
@@ -133,6 +138,10 @@ public class PeriodDataDistributor
         // PeriodName -> [PeriodIds]
         Map<String, Set<Integer>> periods = TimeSeriesUtils.collectPeriods(yarnConfiguration, periodDir,
                 config.getPeriodField(), config.getPeriodNameField());
+        for (Map.Entry<String, Set<Integer>> period : periods.entrySet()) {
+            log.info("For {} period store, period to cleanup and distribute: {}", period.getKey(),
+                    String.join(",", period.getValue().stream().map(String::valueOf).collect(Collectors.toList())));
+        }
         // PeriodName -> TargetDir
         Map<String, String> targetDirs = new HashMap<>();
         for (Map.Entry<String, Integer> ent : config.getTransactionIdxes().entrySet()) {
@@ -141,16 +150,22 @@ public class PeriodDataDistributor
             targetDirs.put(periodName, targetDir);
         }
 
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, null, Collections.singletonList(LedpException.class));
+        // Only retry for non-LedpException; If don't cleanup first, cannot
+        // retry
+        int maxAttempt = config.isCleanupFirst() ? 3 : 1;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+                Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("Attempt #{} to distribute period store", ctx.getRetryCount() + 1);
             }
 
             // Cleanup impacted periods in period store
-            for (String periodName : periods.keySet()) {
-                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDirs.get(periodName),
-                        periods.get(periodName));
+            if (config.isCleanupFirst()) {
+                for (String periodName : periods.keySet()) {
+                    TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDirs.get(periodName),
+                            periods.get(periodName));
+                }
             }
 
             TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
@@ -162,7 +177,7 @@ public class PeriodDataDistributor
                     .periodNameField(config.getPeriodNameField()) //
                     .build();
             distributer.distributePeriodData();
-            return null;
+            return true;
         });
     }
 

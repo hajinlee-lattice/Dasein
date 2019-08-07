@@ -28,6 +28,11 @@ public class PeriodDataDistributorConfig extends TransformerConfig {
     private Map<String, Integer> transactionIdxes; // PeriodName ->
                                                    // TransactionIdx
 
+    // Whether to cleanup periods (touched in distributer) in target store
+    // before distributing
+    @JsonProperty("CleanupFirst")
+    private boolean cleanupFirst;
+
     public String getPeriodField() {
         return periodField;
     }
@@ -84,4 +89,11 @@ public class PeriodDataDistributorConfig extends TransformerConfig {
         this.transactionIdxes = transactionIdxes;
     }
 
+    public boolean isCleanupFirst() {
+        return cleanupFirst;
+    }
+
+    public void setCleanupFirst(boolean cleanupFirst) {
+        this.cleanupFirst = cleanupFirst;
+    }
 }

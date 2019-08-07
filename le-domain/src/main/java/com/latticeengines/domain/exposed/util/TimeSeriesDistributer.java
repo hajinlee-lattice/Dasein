@@ -125,7 +125,7 @@ public class TimeSeriesDistributer {
         } catch (Exception e) {
             throw e;
         } finally {
-            shutdownBatchWriteExecutor();
+            shutdown();
         }
     }
 
@@ -149,6 +149,9 @@ public class TimeSeriesDistributer {
                     throw new LedpException(LedpCode.LEDP_41002, new String[] { periodField, record.toString() });
                 }
                 Pair<String, Integer> period = Pair.of(periodName, periodId);
+                if (!targetFiles.containsKey(period)) {
+                    continue;
+                }
                 // readBuffer: (PariodName, PeriodId) -> [records]
                 if (!readBuffer.containsKey(period)) {
                     readBuffer.put(period, new ArrayList<>());
@@ -255,7 +258,7 @@ public class TimeSeriesDistributer {
                     // some weird cases
                     res = future.get(1, TimeUnit.MINUTES);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    throw new RuntimeException("Batch write of period data failed");
+                    throw new RuntimeException("Batch write of period data failed", e);
                 }
                 iter.remove();
                 // writers: (PeriodName, PeriodId) -> (start time, size)
@@ -297,7 +300,7 @@ public class TimeSeriesDistributer {
             try {
                 res = future.get(1, TimeUnit.HOURS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException("Batch write future got timeout");
+                throw new RuntimeException("Batch write future got timeout", e);
             }
             futureIter.remove();
             // writers: (PeriodName, PeriodId) -> (start time, size)
@@ -397,7 +400,7 @@ public class TimeSeriesDistributer {
     /**
      * Shut down batch write executor
      */
-    private void shutdownBatchWriteExecutor() {
+    private void shutdown() {
         futures.forEach(future -> {
             if (!future.isDone()) {
                 future.cancel(true);
