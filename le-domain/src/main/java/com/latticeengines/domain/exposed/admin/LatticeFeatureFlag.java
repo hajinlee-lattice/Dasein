@@ -42,6 +42,8 @@ public enum LatticeFeatureFlag {
     ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
     BETA_FEATURE("BetaFeature", "Allows beta features"), //
     ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
+    ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
+    ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
