@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class RestrictionUtils {
 
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
+    private static final Pattern INTEGER_PATTERN = Pattern.compile("^\\d$");
 
     public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
             Map<ComparisonType, Set<AttributeLookup>> map, TimeFilterTranslator timeTranslator) {
@@ -106,9 +108,7 @@ public class RestrictionUtils {
         if (restriction != null) {
             if (restriction instanceof LogicalRestriction) {
                 BreadthFirstSearch search = new BreadthFirstSearch();
-                search.run(restriction, (object, ctx) -> {
-                    accumulateInvalidBkts(object, invalidBkts);
-                });
+                search.run(restriction, (object, ctx) -> accumulateInvalidBkts(object, invalidBkts));
             } else if (restriction instanceof BucketRestriction) {
                 accumulateInvalidBkts(restriction, invalidBkts);
             }
@@ -485,33 +485,22 @@ public class RestrictionUtils {
                 Object newVal;
                 if (val == null) {
                     newVal = null;
-                } else if (val.getClass().equals(attrClz)) {
-                    newVal = attrClz.cast(val);
-                } else {
-                    String strVal = val.toString();
+                } else if (Number.class.isAssignableFrom(val.getClass())) {
+                    newVal = val;
+                } else if (val instanceof String) {
                     try {
-                        switch (attrClz.getSimpleName()) {
-                            case "Short":
-                                newVal = Short.parseShort(strVal);
-                                break;
-                            case "Integer":
-                                newVal = Integer.parseInt(strVal);
-                                break;
-                            case "Long":
-                                newVal = Long.parseLong(strVal);
-                                break;
-                            case "Double":
-                                newVal = Double.parseDouble(strVal);
-                                break;
-                            case "Float":
-                                newVal = Float.parseFloat(strVal);
-                                break;
-                            default:
-                                throw new UnsupportedOperationException("Unknown attribute type to convert: " + attrClz);
+                        String strVal = val.toString();
+                        if (INTEGER_PATTERN.matcher(strVal).matches()) {
+                            newVal = Long.parseLong(strVal);
+                        } else {
+                            newVal = Double.parseDouble(strVal);
                         }
                     } catch (NumberFormatException e) {
-                        throw new UnsupportedOperationException("Cannot cast value " + val + " to " + attrClz);
+                        throw new UnsupportedOperationException("Cannot cast value " + val + " to number.");
                     }
+                } else {
+                    throw new IllegalArgumentException("Cannot make the operand " + val //
+                            + " compatible with attribute type " + attrClz);
                 }
                 newVals.add(newVal);
             });

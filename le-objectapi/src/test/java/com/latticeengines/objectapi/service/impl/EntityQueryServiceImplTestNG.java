@@ -187,7 +187,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction = Restriction.builder() //
                 .let(intAttr) //
-                .inCollection(Arrays.asList("1", "2")) //
+                .inCollection(Arrays.asList("1.5", "2")) //
                 .build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
@@ -195,6 +195,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         String sql = getEntityQueryService(SEGMENT_USER) //
                 .getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
         Assert.assertFalse(sql.contains("lower(Account.NUMBER_OF_FAMILY_MEMBERS)"), sql);
+        Assert.assertTrue(sql.contains("(1.5, 2)"), sql);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

@@ -77,8 +77,8 @@ public class RestrictionUtilsUnitTestNG {
     @DataProvider(name = "numericalBuckets")
     public Object[][] provideNumericalBuckets() {
         return new Object[][] {
-                { Arrays.asList("1", "2"), Integer.class, false },
-                { Arrays.asList("1", "2"), Long.class, false },
+                { Arrays.asList("1", "2.5"), Integer.class, false },
+                { Arrays.asList("1.1", "2"), Long.class, false },
                 { Arrays.asList("1.2", "2"), Double.class, false },
                 { Arrays.asList("1", "2."), Float.class, false },
                 { Arrays.asList(1, "2"), Integer.class, false },
