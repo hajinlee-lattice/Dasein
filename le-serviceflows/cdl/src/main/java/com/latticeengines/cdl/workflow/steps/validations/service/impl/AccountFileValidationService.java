@@ -102,14 +102,13 @@ public class AccountFileValidationService
                                         if (checkNull) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             csvFilePrinter.printRecord(lineId, "", "AccountId cannot be empty!");
-                                            rowError = true;
                                             fileError = true;
                                             errorInPath++;
                                             errorLine++;
                                         } else {
                                             dataFileWriter.append(record);
-                                            continue;
                                         }
+                                        continue;
                                     }
                                     for (Character c : invalidChars) {
                                         if (id.indexOf(c) != -1) {
