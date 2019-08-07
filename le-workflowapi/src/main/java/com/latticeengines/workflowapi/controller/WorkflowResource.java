@@ -100,11 +100,14 @@ public class WorkflowResource {
         AppSubmission submission = new AppSubmission(
                 workflowJobService.submitWorkflow(customerSpace, workflowConfig, null));
         // update status of retried job
+        /*-
+         * FIXME re-enable or change this after UX finalized the behavior
         if (Boolean.TRUE.equals(autoRetry)) {
             // TODO maybe update all retried jobs instead of only auto-retried ones
             log.info("Updating retried job status, workflowId = {}", wfId);
             workflowJobService.updateWorkflowStatusAfterRetry(customerSpace, wfId);
         }
+         */
         return submission;
     }
 
