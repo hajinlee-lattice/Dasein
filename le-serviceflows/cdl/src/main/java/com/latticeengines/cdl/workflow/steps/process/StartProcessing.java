@@ -585,7 +585,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void verifyActiveDataCollectionVersion() {
-        if (!activeVersion.equals(metadataProxy.getMigrationActiveVersion())) {
+        if (!activeVersion.equals(metadataProxy.getMigrationActiveVersion(customerSpace.toString()))) {
             log.error("Current active version for tenant {} doesn't match the one in migration table", customerSpace);
             throw new IllegalStateException(String.format("Current active data collection version not match for %s", customerSpace));
         }
