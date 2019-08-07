@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -298,6 +299,18 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(List<String> uniqueIds) {
+        List<DataFeedTask> dataFeedTasks = datafeedTaskRepository.findByUniqueIdIn(uniqueIds);
+        if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
+            dataFeedTasks.forEach(dataFeedTask -> {
+                TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+                TableEntityMgr.inflateTable(dataFeedTask.getImportData());});
+        }
+        return dataFeedTasks;
+    }
+
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
         DataFeedTask datafeedTask = datafeedTaskRepository.findById(taskId).orElse(null);
@@ -321,6 +334,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setS3ImportStatus(dataFeedTask.getS3ImportStatus());
         deleteReferences(task.getImportTemplate());
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
+        task.setFeedType(dataFeedTask.getFeedType());
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());

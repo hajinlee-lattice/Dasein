@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
@@ -300,6 +301,45 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException(
                     "Failed to cleanupAllAttrConfig: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId convertBatchStoreToImport(String customerSpace, ConvertBatchStoreToImportRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/convertbatchstoretoimport",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("convert batchstore to import", url, request,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start convert batchstore job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId migrateImport(String customerSpace, String userId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/migrateimport",
+                shortenCustomerSpace(customerSpace));
+        if (StringUtils.isEmpty(userId)) {
+            userId = "DEFAULT_MIGRATE_IMPORT_USER";
+        }
+        ResponseDocument<String> responseDoc = post("Migrate current import to entity match style", url, userId,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start migrate import job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
