@@ -1,3 +1,28 @@
+// Icons
+@mixin svg-icon ($category, $color) {
+    $svgIcon: map-get((
+        firmographics : '../../assets/images/svg/firmographics.svg',
+        my-attributes : '../../assets/images/svg/my-attr.svg',
+        growth-trends : '../../assets/images/svg/growth-trends.svg',
+        website-profile : '../../assets/images/svg/website-profile.svg',
+        online-presence : '../../assets/images/svg/online-presence.svg',
+        product : '../../assets/images/svg/product-spend-profile.svg',
+        lattice-ratings : '../../assets/images/svg/lattice-ratings.svg',
+        intent : '../../assets/images/svg/intent.svg',
+        contact-attributes : '../../assets/images/svg/contact-attributes.svg',
+        technology-profile : '../../assets/images/svg/technology-profile.svg',
+        website-keywords : '../../assets/images/svg/website-keywords.svg',
+        engagement : '../../assets/images/svg/firmographics.svg',
+        curated-accounts : '../../assets/images/svg/curated-accounts.svg'
+    ), $category);
+
+    background-color: $color;
+    -webkit-mask-image: url($svgIcon);
+            mask-image: url($svgIcon);
+
+}
+
+
 .enrichment-wizard-container {
     padding: 0;
     @media (max-width: 1300px) {
@@ -484,23 +509,25 @@ attr-categories,
                     font-size: 15px;
                     margin-bottom: 5px;
                     white-space: nowrap;
-                    .category-icon {
-                        height: 40px;
-                        width: 40px;
-                        border-width: 1px;
-                        border-style: solid;
-                        //border-color: #d0d1d0;
-                        padding: 10px;
-                        border-radius: 50%;
-                        margin: 0 auto;
+                    .category-icon-container {
                         margin-bottom: 5px;
-                        img {
-                            display: block;
-                            margin: 0 auto;
-                            margin-bottom: 5px;
-                            height: 100%;
-                            width: 100%;
-                        }
+                        display: inline-block;
+                        margin: 0 auto;
+                        border-width: 1px;
+                        border-radius: 50%;
+                        border-style: solid;
+                        -webkit-box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.15);
+                        -moz-box-shadow:    0px 1px 2px 0px rgba(0,0,0,0.15);
+                        box-shadow:         0px 1px 2px 0px rgba(0,0,0,0.15);
+                    }
+                    .category-icon {
+                        padding: 25px;
+                        -webkit-mask-repeat:    no-repeat;
+                                mask-repeat:    no-repeat;
+                        -webkit-mask-size:      20px;
+                                mask-size:      20px;
+                        -webkit-mask-position:  center center;
+                                mask-position:  center center;
                     }
                     .category-label {
                         .category-label-span {
@@ -833,24 +860,44 @@ attr-categories,
                         height: 35px;
                         overflow: hidden;
                     }
-                    .category-icon {
-                        height: 36px;
-                        width: 36px;
-                        border-width: 1px;
-                        border-style: solid;
-                        //border-color: #d0d1d0;
-                        padding: 8px;
-                        border-radius: 50%;
-                        margin: 0 auto;
+                    .category-icon-container {
                         margin-bottom: 5px;
-                        img {
-                            display: block;
-                            margin: 0 auto;
-                            margin-bottom: 5px;
-                            height: 100%;
-                            width: 100%;
-                        }
+                        display: inline-block;
+                        margin: 0 auto;
+                        border-width: 1px;
+                        border-radius: 50%;
+                        border-style: solid;
+                        -webkit-box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.15);
+                        -moz-box-shadow:    0px 1px 2px 0px rgba(0,0,0,0.15);
+                        box-shadow:         0px 1px 2px 0px rgba(0,0,0,0.15);
                     }
+                    .category-icon {
+                        padding: 25px;
+                        -webkit-mask-repeat:    no-repeat;
+                                mask-repeat:    no-repeat;
+                        -webkit-mask-size:      20px;
+                                mask-size:      20px;
+                        -webkit-mask-position:  center center;
+                                mask-position:  center center;
+                    }
+                    // .category-icon {
+                    //     height: 36px;
+                    //     width: 36px;
+                    //     border-width: 1px;
+                    //     border-style: solid;
+                    //     //border-color: #d0d1d0;
+                    //     padding: 8px;
+                    //     border-radius: 50%;
+                    //     margin: 0 auto;
+                    //     margin-bottom: 5px;
+                    //     img {
+                    //         display: block;
+                    //         margin: 0 auto;
+                    //         margin-bottom: 5px;
+                    //         height: 100%;
+                    //         width: 100%;
+                    //     }
+                    // }
                 }
                 .count {
                     position: absolute;
@@ -917,38 +964,59 @@ attr-categories,
                         font-size: 16px;
                         margin: 0.45em 0 1.25em;
                         font-weight: bold;
-                        .category-icon { 
-                            position: relative;
-                            height: 36px;
-                            width: 36px;
-                            border-width: 1px;
-                            border-style: solid;
-                            // border-color: #d0d1d0;
-                            padding: 8px;
-                            border-radius: 50%;
-                            margin: 0 auto;
-                            margin-bottom: 5px;
-                            img {
-                                display: block;
-                                margin: 0 auto;
-                                margin-bottom: 5px;
-                                height: 100%;
-                                width: 100%;
+                        .highlighted-decoration {
+                            position: absolute;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            white-space: nowrap;
+                            margin: 0 10px;
+                            &:first-child {
+                                right: 100%;
                             }
-                            .highlighted-decoration {
-                                position: absolute;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                white-space: nowrap;
-                                margin: 0 10px;
-                                &:first-child {
-                                    right: 100%;
-                                }
-                                &:last-child {
-                                    left: 100%;
-                                }
+                            &:last-child {
+                                left: 100%;
                             }
                         }
+                        .category-icon-container {
+                            margin-bottom: 5px;
+                            display: inline-block;
+                            margin: 0 auto;
+                            border-width: 1px;
+                            border-radius: 50%;
+                            border-style: solid;
+                            -webkit-box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.15);
+                            -moz-box-shadow:    0px 1px 2px 0px rgba(0,0,0,0.15);
+                            box-shadow:         0px 1px 2px 0px rgba(0,0,0,0.15);
+                        }
+                        .category-icon {
+                            padding: 25px;
+                            -webkit-mask-repeat:    no-repeat;
+                                    mask-repeat:    no-repeat;
+                            -webkit-mask-size:      20px;
+                                    mask-size:      20px;
+                            -webkit-mask-position:  center center;
+                                    mask-position:  center center;
+                        }
+                        // .category-icon { 
+                        //     position: relative;
+                        //     height: 36px;
+                        //     width: 36px;
+                        //     border-width: 1px;
+                        //     border-style: solid;
+                        //     // border-color: #d0d1d0;
+                        //     padding: 8px;
+                        //     border-radius: 50%;
+                        //     margin: 0 auto;
+                        //     margin-bottom: 5px;
+                        //     img {
+                        //         display: block;
+                        //         margin: 0 auto;
+                        //         margin-bottom: 5px;
+                        //         height: 100%;
+                        //         width: 100%;
+                        //     }
+                            
+                        // }
                         strong {
                             display: block;
                             max-height: 3.2em;
@@ -1728,7 +1796,11 @@ attr-categories,
         &.color {
             color: #33bdb7;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("firmographics", #33bdb7);
+        }
+
+        .category-icon-container,
         &.border {
             border-color: #33bdb7;
         }
@@ -1780,7 +1852,10 @@ attr-categories,
         &.color {
             color: #65b7e6;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("growth-trends", #33bdb7);
+        }
+        .category-icon-container,
         &.border {
             border-color: #65b7e6;
         }
@@ -1832,7 +1907,10 @@ attr-categories,
         &.color {
             color: #f15a5a;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("intent", #f15a5a);
+        }
+        .category-icon-container,
         &.border {
             border-color: #f15a5a;
         }
@@ -1884,7 +1962,10 @@ attr-categories,
         &.color {
             color: #8e71b2;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("online-presence", #8e71b2);
+        }
+        .category-icon-container,
         &.border {
             border-color: #8e71b2;
         }
@@ -1936,7 +2017,10 @@ attr-categories,
         &.color {
             color: #70bf4a;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("technology-profile", #70bf4a);
+        }
+        .category-icon-container,
         &.border {
             border-color: #70bf4a;
         }
@@ -1988,7 +2072,10 @@ attr-categories,
         &.color {
             color: #fdbc49;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("website-keywords", #fdbc49);
+        }
+        .category-icon-container,
         &.border {
             border-color: #fdbc49;
         }
@@ -2040,7 +2127,10 @@ attr-categories,
         &.color {
             color: #26649b;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("website-profile", #26649b);
+        }
+        .category-icon-container,
         &.border {
             border-color: #26649b;
         }
@@ -2092,7 +2182,10 @@ attr-categories,
         &.color {
             color: #ff9e64;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("contact", #ff9e64);
+        }
+        .category-icon-container,
         &.border {
             border-color: #ff9e64;
         }
@@ -2125,7 +2218,10 @@ attr-categories,
         &.color {
             color: #cd80bc;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("product", #cd80bc);
+        }
+        .category-icon-container,
         &.border {
             border-color: #cd80bc;
         }
@@ -2177,7 +2273,10 @@ attr-categories,
         &.color {
             color: #aac43b;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("engagement", #aac43b);
+        }
+        .category-icon-container,
         &.border {
             border-color: #aac43b;
         }
@@ -2209,7 +2308,10 @@ attr-categories,
         &.color {
             color: #a5bd46;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("curated-accounts", #a5bd46);
+        }
+        .category-icon-container,
         &.border {
             border-color: #a5bd46;
         }
@@ -2240,7 +2342,10 @@ attr-categories,
         &.color {
             color: #21a585;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("contact-attributes", #21a585);
+        }
+        .category-icon-container,
         &.border {
             border-color: #21a585;
         }
@@ -2271,7 +2376,10 @@ attr-categories,
         &.color {
             color: #5f529e;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("my-attributes", #5f529e);
+        }
+        .category-icon-container,
         &.border {
             border-color: #5f529e;
         }
@@ -2303,7 +2411,10 @@ attr-categories,
         &.color {
             color: #457EBA;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("my-contact-account", #457EBA);
+        }
+        .category-icon-container,
         &.border {
             border-color: #457EBA;
         }
@@ -2356,7 +2467,10 @@ attr-categories,
         &.color {
             color: #f2702f;
         }
-        .category-icon,
+        .category-icon {
+            @include svg-icon("lattice-ratings", #f2702f);
+        }
+        .category-icon-container,
         &.border {
             border-color: #f2702f;
         }
