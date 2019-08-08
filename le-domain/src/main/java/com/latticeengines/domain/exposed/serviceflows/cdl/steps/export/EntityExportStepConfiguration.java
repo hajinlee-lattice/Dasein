@@ -22,6 +22,9 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("export_entities")
     private List<ExportEntity> exportEntities;
 
+    @JsonProperty("add_export_timestamp")
+    private boolean addExportTimestamp;
+
     @JsonProperty("compress_result")
     private boolean compressResult;
 
@@ -62,6 +65,14 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setExportEntities(List<ExportEntity> exportEntities) {
         this.exportEntities = exportEntities;
+    }
+
+    public boolean isAddExportTimestamp() {
+        return addExportTimestamp;
+    }
+
+    public void setAddExportTimestamp(boolean addExportTimestamp) {
+        this.addExportTimestamp = addExportTimestamp;
     }
 
     public boolean isCompressResult() {
