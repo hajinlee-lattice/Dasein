@@ -25,7 +25,7 @@ public enum ActionType {
     private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
             Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE,
                     ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION,
-                    ACTIVITY_METRICS_CHANGE, BUSINESS_CALENDAR_CHANGE, CDL_OPERATION_WORKFLOW));
+                    ACTIVITY_METRICS_CHANGE, BUSINESS_CALENDAR_CHANGE));
     private static final Set<ActionType> ATTR_MANAGEMENT_TYPES = new HashSet<>(
             Arrays.asList(ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION));
     private static final Set<ActionType> RATING_RELATED_TYPES = new HashSet<>(

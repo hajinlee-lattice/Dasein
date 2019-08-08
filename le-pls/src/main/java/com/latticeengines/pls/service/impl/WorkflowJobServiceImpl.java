@@ -573,7 +573,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
-                if (!ActionType.getNonWorkflowActions().contains(action.getType())) {
+                if ((!ActionType.getNonWorkflowActions().contains(action.getType()) && action.getType() != ActionType.CDL_OPERATION_WORKFLOW)
+                        || (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()) && action.getTrackingPid() != null)) {
                     if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW == action.getType() && action.getActionStatus() == ActionStatus.CANCELED)
                         job.setJobStatus(JobStatus.CANCELLED);
                     else
