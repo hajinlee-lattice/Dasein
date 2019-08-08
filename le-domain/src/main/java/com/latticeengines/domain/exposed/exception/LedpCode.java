@@ -829,7 +829,7 @@ public enum LedpCode {
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
     LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
-    LEDP_40059("Error when validating with input file, please reference {0}."),
+    LEDP_40059("{0} error when validating with input file, please reference {1} for details."),
     LEDP_40060("Invalid business calendar"),
     LEDP_40061("Cannot update Import System: {0}"),
     LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
