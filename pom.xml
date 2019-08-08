@@ -22,6 +22,7 @@
         <module>le-transform</module>
         <module>le-common</module>
         <module>le-common-web</module>
+        <module>le-graph</module>
         <module>le-app</module>
         <module>le-testframework</module>
         <module>le-network</module>

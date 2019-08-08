@@ -50,7 +50,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessR
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -68,9 +67,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
