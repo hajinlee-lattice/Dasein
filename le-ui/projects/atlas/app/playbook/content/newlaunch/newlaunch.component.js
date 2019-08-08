@@ -166,7 +166,7 @@ angular.module('lp.playbook.wizard.newlaunch', [])
                     }
                     break;
                 default:
-                    channelConfig = {};
+                    channelConfig = null;
             }
             return channelConfig;
         }
