@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -202,6 +203,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{id}",
                 shortenCustomerSpace(customerSpace), id);
         return get("getDataFeedTaskById", url, DataFeedTask.class);
+    }
+
+    public S3ImportSystem getImportSysteByTaskId(String customerSpace, String taskId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/getSystem",
+                shortenCustomerSpace(customerSpace), taskId);
+        return get("getImportSystemByTaskId", url, S3ImportSystem.class);
     }
 
     public Long nextInvokeTime(String customerSpace) {
