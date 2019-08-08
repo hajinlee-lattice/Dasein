@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.graph.DependenciesToGraphAction;
+import com.latticeengines.graphdb.DependenciesToGraphAction;
 
 @Component
 public class DependencyChecker {

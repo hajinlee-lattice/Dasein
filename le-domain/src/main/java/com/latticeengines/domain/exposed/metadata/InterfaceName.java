@@ -112,6 +112,7 @@ public enum InterfaceName {
 
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities
+    AtlasExportTime, // timestamp for csv export
 
     ConsolidateReport, //
 
@@ -133,7 +134,7 @@ public enum InterfaceName {
 
     // Internal
     __Composite_Key__; // primary key for internal use
-    
+
     private static final Set<String> EntityIds = ImmutableSet.of( //
             InterfaceName.EntityId.name(), //
             InterfaceName.AccountId.name(), //

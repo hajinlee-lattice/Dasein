@@ -25,8 +25,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.graph.BootstrapContext;
-import com.latticeengines.graph.entity.GraphEntityManager;
+import com.latticeengines.graphdb.BootstrapContext;
+import com.latticeengines.graphdb.entity.GraphEntityManager;
 
 @Component
 public class GraphVisitorImpl implements GraphVisitor {

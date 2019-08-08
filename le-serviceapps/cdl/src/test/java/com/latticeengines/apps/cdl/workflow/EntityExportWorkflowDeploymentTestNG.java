@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -55,6 +56,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 
 /**
  * dpltc deploy -a admin,pls,lp,cdl,metadata,matchapi,workflowapi
@@ -215,7 +217,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             Map<String, Integer> headerMap = records.getHeaderMap();
             Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
             Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
-            Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"),
+            Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), //
+                    "Header map: " + JsonUtils.serialize(headerMap));
+            Assert.assertTrue(headerMap.containsKey(InterfaceName.AtlasExportTime.name()), //
                     "Header map: " + JsonUtils.serialize(headerMap));
             // FIXME: This purchase history attribute is deprecated due to
             // product table doesn't exist in S3. Should improve checkpoint.
@@ -224,7 +228,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             // "Header map: " + JsonUtils.serialize(headerMap));
             for (CSVRecord record : records) {
                 String dateStr = record.get("Test Date");
-                SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                SimpleDateFormat dateFmt = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
                 try {
                     Date date = dateFmt.parse(dateStr);
                     Assert.assertNotNull(date);

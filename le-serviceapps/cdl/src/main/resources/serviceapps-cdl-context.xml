@@ -10,7 +10,7 @@
     <import resource="classpath:serviceapps-core-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
     <import resource="classpath:serviceapps-cdl-aspect-context.xml"/>
-    <import resource="classpath:graph-context.xml" />
+    <import resource="classpath:graphdb-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.apps.cdl">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.controller.*" />

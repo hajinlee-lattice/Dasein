@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.collections4.MapUtils
-import org.apache.spark.sql.functions.{col, udf, when}
+import org.apache.commons.lang3.StringUtils
+import org.apache.spark.sql.functions.{col, lit, udf, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -18,11 +19,22 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     val config: ConvertToCSVConfig = lattice.config
     val input = lattice.input.head
 
-    val formatted = formatDateAttrs(input, config)
+    val withTimestamp = addTimestamp(input, config)
+    val formatted = formatDateAttrs(withTimestamp, config)
     val renamed = changeToDisplayName(formatted, config)
 
     val result = renamed
     lattice.output = result :: Nil
+  }
+
+  private def addTimestamp(input: DataFrame, config: ConvertToCSVConfig): DataFrame = {
+    val timeAttr = config.getExportTimeAttr
+    if (StringUtils.isNotBlank(timeAttr)) {
+      val now = System.currentTimeMillis
+      input.withColumn(timeAttr, lit(now))
+    } else {
+      input
+    }
   }
 
   private def formatDateAttrs(input: DataFrame, config: ConvertToCSVConfig): DataFrame = {
