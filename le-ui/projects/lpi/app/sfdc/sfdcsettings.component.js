@@ -50,18 +50,6 @@ angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', '
                 $state.go('.', {pageTitle: 'Application Settings'}, {notify: false});
             }
 
-            vm.accountIDMap = {};
-            var ids = [];
-            vm.externaltypes.forEach(function(type) {
-                if (vm.accountids[type] != undefined) {
-                    vm.accountids[type].forEach(function(account) {
-                        vm.accountIDMap[account.fieldName] = type;
-                        ids.push(account);
-                    })
-                }
-            });
-            vm.accountids = ids;
-
             vm.cdlIsEnabled = vm.featureflags.EnableCdl;
             vm.generateAuthTokenButtonLabel = vm.cdlIsEnabled ? 'Email One-time Authentication Token' : 'Generate Salesforce Access Token';
 
@@ -127,30 +115,6 @@ angular.module('lp.sfdc.credentials', ['ngAnimate', 'lp.sfdc', 'common.modal', '
 
                 
             });
-        };
-
-        vm.saveOrgs = function() {
-            var orgs = vm.orgs;
-            angular.forEach(orgs, function(value, key) {
-                SfdcService.saveOrgs(value.configId, value).then(function(result){
-                    console.log(result);
-                    Notice.success({message: 'Your changes have been saved.'});
-                });
-            });
-
-            SfdcStore.setOrgs(vm.orgs);
-            vm.originalData = angular.copy(vm.orgs);
-        };
-
-        vm.saveOrg = function(org) {
-            if (org.accountId != '') { // FIXME - ng-change is called twice when setting accountId to blank option 
-                SfdcService.saveOrgs(org.configId, org).then(function(result){
-                    console.log(result);
-                    Notice.success({message: 'Your changes have been saved.'});
-                });
-                SfdcStore.setOrgs(vm.orgs);
-                vm.originalData = angular.copy(vm.orgs);
-            }
         };
 
         vm.closeStatusMessage = function() {
