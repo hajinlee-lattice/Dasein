@@ -38,6 +38,18 @@ angular
             actions.setExternalIntegrationEnabled(connectorsEnabled);
             return connectorsEnabled;
         }
+
+        this.isLinkedInIntegrationEnabled = function () {
+            let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_LINKEDIN_INTEGRATION);
+            actions.setLinkedInIntegrationEnabled(connectorsEnabled);
+            return connectorsEnabled;
+        }
+
+        this.isFacebookIntegrationEnabled = function () {
+            let connectorsEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FACEBOOK_INTEGRATION);
+            actions.setFacebookIntegrationEnabled(connectorsEnabled);
+            return connectorsEnabled;
+        }
     })
 .config(function($stateProvider) {
     $stateProvider
