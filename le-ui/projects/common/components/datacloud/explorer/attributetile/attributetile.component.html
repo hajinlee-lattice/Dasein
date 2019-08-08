@@ -56,14 +56,11 @@
 
         <div class="header">
             <h2 alt="{{enrichment.DisplayName}}">
-                <div class="category-icon">
+                <div class="category-icon-container">
                     <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                     </div>
-
-                    <img ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" fallback-src="{{vm.categoryIcon(enrichment.Category)}}"
-                        class="ico noselect" onerror="this.style.display='none'" />
-
+                    <div class="category-icon"></div>
                     <div class="highlighted-decoration {{vm.categoryClass(enrichment.Category)}} color" ng-if="enrichment.HighlightState.highlighted && vm.showHighlighting()">
                         <i ng-repeat="i in vm.getArray(5) track by $index" class="fa fa-star" aria-hidden="true"></i>
                     </div>
