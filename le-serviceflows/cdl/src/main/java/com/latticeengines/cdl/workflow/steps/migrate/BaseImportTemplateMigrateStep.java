@@ -65,6 +65,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         if (optionalDataFeedTask.isPresent()) {
             DataFeedTask dataFeedTask = optionalDataFeedTask.get();
             dataFeedTask.setImportTemplate(newTemplate);
+            dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             updateMigrateTracking(dataFeedTask.getUniqueId(), newTemplate.getName());
         } else {
             String newTaskId = NamingUtils.uuid("DataFeedTask");
