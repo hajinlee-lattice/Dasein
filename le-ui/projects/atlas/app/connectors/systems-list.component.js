@@ -19,20 +19,24 @@ export default class SystemsListComponent extends Component {
         this.state = { connectors: [], loading: true, generatedAuthCode: false };
         this.getConnectors = this.getConnectors.bind(this);
         let FeatureFlagService = ReactRouter.getRouter().ngservices.FeatureFlagService;
-        this.alfaFeature = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALPHA_FEATURE);
-        console.log('FF ', this.alfaFeature);
+        this.alphaFeature = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ALPHA_FEATURE);
+        this.linkedInEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_LINKEDIN_INTEGRATION);
+        this.facebookEnabled = FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FACEBOOK_INTEGRATION);
+        console.log('FF ', this.alphaFeature);
+        console.log('FF ', this.linkedInEnabled);
+        console.log('FF ', this.facebookEnabled);
     }
 
     getConnectors(response) {
         let connectors = [];
         let CRMs = response.data.CRM || [];
         let MAPs = response.data.MAP || [];
+        let ADSs = response.data.ADS || [];
         let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
-        if (this.alfaFeature) {
-            connectors = FILE_SYSTEM.concat(CRMs, MAPs);
-        } else {
-            connectors = CRMs.concat(MAPs);
-        }
+
+        connectors = this.alphaFeature ? connectors.concat(FILE_SYSTEM) : connectors;
+        connectors = connectors.concat(CRMs, MAPs);
+        connectors = this.linkedInEnabled || this.facebookEnabled ? connectors.concat(ADSs) : connectors;
         return connectors;
     }
     componentDidMount() {

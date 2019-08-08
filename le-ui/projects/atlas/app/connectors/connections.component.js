@@ -37,7 +37,11 @@ export default class ConnectionsComponent extends Component {
             solutionInstanceId: null,
             openModal: false
         };
-        this.connectors = ConnectorService.getList(this.ConnectorsService.isExternalIntegrationEnabled());
+        this.connectors = ConnectorService.getList({
+            'Marketo': this.ConnectorsService.isExternalIntegrationEnabled(),
+            'Facebook': this.ConnectorsService.isFacebookIntegrationEnabled(),
+            'LinkedIn': this.ConnectorsService.isLinkedInIntegrationEnabled()
+        });
     }
 
     handleChange = () => {

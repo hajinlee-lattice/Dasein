@@ -113,7 +113,7 @@ class ConnectorService {
                 let el = this._connectors[element];
                 if (!this.isExternallyAuthenticatedSystem(element) && el && el.defaultConnector == false) {
                     this._connectorsList.push(this._connectors[element]);
-                } else if (externalIntegrationEnabled && el && el.defaultConnector == false) {
+                } else if (el && el.defaultConnector == false && externalIntegrationEnabled[el.name] == true) {
                     this._connectorsList.push(this._connectors[element]);
                 }
             });
