@@ -50,7 +50,7 @@ public class CDLDataCleanupResource {
     public void createCleanupAction(@PathVariable String customerSpace,
                                             @RequestBody CleanupOperationConfiguration cleanupOperationConfiguration) {
         try {
-                    cdlDataCleanupService.createCleanupAction(customerSpace, cleanupOperationConfiguration);
+            cdlDataCleanupService.createCleanupAction(customerSpace, cleanupOperationConfiguration);
         } catch (Exception e) {
             log.error("error:", e);
             throw e;
