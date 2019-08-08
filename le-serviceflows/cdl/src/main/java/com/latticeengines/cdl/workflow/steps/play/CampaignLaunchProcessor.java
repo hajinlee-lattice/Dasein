@@ -223,13 +223,16 @@ public class CampaignLaunchProcessor {
 
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
+        List<ColumnMetadata> fieldMappingMetadata = null;
         PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
                 playName, playLaunchId);
-        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                playLaunchChannel.getId());
-        log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
-                + ", the list of columnmetadata is:");
-        log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+        if (playLaunchChannel != null) {
+            fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                    playLaunchChannel.getId());
+            log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
+                    + ", the list of columnmetadata is:");
+            log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+        }
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
         RatingEngine ratingEngine = play.getRatingEngine();

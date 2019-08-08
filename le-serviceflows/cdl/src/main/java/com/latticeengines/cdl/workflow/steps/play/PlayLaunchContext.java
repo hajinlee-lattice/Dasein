@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext.PlayLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -90,8 +91,18 @@ public class PlayLaunchContext {
     }
 
     public PlayLaunchSparkContext toPlayLaunchSparkContext() {
-        return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
-                this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration);
+        return new PlayLaunchSparkContextBuilder()//
+                .tenant(this.tenant)//
+                .playName(this.playName)//
+                .playLaunchId(this.playLaunchId)//
+                .playLaunch(this.playLaunch)//
+                .play(this.play)//
+                .ratingEngine(this.ratingEngine)//
+                .segment(this.segment)//
+                .launchTimestampMillis(this.launchTimestampMillis)//
+                .ratingId(this.ratingId)//
+                .publishedIteration(this.publishedIteration)//
+                .build();
     }
 
     public CustomerSpace getCustomerSpace() {

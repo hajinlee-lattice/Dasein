@@ -33,7 +33,7 @@ public class PlayLaunchSparkContext implements Serializable {
     private String joinKey;
 
     @JsonProperty("Tenant")
-    private Long tenantPid;
+    private long tenantPid;
 
     @JsonProperty("PlayName")
     private String playName;
@@ -121,7 +121,7 @@ public class PlayLaunchSparkContext implements Serializable {
         this.joinKey = joinKey;
     }
 
-    public Long getTenantPid() {
+    public long getTenantPid() {
         return tenantPid;
     }
 
@@ -269,6 +269,76 @@ public class PlayLaunchSparkContext implements Serializable {
             this.sfdcAccountID = destinationAccountId;
         } else {
             this.sfdcAccountID = null;
+        }
+    }
+
+    public static class PlayLaunchSparkContextBuilder {
+
+        private Tenant tenant;
+        private String playName;
+        private String playLaunchId;
+        private PlayLaunch playLaunch;
+        private Play play;
+        private RatingEngine ratingEngine;
+        private MetadataSegment segment;
+        private long launchTimestampMillis;
+        private String ratingId;
+        private RatingModel publishedIteration;
+
+        public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
+            this.tenant = tenant;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder playName(String playName) {
+            this.playName = playName;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder playLaunchId(String playLaunchId) {
+            this.playLaunchId = playLaunchId;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder playLaunch(PlayLaunch playLaunch) {
+            this.playLaunch = playLaunch;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder play(Play play) {
+            this.play = play;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder ratingEngine(RatingEngine ratingEngine) {
+            this.ratingEngine = ratingEngine;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder segment(MetadataSegment segment) {
+            this.segment = segment;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder launchTimestampMillis(long launchTimestampMillis) {
+            this.launchTimestampMillis = launchTimestampMillis;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder ratingId(String ratingId) {
+            this.ratingId = ratingId;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder publishedIteration(RatingModel publishedIteration) {
+            this.publishedIteration = publishedIteration;
+            return this;
+        }
+
+        public PlayLaunchSparkContext build() {
+            return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
+                    this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId,
+                    this.publishedIteration);
         }
     }
 

@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext.PlayLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -83,8 +84,18 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
 
-        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContext(tenant, play.getName(), playLaunch.getId(),
-                playLaunch, play, ratingEngine, segment, launchTime, ratingId, aiModel);
+        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
+                .tenant(tenant)//
+                .playName(play.getName())//
+                .playLaunchId(playLaunch.getId())//
+                .playLaunch(playLaunch)//
+                .play(play)//
+                .ratingEngine(ratingEngine)//
+                .segment(segment)//
+                .launchTimestampMillis(launchTime)//
+                .ratingId(ratingId)//
+                .publishedIteration(aiModel)//
+                .build();
         return sparkContext;
     }
 
