@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTe
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -46,6 +47,9 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
 
     @Inject
     protected CDLProxy cdlProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     protected MigrateTrackingProxy migrateTrackingProxy;
@@ -81,6 +85,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            dropBoxProxy.createTemplateFolder(customerSpace.toString(), null, getFeedType(), "");
             updateMigrateTracking(newTaskId, newTemplate.getName());
         }
     }
