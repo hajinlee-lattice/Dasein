@@ -88,7 +88,7 @@ public class PeriodDataDistributor
         // Only retry for non-LedpException; If don't cleanup first, cannot
         // retry
         int maxAttempt = config.isCleanupFirst() ? 3 : 1;
-        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -153,7 +153,7 @@ public class PeriodDataDistributor
         // Only retry for non-LedpException; If don't cleanup first, cannot
         // retry
         int maxAttempt = config.isCleanupFirst() ? 3 : 1;
-        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
