@@ -170,7 +170,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
             tasks.add(() -> populateBatchStore(shortTenantId, entity, String.valueOf(version)));
         }
-        tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
