@@ -18,9 +18,6 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
 
     @Test(groups = "deployment-app")
     private void testDecoratedMetadata() {
-        // Enable EntityMatch feature flag
-        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
-
         testAccountMetadata();
         testContactMetadata();
     }
@@ -30,11 +27,12 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
     @Override
     protected Map<String, ColumnMetadata> getAccountMetadataToVerify() {
         Map<String, ColumnMetadata> cms = new HashMap<>();
-        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
-                .withAttrName(InterfaceName.AccountId.name()) //
+        cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerAccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
                 .withSubcategory("Account IDs") //
-                .withGroups(ColumnSelection.Predefined.Enrichment) //
+                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
+                        ColumnSelection.Predefined.Segment) //
                 .build());
         return cms;
     }
@@ -44,18 +42,23 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
     @Override
     protected Map<String, ColumnMetadata> getContactMetadataToVerify() {
         Map<String, ColumnMetadata> cms = new HashMap<>();
-        cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
-                .withAttrName(InterfaceName.AccountId.name()) //
+        cms.put(InterfaceName.CustomerContactId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory("Other") //
-                .withGroups(ColumnSelection.Predefined.Enrichment) //
+                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
+                        ColumnSelection.Predefined.Segment) //
                 .build());
-        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
-                .withAttrName(InterfaceName.ContactId.name()) //
+        cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerAccountId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory("Other") //
-                .withGroups(ColumnSelection.Predefined.Enrichment) //
                 .build());
         return cms;
+    }
+
+    @Override
+    protected void overwriteFeatureFlag() {
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
     }
 }

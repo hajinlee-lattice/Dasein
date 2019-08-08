@@ -13,7 +13,5 @@ public enum AttrSubType {
     HasPurchased, //
     APS, //
     CuratedAccount, //
-    // IDs generated/maintained by Atlas
-    InternalLookupId, //
 
 }

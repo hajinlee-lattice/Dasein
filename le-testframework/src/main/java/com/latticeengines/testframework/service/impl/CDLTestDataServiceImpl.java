@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -93,6 +94,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private final DataCollectionProxy dataCollectionProxy;
     private final RedshiftService redshiftService;
     private final RatingEngineProxy ratingEngineProxy;
+    private final BatonService batonService;
 
     @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
@@ -106,12 +108,13 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
             DataCollectionProxy dataCollectionProxy, RedshiftService redshiftService,
-            RatingEngineProxy ratingEngineProxy) {
+            RatingEngineProxy ratingEngineProxy, BatonService batonService) {
         this.testArtifactService = testArtifactService;
         this.metadataProxy = metadataProxy;
         this.dataCollectionProxy = dataCollectionProxy;
         this.redshiftService = redshiftService;
         this.ratingEngineProxy = ratingEngineProxy;
+        this.batonService = batonService;
         srcTables.put(BusinessEntity.Account, "cdl_test_account_%d");
         srcTables.put(BusinessEntity.Contact, "cdl_test_contact_%d");
         srcTables.put(BusinessEntity.Product, "cdl_test_product_%d");
@@ -167,7 +170,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
             tasks.add(() -> populateBatchStore(shortTenantId, entity, String.valueOf(version)));
         }
-        tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
         ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
@@ -495,7 +497,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private Long populateTableRole(String tenantId, TableRoleInCollection role, String s3Version) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
-        Table table = readTableFromS3(role, s3Version);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
+        Table table = readTableFromS3(role, s3Version, entityMatchEnabled);
         if (table != null) {
             String tableName = NamingUtils.timestamp(tenantId + "_" + role, DATE);
             table.setName(tableName);
@@ -515,9 +518,14 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         return null;
     }
 
-    private Table readTableFromS3(TableRoleInCollection role, String version) {
-        if (testArtifactService.testArtifactExists(S3_DIR, version, role.name() + ".json.gz")) {
-            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, role.name() + ".json.gz");
+    private Table readTableFromS3(TableRoleInCollection role, String version, boolean entityMatchEnabled) {
+        String tableName = role.name() + ".json.gz";
+        if (entityMatchEnabled
+                && testArtifactService.testArtifactExists(S3_DIR, version, role.name() + "_EM.json.gz")) {
+            tableName = role.name() + "_EM.json.gz";
+        }
+        if (testArtifactService.testArtifactExists(S3_DIR, version, tableName)) {
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, tableName);
             Table table;
             try {
                 GZIPInputStream gis = new GZIPInputStream(is);

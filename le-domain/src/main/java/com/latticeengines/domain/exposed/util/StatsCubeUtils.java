@@ -479,8 +479,7 @@ public class StatsCubeUtils {
         // Also hide all system attributes.
         return (cm.isDateAttribute() && !(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
                 || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory())))
-                || isSystemAttribute(entity, cm, entityMatchEnabled)
-                || isInternalLookupIdAttribute(entity, cm, entityMatchEnabled);
+                || isSystemAttribute(entity, cm, entityMatchEnabled);
     }
 
     public static boolean isDateAttribute(ColumnMetadata cm) {
@@ -504,26 +503,6 @@ public class StatsCubeUtils {
             }
         }
         return systemAttrsMap.get(entity);
-    }
-
-    public static boolean isInternalLookupIdAttribute(BusinessEntity entity, ColumnMetadata cm,
-            boolean entityMatchEnabled) {
-        return getInternalLookupIdAttrs(entity, entityMatchEnabled).contains(cm.getAttrName());
-    }
-
-    private static Set<String> getInternalLookupIdAttrs(BusinessEntity entity, boolean entityMatchEnabled) {
-        ConcurrentMap<BusinessEntity, Set<String>> internalLookupIdAttrsMap = getInternalLookupIdAttrsMap(entityMatchEnabled);
-        if (!internalLookupIdAttrsMap.containsKey(entity)) {
-            synchronized (StringUtils.class) {
-                if (!internalLookupIdAttrsMap.containsKey(entity)) {
-                    Set<String> internalLookupIdAttrs = new HashSet<>();
-                    SchemaRepository.getInternalLookupIdAttributes(entity, entityMatchEnabled)
-                            .forEach(interfaceName -> internalLookupIdAttrs.add(interfaceName.name()));
-                    internalLookupIdAttrsMap.put(entity, internalLookupIdAttrs);
-                }
-            }
-        }
-        return internalLookupIdAttrsMap.get(entity);
     }
 
     private static ConcurrentMap<BusinessEntity, Set<String>> getSystemAttrsMap(boolean entityMatchEnabled) {

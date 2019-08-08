@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -72,11 +74,12 @@ public enum AtlasExportType {
                 .collect(Collectors.toList());
     }
 
-    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity, boolean enableEntityMatch) {
         List<Pair<InterfaceName, String>> defaultExportAttributesPair = getDefaultExportAttributesPair(
                 entity);
         return defaultExportAttributesPair.stream() //
-                .map(Pair::getLeft) //
+                .map(pair -> (!enableEntityMatch || !EM_ATTR_MAP.containsKey(pair.getLeft())) ? //
+                        pair.getLeft() : EM_ATTR_MAP.get(pair.getLeft()))
                 .collect(Collectors.toSet());
     }
 
@@ -126,4 +129,12 @@ public enum AtlasExportType {
     public List<Triple<BusinessEntity, String, String>> getDefaultAttributeTuples() {
         return defaultAttributeTuples;
     }
+
+    // For entity match enabled tenant, legacy AccountId should be replaced by
+    // CustomerAccountId, legacy ContactId should be replaced by
+    // CustomerContactId
+    private static final Map<InterfaceName, InterfaceName> EM_ATTR_MAP = ImmutableMap.of( //
+            InterfaceName.AccountId, InterfaceName.CustomerAccountId, //
+            InterfaceName.ContactId, InterfaceName.CustomerContactId //
+    );
 }

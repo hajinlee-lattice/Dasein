@@ -28,4 +28,6 @@
         <constructor-arg index="0" ref="awsCredentials" />
     </bean>
 
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
 </beans>
