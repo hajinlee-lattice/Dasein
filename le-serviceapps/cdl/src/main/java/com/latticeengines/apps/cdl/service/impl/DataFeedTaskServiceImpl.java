@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,8 +16,10 @@ import org.springframework.util.CollectionUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -27,6 +30,7 @@ import com.latticeengines.metadata.service.MetadataService;
 public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskServiceImpl.class);
+    private static final String SYSTEM_SPLITTER = "_";
 
     @Inject
     private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
@@ -36,6 +40,9 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Inject
     private MetadataService mdService;
+
+    @Inject
+    private S3ImportSystemService s3ImportSystemService;
 
     @Override
     public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
@@ -214,5 +221,25 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             }
         }
         return tables;
+    }
+
+    @Override
+    public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskUniqueId) {
+        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        if (dataFeedTask == null) {
+            return null;
+        }
+        String systemName = getSystemNameFromFeedType(dataFeedTask.getFeedType());
+        if (StringUtils.isEmpty(systemName)) {
+            return null;
+        }
+        return s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    private String getSystemNameFromFeedType(String feedType) {
+        if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
+            return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));
+        }
+        return null;
     }
 }
