@@ -77,7 +77,7 @@
         <module>le-cache</module>
         <module>le-redis</module>
         <module>le-ldc-collectiondb</module>
-        <module>le-graph</module>
+        <module>le-graphdb</module>
         <module>le-component</module>
         <module>le-spark</module>
     </modules>
