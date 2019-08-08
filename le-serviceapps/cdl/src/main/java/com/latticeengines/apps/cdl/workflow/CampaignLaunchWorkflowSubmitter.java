@@ -53,7 +53,9 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 playLaunch.getDestinationSysType());
 
         boolean enableExport = batonService.isEnabled(getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
+                LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION)
+                || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION)
+                || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION);
         boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
         CampaignLaunchWorkflowConfiguration configuration = new CampaignLaunchWorkflowConfiguration.Builder()
