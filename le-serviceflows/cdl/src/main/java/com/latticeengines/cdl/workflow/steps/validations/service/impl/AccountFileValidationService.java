@@ -43,7 +43,7 @@ public class AccountFileValidationService
 
     @Override
     public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
-            List<String> processedRecords) {
+            List<String> processedRecords, StringBuilder stastistics) {
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
