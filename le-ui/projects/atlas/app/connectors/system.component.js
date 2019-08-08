@@ -111,22 +111,6 @@ export default class SystemComponent extends Component {
 										name={"tray-iframe"}
 										onLoad={() => {
 											console.log("Iframe loaded");
-											var cssLink = document.createElement(
-												"link"
-											);
-											cssLink.href =
-												"./system.component.scss";
-											cssLink.rel = "stylesheet";
-											cssLink.type = "text/css";
-											console.log(
-												"IFRAMES ==> ",
-												frames["tray-iframe"]
-											);
-											frames[
-												"tray-iframe"
-											].document.head.appendChild(
-												cssLink
-											);
 										}}
 										src={url}
 										mounted={this.props.iframeMounted}
