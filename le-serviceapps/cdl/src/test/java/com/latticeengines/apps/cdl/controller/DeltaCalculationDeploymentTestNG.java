@@ -5,7 +5,6 @@ import static com.latticeengines.domain.exposed.cdl.CDLExternalSystemName.Market
 import static com.latticeengines.domain.exposed.cdl.CDLExternalSystemName.Salesforce;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +25,8 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
 import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -60,27 +57,10 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private TestPlayCreationHelper playCreationHelper3;
 
-    @Inject
-    private TenantService tenantService;
-
     private List<TestPlaySetupConfig> testPlaySetupConfigs = new ArrayList<>();
 
     @BeforeClass(groups = "deployment-app", enabled = false)
     public void setup() throws Exception {
-
-        List<String> tenants = Arrays.asList("LETest1565029942183.LETest1565029942183.Production",
-                "JLM_1565035479103.JLM_1565035479103.Production", "JLM_1565035901844.JLM_1565035901844.Production",
-                "JLM_1565036306867.JLM_1565036306867.Production", "JLM_1565036665852.JLM_1565036665852.Production",
-                "JLM_1565037001764.JLM_1565037001764.Production", "JLM_1565037252727.JLM_1565037252727.Production",
-                "JLM_1565038905021.JLM_1565038905021.Production");
-
-        tenants.forEach(t -> {
-            Tenant tenant = tenantService.findByTenantId(t);
-            if (tenant != null) {
-                tenantService.discardTenant(tenant);
-            }
-        });
-
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
