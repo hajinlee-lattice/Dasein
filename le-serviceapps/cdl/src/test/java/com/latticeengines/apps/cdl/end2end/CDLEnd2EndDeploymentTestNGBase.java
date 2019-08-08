@@ -184,9 +184,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of new account after ProcessTransaction entity match test (There
     // are 91 new CustomerAccountId in txn imports for ProcessTransaction test)
     static final Long NEW_ACCOUNT_PT_EM = 91L;
+    // Number of new account after ProcessTransaction entity match test for GA
+    // tenants
+    static final Long NEW_ACCOUNT_PT_EMGA = 0L;
     // Number of new account after UpdateTransaction entity match test (There
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     static final Long NEW_ACCOUNT_UT_EM = 190L;
+    // Number of new account after UpdateTransaction entity match test for GA
+    // tenants
+    static final Long NEW_ACCOUNT_UT_EMGA = 0L;
     // Number of new account after UpdateAccount entity match test
     // FIXME change back to 111 after using new ProcessAccount checkpoint.
     // currently
@@ -212,7 +218,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total account after UpdateTransaction entity match test (There
     // are 190 new CustomerAccountId in txn imports for UpdateTransaction test)
     // -- 1184
+    // Number of total account after ProcessTransaction entity match test for GA
+    // tenants (use ACCOUNT_PA_EM since checkpoint is not changed yet)
+    static final Long ACCOUNT_PT_EMGA = ACCOUNT_PA_EM + NEW_ACCOUNT_PT_EMGA;
     static final Long ACCOUNT_UT_EM = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EM;
+    // Number of total account after UpdateTransaction entity match test for GA
+    // tenants (use ACCOUNT_PT_EM since checkpoint is not changed yet)
+    static final Long ACCOUNT_UT_EMGA = ACCOUNT_PT_EM + NEW_ACCOUNT_UT_EMGA;
     // Number of total account after UpdateAccount entity match test -- 1016
     static final Long ACCOUNT_UA_EM = ACCOUNT_PA_EM + NEW_ACCOUNT_UA_EM;
 
@@ -356,6 +368,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final String SEGMENT_NAME_CURATED_ATTR = NamingUtils.timestamp("E2ESegmentCuratedAttr");
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
     static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
+    static final String SEGMENT_NAME_PRODUCT_BUNDLE = NamingUtils.timestamp("SEGMENT_NAME_PRODUCT_BUNDLE");
 
     /* Expected rating result */
 
@@ -704,6 +717,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
             boolean outsizeFlag) {
+        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
+                outsizeFlag);
+        JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
+    ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
+                                              boolean compressed, boolean outsizeFlag) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
@@ -729,9 +751,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         log.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
                 INITIATOR);
-        JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
-        Assert.assertEquals(status, JobStatus.COMPLETED);
-        log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+        return applicationId;
     }
 
     void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
@@ -1223,6 +1243,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(segment);
     }
 
+    void createTestSegmentProductBundle() {
+        testMetadataSegmentProxy.createOrUpdate(constructSegmentForProductBundle());
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_PRODUCT_BUNDLE);
+        Assert.assertNotNull(segment);
+    }
+
     private MetadataSegment constructTestSegment1() {
         Bucket websiteBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(".com"));
         BucketRestriction websiteRestriction = new BucketRestriction(
@@ -1323,6 +1349,32 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         segment.setDescription("A test segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setAccountRestriction(accountRestriction);
+        return segment;
+    }
+
+    private MetadataSegment constructSegmentForProductBundle() {
+        //bundle1 CMT4: Autosampler Vials and Closures
+        //bundle2 CMT3: Other Plasticware
+        Bucket.Transaction txn1 = new Bucket.Transaction("4VXsZpo1WU5dpAYAdWTiKD9yZA1sd", TimeFilter.ever(), null, null,
+                false);
+        Bucket purchaseBkt1 = Bucket.txnBkt(txn1);
+        BucketRestriction purchaseRestriction1 = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"), purchaseBkt1);
+        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null, null,
+                false);
+        Bucket purchaseBkt2 = Bucket.txnBkt(txn2);
+        BucketRestriction purchaseRestriction2 = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"), purchaseBkt2);
+        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1,
+                purchaseRestriction2).build();
+
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_PRODUCT_BUNDLE);
+        segment.setDisplayName("End2End Segment For Product Bundle");
+        segment.setDescription("A test segment for CDL end2end product bundle.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+
         return segment;
     }
 

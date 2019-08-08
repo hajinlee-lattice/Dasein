@@ -67,7 +67,7 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
-        <aws.version>1.11.546</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.566</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.3</spark.version>
         <scala.version>2.11.12</scala.version>

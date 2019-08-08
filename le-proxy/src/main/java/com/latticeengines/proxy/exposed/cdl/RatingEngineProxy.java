@@ -393,6 +393,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return getList("get depending attrs for rating model", url, AttributeLookup.class);
     }
 
+    public List<RatingModel> getAllModels(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/allmodels",
+                shortenCustomerSpace(customerSpace));
+        return getList("get all models in customer space", url, RatingModel.class);
+    }
+
     @VisibleForTesting
     String constructUpdateRatingModelUrl(String customerSpace, String ratingEngineId,
             String ratingModelId, String user) {

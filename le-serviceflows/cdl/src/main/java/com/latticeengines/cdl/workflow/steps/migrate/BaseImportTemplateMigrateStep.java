@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTe
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -48,6 +49,9 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
     protected CDLProxy cdlProxy;
 
     @Inject
+    private DropBoxProxy dropBoxProxy;
+
+    @Inject
     protected MigrateTrackingProxy migrateTrackingProxy;
 
     @Override
@@ -65,6 +69,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
         if (optionalDataFeedTask.isPresent()) {
             DataFeedTask dataFeedTask = optionalDataFeedTask.get();
             dataFeedTask.setImportTemplate(newTemplate);
+            dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             updateMigrateTracking(dataFeedTask.getUniqueId(), newTemplate.getName());
         } else {
             String newTaskId = NamingUtils.uuid("DataFeedTask");
@@ -74,6 +79,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
             dataFeedTask.setEntity(getEntity());
             dataFeedTask.setFeedType(getFeedType());
+            dataFeedTask.setTemplateDisplayName(getFeedType());
             dataFeedTask.setSource(SourceType.FILE.getName());
             dataFeedTask.setActiveJob("Not specified");
             dataFeedTask.setSourceConfig("Not specified");
@@ -81,6 +87,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            dropBoxProxy.createTemplateFolder(customerSpace.toString(), null, getFeedType(), "");
             updateMigrateTracking(newTaskId, newTemplate.getName());
         }
     }

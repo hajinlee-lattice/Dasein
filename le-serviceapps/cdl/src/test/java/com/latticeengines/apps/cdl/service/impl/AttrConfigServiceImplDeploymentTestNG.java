@@ -57,13 +57,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private Set<String> accountSystemAttrsEntityMatchEnabled = SchemaRepository
             .getSystemAttributes(BusinessEntity.Account, true).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> accountInternalLookupIdAttrs = SchemaRepository
-            .getInternalLookupIdAttributes(BusinessEntity.Account, false).stream() //
+    private Set<String> accountExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Account, false)
+            .stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> accountInternalLookupIdAttrsEntityMatchEnabled = SchemaRepository
-            .getInternalLookupIdAttributes(BusinessEntity.Account, true).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> accountExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Account)
+    private Set<String> accountExportAttrsEntityMatchEnabled = SchemaRepository
+            .getDefaultExportAttributes(BusinessEntity.Account, true)
             .stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
@@ -79,13 +77,10 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     private Set<String> contactSystemAttrsEntityMatchEnabled = SchemaRepository
             .getSystemAttributes(BusinessEntity.Contact, true).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> contactInternalLookupIdAttrs = SchemaRepository
-            .getInternalLookupIdAttributes(BusinessEntity.Contact, false).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> contactInternalLookupIdAttrsEntityMatchEnabled = SchemaRepository
-            .getInternalLookupIdAttributes(BusinessEntity.Contact, true).stream() //
-            .map(InterfaceName::name).collect(Collectors.toSet());
-    private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact) //
+    private Set<String> contactExportAttrs = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact, false) //
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactExportAttrsEntityMatchEnabled = SchemaRepository
+            .getDefaultExportAttributes(BusinessEntity.Contact, true) //
             .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Set<String> psSystemAttrs = SchemaRepository
@@ -130,7 +125,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifySystemAttr(config, cat);
                 break;
             case Partition.STD_ATTRS:
-                boolean exportByDefault = accountExportAttrs.contains(attrName);
+                boolean exportByDefault = getAccountExportAttrs(entityMatchEnabled).contains(attrName);
                 verifyFlags(config, cat, partition, //
                         Active, false, //
                         true, true, //
@@ -138,15 +133,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         true, true, //
                         false, true, //
                         false, true);
-                break;
-            case Partition.INTERNAL_LOOKUP_ID:
-                verifyFlags(config, cat, partition, //
-                        Active, false, //
-                        false, false, //
-                        true, true, //
-                        false, false, //
-                        false, false, //
-                        false, false);
                 break;
             case Partition.EXTERNAL_ID:
                 verifyFlags(config, cat, partition, //
@@ -174,8 +160,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String partiion;
         if (getAccountSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
-        } else if (getAccountInternalLookupIdAttrs(entityMatchEnabled).contains(attrName)) {
-            partiion = Partition.INTERNAL_LOOKUP_ID;
         } else if (getAccountStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
         } else if (CRM_ID.equals(attrName)) {
@@ -197,22 +181,13 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifySystemAttr(config, cat);
                 break;
             case Partition.STD_ATTRS:
-                boolean exportByDefault = contactExportAttrs.contains(attrName);
+                boolean exportByDefault = getContactExportAttrs(entityMatchEnabled).contains(attrName);
                 verifyFlags(config, cat, partition, //
                         Active, false, //
                         true, true, //
                         exportByDefault, true, //
                         true, true, //
                         false, true, //
-                        false, false);
-                break;
-            case Partition.INTERNAL_LOOKUP_ID:
-                verifyFlags(config, cat, partition, //
-                        Active, false, //
-                        false, false, //
-                        true, true, //
-                        false, false, //
-                        false, false, //
                         false, false);
                 break;
             case Partition.OTHERS:
@@ -232,8 +207,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String partiion;
         if (getContactSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
-        } else if (getContactInternalLookupIdAttrs(entityMatchEnabled).contains(attrName)) {
-            partiion = Partition.INTERNAL_LOOKUP_ID;
         } else if (getContactStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
         } else {
@@ -589,11 +562,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         }
     }
 
-    private Set<String> getAccountInternalLookupIdAttrs(boolean entityMatchEnabled) {
+    private Set<String> getAccountExportAttrs(boolean entityMatchEnabled) {
         if (entityMatchEnabled) {
-            return accountInternalLookupIdAttrsEntityMatchEnabled;
+            return accountExportAttrsEntityMatchEnabled;
         } else {
-            return accountInternalLookupIdAttrs;
+            return accountExportAttrs;
         }
     }
 
@@ -613,11 +586,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         }
     }
 
-    private Set<String> getContactInternalLookupIdAttrs(boolean entityMatchEnabled) {
+    private Set<String> getContactExportAttrs(boolean entityMatchEnabled) {
         if (entityMatchEnabled) {
-            return contactInternalLookupIdAttrsEntityMatchEnabled;
+            return contactExportAttrsEntityMatchEnabled;
         } else {
-            return contactInternalLookupIdAttrs;
+            return contactExportAttrs;
         }
     }
 
@@ -627,7 +600,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         static final String EXTERNAL_ID = "ExternalID";
         static final String HAS_PURCHASED = "HasPurchased";
         static final String APS = "APS";
-        static final String INTERNAL_LOOKUP_ID = "InternalLookupId";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes

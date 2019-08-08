@@ -76,6 +76,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         long errorLine;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
                 enableEntityMatch, enableEntityMatchGA);
+        // this variable is used to generate statistics for product
+        StringBuilder statistics = new StringBuilder();
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
@@ -84,7 +86,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
                     .getValidationService(fileConfiguration.getClass().getSimpleName());
-            errorLine = fileValidationService.validate(fileConfiguration, processedRecords);
+            errorLine = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
         }
         // update eaiJobDetail if found error in validations
         if (errorLine != 0L) {
@@ -114,7 +116,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         super.execute();
         // make sure report first, then throw exception if necessary
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
-            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { statistics.toString(),
+                    ImportProperty.ERROR_FILE });
         }
     }
 

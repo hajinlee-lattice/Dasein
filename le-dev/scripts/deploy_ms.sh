@@ -36,6 +36,8 @@ dkpull tomcat-jre-8
 pushd ${WSHOME}/le-docker
 mvn -DskipTests compile
 
+
+APPS=$1
 if [[ -z ${APPS} ]]; then
     APPS="admin,pls,playmaker,oauth2,scoringapi,saml,matchapi,ulysses,dataflowapi,eai,metadata,modeling,scoring,workflowapi,quartz,datacloudapi,objectapi,cdl,lp"
     echo "APPS is not specified, going to build images for all apps: ${APPS}"
@@ -45,11 +47,12 @@ cd src/main/scripts/tomcat
 bash build.sh ${APPS}
 
 export PYTHONPATH=${WSHOME}/le-dev/scripts:${PYTHONPATH}
+ANACONDA_MINISTACK_PATH=${ANACONDA_MINISTACK_PATH:="${ANACONDA_HOME}/envs/ministack"}
 for app in $(echo ${APPS} | sed "s/,/ /g"); do
     echo "====================================================================================="
     echo "WARNING: Going to push ${app} image to ECR, this is going to be very slow from local!"
     echo "====================================================================================="
-    python -m docker push -e qa -t ${DOCKER_TAG} ${app}
+    ${ANACONDA_MINISTACK_PATH}/bin/python -m docker push -e qa -t ${DOCKER_TAG} ${app}
 done
 
 popd

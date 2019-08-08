@@ -56,6 +56,8 @@ public class SchemaRepository {
         } else {
             if (entityMatchEnabled) {
                 sysAttrs.add(InterfaceName.EntityId);
+                sysAttrs.add(InterfaceName.AccountId);
+                sysAttrs.add(InterfaceName.ContactId);
                 if (!BusinessEntity.Account.equals(entity)) {
                     sysAttrs.add(InterfaceName.CustomerAccountId);
                 }
@@ -120,27 +122,8 @@ public class SchemaRepository {
         return stdAttrs;
     }
 
-    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
-        return AtlasExportType.getDefaultExportAttributes(entity);
-    }
-
-    public static Set<InterfaceName> getInternalLookupIdAttributes(BusinessEntity entity, boolean enableEntityMatch) {
-        Set<InterfaceName> idAttrs = new HashSet<>();
-        if (!enableEntityMatch) {
-            return idAttrs;
-        }
-        switch (entity) {
-        case Account:
-            idAttrs.add(InterfaceName.AccountId);
-            break;
-        case Contact:
-            idAttrs.add(InterfaceName.ContactId);
-            idAttrs.add(InterfaceName.AccountId);
-            break;
-        default:
-            break;
-        }
-        return idAttrs;
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity, boolean enableEntityMatch) {
+        return AtlasExportType.getDefaultExportAttributes(entity, enableEntityMatch);
     }
 
     public Table getSchema(BusinessEntity entity, boolean cdlSchema, boolean withoutId, boolean enableEntityMatch) {
