@@ -6,7 +6,7 @@ import java.util.UUID
 import com.latticeengines.common.exposed.util.{JsonUtils, KryoUtils}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
-import com.latticeengines.domain.exposed.pls.{AIModel, PlayLaunch, PlayLaunchSparkContext, RatingBucketName, RatingEngineType}
+import com.latticeengines.domain.exposed.pls.{PlayLaunchSparkContext, RatingBucketName}
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
@@ -46,16 +46,17 @@ object CreateRecommendationsJob {
 
     val playLaunchContext = JsonUtils.deserialize(serializedCtx, classOf[PlayLaunchSparkContext])
 
-    val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
     val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
-    val tenantId: Long = playLaunchContext.getTenant.getPid
+    val tenantId: Long = playLaunchContext.getTenantPid
     val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
     val externalAccountId: String = accountId
     val uuid: String = UUID.randomUUID().toString
-    val description: String = playLaunchContext.getPlay.getDescription
-
+    val description: String = playLaunchContext.getPlayDescription
+    val ratingModelId: String = playLaunchContext.getModelId
+    val modelSummaryId: String = playLaunchContext.getModelSummaryId
+    
     var synchronizationDestination: String = null
     var destinationOrgId: String = null
     var destinationSysType: String = null
@@ -67,12 +68,10 @@ object CreateRecommendationsJob {
     var monetaryValue: Option[Double] = None
     var priorityId: String = null
     var priorityDisplayName: String = null
-    var ratingModelId: String = null
-    var modelSummaryId: String = null
     var launchTime: Option[Long] = None
 
-    if (playLaunch.getCreated != null) {
-      launchTime = Some(playLaunch.getCreated.getTime)
+    if (playLaunchContext.getCreated != null) {
+      launchTime = Some(playLaunchContext.getCreated.getTime)
     } else {
       launchTime = Some(launchTimestampMillis)
     }
@@ -111,12 +110,6 @@ object CreateRecommendationsJob {
         else
           null
       priorityDisplayName = bucketName
-      ratingModelId = playLaunchContext.getPublishedIteration.getId
-      if (playLaunchContext.getPlay.getRatingEngine.getType != RatingEngineType.RULE_BASED) {
-        modelSummaryId = playLaunchContext.getPublishedIteration.asInstanceOf[AIModel].getModelSummaryId
-      } else {
-        modelSummaryId = ""
-      }
     }
 
     Recommendation(None, // PID
@@ -184,8 +177,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
   override def runJob(spark: SparkSession, lattice: LatticeContext[CreateRecommendationConfig]): Unit = {
     val config: CreateRecommendationConfig = lattice.config
     val playLaunchContext: PlayLaunchSparkContext = config.getPlayLaunchSparkContext
-    val playLaunch: PlayLaunch = playLaunchContext.getPlayLaunch
-    val topNCount = playLaunch.getTopNCount
+    val topNCount = playLaunchContext.getTopNCount
     val joinKey: String = playLaunchContext.getJoinKey
     println("----- BEGIN SCRIPT OUTPUT -----")
 	  println(s"joinKey is: $joinKey")

@@ -424,4 +424,12 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         log.info("url is " + url);
         return patch("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunchChannel.class);
     }
+
+    public PlayLaunchChannel getPlayLaunchChannelFromPlayLaunch(String customerSpace, String playName,
+            String launchId) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/channel",
+                shortenCustomerSpace(customerSpace), playName, launchId);
+        log.info("getPlayLaunchChannel url is " + url);
+        return get("getPlayLaunchChannelFromPlayLaunch ", url, PlayLaunchChannel.class);
+    }
 }

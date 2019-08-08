@@ -5,19 +5,26 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -39,6 +46,8 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 @Component
 public class FrontEndQueryCreator {
 
+    private static final Logger log = LoggerFactory.getLogger(FrontEndQueryCreator.class);
+
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
@@ -55,7 +64,7 @@ public class FrontEndQueryCreator {
         initLookupFieldsConfiguration();
     }
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -63,9 +72,9 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
-        prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, launch.getDestinationAccountId());
+        prepareLookupsForFrontEndQueries(playLaunchContext, useSpark);
 
-        prepareQueryWithRestrictions(playLaunchContext, separateActWithCnt);
+        prepareQueryWithRestrictions(playLaunchContext, useSpark);
 
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
@@ -90,6 +99,94 @@ public class FrontEndQueryCreator {
                 contactFrontEndQuery);
     }
 
+    private void prepareLookupsForFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
+        String destinationAccountId = playLaunchContext.getPlayLaunch().getDestinationAccountId();
+        Map<BusinessEntity, List<String>> tempAccLookupFields;
+        if (StringUtils.isBlank(destinationAccountId)) {
+            tempAccLookupFields = accountLookupFields;
+        } else {
+            final String fDestinationAccountId = destinationAccountId.trim();
+
+            tempAccLookupFields = new HashMap<>();
+            List<String> colList = accountLookupFields.get(BusinessEntity.Account).stream()
+                    .filter(c -> !fDestinationAccountId.equals(c)) //
+                    .collect(Collectors.toList());
+            colList.add(fDestinationAccountId);
+            tempAccLookupFields.put(BusinessEntity.Account, colList);
+        }
+        final Map<BusinessEntity, List<String>> accLookupFields = tempAccLookupFields;
+        List<Lookup> accountLookups = new ArrayList<>();
+        accountLookupFields //
+                .keySet().stream() //
+                .forEach( //
+                        businessEntity -> prepareLookups(businessEntity, accountLookups, accLookupFields));
+
+        List<Lookup> contactLookups = new ArrayList<>();
+        contactLookupFields //
+                .keySet().stream() //
+                .forEach( //
+                        businessEntity -> prepareLookups(businessEntity, contactLookups, contactLookupFields));
+        // if useSpark, need to union with user configured fields
+        if (useSpark) {
+            unionAccountAndContactLookups(accountLookups, contactLookups, playLaunchContext.getFieldMappingMetadata());
+        }
+        playLaunchContext.getAccountFrontEndQuery().setLookups(accountLookups);
+        playLaunchContext.getContactFrontEndQuery().setLookups(contactLookups);
+    }
+
+    @VisibleForTesting
+    void unionAccountAndContactLookups(List<Lookup> accountLookups, List<Lookup> contactLookups,
+            List<ColumnMetadata> fieldMappingMetadata) {
+        if (CollectionUtils.isNotEmpty(fieldMappingMetadata)) {
+            Map<BusinessEntity, Set<Lookup>> fieldMaps = new HashMap<>();
+            fieldMappingMetadata.stream().filter(md -> !md.isCampaignDerivedField()).forEach(md -> {
+                BusinessEntity entity = md.getEntity();
+                if (!fieldMaps.containsKey(entity)) {
+                    fieldMaps.put(md.getEntity(), new HashSet<>());
+                }
+                fieldMaps.get(entity).add(new AttributeLookup(entity, md.getAttrName()));
+            });
+            // check to see if the entities are eligible for export
+            if (!BusinessEntity.EXPORT_ENTITIES.containsAll(fieldMaps.keySet())) {
+                throw new RuntimeException("Not every entity is eligible for export " + fieldMaps.keySet());
+            }
+
+            Iterator<Lookup> accountIterator = accountLookups.iterator();
+            Iterator<Lookup> contactIterator = contactLookups.iterator();
+            Set<Lookup> userConfiguredAccountLookups = fieldMaps.get(BusinessEntity.Account);
+            Set<Lookup> userConfiguredContactLookups = fieldMaps.get(BusinessEntity.Contact);
+            if (userConfiguredAccountLookups != null) {
+                while (accountIterator.hasNext()) {
+                    Lookup accLookup = accountIterator.next();
+                    if (userConfiguredAccountLookups.contains(accLookup)) {
+                        userConfiguredAccountLookups.remove(accLookup);
+                    }
+                }
+                accountLookups.addAll(userConfiguredAccountLookups);
+                fieldMaps.remove(BusinessEntity.Account);
+            }
+            if (userConfiguredContactLookups != null) {
+                while (contactIterator.hasNext()) {
+                    Lookup conLookup = contactIterator.next();
+                    if (userConfiguredContactLookups.contains(conLookup)) {
+                        userConfiguredContactLookups.remove(conLookup);
+                    }
+                }
+                contactLookups.addAll(userConfiguredContactLookups);
+                fieldMaps.remove(BusinessEntity.Contact);
+            }
+            // add remaining lookups to AccountLookups
+            if (MapUtils.isNotEmpty(fieldMaps)) {
+                fieldMaps.entrySet().iterator().forEachRemaining(entry -> {
+                    accountLookups.addAll(entry.getValue());
+                });
+            }
+            log.info("accountLookups=" + Arrays.toString(accountLookups.toArray()));
+            log.info("contactLookups=" + Arrays.toString(contactLookups.toArray()));
+        }
+    }
+
+    @SuppressWarnings("unused")
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
             FrontEndQuery contactFrontEndQuery, String destinationAccountId) {
         Map<BusinessEntity, List<String>> tempAccLookupFields;
@@ -153,7 +250,7 @@ public class FrontEndQueryCreator {
         entityFrontEndQuery.setSort(sort);
     }
 
-    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext, boolean separateActWithCnt) {
+    private void prepareQueryWithRestrictions(PlayLaunchContext playLaunchContext, boolean useSpark) {
 
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -176,7 +273,7 @@ public class FrontEndQueryCreator {
             Restriction extractedContactRestriction = contactRestriction.getRestriction() == null
                     ? LogicalRestriction.builder().or(new ArrayList<>()).build()
                     : contactRestriction.getRestriction();
-            if (!separateActWithCnt) {
+            if (!useSpark) {
                 contactFrontEndQuery.setContactRestriction(prepareContactRestriction(extractedContactRestriction,
                         modifiableAccountIdCollectionForContacts));
             } else {
