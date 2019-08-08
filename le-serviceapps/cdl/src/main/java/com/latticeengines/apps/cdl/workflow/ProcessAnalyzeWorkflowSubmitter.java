@@ -497,39 +497,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return completedActionIds;
     }
 
-    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids,
-                                     Set<Long> importActionIds) {
-        boolean isComplete = true; // by default every action is valid
-        if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-            // special check if is selected type
-            isComplete = false;
-            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
-                return false;
-            }
-            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                importActionIds.add(action.getPid());
-                isComplete = true;
-            } else {
-                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
-                        .getActionConfiguration();
-                if (importActionConfiguration == null) {
-                    log.error("Import action configuration is null!");
-                    return false;
-                }
-                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
-                    importActionIds.add(action.getPid());
-                    isComplete = true;
-                }
-            }
-        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
-            isComplete = false;
-            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                isComplete = true;
-            }
-        }
-        return isComplete;
-    }
-
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
                                                                       ProcessAnalyzeRequest request,
                                                                       List<Long> actionIds,
