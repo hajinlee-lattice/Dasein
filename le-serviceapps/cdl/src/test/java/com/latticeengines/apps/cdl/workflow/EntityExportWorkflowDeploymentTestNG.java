@@ -18,7 +18,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -57,6 +56,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 
 /**
  * dpltc deploy -a admin,pls,lp,cdl,metadata,matchapi,workflowapi
