@@ -717,38 +717,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
             boolean outsizeFlag) {
-        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
-        log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
-        String outputFileName = s3FileName;
-        if (feedType == null) {
-            feedType = getFeedTypeByEntity(entity.name());
-        }
-        if (s3FileName.endsWith(".gz"))
-            outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
-        SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
-                csvResource, outsizeFlag);
-        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name(),
-                SourceType.FILE.getName(), feedType);
-        modifyFieldMappings(entity, fieldMappingDocument);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-        }
-
-        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument, entity.name(),
-                SourceType.FILE.getName(), feedType);
-        log.info("Modified field mapping document is saved, start importing ...");
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
-                INITIATOR);
+        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
+                outsizeFlag);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
-    ApplicationId importData2(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
-                    boolean outsizeFlag) {
+    ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
+                                              boolean compressed, boolean outsizeFlag) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;

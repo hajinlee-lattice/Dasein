@@ -54,7 +54,7 @@ public class SegmentDependencyUtil {
         return restrictionSet;
     }
 
-    public List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments) {
+    public static List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments) {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (metadataSegments != null) {
             for (MetadataSegment metadataSegment : metadataSegments) {

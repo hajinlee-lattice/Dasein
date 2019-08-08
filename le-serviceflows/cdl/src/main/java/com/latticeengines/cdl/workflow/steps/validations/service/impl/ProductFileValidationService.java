@@ -462,7 +462,7 @@ public class ProductFileValidationService
             statistics.append(String.format("%s product bundle has different product SKUs. Dependant models will " +
                     "need" +
                     " to be remodelled to get accurate" +
-                    " scores.", String.valueOf(missingBundleInUse)));
+                    " scores.", String.valueOf(bundleWithDiffSku)));
         }
     }
 

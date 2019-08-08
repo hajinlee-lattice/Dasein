@@ -47,9 +47,6 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy plsModelSummaryProxy;
-
-    @Inject
     private SegmentProxy segmentProxy;
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -57,7 +54,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
-    // Target Products are shared with CrossSellModelEnd2EndDeploymentTestNG
+    // Target Products are shared with CrossSellModelEnd2EndDeploymentTestNG RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> targetProducts = ImmutableList.of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
     @Override
     @BeforeClass(groups = "end2end")
@@ -84,24 +81,23 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
             setupAIModelsThread.join();
         }
         modelSummaryProxy.downloadModelSummary(mainCustomerSpace);
-        testBed.attachProtectedProxy(plsModelSummaryProxy);
-        List<ModelSummary> summaries = plsModelSummaryProxy.getSummaries();
+
+        List<ModelSummary> summaries = modelSummaryProxy.getModelSummaries(customerSpace, null);
         Assert.assertNotNull(summaries);
         ModelSummary summary = summaries.get(0);
 
         RatingEngine ai = createCrossSellEngine(segment, summary, PredictionType.EXPECTED_VALUE);
         activateRatingEngine(ai.getId());
-        ApplicationId applicationId = importData2(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
+        ApplicationId applicationId = importDataWithApplicationId(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
                 false, false);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
     }
 
     private void setupAIModels() {
-        testBed.attachProtectedProxy(plsModelSummaryProxy);
-        testBed.switchToSuperAdmin();
         uploadModel(MODELS_RESOURCE_ROOT + "/ev_model.tar.gz");
     }
+
     @SuppressWarnings("deprecation")
     private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
                                                PredictionType predictionType) throws InterruptedException {
