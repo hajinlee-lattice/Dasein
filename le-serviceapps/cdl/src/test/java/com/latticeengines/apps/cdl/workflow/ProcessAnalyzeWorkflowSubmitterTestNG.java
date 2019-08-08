@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -26,19 +27,23 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBase {
@@ -71,7 +76,10 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private ActionService actionService;
 
     @Mock
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
+
+    @Mock
+    private DataFeedTaskService dataFeedTaskService;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -93,7 +101,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetEmptyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateEmptyActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         Assert.assertTrue(CollectionUtils.isEmpty(list));
     }
@@ -102,7 +110,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     public void testGetNoCancelActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -126,7 +134,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetMetadataOnlyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateMetadataChangeActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -137,8 +145,9 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetFullActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateFullActions());
+        when(dataFeedTaskService.getDataFeedTask(anyString(), nullable(String.class))).thenReturn(generateImportDataFeedTask());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -156,7 +165,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
                 COMPLETE_ACTION_1_TRACKING_PID, COMPLETE_ACTION_2_TRACKING_PID).map(Object::toString)
                 .collect(Collectors.toList());
         when(workflowProxy.getWorkflowExecutionsByJobPids(workflowIdStr)).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -169,7 +178,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
                                                           List<Action> actions, List<Long> inheritableActionIds) {
-        when(dataFeedProxy.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
+        when(dataFeedService.getDefaultDataFeed(anyString())).thenReturn(new DataFeed());
+        when(dataFeedService.getLatestExecution(anyString(), any(), any())).thenReturn(dataFeedExecution);
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 
@@ -349,6 +359,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Tenant tenant = new Tenant();
         tenant.setId(unlockedCustomerSpace);
         return tenant;
+    }
+
+    private DataFeedTask generateImportDataFeedTask() {
+        DataFeedTask dataFeedTask = new DataFeedTask();
+        dataFeedTask.setEntity(BusinessEntity.Account.name());
+        return dataFeedTask;
     }
 
 }
