@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 public class ConvertToCSVConfig extends SparkJobConfig {
 
     public static final String NAME = "convertToCSV";
+    public static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"; // default date format
 
     @JsonProperty("DisplayNames")
     private Map<String, String> displayNames;
@@ -23,6 +24,9 @@ public class ConvertToCSVConfig extends SparkJobConfig {
 
     @JsonProperty("Compress")
     private Boolean compress;
+
+    @JsonProperty("ExportTimeAttr")
+    private String exportTimeAttr;
 
     @Override
     @JsonProperty("Name")
@@ -60,5 +64,13 @@ public class ConvertToCSVConfig extends SparkJobConfig {
 
     public void setCompress(Boolean compress) {
         this.compress = compress;
+    }
+
+    public String getExportTimeAttr() {
+        return exportTimeAttr;
+    }
+
+    public void setExportTimeAttr(String exportTimeAttr) {
+        this.exportTimeAttr = exportTimeAttr;
     }
 }

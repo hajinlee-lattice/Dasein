@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.graph.DependenciesToGraphAction;
+import com.latticeengines.graphdb.DependenciesToGraphAction;
 
 @Component
 public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {

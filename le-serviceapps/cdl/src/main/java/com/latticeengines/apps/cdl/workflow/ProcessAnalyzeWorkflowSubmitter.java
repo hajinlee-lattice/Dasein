@@ -464,8 +464,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         boolean alwaysOnCampain = FeatureFlagUtils.isAlwaysOnCampaign(flags);
-        log.info("Feature flags = {}, tenant = {}, entityMatchEnabled={}, workflowPid={}", flags, customerSpace,
-                entityMatchEnabled, workflowPid);
+        log.info("Submitting PA: FeatureFlags={}, tenant={}, entityMatchEnabled={}, workflowPid={}", flags,
+                customerSpace, entityMatchEnabled, workflowPid);
         if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
         }

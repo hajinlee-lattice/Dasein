@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.graph.VertexCreationRequest;
 import com.latticeengines.domain.exposed.graph.VertexDeletionRequest;
 import com.latticeengines.domain.exposed.graph.VertexType;
-import com.latticeengines.graph.entity.GraphEntityManager;
+import com.latticeengines.graphdb.entity.GraphEntityManager;
 
 @Aspect
 public class DependencyGraphTenantEntityMgrAspect {

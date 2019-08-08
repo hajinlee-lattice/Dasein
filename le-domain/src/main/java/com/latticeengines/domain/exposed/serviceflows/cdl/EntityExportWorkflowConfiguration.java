@@ -54,6 +54,7 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         public EntityExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("entityExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            step.setAddExportTimestamp(true); // always add export timestamp
             configuration.add(importS3);
             configuration.add(step);
             return configuration;

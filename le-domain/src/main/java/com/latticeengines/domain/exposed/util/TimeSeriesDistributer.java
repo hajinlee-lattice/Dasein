@@ -37,7 +37,7 @@ public class TimeSeriesDistributer {
 
     // To fake period name for single period data store without period name
     public static final String DUMMY_PERIOD = "DUMMY_PERIOD";
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 10_000;
     private static final int DISTRIBUTERS = 16;
     private static final int BUFFER_THRESHOLD = 2 * 128 * 1024;
     private static final long WRITER_TIMEOUT_SEC = 3600;
@@ -109,6 +109,9 @@ public class TimeSeriesDistributer {
                 batchReadPeriodData();
                 batchWritePeriodData(BATCH_SIZE);
             }
+            log.info(
+                    "Reading time-series records finished. Start draining read buffer. Current read buffer size: {}, write buffer size: {}",
+                    getReadBufferSize(), getWriteBufferSize());
             // drain read buffer
             while (getReadBufferSize() != 0) {
                 consumeBatchWriteFutures();
@@ -118,6 +121,7 @@ public class TimeSeriesDistributer {
                 } catch (InterruptedException e) {
                 }
             }
+            log.info("Start draining write buffer. Current write buffer size: {}", getWriteBufferSize());
             // drain write buffer
             while (getWriteBufferSize() != 0) {
                 syncConsumeBatchWriteFutures();
@@ -222,8 +226,11 @@ public class TimeSeriesDistributer {
             public Pair<Pair<String, Integer>, Boolean> call() {
                 try {
                     try (PerformanceTimer timer = new PerformanceTimer(
-                            String.format("Distribute %d time-series records", records.size()))) {
-                        timer.setThreshold(1000);
+                            String.format("Distribute %d time-series records for period %s-%d", records.size(),
+                                    period.getLeft(), period.getRight()))) {
+                        // FIXME: Enable log for every write temporarily to
+                        // troubleshoot write failure issue in QA env
+                        timer.setThreshold(0);
 
                         if (!HdfsUtils.fileExists(yarnConfig, targetFile)) {
                             AvroUtils.writeToHdfsFile(yarnConfig, schema, targetFile, records);
@@ -232,7 +239,7 @@ public class TimeSeriesDistributer {
                         }
                     }
                 } catch (Exception e) {
-                    log.error(String.format("Fail to write %d records to file.", records.size(), targetFile), e);
+                    log.error(String.format("Fail to write %d records for to file %s.", records.size(), targetFile), e);
                     return Pair.of(period, Boolean.FALSE);
                 }
                 return Pair.of(period, Boolean.TRUE);

@@ -39,7 +39,7 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-graph</artifactId>
+            <artifactId>le-graphdb</artifactId>
             <version>${project.version}</version>
         </dependency>
 
