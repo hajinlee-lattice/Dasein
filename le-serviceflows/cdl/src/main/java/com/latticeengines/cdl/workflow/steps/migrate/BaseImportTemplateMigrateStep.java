@@ -78,6 +78,7 @@ public abstract class BaseImportTemplateMigrateStep<T extends ImportTemplateMigr
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
             dataFeedTask.setEntity(getEntity());
             dataFeedTask.setFeedType(getFeedType());
+            dataFeedTask.setTemplateDisplayName(getFeedType());
             dataFeedTask.setSource(SourceType.FILE.getName());
             dataFeedTask.setActiveJob("Not specified");
             dataFeedTask.setSourceConfig("Not specified");
