@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class ChoreographerContext {
 
     @JsonProperty
-    private Set<BusinessEntity> jobImpactedEntities = new HashSet<>();
+    private Set<BusinessEntity> entitiesRebuildDueToActions = new HashSet<>();
 
     @JsonProperty
     private boolean dataCloudChanged;
@@ -38,12 +38,12 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean fullRematch;
 
-    public Set<BusinessEntity> getJobImpactedEntities() {
-        return jobImpactedEntities;
+    public Set<BusinessEntity> getEntitiesRebuildDueToActions() {
+        return entitiesRebuildDueToActions;
     }
 
-    public void setJobImpactedEntities(Set<BusinessEntity> jobImpactedEntities) {
-        this.jobImpactedEntities = jobImpactedEntities;
+    public void setEntitiesRebuildDueToActions(Set<BusinessEntity> entitiesRebuildDueToActions) {
+        this.entitiesRebuildDueToActions = entitiesRebuildDueToActions;
     }
 
     public boolean isDataCloudChanged() {

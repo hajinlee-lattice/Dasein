@@ -64,7 +64,6 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -83,9 +82,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private MatchProxy matchProxy;
 
     @Inject
     private PeriodProxy periodProxy;
@@ -235,11 +231,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 });
     }
 
-    protected void setGrapherContext() {
-        grapherContext.setDataCloudChanged(checkDataCloudChange());
-        Set<BusinessEntity> impactedEntities = getImpactedEntities();
-        grapherContext.setJobImpactedEntities(impactedEntities);
+    void setGrapherContext() {
         List<Action> actions = getActions();
+        grapherContext.setDataCloudChanged(checkDataCloudChange());
+        grapherContext.setEntitiesRebuildDueToActions(getEntitiesShouldRebuildByActions());
 
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
         List<Action> accountAttrActions = getAttrManagementActionsForAccount(attrMgmtActions);
@@ -261,7 +256,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
 
-    protected Set<BusinessEntity> getImpactedEntities() {
+    Set<BusinessEntity> getEntitiesShouldRebuildByActions() {
         return RebuildEntitiesProvider.getRebuildEntities(this);
     }
 

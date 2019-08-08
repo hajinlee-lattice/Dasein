@@ -69,7 +69,7 @@ public class StartProcessingUnitTestNG {
         startProcessing.setConfiguration(config);
 
         StartProcessing spy = spy(startProcessing);
-        doReturn(null).when(spy).getImpactedEntities();
+        doReturn(null).when(spy).getEntitiesShouldRebuildByActions();
         doReturn(true).when(spy).hasAccountBatchStore();
         doReturn(Collections.emptyList()).when(spy).getActions();
         doReturn(Collections.emptyList()).when(spy).getRatingRelatedActions(any());
