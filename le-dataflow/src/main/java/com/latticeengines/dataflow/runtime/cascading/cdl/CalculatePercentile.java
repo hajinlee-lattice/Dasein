@@ -121,12 +121,12 @@ public class CalculatePercentile extends BaseOperation implements Buffer {
                 .findFirst().orElse(null);
 
         if (StringUtils.isBlank(percentileStr)) {
-            if (percentiles.get(percentiles.size() - 1).upper <= score) {
-                percentileStr = percentiles.get(percentiles.size() - 1).name;
-            } else if (percentiles.get(0).lower > score) {
+            if (percentiles.get(0).lower >= score) {
                 percentileStr = percentiles.get(0).name;
+            } else if (percentiles.get(percentiles.size() - 1).upper <= score) {
+                percentileStr = percentiles.get(percentiles.size() - 1).name;
             } else {
-                throw new RuntimeException();
+                throw new RuntimeException(String.format("Score %d is out of bound.", score));
             }
         }
         Integer lookupPercentile = Integer.parseInt(percentileStr.trim());
