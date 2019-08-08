@@ -305,14 +305,14 @@ export const openConfigWindow = () => {
                 return {
                     orgId: adAccount,
                     orgName: trayAuthenticationName,
-                    externalSystemType: "ADS"
+                    externalSystemType: "MAP"
 
                 }
             default:
                 return {
                     orgId: guidGenerator(),
                     orgName: trayAuthenticationName,
-                    externalSystemType: "ADS"
+                    externalSystemType: "MAP"
                 }
         }
 
