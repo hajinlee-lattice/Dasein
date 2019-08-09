@@ -160,7 +160,7 @@ public class MetadataServiceImpl implements MetadataService {
                         Table found = tableEntityMgr.findByName(table.getName(), false);
                         if (found != null) {
                             log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
-                            if (migrationTrackEntityMgr.canDeleteOrRenameTable(found.getTenant(), found.getName())) {
+                            if (!migrationTrackEntityMgr.canDeleteOrRenameTable(found.getTenant(), found.getName())) {
                                 log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
                                 throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
                             }

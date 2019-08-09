@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -285,8 +284,20 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
-        List<Long> completedActionIds = new ArrayList<>(checkDeleteAndImport(customerSpace, actions,
-                completedImportAndDeleteJobPids, needDeletedEntity));
+        Set<Long> importActionIds = new HashSet<>();
+        List<Action> completedActions = actions.stream()
+                .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds)).collect(Collectors.toList());
+        List<Action> nonWorkflowDeleteActions =
+                actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.CDL_OPERATION_WORKFLOW).collect(Collectors.toList());
+        Set<BusinessEntity> importedEntities = getImportEntities(customerSpace, completedActions);
+        //in old logic, delete operation done by cdlOperationWorkflow, so we don't need pick it at pa to delete again
+        // in new logic, delete operation done by pa step, so we need pick the entity we need deleted,
+        // waiting compare with import entity to judge if we can delete or not
+        Set<BusinessEntity> totalNeedDeletedEntities = getDeletedEntities(nonWorkflowDeleteActions);
+        needDeletedEntity.addAll(getCurrentDeletedEntities(importedEntities, totalNeedDeletedEntities,
+                importActionIds.size()));
+        List<Long> completedActionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
+        completedActionIds.addAll(nonWorkflowDeleteActions.stream().map(Action::getPid).collect(Collectors.toList()));
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
         return completedActionIds;
@@ -430,71 +441,52 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private Set<Long> checkDeleteAndImport(@NotNull String customerSpace, List<Action> actions,
-                                           List<Long> completedImportAndDeleteJobPids,
-                                           Set<BusinessEntity> needDeletedEntity) {
-        Set<BusinessEntity> importedEntity = new HashSet<>();
-        Set<Long> completedActionIds = new HashSet<>();
-        int importActionSize = 0;
-        for (Action action : actions) {
-            if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-                if (importActionCount > 0 && importActionSize >= importActionCount) {
-                    //if importActionCount over limit per pa, we just added the entity if entity list isn't completed
-                    if (importedEntity.size() < 4 && completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                        importActionSize++;
-                        if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
-                            ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
-                            DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
-                                    importActionConfiguration.getDataFeedTaskId());
-                            importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
-                        }
-
-                    }
-                } else {
-                    if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                        importActionSize++;
-                        completedActionIds.add(action.getPid());
-                        if (importedEntity.size() < 4) {
-                            //if entity list isn't completed, do this logic to check import entity
-                            if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
-                                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
-                                DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
-                                        importActionConfiguration.getDataFeedTaskId());
-                                importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
-                            }
-                        }
-                    }
-                }
-            } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
-                if (action.getTrackingPid() == null) {
-                    // in new logic, delete operation done by pa step, so we need pick the entity we need deleted,
-                    // waiting compare with import entity to judge if we can delete or not
-                    completedActionIds.add(action.getPid());
-                    if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
-                        CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
-                        needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
-                    }
-                } else if (action.getTrackingPid() != null && completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                    //in old logic, delete operation done by cdlOperationWorkflow, so we don't need pick it at pa to
-                    // delete again
-                    completedActionIds.add(action.getPid());
-                }
-            } else {
-                completedActionIds.add(action.getPid());
-            }
-        }
-        //judge this entity which need delete entity has import action, if not, cannot delete
-        if (needDeletedEntity.size() != importedEntity.size() && needDeletedEntity.size() != 0) {
+    private Set<BusinessEntity> getCurrentDeletedEntities(Set<BusinessEntity> importedEntity,
+                                                          Set<BusinessEntity> needDeletedEntity,
+                                                          int importActionNum) {
+        //judge this entity which need delete entity has import action, if not, check if importActionNum is over than
+        // limit, if not, cannot deleted, else delete those entity that we can find it in current importAction.
+        if (needDeletedEntity.size() != importedEntity.size() && needDeletedEntity.size() != 0 && importActionNum < importActionCount) {
             throw new RuntimeException(String.format("deleteEntity %s isn't match importEntity %s",
                     JsonUtils.serialize(needDeletedEntity), JsonUtils.serialize(importedEntity)));
         } else {
-            importedEntity.retainAll(needDeletedEntity);
-            if (importedEntity.size() != needDeletedEntity.size()) {
-                throw new RuntimeException(String.format("deleteEntity %s isn't match retainAllEntity %s",
-                        JsonUtils.serialize(needDeletedEntity), JsonUtils.serialize(importedEntity)));
+            Set<BusinessEntity> currentNeedDeletedEntity = new HashSet<>(needDeletedEntity);
+            currentNeedDeletedEntity.retainAll(importedEntity);
+            return currentNeedDeletedEntity;
+        }
+    }
+
+    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids,
+                                     Set<Long> importActionIds) {
+        boolean isComplete = true; // by default every action is valid
+        if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+            // special check if is selected type
+            isComplete = false;
+            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
+                return false;
+            }
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                importActionIds.add(action.getPid());
+                isComplete = true;
+            } else {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                        .getActionConfiguration();
+                if (importActionConfiguration == null) {
+                    log.error("Import action configuration is null!");
+                    return false;
+                }
+                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    importActionIds.add(action.getPid());
+                    isComplete = true;
+                }
+            }
+        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+            isComplete = false;
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                isComplete = true;
             }
         }
-        return completedActionIds;
+        return isComplete;
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
@@ -664,5 +656,44 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private List<Long> getImportActionIds(String customerSpace) {
         Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
         return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
+    }
+
+    private Set<BusinessEntity> getImportEntities(String customerSpace, List<Action> actions) {
+        Set<BusinessEntity> importedEntity = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action : actions) {
+                if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                    if (importedEntity.size() >= 4) {
+                        break;
+                    }
+                    //if entity list isn't completed, do this logic to check import entity
+                    if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
+                        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
+                                importActionConfiguration.getDataFeedTaskId());
+                        importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
+                    }
+                }
+            }
+        }
+        return importedEntity;
+    }
+
+    private Set<BusinessEntity> getDeletedEntities(List<Action> actions) {
+        Set<BusinessEntity> needDeletedEntity = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action : actions) {
+                if (needDeletedEntity.size() >= 4) {
+                    break;
+                }
+                if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+                    if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
+                        CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+                        needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
+                    }
+                }
+            }
+        }
+        return needDeletedEntity;
     }
 }
