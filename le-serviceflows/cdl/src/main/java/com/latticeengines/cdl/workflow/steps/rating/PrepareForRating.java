@@ -76,7 +76,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
 
-    @Value("${cdl.processAnalyze.partial.rating.update.enabled")
+    @Value("${cdl.processAnalyze.partial.rating.update.enabled}")
     private boolean partialUpdateEnabled;
 
     private String customerSpace;
