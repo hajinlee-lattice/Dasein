@@ -122,9 +122,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
-        Set<String> renewableKeys = new HashSet<>(TABLE_NAMES_FOR_PA_RETRY);
-        renewableKeys.addAll(EXTRA_KEYS_FOR_PA_RETRY);
-        clearExecutionContext(renewableKeys);
+        clearExecutionContext(getRenewableCtxKeys());
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
@@ -527,10 +525,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setupInactiveVersion() {
-        Set<String> tableNamesForRetry = TABLE_NAMES_FOR_PA_RETRY.stream() //
-                .map(this::getStringValueFromContext) //
-                .filter(StringUtils::isNotBlank) //
-                .collect(Collectors.toSet());
+        Set<String> tableNamesForRetry = getTableNamesForPaRetry();
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             List<String> tableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role,
                     inactiveVersion);
