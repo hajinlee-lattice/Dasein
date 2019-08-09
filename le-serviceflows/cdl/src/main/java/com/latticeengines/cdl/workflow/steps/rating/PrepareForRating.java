@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,8 +25,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.graph.PrimitiveGraphNode;
 import com.latticeengines.common.exposed.graph.StringGraphNode;
-import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
@@ -48,6 +49,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
+import com.latticeengines.graph.util.DependencyGraphEngine;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
@@ -278,27 +280,17 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private List<List<String>> getREDepGraphLayers(List<RatingModelContainer> containers, int maxIter) {
-        Map<String, StringGraphNode> nodes = getREDepGraph(containers);
-        List<StringGraphNode> graph = new ArrayList<>(nodes.values());
-        Map<StringGraphNode, Integer> depthMap = GraphUtils.getDepthMap(graph, StringGraphNode.class);
-        log.info("Resolved depth map: " + JsonUtils.serialize(depthMap));
-        if (MapUtils.isNotEmpty(depthMap)) {
-            int maxDepth = Math.min(depthMap.values().stream().max(Integer::compareTo).orElse(1) + 1, maxIter);
-            List<List<String>> generations = new ArrayList<>(maxDepth);
-            for (int i = 0; i < maxDepth; i++) {
-                generations.add(new ArrayList<>());
-            }
-            depthMap.forEach((engineIdNode, engineDepth) -> {
-                int engineItr = Math.min(engineDepth, maxDepth - 1);
-                generations.get(engineItr).add(engineIdNode.getVal());
-            });
-            return generations;
-        } else {
-            return null;
+        try (DependencyGraphEngine graphEngine = new DependencyGraphEngine()) {
+            Collection<StringGraphNode> nodes = getREDepGraph(containers);
+            graphEngine.loadGraphNodes(nodes);
+            List<Set<StringGraphNode>> layers = graphEngine.getDependencyLayers(StringGraphNode.class, maxIter);
+            return layers.stream().map(set -> //
+                    set.stream().map(PrimitiveGraphNode::getVal).collect(Collectors.toList()) //
+            ).collect(Collectors.toList());
         }
     }
 
-    private Map<String, StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
+    private Collection<StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
         final ConcurrentMap<String, StringGraphNode> nodes = new ConcurrentHashMap<>();
         final Set<String> engineIds = containers.stream() //
                 .map(container -> {
@@ -327,7 +319,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                         }
                     });
                 }
-                List<String> childIds = nodes.get(engineId).getChildren().stream().map(StringGraphNode::getVal)
+                List<String> childIds = nodes.get(engineId).getChildren().stream().map(PrimitiveGraphNode::getVal)
                         .collect(Collectors.toList());
                 log.info(String.format("Engine %s depends on %s", engineId, childIds));
             };
@@ -336,7 +328,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
         ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
         threadPool.shutdown();
-        return new HashMap<>(nodes);
+        return nodes.values();
     }
 
     private void initializeRatingLifts() {
